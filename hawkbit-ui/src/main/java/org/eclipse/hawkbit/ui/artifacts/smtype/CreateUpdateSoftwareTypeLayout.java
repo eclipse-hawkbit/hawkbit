@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -69,7 +70,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(this::createOptionValueChanged);
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     @Override
@@ -86,19 +87,23 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
+        tagName.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagName()));
+        tagName.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, tagName));
 
         typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
+        typeKey.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTypeKey()));
+        typeKey.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, typeKey));
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-
         tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
+        tagDesc.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagDesc()));
 
         singleMultiOptionGroup();
     }
@@ -116,7 +121,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null,
+                CommonDialogWindowHelper.getMandatoryFields(getFormLayout()), getEditedFields(), i18n);
     }
 
     /**
@@ -126,15 +132,16 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
      *            ValueChangeEvent
      */
     @Override
-    protected void createOptionValueChanged(final ValueChangeEvent event) {
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
-        super.createOptionValueChanged(event);
+        super.optionValueChanged(event);
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
             assignOptiongroup.setEnabled(false);
         } else {
             assignOptiongroup.setEnabled(true);
         }
+        assignOptiongroup.select(singleAssignStr);
     }
 
     /**
@@ -166,17 +173,19 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
+        setOriginalTagName(targetTagSelected);
         final SoftwareModuleType selectedTypeTag = swTypeManagementService
                 .findSoftwareModuleTypeByName(targetTagSelected);
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
+            setOriginalTagDesc(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
+            setOriginalTypeKey(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
                 assignOptiongroup.setValue(multiAssignStr);
             } else {
                 assignOptiongroup.setValue(singleAssignStr);
             }
-
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         }
     }
@@ -198,10 +207,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void save(final ClickEvent event) {
-        if (!mandatoryValuesPresent()) {
-            return;
-        }
-
         final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
                 .findSoftwareModuleTypeByKey(typeKey.getValue());
         final SoftwareModuleType existingSMTypeByName = swTypeManagementService
@@ -211,7 +216,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 createNewSWModuleType();
             }
         } else {
-
             updateSWModuleType(existingSMTypeByName);
         }
     }

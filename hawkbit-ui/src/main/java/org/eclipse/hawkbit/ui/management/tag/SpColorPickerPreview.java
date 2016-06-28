@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.management.tag;
 
 import java.lang.reflect.Field;
 
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+
 import com.google.common.base.Throwables;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -44,7 +46,7 @@ public final class SpColorPickerPreview extends ColorPickerPreview implements Te
         try {
             final Field textField = ColorPickerPreview.class.getDeclaredField("field");
             textField.setAccessible(true);
-            ((TextField) textField.get(this)).setId("color-preview-field");
+            ((TextField) textField.get(this)).setId(SPUIComponentIdProvider.COLOR_PREVIEW);
             ((TextField) textField.get(this)).addTextChangeListener(this);
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             Throwables.propagate(e);

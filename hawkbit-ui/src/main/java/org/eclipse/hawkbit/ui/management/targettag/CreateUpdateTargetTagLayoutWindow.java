@@ -88,29 +88,31 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
+        setOriginalTagName(targetTagSelected);
         final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
         if (null != selectedTargetTag) {
             tagDesc.setValue(selectedTargetTag.getDescription());
+            setOriginalTagDesc(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
+                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()),
                         selectedTargetTag.getColour());
+                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()));
             }
         }
     }
 
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingTag)) {
-                    createNewTag();
-                }
-            } else {
-                updateExistingTag(existingTag);
+        final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingTag);
         }
     }
 

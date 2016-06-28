@@ -32,9 +32,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
 /**
- *
  * Class for Create/Update Tag Layout of distribution set
- * 
  */
 @SpringComponent
 @ViewScope
@@ -87,16 +85,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
      */
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingDistTag)) {
-                    createNewTag();
-                }
-            } else {
-
-                updateExistingTag(existingDistTag);
+        final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingDistTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingDistTag);
         }
     }
 
@@ -156,14 +151,18 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
+        setOriginalTagName(distTagSelected);
         final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
         if (null != selectedDistTag) {
             tagDesc.setValue(selectedDistTag.getDescription());
+            setOriginalTagDesc(selectedDistTag.getDescription());
             if (null == selectedDistTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
+                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()),
                         selectedDistTag.getColour());
+                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()));
             }
         }
     }
@@ -181,4 +180,5 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
                 permChecker.hasUpdateDistributionPermission());
     }
+
 }

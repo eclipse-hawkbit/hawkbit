@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
@@ -78,6 +79,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
 
     private void createOptionGroup() {
         actionTypeOptionGroup = new FlexibleOptionGroup();
+        actionTypeOptionGroup.setId(SPUIComponentIdProvider.ROLLOUT_ACTION_BUTTON_ID);
         actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
         actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
         actionTypeOptionGroup.addItem(ActionTypeOption.AUTO_FORCED);

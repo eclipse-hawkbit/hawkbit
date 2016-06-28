@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +26,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -43,26 +42,19 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- *
+ * WindowContent for adding/editing a Distribution
  */
 @SpringComponent
 @ViewScope
@@ -92,24 +84,17 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
-    private Label madatoryLabel;
     private TextArea descTextArea;
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
     private Long editDistId;
-    private CommonDialogWindow addDistributionWindow;
+    private CommonDialogWindow window;
     private String originalDistName;
     private String originalDistVersion;
     private String originalDistDescription;
     private Boolean originalReqMigStep;
     private String originalDistSetType;
-    private final List<Component> changedComponents = new ArrayList<>();
-    private ValueChangeListener reqMigStepCheckboxListerner;
-    private TextChangeListener descTextAreaListener;
-    private TextChangeListener distNameTextFieldListener;
-    private TextChangeListener distVersionTextFieldListener;
-    private ValueChangeListener distsetTypeNameComboBoxListener;
 
     private FormLayout formLayout;
 
@@ -132,7 +117,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         setSizeUndefined();
 
         formLayout = new FormLayout();
-        formLayout.addComponent(madatoryLabel);
         formLayout.addComponent(distsetTypeNameComboBox);
         formLayout.addComponent(distNameTextField);
         formLayout.addComponent(distVersionTextField);
@@ -140,7 +124,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         formLayout.addComponent(reqMigStepCheckbox);
 
         setCompositionRoot(formLayout);
-
         distNameTextField.focus();
     }
 
@@ -152,33 +135,42 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
         distNameTextField.setNullRepresentation("");
+        distNameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistName));
+        distNameTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, distNameTextField));
 
         distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
         distVersionTextField.setNullRepresentation("");
+        distVersionTextField
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistVersion));
+        distVersionTextField
+                .addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, distVersionTextField));
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
                 false, "", i18n.get("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
+        populateDistSetTypeNameCombo();
+        distsetTypeNameComboBox.addValueChangeListener(
+                event -> window.checkMandatoryEditedValue(event, distsetTypeNameComboBox, originalDistSetType));
 
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
                 ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
         descTextArea.setNullRepresentation("");
-
-        /* Label for mandatory symbol */
-        madatoryLabel = new Label(i18n.get("label.mandatory.field"));
-        madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
+        descTextArea
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistDescription));
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
+        reqMigStepCheckbox.addValueChangeListener(
+                event -> window.checkMandatoryEditedValueBoolean(event, reqMigStepCheckbox, originalReqMigStep));
     }
 
     /**
@@ -200,27 +192,17 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         return disttypeContainer;
     }
 
-    private void enableSaveButton() {
-        addDistributionWindow.setSaveButtonEnabled(true);
-    }
-
     private DistributionSetType getDefaultDistributionSetType() {
         final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
     }
 
-    private void disableSaveButton() {
-        addDistributionWindow.setSaveButtonEnabled(false);
-    }
-
     private void saveDistribution() {
-        /* add new or update target */
         if (editDistribution) {
             updateDistribution();
         } else {
             addNewDistribution();
         }
-
     }
 
     /**
@@ -254,19 +236,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
-    private void addListeners() {
-        reqMigStepCheckboxListerner = event -> checkValueChanged(originalReqMigStep, event);
-        descTextAreaListener = event -> checkValueChanged(originalDistDescription, event);
-        distNameTextFieldListener = event -> checkValueChanged(originalDistName, event);
-        distVersionTextFieldListener = event -> checkValueChanged(originalDistVersion, event);
-        distsetTypeNameComboBoxListener = event -> checkValueChanged(originalDistSetType, event);
-        reqMigStepCheckbox.addValueChangeListener(reqMigStepCheckboxListerner);
-        descTextArea.addTextChangeListener(descTextAreaListener);
-        distNameTextField.addTextChangeListener(distNameTextFieldListener);
-        distVersionTextField.addTextChangeListener(distVersionTextFieldListener);
-        distsetTypeNameComboBox.addValueChangeListener(distsetTypeNameComboBoxListener);
-    }
-
     /**
      * Add new Distribution set.
      */
@@ -298,8 +267,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Close window.
      */
     private void closeThisWindow() {
-        addDistributionWindow.close();
-        UI.getCurrent().removeWindow(addDistributionWindow);
+        window.close();
+        UI.getCurrent().removeWindow(window);
     }
 
     /**
@@ -372,7 +341,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             if (distSetTypeName == null) {
                 distsetTypeNameComboBox.addStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
             }
-
             notificationMessage.displayValidationError(i18n.get("message.mandatory.check"));
             return false;
         }
@@ -382,7 +350,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private void discardDistribution() {
         /* Just close this window */
-        distsetTypeNameComboBox.removeValueChangeListener(distsetTypeNameComboBoxListener);
         closeThisWindow();
     }
 
@@ -398,80 +365,20 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        if (addDistributionWindow != null) {
-            addDistributionWindow.setSaveButtonEnabled(true);
+
+        originalDistDescription = null;
+        originalDistName = null;
+        originalDistSetType = null;
+        originalDistVersion = null;
+        originalReqMigStep = Boolean.FALSE;
+
+        if (window != null) {
+            window.reset();
         }
-        removeListeners();
-        changedComponents.clear();
     }
 
     private void populateRequiredComponents() {
         populateDistSetTypeNameCombo();
-    }
-
-    private void removeListeners() {
-        reqMigStepCheckbox.removeValueChangeListener(reqMigStepCheckboxListerner);
-        descTextArea.removeTextChangeListener(descTextAreaListener);
-        distNameTextField.removeTextChangeListener(distNameTextFieldListener);
-        distVersionTextField.removeTextChangeListener(distVersionTextFieldListener);
-    }
-
-    public void setOriginalDistName(final String originalDistName) {
-        this.originalDistName = originalDistName;
-    }
-
-    public void setOriginalDistVersion(final String originalDistVersion) {
-        this.originalDistVersion = originalDistVersion;
-    }
-
-    public void setOriginalDistDescription(final String originalDistDescription) {
-        this.originalDistDescription = originalDistDescription;
-    }
-
-    private void checkValueChanged(final String originalValue, final TextChangeEvent event) {
-        if (editDistribution) {
-            final String newValue = event.getText();
-            if (!originalValue.equalsIgnoreCase(newValue)) {
-                changedComponents.add(event.getComponent());
-            } else {
-                changedComponents.remove(event.getComponent());
-            }
-            enableDisableSaveButton();
-        }
-    }
-
-    private void checkValueChanged(final Boolean originalValue, final ValueChangeEvent event) {
-        if (editDistribution) {
-            if (!originalValue.equals(event.getProperty().getValue())) {
-                changedComponents.add(reqMigStepCheckbox);
-            } else {
-                changedComponents.remove(reqMigStepCheckbox);
-            }
-            enableDisableSaveButton();
-        }
-    }
-
-    private void checkValueChanged(final String originalValue, final ValueChangeEvent event) {
-        if (editDistribution) {
-            if (!originalValue.equals(event.getProperty().getValue())) {
-                changedComponents.add(distsetTypeNameComboBox);
-            } else {
-                changedComponents.remove(distsetTypeNameComboBox);
-            }
-            enableDisableSaveButton();
-        }
-    }
-
-    private void enableDisableSaveButton() {
-        if (changedComponents.isEmpty()) {
-            disableSaveButton();
-        } else {
-            enableSaveButton();
-        }
-    }
-
-    private void setOriginalReqMigStep(final Boolean originalReqMigStep) {
-        this.originalReqMigStep = originalReqMigStep;
     }
 
     /**
@@ -482,7 +389,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        addDistributionWindow.setSaveButtonEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());
@@ -495,25 +401,35 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             if (distSet.getDescription() != null) {
                 descTextArea.setValue(distSet.getDescription());
             }
-            setOriginalDistName(distSet.getName());
-            setOriginalDistVersion(distSet.getVersion());
-            setOriginalDistDescription(distSet.getDescription());
-            setOriginalReqMigStep(distSet.isRequiredMigrationStep());
-            setOriginalDistSetTYpe(distSet.getType().getName());
-            addListeners();
+            originalDistName = distSet.getName();
+            originalDistVersion = distSet.getVersion();
+            originalDistDescription = distSet.getDescription();
+            originalReqMigStep = distSet.isRequiredMigrationStep();
+            originalDistSetType = distSet.getType().getName();
+            window.updateEditedFields(distsetTypeNameComboBox.getId(), Boolean.FALSE);
+            window.updateEditedFields(reqMigStepCheckbox.getId(), Boolean.FALSE);
         }
     }
 
     public CommonDialogWindow getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
+                null, CommonDialogWindowHelper.getMandatoryFields(formLayout), getEditedFields(), i18n);
+        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         populateRequiredComponents();
         resetComponents();
-        addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null);
-        addDistributionWindow.getButtonsLayout().removeStyleName("actionButtonsMargin");
+        return window;
+    }
 
-        return addDistributionWindow;
+    private Map<String, Boolean> getEditedFields() {
+        final Map<String, Boolean> editedFields = new HashMap<>();
+        editedFields.put(distsetTypeNameComboBox.getId(), Boolean.FALSE);
+        editedFields.put(distNameTextField.getId(), Boolean.FALSE);
+        editedFields.put(distVersionTextField.getId(), Boolean.FALSE);
+        editedFields.put(descTextArea.getId(), Boolean.FALSE);
+        editedFields.put(reqMigStepCheckbox.getId(), Boolean.FALSE);
+        return editedFields;
     }
 
     /**
@@ -523,14 +439,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setContainerDataSource(getDistSetTypeLazyQueryContainer());
         distsetTypeNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
         distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getName());
-    }
-
-    /**
-     * @param originalDistSetTYpe
-     *            the originalDistSetTYpe to set
-     */
-    public void setOriginalDistSetTYpe(final String originalDistSetType) {
-        this.originalDistSetType = originalDistSetType;
     }
 
 }
