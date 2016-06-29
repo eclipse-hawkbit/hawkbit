@@ -129,7 +129,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
             }
             newTargetTag = tagManagement.createTargetTag(newTargetTag);
             displaySuccess(newTargetTag.getName());
-            closeWindow();
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
         }

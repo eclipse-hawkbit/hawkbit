@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -40,7 +39,6 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -184,8 +182,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         setCompositionRoot(formLayout);
 
         window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
-                formLayout, i18n);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), null, null, formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
 
         nameTextField.setEnabled(!editSwModule);
@@ -202,10 +199,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        if (!mandatoryCheck(name, version, type)) {
-            return;
-        }
-
         if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
             uiNotifcation.displayValidationError(
                     i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
@@ -218,8 +211,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
                         new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
                 eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
             }
-            // close the window
-            closeThisWindow();
         }
     }
 
@@ -239,7 +230,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
             eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
         }
-        closeThisWindow();
     }
 
     /**
@@ -249,6 +239,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         if (baseSwModuleId == null) {
             return;
         }
+        editSwModule = Boolean.TRUE;
         final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModle.getName());
         versionTextField.setValue(swModle.getVersion());
@@ -260,42 +251,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-    }
-
-    /**
-     * Method to close window.
-     */
-    private void closeThisWindow() {
-        window.close();
-        UI.getCurrent().removeWindow(window);
-    }
-
-    /**
-     * Validation check - Mandatory.
-     * 
-     * @param name
-     *            as String
-     * @param version
-     *            as version
-     * @return boolena as flag
-     */
-    private boolean mandatoryCheck(final String name, final String version, final String type) {
-        boolean isValid = true;
-        if (name == null || version == null || type == null) {
-            if (name == null) {
-                nameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-            }
-            if (version == null) {
-                versionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-            }
-            if (type == null) {
-                typeComboBox.addStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
-            }
-
-            uiNotifcation.displayValidationError(i18n.get("message.mandatory.check"));
-            isValid = false;
-        }
-        return isValid;
     }
 
     private void saveOrUpdate() {

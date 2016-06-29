@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
@@ -38,6 +39,8 @@ import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Validator;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeNotifier;
@@ -64,6 +67,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * 
  * Table pop-up-windows including a minimize and close icon in the upper right
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
+ * 
  */
 public class CommonDialogWindow extends Window implements Serializable {
 
@@ -89,6 +93,8 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final ClickListener cancelButtonClickListener;
 
+    private final ClickListener close = event -> close();
+
     private final Map<Component, Object> orginalValues;
 
     private final List<AbstractField<?>> allComponents;
@@ -113,7 +119,6 @@ public class CommonDialogWindow extends Window implements Serializable {
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
             final AbstractLayout layout, final I18N i18n) {
         checkNotNull(saveButtonClickListener);
-        checkNotNull(cancelButtonClickListener);
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
@@ -211,13 +216,11 @@ public class CommonDialogWindow extends Window implements Serializable {
             }
             orginalValues.put(field, value);
         }
-
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
     }
 
     private final void addListeners() {
         for (final AbstractField<?> field : allComponents) {
-
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
             }
@@ -229,13 +232,13 @@ public class CommonDialogWindow extends Window implements Serializable {
             }
         }
 
-        saveButton.addClickListener(event -> close());
-        cancelButton.addClickListener(event -> close());
+        saveButton.addClickListener(close);
+        cancelButton.addClickListener(close);
     }
 
     private boolean isSaveButtonEnabledAfterValueChange(final Component currentChangedComponent,
             final Object newValue) {
-        return isMandatoyFieldNotEmpty(currentChangedComponent, newValue)
+        return isMandatoryFieldNotEmptyAndValid(currentChangedComponent, newValue)
                 && isValuesChanged(currentChangedComponent, newValue);
     }
 
@@ -247,7 +250,6 @@ public class CommonDialogWindow extends Window implements Serializable {
             if (!isValueEquals(field, orginalValue, currentValue)) {
                 return true;
             }
-
         }
         return false;
     }
@@ -289,31 +291,45 @@ public class CommonDialogWindow extends Window implements Serializable {
         return false;
     }
 
-    private boolean isMandatoyFieldNotEmpty(final Component currentChangedComponent, final Object newValue) {
+    private boolean isMandatoryFieldNotEmptyAndValid(final Component currentChangedComponent, final Object newValue) {
+
+        boolean valid = true;
         final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(field -> field.isRequired())
                 .collect(Collectors.toList());
 
-        for (final AbstractField<?> field : requiredComponents) {
-            Object value = getCurrentVaue(currentChangedComponent, newValue, field);
+        requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
-            if (String.class.equals(field.getType())) {
-                value = Strings.emptyToNull((String) value);
-            }
-
-            if (Set.class.equals(field.getType())) {
-                value = emptyToNull((Collection<?>) value);
-            }
+        for (final AbstractField field : requiredComponents) {
+            final Object value = getCurrentVaue(currentChangedComponent, newValue, field);
 
             if (value == null) {
                 return false;
             }
-        }
-        return true;
 
+            // We need to loop through the entire loop for validity testing.
+            // Otherwise the UI will only mark the
+            // first field with errors and then stop. If there are several
+            // fields with errors, this is bad.
+            field.setValue(value);
+            if (!field.isValid()) {
+                valid = false;
+            }
+        }
+
+        return valid;
     }
 
-    private static Object emptyToNull(final Collection<?> c) {
-        return (c == null || c.isEmpty()) ? null : c;
+    private boolean hasNullValidator(final Component component) {
+
+        if (component instanceof AbstractField<?>) {
+            final AbstractField<?> fieldComponent = (AbstractField<?>) component;
+            for (final Validator validator : fieldComponent.getValidators()) {
+                if (validator instanceof NullValidator) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
@@ -328,6 +344,10 @@ public class CommonDialogWindow extends Window implements Serializable {
 
             if (c instanceof AbstractField) {
                 components.add((AbstractField<?>) c);
+            }
+
+            if (c instanceof FlexibleOptionGroupItemComponent) {
+                components.add(((FlexibleOptionGroupItemComponent) c).getOwner());
             }
         }
         return components;
@@ -374,7 +394,9 @@ public class CommonDialogWindow extends Window implements Serializable {
                 FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
-        cancelButton.addClickListener(cancelButtonClickListener);
+        if (cancelButtonClickListener != null) {
+            cancelButton.addClickListener(cancelButtonClickListener);
+        }
 
         buttonsLayout.addComponent(cancelButton);
         buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
@@ -419,7 +441,6 @@ public class CommonDialogWindow extends Window implements Serializable {
         @Override
         public void textChange(final TextChangeEvent event) {
             saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, event.getText()));
-
         }
 
         @Override
@@ -436,7 +457,6 @@ public class CommonDialogWindow extends Window implements Serializable {
             saveButton.setEnabled(
                     isSaveButtonEnabledAfterValueChange(table, table.getContainerDataSource().getItemIds()));
         }
-
     }
 
 }

@@ -179,11 +179,6 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
         }
-
-        // TODO:
-        // window.checkColorChange(colorPickerLayout.getId(),
-        // colorPickerLayout.getSelectedColor(),
-        // getOriginalSelectedColor());
     }
 
     /**

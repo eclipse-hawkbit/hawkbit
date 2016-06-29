@@ -50,7 +50,6 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -192,7 +191,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         final String distSetTypeName = HawkbitCommonUtil
                 .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
 
-        if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
+        if (duplicateCheck(name, version)) {
             final DistributionSet currentDS = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
@@ -210,7 +209,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 notificationMessage.displayValidationError(
                         i18n.get("message.distribution.no.update", currentDS.getName() + ":" + currentDS.getVersion()));
             }
-            closeThisWindow();
         }
     }
 
@@ -224,7 +222,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         final String distSetTypeName = HawkbitCommonUtil
                 .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
 
-        if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
+        if (duplicateCheck(name, version)) {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
             DistributionSet newDist = entityFactory.generateDistributionSet();
@@ -234,19 +232,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
             notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                     new Object[] { newDist.getName(), newDist.getVersion() }));
-            /* close the window */
-            closeThisWindow();
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
         }
-    }
-
-    /**
-     * Close window.
-     */
-    private void closeThisWindow() {
-        window.close();
-        UI.getCurrent().removeWindow(window);
     }
 
     /**
@@ -290,45 +278,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         } else {
             return true;
         }
-    }
-
-    /**
-     * Mandatory Check.
-     *
-     * @param name
-     *            as String
-     * @param version
-     *            as String
-     * @param selectedJVM
-     *            as String
-     * @param selectedAgentHub
-     *            as String
-     * @param selectedOs
-     *            as String
-     * @return boolean as flag
-     */
-    private boolean mandatoryCheck(final String name, final String version, final String distSetTypeName) {
-
-        if (name == null || version == null || distSetTypeName == null) {
-            if (name == null) {
-                distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-            }
-            if (version == null) {
-                distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-            }
-            if (distSetTypeName == null) {
-                distsetTypeNameComboBox.addStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
-            }
-            notificationMessage.displayValidationError(i18n.get("message.mandatory.check"));
-            return false;
-        }
-
-        return true;
-    }
-
-    private void discardDistribution() {
-        /* Just close this window */
-        closeThisWindow();
     }
 
     /**
@@ -377,8 +326,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null, formLayout, i18n);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), null, null, formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         return window;
     }

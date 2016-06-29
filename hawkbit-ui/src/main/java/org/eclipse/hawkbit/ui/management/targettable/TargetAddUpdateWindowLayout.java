@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -40,7 +38,6 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -74,10 +71,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private String controllerId;
     private FormLayout formLayout;
     private CommonDialogWindow window;
-
-    private String originalTargetName;
-    private String originalTargetDesc;
-    private String originalControllerId;
 
     /**
      * Initialize the Add Update Window Component for Target.
@@ -139,10 +132,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { latestTarget.getName() }));
         // publishing through event bus
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
-
-        /* close the window */
-        closeThisWindow();
-        /* update details in table */
     }
 
     private void saveTargetListner() {
@@ -153,13 +142,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
-    private void discardTargetListner() {
-        closeThisWindow();
-    }
-
     private void addNewTarget() {
         final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
-        if (mandatoryCheck(newControlllerId) && duplicateCheck(newControlllerId)) {
+        if (duplicateCheck(newControlllerId)) {
             final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
@@ -176,25 +161,14 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
             /* display success msg */
             uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
-            /* close the window */
-            closeThisWindow();
         }
     }
 
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(),
-                event -> discardTargetListner(), null, formLayout, i18n);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), null, null, formLayout, i18n);
         return window;
-    }
-
-    private Map<String, Boolean> getEditedFields() {
-        final Map<String, Boolean> editedFields = new HashMap<>();
-        editedFields.put(controllerIDTextField.getId(), Boolean.FALSE);
-        editedFields.put(nameTextField.getId(), Boolean.FALSE);
-        editedFields.put(descTextArea.getId(), Boolean.FALSE);
-        return editedFields;
     }
 
     /**
@@ -208,32 +182,11 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.clear();
         descTextArea.clear();
         editTarget = Boolean.FALSE;
-
-        originalControllerId = null;
-        originalTargetDesc = null;
-        originalTargetName = null;
-
-    }
-
-    private void closeThisWindow() {
-        editTarget = Boolean.FALSE;
-        window.close();
-        UI.getCurrent().removeWindow(window);
     }
 
     private void setTargetValues(final Target target, final String name, final String description) {
         target.setName(name == null ? target.getControllerId() : name);
         target.setDescription(description);
-    }
-
-    private boolean mandatoryCheck(final String newControlllerId) {
-        if (newControlllerId == null) {
-            controllerIDTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-            uINotification.displayValidationError("Mandatory details are missing");
-            return false;
-        } else {
-            return true;
-        }
     }
 
     private boolean duplicateCheck(final String newControlllerId) {
@@ -261,10 +214,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (target.getDescription() != null) {
             descTextArea.setValue(target.getDescription());
         }
-
-        originalTargetDesc = descTextArea.getValue();
-        originalTargetName = nameTextField.getValue();
-        originalControllerId = controllerIDTextField.getValue();
         window.addStyleName("target-update-window");
     }
 

@@ -36,7 +36,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
-import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -45,8 +44,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
-        implements ColorChangeListener, ColorSelector {
+public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
     private static final long serialVersionUID = -5169398523815919367L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
@@ -231,7 +229,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
             newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
 
@@ -253,7 +250,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
             existingType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
             swTypeManagementService.updateSoftwareModuleType(existingType);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
 

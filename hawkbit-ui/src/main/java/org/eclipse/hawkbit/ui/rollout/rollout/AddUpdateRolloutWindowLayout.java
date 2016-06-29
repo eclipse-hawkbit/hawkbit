@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -58,8 +57,9 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Validator;
+import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
-import com.vaadin.data.validator.RegexpValidator;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -69,7 +69,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -86,8 +85,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
-
-    private static final String NUMBER_REGEXP = "[-]?[0-9]*\\.?,?[0-9]+";
 
     @Autowired
     private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
@@ -146,6 +143,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextArea targetFilterQuery;
 
+    private final NullValidator nullValidator = new NullValidator(null, false);
+
     /**
      * Create components and layout.
      */
@@ -157,10 +156,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     public CommonDialogWindow getWindow(final Long rolloutId) {
         resetComponents();
-        populateData(rolloutId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), null,
                 uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
+        populateData(rolloutId);
         return window;
     }
 
@@ -207,33 +206,34 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         addComponent(getMandatoryLabel("textfield.name"), 0, 0);
         addComponent(rolloutName, 1, 0);
-        rolloutName.setRequired(true);
+        rolloutName.addValidator(nullValidator);
 
         addComponent(getMandatoryLabel("prompt.distribution.set"), 0, 1);
         addComponent(distributionSet, 1, 1);
-        distributionSet.setRequired(true);
+        distributionSet.addValidator(nullValidator);
 
         addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
-        targetFilterQueryCombo.setRequired(true);
+        targetFilterQueryCombo.addValidator(nullValidator);
+        targetFilterQuery.removeValidator(nullValidator);
 
         addComponent(totalTargetsLabel, 2, 2);
 
         addComponent(getMandatoryLabel("prompt.number.of.groups"), 0, 3);
         addComponent(noOfGroups, 1, 3);
-        noOfGroups.setRequired(true);
+        noOfGroups.addValidator(nullValidator);
 
         addComponent(groupSizeLabel, 2, 3);
 
         addComponent(getMandatoryLabel("prompt.tigger.threshold"), 0, 4);
         addComponent(triggerThreshold, 1, 4);
-        triggerThreshold.setRequired(true);
+        triggerThreshold.addValidator(nullValidator);
 
         addComponent(getPercentHintLabel(), 2, 4);
 
         addComponent(getMandatoryLabel("prompt.error.threshold"), 0, 5);
         addComponent(errorThreshold, 1, 5);
-        errorThreshold.setRequired(true);
+        errorThreshold.addValidator(nullValidator);
         addComponent(errorThresholdOptionGroup, 2, 5);
 
         addComponent(getLabel("textfield.description"), 0, 6);
@@ -386,10 +386,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 targetFilterQF);
     }
 
-    private void onDiscard() {
-        closeThisWindow();
-    }
-
     private void onRolloutSave() {
         if (editRolloutEnabled) {
             editRollout();
@@ -399,7 +395,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void editRollout() {
-        if (mandatoryCheckForEdit() && validateFields() && duplicateCheckForEdit() && null != rolloutForEdit) {
+        if (duplicateCheckForEdit() && rolloutForEdit != null) {
             rolloutForEdit.setName(rolloutName.getValue());
             rolloutForEdit.setDescription(description.getValue());
             final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
@@ -417,7 +413,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
             uiNotification
                     .displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
-            closeThisWindow();
             eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
         }
     }
@@ -445,11 +440,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void createRollout() {
-        if (mandatoryCheck() && validateFields() && duplicateCheck()) {
+        if (duplicateCheck()) {
             final Rollout rolloutToCreate = saveRollout();
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
             eventBus.publish(this, RolloutEvent.CREATE_ROLLOUT);
-            closeThisWindow();
         }
     }
 
@@ -506,48 +500,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return true;
     }
 
-    private void closeThisWindow() {
-        window.close();
-        UI.getCurrent().removeWindow(window);
-    }
-
-    private boolean mandatoryCheck() {
-        final DistributionSetIdName ds = getDistributionSetSelected();
-        final String targetFilter = (String) targetFilterQueryCombo.getValue();
-        final String triggerThresoldValue = triggerThreshold.getValue();
-        final String errorThresoldValue = errorThreshold.getValue();
-        if (hasNoNameOrTargetFilter(targetFilter) || ds == null
-                || HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                || isThresholdValueMissing(triggerThresoldValue, errorThresoldValue)) {
-            uiNotification.displayValidationError(i18n.get("message.mandatory.check"));
-            return false;
-        }
-        return true;
-    }
-
-    private boolean mandatoryCheckForEdit() {
-        final DistributionSetIdName ds = getDistributionSetSelected();
-        final String targetFilter = targetFilterQuery.getValue();
-        final String triggerThresoldValue = triggerThreshold.getValue();
-        final String errorThresoldValue = errorThreshold.getValue();
-        if (hasNoNameOrTargetFilter(targetFilter) || ds == null
-                || HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                || isThresholdValueMissing(triggerThresoldValue, errorThresoldValue)) {
-            uiNotification.displayValidationError(i18n.get("message.mandatory.check"));
-            return false;
-        }
-        return true;
-    }
-
-    private boolean hasNoNameOrTargetFilter(final String targetFilter) {
-        return getRolloutName() == null || targetFilter == null;
-    }
-
-    private boolean isThresholdValueMissing(final String triggerThresoldValue, final String errorThresoldValue) {
-        return HawkbitCommonUtil.trimAndNullIfEmpty(triggerThresoldValue) == null
-                || HawkbitCommonUtil.trimAndNullIfEmpty(errorThresoldValue) == null;
-    }
-
     private boolean duplicateCheck() {
         if (rolloutManagement.findRolloutByName(getRolloutName()) != null) {
             uiNotification.displayValidationError(
@@ -573,7 +525,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createErrorThreshold() {
         final TextField errorField = getTextfield("prompt.error.threshold");
+        errorField.setNullRepresentation("");
         errorField.addValidator(new ThresholdFieldValidator());
+        errorField.setConverter(new StringToIntegerConverter());
+        errorField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         errorField.setId(SPUIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
         errorField.setMaxLength(7);
         errorField.setSizeUndefined();
@@ -583,7 +538,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private TextField createTriggerThreshold() {
         final TextField thresholdField = getTextfield("prompt.tigger.threshold");
         thresholdField.setId(SPUIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
+        thresholdField.setNullRepresentation("");
         thresholdField.addValidator(new ThresholdFieldValidator());
+        thresholdField.setConverter(new StringToIntegerConverter());
+        thresholdField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         thresholdField.setSizeUndefined();
         thresholdField.setMaxLength(3);
         return thresholdField;
@@ -595,12 +553,15 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         noOfGroupsField.addValidator(new GroupNumberValidator());
         noOfGroupsField.setSizeUndefined();
         noOfGroupsField.setMaxLength(3);
+        noOfGroupsField.setConverter(new StringToIntegerConverter());
+        noOfGroupsField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         noOfGroupsField.addValueChangeListener(this::onGroupNumberChange);
+        noOfGroupsField.setNullRepresentation("");
         return noOfGroupsField;
     }
 
     private void onGroupNumberChange(final ValueChangeEvent event) {
-        if (noOfGroups.isValid() && !Strings.isNullOrEmpty(noOfGroups.getValue())) {
+        if (event.getProperty().getValue() != null && noOfGroups.isValid()) {
             groupSizeLabel.setValue(getTargetPerGroupMessage(String.valueOf(getGroupSize())));
             groupSizeLabel.setVisible(true);
         } else {
@@ -643,10 +604,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
     }
 
-    private DistributionSetIdName getDistributionSetSelected() {
-        return (DistributionSetIdName) distributionSet.getValue();
-    }
-
     class ErrorThresoldOptionValidator implements Validator {
         private static final long serialVersionUID = 9049939751976326550L;
 
@@ -659,8 +616,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     uiNotification
                             .displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
-                    if (StringUtils.isNotBlank(value.toString())) {
-                        new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                    if (value != null) {
                         final int groupSize = getGroupSize();
                         new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0,
                                 groupSize).validate(Integer.valueOf(value.toString()));
@@ -670,8 +626,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // suppress the need of preserve original exception, will blow
             // up the
             // log and not necessary here
-            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
-                LOG.error(ex.getMessage());
+            catch (
+
+            @SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+                // we have to throw the exception here, otherwise the UI won't
+                // show the vaadin validation error!
+                throw ex;
             }
         }
     }
@@ -686,8 +646,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             try {
-                if (StringUtils.isNotBlank(value.toString())) {
-                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                if (value != null) {
                     new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
                             .validate(Integer.valueOf(value.toString()));
                 }
@@ -696,7 +655,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // up the
             // log and not necessary here
             catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
-                LOG.error(ex.getMessage());
+                // we have to throw the exception here, otherwise the UI won't
+                // show the vaadin validation error!
+                throw ex;
             }
         }
     }
@@ -707,8 +668,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             try {
-                if (StringUtils.isNotBlank(value.toString())) {
-                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                if (value != null) {
                     new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
                             .validate(Integer.valueOf(value.toString()));
                 }
@@ -717,7 +677,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // up the
             // log and not necessary here
             catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
-                LOG.error(ex.getMessage());
+                // we have to throw the exception here, otherwise the UI won't
+                // show the vaadin validation error!
+                throw ex;
             }
         }
     }
@@ -749,7 +711,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         noOfGroups.setEnabled(false);
         targetFilterQuery.setValue(rolloutForEdit.getTargetFilterQuery());
         removeComponent(1, 2);
+        targetFilterQueryCombo.removeValidator(nullValidator);
         addComponent(targetFilterQuery, 1, 2);
+        targetFilterQuery.addValidator(nullValidator);
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rolloutForEdit.getTargetFilterQuery());
         totalTargetsLabel.setValue(getTotalTargetMessage());
@@ -795,7 +759,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      * @param rolloutGroups
      */
     private void setThresholdValues(final List<RolloutGroup> rolloutGroups) {
-        if (null != rolloutGroups && !rolloutGroups.isEmpty()) {
+        if (rolloutGroups != null && !rolloutGroups.isEmpty()) {
             errorThreshold.setValue(rolloutGroups.get(0).getErrorConditionExp());
             triggerThreshold.setValue(rolloutGroups.get(0).getSuccessConditionExp());
             noOfGroups.setValue(String.valueOf(rolloutGroups.size()));

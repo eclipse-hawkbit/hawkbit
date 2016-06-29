@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -49,8 +48,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.colorpicker.ColorChangeListener;
-import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -58,8 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
-        implements ColorChangeListener, ColorSelector {
+public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
     private static final long serialVersionUID = -5169398523815877767L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateDistSetTypeLayout.class);
@@ -259,9 +255,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         for (final Long id : selectedIds) {
             addTargetTableData(id);
         }
-        // TODO: Add Table to window
-        // window.updateRequiredFields(selectedTable.getId(),
-        // hasContentChanged());
     }
 
     private void removeSMType() {
@@ -274,38 +267,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         for (final Long id : selectedIds) {
             addSourceTableData(id);
             selectedTable.removeItem(id);
-            // window.updateRequiredFields(selectedTable.getId(),
-            // hasContentChanged());
         }
-    }
-
-    private Boolean hasContentChanged() {
-
-        if (originalSelectedTableContainer == null) {
-            originalSelectedTableContainer = new IndexedContainer();
-        }
-        // is new softwareModule added?
-        for (final Iterator itemIterator = selectedTableContainer.getItemIds().iterator(); itemIterator.hasNext();) {
-            final long itemId = (Long) itemIterator.next();
-            if (!originalSelectedTableContainer.containsId(itemId)) {
-                // window.updateEditedFields(selectedTable.getId(),
-                // Boolean.TRUE);
-                return Boolean.TRUE;
-            }
-        }
-
-        // is softwareModule removed and at least one softwareModule is selected
-        for (final Iterator itemIterator = originalSelectedTableContainer.getItemIds().iterator(); itemIterator
-                .hasNext();) {
-            final long itemId = (Long) itemIterator.next();
-            if (selectedTableContainer.size() > 0 && !selectedTableContainer.containsId(itemId)) {
-                // window.updateEditedFields(selectedTable.getId(),
-                // Boolean.TRUE);
-                return Boolean.TRUE;
-            }
-        }
-
-        return Boolean.FALSE;
     }
 
     @SuppressWarnings("unchecked")
@@ -402,10 +364,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             newDistType.setColour(colorPicked);
             newDistType = distributionSetManagement.createDistributionSetType(newDistType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
         }
@@ -445,7 +405,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             distributionSetManagement.updateDistributionSetType(updateDistSetType);
             uiNotification
                     .displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 
@@ -480,18 +439,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         return distSetType;
     }
 
-    @Override
-    public void addColorChangeListener(final ColorChangeListener listener) {
-
-        LOG.info("in side addColorChangeListener() ");
-    }
-
-    @Override
-    public void removeColorChangeListener(final ColorChangeListener listener) {
-
-        LOG.info("in side removeColorChangeListener() ");
-    }
-
     /**
      * reset the components.
      */
@@ -515,7 +462,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         super.optionValueChanged(event);
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
-            // window.updateRequiredFields(selectedTable.getId(), Boolean.TRUE);
             selectedTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
             distTypeSelectLayout.setEnabled(false);
@@ -616,6 +562,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         sourceTable.removeItem(swModuleType.getId());
         saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
         saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
+
+        // TODO CHECKBOX
         final CheckBox mandatoryCheckbox = (CheckBox) selectedTableContainer
                 .getContainerProperty(swModuleType.getId(), DIST_TYPE_MANDATORY).getValue();
 
