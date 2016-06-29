@@ -141,7 +141,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted due to worng content type");
-        } catch (final IllegalArgumentException e) {
+        } catch (final AmqpRejectAndDontRequeueException e) {
         }
     }
 
