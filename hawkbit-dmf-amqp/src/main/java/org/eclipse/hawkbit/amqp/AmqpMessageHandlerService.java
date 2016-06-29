@@ -138,9 +138,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
-    public Message onAuthenticationRequest(final Message message,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
-        return onAuthenticationRequest(message);
+    public Message onAuthenticationRequest(final Message message) {
+        checkContentTypeJson(message);
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            return handleAuthentifiactionMessage(message);
+        } catch (final IllegalArgumentException ex) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
+        } catch (final TenantNotExistException teex) {
+            throw new AmqpRejectAndDontRequeueException(teex);
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
     }
 
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
@@ -159,7 +168,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final EventTopic eventTopic = EventTopic.valueOf(topicValue);
                 handleIncomingEvent(message, eventTopic);
                 break;
-
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
@@ -171,20 +179,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             SecurityContextHolder.setContext(oldContext);
         }
         return null;
-    }
-
-    public Message onAuthenticationRequest(final Message message) {
-        checkContentTypeJson(message);
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        try {
-            return handleAuthentifiactionMessage(message);
-        } catch (final IllegalArgumentException ex) {
-            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException teex) {
-            throw new AmqpRejectAndDontRequeueException(teex);
-        } finally {
-            SecurityContextHolder.setContext(oldContext);
-        }
     }
 
     private Message handleAuthentifiactionMessage(final Message message) {
@@ -414,7 +408,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + message.getMessageProperties().getCorrelationId());
+                    + new String(message.getMessageProperties().getCorrelationId()));
         }
 
         actionStatus.setAction(action);
@@ -466,7 +460,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;
         }
-        throw new IllegalArgumentException("Content-Type is not JSON compatible");
+        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     void setControllerManagement(final ControllerManagement controllerManagement) {
