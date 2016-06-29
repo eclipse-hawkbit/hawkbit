@@ -408,12 +408,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + new String(message.getMessageProperties().getCorrelationId()));
+                    + convertCorrelationId(message));
         }
 
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
         return actionStatus;
+    }
+
+    private static String convertCorrelationId(final Message message) {
+        return new String(message.getMessageProperties().getCorrelationId());
     }
 
     private Action getUpdateActionStatus(final ActionStatus actionStatus) {
