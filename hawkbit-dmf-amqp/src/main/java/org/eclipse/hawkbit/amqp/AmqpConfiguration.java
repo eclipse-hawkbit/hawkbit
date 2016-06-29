@@ -22,11 +22,11 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -268,15 +268,8 @@ public class AmqpConfiguration {
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public SimpleRabbitListenerContainerFactory listenerContainerFactory() {
-        final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
-        containerFactory.setDefaultRequeueRejected(true);
-        containerFactory.setConnectionFactory(rabbitConnectionFactory);
-        containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
-        containerFactory.setConcurrentConsumers(amqpProperties.getInitialConcurrentConsumers());
-        containerFactory.setMaxConcurrentConsumers(amqpProperties.getMaxConcurrentConsumers());
-        containerFactory.setPrefetchCount(amqpProperties.getPrefetchCount());
-        return containerFactory;
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
