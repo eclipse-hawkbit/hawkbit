@@ -42,6 +42,9 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
     }
 
     @Override
+    // Exception squid:UnusedProtectedMethod - called by
+    // AbstractRabbitListenerContainerFactory
+    @SuppressWarnings("squid:UnusedProtectedMethod")
     protected void initializeContainer(final SimpleMessageListenerContainer instance) {
         super.initializeContainer(instance);
         instance.setDeclarationRetries(amqpProperties.getDeclarationRetries());
