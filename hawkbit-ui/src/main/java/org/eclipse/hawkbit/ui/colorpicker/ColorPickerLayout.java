@@ -73,6 +73,7 @@ public class ColorPickerLayout extends GridLayout {
         colorSelect.setWidth("220px");
 
         redSlider = createRGBSlider("", "red");
+        redSlider.setId(SPUIComponentIdProvider.COLOR_PICKER_RED_SLIDER);
         greenSlider = createRGBSlider("", "green");
         blueSlider = createRGBSlider("", "blue");
 

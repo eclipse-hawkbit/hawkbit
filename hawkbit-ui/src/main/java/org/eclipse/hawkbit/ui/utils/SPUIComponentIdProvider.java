@@ -311,6 +311,14 @@ public final class SPUIComponentIdProvider {
      */
     public static final String COLOR_PICKER_LAYOUT = "color.picker.layout";
     /**
+     * Id for ColorPickerLayout's red slider
+     */
+    public static final String COLOR_PICKER_RED_SLIDER = "color.picker.red.slider";
+    /**
+     * Id for Color preview field with the color code
+     */
+    public static final String COLOR_PREVIEW_FIELD = "color-preview-field";
+    /**
      * Id for OptionGroup Create/Update tag
      */
     public static final String OPTION_GROUP = "create.update.tag";
