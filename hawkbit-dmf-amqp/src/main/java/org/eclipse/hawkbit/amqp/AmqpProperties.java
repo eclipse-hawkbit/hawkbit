@@ -68,6 +68,29 @@ public class AmqpProperties {
      */
     private int initialConcurrentConsumers = 3;
 
+    /**
+     * The number of retry attempts when passive queue declaration fails.
+     * Passive queue declaration occurs when the consumer starts or, when
+     * consuming from multiple queues, when not all queues were available during
+     * initialization.
+     */
+    private int declarationRetries = 50;
+
+    /**
+     * @return the declarationRetries
+     */
+    public int getDeclarationRetries() {
+        return declarationRetries;
+    }
+
+    /**
+     * @param declarationRetries
+     *            the declarationRetries to set
+     */
+    public void setDeclarationRetries(final int declarationRetries) {
+        this.declarationRetries = declarationRetries;
+    }
+
     public String getAuthenticationReceiverQueue() {
         return authenticationReceiverQueue;
     }

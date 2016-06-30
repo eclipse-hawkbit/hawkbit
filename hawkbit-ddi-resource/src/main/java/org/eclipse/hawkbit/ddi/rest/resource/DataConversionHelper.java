@@ -79,12 +79,12 @@ public final class DataConversionHelper {
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler) {
         final List<DdiArtifact> files = new ArrayList<>();
-        
+
         module.getLocalArtifacts()
-        .forEach(artifact -> files.add(createArtifact(targetid, artifactUrlHandler, artifact)));
+                .forEach(artifact -> files.add(createArtifact(targetid, artifactUrlHandler, artifact)));
         return files;
     }
-    
+
     private static DdiArtifact createArtifact(final String targetid, final ArtifactUrlHandler artifactUrlHandler,
             final LocalArtifact artifact) {
         final DdiArtifact file = new DdiArtifact();
@@ -125,7 +125,7 @@ public final class DataConversionHelper {
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(target.getControllerId(), action.getId(),
-                                actions.hashCode())).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                                calculateEtag(action))).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
                 addedUpdate = true;
             } else if (action.isCancelingOrCanceled() && !addedCancel) {
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
@@ -139,6 +139,22 @@ public final class DataConversionHelper {
             result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
                     target.getControllerId())).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
+        return result;
+    }
+
+    /**
+     * Calculates an etag for the given {@link Action} based on the entities
+     * hashcode and the {@link Action#isHitAutoForceTime(long)} to reflect a
+     * force switch.
+     * 
+     * @param action
+     *            to calculate the etag for
+     * @return the etag
+     */
+    private static int calculateEtag(final Action action) {
+        final int prime = 31;
+        int result = action.hashCode();
+        result = prime * result + (action.isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237);
         return result;
     }
 
