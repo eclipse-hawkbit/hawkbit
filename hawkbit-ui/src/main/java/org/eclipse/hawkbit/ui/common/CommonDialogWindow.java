@@ -52,6 +52,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
@@ -207,6 +208,10 @@ public class CommonDialogWindow extends Window implements Serializable {
         addListeners();
     }
 
+    /**
+     * saves the original values in a Map so we can use them for detecting
+     * changes
+     */
     public final void setOrginaleValues() {
         for (final AbstractField<?> field : allComponents) {
             Object value = field.getValue();
@@ -244,10 +249,13 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private boolean isValuesChanged(final Component currentChangedComponent, final Object newValue) {
         for (final AbstractField<?> field : allComponents) {
-            final Object orginalValue = orginalValues.get(field);
+            Object originalValue = orginalValues.get(field);
+            if (field instanceof CheckBox && originalValue == null) {
+                originalValue = Boolean.FALSE;
+            }
             final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (!isValueEquals(field, orginalValue, currentValue)) {
+            if (!isValueEquals(field, originalValue, currentValue)) {
                 return true;
             }
         }
@@ -300,7 +308,15 @@ public class CommonDialogWindow extends Window implements Serializable {
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
         for (final AbstractField field : requiredComponents) {
-            final Object value = getCurrentVaue(currentChangedComponent, newValue, field);
+            Object value = getCurrentVaue(currentChangedComponent, newValue, field);
+
+            if (String.class.equals(field.getType())) {
+                value = Strings.emptyToNull((String) value);
+            }
+
+            if (Set.class.equals(field.getType())) {
+                value = emptyToNull((Collection<?>) value);
+            }
 
             if (value == null) {
                 return false;
@@ -317,6 +333,10 @@ public class CommonDialogWindow extends Window implements Serializable {
         }
 
         return valid;
+    }
+
+    private static Object emptyToNull(final Collection<?> c) {
+        return (c == null || c.isEmpty()) ? null : c;
     }
 
     private boolean hasNullValidator(final Component component) {
@@ -457,6 +477,20 @@ public class CommonDialogWindow extends Window implements Serializable {
             saveButton.setEnabled(
                     isSaveButtonEnabledAfterValueChange(table, table.getContainerDataSource().getItemIds()));
         }
+    }
+
+    /**
+     * Adds the component manually to the allComponents-List and adds a
+     * ValueChangeListener to it. Necessary in Update Distribution Type as the
+     * CheckBox concerned is an ItemProperty...
+     * 
+     * @param component
+     *            AbstractField
+     */
+    public void updateAllComponents(final AbstractField component) {
+
+        allComponents.add(component);
+        component.addValueChangeListener(new ChangeListener(component));
     }
 
 }

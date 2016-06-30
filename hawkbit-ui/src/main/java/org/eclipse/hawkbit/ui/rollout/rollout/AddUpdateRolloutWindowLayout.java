@@ -155,12 +155,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     public CommonDialogWindow getWindow(final Long rolloutId) {
-        resetComponents();
-        window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), null,
-                uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
+        window = getWindow();
         populateData(rolloutId);
         return window;
+    }
+
+    public CommonDialogWindow getWindow() {
+        resetComponents();
+        return SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), null,
+                uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
     }
 
     /**
@@ -610,9 +614,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             try {
-                if (HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                        || (HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null
-                                && targetFilterQuery.getValue() == null)) {
+                if (isNoOfGroupsOrTargetFilterEmpty()) {
                     uiNotification
                             .displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
@@ -626,13 +628,17 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // suppress the need of preserve original exception, will blow
             // up the
             // log and not necessary here
-            catch (
-
-            @SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+            catch (final InvalidValueException ex) {
                 // we have to throw the exception here, otherwise the UI won't
                 // show the vaadin validation error!
                 throw ex;
             }
+        }
+
+        private boolean isNoOfGroupsOrTargetFilterEmpty() {
+            return HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
+                    || (HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null
+                            && targetFilterQuery.getValue() == null);
         }
     }
 
@@ -654,7 +660,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // suppress the need of preserve original exception, will blow
             // up the
             // log and not necessary here
-            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+            catch (final InvalidValueException ex) {
                 // we have to throw the exception here, otherwise the UI won't
                 // show the vaadin validation error!
                 throw ex;
@@ -676,7 +682,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             // suppress the need of preserve original exception, will blow
             // up the
             // log and not necessary here
-            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+            catch (final InvalidValueException ex) {
                 // we have to throw the exception here, otherwise the UI won't
                 // show the vaadin validation error!
                 throw ex;

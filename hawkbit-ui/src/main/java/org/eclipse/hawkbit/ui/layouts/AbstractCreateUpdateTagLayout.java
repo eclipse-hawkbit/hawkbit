@@ -602,14 +602,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     @Override
     public void addColorChangeListener(final ColorChangeListener listener) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void removeColorChangeListener(final ColorChangeListener listener) {
-        // TODO Auto-generated method stub
-
     }
 
 }

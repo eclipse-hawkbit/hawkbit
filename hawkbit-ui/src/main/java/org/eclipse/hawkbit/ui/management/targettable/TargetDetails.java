@@ -106,7 +106,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (getSelectedBaseEntity() == null) {
             return;
         }
-        targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
+        targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
+        // targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
         openWindow();
     }
 

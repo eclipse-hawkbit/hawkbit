@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -82,6 +83,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
     private IndexedContainer sourceTableContainer;
 
     private IndexedContainer originalSelectedTableContainer;
+
+    private Map<CheckBox, Boolean> mandatoryCheckboxMap;
 
     @Override
     protected void createRequiredComponents() {
@@ -315,7 +318,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
             saveTblitem = selectedTableContainer.addItem(id);
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
                     sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_NAME).getValue());
-            saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox());
+            final CheckBox mandatoryCheckBox = new CheckBox();
+            window.updateAllComponents(mandatoryCheckBox);
+            saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(mandatoryCheckBox);
             saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(
                     sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
         }
@@ -327,7 +332,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         if (sourceTableContainer != null) {
             Item saveTblitem;
             saveTblitem = sourceTableContainer.addItem(selectedId);
-            selectedTable.getContainerDataSource().getItem(selectedId).getItemProperty(DIST_TYPE_NAME);
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(selectedTable.getContainerDataSource()
                     .getItem(selectedId).getItemProperty(DIST_TYPE_NAME).getValue());
             saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(selectedTable.getContainerDataSource()
@@ -357,10 +361,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
                 final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
                 checkMandatoryAndAddMandatoryModuleType(newDistType, isMandatory, swModuleType);
             }
-            if (null != typeDescValue) {
-                newDistType.setDescription(typeDescValue);
-            }
-
+            newDistType.setDescription(typeDescValue);
             newDistType.setColour(colorPicked);
             newDistType = distributionSetManagement.createDistributionSetType(newDistType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
@@ -387,7 +388,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         if (null != typeNameValue) {
             updateDistSetType.setName(typeNameValue);
             updateDistSetType.setKey(typeKeyValue);
-            updateDistSetType.setDescription(null != typeDescValue ? typeDescValue : null);
+            updateDistSetType.setDescription(typeDescValue);
 
             if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
                     && !itemIds.isEmpty()) {
@@ -407,7 +408,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
                     .displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
@@ -417,7 +417,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
             final Boolean isMandatory, final SoftwareModuleType swModuleType) {
         if (isMandatory) {
             updateDistSetType.addMandatoryModuleType(swModuleType);
-
         } else {
             updateDistSetType.addOptionalModuleType(swModuleType);
         }
@@ -561,15 +560,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         final Item saveTblitem = selectedTableContainer.addItem(swModuleType.getId());
         sourceTable.removeItem(swModuleType.getId());
         saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
-        saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
-
-        // TODO CHECKBOX
-        final CheckBox mandatoryCheckbox = (CheckBox) selectedTableContainer
-                .getContainerProperty(swModuleType.getId(), DIST_TYPE_MANDATORY).getValue();
+        final CheckBox mandatoryCheckbox = new CheckBox("", mandatory);
+        mandatoryCheckbox.setId(swModuleType.getName());
+        saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(mandatoryCheckbox);
 
         final Item originalItem = originalSelectedTableContainer.addItem(swModuleType.getId());
         originalItem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
-        originalItem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
+        originalItem.getItemProperty(DIST_TYPE_MANDATORY).setValue(mandatoryCheckbox);
+
+        window.updateAllComponents(mandatoryCheckbox);
     }
 
     @Override

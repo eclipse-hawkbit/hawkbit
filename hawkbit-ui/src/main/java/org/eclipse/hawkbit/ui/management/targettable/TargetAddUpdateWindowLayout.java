@@ -171,6 +171,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         return window;
     }
 
+    public Window getWindow(final String entityId) {
+        populateValuesOfTarget(entityId);
+        getWindow();
+        window.addStyleName("target-update-window");
+        return window;
+    }
+
     /**
      * clear all fields of Target Edit Window.
      */
@@ -203,7 +210,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     /**
      * @param controllerId
      */
-    public void populateValuesOfTarget(final String controllerId) {
+    private void populateValuesOfTarget(final String controllerId) {
         resetComponents();
         this.controllerId = controllerId;
         editTarget = Boolean.TRUE;
@@ -214,7 +221,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (target.getDescription() != null) {
             descTextArea.setValue(target.getDescription());
         }
-        window.addStyleName("target-update-window");
     }
 
     public FormLayout getFormLayout() {

@@ -220,21 +220,14 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
             SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
                     typeDescValue, assignNumber);
             newSWType.setColour(colorPicked);
-
-            if (null != typeDescValue) {
-                newSWType.setDescription(typeDescValue);
-            }
-
+            newSWType.setDescription(typeDescValue);
             newSWType.setColour(colorPicked);
-
             newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
-
         }
     }
 
@@ -244,19 +237,15 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != typeNameValue) {
             existingType.setName(typeNameValue);
-
-            existingType.setDescription(null != typeDescValue ? typeDescValue : null);
-
+            existingType.setDescription(typeDescValue);
             existingType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
             swTypeManagementService.updateSoftwareModuleType(existingType);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
-
     }
 
     @Override
