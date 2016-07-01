@@ -58,4 +58,10 @@ public interface Target extends NamedEntity {
      */
     String getSecurityToken();
 
+    /**
+     * @param token
+     *            new securityToken
+     */
+    void setSecurityToken(String token);
+
 }

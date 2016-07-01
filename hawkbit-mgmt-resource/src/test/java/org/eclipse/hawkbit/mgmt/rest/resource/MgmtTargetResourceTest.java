@@ -356,6 +356,54 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that target update request is reflected by repository.")
+    public void updateTargetSecurityToken() throws Exception {
+        final String knownControllerId = "123";
+        final String knownNewToken = "6567576565";
+        final String knownNameNotModiy = "nameNotModiy";
+        final String body = new JSONObject().put("securityToken", knownNewToken).toString();
+
+        // prepare
+        final Target t = entityFactory.generateTarget(knownControllerId);
+        t.setName(knownNameNotModiy);
+        targetManagement.createTarget(t);
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+                .andExpect(jsonPath("$.securityToken", equalTo(knownNewToken)))
+                .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
+
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
+        assertThat(findTargetByControllerID.getSecurityToken()).isEqualTo(knownNewToken);
+        assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
+    }
+
+    @Test
+    @Description("Ensures that target update request is reflected by repository.")
+    public void updateTargetAddress() throws Exception {
+        final String knownControllerId = "123";
+        final String knownNewAddress = "amqp://test123/foobar";
+        final String knownNameNotModiy = "nameNotModiy";
+        final String body = new JSONObject().put("address", knownNewAddress).toString();
+
+        // prepare
+        final Target t = entityFactory.generateTarget(knownControllerId);
+        t.setName(knownNameNotModiy);
+        targetManagement.createTarget(t);
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+                .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
+                .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
+
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
+        assertThat(findTargetByControllerID.getTargetInfo().getAddress().toString()).isEqualTo(knownNewAddress);
+        assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
+    }
+
+    @Test
     @Description("Ensures that target query returns list of targets in defined format.")
     public void getTargetWithoutAddtionalRequestParameters() throws Exception {
         final int knownTargetAmount = 3;
@@ -679,7 +727,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     @Test
     public void createTargetsListReturnsSuccessful() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1");
+        final Target test1 = entityFactory.generateTarget("id1", "token");
         test1.setDescription("testid1");
         test1.setName("testname1");
         test1.getTargetInfo().setAddress("amqp://test123/foobar");
@@ -696,7 +744,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         targets.add(test3);
 
         final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets))
+                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -705,6 +753,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("[0].description", equalTo("testid1")))
                 .andExpect(jsonPath("[0].createdAt", not(equalTo(0))))
                 .andExpect(jsonPath("[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[0].securityToken", equalTo("token")))
                 .andExpect(jsonPath("[0].address", equalTo("amqp://test123/foobar")))
                 .andExpect(jsonPath("[1].name", equalTo("testname2")))
                 .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
@@ -731,6 +780,9 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("id1")).isNotNull();
         assertThat(targetManagement.findTargetByControllerID("id1").getName()).isEqualTo("testname1");
         assertThat(targetManagement.findTargetByControllerID("id1").getDescription()).isEqualTo("testid1");
+        assertThat(targetManagement.findTargetByControllerID("id1").getSecurityToken()).isEqualTo("token");
+        assertThat(targetManagement.findTargetByControllerID("id1").getTargetInfo().getAddress().toString())
+                .isEqualTo("amqp://test123/foobar");
         assertThat(targetManagement.findTargetByControllerID("id2")).isNotNull();
         assertThat(targetManagement.findTargetByControllerID("id2").getName()).isEqualTo("testname2");
         assertThat(targetManagement.findTargetByControllerID("id2").getDescription()).isEqualTo("testid2");

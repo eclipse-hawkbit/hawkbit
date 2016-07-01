@@ -287,6 +287,7 @@ public interface EntityFactory {
 
     /**
      * Generates an empty {@link Target} without persisting it.
+     * {@link Target#getSecurityToken()} is generated.
      * 
      * @param controllerID
      *            of the {@link Target}
@@ -294,6 +295,19 @@ public interface EntityFactory {
      * @return {@link Target} object
      */
     Target generateTarget(@NotEmpty String controllerID);
+
+    /**
+     * Generates an empty {@link Target} without persisting it.
+     * 
+     * @param controllerID
+     *            of the {@link Target}
+     * @param securityToken
+     *            of the {@link Target} for authentication if enabled on tenant.
+     *            Generates one if empty or <code>null</code>.
+     * 
+     * @return {@link Target} object
+     */
+    Target generateTarget(@NotEmpty String controllerID, @NotEmpty String securityToken);
 
     /**
      * Generates an empty {@link TargetFilterQuery} without persisting it.
