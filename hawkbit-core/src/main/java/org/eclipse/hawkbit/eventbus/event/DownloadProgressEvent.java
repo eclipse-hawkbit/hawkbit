@@ -21,6 +21,7 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
 
     private final Long statusId;
     private final int progressPercent;
+    private final long shippedBytes;
 
     /**
      * Constructor.
@@ -32,13 +33,15 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
      * @param progressPercent
      *            number (1-100)
      */
-    public DownloadProgressEvent(final String tenant, final Long statusId, final int progressPercent) {
+    public DownloadProgressEvent(final String tenant, final Long statusId, final int progressPercent,
+            final long shippedBytes) {
         // the revision of the DownloadProgressEvent is just equal the
         // progressPercentage due the
         // percentage is going from 0 to 100.
         super(statusId, tenant);
         this.statusId = statusId;
         this.progressPercent = progressPercent;
+        this.shippedBytes = shippedBytes;
     }
 
     /**
@@ -54,4 +57,12 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
     public int getProgressPercent() {
         return progressPercent;
     }
+
+    /**
+     * @return the shippedBytes
+     */
+    public long getShippedBytes() {
+        return shippedBytes;
+    }
+
 }

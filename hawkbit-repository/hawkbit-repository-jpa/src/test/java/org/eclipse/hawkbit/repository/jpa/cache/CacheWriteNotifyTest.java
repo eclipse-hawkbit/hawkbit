@@ -64,7 +64,7 @@ public class CacheWriteNotifyTest {
         when(cacheManagerMock.getCache(Action.class.getName())).thenReturn(cacheMock);
         when(tenantAwareMock.getCurrentTenant()).thenReturn("default");
 
-        underTest.downloadProgressPercent(knownStatusId, knownPercentage);
+        underTest.downloadProgressPercent(knownStatusId, knownPercentage, 100L);
 
         verify(cacheManagerMock).getCache(eq(Action.class.getName()));
         verify(cacheMock).put(knownStatusId + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, knownPercentage);

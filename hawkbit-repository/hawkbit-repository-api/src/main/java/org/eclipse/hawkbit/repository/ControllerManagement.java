@@ -65,9 +65,11 @@ public interface ControllerManagement {
      *            the ID of the {@link ActionStatus}
      * @param progressPercent
      *            the progress in percentage which must be between 0-100
+     * @param shippedBytes
+     *            since last event
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    void downloadProgressPercent(long statusId, int progressPercent);
+    void downloadProgressPercent(long statusId, int progressPercent, long shippedBytes);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

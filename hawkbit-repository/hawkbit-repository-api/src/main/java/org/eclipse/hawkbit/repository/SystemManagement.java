@@ -63,13 +63,18 @@ public interface SystemManagement {
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
+    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY +
+    // SpringEvalExpressions.HAS_AUTH_OR
+    // + SpringEvalExpressions.HAS_AUTH_READ_TARGET +
+    // SpringEvalExpressions.HAS_AUTH_OR
+    // + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData getTenantMetadata();
 
     /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for
      * new tenants also two {@link SoftwareModuleType} (os and app) and
-     * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT} {@link DistributionSetType}s
-     * (os and os_app).
+     * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT}
+     * {@link DistributionSetType}s (os and os_app).
      *
      * DISCLAIMER: this variant is used during initial login (where the tenant
      * is not yet in the session). Please user {@link #getTenantMetadata()} for
@@ -79,6 +84,7 @@ public interface SystemManagement {
      *            to retrieve data for
      * @return {@link TenantMetaData} of given tenant
      */
+    // @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantMetaData getTenantMetadata(@NotNull String tenant);
 
     /**
@@ -88,6 +94,7 @@ public interface SystemManagement {
      *            to update
      * @return updated {@link TenantMetaData} entity
      */
+    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(@NotNull TenantMetaData metaData);
 
 }

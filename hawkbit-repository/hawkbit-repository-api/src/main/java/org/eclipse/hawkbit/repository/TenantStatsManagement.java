@@ -16,19 +16,23 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Management service for statistics of a single tenant.
  *
  */
-@FunctionalInterface
 public interface TenantStatsManagement {
 
     /**
-     * Service for stats of a single tenant. Opens a new transaction and as a
-     * result can an be used for multiple tenants, i.e. to allow in one session
-     * to collect data of all tenants in the system.
+     * Service for stats of a single tenant.
      *
-     * @param tenant
-     *            to collect for
      * @return collected statistics
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    TenantUsage getStatsOfTenant(String tenant);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    TenantUsage getStatsOfTenant();
+
+    /**
+     * Resets {@link TenantUsage#getOverallArtifactTrafficInBytes()} to zero.
+     * 
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    void resetTrafficStatsOfTenant();
 
 }

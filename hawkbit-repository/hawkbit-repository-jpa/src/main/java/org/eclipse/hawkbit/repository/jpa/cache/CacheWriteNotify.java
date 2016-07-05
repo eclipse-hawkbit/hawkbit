@@ -54,8 +54,10 @@ public class CacheWriteNotify {
      *            the ID of the {@link ActionStatus}
      * @param progressPercent
      *            the progress in percentage which must be between 0-100
+     * @param shippedBytes
+     *            since last event
      */
-    public void downloadProgressPercent(final long statusId, final int progressPercent) {
+    public void downloadProgressPercent(final long statusId, final int progressPercent, final long shippedBytes) {
 
         final Cache cache = cacheManager.getCache(Action.class.getName());
         final String cacheKey = CacheKeys.entitySpecificCacheKey(String.valueOf(statusId),
@@ -69,7 +71,8 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent));
+        eventBus.post(
+                new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent, shippedBytes));
     }
 
     /**

@@ -293,6 +293,7 @@ public final class RestResourceConversionHelper {
 
         long toRead = length;
         boolean toContinue = true;
+        long shippedSinceLastEvent = 0;
 
         while (toContinue) {
             final int r = from.read(buf);
@@ -304,9 +305,11 @@ public final class RestResourceConversionHelper {
             if (toRead > 0) {
                 to.write(buf, 0, r);
                 total += r;
+                shippedSinceLastEvent += r;
             } else {
                 to.write(buf, 0, (int) toRead + r);
                 total += toRead + r;
+                shippedSinceLastEvent += toRead + r;
                 toContinue = false;
             }
 
@@ -316,7 +319,8 @@ public final class RestResourceConversionHelper {
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
                     progressPercent = newPercent;
-                    controllerManagement.downloadProgressPercent(statusId, progressPercent);
+                    controllerManagement.downloadProgressPercent(statusId, progressPercent, shippedSinceLastEvent);
+                    shippedSinceLastEvent = 0;
                 }
             }
         }

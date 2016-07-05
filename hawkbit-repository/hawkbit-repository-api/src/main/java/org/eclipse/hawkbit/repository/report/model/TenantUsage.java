@@ -19,6 +19,7 @@ public class TenantUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
+    private long overallArtifactTrafficInBytes;
 
     /**
      * Constructor.
@@ -105,12 +106,28 @@ public class TenantUsage {
         return this;
     }
 
+    /**
+     * @return the overallArtifactTrafficInBytes
+     */
+    public long getOverallArtifactTrafficInBytes() {
+        return overallArtifactTrafficInBytes;
+    }
+
+    /**
+     * @param overallArtifactTrafficInBytes
+     *            the overallArtifactTrafficInBytes to set
+     */
+    public void setOverallArtifactTrafficInBytes(final long overallArtifactTrafficInBytes) {
+        this.overallArtifactTrafficInBytes = overallArtifactTrafficInBytes;
+    }
+
     @Override
-    public int hashCode() { // NOSONAR - as this is generated code
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (actions ^ (actions >>> 32));
         result = prime * result + (int) (artifacts ^ (artifacts >>> 32));
+        result = prime * result + (int) (overallArtifactTrafficInBytes ^ (overallArtifactTrafficInBytes >>> 32));
         result = prime * result + (int) (overallArtifactVolumeInBytes ^ (overallArtifactVolumeInBytes >>> 32));
         result = prime * result + (int) (targets ^ (targets >>> 32));
         result = prime * result + ((tenantName == null) ? 0 : tenantName.hashCode());
@@ -118,8 +135,7 @@ public class TenantUsage {
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -134,6 +150,9 @@ public class TenantUsage {
             return false;
         }
         if (artifacts != other.artifacts) {
+            return false;
+        }
+        if (overallArtifactTrafficInBytes != other.overallArtifactTrafficInBytes) {
             return false;
         }
         if (overallArtifactVolumeInBytes != other.overallArtifactVolumeInBytes) {
@@ -154,8 +173,9 @@ public class TenantUsage {
 
     @Override
     public String toString() {
-        return "SystemUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
-                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes + "]";
+        return "TenantUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
+                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes
+                + ", overallArtifactTrafficInBytes=" + overallArtifactTrafficInBytes + "]";
     }
 
 }

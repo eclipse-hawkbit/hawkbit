@@ -29,11 +29,11 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -59,11 +59,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Artifact Download Resource")
 public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMongoDB {
 
+    private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
+
     public DdiArtifactDownloadTest() {
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);
     }
 
     private volatile int downLoadProgress = 0;
+    private volatile long shippedBytes = 0;
 
     @Autowired
     private EventBus eventBus;
@@ -236,6 +239,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
+        shippedBytes = 0;
+        tenantStatsManagement.resetTrafficStatsOfTenant();
         eventBus.register(this);
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -249,7 +254,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024 * 1024);
+        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
@@ -276,6 +281,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE)
+                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
     }
 
     @Test
@@ -313,6 +320,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
             + "anonymous as authorization is notpossible, e.g. chekc if the controller has the artifact assigned.")
     public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
         downLoadProgress = 1;
+        shippedBytes = 0;
+        tenantStatsManagement.resetTrafficStatsOfTenant();
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -327,7 +336,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
+        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
         final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
 
@@ -335,6 +344,10 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         deploymentManagement.assignDistributionSet(ds, targets);
         mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
                 .andExpect(status().isNotFound());
+
+        assertThat(downLoadProgress).isEqualTo(1);
+        assertThat(shippedBytes).isEqualTo(0)
+                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
     }
 
     @Test
@@ -342,6 +355,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Ensures that an authenticated and named controller is permitted to download.")
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
+        shippedBytes = 0;
+        tenantStatsManagement.resetTrafficStatsOfTenant();
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -356,7 +371,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(5 * 1024 * 1024);
+        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
         final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
@@ -389,6 +404,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE)
+                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
     }
 
     @Test
@@ -550,5 +567,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Subscribe
     public void listen(final DownloadProgressEvent event) {
         downLoadProgress++;
+        shippedBytes += event.getShippedBytes();
     }
 }
