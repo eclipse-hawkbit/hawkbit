@@ -38,13 +38,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 
@@ -61,7 +61,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
     public void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
-        final Target createdTarget = targetManagement.createTarget(new JpaTarget("targetWithSecurityToken"));
+        final Target createdTarget = targetManagement.createTarget(new JpaTarget("targetWithSecurityToken", "token"));
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
         final String securityTokenWithReadPermission = securityRule.runAs(WithSpringAuthorityRule
@@ -80,7 +80,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                     return createdTarget.getSecurityToken();
                 });
 
-        assertThat(createdTarget.getSecurityToken()).isNotNull();
+        assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();
         assertThat(securityTokenAsSystemCode).isNotNull();
 

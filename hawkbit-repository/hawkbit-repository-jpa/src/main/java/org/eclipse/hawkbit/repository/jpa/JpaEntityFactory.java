@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -85,6 +86,14 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public Target generateTarget(final String controllerId) {
         return new JpaTarget(controllerId);
+    }
+
+    @Override
+    public Target generateTarget(final String controllerId, final String securityToken) {
+        if (StringUtils.isEmpty(securityToken)) {
+            return new JpaTarget(controllerId);
+        }
+        return new JpaTarget(controllerId, securityToken);
     }
 
     @Override
