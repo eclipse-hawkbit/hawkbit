@@ -132,7 +132,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         final JpaSoftwareModuleType type = softwareModuleTypeRepository.findOne(sm.getId());
 
         boolean updated = false;
-        if (sm.getDescription() != null && !sm.getDescription().equals(type.getDescription())) {
+        if (sm.getDescription() == null || !sm.getDescription().equals(type.getDescription())) {
             type.setDescription(sm.getDescription());
             updated = true;
         }
