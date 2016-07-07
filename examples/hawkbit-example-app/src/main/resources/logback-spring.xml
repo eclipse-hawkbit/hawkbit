@@ -20,16 +20,13 @@
    <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="WARN" />
    <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN" />
    <Logger name="org.apache.tomcat.jdbc.pool.ConnectionPool" level="DEBUG" />
-   <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />   
-   
-   
-<!--    <Logger name="org.eclipse.hawkbit.rest.util.MockMvcResultPrinter" level="DEBUG" /> -->
+   <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
 
    <!-- Security Log with hints on potential attacks -->
    <logger name="server-security" level="INFO" />
 
    <Root level="INFO">
-      <AppenderRef ref="Console" />
+      <appender-ref ref="CONSOLE" />
    </Root>
 
 </configuration>

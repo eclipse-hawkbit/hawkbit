@@ -15,10 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.BeforeClass;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,23 +34,17 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Download Resource")
-public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrationTest {
-
-    @BeforeClass
-    public static void initialize() {
-        // set property to mongoPort which does not start any mongoDB of
-        // parallel test execution
-        System.setProperty("spring.data.mongodb.port", "1020");
-    }
+public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrationTestWithMongoDB {
 
     @Test
     @Description("Ensures that the correct error code is returned in case MongoDB unavailable.")
     public void missingMongoDbConnectionResultsInErrorAtUpload() throws Exception {
+        mongodExecutable.stop();
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
-        SoftwareModule sm = entityFactory.generateSoftwareModule(
-                softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"),
+                "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
@@ -72,6 +66,11 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrat
         // ensure that the JPA transaction was rolled back
         assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
+    }
+
+    @After
+    public void cleanCurrentCollection() {
+        // not needed, mongodb is stopped already
     }
 
 }

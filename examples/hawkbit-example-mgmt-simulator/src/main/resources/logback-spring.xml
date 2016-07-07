@@ -14,8 +14,8 @@
 
    <logger name="feign.Logger" level="debug" />
 
-   <root level="INFO">
-      <appender-ref ref="STDOUT" />
-   </root>
+   <Root level="INFO">
+      <appender-ref ref="CONSOLE" />
+   </Root>
 
 </configuration>

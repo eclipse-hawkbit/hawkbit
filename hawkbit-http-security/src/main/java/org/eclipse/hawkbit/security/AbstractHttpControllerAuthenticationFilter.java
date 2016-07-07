@@ -115,7 +115,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,
-            final Authentication authResult) {
+            final Authentication authResult) throws IOException, ServletException {
         final Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.addAll(authResult.getAuthorities());
         authorities.addAll(abstractControllerAuthenticationFilter.getSuccessfulAuthenticationAuthorities());

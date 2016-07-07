@@ -21,12 +21,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -35,6 +38,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +63,18 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Artifact Download Resource")
 public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMongoDB {
 
-    private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
-
     public DdiArtifactDownloadTest() {
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);
     }
 
     private volatile int downLoadProgress = 0;
-    private volatile long shippedBytes = 0;
-    private volatile long shippedBytesTotal = 0;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+
+    @Before
+    public void setup() {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     @Autowired
     private EventBus eventBus;
@@ -240,8 +247,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
-        shippedBytes = 0;
-        shippedBytesTotal = 0;
         eventBus.register(this);
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -255,7 +260,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
+        final byte random[] = RandomUtils.nextBytes(5 * 1024 * 1024);
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
@@ -273,7 +278,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                                 ds.findFirstModuleByType(osType).getId(), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
@@ -282,7 +287,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -320,8 +324,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
             + "anonymous as authorization is notpossible, e.g. chekc if the controller has the artifact assigned.")
     public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
         downLoadProgress = 1;
-        shippedBytes = 0;
-        shippedBytesTotal = 0;
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -329,24 +331,21 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         // create target
         Target target = entityFactory.generateTarget("4712");
         target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
+        final List<Target> targets = new ArrayList();
         targets.add(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final byte random[] = RandomUtils.nextBytes(5 * 1024);
+        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
         deploymentManagement.assignDistributionSet(ds, targets);
         mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
                 .andExpect(status().isNotFound());
-
-        assertThat(downLoadProgress).isEqualTo(1);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(0L);
     }
 
     @Test
@@ -354,8 +353,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Ensures that an authenticated and named controller is permitted to download.")
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
-        shippedBytes = 0;
-        shippedBytesTotal = 0;
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -370,7 +367,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
+        final byte random[] = RandomUtils.nextBytes(5 * 1024 * 1024);
         final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
@@ -386,7 +383,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isOk()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
 
         assertTrue("The same file that was uploaded is expected when downloaded",
@@ -403,7 +400,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -444,7 +440,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                     .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                     .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                     .andExpect(header().string("Accept-Ranges", "bytes"))
-                    .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                    .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                     .andExpect(header().longValue("Content-Length", range))
                     .andExpect(header().string("Content-Range", "bytes " + rangeString + "/" + resultLength))
                     .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
@@ -461,7 +457,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().longValue("Content-Length", 1000))
                 .andExpect(header().string("Content-Range",
                         "bytes " + (resultLength - 1000) + "-" + (resultLength - 1) + "/" + resultLength))
@@ -477,7 +473,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().longValue("Content-Length", resultLength - 1000))
                 .andExpect(header().string("Content-Range",
                         "bytes " + 1000 + "-" + (resultLength - 1) + "/" + resultLength))
@@ -493,7 +489,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType("multipart/byteranges; boundary=THIS_STRING_SEPARATES_MULTIPART"))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
 
         outputStream.reset();
@@ -565,8 +561,5 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Subscribe
     public void listen(final DownloadProgressEvent event) {
         downLoadProgress++;
-        shippedBytes += event.getShippedBytesSinceLast();
-        shippedBytesTotal = event.getShippedBytesOverall();
-
     }
 }
