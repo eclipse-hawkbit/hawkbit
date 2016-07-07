@@ -63,11 +63,6 @@ public interface SystemManagement {
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
-    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY +
-    // SpringEvalExpressions.HAS_AUTH_OR
-    // + SpringEvalExpressions.HAS_AUTH_READ_TARGET +
-    // SpringEvalExpressions.HAS_AUTH_OR
-    // + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData getTenantMetadata();
 
     /**
@@ -84,7 +79,6 @@ public interface SystemManagement {
      *            to retrieve data for
      * @return {@link TenantMetaData} of given tenant
      */
-    // @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantMetaData getTenantMetadata(@NotNull String tenant);
 
     /**
@@ -94,7 +88,6 @@ public interface SystemManagement {
      *            to update
      * @return updated {@link TenantMetaData} entity
      */
-    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(@NotNull TenantMetaData metaData);
 
 }
