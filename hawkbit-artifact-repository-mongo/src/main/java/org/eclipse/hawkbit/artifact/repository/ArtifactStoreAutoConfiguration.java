@@ -11,14 +11,12 @@ package org.eclipse.hawkbit.artifact.repository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
  * Auto configuration for the {@link ArtifactStore}.
  */
 @Configuration
 @ConditionalOnMissingBean(value = ArtifactRepository.class)
-@Import(value = MongoConfiguration.class)
 public class ArtifactStoreAutoConfiguration {
 
     /**
