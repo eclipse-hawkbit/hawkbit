@@ -29,7 +29,7 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
      * @param tenant
      *            the tenant for this event
      * @param statusId
-     *            of {@link UpdateActionStatus}
+     *            of {@link Action}
      * @param progressPercent
      *            number (1-100)
      */
