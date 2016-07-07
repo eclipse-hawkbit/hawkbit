@@ -224,8 +224,10 @@ public final class SpPermission {
         /*
          * Spring security eval expressions.
          */
-        private static final String HAS_AUTH_PREFIX = "hasAuthority('";
-        private static final String HAS_AUTH_SUFFIX = "')";
+        private static final String BRACKET_OPEN = "(";
+        private static final String BRACKET_CLOSE = ")";
+        private static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
+        private static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
         private static final String HAS_AUTH_AND = " and ";
 
         /**
@@ -258,81 +260,109 @@ public final class SpPermission {
         public static final String HAS_AUTH_OR = " or ";
 
         /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#UPDATE_TARGET}.
+         * Spring security eval hasAnyRole expression to check if the spring
+         * context contains system code role
+         * {@link SpringEvalExpressions#SYSTEM_ROLE}.
          */
-        public static final String HAS_AUTH_UPDATE_TARGET = HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
+        public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SYSTEM_ROLE + HAS_AUTH_SUFFIX;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#SYSTEM_ADMIN}.
+         * context contains {@link SpPermission#UPDATE_TARGET} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_SYSTEM_ADMIN = HAS_AUTH_PREFIX + SYSTEM_ADMIN + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_UPDATE_TARGET = HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#READ_TARGET}.
+         * context contains {@link SpPermission#SYSTEM_ADMIN} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_SYSTEM_ADMIN = HAS_AUTH_PREFIX + SYSTEM_ADMIN + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#CREATE_TARGET}.
+         * context contains {@link SpPermission#READ_TARGET} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX + HAS_AUTH_OR
+                + IS_SYSTEM_CODE;;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#DELETE_TARGET}.
+         * context contains {@link SpPermission#CREATE_TARGET} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_DELETE_TARGET = HAS_AUTH_PREFIX + DELETE_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#READ_REPOSITORY} and
-         * {@link SpPermission#UPDATE_TARGET}.
+         * context contains {@link SpPermission#DELETE_TARGET} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = HAS_AUTH_PREFIX + READ_REPOSITORY
-                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#CREATE_REPOSITORY}.
-         */
-        public static final String HAS_AUTH_CREATE_REPOSITORY = HAS_AUTH_PREFIX + CREATE_REPOSITORY + HAS_AUTH_SUFFIX;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#DELETE_REPOSITORY}.
-         */
-        public static final String HAS_AUTH_DELETE_REPOSITORY = HAS_AUTH_PREFIX + DELETE_REPOSITORY + HAS_AUTH_SUFFIX;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#READ_REPOSITORY}.
-         */
-        public static final String HAS_AUTH_READ_REPOSITORY = HAS_AUTH_PREFIX + READ_REPOSITORY + HAS_AUTH_SUFFIX;
-
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#UPDATE_REPOSITORY}.
-         */
-        public static final String HAS_AUTH_UPDATE_REPOSITORY = HAS_AUTH_PREFIX + UPDATE_REPOSITORY + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_DELETE_TARGET = HAS_AUTH_PREFIX + DELETE_TARGET + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#READ_REPOSITORY} and
-         * {@link SpPermission#READ_TARGET}.
+         * {@link SpPermission#UPDATE_TARGET} or {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET = HAS_AUTH_PREFIX + READ_REPOSITORY
-                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX
+                + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#DOWNLOAD_REPOSITORY_ARTIFACT}.
+         * context contains {@link SpPermission#CREATE_REPOSITORY} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_CREATE_REPOSITORY = HAS_AUTH_PREFIX + CREATE_REPOSITORY + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#DELETE_REPOSITORY} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_DELETE_REPOSITORY = HAS_AUTH_PREFIX + DELETE_REPOSITORY + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#READ_REPOSITORY} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_READ_REPOSITORY = HAS_AUTH_PREFIX + READ_REPOSITORY + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#UPDATE_REPOSITORY} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_UPDATE_REPOSITORY = HAS_AUTH_PREFIX + UPDATE_REPOSITORY + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#READ_REPOSITORY} and
+         * {@link SpPermission#READ_TARGET} or {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
+                + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#DOWNLOAD_REPOSITORY_ARTIFACT} or
+         * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_DOWNLOAD_ARTIFACT = HAS_AUTH_PREFIX + DOWNLOAD_REPOSITORY_ARTIFACT
-                + HAS_AUTH_SUFFIX;
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAnyRole expression to check if the spring
@@ -351,56 +381,55 @@ public final class SpPermission {
                 + HAS_AUTH_SUFFIX;
 
         /**
-         * Spring security eval hasAnyRole expression to check if the spring
-         * context contains system code role
-         * {@link SpringEvalExpressions#SYSTEM_ROLE}.
-         */
-        public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SYSTEM_ROLE + HAS_AUTH_SUFFIX;
-
-        /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#CREATE_REPOSITORY} and
-         * {@link SpPermission#CREATE_TARGET}.
+         * {@link SpPermission#CREATE_TARGET} or {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_CREATE_REPOSITORY_AND_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_REPOSITORY
-                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_CREATE_REPOSITORY_AND_CREATE_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + CREATE_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX
+                + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT}
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} or
+         * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
-                + HAS_AUTH_SUFFIX;
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
-         * {@link SpPermission#READ_TARGET}
+         * {@link SpPermission#READ_TARGET} or {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = HAS_AUTH_PREFIX
-                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET
-                + HAS_AUTH_SUFFIX;;
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
+                + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
-         * {@link SpPermission#UPDATE_TARGET}.
+         * {@link SpPermission#UPDATE_TARGET} or {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
-                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET
+                + HAS_AUTH_SUFFIX + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#TENANT_CONFIGURATION}
+         * context contains {@link SpPermission#TENANT_CONFIGURATION} or
+         * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
-                + HAS_AUTH_SUFFIX;
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#SYSTEM_MONITOR}
+         * context contains {@link SpPermission#SYSTEM_MONITOR} or
+         * {@link #IS_SYSTEM_CODE}.
          */
-        public static final String HAS_AUTH_SYSTEM_MONITOR = HAS_AUTH_PREFIX + SYSTEM_MONITOR + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_SYSTEM_MONITOR = HAS_AUTH_PREFIX + SYSTEM_MONITOR + HAS_AUTH_SUFFIX
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         private SpringEvalExpressions() {
             // utility class
