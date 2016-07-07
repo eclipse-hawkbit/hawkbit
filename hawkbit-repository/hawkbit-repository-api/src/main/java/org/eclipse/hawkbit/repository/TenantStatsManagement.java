@@ -29,12 +29,4 @@ public interface TenantStatsManagement {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantUsage getStatsOfTenant();
 
-    /**
-     * Resets {@link TenantUsage#getOverallArtifactTrafficInBytes()} to zero.
-     * 
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
-    void resetTrafficStatsOfTenant();
-
 }

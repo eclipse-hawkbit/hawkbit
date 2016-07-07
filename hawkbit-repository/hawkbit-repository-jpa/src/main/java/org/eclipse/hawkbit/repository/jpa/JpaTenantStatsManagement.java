@@ -8,12 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -22,8 +18,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Management service for statistics of a single tenant.
@@ -44,8 +38,6 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     @Autowired
     private TenantAware tenantAware;
 
-    private final Map<String, AtomicLong> traffic = new ConcurrentHashMap<>();
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     public TenantUsage getStatsOfTenant() {
@@ -64,26 +56,9 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
         }
 
         result.setActions(actionRepository.count());
-        if (traffic.containsKey(tenant)) {
-            result.setOverallArtifactTrafficInBytes(traffic.get(tenant).get());
-        }
 
         return result;
 
-    }
-
-    @Override
-    public void resetTrafficStatsOfTenant() {
-        traffic.remove(tenantAware.getCurrentTenant());
-    }
-
-    @Subscribe
-    public void listen(final DownloadProgressEvent event) {
-        if (traffic.containsKey(event.getTenant())) {
-            traffic.get(event.getTenant()).addAndGet(event.getShippedBytes());
-        } else {
-            traffic.put(event.getTenant(), new AtomicLong(event.getShippedBytes()));
-        }
     }
 
 }

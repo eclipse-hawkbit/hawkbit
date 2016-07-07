@@ -67,6 +67,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
     private volatile int downLoadProgress = 0;
     private volatile long shippedBytes = 0;
+    private volatile long shippedBytesTotal = 0;
 
     @Autowired
     private EventBus eventBus;
@@ -240,7 +241,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        tenantStatsManagement.resetTrafficStatsOfTenant();
+        shippedBytesTotal = 0;
         eventBus.register(this);
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -281,8 +282,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE)
-                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
+        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -321,7 +321,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        tenantStatsManagement.resetTrafficStatsOfTenant();
+        shippedBytesTotal = 0;
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -329,7 +329,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         // create target
         Target target = entityFactory.generateTarget("4712");
         target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList();
+        final List<Target> targets = new ArrayList<>();
         targets.add(target);
 
         // create ds
@@ -337,7 +337,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
@@ -346,8 +346,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         assertThat(downLoadProgress).isEqualTo(1);
-        assertThat(shippedBytes).isEqualTo(0)
-                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
+        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(0L);
     }
 
     @Test
@@ -356,7 +355,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        tenantStatsManagement.resetTrafficStatsOfTenant();
+        shippedBytesTotal = 0;
         eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
@@ -404,8 +403,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE)
-                .isEqualTo(tenantStatsManagement.getStatsOfTenant().getOverallArtifactTrafficInBytes());
+        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -567,6 +565,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Subscribe
     public void listen(final DownloadProgressEvent event) {
         downLoadProgress++;
-        shippedBytes += event.getShippedBytes();
+        shippedBytes += event.getShippedBytesSinceLast();
+        shippedBytesTotal = event.getShippedBytesOverall();
+
     }
 }

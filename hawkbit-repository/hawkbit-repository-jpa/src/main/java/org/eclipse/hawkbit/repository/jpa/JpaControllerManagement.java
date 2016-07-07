@@ -451,8 +451,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void addInformationalActionStatus(final ActionStatus statusMessage) {
-        actionStatusRepository.save((JpaActionStatus) statusMessage);
+    public ActionStatus addInformationalActionStatus(final ActionStatus statusMessage) {
+        return actionStatusRepository.save((JpaActionStatus) statusMessage);
     }
 
     @Override
@@ -469,8 +469,9 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public void downloadProgressPercent(final long statusId, final int progressPercent, final long shippedBytes) {
-        cacheWriteNotify.downloadProgressPercent(statusId, progressPercent, shippedBytes);
+    public void downloadProgressPercent(final long statusId, final int progressPercent,
+            final long shippedBytesSinceLast, final long shippedBytesOverall) {
+        cacheWriteNotify.downloadProgressPercent(statusId, progressPercent, shippedBytesSinceLast, shippedBytesOverall);
     }
 
 }

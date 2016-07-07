@@ -87,7 +87,6 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
         result.setArtifacts(tenant.getArtifacts());
         result.setOverallArtifactVolumeInBytes(tenant.getOverallArtifactVolumeInBytes());
         result.setTargets(tenant.getTargets());
-        result.setOverallArtifactTrafficInBytes(tenant.getOverallArtifactTrafficInBytes());
 
         return result;
     }

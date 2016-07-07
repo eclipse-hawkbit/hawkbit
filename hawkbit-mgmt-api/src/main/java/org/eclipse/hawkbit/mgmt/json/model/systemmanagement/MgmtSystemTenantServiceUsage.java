@@ -25,7 +25,6 @@ public class MgmtSystemTenantServiceUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
-    private long overallArtifactTrafficInBytes;
 
     /**
      * Constructor.
@@ -34,14 +33,6 @@ public class MgmtSystemTenantServiceUsage {
      */
     public MgmtSystemTenantServiceUsage(final String tenantName) {
         this.tenantName = tenantName;
-    }
-
-    public long getOverallArtifactTrafficInBytes() {
-        return overallArtifactTrafficInBytes;
-    }
-
-    public void setOverallArtifactTrafficInBytes(final long overallArtifactTrafficInBytes) {
-        this.overallArtifactTrafficInBytes = overallArtifactTrafficInBytes;
     }
 
     public long getTargets() {

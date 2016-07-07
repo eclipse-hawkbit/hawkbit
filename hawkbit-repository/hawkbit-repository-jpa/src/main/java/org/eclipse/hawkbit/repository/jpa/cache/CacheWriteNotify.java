@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa.cache;
 
 import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -54,12 +53,15 @@ public class CacheWriteNotify {
      *            the ID of the {@link ActionStatus}
      * @param progressPercent
      *            the progress in percentage which must be between 0-100
-     * @param shippedBytes
+     * @param shippedBytesSinceLast
      *            since last event
+     * @param shippedBytesOverall
+     *            for the download request
      */
-    public void downloadProgressPercent(final long statusId, final int progressPercent, final long shippedBytes) {
+    public void downloadProgressPercent(final long statusId, final int progressPercent,
+            final long shippedBytesSinceLast, final long shippedBytesOverall) {
 
-        final Cache cache = cacheManager.getCache(Action.class.getName());
+        final Cache cache = cacheManager.getCache(ActionStatus.class.getName());
         final String cacheKey = CacheKeys.entitySpecificCacheKey(String.valueOf(statusId),
                 CacheKeys.DOWNLOAD_PROGRESS_PERCENT);
         if (progressPercent < DOWNLOAD_PROGRESS_MAX) {
@@ -71,8 +73,8 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventBus.post(
-                new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent, shippedBytes));
+        eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent,
+                shippedBytesSinceLast, shippedBytesOverall));
     }
 
     /**
