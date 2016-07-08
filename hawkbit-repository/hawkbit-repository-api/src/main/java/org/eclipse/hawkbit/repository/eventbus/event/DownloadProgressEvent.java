@@ -6,13 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.eventbus.event;
+package org.eclipse.hawkbit.repository.eventbus.event;
+
+import org.eclipse.hawkbit.eventbus.event.AbstractDistributedEvent;
 
 /**
- * Event that contains an updated download progress for a given Action.
- *
- *
- *
+ * Event that contains an updated download progress for a given ActionStatus
+ * that was written for a download request.
  *
  */
 public class DownloadProgressEvent extends AbstractDistributedEvent {
@@ -20,7 +20,7 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
     private static final long serialVersionUID = 1L;
 
     private final Long statusId;
-    private final int progressPercent;
+    private final long requestedBytes;
     private final long shippedBytesSinceLast;
     private final long shippedBytesOverall;
 
@@ -30,22 +30,21 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
      * @param tenant
      *            the tenant for this event
      * @param statusId
-     *            of {@link ActionStatus}
-     * @param progressPercent
-     *            number (1-100)
+     *            of ActionStatus that was written for the download request
+     * @param requestedBytes
+     *            bytes requested
      * @param shippedBytesSinceLast
      *            bytes since last event
      * @param shippedBytesOverall
      *            on the download request
      */
-    public DownloadProgressEvent(final String tenant, final Long statusId, final int progressPercent,
-            final long shippedBytesSinceLast, final long shippedBytesOverall) {
+    public DownloadProgressEvent(final String tenant, final Long statusId, final Long requestedBytes,
+            final Long shippedBytesSinceLast, final Long shippedBytesOverall) {
         // the revision of the DownloadProgressEvent is just equal the
-        // progressPercentage due the
-        // percentage is going from 0 to 100.
-        super(statusId, tenant);
+        // shippedBytesOverall as this is a growing number.
+        super(shippedBytesOverall, tenant);
         this.statusId = statusId;
-        this.progressPercent = progressPercent;
+        this.requestedBytes = requestedBytes;
         this.shippedBytesSinceLast = shippedBytesSinceLast;
         this.shippedBytesOverall = shippedBytesOverall;
     }
@@ -54,8 +53,8 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
         return statusId;
     }
 
-    public int getProgressPercent() {
-        return progressPercent;
+    public long getRequestedBytes() {
+        return requestedBytes;
     }
 
     public long getShippedBytesSinceLast() {

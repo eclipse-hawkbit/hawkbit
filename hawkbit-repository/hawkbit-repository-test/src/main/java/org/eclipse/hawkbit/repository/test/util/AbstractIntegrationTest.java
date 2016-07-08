@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.security.DosFilter;
@@ -93,9 +92,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected TargetManagement targetManagement;
-
-    @Autowired
-    protected TenantStatsManagement tenantStatsManagement;
 
     @Autowired
     protected TargetFilterQueryManagement targetFilterQueryManagement;

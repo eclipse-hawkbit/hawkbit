@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.cache;
 
-import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
+import java.math.RoundingMode;
+
+import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -19,6 +21,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.math.DoubleMath;
 
 /**
  * An service which combines the functionality for functional use cases to write
@@ -29,10 +32,6 @@ import com.google.common.eventbus.EventBus;
  */
 @Service
 public class CacheWriteNotify {
-
-    /**
-    *
-    */
     private static final int DOWNLOAD_PROGRESS_MAX = 100;
 
     @Autowired
@@ -45,25 +44,29 @@ public class CacheWriteNotify {
     private TenantAware tenantAware;
 
     /**
-     * writes the download progress in percentage into the cache
+     * writes the download progress into the cache
      * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the
      * {@link EventBus} with a {@link DownloadProgressEvent}.
      * 
      * @param statusId
      *            the ID of the {@link ActionStatus}
-     * @param progressPercent
-     *            the progress in percentage which must be between 0-100
+     * @param requestedBytes
+     *            requested bytes of the request
      * @param shippedBytesSinceLast
      *            since last event
      * @param shippedBytesOverall
      *            for the download request
      */
-    public void downloadProgressPercent(final long statusId, final int progressPercent,
-            final long shippedBytesSinceLast, final long shippedBytesOverall) {
+    public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
+            final Long shippedBytesOverall) {
 
         final Cache cache = cacheManager.getCache(ActionStatus.class.getName());
         final String cacheKey = CacheKeys.entitySpecificCacheKey(String.valueOf(statusId),
                 CacheKeys.DOWNLOAD_PROGRESS_PERCENT);
+
+        final int progressPercent = DoubleMath.roundToInt(shippedBytesOverall * 100.0 / requestedBytes,
+                RoundingMode.DOWN);
+
         if (progressPercent < DOWNLOAD_PROGRESS_MAX) {
             cache.put(cacheKey, progressPercent);
         } else {
@@ -73,7 +76,7 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent,
+        eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
                 shippedBytesSinceLast, shippedBytesOverall));
     }
 

@@ -469,9 +469,9 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public void downloadProgressPercent(final long statusId, final int progressPercent,
-            final long shippedBytesSinceLast, final long shippedBytesOverall) {
-        cacheWriteNotify.downloadProgressPercent(statusId, progressPercent, shippedBytesSinceLast, shippedBytesOverall);
+    public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
+            final Long shippedBytesOverall) {
+        cacheWriteNotify.downloadProgress(statusId, requestedBytes, shippedBytesSinceLast, shippedBytesOverall);
     }
 
 }

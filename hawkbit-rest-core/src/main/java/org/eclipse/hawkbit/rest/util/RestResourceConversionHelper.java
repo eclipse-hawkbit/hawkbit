@@ -320,8 +320,7 @@ public final class RestResourceConversionHelper {
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
                     progressPercent = newPercent;
-                    controllerManagement.downloadProgressPercent(statusId, progressPercent, shippedSinceLastEvent,
-                            total);
+                    controllerManagement.downloadProgress(statusId, length, shippedSinceLastEvent, total);
                     shippedSinceLastEvent = 0;
                 }
             }

@@ -16,10 +16,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Management service for statistics of a single tenant.
  *
  */
+@FunctionalInterface
 public interface TenantStatsManagement {
 
     /**
-     * Service for stats of a single tenant.
+     * Service for stats of the current tenant.
      *
      * @return collected statistics
      */
