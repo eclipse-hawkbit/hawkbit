@@ -367,7 +367,7 @@ public final class SpPermission {
         /**
          * Spring security eval hasAnyRole expression to check if the spring
          * context contains the anoynmous role or the controller specific role
-         * {@link SpPermission#CONTROLLER_ROLE}.
+         * {@link SpringEvalExpressions#CONTROLLER_ROLE}.
          */
         public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
                 + "')";
@@ -375,7 +375,7 @@ public final class SpPermission {
         /**
          * Spring security eval hasAuthority expression to check if the spring
          * context contains the role to allow controllers to download specific
-         * role {@link SpPermission#CONTROLLER_DOWNLOAD_ROLE}.
+         * role {@link SpringEvalExpressions#CONTROLLER_DOWNLOAD_ROLE}
          */
         public static final String HAS_CONTROLLER_DOWNLOAD = HAS_AUTH_PREFIX + CONTROLLER_DOWNLOAD_ROLE
                 + HAS_AUTH_SUFFIX;
