@@ -54,8 +54,7 @@ public interface TenantConfigurationManagement {
      * @return <null> if no default value is set and no database value available
      *         or returns the tenant configuration value
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     <T> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(TenantConfigurationKey configurationKey,
             Class<T> propertyType, TenantConfiguration tenantConfiguration);
 
@@ -87,8 +86,7 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     <T> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey);
 
     /**
@@ -114,8 +112,7 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     <T> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey,
             Class<T> propertyType);
 
@@ -139,7 +136,6 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     <T> T getGlobalConfigurationValue(TenantConfigurationKey configurationKey, Class<T> propertyType);
 }
