@@ -280,7 +280,7 @@ public final class SpPermission {
          * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_SYSTEM_ADMIN = HAS_AUTH_PREFIX + SYSTEM_ADMIN + HAS_AUTH_SUFFIX
-                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
@@ -288,7 +288,7 @@ public final class SpPermission {
          * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX + HAS_AUTH_OR
-                + IS_SYSTEM_CODE;;
+                + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
@@ -296,7 +296,7 @@ public final class SpPermission {
          * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX
-                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
@@ -304,7 +304,7 @@ public final class SpPermission {
          * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_DELETE_TARGET = HAS_AUTH_PREFIX + DELETE_TARGET + HAS_AUTH_SUFFIX
-                + HAS_AUTH_OR + IS_SYSTEM_CODE;;
+                + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
