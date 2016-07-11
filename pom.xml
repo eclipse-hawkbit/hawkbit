@@ -68,7 +68,7 @@
       <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
       <spring-amqp.version>1.6.0.RELEASE</spring-amqp.version>
       <rabbitmq.version>3.6.2</rabbitmq.version>
-      <spring-security.version>4.1.0.RELEASE</spring-security.version>
+      <spring-security.version>4.1.1.RELEASE</spring-security.version>
       <!--  Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->
@@ -102,7 +102,6 @@
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.4.3</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
-      <jersey-client.version>1.18.1</jersey-client.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
       <jlorem.version>1.1</jlorem.version>
@@ -589,12 +588,6 @@
             <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-junit-adaptor</artifactId>
             <version>${allure.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${jersey-client.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>

@@ -139,10 +139,10 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     public void securityTokenIsNotInResponseIfMissingPermission() throws Exception {
 
         final String knownControllerId = "knownControllerId";
-        targetManagement.createTarget(entityFactory.generateTarget(knownControllerId));
+        final Target createTarget = targetManagement.createTarget(entityFactory.generateTarget(knownControllerId));
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownControllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("securityToken").doesNotExist());
+                .andExpect(jsonPath("securityToken", equalTo(null)));
     }
 
     @Test
