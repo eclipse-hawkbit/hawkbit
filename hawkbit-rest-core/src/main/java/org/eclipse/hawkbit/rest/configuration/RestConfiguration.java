@@ -17,12 +17,15 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Configuration for Rest api.
  */
 @Configuration
+@EnableHypermediaSupport(type = { HypermediaType.HAL })
 public class RestConfiguration {
 
     /**
