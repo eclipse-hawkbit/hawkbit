@@ -43,10 +43,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
- *
- *
- *
- *
  */
 public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
@@ -58,9 +54,9 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected IndexedContainer container;
 
-    protected final Map<Long, TagData> tagDetails = new HashMap<>();
+    protected final transient Map<Long, TagData> tagDetails = new HashMap<>();
 
-    protected final Map<Long, TagData> tokensAdded = new HashMap<>();
+    protected final transient Map<Long, TagData> tokensAdded = new HashMap<>();
 
     protected CssLayout tokenLayout = new CssLayout();
 
