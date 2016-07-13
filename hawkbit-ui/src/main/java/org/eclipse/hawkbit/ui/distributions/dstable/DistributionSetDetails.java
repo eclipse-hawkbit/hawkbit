@@ -84,7 +84,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private VerticalLayout tagsLayout;
 
-    Map<String, StringBuilder> assignedSWModule = new HashMap<>();
+    private final Map<String, StringBuilder> assignedSWModule = new HashMap<>();
 
     /**
      * softwareLayout Initialize the component.

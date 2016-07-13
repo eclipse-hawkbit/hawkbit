@@ -96,7 +96,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final ClickListener close = event -> close();
 
-    private final Map<Component, Object> orginalValues;
+    private final transient Map<Component, Object> orginalValues;
 
     private final List<AbstractField<?>> allComponents;
 
