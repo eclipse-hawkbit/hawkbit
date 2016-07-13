@@ -68,8 +68,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("controllerId") final String controllerId) {
+        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
         // to single response include poll status
         final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget);
         MgmtTargetMapper.addPollStatus(findTarget, response);
@@ -115,9 +115,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
-        final Target existingTarget = findTargetWithExceptionIfNotFound(targetId);
+        final Target existingTarget = findTargetWithExceptionIfNotFound(controllerId);
         LOG.debug("updating target {}", existingTarget.getId());
         if (targetRest.getDescription() != null) {
             existingTarget.setDescription(targetRest.getDescription());
@@ -125,22 +125,29 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         if (targetRest.getName() != null) {
             existingTarget.setName(targetRest.getName());
         }
+        if (targetRest.getAddress() != null) {
+            existingTarget.getTargetInfo().setAddress(targetRest.getAddress());
+        }
+        if (targetRest.getSecurityToken() != null) {
+            existingTarget.setSecurityToken(targetRest.getSecurityToken());
+        }
+
         final Target updateTarget = this.targetManagement.updateTarget(existingTarget);
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
-        final Target target = findTargetWithExceptionIfNotFound(targetId);
+    public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         this.targetManagement.deleteTargets(target.getId());
-        LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
+        LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") final String targetId) {
-        final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
+    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
+        final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
         final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
         if (controllerAttributes.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -153,13 +160,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
+            @PathVariable("controllerId") final String controllerId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
+        final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -177,14 +185,15 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         return new ResponseEntity<>(
-                new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount),
+                new PagedList<>(MgmtTargetMapper.toResponse(controllerId, activeActions.getContent()),
+                        totalActionCount),
                 HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId) {
-        final Target target = findTargetWithExceptionIfNotFound(targetId);
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -192,18 +201,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        final MgmtAction result = MgmtTargetMapper.toResponse(targetId, action, action.isActive());
+        final MgmtAction result = MgmtTargetMapper.toResponse(controllerId, action, action.isActive());
 
         if (!action.isCancelingOrCanceled()) {
             result.add(linkTo(
                     methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
                             .withRel("distributionset"));
         } else if (action.isCancelingOrCanceled()) {
-            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId()))
+            result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
                     .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
         }
 
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(targetId, action.getId(), 0,
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
                         .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
@@ -212,10 +221,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
-        final Target target = findTargetWithExceptionIfNotFound(targetId);
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
         if (force) {
@@ -231,12 +240,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
-            @PathVariable("targetId") final String targetId, @PathVariable("actionId") final Long actionId,
+            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
 
-        final Target target = findTargetWithExceptionIfNotFound(targetId);
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -260,8 +269,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("targetId") final String targetId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+            @PathVariable("controllerId") final String controllerId) {
+        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
         final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
                 .toResponse(findTarget.getAssignedDistributionSet());
         final HttpStatus retStatus;
@@ -274,29 +283,29 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtDistributionSetAssigment dsId) {
 
-        findTargetWithExceptionIfNotFound(targetId);
+        findTargetWithExceptionIfNotFound(controllerId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedEntity()
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), controllerId).getAssignedEntity()
                 .iterator();
         if (changed.hasNext()) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
         LOG.error("Target update (ds {} assigment to target {}) failed! Returnd target list is empty.", dsId.getId(),
-                targetId);
+                controllerId);
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
-            @PathVariable("targetId") final String targetId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+            @PathVariable("controllerId") final String controllerId) {
+        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
         final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
                 .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
         final HttpStatus retStatus;
@@ -308,10 +317,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return new ResponseEntity<>(distributionSetRest, retStatus);
     }
 
-    private Target findTargetWithExceptionIfNotFound(final String targetId) {
-        final Target findTarget = this.targetManagement.findTargetByControllerID(targetId);
+    private Target findTargetWithExceptionIfNotFound(final String controllerId) {
+        final Target findTarget = this.targetManagement.findTargetByControllerID(controllerId);
         if (findTarget == null) {
-            throw new EntityNotFoundException("Target with Id {" + targetId + "} does not exist");
+            throw new EntityNotFoundException("Target with Id {" + controllerId + "} does not exist");
         }
         return findTarget;
     }

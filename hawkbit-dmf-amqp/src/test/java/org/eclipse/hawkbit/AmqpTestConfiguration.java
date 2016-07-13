@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -78,18 +78,17 @@ public class AmqpTestConfiguration {
      * @return ExecutorService with security context availability in thread
      *         execution..
      */
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutor(threadPoolExecutor());
+        return new DelegatingSecurityContextExecutorService(threadPoolExecutor());
     }
 
     /**
      * @return central ThreadPoolExecutor for general purpose multi threaded
      *         operations. Tries an orderly shutdown when destroyed.
      */
-    @Bean(destroyMethod = "shutdown")
-    public ThreadPoolExecutor threadPoolExecutor() {
+    private ThreadPoolExecutor threadPoolExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(10);
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 10, 1000, TimeUnit.MILLISECONDS,
                 blockingQueue, new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build());

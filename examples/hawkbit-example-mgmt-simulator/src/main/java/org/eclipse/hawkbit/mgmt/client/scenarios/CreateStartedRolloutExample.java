@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Example for creating and starting a Rollout.
@@ -36,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class CreateStartedRolloutExample {
 
     /* known software module type name and key */
-    private static final String SM_MODULE_TYPE = "firmware";
+    private static final String SM_MODULE_TYPE = "gettingstarted-rollout-example";
 
     /* known distribution set type name and key */
     private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;
@@ -45,6 +46,7 @@ public class CreateStartedRolloutExample {
     private MgmtDistributionSetClientResource distributionSetResource;
 
     @Autowired
+    @Qualifier("mgmtSoftwareModuleClientResource")
     private MgmtSoftwareModuleClientResource softwareModuleResource;
 
     @Autowired

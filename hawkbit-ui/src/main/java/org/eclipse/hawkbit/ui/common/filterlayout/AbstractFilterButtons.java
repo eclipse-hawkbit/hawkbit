@@ -34,10 +34,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for filter button layout.
- * 
- *
- *
- * 
  */
 public abstract class AbstractFilterButtons extends Table {
 

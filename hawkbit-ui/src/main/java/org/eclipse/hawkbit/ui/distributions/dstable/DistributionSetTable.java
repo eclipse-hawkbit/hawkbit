@@ -65,7 +65,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- *
  */
 @SpringComponent
 @ViewScope
@@ -468,7 +467,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
-
     }
 
 }

@@ -638,9 +638,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     /**
      * Added by Saumya Target pin listener.
      *
-     * @param installedDistItemIds
+     * @param installedDistItemId
      *            Item ids of installed distribution set
-     * @param assignedDistTableItemIds
+     * @param assignedDistTableItemId
      *            Item ids of assigned distribution set
      */
     public void styleDistributionSetTable(final Long installedDistItemId, final Long assignedDistTableItemId) {

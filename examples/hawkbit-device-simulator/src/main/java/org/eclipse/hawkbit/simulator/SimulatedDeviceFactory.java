@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.simulator;
 import java.net.URL;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
+import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.http.ControllerResource;
 import org.eclipse.hawkbit.simulator.http.GatewayTokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class SimulatedDeviceFactory {
     @Autowired
     private DeviceSimulatorUpdater deviceUpdater;
 
+    @Autowired
+    private SpSenderService spSenderService;
+
     /**
      * Creating a simulated devices.
      * 
@@ -41,7 +45,7 @@ public class SimulatedDeviceFactory {
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant,
             final Protocol protocol) {
-        return createSimulatedDevice(id, tenant, protocol, 30, null, null);
+        return createSimulatedDevice(id, tenant, protocol, 1800, null, null);
     }
 
     /**
@@ -55,7 +59,7 @@ public class SimulatedDeviceFactory {
      *            the protocol which should be used be the simulated device
      * @param pollDelaySec
      *            the poll delay time in seconds which should be used for
-     *            {@link DDISimulatedDevice}s
+     *            {@link DDISimulatedDevice}s and {@link DMFSimulatedDevice}
      * @param baseEndpoint
      *            the http base endpoint which should be used for
      *            {@link DDISimulatedDevice}s
@@ -68,7 +72,7 @@ public class SimulatedDeviceFactory {
             final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
         switch (protocol) {
         case DMF_AMQP:
-            return new DMFSimulatedDevice(id, tenant);
+            return new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
         case DDI_HTTP:
             final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())
                     .requestInterceptor(new GatewayTokenInterceptor(gatewayToken)).logLevel(Logger.Level.BASIC)

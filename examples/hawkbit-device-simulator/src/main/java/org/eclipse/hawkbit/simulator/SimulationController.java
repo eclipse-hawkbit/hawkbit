@@ -66,7 +66,7 @@ public class SimulationController {
             @RequestParam(value = "tenant", defaultValue = "DEFAULT") final String tenant,
             @RequestParam(value = "api", defaultValue = "dmf") final String api,
             @RequestParam(value = "endpoint", defaultValue = "http://localhost:8080") final String endpoint,
-            @RequestParam(value = "polldelay", defaultValue = "30") final int pollDelay,
+            @RequestParam(value = "polldelay", defaultValue = "1800") final int pollDelay,
             @RequestParam(value = "gatewaytoken", defaultValue = "") final String gatewayToken)
             throws MalformedURLException {
 
@@ -86,10 +86,6 @@ public class SimulationController {
             final String deviceId = name + i;
             repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
                     gatewayToken));
-
-            if (protocol == Protocol.DMF_AMQP) {
-                spSenderService.createOrUpdateThing(tenant, deviceId);
-            }
         }
 
         return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");

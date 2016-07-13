@@ -14,7 +14,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
@@ -33,10 +32,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -151,24 +148,6 @@ public final class SPUIComponentProvider {
      *            type of window
      * @return Window
      */
-    public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
-            final Component content, final ClickListener saveButtonClickListener,
-            final ClickListener cancelButtonClickListener, final String helpLink) {
-        return SPUIWindowDecorator.getDeocratedWindow(caption, id, type, content, saveButtonClickListener,
-                cancelButtonClickListener, helpLink);
-    }
-
-    /**
-     * Get window component.
-     * 
-     * @param caption
-     *            window caption
-     * @param id
-     *            window id
-     * @param type
-     *            type of window
-     * @return Window
-     */
     public static Window getWindow(final String caption, final String id, final String type) {
         return SPUIWindowDecorator.getDeocratedWindow(caption, id, type);
     }
@@ -204,6 +183,8 @@ public final class SPUIComponentProvider {
     /**
      * Get Label UI component. *
      * 
+     * @param caption
+     *            set the caption of the textArea
      * @param style
      *            set style
      * @param styleName

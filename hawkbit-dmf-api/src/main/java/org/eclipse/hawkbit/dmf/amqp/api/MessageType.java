@@ -26,9 +26,4 @@ public enum MessageType {
      */
     THING_CREATED,
 
-    /**
-     * The authentication type.
-     */
-    AUTHENTIFICATION,
-
 }

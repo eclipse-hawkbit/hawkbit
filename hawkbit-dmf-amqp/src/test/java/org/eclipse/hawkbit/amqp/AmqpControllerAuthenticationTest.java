@@ -158,7 +158,7 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication message without principal")
     public void testAuthenticationMessageBadCredantialsWithoutPricipal() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
 
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
                 FileResource.sha1("12345"));
@@ -166,8 +166,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -178,7 +177,7 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication message without wrong credential")
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
                 FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
@@ -189,8 +188,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -201,7 +199,7 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication message successfull")
     public void testSuccessfullMessageAuthentication() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
                 FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
@@ -212,8 +210,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -232,7 +229,9 @@ public class AmqpControllerAuthenticationTest {
 
     private MessageProperties createMessageProperties(final MessageType type, final String replyTo) {
         final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        if (type != null) {
+            messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        }
         messageProperties.setHeader(MessageHeaderKey.TENANT, TENANT);
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setReplyTo(replyTo);

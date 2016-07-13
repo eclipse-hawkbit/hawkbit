@@ -61,8 +61,7 @@ public interface RolloutManagement {
      *            this check. This check is only applied if the last check is
      *            less than (lastcheck-delay).
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void checkRunningRollouts(long delayBetweenChecks);
 
     /**
@@ -266,8 +265,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void pauseRollout(@NotNull Rollout rollout);
 
     /**
@@ -281,8 +279,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void resumeRollout(@NotNull Rollout rollout);
 
     /**
@@ -303,8 +300,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout startRollout(@NotNull Rollout rollout);
 
     /**
@@ -326,8 +322,7 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout startRolloutAsync(@NotNull Rollout rollout);
 
     /**

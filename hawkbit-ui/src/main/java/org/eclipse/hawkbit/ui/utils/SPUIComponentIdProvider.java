@@ -177,6 +177,10 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_MODULE_COMBO = "dist.module.combo.";
     /**
+     * ID for Distribution Tag ComboBox
+     */
+    public static final String DIST_TAG_COMBO = "dist.tag.combo";
+    /**
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
@@ -322,6 +326,22 @@ public final class SPUIComponentIdProvider {
      * tag color preview button id.
      */
     public static final String TAG_COLOR_PREVIEW_ID = "tag.color.preview";
+    /**
+     * Id for ColorPickerLayout
+     */
+    public static final String COLOR_PICKER_LAYOUT = "color.picker.layout";
+    /**
+     * Id for ColorPickerLayout's red slider
+     */
+    public static final String COLOR_PICKER_RED_SLIDER = "color.picker.red.slider";
+    /**
+     * Id for Color preview field with the color code
+     */
+    public static final String COLOR_PREVIEW_FIELD = "color-preview-field";
+    /**
+     * Id for OptionGroup Create/Update tag
+     */
+    public static final String OPTION_GROUP = "create.update.tag";
     /**
      * Confirmation dialogue OK button id.
      */
@@ -941,6 +961,11 @@ public final class SPUIComponentIdProvider {
      * Artifact uplaod view - uplod status popup id.
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
+
+    /**
+     * Table multiselect for selecting DistType
+     */
+    public static final String SELECT_DIST_TYPE = "select-dist-type";
 
     /**
      * /* Private Constructor.

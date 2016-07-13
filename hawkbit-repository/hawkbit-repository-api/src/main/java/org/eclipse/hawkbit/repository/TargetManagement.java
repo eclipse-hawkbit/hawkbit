@@ -180,25 +180,6 @@ public interface TargetManagement {
     List<Target> createTargets(@NotNull Collection<Target> targets);
 
     /**
-     * creating a new {@link Target} including poll status data. useful
-     * especially in plug and play scenarios.
-     *
-     * @param targets
-     *            to be created *
-     * @param status
-     *            of the target
-     * @param lastTargetQuery
-     *            if a plug and play case
-     * @param address
-     *            if a plug and play case
-     *
-     * @return newly created target
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<Target> createTargets(@NotNull Collection<Target> targets, @NotNull TargetUpdateStatus status,
-            Long lastTargetQuery, URI address);
-
-    /**
      * Deletes all targets with the given IDs.
      *
      * @param targetIDs

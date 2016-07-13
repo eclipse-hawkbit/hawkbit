@@ -44,7 +44,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Header of Software module table.
- *
  */
 @SpringComponent
 @ViewScope
@@ -211,4 +210,5 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     protected void setDataAvailable(final boolean available) {
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
+
 }

@@ -10,17 +10,11 @@
 
 -->
 <configuration>
-   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-      <!-- Log message format -->
-      <encoder>
-         <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
-         </pattern>
-      </encoder>
-   </appender>
+   <include resource="org/springframework/boot/logging/logback/base.xml" />
 
-   <logger name="org.eclipse.hawkbit" level="info" />
+   <logger name="feign.Logger" level="debug" />
 
-   <root level="error">
+   <root level="INFO">
       <appender-ref ref="STDOUT" />
    </root>
 

@@ -14,12 +14,7 @@ import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
 /**
- * 
  * Renders button with provided HTML content. Used to display button with icons.
- * 
- * 
- * 
- *
  */
 public class HtmlButtonRenderer extends ButtonRenderer {
 
@@ -68,4 +63,5 @@ public class HtmlButtonRenderer extends ButtonRenderer {
     private String getStyle(final String style) {
         return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
     }
+
 }

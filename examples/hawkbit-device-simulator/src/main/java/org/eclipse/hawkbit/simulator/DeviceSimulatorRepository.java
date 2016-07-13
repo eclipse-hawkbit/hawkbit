@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.simulator;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DeviceSimulatorRepository {
 
-    private final Map<DeviceKey, AbstractSimulatedDevice> devices = new LinkedHashMap<>();
+    private final Map<DeviceKey, AbstractSimulatedDevice> devices = new ConcurrentHashMap<>();
 
     @Autowired
     private SimulatedDeviceFactory deviceFactory;

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.data.SortDirection;
+import org.eclipse.hawkbit.util.IpUtil;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -141,7 +142,9 @@ public final class MgmtTargetMapper {
 
         final URI address = target.getTargetInfo().getAddress();
         if (address != null) {
-            targetRest.setIpAddress(address.getHost());
+            if (IpUtil.isIpAddresKnown(address)) {
+                targetRest.setIpAddress(address.getHost());
+            }
             targetRest.setAddress(address.toString());
         }
 
@@ -179,9 +182,11 @@ public final class MgmtTargetMapper {
     }
 
     static Target fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        final Target target = entityFactory.generateTarget(targetRest.getControllerId());
+        final Target target = entityFactory.generateTarget(targetRest.getControllerId(), targetRest.getSecurityToken());
         target.setDescription(targetRest.getDescription());
         target.setName(targetRest.getName());
+        target.getTargetInfo().setAddress(targetRest.getAddress());
+
         return target;
     }
 

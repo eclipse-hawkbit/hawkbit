@@ -41,9 +41,9 @@ public abstract class JsonBuilder {
             try {
                 builder.append(new JSONObject().put("name", module.getName())
                         .put("description", module.getDescription()).put("type", module.getType().getKey())
-                        .put("id", Long.MAX_VALUE).put("vendor", module.getVendor())
-                        .put("version", module.getVersion()).put("createdAt", "0").put("updatedAt", "0")
-                        .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+                        .put("id", Long.MAX_VALUE).put("vendor", module.getVendor()).put("version", module.getVersion())
+                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
+                        .put("updatedBy", "fghdfkjghdfkjh").toString());
             } catch (final Exception e) {
                 e.printStackTrace();
             }
@@ -185,15 +185,13 @@ public abstract class JsonBuilder {
         final List<String> messages = new ArrayList<String>();
         messages.add(message);
 
-        return new JSONObject()
-                .put("id", id)
-                .put("time", "20140511T121314")
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
-                        new JSONObject()
-                                .put("execution", execution)
+                        new JSONObject().put("execution", execution)
                                 .put("result",
                                         new JSONObject().put("finished", finished).put("progress",
-                                                new JSONObject().put("cnt", 2).put("of", 5))).put("details", messages))
+                                                new JSONObject().put("cnt", 2).put("of", 5)))
+                                .put("details", messages))
                 .toString();
 
     }
@@ -369,21 +367,22 @@ public abstract class JsonBuilder {
 
     }
 
-    /**
-     * @param targets
-     * @return
-     */
-    public static String targets(final List<Target> targets) {
+    public static String targets(final List<Target> targets, final boolean withToken) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
         for (final Target target : targets) {
             try {
+                final String address = target.getTargetInfo().getAddress() != null
+                        ? target.getTargetInfo().getAddress().toString() : null;
+
+                final String token = withToken ? target.getSecurityToken() : null;
+
                 builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                        .put("description", target.getDescription()).put("name", target.getName())
-                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
-                        .put("updatedBy", "fghdfkjghdfkjh").toString());
+                        .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+                        .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                        .put("address", address).put("securityToken", token).toString());
             } catch (final Exception e) {
                 e.printStackTrace();
             }
@@ -441,9 +440,7 @@ public abstract class JsonBuilder {
             throws JSONException {
         final List<String> messages = new ArrayList<String>();
         messages.add(message);
-        return new JSONObject()
-                .put("id", id)
-                .put("time", "20140511T121314")
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success")).put("details", messages))
@@ -453,13 +450,12 @@ public abstract class JsonBuilder {
 
     public static String configData(final String id, final Map<String, String> attributes, final String execution)
             throws JSONException {
-        return new JSONObject()
-                .put("id", id)
-                .put("time", "20140511T121314")
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new ArrayList<String>())).put("data", attributes).toString();
+                                .put("details", new ArrayList<String>()))
+                .put("data", attributes).toString();
 
     }
 

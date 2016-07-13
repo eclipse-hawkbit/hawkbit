@@ -84,7 +84,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private VerticalLayout tagsLayout;
 
-    Map<String, StringBuilder> assignedSWModule = new HashMap<>();
+    private final Map<String, StringBuilder> assignedSWModule = new HashMap<>();
 
     /**
      * softwareLayout Initialize the component.
@@ -259,8 +259,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
-        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
+        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

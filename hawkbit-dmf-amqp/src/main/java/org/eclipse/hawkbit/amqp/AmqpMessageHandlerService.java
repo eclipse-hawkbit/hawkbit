@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -35,8 +36,10 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -44,9 +47,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -101,6 +106,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @Autowired
     private EntityFactory entityFactory;
 
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
+
     /**
      * Constructor.
      * 
@@ -111,27 +119,39 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         super(defaultTemplate);
     }
 
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
-    private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
-        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
-    }
-
     /**
-     * Method to handle all incoming amqp messages.
+     * Method to handle all incoming DMF amqp messages.
      *
      * @param message
      *            incoming message
      * @param type
      *            the message type
-     * @param contentType
-     *            the contentType of the message
      * @param tenant
      *            the contentType of the message
-     * @param virtualHost
-     *            the virtual host
+     * 
      * @return a message if <null> no message is send back to sender
      */
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
+    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
+        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
+    }
+
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
+    public Message onAuthenticationRequest(final Message message) {
+        checkContentTypeJson(message);
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            return handleAuthentifiactionMessage(message);
+        } catch (final IllegalArgumentException ex) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
+        } catch (final TenantNotExistException teex) {
+            throw new AmqpRejectAndDontRequeueException(teex);
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
@@ -148,11 +168,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final EventTopic eventTopic = EventTopic.valueOf(topicValue);
                 handleIncomingEvent(message, eventTopic);
                 break;
-            case AUTHENTIFICATION:
-                return handleAuthentifiactionMessage(message);
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
+        } catch (final IllegalArgumentException ex) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
+        } catch (final TenantNotExistException teex) {
+            throw new AmqpRejectAndDontRequeueException(teex);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -308,9 +330,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DistributionSet distributionSet = action.getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
+        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                 target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
-                target.getSecurityToken()));
+                targetSecurityToken));
 
     }
 
@@ -340,11 +363,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
-
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
+        final ActionStatus actionStatus = createActionStatus(message, actionUpdateStatus, action);
 
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:
@@ -380,6 +399,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
+    }
+
+    private ActionStatus createActionStatus(final Message message, final ActionUpdateStatus actionUpdateStatus,
+            final Action action) {
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
+        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
+        if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
+                    + convertCorrelationId(message));
+        }
+
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(System.currentTimeMillis());
+        return actionStatus;
+    }
+
+    private static String convertCorrelationId(final Message message) {
+        return new String(message.getMessageProperties().getCorrelationId());
     }
 
     private Action getUpdateActionStatus(final ActionStatus actionStatus) {
@@ -421,12 +459,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void checkContentTypeJson(final Message message) {
+    private static void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;
         }
-        throw new IllegalArgumentException("Content-Type is not JSON compatible");
+        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     void setControllerManagement(final ControllerManagement controllerManagement) {
@@ -457,4 +495,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         this.entityFactory = entityFactory;
     }
 
+    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
+        this.systemSecurityContext = systemSecurityContext;
+    }
 }

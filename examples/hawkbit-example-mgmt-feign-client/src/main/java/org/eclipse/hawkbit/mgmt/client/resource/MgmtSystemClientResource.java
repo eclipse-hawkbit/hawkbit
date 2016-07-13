@@ -16,6 +16,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
  * Client binding for the {@link MgmtSystemRestApi}.
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING)
 public interface MgmtSystemClientResource extends MgmtSystemRestApi {
 }

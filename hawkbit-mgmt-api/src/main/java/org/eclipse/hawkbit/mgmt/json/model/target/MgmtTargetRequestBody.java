@@ -18,6 +18,20 @@ public class MgmtTargetRequestBody {
     @JsonProperty(required = true)
     private String controllerId;
 
+    @JsonProperty
+    private String address;
+
+    @JsonProperty
+    private String securityToken;
+
+    public String getSecurityToken() {
+        return securityToken;
+    }
+
+    public void setSecurityToken(final String securityToken) {
+        this.securityToken = securityToken;
+    }
+
     /**
      * @return the name
      */
@@ -64,6 +78,14 @@ public class MgmtTargetRequestBody {
     public MgmtTargetRequestBody setControllerId(final String controllerId) {
         this.controllerId = controllerId;
         return this;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(final String address) {
+        this.address = address;
     }
 
 }
