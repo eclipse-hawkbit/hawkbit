@@ -37,8 +37,10 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -59,8 +61,6 @@ public class SoftwareModuleDetailsTable extends Table {
     private static final String SOFT_MODULE = "softwareModule";
 
     private static final String SOFT_TYPE_MANDATORY = "mandatory";
-
-    private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
 
     private boolean isTargetAssigned;
 
@@ -109,7 +109,6 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private void createSwModuleTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        addStyleName(ValoTheme.TABLE_NO_STRIPES);
         setSelectable(false);
         setImmediate(true);
         setContainerDataSource(getSwModuleContainer());
@@ -123,22 +122,13 @@ public class SoftwareModuleDetailsTable extends Table {
         final IndexedContainer container = new IndexedContainer();
         container.addContainerProperty(SOFT_TYPE_MANDATORY, Label.class, "");
         container.addContainerProperty(SOFT_TYPE_NAME, Label.class, "");
-        container.addContainerProperty(SOFT_MODULE, Label.class, "");
-        if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
-            container.addContainerProperty(UNASSIGN_SOFT_MODULE, Button.class, "");
-        }
+        container.addContainerProperty(SOFT_MODULE, VerticalLayout.class, "");
         setColumnExpandRatio(SOFT_TYPE_MANDATORY, 0.1f);
         setColumnExpandRatio(SOFT_TYPE_NAME, 0.4f);
         setColumnExpandRatio(SOFT_MODULE, 0.3f);
-        if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
-            setColumnExpandRatio(UNASSIGN_SOFT_MODULE, 0.2F);
-        }
         setColumnAlignment(SOFT_TYPE_MANDATORY, Align.RIGHT);
         setColumnAlignment(SOFT_TYPE_NAME, Align.LEFT);
         setColumnAlignment(SOFT_MODULE, Align.LEFT);
-        if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
-            setColumnAlignment(UNASSIGN_SOFT_MODULE, Align.RIGHT);
-        }
         return container;
     }
 
@@ -146,10 +136,6 @@ public class SoftwareModuleDetailsTable extends Table {
         setColumnHeader(SOFT_TYPE_MANDATORY, "");
         setColumnHeader(SOFT_TYPE_NAME, i18n.get("header.caption.typename"));
         setColumnHeader(SOFT_MODULE, i18n.get("header.caption.softwaremodule"));
-        if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
-            setColumnHeader(UNASSIGN_SOFT_MODULE, i18n.get("header.caption.unassign"));
-        }
-
     }
 
     /**
@@ -188,31 +174,17 @@ public class SoftwareModuleDetailsTable extends Table {
         final Item saveTblitem = getContainerDataSource().addItem(swModType.getName());
         final Label mandatoryLabel = createMandatoryLabel(isMandatory);
         final Label typeName = HawkbitCommonUtil.getFormatedLabel(swModType.getName());
+        final VerticalLayout verticalLayout = createSoftModuleLayout(swModType,distributionSet, alreadyAssignedSwModules);
 
-        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
-        final Button reassignSoftModule = SPUIComponentProvider.getButton(swModType.getName(), "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-
-        reassignSoftModule.addClickListener(event -> unassignSW(event, distributionSet, alreadyAssignedSwModules));
-        if (null != alreadyAssignedSwModules && !alreadyAssignedSwModules.isEmpty()) {
-            final String swModuleName = getSwModuleName(alreadyAssignedSwModules, swModType);
-            softwareModule.setValue(swModuleName);
-            softwareModule.setDescription(swModuleName);
-        }
         saveTblitem.getItemProperty(SOFT_TYPE_MANDATORY).setValue(mandatoryLabel);
         saveTblitem.getItemProperty(SOFT_TYPE_NAME).setValue(typeName);
-        saveTblitem.getItemProperty(SOFT_MODULE).setValue(softwareModule);
-        if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
-                && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
-            saveTblitem.getItemProperty(UNASSIGN_SOFT_MODULE).setValue(reassignSoftModule);
-        }
+        saveTblitem.getItemProperty(SOFT_MODULE).setValue(verticalLayout);
 
     }
 
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
-        final SoftwareModule unAssignedSw = getSoftwareModule((Label) getContainerDataSource()
-                .getItem(event.getButton().getId()).getItemProperty(SOFT_MODULE).getValue(), alreadyAssignedSwModules);
+    	final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(),alreadyAssignedSwModules);
         final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                 unAssignedSw);
         manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
@@ -232,16 +204,45 @@ public class SoftwareModuleDetailsTable extends Table {
         return false;
 
     }
+    
+    
+    private VerticalLayout createSoftModuleLayout(final SoftwareModuleType swModType,DistributionSet distributionSet, Set<SoftwareModule> alreadyAssignedSwModules){
+    	VerticalLayout verticalLayout = new VerticalLayout();
+    	for (final SoftwareModule sw : alreadyAssignedSwModules) { 
+            if (swModType.getKey().equals(sw.getType().getKey())) {
+            	HorizontalLayout horizontalLayout = new HorizontalLayout();
+            	horizontalLayout.setSizeFull();
+            	final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+                final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
+                        FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+               reassignSoftModule.addClickListener(event -> unassignSW(event, distributionSet, alreadyAssignedSwModules));
+               String softwareModNameVersion = HawkbitCommonUtil.getFormattedNameVersion(sw.getName(), sw.getVersion());
+                softwareModule.setValue(softwareModNameVersion);
+                softwareModule.setDescription(softwareModNameVersion);
+                softwareModule.setId(sw.getName()+"-label");
+                horizontalLayout.addComponent(softwareModule);
+                horizontalLayout.setExpandRatio(softwareModule, 1f);
+                if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
+                        && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
+                	horizontalLayout.addComponent(reassignSoftModule);
+                }
+                verticalLayout.addComponent(horizontalLayout);
+            }
+           
+        }
+    	
+    	return verticalLayout;
+    }
 
     /**
      * @param value
      * @param alreadyAssignedSwModules
      * @return
      */
-    protected SoftwareModule getSoftwareModule(final Label softwareModule,
+    protected SoftwareModule getSoftwareModule(final String softwareModule,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         for (final SoftwareModule sw : alreadyAssignedSwModules) {
-            if (softwareModule.getValue().contains(sw.getName())) {
+            if (softwareModule.equals(sw.getName())) {
                 return sw;
             }
         }
@@ -255,16 +256,5 @@ public class SoftwareModuleDetailsTable extends Table {
             mandatoryLable.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         }
         return mandatoryLable;
-    }
-
-    private String getSwModuleName(final Set<SoftwareModule> swModulesSet, final SoftwareModuleType swModType) {
-        final StringBuilder assignedSWModules = new StringBuilder();
-        for (final SoftwareModule sw : swModulesSet) {
-            if (swModType.getKey().equals(sw.getType().getKey())) {
-                assignedSWModules.append(HawkbitCommonUtil.getFormattedNameVersion(sw.getName(), sw.getVersion()))
-                        .append("</br>");
-            }
-        }
-        return assignedSWModules.toString();
     }
 }

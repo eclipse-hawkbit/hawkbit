@@ -43,6 +43,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
@@ -62,8 +63,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private static final long serialVersionUID = -4595004466943546669L;
 
     private static final String SOFT_MODULE = "softwareModule";
-
-    private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -150,23 +149,22 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE)
-                            .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
-                    assignSoftModuleButton(item, entry);
-
+                            .setValue(createSoftModuleLayout(entry.getValue().toString()));
                 }
             }
         }
     }
 
-    private void assignSoftModuleButton(final Item item, final Map.Entry<String, StringBuilder> entry) {
+    private Button assignSoftModuleButton(final String softwareModuleName) {
         if (getPermissionChecker().hasUpdateDistributionPermission() && distributionSetManagement
                 .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
                 .getAssignedTargets().isEmpty()) {
-            final Button reassignSoftModule = SPUIComponentProvider.getButton(entry.getKey(), "", "", "", true,
+            final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
-            item.getItemProperty(UNASSIGN_SOFT_MODULE).setValue(reassignSoftModule);
+            return reassignSoftModule;
         }
+		return null;
     }
 
     private String getUnsavedAssigedSwModule(final String name, final String version) {
@@ -208,11 +206,25 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
                 item.getItemProperty(SOFT_MODULE)
-                        .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
-                assignSoftModuleButton(item, entry);
-
+                        .setValue(createSoftModuleLayout(entry.getValue().toString()));
             }
         }
+    }
+    
+    private VerticalLayout createSoftModuleLayout(String softwareModuleName){
+    	VerticalLayout verticalLayout = new VerticalLayout();
+    	HorizontalLayout horizontalLayout = new HorizontalLayout();
+    	horizontalLayout.setSizeFull();
+    	final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+        final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
+        softwareModule.setValue(softwareModuleName);
+        softwareModule.setDescription(softwareModuleName);
+        softwareModule.setId(softwareModuleName+"-label");
+        horizontalLayout.addComponent(softwareModule);
+        horizontalLayout.setExpandRatio(softwareModule, 1f);
+        horizontalLayout.addComponent(reassignSoftModule);
+        verticalLayout.addComponent(horizontalLayout);
+    	return verticalLayout;
     }
 
     private VerticalLayout createSoftwareModuleTab() {
@@ -353,7 +365,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getTabSheetId() {
-        return null;
+        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
 
     @Override

@@ -193,6 +193,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         assignOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         assignOptiongroup.addStyleName("custom-option-group");
         assignOptiongroup.setNullSelectionAllowed(false);
+        assignOptiongroup.setId(SPUIDefinitions.ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
         assignOptiongroup.select(tagOptions.get(0));
     }
 
@@ -326,6 +327,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagNameComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
         tagNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+    }
+    
+    @Override
+    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
+        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
     }
 
 }
