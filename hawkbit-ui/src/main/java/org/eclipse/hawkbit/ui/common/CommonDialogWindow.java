@@ -413,7 +413,6 @@ public class CommonDialogWindow extends Window implements Serializable {
         cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
                 FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
-        cancelButton.addStyleName("default-color");
         if (cancelButtonClickListener != null) {
             cancelButton.addClickListener(cancelButtonClickListener);
         }
@@ -427,7 +426,6 @@ public class CommonDialogWindow extends Window implements Serializable {
         saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
         saveButton.setSizeUndefined();
-        saveButton.addStyleName("default-color");
         saveButton.addClickListener(saveButtonClickListener);
         saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);

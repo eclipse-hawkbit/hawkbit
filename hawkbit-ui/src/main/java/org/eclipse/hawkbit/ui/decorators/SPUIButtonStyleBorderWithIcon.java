@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
@@ -29,6 +31,7 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
         setButtonIcon(icon);
 
         button.addStyleName(ValoTheme.LABEL_SMALL);
+        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         button.setSizeFull();
 
         return button;
@@ -36,14 +39,12 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
     private void setButtonStyle(final String style, final boolean setStyle) {
 
-        if (style == null) {
+        if (StringUtils.isEmpty(style)) {
             return;
         }
 
         if (setStyle) {
             button.setStyleName(style);
-        } else {
-            button.addStyleName(style);
         }
     }
 
