@@ -271,12 +271,5 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
                 new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
         tagNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
     }
-    
-    @Override
-    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
-        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
-    }
 
 }
