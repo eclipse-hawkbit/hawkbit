@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
@@ -62,14 +63,11 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
- * 
  * Rollout list grid component.
- *
  */
 @SpringComponent
 @ViewScope
@@ -145,6 +143,7 @@ public class RolloutListGrid extends AbstractGrid {
         final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
+        	refreshGrid();
             return;
         }
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
@@ -159,7 +158,6 @@ public class RolloutListGrid extends AbstractGrid {
         }
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
-
     }
 
     @Override
@@ -200,7 +198,6 @@ public class RolloutListGrid extends AbstractGrid {
 
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.ACTION, String.class,
                 FontAwesome.CIRCLE_O.getHtml(), false, false);
-
     }
 
     @Override
@@ -292,7 +289,6 @@ public class RolloutListGrid extends AbstractGrid {
         for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
-
     }
 
     @Override
@@ -315,7 +311,6 @@ public class RolloutListGrid extends AbstractGrid {
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
-
     }
 
     private void createRolloutStatusToFontMap() {
@@ -437,8 +432,7 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void onUpdate(final ContextMenuData contextMenuData) {
-        addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
-        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(contextMenuData.getRolloutId());
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
@@ -684,7 +678,6 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
-
     }
 
 }

@@ -32,9 +32,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
 /**
- *
  * Class for Create/Update Tag Layout of distribution set
- * 
  */
 @SpringComponent
 @ViewScope
@@ -87,16 +85,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
      */
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingDistTag)) {
-                    createNewTag();
-                }
-            } else {
-
-                updateExistingTag(existingDistTag);
+        final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingDistTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingDistTag);
         }
     }
 
@@ -180,5 +175,10 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         super.reset();
         setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
                 permChecker.hasUpdateDistributionPermission());
+    }
+
+    @Override
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.tag");
     }
 }

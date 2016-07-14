@@ -115,9 +115,21 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      *            controller ID of the {@link Target}
      */
     public JpaTarget(final String controllerId) {
+        this(controllerId, SecurityTokenGeneratorHolder.getInstance().generateToken());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param controllerId
+     *            controller ID of the {@link Target}
+     * @param securityToken
+     *            for target authentication if enabled
+     */
+    public JpaTarget(final String controllerId, final String securityToken) {
         this.controllerId = controllerId;
         setName(controllerId);
-        securityToken = SecurityTokenGeneratorHolder.getInstance().generateToken();
+        this.securityToken = securityToken;
         targetInfo = new JpaTargetInfo(this);
     }
 

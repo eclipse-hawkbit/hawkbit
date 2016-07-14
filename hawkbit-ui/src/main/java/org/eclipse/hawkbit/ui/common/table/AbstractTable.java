@@ -95,9 +95,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         if (values == null) {
             values = Collections.emptySet();
         }
-        if (values.contains(null)) {
-            LOG.warn("Null values in table content. How could this happen?");
-        }
         return values;
     }
 
