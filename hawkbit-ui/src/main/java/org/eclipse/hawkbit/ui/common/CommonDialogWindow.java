@@ -378,11 +378,10 @@ public class CommonDialogWindow extends Window implements Serializable {
         buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
+        buttonsLayout.addStyleName("actionButtonsMargin");
 
         createSaveButton();
-
         createCancelButton();
-        buttonsLayout.addStyleName("actionButtonsMargin");
 
         addHelpLink();
 
