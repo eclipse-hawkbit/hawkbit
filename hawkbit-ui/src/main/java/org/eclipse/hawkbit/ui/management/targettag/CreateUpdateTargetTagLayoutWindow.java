@@ -102,15 +102,13 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingTag)) {
-                    createNewTag();
-                }
-            } else {
-                updateExistingTag(existingTag);
+        final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingTag);
         }
     }
 
@@ -131,7 +129,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
             }
             newTargetTag = tagManagement.createTargetTag(newTargetTag);
             displaySuccess(newTargetTag.getName());
-            closeWindow();
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
         }
@@ -148,6 +145,11 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
         super.reset();
         setOptionGroupDefaultValue(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
+    }
+
+    @Override
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.tag");
     }
 
 }

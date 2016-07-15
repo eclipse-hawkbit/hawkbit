@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.autoconfigure.scheduling;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
@@ -24,9 +26,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -45,20 +50,28 @@ public class ExecutorAutoConfiguration {
 
     /**
      * @return ExecutorService with security context availability in thread
-     *         execution..
+     *         execution.
+     */
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean
+    public ExecutorService asyncExecutor() {
+        return new DelegatingSecurityContextExecutorService(threadPoolExecutor());
+    }
+
+    /**
+     * @return {@link TaskExecutor} for task execution
      */
     @Bean
     @ConditionalOnMissingBean
-    public Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutor(threadPoolExecutor());
+    public TaskExecutor taskExecutor() {
+        return new ConcurrentTaskExecutor(asyncExecutor());
     }
 
     /**
      * @return central ThreadPoolExecutor for general purpose multi threaded
      *         operations. Tries an orderly shutdown when destroyed.
      */
-    @Bean(destroyMethod = "shutdown")
-    public ThreadPoolExecutor threadPoolExecutor() {
+    private ThreadPoolExecutor threadPoolExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
                 asyncConfigurerProperties.getQueuesize());
         return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
@@ -92,31 +105,24 @@ public class ExecutorAutoConfiguration {
     }
 
     /**
-     * @return {@link TaskExecutor} for task execution
+     * @return {@link ScheduledExecutorService} with security context
+     *         availability in thread execution.
      */
-    @Bean
-    @ConditionalOnMissingBean
-    public TaskExecutor taskExecutor() {
-        return new ConcurrentTaskExecutor(asyncExecutor());
-    }
-
-    /**
-     * @return {@link ScheduledExecutorService} based on
-     *         {@link #threadPoolTaskScheduler()}.
-     */
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public ScheduledExecutorService scheduledExecutorService() {
-        return threadPoolTaskScheduler().getScheduledExecutor();
+        return new DelegatingSecurityContextScheduledExecutorService(
+                Executors.newScheduledThreadPool(asyncConfigurerProperties.getSchedulerThreads(),
+                        new ThreadFactoryBuilder().setNameFormat("central-scheduled-executor-pool-%d").build()));
     }
 
     /**
-     * @return {@link ThreadPoolTaskScheduler} for scheduled operations.
+     * @return {@link TaskScheduler} for task execution
      */
     @Bean
     @ConditionalOnMissingBean
-    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
-        return new ThreadPoolTaskScheduler();
+    public TaskScheduler taskScheduler() {
+        return new ConcurrentTaskScheduler(scheduledExecutorService());
     }
 
 }

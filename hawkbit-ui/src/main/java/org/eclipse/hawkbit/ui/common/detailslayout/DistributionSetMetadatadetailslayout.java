@@ -89,13 +89,15 @@ public class DistributionSetMetadatadetailslayout extends Table{
      */
     public void populateDSMetadata(final DistributionSet distributionSet) {
         removeAllItems();
-        if (null != distributionSet) { 
-            selectedDistSetId = distributionSet.getId();
-            final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
-            if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
-                dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
-            }
-         }
+        if (null == distributionSet) {
+        	return;
+        }
+        selectedDistSetId = distributionSet.getId();
+        final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
+        if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
+            dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
+        }
+     
     }
     
     /**

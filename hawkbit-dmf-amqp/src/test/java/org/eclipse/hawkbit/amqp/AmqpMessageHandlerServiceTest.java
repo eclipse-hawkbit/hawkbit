@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,6 +113,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private SystemSecurityContext systemSecurityContextMock;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
@@ -124,6 +128,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
         amqpMessageHandlerService.setEventBus(eventBus);
         amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
+        amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
 
     }
 
@@ -135,8 +140,8 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to worng content type");
-        } catch (final IllegalArgumentException e) {
+            fail("AmqpRejectAndDontRequeueException was excepeted due to worng content type");
+        } catch (final AmqpRejectAndDontRequeueException e) {
         }
     }
 
@@ -170,7 +175,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no replyTo header was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no replyTo header was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -184,7 +189,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no thingID was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no thingID was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -200,7 +205,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, type, TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown message type");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -213,21 +218,21 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown message type");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         try {
             messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown topic");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown topic");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted because there was no event topic");
+            fail("AmqpRejectAndDontRequeueException was excepeted because there was no event topic");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -246,7 +251,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no action id was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -263,7 +268,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no action id was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -273,14 +278,13 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -292,7 +296,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -303,8 +307,7 @@ public class AmqpMessageHandlerServiceTest {
                 .thenThrow(EntityNotFoundException.class);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -316,7 +319,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -334,8 +337,7 @@ public class AmqpMessageHandlerServiceTest {
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -366,6 +368,8 @@ public class AmqpMessageHandlerServiceTest {
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
         when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
                 .thenReturn(softwareModuleList);
+
+        when(systemSecurityContextMock.runAsSystem(anyObject())).thenReturn("securityToken");
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -411,7 +415,9 @@ public class AmqpMessageHandlerServiceTest {
 
     private MessageProperties createMessageProperties(final MessageType type, final String replyTo) {
         final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        if (type != null) {
+            messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        }
         messageProperties.setHeader(MessageHeaderKey.TENANT, TENANT);
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setReplyTo(replyTo);

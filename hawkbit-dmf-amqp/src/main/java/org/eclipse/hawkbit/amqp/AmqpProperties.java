@@ -31,9 +31,15 @@ public class AmqpProperties {
     private String deadLetterExchange = "dmf.connector.deadletter";
 
     /**
-     * DMF API receiving queue.
+     * DMF API receiving queue for EVENT or THING_CREATED message.
      */
     private String receiverQueue = "dmf_receiver";
+
+    /**
+     * Authentication request called by 3rd party artifact storages for download
+     * authorizations.
+     */
+    private String authenticationReceiverQueue = "authentication_receiver";
 
     /**
      * Missing queue fatal.
@@ -61,6 +67,37 @@ public class AmqpProperties {
      * {@link #maxConcurrentConsumers}.
      */
     private int initialConcurrentConsumers = 3;
+
+    /**
+     * The number of retry attempts when passive queue declaration fails.
+     * Passive queue declaration occurs when the consumer starts or, when
+     * consuming from multiple queues, when not all queues were available during
+     * initialization.
+     */
+    private int declarationRetries = 50;
+
+    /**
+     * @return the declarationRetries
+     */
+    public int getDeclarationRetries() {
+        return declarationRetries;
+    }
+
+    /**
+     * @param declarationRetries
+     *            the declarationRetries to set
+     */
+    public void setDeclarationRetries(final int declarationRetries) {
+        this.declarationRetries = declarationRetries;
+    }
+
+    public String getAuthenticationReceiverQueue() {
+        return authenticationReceiverQueue;
+    }
+
+    public void setAuthenticationReceiverQueue(final String authenticationReceiverQueue) {
+        this.authenticationReceiverQueue = authenticationReceiverQueue;
+    }
 
     public int getPrefetchCount() {
         return prefetchCount;
@@ -147,16 +184,16 @@ public class AmqpProperties {
         return receiverQueue;
     }
 
-    public void setReceiverQueue(final String receiverQueue) {
-        this.receiverQueue = receiverQueue;
-    }
-
     public int getRequestedHeartBeat() {
         return requestedHeartBeat;
     }
 
     public void setRequestedHeartBeat(final int requestedHeartBeat) {
         this.requestedHeartBeat = requestedHeartBeat;
+    }
+
+    public void setReceiverQueue(final String receiverQueue) {
+        this.receiverQueue = receiverQueue;
     }
 
 }

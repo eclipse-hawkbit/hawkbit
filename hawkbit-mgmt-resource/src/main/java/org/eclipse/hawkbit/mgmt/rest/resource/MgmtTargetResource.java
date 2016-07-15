@@ -125,6 +125,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         if (targetRest.getName() != null) {
             existingTarget.setName(targetRest.getName());
         }
+        if (targetRest.getAddress() != null) {
+            existingTarget.getTargetInfo().setAddress(targetRest.getAddress());
+        }
+        if (targetRest.getSecurityToken() != null) {
+            existingTarget.setSecurityToken(targetRest.getSecurityToken());
+        }
+
         final Target updateTarget = this.targetManagement.updateTarget(existingTarget);
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);

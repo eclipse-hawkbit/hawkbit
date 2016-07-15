@@ -9,13 +9,15 @@
 package org.eclipse.hawkbit.rest.exception;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadBase.FileSizeLimitExceededException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.repository.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +28,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
 
+import com.google.common.collect.Iterables;
+
 /**
  * General controller advice for exception handling.
- *
- *
- *
- *
  */
 @ControllerAdvice
 public class ResponseExceptionHandler {
@@ -89,14 +89,11 @@ public class ResponseExceptionHandler {
     @ExceptionHandler(SpServerRtException.class)
     public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request,
             final Exception ex) {
-        LOG.debug("Handling exception of request {}", request.getRequestURL());
-        final ExceptionInfo response = new ExceptionInfo();
+        logRequest(request, ex);
+        final ExceptionInfo response = createExceptionInfo(ex);
         final HttpStatus responseStatus;
-        response.setMessage(ex.getMessage());
-        response.setExceptionClass(ex.getClass().getName());
         if (ex instanceof SpServerRtException) {
             responseStatus = getStatusOrDefault(((SpServerRtException) ex).getError());
-            response.setErrorCode(((SpServerRtException) ex).getError().getKey());
         } else {
             responseStatus = DEFAULT_RESPONSE_STATUS;
         }
@@ -118,11 +115,8 @@ public class ResponseExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionInfo> handleHttpMessageNotReadableException(final HttpServletRequest request,
             final Exception ex) {
-        LOG.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
-        final ExceptionInfo response = new ExceptionInfo();
-        response.setErrorCode(SpServerError.SP_REST_BODY_NOT_READABLE.getKey());
-        response.setMessage(SpServerError.SP_REST_BODY_NOT_READABLE.getMessage());
-        response.setExceptionClass(MessageNotReadableException.class.getName());
+        logRequest(request, ex);
+        final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -139,35 +133,30 @@ public class ResponseExceptionHandler {
      *         as entity.
      */
     @ExceptionHandler(MultipartException.class)
-    public ResponseEntity<ExceptionInfo> handleFileLimitExceededException(final HttpServletRequest request,
+    public ResponseEntity<ExceptionInfo> handleMultipartException(final HttpServletRequest request,
             final Exception ex) {
-        LOG.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
 
-        final ExceptionInfo response = new ExceptionInfo();
+        logRequest(request, ex);
 
-        if (searchForCause(ex, FileSizeLimitExceededException.class)) {
-            response.setErrorCode(SpServerError.SP_ARTIFACT_UPLOAD_FILE_LIMIT_EXCEEDED.getKey());
-            response.setMessage(SpServerError.SP_ARTIFACT_UPLOAD_FILE_LIMIT_EXCEEDED.getMessage());
-            response.setExceptionClass(FileSizeLimitExceededException.class.getName());
-        } else {
-            response.setErrorCode(SpServerError.SP_ARTIFACT_UPLOAD_FAILED.getKey());
-            response.setMessage(SpServerError.SP_ARTIFACT_UPLOAD_FAILED.getMessage());
-            response.setExceptionClass(MultipartException.class.getName());
-        }
-
+        final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
+        final Throwable responseCause = Iterables.getLast(throwables);
+        final ExceptionInfo response = createExceptionInfo(new MultiPartFileUploadException(responseCause));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    private static boolean searchForCause(final Throwable t, final Class<?> lookFor) {
-        if (t != null && t.getCause() != null) {
-            if (t.getCause().getClass().isAssignableFrom(lookFor)) {
-                return true;
-            } else {
-                return searchForCause(t.getCause(), lookFor);
-            }
+    private void logRequest(final HttpServletRequest request, final Exception ex) {
+        LOG.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+    }
+
+    private ExceptionInfo createExceptionInfo(final Exception ex) {
+        final ExceptionInfo response = new ExceptionInfo();
+        response.setMessage(ex.getMessage());
+        response.setExceptionClass(ex.getClass().getName());
+        if (ex instanceof SpServerRtException) {
+            response.setErrorCode(((SpServerRtException) ex).getError().getKey());
         }
 
-        return false;
+        return response;
     }
 
 }

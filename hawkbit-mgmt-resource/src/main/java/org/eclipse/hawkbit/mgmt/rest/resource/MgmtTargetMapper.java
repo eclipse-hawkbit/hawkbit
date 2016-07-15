@@ -182,10 +182,11 @@ public final class MgmtTargetMapper {
     }
 
     static Target fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        final Target target = entityFactory.generateTarget(targetRest.getControllerId());
+        final Target target = entityFactory.generateTarget(targetRest.getControllerId(), targetRest.getSecurityToken());
         target.setDescription(targetRest.getDescription());
         target.setName(targetRest.getName());
         target.getTargetInfo().setAddress(targetRest.getAddress());
+
         return target;
     }
 

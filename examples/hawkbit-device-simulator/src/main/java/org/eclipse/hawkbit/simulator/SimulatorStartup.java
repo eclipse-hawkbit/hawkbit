@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.simulator;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +52,6 @@ public class SimulatorStartup implements ApplicationListener<ContextRefreshedEve
                             autostart.getGatewayToken()));
                 } catch (final MalformedURLException e) {
                     LOGGER.error("Creation of simulated device at startup failed.", e);
-                }
-
-                if (autostart.getApi() == Protocol.DMF_AMQP) {
-                    spSenderService.createOrUpdateThing(autostart.getTenant(), deviceId);
                 }
             }
         });

@@ -8,8 +8,11 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.slf4j.Logger;
@@ -18,11 +21,12 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +56,6 @@ public class AmqpConfiguration {
     private AmqpDeadletterProperties amqpDeadletterProperties;
 
     @Autowired
-    @Qualifier("threadPoolExecutor")
-    private ThreadPoolExecutor threadPoolExecutor;
-
-    @Autowired
     private ConnectionFactory rabbitConnectionFactory;
 
     @Configuration
@@ -66,8 +66,8 @@ public class AmqpConfiguration {
         private AmqpProperties amqpProperties;
 
         @Autowired
-        @Qualifier("threadPoolExecutor")
-        private ThreadPoolExecutor threadPoolExecutor;
+        @Qualifier("asyncExecutor")
+        private Executor threadPoolExecutor;
 
         @Autowired
         private ScheduledExecutorService scheduledExecutorService;
@@ -145,24 +145,69 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the sp receiver queue.
+     * Create the DMF API receiver queue for retrieving DMF messages.
      *
      * @return the receiver queue
      */
     @Bean
-    public Queue receiverQueue() {
+    public Queue dmfReceiverQueue() {
         return new Queue(amqpProperties.getReceiverQueue(), true, false, false,
                 amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
     }
 
     /**
-     * Create the dead letter fanout exchange.
+     * Create the DMF API receiver queue for authentication requests called by
+     * 3rd party artifact storages for download authorization by devices.
+     *
+     * @return the receiver queue
+     */
+    @Bean
+    public Queue authenticationReceiverQueue() {
+        return QueueBuilder.nonDurable(amqpProperties.getAuthenticationReceiverQueue()).autoDelete()
+                .withArguments(getTTLMaxArgsAuthenticationQueue()).build();
+    }
+
+    /**
+     * Create DMF exchange.
      *
      * @return the fanout exchange
      */
     @Bean
-    public FanoutExchange senderExchange() {
+    public FanoutExchange dmfSenderExchange() {
         return new FanoutExchange(AmqpSettings.DMF_EXCHANGE);
+    }
+
+    /**
+     * Create the Binding {@link AmqpConfiguration#dmfReceiverQueue()} to
+     * {@link AmqpConfiguration#dmfSenderExchange()}.
+     *
+     * @return the binding and create the queue and exchange
+     */
+    @Bean
+    public Binding bindDmfSenderExchangeToDmfQueue() {
+        return BindingBuilder.bind(dmfReceiverQueue()).to(dmfSenderExchange());
+    }
+
+    /**
+     * Create authentication exchange.
+     *
+     * @return the fanout exchange
+     */
+    @Bean
+    public FanoutExchange authenticationExchange() {
+        return new FanoutExchange(AmqpSettings.AUTHENTICATION_EXCHANGE, false, true);
+    }
+
+    /**
+     * Create the Binding
+     * {@link AmqpConfiguration#authenticationReceiverQueue()} to
+     * {@link AmqpConfiguration#authenticationExchange()}.
+     *
+     * @return the binding and create the queue and exchange
+     */
+    @Bean
+    public Binding bindAuthenticationSenderExchangeToAuthenticationQueue() {
+        return BindingBuilder.bind(authenticationReceiverQueue()).to(authenticationExchange());
     }
 
     /**
@@ -181,29 +226,18 @@ public class AmqpConfiguration {
      * @return the fanout exchange
      */
     @Bean
-    public FanoutExchange exchangeDeadLetter() {
+    public FanoutExchange deadLetterExchange() {
         return new FanoutExchange(amqpProperties.getDeadLetterExchange());
     }
 
     /**
-     * Create the Binding deadLetterQueue to exchangeDeadLetter.
+     * Create the Binding deadLetterQueue to deadLetterExchange.
      *
      * @return the binding
      */
     @Bean
-    public Binding bindDeadLetterQueueToLwm2mExchange() {
-        return BindingBuilder.bind(deadLetterQueue()).to(exchangeDeadLetter());
-    }
-
-    /**
-     * Create the Binding {@link AmqpConfiguration#receiverQueue()} to
-     * {@link AmqpConfiguration#senderExchange()}.
-     *
-     * @return the binding and create the queue and exchange
-     */
-    @Bean
-    public Binding bindSenderExchangeToSpQueue() {
-        return BindingBuilder.bind(receiverQueue()).to(senderExchange());
+    public Binding bindDeadLetterQueueToDeadLetterExchange() {
+        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
     }
 
     /**
@@ -234,15 +268,15 @@ public class AmqpConfiguration {
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public SimpleRabbitListenerContainerFactory listenerContainerFactory() {
-        final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
-        containerFactory.setDefaultRequeueRejected(true);
-        containerFactory.setConnectionFactory(rabbitConnectionFactory);
-        containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
-        containerFactory.setConcurrentConsumers(amqpProperties.getInitialConcurrentConsumers());
-        containerFactory.setMaxConcurrentConsumers(amqpProperties.getMaxConcurrentConsumers());
-        containerFactory.setPrefetchCount(amqpProperties.getPrefetchCount());
-        return containerFactory;
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
+    }
+
+    private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
+        final Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
+        args.put("x-max-length", 1_000);
+        return args;
     }
 
 }

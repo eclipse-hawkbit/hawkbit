@@ -51,7 +51,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Header of Software module table.
- *
  */
 @SpringComponent
 @ViewScope

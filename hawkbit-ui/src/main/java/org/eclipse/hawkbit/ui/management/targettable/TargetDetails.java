@@ -106,8 +106,13 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (getSelectedBaseEntity() == null) {
             return;
         }
+        targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
+        // targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
+        openWindow();
+    }
+
+    private void openWindow() {
         final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-        targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

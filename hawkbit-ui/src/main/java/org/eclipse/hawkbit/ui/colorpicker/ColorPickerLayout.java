@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.AbstractColorPicker.Coordinates2Color;
@@ -47,6 +48,7 @@ public class ColorPickerLayout extends GridLayout {
 
         setColumns(2);
         setRows(4);
+        setId(SPUIComponentIdProvider.COLOR_PICKER_LAYOUT);
 
         init();
 
@@ -71,6 +73,7 @@ public class ColorPickerLayout extends GridLayout {
         colorSelect.setWidth("220px");
 
         redSlider = createRGBSlider("", "red");
+        redSlider.setId(SPUIComponentIdProvider.COLOR_PICKER_RED_SLIDER);
         greenSlider = createRGBSlider("", "green");
         blueSlider = createRGBSlider("", "blue");
 

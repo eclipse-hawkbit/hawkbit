@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -101,6 +102,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private CommonDialogWindow metadataWindow;
 
     private E selectedEntity;
+    
+    private HorizontalLayout mainLayout ;
 
     @PostConstruct
     private void init() {
@@ -118,21 +121,21 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
      *            metadata to be selected
      * @return @link{CommonDialogWindow}
      */
-    public CommonDialogWindow getWindow(final E entity, final M metaData) {
-        selectedEntity = entity;
-        String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
-        metadataWindow = SPUIComponentProvider.getWindow(getMetadataCaption(nameVersion), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onSave(), event -> onCancel(), null);
-        metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
-        metadataWindow.setHeight(550, Unit.PIXELS);
-        metadataWindow.setWidth(800, Unit.PIXELS);
-        metadataWindow.getMainLayout().setSizeFull();
-        metadataWindow.setResizable(true);
-        metadataWindow.addWindowModeChangeListener(event -> onResize(event));
-        metadataWindow.getButtonsLayout().addComponent(discardButton, 1);
-        setUpDetails(entity.getId(), metaData);
-        return metadataWindow;
-    }
+	public CommonDialogWindow getWindow(final E entity, final M metaData) {
+		selectedEntity = entity;
+		String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+		metadataWindow = SPUIWindowDecorator.getWindow(getMetadataCaption(nameVersion), null,
+				SPUIDefinitions.CUSTOM_METADATA_WINDOW, this, event -> onSave(), event -> onCancel(), null, mainLayout, i18n);
+		metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
+		metadataWindow.setHeight(550, Unit.PIXELS);
+		metadataWindow.setWidth(800, Unit.PIXELS);
+		metadataWindow.getMainLayout().setSizeFull();
+		metadataWindow.setResizable(true);
+		metadataWindow.addWindowModeChangeListener(event -> onResize(event));
+		((HorizontalLayout)metadataWindow.getButtonsLayout()).addComponent(discardButton, 1);
+		setUpDetails(entity.getId(), metaData);
+		return metadataWindow;
+	}
 
     public E getSelectedEntity() {
         return selectedEntity;
@@ -200,7 +203,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataFieldsLayout.setSpacing(true);
         metadataFieldsLayout.setExpandRatio(valueTextArea, 1F);
 
-        HorizontalLayout mainLayout = new HorizontalLayout();
+        mainLayout = new HorizontalLayout();
         mainLayout.addComponent(tableLayout);
         mainLayout.addComponent(metadataFieldsLayout);
         mainLayout.setExpandRatio(tableLayout, 0.5F);
@@ -544,5 +547,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void setDiscardButtonEnabled(Boolean enable) {
         discardButton.setEnabled(enable);
     }
+    
+    
 
 }

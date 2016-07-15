@@ -367,11 +367,7 @@ public abstract class JsonBuilder {
 
     }
 
-    /**
-     * @param targets
-     * @return
-     */
-    public static String targets(final List<Target> targets) {
+    public static String targets(final List<Target> targets, final boolean withToken) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
@@ -381,10 +377,12 @@ public abstract class JsonBuilder {
                 final String address = target.getTargetInfo().getAddress() != null
                         ? target.getTargetInfo().getAddress().toString() : null;
 
+                final String token = withToken ? target.getSecurityToken() : null;
+
                 builder.append(new JSONObject().put("controllerId", target.getControllerId())
                         .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
                         .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                        .put("address", address).toString());
+                        .put("address", address).put("securityToken", token).toString());
             } catch (final Exception e) {
                 e.printStackTrace();
             }

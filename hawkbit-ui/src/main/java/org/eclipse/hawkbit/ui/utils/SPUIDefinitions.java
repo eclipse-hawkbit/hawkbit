@@ -345,15 +345,6 @@ public final class SPUIDefinitions {
      */
     public static final String NEW_TARGET_TAG_COLOR = "target.tag.add.color";
     /**
-     * New Target tag save icon id.
-     */
-    // public static final String NEW_TARGET_TAG_SAVE = "target.tag.add.save";
-    /**
-     * New Target tag discard icon id.
-     */
-    // public static final String NEW_TARGET_TAG_DISRACD =
-    // "target.tag.add.discard";
-    /**
      * New Target tag add icon id.
      */
     public static final String ADD_TARGET_TAG = "target.tag.add";
@@ -1026,6 +1017,11 @@ public final class SPUIDefinitions {
      * SoftwareModule Metadata tab Id
      */
     public static final String SOFTWAREMODULE_METADATA_TAB_ID = "swModule.metadata.tab.id";
+
+    /***
+     * Custom window for metadata.
+     */
+	public static final String CUSTOM_METADATA_WINDOW = "custom.metadata.window";
 
     /**
      * /** Constructor.
