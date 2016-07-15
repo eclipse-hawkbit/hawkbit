@@ -15,10 +15,9 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Button with icon decorator.
- *
+ * Decorator class for a borderless Button with icon.
  */
-public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
+public class SPUIButtonStyleNoBorderWithIcon implements SPUIButtonDecorator {
 
     private Button button;
 
@@ -27,16 +26,30 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
         this.button = button;
 
+        button.addStyleName(ValoTheme.LABEL_SMALL);
+        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+
         setButtonStyle(style, setStyle);
         setButtonIcon(icon);
 
-        button.addStyleName(ValoTheme.LABEL_SMALL);
-        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         button.setSizeFull();
+
+        setButtonStyle(style, setStyle);
 
         return button;
     }
 
+    /**
+     * It is possible to add or set a new style to the button. If a new style is
+     * set the other styles (LABEL_SMALL and BUTTON_BORDERLESS_COLORED) will be
+     * overwritten
+     * 
+     * @param style
+     *            styleName
+     * @param setStyle
+     *            boolean: Trigger if the style should be added or replace the
+     *            other styles
+     */
     private void setButtonStyle(final String style, final boolean setStyle) {
 
         if (StringUtils.isEmpty(style)) {
@@ -45,6 +58,8 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
         if (setStyle) {
             button.setStyleName(style);
+        } else {
+            button.addStyleName(style);
         }
     }
 

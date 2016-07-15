@@ -25,7 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -411,7 +411,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private void createCancelButton() {
         cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+                FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         if (cancelButtonClickListener != null) {
             cancelButton.addClickListener(cancelButtonClickListener);
@@ -424,7 +424,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private void createSaveButton() {
         saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
+                FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addClickListener(saveButtonClickListener);
         saveButton.setEnabled(false);
