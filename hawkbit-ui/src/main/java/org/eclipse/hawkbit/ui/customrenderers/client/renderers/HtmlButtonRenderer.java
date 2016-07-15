@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+
 import com.google.gwt.user.client.ui.Button;
 import com.vaadin.client.renderers.ButtonRenderer;
 import com.vaadin.client.ui.VButton;
@@ -29,11 +31,8 @@ public class HtmlButtonRenderer extends ButtonRenderer {
         applystyles(button, buttonEnable);
         // this is to allow the button to disappear, if the text is null
         button.setVisible(text != null);
-
-        button.getElement().setId("rollout.action.button.id." + cell.getColumnIndex());
-
+        button.getElement().setId(SPUIComponentIdProvider.ROLLOUT_ACTION_ID + "." + cell.getColumnIndex());
         button.setEnabled(buttonEnable);
-
     }
 
     /**
@@ -48,11 +47,12 @@ public class HtmlButtonRenderer extends ButtonRenderer {
     }
 
     private void applystyles(final Button button, final boolean buttonEnable) {
+
         button.setStyleName(VButton.CLASSNAME);
         button.addStyleName(getStyle("tiny"));
         button.addStyleName(getStyle("borderless"));
-        button.addStyleName(getStyle("icon-only"));
         button.addStyleName(getStyle("button-no-border"));
+        button.addStyleName(getStyle("action-type-padding"));
 
         if (buttonEnable) {
             return;
