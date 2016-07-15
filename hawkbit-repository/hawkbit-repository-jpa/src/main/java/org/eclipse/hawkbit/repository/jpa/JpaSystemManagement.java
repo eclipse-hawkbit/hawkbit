@@ -147,7 +147,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final List<String> tenants = findTenants();
 
         tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
-            report.addTenantData(systemStatsManagement.getStatsOfTenant(tenant));
+            report.addTenantData(systemStatsManagement.getStatsOfTenant());
             return null;
         }));
     }
