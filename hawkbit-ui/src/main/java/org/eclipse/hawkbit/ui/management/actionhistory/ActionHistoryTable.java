@@ -414,7 +414,8 @@ public class ActionHistoryTable extends TreeTable {
         final Button actionForce = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, "", i18n.get("message.force.action"),
                 ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT, SPUIButtonStyleSmallNoBorder.class);
-        actionForce.setEnabled(isActionActive && !actionWithActiveStatus.isForce());
+        actionForce.setEnabled(
+                isActionActive && !actionWithActiveStatus.isForce() && !actionWithActiveStatus.isCancelingOrCanceled());
         actionForce.addClickListener(event -> confirmAndForceAction(actionId));
 
         final Button actionForceQuit = SPUIComponentProvider.getButton(
