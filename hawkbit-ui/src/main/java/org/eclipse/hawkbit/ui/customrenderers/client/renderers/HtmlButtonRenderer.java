@@ -50,7 +50,7 @@ public class HtmlButtonRenderer extends ButtonRenderer {
 
         button.setStyleName(VButton.CLASSNAME);
         button.addStyleName(getStyle("tiny"));
-        button.addStyleName(getStyle("borderless"));
+        button.addStyleName(getStyle("borderless-colored"));
         button.addStyleName(getStyle("button-no-border"));
         button.addStyleName(getStyle("action-type-padding"));
 
