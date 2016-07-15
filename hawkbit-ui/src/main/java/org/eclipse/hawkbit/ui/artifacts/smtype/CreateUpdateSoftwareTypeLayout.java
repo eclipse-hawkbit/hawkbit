@@ -164,10 +164,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
-                assignOptiongroup.setValue(multiAssignStr);
-            } else {
+            if (selectedTypeTag.getMaxAssignments() == 1) {
                 assignOptiongroup.setValue(singleAssignStr);
+            } else {
+                assignOptiongroup.setValue(multiAssignStr);
             }
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         }
