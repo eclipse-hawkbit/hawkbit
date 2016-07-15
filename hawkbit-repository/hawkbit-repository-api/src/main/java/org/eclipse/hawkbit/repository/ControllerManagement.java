@@ -14,8 +14,8 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -58,16 +58,20 @@ public interface ControllerManagement {
     Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
 
     /**
-     * Sends the download progress in percentage and notifies the
-     * {@link EventBus} with a {@link DownloadProgressEvent}.
+     * Sends the download progress and notifies the {@link EventBus} with a
+     * {@link DownloadProgressEvent}.
      * 
      * @param statusId
      *            the ID of the {@link ActionStatus}
-     * @param progressPercent
-     *            the progress in percentage which must be between 0-100
+     * @param requestedBytes
+     *            requested bytes of the request
+     * @param shippedBytesSinceLast
+     *            since the last report
+     * @param shippedBytesOverall
+     *            for the {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    void downloadProgressPercent(long statusId, int progressPercent);
+    void downloadProgress(Long statusId, Long requestedBytes, Long shippedBytesSinceLast, Long shippedBytesOverall);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
@@ -75,9 +79,11 @@ public interface ControllerManagement {
      * 
      * @param statusMessage
      *            to add to the action
+     * 
+     * @return create {@link ActionStatus} entity
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    void addInformationalActionStatus(@NotNull ActionStatus statusMessage);
+    ActionStatus addInformationalActionStatus(@NotNull ActionStatus statusMessage);
 
     /**
      * Adds an {@link ActionStatus} entry for an update {@link Action} including

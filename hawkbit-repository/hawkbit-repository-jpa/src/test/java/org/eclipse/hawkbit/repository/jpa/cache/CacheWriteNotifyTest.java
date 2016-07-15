@@ -13,8 +13,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,15 +59,14 @@ public class CacheWriteNotifyTest {
     @Test
     public void downloadgProgressIsCachedAndEventSent() {
         final long knownStatusId = 1;
-        final int knownPercentage = 23;
 
-        when(cacheManagerMock.getCache(Action.class.getName())).thenReturn(cacheMock);
+        when(cacheManagerMock.getCache(ActionStatus.class.getName())).thenReturn(cacheMock);
         when(tenantAwareMock.getCurrentTenant()).thenReturn("default");
 
-        underTest.downloadProgressPercent(knownStatusId, knownPercentage);
+        underTest.downloadProgress(knownStatusId, 500L, 100L, 100L);
 
-        verify(cacheManagerMock).getCache(eq(Action.class.getName()));
-        verify(cacheMock).put(knownStatusId + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, knownPercentage);
+        verify(cacheManagerMock).getCache(eq(ActionStatus.class.getName()));
+        verify(cacheMock).put(knownStatusId + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, 20);
         verify(eventBusMock).post(any(DownloadProgressEvent.class));
     }
 
