@@ -54,7 +54,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManage
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -81,7 +80,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableAspectJAutoProxy
 @Configuration
 @ComponentScan
-@EnableAutoConfiguration
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
