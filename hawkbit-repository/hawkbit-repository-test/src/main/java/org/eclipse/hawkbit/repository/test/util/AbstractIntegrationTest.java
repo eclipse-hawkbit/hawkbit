@@ -12,6 +12,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
+import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
