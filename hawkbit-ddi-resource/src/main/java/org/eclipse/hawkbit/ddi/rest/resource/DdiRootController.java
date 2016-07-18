@@ -156,8 +156,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
-                final Action action = checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(), target,
-                        module);
+                final ActionStatus action = checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(),
+                        target, module);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
@@ -167,7 +167,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return result;
     }
 
-    private Action checkAndLogDownload(final HttpServletRequest request, final Target target,
+    private ActionStatus checkAndLogDownload(final HttpServletRequest request, final Target target,
             final SoftwareModule module) {
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
@@ -185,8 +185,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             statusMessage.addMessage(
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
-        controllerManagement.addInformationalActionStatus(statusMessage);
-        return action;
+
+        return controllerManagement.addInformationalActionStatus(statusMessage);
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {

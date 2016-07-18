@@ -31,7 +31,7 @@ public class DownloadIdCacheAutoConfiguration {
     private CacheManager cacheManager;
 
     /**
-     * Bean for the downlod id cache.
+     * Bean for the download id cache.
      * 
      * @return the cache
      */
