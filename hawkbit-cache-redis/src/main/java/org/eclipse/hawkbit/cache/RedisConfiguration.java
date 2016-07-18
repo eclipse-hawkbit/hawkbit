@@ -15,6 +15,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -50,8 +51,14 @@ public class RedisConfiguration {
      * @return the spring redis cache manager.
      */
     @Bean
+    @Primary
     public CacheManager cacheManager() {
-        return new TenantAwareCacheManager(new RedisCacheManager(redisTemplate()), tenantAware);
+        return new TenantAwareCacheManager(directCacheManager(), tenantAware);
+    }
+
+    @Bean(name = "directCacheManager")
+    public CacheManager directCacheManager() {
+        return new RedisCacheManager(redisTemplate());
     }
 
     /**

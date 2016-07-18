@@ -67,12 +67,16 @@ public class SystemSecurityContext {
     // Exception squid:S2221 - Callable declares Exception
     @SuppressWarnings("squid:S2221")
     public <T> T runAsSystem(final Callable<T> callable) {
+        return runAsSystemAsTenant(callable, tenantAware.getCurrentTenant());
+    }
+
+    public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             logger.debug("entering system code execution");
-            return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), () -> {
+            return tenantAware.runAsTenant(tenant, () -> {
                 try {
-                    setSystemContext(oldContext);
+                    setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
                 } catch (final Exception e) {
                     throw Throwables.propagate(e);
