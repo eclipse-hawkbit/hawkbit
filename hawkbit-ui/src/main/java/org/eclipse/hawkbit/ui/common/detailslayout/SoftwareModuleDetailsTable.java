@@ -224,7 +224,7 @@ public class SoftwareModuleDetailsTable extends Table {
                 softwareModule.setDescription(softwareModNameVersion);
                 softwareModule.setId(sw.getName() + "-label");
                 horizontalLayout.addComponent(softwareModule);
-                horizontalLayout.setExpandRatio(softwareModule, 1f);
+                horizontalLayout.setExpandRatio(softwareModule, 1F);
                 if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
                         && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
                     horizontalLayout.addComponent(reassignSoftModule);

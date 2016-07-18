@@ -219,7 +219,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         softwareModule.setDescription(softwareModuleName);
         softwareModule.setId(softwareModuleName + "-label");
         horizontalLayout.addComponent(softwareModule);
-        horizontalLayout.setExpandRatio(softwareModule, 1f);
+        horizontalLayout.setExpandRatio(softwareModule, 1F);
         horizontalLayout.addComponent(reassignSoftModule);
         verticalLayout.addComponent(horizontalLayout);
         return verticalLayout;
