@@ -181,7 +181,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
              * type is drroped, then add to the list.
              */
 
-            if (module.getType().getMaxAssignments() == Integer.MAX_VALUE) {
+            if (module.getType().getMaxAssignments() > 1) {
                 assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
                         .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>");
             }
