@@ -148,8 +148,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
                 item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
-                    item.getItemProperty(SOFT_MODULE)
-                            .setValue(createSoftModuleLayout(entry.getValue().toString()));
+                    item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
                 }
             }
         }
@@ -164,7 +163,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             reassignSoftModule.setEnabled(false);
             return reassignSoftModule;
         }
-		return null;
+        return null;
     }
 
     private String getUnsavedAssigedSwModule(final String name, final String version) {
@@ -205,26 +204,25 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
             final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
-                item.getItemProperty(SOFT_MODULE)
-                        .setValue(createSoftModuleLayout(entry.getValue().toString()));
+                item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
             }
         }
     }
-    
-    private VerticalLayout createSoftModuleLayout(String softwareModuleName){
-    	VerticalLayout verticalLayout = new VerticalLayout();
-    	HorizontalLayout horizontalLayout = new HorizontalLayout();
-    	horizontalLayout.setSizeFull();
-    	final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+
+    private VerticalLayout createSoftModuleLayout(final String softwareModuleName) {
+        final VerticalLayout verticalLayout = new VerticalLayout();
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setSizeFull();
+        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
         final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
         softwareModule.setValue(softwareModuleName);
         softwareModule.setDescription(softwareModuleName);
-        softwareModule.setId(softwareModuleName+"-label");
+        softwareModule.setId(softwareModuleName + "-label");
         horizontalLayout.addComponent(softwareModule);
         horizontalLayout.setExpandRatio(softwareModule, 1f);
         horizontalLayout.addComponent(reassignSoftModule);
         verticalLayout.addComponent(horizontalLayout);
-    	return verticalLayout;
+        return verticalLayout;
     }
 
     private VerticalLayout createSoftwareModuleTab() {

@@ -304,7 +304,7 @@ public final class SPUIDefinitions {
      * New Create Update option group id.
      */
     public static final String CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID = "create.option.group.dist.set.type.id";
-    
+
     /**
      * Assign option group id(Firmware/Software).
      */

@@ -174,7 +174,8 @@ public class SoftwareModuleDetailsTable extends Table {
         final Item saveTblitem = getContainerDataSource().addItem(swModType.getName());
         final Label mandatoryLabel = createMandatoryLabel(isMandatory);
         final Label typeName = HawkbitCommonUtil.getFormatedLabel(swModType.getName());
-        final VerticalLayout verticalLayout = createSoftModuleLayout(swModType,distributionSet, alreadyAssignedSwModules);
+        final VerticalLayout verticalLayout = createSoftModuleLayout(swModType, distributionSet,
+                alreadyAssignedSwModules);
 
         saveTblitem.getItemProperty(SOFT_TYPE_MANDATORY).setValue(mandatoryLabel);
         saveTblitem.getItemProperty(SOFT_TYPE_NAME).setValue(typeName);
@@ -184,7 +185,7 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
-    	final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(),alreadyAssignedSwModules);
+        final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
         final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                 unAssignedSw);
         manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
@@ -204,34 +205,36 @@ public class SoftwareModuleDetailsTable extends Table {
         return false;
 
     }
-    
-    
-    private VerticalLayout createSoftModuleLayout(final SoftwareModuleType swModType,DistributionSet distributionSet, Set<SoftwareModule> alreadyAssignedSwModules){
-    	VerticalLayout verticalLayout = new VerticalLayout();
-    	for (final SoftwareModule sw : alreadyAssignedSwModules) { 
+
+    private VerticalLayout createSoftModuleLayout(final SoftwareModuleType swModType,
+            final DistributionSet distributionSet, final Set<SoftwareModule> alreadyAssignedSwModules) {
+        final VerticalLayout verticalLayout = new VerticalLayout();
+        for (final SoftwareModule sw : alreadyAssignedSwModules) {
             if (swModType.getKey().equals(sw.getType().getKey())) {
-            	HorizontalLayout horizontalLayout = new HorizontalLayout();
-            	horizontalLayout.setSizeFull();
-            	final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+                final HorizontalLayout horizontalLayout = new HorizontalLayout();
+                horizontalLayout.setSizeFull();
+                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
                 final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
                         FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-               reassignSoftModule.addClickListener(event -> unassignSW(event, distributionSet, alreadyAssignedSwModules));
-               String softwareModNameVersion = HawkbitCommonUtil.getFormattedNameVersion(sw.getName(), sw.getVersion());
+                reassignSoftModule
+                        .addClickListener(event -> unassignSW(event, distributionSet, alreadyAssignedSwModules));
+                final String softwareModNameVersion = HawkbitCommonUtil.getFormattedNameVersion(sw.getName(),
+                        sw.getVersion());
                 softwareModule.setValue(softwareModNameVersion);
                 softwareModule.setDescription(softwareModNameVersion);
-                softwareModule.setId(sw.getName()+"-label");
+                softwareModule.setId(sw.getName() + "-label");
                 horizontalLayout.addComponent(softwareModule);
                 horizontalLayout.setExpandRatio(softwareModule, 1f);
                 if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission() && !isTargetAssigned
                         && (isSoftModAvaiableForSoftType(alreadyAssignedSwModules, swModType))) {
-                	horizontalLayout.addComponent(reassignSoftModule);
+                    horizontalLayout.addComponent(reassignSoftModule);
                 }
                 verticalLayout.addComponent(horizontalLayout);
             }
-           
+
         }
-    	
-    	return verticalLayout;
+
+        return verticalLayout;
     }
 
     /**
