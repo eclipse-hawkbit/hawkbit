@@ -191,7 +191,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         headerWrapperLayout.setWidth("100%");
         headerLayout.setHeight("30px");
 
-        
         final VerticalLayout tableLayout = new VerticalLayout();
         tableLayout.setSizeFull();
         tableLayout.setHeight("100%");
