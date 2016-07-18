@@ -220,7 +220,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Modifying
     public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
-        cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
         tenantAware.runAsTenant(tenant, () -> {
             entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
