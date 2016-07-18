@@ -17,6 +17,7 @@ import java.util.Random;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
@@ -28,6 +29,15 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("System Management")
 public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
+
+    @Test
+    @Description("Micha TODO!")
+    public void createInitialTenantWithoutSecurityContext() {
+        securityRule.clear();
+        final String tenantToBeCreated = "newTenantToCreate";
+        final TenantMetaData tenantMetadata = systemManagement.getTenantMetadata(tenantToBeCreated);
+        assertThat(tenantMetadata).isNotNull();
+    }
 
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")
