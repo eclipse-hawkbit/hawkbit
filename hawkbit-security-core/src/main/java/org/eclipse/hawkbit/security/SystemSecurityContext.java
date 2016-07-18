@@ -60,6 +60,9 @@ public class SystemSecurityContext {
      * The security context will be switched to the system code and back after
      * the callable is called.
      * 
+     * The system code is executed for a current tenant by using the
+     * {@link TenantAware#getCurrentTenant()}.
+     * 
      * @param callable
      *            the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
@@ -70,6 +73,26 @@ public class SystemSecurityContext {
         return runAsSystemAsTenant(callable, tenantAware.getCurrentTenant());
     }
 
+    /**
+     * Runs a given {@link Callable} within a system security context, which is
+     * permitted to call secured system code. Often the system needs to call
+     * secured methods by it's own without relying on the current security
+     * context e.g. if the current security context does not contain the
+     * necessary permission it's necessary to execute code as system code to
+     * execute necessary methods and functionality.
+     * 
+     * The security context will be switched to the system code and back after
+     * the callable is called.
+     * 
+     * The system code is executed for a specific given tenant by using the
+     * {@link TenantAware}.
+     * 
+     * @param callable
+     *            the callable to call within the system security context
+     * @param tenant
+     *            the tenant to act as system code
+     * @return the return value of the {@link Callable#call()} method.
+     */
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -104,6 +127,13 @@ public class SystemSecurityContext {
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
+    /**
+     * An implementation of the Spring's {@link Authentication} object which is
+     * used within a system security code block and wraps the original
+     * authentication object. The wrapped object contains the necessary
+     * {@link SpringEvalExpressions#SYSTEM_ROLE} which is allowed to execute all
+     * secured methods.
+     */
     public static class SystemCodeAuthentication implements Authentication {
 
         private static final long serialVersionUID = 1L;
