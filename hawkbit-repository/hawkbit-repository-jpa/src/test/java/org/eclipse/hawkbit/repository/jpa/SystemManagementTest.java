@@ -31,7 +31,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Test
-    @Description("Micha TODO!")
+    @Description("Ensures that you can create a tenant without setting the necessary security context which holds a current tenant")
     public void createInitialTenantWithoutSecurityContext() {
         securityRule.clear();
         final String tenantToBeCreated = "newTenantToCreate";
