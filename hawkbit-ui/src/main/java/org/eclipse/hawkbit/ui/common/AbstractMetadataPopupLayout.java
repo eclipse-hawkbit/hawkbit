@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -510,7 +510,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Button createDiscardButton() {
         final Button discardButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON,
-                i18n.get("button.discard"), "", "", true, FontAwesome.UNDO, SPUIButtonStyleBorderWithIcon.class);
+                i18n.get("button.discard"), "", "", true, FontAwesome.UNDO, SPUIButtonStyleNoBorderWithIcon.class);
         discardButton.setSizeUndefined();
         discardButton.addStyleName("default-color");
         discardButton.addClickListener(event -> onDiscard());
