@@ -184,6 +184,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             headerLayout.setComponentAlignment(addIcon, Alignment.MIDDLE_RIGHT);
         }
         headerLayout.setExpandRatio(headerCaption, 1.0F);
+        
 
         final HorizontalLayout headerWrapperLayout = new HorizontalLayout();
         headerWrapperLayout.addStyleName("bordered-layout" + " " + "no-border-bottom" + " " + "metadata-table-margin");
