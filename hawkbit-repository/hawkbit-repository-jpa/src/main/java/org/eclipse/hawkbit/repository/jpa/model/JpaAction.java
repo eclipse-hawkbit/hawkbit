@@ -27,10 +27,7 @@ import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -89,13 +86,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
 
-    /**
-     * Note: filled only in {@link Status#DOWNLOAD}.
-     */
-    @Transient
-    @CacheField(key = CacheKeys.DOWNLOAD_PROGRESS_PERCENT)
-    private int downloadProgressPercent;
-
     @Override
     public DistributionSet getDistributionSet() {
         return distributionSet;
@@ -118,15 +108,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public void setStatus(final Status status) {
         this.status = status;
-    }
-
-    @Override
-    public int getDownloadProgressPercent() {
-        return downloadProgressPercent;
-    }
-
-    public void setDownloadProgressPercent(final int downloadProgressPercent) {
-        this.downloadProgressPercent = downloadProgressPercent;
     }
 
     @Override

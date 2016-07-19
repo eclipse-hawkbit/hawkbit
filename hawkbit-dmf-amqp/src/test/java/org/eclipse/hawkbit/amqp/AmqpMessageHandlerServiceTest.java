@@ -140,8 +140,8 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to worng content type");
-        } catch (final IllegalArgumentException e) {
+            fail("AmqpRejectAndDontRequeueException was excepeted due to worng content type");
+        } catch (final AmqpRejectAndDontRequeueException e) {
         }
     }
 
@@ -175,7 +175,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no replyTo header was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no replyTo header was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -189,7 +189,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no thingID was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no thingID was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -205,7 +205,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, type, TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown message type");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -218,21 +218,21 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown message type");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         try {
             messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted due to unknown topic");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown topic");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted because there was no event topic");
+            fail("AmqpRejectAndDontRequeueException was excepeted because there was no event topic");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -251,7 +251,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no action id was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
@@ -268,7 +268,7 @@ public class AmqpMessageHandlerServiceTest {
 
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("IllegalArgumentException was excepeted since no action id was set");
+            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
         } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }

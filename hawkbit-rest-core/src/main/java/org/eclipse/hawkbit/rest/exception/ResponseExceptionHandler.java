@@ -9,11 +9,12 @@
 package org.eclipse.hawkbit.rest.exception;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.SpServerRtException;
 import org.eclipse.hawkbit.repository.exception.MultiPartFileUploadException;
@@ -26,6 +27,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
+
+import com.google.common.collect.Iterables;
 
 /**
  * General controller advice for exception handling.
@@ -135,32 +138,14 @@ public class ResponseExceptionHandler {
 
         logRequest(request, ex);
 
-        Throwable responseCause = ex;
-
-        final Throwable searchForCause = searchForCause(ex, FileUploadException.class);
-        if (searchForCause != null) {
-            responseCause = searchForCause;
-        }
-
+        final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
+        final Throwable responseCause = Iterables.getLast(throwables);
         final ExceptionInfo response = createExceptionInfo(new MultiPartFileUploadException(responseCause));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     private void logRequest(final HttpServletRequest request, final Exception ex) {
         LOG.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
-    }
-
-    private static Throwable searchForCause(final Throwable t, final Class<?> lookFor) {
-        if (t == null || t.getCause() == null) {
-            return null;
-        }
-
-        final Throwable cause = t.getCause();
-
-        if (cause.getClass().equals(lookFor)) {
-            return cause;
-        }
-        return searchForCause(cause, lookFor);
     }
 
     private ExceptionInfo createExceptionInfo(final Exception ex) {

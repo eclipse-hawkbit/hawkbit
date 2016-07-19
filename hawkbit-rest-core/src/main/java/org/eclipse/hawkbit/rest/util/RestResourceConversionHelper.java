@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public final class RestResourceConversionHelper {
      * @param controllerManagement
      *            to write progress updates to
      * @param statusId
-     *            of the UpdateActionStatus
+     *            of the {@link ActionStatus}
      *
      * @return http code
      *
@@ -293,6 +294,7 @@ public final class RestResourceConversionHelper {
 
         long toRead = length;
         boolean toContinue = true;
+        long shippedSinceLastEvent = 0;
 
         while (toContinue) {
             final int r = from.read(buf);
@@ -304,9 +306,11 @@ public final class RestResourceConversionHelper {
             if (toRead > 0) {
                 to.write(buf, 0, r);
                 total += r;
+                shippedSinceLastEvent += r;
             } else {
                 to.write(buf, 0, (int) toRead + r);
                 total += toRead + r;
+                shippedSinceLastEvent += toRead + r;
                 toContinue = false;
             }
 
@@ -316,7 +320,8 @@ public final class RestResourceConversionHelper {
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
                     progressPercent = newPercent;
-                    controllerManagement.downloadProgressPercent(statusId, progressPercent);
+                    controllerManagement.downloadProgress(statusId, length, shippedSinceLastEvent, total);
+                    shippedSinceLastEvent = 0;
                 }
             }
         }

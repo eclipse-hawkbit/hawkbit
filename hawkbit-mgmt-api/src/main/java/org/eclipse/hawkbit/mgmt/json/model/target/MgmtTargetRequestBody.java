@@ -21,6 +21,17 @@ public class MgmtTargetRequestBody {
     @JsonProperty
     private String address;
 
+    @JsonProperty
+    private String securityToken;
+
+    public String getSecurityToken() {
+        return securityToken;
+    }
+
+    public void setSecurityToken(final String securityToken) {
+        this.securityToken = securityToken;
+    }
+
     /**
      * @return the name
      */

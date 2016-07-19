@@ -39,16 +39,14 @@ public interface SystemManagement {
      * @param tenant
      *            to delete
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     void deleteTenant(@NotNull String tenant);
 
     /**
      *
      * @return list of all tenant names in the system.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     List<String> findTenants();
 
     /**
@@ -68,8 +66,8 @@ public interface SystemManagement {
     /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for
      * new tenants also two {@link SoftwareModuleType} (os and app) and
-     * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT} {@link DistributionSetType}s
-     * (os and os_app).
+     * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT}
+     * {@link DistributionSetType}s (os and os_app).
      *
      * DISCLAIMER: this variant is used during initial login (where the tenant
      * is not yet in the session). Please user {@link #getTenantMetadata()} for

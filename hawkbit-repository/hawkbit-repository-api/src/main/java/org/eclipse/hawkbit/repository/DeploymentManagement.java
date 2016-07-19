@@ -269,8 +269,7 @@ public interface DeploymentManagement {
      * @return the actions referring a specific rollout and a specific parent
      *         rollout group in a specific status
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
             @NotNull RolloutGroup rolloutGroupParent, @NotNull Action.Status actionStatus);
 
@@ -496,8 +495,7 @@ public interface DeploymentManagement {
      *            the action to start now.
      * @return the action which has been started
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Action startScheduledAction(@NotNull Action action);
 
     /**

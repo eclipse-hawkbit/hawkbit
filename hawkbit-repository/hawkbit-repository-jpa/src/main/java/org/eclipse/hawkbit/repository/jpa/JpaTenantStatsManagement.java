@@ -12,8 +12,8 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +35,14 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     @Autowired
     private ActionRepository actionRepository;
 
+    @Autowired
+    private TenantAware tenantAware;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    public TenantUsage getStatsOfTenant(final String tenant) {
+    public TenantUsage getStatsOfTenant() {
+        final String tenant = tenantAware.getCurrentTenant();
+
         final TenantUsage result = new TenantUsage(tenant);
 
         result.setTargets(targetRepository.count());

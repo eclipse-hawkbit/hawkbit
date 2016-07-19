@@ -17,9 +17,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
@@ -33,12 +31,10 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Superclass defining common properties and methods for creating/updating
  * types.
- *
  */
-public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
+public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
@@ -52,7 +48,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(this::createOptionValueChanged);
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     @Override
@@ -61,7 +57,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
         createTypeStr = i18n.get("label.create.type");
         updateTypeStr = i18n.get("label.update.type");
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
-        madatoryLabel = getMandatoryLabel();
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
@@ -137,7 +132,8 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
      * @param event
      *            ValueChangeEvent
      */
-    protected void createOptionValueChanged(final ValueChangeEvent event) {
+    @Override
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
             tagName.clear();
@@ -151,7 +147,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
         } else {
             typeKey.setEnabled(true);
             tagName.setEnabled(true);
-            window.setSaveButtonEnabled(true);
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
@@ -203,6 +198,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         optiongroup = new OptionGroup("Select Action");
+        optiongroup.setId(SPUIComponentIdProvider.OPTION_GROUP);
         optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optiongroup.addStyleName("custom-option-group");
         optiongroup.setNullSelectionAllowed(false);
@@ -283,24 +279,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             }
         }
         return Boolean.FALSE;
-    }
-
-    @Override
-    protected Boolean mandatoryValuesPresent() {
-        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
-            }
-            if (optiongroup.getValue().equals(updateTypeStr)) {
-                if (null == tagNameComboBox.getValue()) {
-                    displayValidationError(i18n.get("message.error.missing.tagName"));
-                } else {
-                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
-                }
-            }
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
     }
 
     @Override
