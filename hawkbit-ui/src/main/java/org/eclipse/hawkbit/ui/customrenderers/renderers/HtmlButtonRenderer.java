@@ -31,7 +31,7 @@ public class HtmlButtonRenderer extends ButtonRenderer {
      * @param listener
      *            RendererClickListener
      */
-    public HtmlButtonRenderer(RendererClickListener listener) {
+    public HtmlButtonRenderer(final RendererClickListener listener) {
         super(listener);
     }
 }
