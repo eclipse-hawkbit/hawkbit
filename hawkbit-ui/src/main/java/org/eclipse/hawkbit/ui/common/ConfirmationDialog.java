@@ -89,6 +89,7 @@ public class ConfirmationDialog implements Button.ClickListener {
         final Button cancelButton = SPUIComponentProvider.getButton(null, cancelLabel, "", null, false, null,
                 SPUIButtonStyleTiny.class);
         cancelButton.addClickListener(this);
+        cancelButton.setId(SPUIComponentIdProvider.CANCEL_BUTTON);
         window.setModal(true);
         window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_SYLE);
         if (this.callback == null) {

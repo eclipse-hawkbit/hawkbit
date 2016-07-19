@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
@@ -49,15 +50,14 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.event.Action.Handler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -73,11 +73,13 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class ActionHistoryTable extends TreeTable implements Handler {
+public class ActionHistoryTable extends TreeTable {
 
+    private static final long serialVersionUID = -1631514704696786653L;
+    private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
-    private static final long serialVersionUID = -1631514704696786653L;
+
     @Autowired
     private I18N i18n;
 
@@ -94,14 +96,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     private ManagementUIState managementUIState;
 
     private Container hierarchicalContainer;
-    private boolean alreadyHasMessages = false;
+    private boolean alreadyHasMessages;
 
     private Target target;
 
-    com.vaadin.event.Action actionCancel;
-    com.vaadin.event.Action actionForce;
-    com.vaadin.event.Action actionForceQuit;
-    private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
     /**
@@ -109,10 +107,6 @@ public class ActionHistoryTable extends TreeTable implements Handler {
      */
     @PostConstruct
     public void init() {
-        actionCancel = new com.vaadin.event.Action(i18n.get("message.cancel.action"));
-        actionForceQuit = new com.vaadin.event.Action(i18n.get("message.forcequit.action"));
-        actionForceQuit.setIcon(FontAwesome.WARNING);
-        actionForce = new com.vaadin.event.Action(i18n.get("message.force.action"));
         initializeTableSettings();
         buildComponent();
         restorePreviousState();
@@ -149,11 +143,12 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     }
 
     private void setColumnExpandRatioForMinimisedTable() {
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DIST, 0.3f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_STATUS, 0.15f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DATETIME, 0.3f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_FORCED, 0.15f);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DIST, 0.3F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_STATUS, 0.15F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DATETIME, 0.3F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_FORCED, 0.15F);
+        setColumnExpandRatio(SPUIDefinitions.ACTIONS_COLUMN, 0.2F);
     }
 
     private void initializeTableSettings() {
@@ -163,14 +158,15 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         setMultiSelect(false);
         setSortEnabled(true);
         setColumnReorderingAllowed(true);
-        setHeight(100.0f, Unit.PERCENTAGE);
-        setWidth(100.0f, Unit.PERCENTAGE);
+        setHeight(100.0F, Unit.PERCENTAGE);
+        setWidth(100.0F, Unit.PERCENTAGE);
         setImmediate(true);
         setStyleName("sp-table");
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
         setColumnAlignment(SPUIDefinitions.ACTION_HIS_TBL_FORCED, Align.CENTER);
         setColumnAlignment(SPUIDefinitions.ACTION_HIS_TBL_STATUS, Align.CENTER);
+        setColumnAlignment(SPUIDefinitions.ACTIONS_COLUMN, Align.CENTER);
         // listeners for child
         addExpandListener(event -> {
             expandParentActionRow(event.getItemId());
@@ -180,11 +176,6 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             collapseParentActionRow(event.getItemId());
             managementUIState.getExpandParentActionRowId().remove(event.getItemId());
         });
-        /*
-         * Add the cancel action handler for active actions. To be used to
-         * cancel the action.
-         */
-        addActionHandler(this);
     }
 
     /**
@@ -203,6 +194,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                 null);
         hierarchicalContainer.addContainerProperty(SPUIDefinitions.ACTION_HIS_TBL_MSGS_HIDDEN, List.class, null);
         hierarchicalContainer.addContainerProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME, String.class, null);
+
     }
 
     private List<Object> getVisbleColumns() {
@@ -212,6 +204,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_STATUS);
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_FORCED);
+        visibleColumnIds.add(SPUIDefinitions.ACTIONS_COLUMN);
+
         if (managementUIState.isActionHistoryMaximized()) {
             visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME);
             visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_MSGS);
@@ -241,12 +235,12 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void getcontainerData() {
         hierarchicalContainer.removeAllItems();
-        
+
         if (target != null) {
             /* service method to create action history for target */
             final List<ActionWithStatusCount> actionHistory = deploymentManagement
-                .findActionsWithStatusCountByTargetOrderByIdDesc(target);
-            
+                    .findActionsWithStatusCountByTargetOrderByIdDesc(target);
+
             addDetailsToContainer(actionHistory);
         }
     }
@@ -299,23 +293,22 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(actionWithStatusCount.getDsName() + ":" +
-                                 actionWithStatusCount.getDsVersion());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
+                    .setValue(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion());
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
             ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
-                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getAction().getLastModifiedAt() != null)
-                            ? actionWithStatusCount.getAction().getLastModifiedAt()
-                            : actionWithStatusCount.getAction().getLastModifiedAt()));
+                    .setValue(SPDateTimeUtil.getFormattedDate(actionWithStatusCount.getAction().getLastModifiedAt()));
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME)
                     .setValue(actionWithStatusCount.getRolloutName());
 
             if (actionWithStatusCount.getActionStatusCount() > 0) {
-                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), true);
+                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(),
+                        true);
             }
         }
     }
@@ -349,12 +342,18 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                 return getForcedColumn(itemId);
             }
         });
+
+        addGeneratedColumn(SPUIDefinitions.ACTIONS_COLUMN, new Table.ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component generateCell(final Table source, final Object itemId, final Object columnId) {
+                return createActionBarColumn(itemId);
+            }
+        });
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
     private Component getForcedColumn(final Object itemId) {
         final Action actionWithActiveStatus = (Action) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).getValue();
@@ -371,10 +370,6 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         return actionLabel;
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
     private Component getActiveColumn(final Object itemId) {
         final Action.Status status = (Action.Status) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).getValue();
@@ -396,10 +391,44 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         return activeStatusIcon;
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
+    private HorizontalLayout createActionBarColumn(final Object itemId) {
+        final HorizontalLayout actionBar = new HorizontalLayout();
+        final Item item = hierarchicalContainer.getItem(itemId);
+        final Long actionId = (Long) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN).getValue();
+        final String activeValue = (String) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN)
+                .getValue();
+        final Action actionWithActiveStatus = (Action) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED)
+                .getValue();
+
+        if (actionWithActiveStatus == null) {
+            return null;
+        }
+        final boolean isActionActive = target != null && SPUIDefinitions.ACTIVE.equals(activeValue);
+
+        final Button actionCancel = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, "", i18n.get("message.cancel.action"),
+                ValoTheme.BUTTON_TINY, true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        actionCancel.setEnabled(isActionActive && !actionWithActiveStatus.isCancelingOrCanceled());
+        actionCancel.addClickListener(event -> confirmAndCancelAction(actionId));
+
+        final Button actionForce = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, "", i18n.get("message.force.action"),
+                ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT, SPUIButtonStyleSmallNoBorder.class);
+        actionForce.setEnabled(
+                isActionActive && !actionWithActiveStatus.isForce() && !actionWithActiveStatus.isCancelingOrCanceled());
+        actionForce.addClickListener(event -> confirmAndForceAction(actionId));
+
+        final Button actionForceQuit = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, "", i18n.get("message.forcequit.action"),
+                ValoTheme.BUTTON_TINY + " redicon", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        actionForceQuit.setEnabled(isActionActive && actionWithActiveStatus.isCancelingOrCanceled());
+        actionForceQuit.addClickListener(event -> confirmAndForceQuitAction(actionId));
+
+        actionBar.addComponents(actionCancel, actionForce, actionForceQuit);
+
+        return actionBar;
+    }
+
     private Component getStatusColumn(final Object itemId) {
         final Action.Status status = (Action.Status) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).getValue();
@@ -426,11 +455,11 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList;
-                    if (managementUIState.isActionHistoryMaximized()) {
-                        actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
-                    } else {
-                        actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
-                    }
+            if (managementUIState.isActionHistoryMaximized()) {
+                actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
+            } else {
+                actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
+            }
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
              * Since the recent action status and messages are already
@@ -448,9 +477,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
-                            .setValue(action.getDistributionSet().getName() + ":"
-                                    + action.getDistributionSet().getVersion());
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
+                            action.getDistributionSet().getName() + ":" + action.getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
@@ -636,14 +664,15 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void setColumnExpantRatioOnTableMaximize() {
         /* set messages column can expand the rest of the available space */
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_STATUS, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DIST, 0.2f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_FORCED, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME, 0.1f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_MSGS, 0.35f);
-        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DATETIME, 0.15f);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_STATUS, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DIST, 0.2F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_FORCED, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME, 0.1F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_MSGS, 0.35F);
+        setColumnExpandRatio(SPUIDefinitions.ACTION_HIS_TBL_DATETIME, 0.15F);
+        setColumnExpandRatio(SPUIDefinitions.ACTIONS_COLUMN, 0.2F);
     }
 
     /**
@@ -705,46 +734,6 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         setColumnExpandRatioForMinimisedTable();
     }
 
-    @Override
-    public void handleAction(final com.vaadin.event.Action action, final Object sender, final Object target) {
-        /* Get the actionId details of the cancel item or row */
-        final Item item = hierarchicalContainer.getItem(target);
-        final Long actionId = (Long) item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN).getValue();
-        if (action.equals(actionCancel)) {
-            if (actionId != null) {
-                confirmAndCancelAction(actionId);
-            }
-        } else if (action.equals(actionForce)) {
-            confirmAndForceAction(actionId);
-        } else if (action.equals(actionForceQuit)) {
-            confirmAndForceQuitAction(actionId);
-        }
-    }
-
-    @Override
-    public com.vaadin.event.Action[] getActions(final Object target, final Object sender) {
-        final List<com.vaadin.event.Action> actions = Lists.newArrayList();
-        if (target != null) {
-            /* Check if the row or item belongs to active action */
-            final String activeValue = (String) hierarchicalContainer.getItem(target)
-                    .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).getValue();
-            if (SPUIDefinitions.ACTIVE.equals(activeValue)) {
-                final Action actionWithActiveStatus = (Action) hierarchicalContainer.getItem(target)
-                        .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).getValue();
-                if (!actionWithActiveStatus.isForce()) {
-                    actions.add(actionForce);
-                }
-                if (!actionWithActiveStatus.isCancelingOrCanceled()) {
-                    actions.add(actionCancel);
-                } else {
-                    actions.add(actionForceQuit);
-                }
-
-            }
-        }
-        return actions.toArray(new com.vaadin.event.Action[actions.size()]);
-    }
-
     /**
      * Show confirmation window and if ok then only, force the action.
      *
@@ -755,21 +744,15 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.force.action.confirmbox"),
                 i18n.get("message.force.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
-                    if (ok) {
-                        /* cancel the action */
-                        deploymentManagement.forceTargetAction(actionId);
-
-                        /*
-                         * Refresh the action history table to show latest
-                         * change of the action cancellation and update the
-                         * Target Details
-                         */
-
-                        populateAndupdateTargetDetails(target);
-                        notification.displaySuccess(i18n.get("message.force.action.success"));
+                    if (!ok) {
+                        return;
                     }
+                    deploymentManagement.forceTargetAction(actionId);
+                    populateAndupdateTargetDetails(target);
+                    notification.displaySuccess(i18n.get("message.force.action.success"));
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
+
         confirmDialog.getWindow().bringToFront();
     }
 
@@ -777,22 +760,19 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
                 i18n.get("message.forcequit.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
-                    if (ok) {
-                        final boolean cancelResult = forceQuitActiveAction(actionId);
-                        if (cancelResult) {
-                            /*
-                             * Refresh the action history table to show latest
-                             * change of the action cancellation and update the
-                             * Target Details
-                             */
-                            populateAndupdateTargetDetails(target);
-                            notification.displaySuccess(i18n.get("message.forcequit.action.success"));
-                        } else {
-                            notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
-                        }
+                    if (!ok) {
+                        return;
                     }
-                } , FontAwesome.WARNING);
+                    final boolean cancelResult = forceQuitActiveAction(actionId);
+                    if (cancelResult) {
+                        populateAndupdateTargetDetails(target);
+                        notification.displaySuccess(i18n.get("message.forcequit.action.success"));
+                    } else {
+                        notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
+                    }
+                }, FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
+
         confirmDialog.getWindow().bringToFront();
     }
 
@@ -803,21 +783,21 @@ public class ActionHistoryTable extends TreeTable implements Handler {
      *            as Id if the action needs to be cancelled.
      */
     private void confirmAndCancelAction(final Long actionId) {
+        if (actionId == null) {
+            return;
+        }
+
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
                 i18n.get("message.cancel.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
-                    if (ok) {
-                        final boolean cancelResult = cancelActiveAction(actionId);
-                        if (cancelResult) {
-                            /*
-                             * Refresh the action history table to show latest
-                             * change of the action cancellation and update the
-                             * Target Details
-                             */
-                            populateAndupdateTargetDetails(target);
-                            notification.displaySuccess(i18n.get("message.cancel.action.success"));
-                        } else {
-                            notification.displayValidationError(i18n.get("message.cancel.action.failed"));
-                        }
+                    if (!ok) {
+                        return;
+                    }
+                    final boolean cancelResult = cancelActiveAction(actionId);
+                    if (cancelResult) {
+                        populateAndupdateTargetDetails(target);
+                        notification.displaySuccess(i18n.get("message.cancel.action.success"));
+                    } else {
+                        notification.displayValidationError(i18n.get("message.cancel.action.failed"));
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());

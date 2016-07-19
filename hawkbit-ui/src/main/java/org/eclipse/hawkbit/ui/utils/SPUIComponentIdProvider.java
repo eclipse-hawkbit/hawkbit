@@ -247,6 +247,11 @@ public final class SPUIComponentIdProvider {
     public static final String DISCARD_SW_MODULE_TYPE = "save.actions.popup.discard.sw.module.type";
 
     /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
+
+    /**
      * ID - Label.
      */
     public static final String ACTION_LABEL = "save.actions.popup.actionMsg";
@@ -292,6 +297,21 @@ public final class SPUIComponentIdProvider {
      * Action history table Id.
      */
     public static final String ACTION_HISTORY_TABLE_ID = "action.history.tableId";
+
+    /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
+
+    /**
+     * Action history table force Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
+
+    /**
+     * Action history table force quit Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
 
     /**
      * Target filter wrapper id.
@@ -837,19 +857,26 @@ public final class SPUIComponentIdProvider {
      * Rollout target filter query combo id.
      */
     public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
+
     /**
      * Rollout action button id.
      */
-    public static final String ROLLOUT_ACTION_BUTTON_ID = "rollout.action.button.id";
+    public static final String ROLLOUT_ACTION_ID = "rollout.action.button.id";
+
+    /**
+     * Rollout start button id.
+     */
+    public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
+
     /**
      * Rollout pause button id.
      */
-    public static final String ROLLOUT_PAUSE_BUTTON_ID = "rollout.pause.button.id";
+    public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
 
     /**
      * Rollout resume button id.
      */
-    public static final String ROLLOUT_RESUME_BUTTON_ID = "rollout.resume.button.id";
+    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
 
     /**
      * Rollout save or start option group id.
