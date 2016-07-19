@@ -215,7 +215,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()")
+    @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteTenant(final String tenant) {
@@ -242,7 +242,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator")
+    @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData getTenantMetadata() {
@@ -277,7 +277,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()")
+    @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData updateTenantMetadata(final TenantMetaData metaData) {
