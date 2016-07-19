@@ -96,7 +96,7 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public int hashCode() {
-            return (delegate != null) ? delegate.hashCode() : null;
+            return (delegate != null) ? delegate.hashCode() : -1;
         }
 
         @Override
@@ -126,7 +126,7 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public boolean isAuthenticated() {
-            return (delegate != null) ? delegate.isAuthenticated() : null;
+            return (delegate != null) ? delegate.isAuthenticated() : true;
         }
 
         @Override

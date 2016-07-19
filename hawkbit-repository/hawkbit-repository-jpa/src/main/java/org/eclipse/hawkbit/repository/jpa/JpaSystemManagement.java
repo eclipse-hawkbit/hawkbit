@@ -167,7 +167,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "tenantMetadata", key = "#tenant.toUpperCase()", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData getTenantMetadata(final String tenant) {
