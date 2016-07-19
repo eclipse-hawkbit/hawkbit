@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -21,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -39,7 +35,6 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -53,7 +48,6 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window.WindowModeChangeEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -93,8 +87,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Button addIcon;
 
-    private Button discardButton;
-
     private Grid metaDataGrid;
 
     private Label headerCaption;
@@ -131,12 +123,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
         metadataWindow.getMainLayout().setSizeFull();
-        metadataWindow.setResizable(true);
         metadataWindow.getButtonsLayout().setHeight("45px");
-        metadataWindow.addWindowModeChangeListener(event -> onResize(event));
-        ((HorizontalLayout) metadataWindow.getButtonsLayout()).addComponent(discardButton, 1);
-        ((HorizontalLayout) metadataWindow.getButtonsLayout()).setComponentAlignment(discardButton,
-                Alignment.MIDDLE_RIGHT);
         setUpDetails(entity.getId(), metaData);
         return metadataWindow;
     }
@@ -169,7 +156,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metaDataGrid = createMetadataGrid();
         addIcon = createAddIcon();
         headerCaption = createHeaderCaption();
-        discardButton = createDiscardButton();
     }
 
     private void buildLayout() {
@@ -377,7 +363,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                     metaDataGrid.select(metadata.getKey());
                     addIcon.setEnabled(true);
                     metadataWindow.setSaveButtonEnabled(false);
-                    setDiscardButtonEnabled(false);
                     if (!hasUpdatePermission()) {
                         valueTextArea.setEnabled(false);
                     }
@@ -389,7 +374,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 metaDataGrid.select(metadata.getKey());
                 addIcon.setEnabled(true);
                 metadataWindow.setSaveButtonEnabled(false);
-                setDiscardButtonEnabled(false);
             }
         }
     }
@@ -424,18 +408,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return caption.toString();
     }
 
-    private void onDiscard() {
-        if (metaDataGrid.getSelectedRow() == null) {
-            keyTextField.clear();
-            valueTextArea.clear();
-        } else {
-            final Object itemSelected = metaDataGrid.getSelectedRow();
-            popualateKeyValue(itemSelected);
-        }
-        metadataWindow.setSaveButtonEnabled(false);
-        setDiscardButtonEnabled(false);
-    }
-
     private void onCancel() {
         metadataWindow.close();
         UI.getCurrent().removeWindow(metadataWindow);
@@ -445,10 +417,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         if (hasCreatePermission() || hasUpdatePermission()) {
             if (!valueTextArea.getValue().isEmpty() && !event.getText().isEmpty()) {
                 metadataWindow.setSaveButtonEnabled(true);
-                setDiscardButtonEnabled(true);
             } else {
                 metadataWindow.setSaveButtonEnabled(false);
-                setDiscardButtonEnabled(false);
             }
         }
     }
@@ -473,48 +443,16 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             }
         }
         metadataWindow.setSaveButtonEnabled(false);
-        setDiscardButtonEnabled(false);
     }
 
     private void onValueChange(final TextChangeEvent event) {
         if (hasCreatePermission() || hasUpdatePermission()) {
             if (!keyTextField.getValue().isEmpty() && !event.getText().isEmpty()) {
                 metadataWindow.setSaveButtonEnabled(true);
-                setDiscardButtonEnabled(true);
             } else {
                 metadataWindow.setSaveButtonEnabled(false);
-                setDiscardButtonEnabled(false);
             }
         }
-    }
-
-    private void onResize(final WindowModeChangeEvent event) {
-        if (event.getWindowMode() == WindowMode.MAXIMIZED) {
-            metaDataGrid.getColumn(DELETE_BUTTON).setWidth(70);
-        } else {
-            metaDataGrid.getColumn(DELETE_BUTTON).setWidth(50);
-        }
-        // Repopulating the grid (forcing for repaint)- workaround as grid size
-        // is not getting adjusted
-        final Map<String, String> keyValueDetails = new LinkedHashMap<>();
-        for (final Object key : metaDataGrid.getContainerDataSource().getItemIds()) {
-            final Item item = metaDataGrid.getContainerDataSource().getItem(key);
-            final String value = (String) item.getItemProperty(VALUE).getValue();
-            keyValueDetails.put((String) key, value);
-        }
-        metaDataGrid.getContainerDataSource().removeAllItems();
-        for (final Entry<String, String> entry : keyValueDetails.entrySet()) {
-            addItemToGrid(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private Button createDiscardButton() {
-        final Button discardButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON,
-                i18n.get("button.discard"), "", "", true, FontAwesome.UNDO, SPUIButtonStyleNoBorderWithIcon.class);
-        discardButton.setSizeUndefined();
-        discardButton.addStyleName("default-color");
-        discardButton.addClickListener(event -> onDiscard());
-        return discardButton;
     }
 
     private void setUpDetails(final Long swId, final M metaData) {
@@ -543,12 +481,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         keyTextField.setEnabled(false);
         valueTextArea.setEnabled(false);
         metadataWindow.setSaveButtonEnabled(false);
-        setDiscardButtonEnabled(false);
         addIcon.setEnabled(true);
-    }
-
-    private void setDiscardButtonEnabled(final Boolean enable) {
-        discardButton.setEnabled(enable);
     }
 
 }
