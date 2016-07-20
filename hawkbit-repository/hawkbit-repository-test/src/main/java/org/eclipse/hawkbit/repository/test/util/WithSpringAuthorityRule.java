@@ -63,7 +63,7 @@ public class WithSpringAuthorityRule implements TestRule {
         }
         return oldContext;
     }
-
+    
     /**
      * @param annotation
      */
@@ -128,6 +128,14 @@ public class WithSpringAuthorityRule implements TestRule {
 
     private void after(final SecurityContext oldContext) {
         SecurityContextHolder.setContext(oldContext);
+    }
+    
+    /**
+     * Clears the current security context.
+     */
+    public void clear()
+    {
+        SecurityContextHolder.clearContext();
     }
 
     /**

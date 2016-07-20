@@ -8,15 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Button with icon decorator.
- *
+ * Decorator class for a borderless Button with an icon.
  */
-public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
+public class SPUIButtonStyleNoBorderWithIcon implements SPUIButtonDecorator {
 
     private Button button;
 
@@ -24,23 +25,25 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
 
         this.button = button;
-
-        setButtonStyle(style, setStyle);
-        setButtonIcon(icon);
+        button.setSizeFull();
 
         button.addStyleName(ValoTheme.LABEL_SMALL);
-        button.setSizeFull();
+        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        setOrAddButtonStyle(style, setStyle);
+
+        setButtonIcon(icon);
 
         return button;
     }
 
-    private void setButtonStyle(final String style, final boolean setStyle) {
+    private void setOrAddButtonStyle(final String style, final boolean setStyle) {
 
-        if (style == null) {
+        if (StringUtils.isEmpty(style)) {
             return;
         }
 
         if (setStyle) {
+            // overwrite all other styles
             button.setStyleName(style);
         } else {
             button.addStyleName(style);

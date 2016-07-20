@@ -79,7 +79,6 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
 
     private void createOptionGroup() {
         actionTypeOptionGroup = new FlexibleOptionGroup();
-        actionTypeOptionGroup.setId(SPUIComponentIdProvider.ROLLOUT_ACTION_BUTTON_ID);
         actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
         actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
         actionTypeOptionGroup.addItem(ActionTypeOption.AUTO_FORCED);
@@ -100,6 +99,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(forceLabel);
 
         final FlexibleOptionGroupItemComponent softItem = actionTypeOptionGroup.getItemComponent(ActionTypeOption.SOFT);
+        softItem.setId(SPUIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
         softItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(softItem);
         final Label softLabel = new Label();

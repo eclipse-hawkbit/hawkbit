@@ -25,6 +25,7 @@ import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific
@@ -33,9 +34,6 @@ import org.springframework.context.annotation.Configuration;
  *
  * This is done by providing a special {@link TenantCacheResolver} which
  * generates a cache name included the current tenant.
- *
- *
- *
  */
 @Configuration
 @EnableCaching
@@ -51,18 +49,27 @@ public class CacheAutoConfiguration extends CachingConfigurerSupport {
     @Override
     @Bean
     @ConditionalOnMissingBean
+    @Primary
     public TenancyCacheManager cacheManager() {
-        return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware);
+        return new TenantAwareCacheManager(directCacheManager(), tenantAware);
+    }
+
+    /**
+     * @return the direct cache manager to access without tenant aware check,
+     *         cause in sometimes it's necessary to access the cache directly
+     *         without having the current tenant, e.g. initial creation of
+     *         tenant
+     */
+    @Bean(name = "directCacheManager")
+    @ConditionalOnMissingBean(name = "directCacheManager")
+    public CacheManager directCacheManager() {
+        return new GuavaCacheManager();
     }
 
     /**
      * A {@link SimpleCacheResolver} implementation which includes the
      * {@link TenantAware#getCurrentTenant()} into the cache name before
      * resolving it.
-     *
-     *
-     *
-     *
      */
     public class TenantCacheResolver extends SimpleCacheResolver {
 

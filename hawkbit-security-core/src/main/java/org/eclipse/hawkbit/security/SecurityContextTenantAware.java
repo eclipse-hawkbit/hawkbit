@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -80,32 +81,37 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public boolean equals(final Object another) {
-            return delegate.equals(another);
+            if (delegate != null) {
+                return delegate.equals(another);
+            } else if (another == null) {
+                return true;
+            }
+            return false;
         }
 
         @Override
         public String toString() {
-            return delegate.toString();
+            return (delegate != null) ? delegate.toString() : null;
         }
 
         @Override
         public int hashCode() {
-            return delegate.hashCode();
+            return (delegate != null) ? delegate.hashCode() : -1;
         }
 
         @Override
         public String getName() {
-            return delegate.getName();
+            return (delegate != null) ? delegate.getName() : null;
         }
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return delegate.getAuthorities();
+            return (delegate != null) ? delegate.getAuthorities() : Collections.emptyList();
         }
 
         @Override
         public Object getCredentials() {
-            return delegate.getCredentials();
+            return (delegate != null) ? delegate.getCredentials() : null;
         }
 
         @Override
@@ -115,16 +121,19 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public Object getPrincipal() {
-            return delegate.getPrincipal();
+            return (delegate != null) ? delegate.getPrincipal() : null;
         }
 
         @Override
         public boolean isAuthenticated() {
-            return delegate.isAuthenticated();
+            return (delegate != null) ? delegate.isAuthenticated() : true;
         }
 
         @Override
-        public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+        public void setAuthenticated(final boolean isAuthenticated) {
+            if (delegate == null) {
+                return;
+            }
             delegate.setAuthenticated(isAuthenticated);
         }
     }
