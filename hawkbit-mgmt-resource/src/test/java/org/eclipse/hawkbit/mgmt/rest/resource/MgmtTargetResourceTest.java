@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -34,7 +35,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
-import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -1082,8 +1082,6 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
             throws InterruptedException {
 
-        final PageRequest pageRequest = new PageRequest(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
-
         Target target = entityFactory.generateTarget(knownTargetId);
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
@@ -1129,7 +1127,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     public void assignDistributionSetToTarget() throws Exception {
 
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
+        targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
@@ -1315,10 +1313,11 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     /**
-     * creating targets with the given amount by setting name, id etc from the
+     * Creating targets with the given amount by setting name, id etc from the
      * alphabet [a-z] using ASCII.
-     * 
+     *
      * @param amount
+     *            The number of targets to create
      */
     private void createTargetsAlphabetical(final int amount) {
         char character = 'a';
@@ -1335,7 +1334,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     /**
      * helper method to give feedback mark an target IN_SYNC
-     * 
+     *
      */
     private void feedbackToByInSync(final Long actionId) {
         final Action action = deploymentManagement.findAction(actionId);
@@ -1346,7 +1345,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     /**
      * helper method to create a target and start an action on it.
-     * 
+     *
      * @return The targetid of the created target.
      */
     private Target createTargetAndStartAction() {
@@ -1355,7 +1354,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final Target tA = targetManagement
                 .createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
         // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
+        deploymentManagement.assignDistributionSet(dsA, newArrayList(tA));
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
         assertThat(actionsByTarget.getContent()).hasSize(1);
