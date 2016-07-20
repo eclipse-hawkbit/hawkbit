@@ -31,8 +31,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.data.jpa.repository.Modifying;
@@ -214,7 +212,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteTenant(final String tenant) {
@@ -241,7 +238,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData getTenantMetadata() {
@@ -276,7 +272,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()", cacheManager = "directCacheManager")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData updateTenantMetadata(final TenantMetaData metaData) {
