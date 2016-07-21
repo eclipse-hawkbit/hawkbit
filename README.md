@@ -1,6 +1,6 @@
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=svg)](https://circleci.com/gh/eclipse/hawkbit)
 
-<img src=hawkbit_logo.png width=300 height=100 />
+<img src=hawkbit_logo.png width=533 height=246 />
 
 # Eclipse.IoT hawkBit - Update Server
 
