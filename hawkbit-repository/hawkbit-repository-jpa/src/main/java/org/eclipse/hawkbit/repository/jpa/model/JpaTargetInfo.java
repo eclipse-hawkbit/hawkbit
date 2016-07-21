@@ -23,6 +23,7 @@ import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -37,7 +38,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -48,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Persistable;
@@ -64,7 +69,8 @@ import org.springframework.data.domain.Persistable;
 @Table(name = "sp_target_info", indexes = {
         @Index(name = "sp_idx_target_info_02", columnList = "target_id,update_status") })
 @Entity
-public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
+@EntityListeners(EntityPropertyChangeListener.class)
+public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareEntity<JpaTargetInfo> {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetInfo.class);
@@ -320,5 +326,19 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void fireCreateEvent(final JpaTargetInfo jpaTargetInfo,final DescriptorEvent descriptorEvent) {
+        // there is no target info created event
+    }
+
+    @Override
+    public void fireUpdateEvent(final JpaTargetInfo jpaTargetInfo, final DescriptorEvent descriptorEvent) {
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () -> EventBusHolder.getInstance().getEventBus().post(new TargetInfoUpdateEvent(jpaTargetInfo)));
+    }
+
+    @Override
+    public void fireDeleteEvent(final JpaTargetInfo jpaTargetInfo, final DescriptorEvent descriptorEvent) {
     }
 }

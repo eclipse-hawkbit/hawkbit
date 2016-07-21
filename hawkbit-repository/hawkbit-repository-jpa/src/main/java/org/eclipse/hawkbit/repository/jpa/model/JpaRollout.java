@@ -25,13 +25,18 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -44,7 +49,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaRollout extends AbstractJpaNamedEntity implements Rollout {
+public class JpaRollout extends AbstractJpaNamedEntity implements Rollout,EventAwareEntity<JpaRollout> {
 
     private static final long serialVersionUID = 1L;
 
@@ -195,6 +200,24 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout {
         return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
                 + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
                 + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+    }
+
+    @Override
+    public void fireCreateEvent(final JpaRollout jpaRollout, final DescriptorEvent descriptorEvent) {
+        
+    }
+
+    @Override
+    public void fireUpdateEvent(final JpaRollout jpaRollout, final DescriptorEvent descriptorEvent) {
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder.getInstance().getEventBus().
+                post(new RolloutPropertyChangeEvent(jpaRollout, EntityPropertyChangeHelper.getChangeSet(
+                                Rollout.class, descriptorEvent))));
+        
+    }
+
+    @Override
+    public void fireDeleteEvent(final JpaRollout jpaRollout, final DescriptorEvent descriptorEvent) {
+        
     }
 
 }

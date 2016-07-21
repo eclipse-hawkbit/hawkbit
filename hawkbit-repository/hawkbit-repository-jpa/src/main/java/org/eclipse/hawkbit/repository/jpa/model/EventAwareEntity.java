@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-/**
- * Interface to accept visitor @link{AbstractDescriptorEventVisitor}.
- *
- */
-public interface AcceptVisitor {
-	public void postActionOnEntity(AbstractDescriptorEventVisitor visitor,
-			DescriptorEventDetails eventDetails);
+import org.eclipse.persistence.descriptors.DescriptorEvent;
+
+public interface EventAwareEntity<T> {
+
+    public void fireCreateEvent(T t,DescriptorEvent descriptorEvent);
+
+    public void fireUpdateEvent(T t,DescriptorEvent descriptorEvent);
+
+    public void fireDeleteEvent(T t,DescriptorEvent descriptorEvent);
 }

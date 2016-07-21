@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import org.eclipse.hawkbit.repository.jpa.model.DescriptorEventDetails.ActionType;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 
@@ -18,19 +17,23 @@ import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
-	@Override
-	public void postInsert(final DescriptorEvent event) {
-		AbstractDescriptorEventVisitor visitor = new AbstractDescriptorEventVisitorImpl();
-		((AbstractJpaBaseEntity) event.getObject()).postActionOnEntity(visitor,
-				new DescriptorEventDetails(ActionType.CREATE, event));
+    @Override
+    public void postInsert(final DescriptorEvent event) {
 
-	}
+        final Object object = event.getObject();
+        if (object instanceof EventAwareEntity) {
+            ((EventAwareEntity) object).fireCreateEvent(object,event);
+        }
+    }
 
-	@Override
-	public void postUpdate(final DescriptorEvent event) {
-		AbstractDescriptorEventVisitor visitor = new AbstractDescriptorEventVisitorImpl();	
-		((AbstractJpaBaseEntity) event.getObject()).postActionOnEntity(visitor,
-				new DescriptorEventDetails(ActionType.UPDATE, event));
-	}
-	
+    @Override
+    public void postUpdate(final DescriptorEvent event) {
+        
+        final Object object = event.getObject();
+        if (object instanceof EventAwareEntity) {
+            ((EventAwareEntity) object).fireUpdateEvent(object,event);
+        }
+    }
+
+
 }

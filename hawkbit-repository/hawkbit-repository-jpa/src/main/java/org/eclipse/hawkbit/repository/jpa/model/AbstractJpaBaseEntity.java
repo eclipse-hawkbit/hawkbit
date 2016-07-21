@@ -32,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @MappedSuperclass
 @Access(AccessType.FIELD)
 @EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class, EntityPropertyChangeListener.class })
-public abstract class AbstractJpaBaseEntity implements BaseEntity,AcceptVisitor {
+public abstract class AbstractJpaBaseEntity implements BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -179,8 +179,4 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity,AcceptVisitor 
     }
 
     
-    @Override
-	public void postActionOnEntity(AbstractDescriptorEventVisitor visitor, DescriptorEventDetails eventDetails){
-    	visitor.publishEventPostAction(eventDetails);
-    }
 }
