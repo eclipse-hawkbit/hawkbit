@@ -1,14 +1,9 @@
-<!--
-
-    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
-
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!-- Copyright (c) 2015 Bosch Software Innovations GmbH and others. All rights 
+   reserved. This program and the accompanying materials are made available 
+   under the terms of the Eclipse Public License v1.0 which accompanies this 
+   distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
@@ -120,7 +115,7 @@
          <groupId>javax.el</groupId>
          <artifactId>javax.el-api</artifactId>
          <scope>test</scope>
-      </dependency>      
+      </dependency>
       <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
@@ -140,31 +135,6 @@
 
    <build>
       <plugins>
-         <plugin>
-            <groupId>org.bsc.maven</groupId>
-            <artifactId>maven-processor-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>process</id>
-                  <goals>
-                     <goal>process</goal>
-                  </goals>
-                  <phase>generate-sources</phase>
-                  <configuration>
-                     <processors>
-                        <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-                     </processors>
-                  </configuration>
-               </execution>
-            </executions>
-            <dependencies>
-               <dependency>
-                  <groupId>org.hibernate</groupId>
-                  <artifactId>hibernate-jpamodelgen</artifactId>
-                  <version>${hibernate.version}</version>
-               </dependency>
-            </dependencies>
-         </plugin>
          <!-- Static weaver for EclipseLink -->
          <plugin>
             <groupId>com.ethlo.persistence.tools</groupId>
@@ -172,11 +142,18 @@
             <version>2.6.2</version>
             <executions>
                <execution>
+                  <id>modelgen</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                     <goal>modelgen</goal>
+                  </goals>
+               </execution>
+               <execution>
                   <phase>process-classes</phase>
                   <goals>
                      <goal>weave</goal>
                   </goals>
-               </execution>
+               </execution>               
             </executions>
             <dependencies>
                <dependency>
