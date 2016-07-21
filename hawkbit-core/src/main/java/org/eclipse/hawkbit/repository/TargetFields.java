@@ -64,7 +64,12 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The tags field.
      */
-    TAG("tags.name");
+    TAG("tags.name"),
+
+    /**
+     * Last time the target or DMF client polled.
+     */
+    LASTCONTROLLERREQUESTAT("targetInfo.lastTargetQuery");
 
     private final String fieldName;
     private List<String> subEntityAttribues;
