@@ -899,6 +899,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     /**
      * Select all rows in the table.
      */
+    @Override
     public void selectAll() {
 
         // As Vaadin Table only returns the current ItemIds which are visible
