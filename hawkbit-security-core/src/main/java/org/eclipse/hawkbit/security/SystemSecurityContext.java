@@ -101,7 +101,9 @@ public class SystemSecurityContext {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
-                } catch (final Exception e) {
+                    // The callable API throws a Exception and not a specific
+                    // one
+                } catch (@SuppressWarnings("squid:S2221") final Exception e) {
                     throw Throwables.propagate(e);
                 }
             });
