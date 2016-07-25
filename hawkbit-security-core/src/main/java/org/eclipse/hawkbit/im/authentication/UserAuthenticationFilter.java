@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
+import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -44,11 +46,16 @@ public interface UserAuthenticationFilter {
      *            the servlet response
      * @param chain
      *            the filterchain
+     * @throws IOException
+     *             cannot read from request
      * @throws ServletException
      *             servlet exception
      */
-
-    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException;
+    // this declaration of multiple checked exception is necessary so it's
+    // aligned with the servlet API.
+    @SuppressWarnings("squid:S1160")
+    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException;
 
     /**
      * @see Filter#destroy()
