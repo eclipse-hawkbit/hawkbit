@@ -21,6 +21,43 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum ActionStatus {
+    /**
+     * Action requests download by this target which has now started.
+     */
+    DOWNLOAD,
 
-    DOWNLOAD, RETRIEVED, RUNNING, FINISHED, ERROR, WARNING, CANCELED, CANCEL_REJECTED;
+    /**
+     * Action has been send to the target.
+     */
+    RETRIEVED,
+
+    /**
+     * Action is still running for this target.
+     */
+    RUNNING,
+
+    /**
+     * Action is finished successfully for this target.
+     */
+    FINISHED,
+
+    /**
+     * Action has failed for this target.
+     */
+    ERROR,
+
+    /**
+     * Action is still running but with warnings.
+     */
+    WARNING,
+
+    /**
+     * Action has been canceled for this target.
+     */
+    CANCELED,
+
+    /**
+     * Cancellation has been rejected by the target..
+     */
+    CANCEL_REJECTED;
 }

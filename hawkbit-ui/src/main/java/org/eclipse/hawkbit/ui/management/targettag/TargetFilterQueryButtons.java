@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -88,7 +88,7 @@ public class TargetFilterQueryButtons extends Table {
     }
 
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.CUSTOM_TARGET_TAG_TABLE_ID;
+        return SPUIComponentIdProvider.CUSTOM_TARGET_TAG_TABLE_ID;
     }
 
     private void setStyle() {

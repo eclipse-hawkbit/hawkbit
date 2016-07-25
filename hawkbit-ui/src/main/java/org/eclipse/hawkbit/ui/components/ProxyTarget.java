@@ -8,29 +8,32 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.security.SecureRandom;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 
 /**
  * Proxy for {@link Target}.
  *
- *
- *
- *
+ */
+/**
+ * @author kaizimmerm
  *
  */
-public class ProxyTarget extends Target {
+public class ProxyTarget implements Serializable {
     private static final long serialVersionUID = -8891449133620645310L;
     private String controllerId;
     private URI address = null;
     private Long lastTargetQuery = null;
     private Long installationDate;
+
+    private Long id;
 
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
 
@@ -56,11 +59,58 @@ public class ProxyTarget extends Target {
 
     private Status status;
 
+    private String name;
+
+    private String description;
+
+    private Long createdAt;
+
+    private TargetInfo targetInfo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public Long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(final Long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public TargetInfo getTargetInfo() {
+        return targetInfo;
+    }
+
+    public void setTargetInfo(final TargetInfo targetInfo) {
+        this.targetInfo = targetInfo;
+    }
+
     /**
      * @param controllerId
      */
     public ProxyTarget() {
-        super(null);
         final Integer generatedId = new SecureRandom().nextInt(Integer.MAX_VALUE) - Integer.MAX_VALUE;
         targetIdName = new TargetIdName(generatedId, generatedId.toString(), generatedId.toString());
     }
@@ -160,7 +210,6 @@ public class ProxyTarget extends Target {
      * 
      * @return String as ID.
      */
-    @Override
     public String getControllerId() {
         return controllerId;
     }
@@ -171,7 +220,6 @@ public class ProxyTarget extends Target {
      * @param controllerId
      *            as ID
      */
-    @Override
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
     }
@@ -262,18 +310,14 @@ public class ProxyTarget extends Target {
      * @param assignedDistributionSet
      *            the assignedDistributionSet to set
      */
-    public void setAssignedDistributionSet(DistributionSet assignedDistributionSet) {
+    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
         this.assignedDistributionSet = assignedDistributionSet;
     }
 
     /**
      * @return the targetIdName
      */
-    @Override
     public TargetIdName getTargetIdName() {
-        if (this.targetIdName == null) {
-            return super.getTargetIdName();
-        }
         return this.targetIdName;
     }
 

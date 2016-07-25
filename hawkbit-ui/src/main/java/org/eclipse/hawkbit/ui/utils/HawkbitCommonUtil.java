@@ -19,15 +19,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
@@ -432,26 +432,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Format the lengthy text.
-     *
-     * @param orgText
-     *            text to be formatted
-     * @return String formatted text
-     */
-    public static String getFormattedText(final String orgText) {
-        if (orgText == null) {
-            return StringUtils.EMPTY;
-        }
-
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (orgText.length() > txtLengthAllowed) {
-            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
-        }
-
-        return orgText;
-    }
-
-    /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
      * 
@@ -781,10 +761,10 @@ public final class HawkbitCommonUtil {
      *            base software module description
      * @return BaseSoftwareModule new base software module
      */
-    public static SoftwareModule addNewBaseSoftware(final String bsname, final String bsversion, final String bsvendor,
-            final SoftwareModuleType bstype, final String description) {
+    public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
+            final String bsversion, final String bsvendor, final SoftwareModuleType bstype, final String description) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        SoftwareModule newSWModule = new SoftwareModule();
+        SoftwareModule newSWModule = entityFactory.generateSoftwareModule();
         newSWModule.setType(bstype);
         newSWModule.setName(bsname);
         newSWModule.setVersion(bsversion);

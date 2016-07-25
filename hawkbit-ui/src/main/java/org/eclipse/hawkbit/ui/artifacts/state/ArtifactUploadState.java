@@ -9,14 +9,18 @@
 package org.eclipse.hawkbit.ui.artifacts.state;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,15 +53,63 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
-    private boolean swTypeFilterClosed = Boolean.FALSE;
+    private boolean swTypeFilterClosed;
 
-    private boolean swModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized;
 
-    private boolean artifactDetailsMaximized = Boolean.FALSE;
+    private boolean artifactDetailsMaximized;
 
     private final Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
 
-    private boolean noDataAvilableSoftwareModule = Boolean.FALSE;
+    private boolean noDataAvilableSoftwareModule;
+
+    private boolean statusPopupMinimized;
+
+    private boolean uploadCompleted;
+
+    private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
+
+    private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
+
+    private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
+
+    private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
+
+    public AtomicInteger getNumberOfFileUploadsFailed() {
+        return numberOfFileUploadsFailed;
+    }
+
+    public AtomicInteger getNumberOfFilesActuallyUpload() {
+        return numberOfFilesActuallyUpload;
+    }
+
+    public AtomicInteger getNumberOfFileUploadsExpected() {
+        return numberOfFileUploadsExpected;
+    }
+
+    public List<UploadStatusObject> getUploadedFileStatusList() {
+        return uploadedFileStatusList;
+    }
+
+    public void setUploadedFileStatusList(final List<UploadStatusObject> uploadedFileStatusList) {
+        this.uploadedFileStatusList = uploadedFileStatusList;
+    }
+
+    public boolean isUploadCompleted() {
+        return uploadCompleted;
+    }
+
+    public void setUploadCompleted(final boolean uploadCompleted) {
+        this.uploadCompleted = uploadCompleted;
+    }
+
+    public void setStatusPopupMinimized(final boolean statusPopupMinimized) {
+        this.statusPopupMinimized = statusPopupMinimized;
+    }
+
+    public boolean isStatusPopupMinimized() {
+        return statusPopupMinimized;
+    }
 
     /**
      * Set software.

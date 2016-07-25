@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
@@ -99,8 +100,8 @@ public class BaseAmqpService {
     }
 
     protected final void logAndThrowMessageError(final Message message, final String error) {
-        LOGGER.warn("Error \"{}\" reported by message: {}", error, message);
-        throw new IllegalArgumentException(error);
+        LOGGER.warn("Warning! \"{}\" reported by message: {}", error, message);
+        throw new AmqpRejectAndDontRequeueException(error);
     }
 
     protected RabbitTemplate getRabbitTemplate() {

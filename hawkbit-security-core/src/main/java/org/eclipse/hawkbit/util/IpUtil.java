@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+
 import com.google.common.net.HttpHeaders;
 
 /**
@@ -24,6 +26,7 @@ import com.google.common.net.HttpHeaders;
  */
 public final class IpUtil {
 
+    private static final String HIDDEN_IP = "***";
     private static final String SCHEME_SEPERATOR = "://";
     private static final String HTTP_SCHEME = "http";
     private static final String AMPQP_SCHEME = "amqp";
@@ -45,17 +48,49 @@ public final class IpUtil {
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
      *            where this request has been sent from
-     * @param forwardHeader
-     *            the header name containing the IP address e.g. forwarded by a
-     *            proxy {@code x-forwarded-for}
+     * @param securityProperties
+     *            hawkBit security properties.
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
-    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader) {
-        String ip = request.getHeader(forwardHeader);
-        if (ip == null || (ip = findClientIpAddress(ip)) == null) {
-            ip = request.getRemoteAddr();
+    public static URI getClientIpFromRequest(final HttpServletRequest request,
+            final HawkbitSecurityProperties securityProperties) {
+
+        return getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader(),
+                securityProperties.getClients().isTrackRemoteIp());
+    }
+
+    /**
+     * Retrieves the string based IP address from a given
+     * {@link HttpServletRequest} by either the
+     * {@link HttpHeaders#X_FORWARDED_FOR} or by the
+     * {@link HttpServletRequest#getRemoteAddr()} methods.
+     * 
+     * @param request
+     *            the {@link HttpServletRequest} to determine the IP address
+     *            where this request has been sent from
+     * @param forwardHeader
+     *            the header name containing the IP address e.g. forwarded by a
+     *            proxy {@code x-forwarded-for}
+     * 
+     * @param trackRemoteIp
+     *            to <code>true</code> if remote IP should be tracked.
+     * @return the {@link URI} based IP address from the client which sent the
+     *         request
+     */
+    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
+            final boolean trackRemoteIp) {
+        String ip;
+
+        if (trackRemoteIp) {
+            ip = request.getHeader(forwardHeader);
+            if (ip == null || (ip = findClientIpAddress(ip)) == null) {
+                ip = request.getRemoteAddr();
+            }
+        } else {
+            ip = HIDDEN_IP;
         }
+
         return createHttpUri(ip);
     }
 
@@ -144,4 +179,17 @@ public final class IpUtil {
     public static boolean isAmqpUri(final URI uri) {
         return uri != null && AMPQP_SCHEME.equals(uri.getScheme());
     }
+
+    /**
+     * Check if the IP address of that {@link URI} is known, i.e. not an AQMP
+     * exchange in DMF case and not HIDDEN_IP in DDI case.
+     * 
+     * @param uri
+     *            the uri
+     * @return <code>true</code> if IP address is actually known by the server
+     */
+    public static boolean isIpAddresKnown(final URI uri) {
+        return uri != null && !(AMPQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
+    }
+
 }

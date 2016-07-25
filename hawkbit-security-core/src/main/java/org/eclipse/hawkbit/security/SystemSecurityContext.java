@@ -34,7 +34,7 @@ import com.google.common.base.Throwables;
 @Service
 public class SystemSecurityContext {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SystemSecurityContext.class);
+    private static final Logger logger = LoggerFactory.getLogger(SystemSecurityContext.class);
 
     private final TenantAware tenantAware;
 
@@ -60,27 +60,55 @@ public class SystemSecurityContext {
      * The security context will be switched to the system code and back after
      * the callable is called.
      * 
+     * The system code is executed for a current tenant by using the
+     * {@link TenantAware#getCurrentTenant()}.
+     * 
      * @param callable
      *            the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
+    // Exception squid:S2221 - Callable declares Exception
+    @SuppressWarnings("squid:S2221")
     public <T> T runAsSystem(final Callable<T> callable) {
+        return runAsSystemAsTenant(callable, tenantAware.getCurrentTenant());
+    }
+
+    /**
+     * Runs a given {@link Callable} within a system security context, which is
+     * permitted to call secured system code. Often the system needs to call
+     * secured methods by it's own without relying on the current security
+     * context e.g. if the current security context does not contain the
+     * necessary permission it's necessary to execute code as system code to
+     * execute necessary methods and functionality.
+     * 
+     * The security context will be switched to the system code and back after
+     * the callable is called.
+     * 
+     * The system code is executed for a specific given tenant by using the
+     * {@link TenantAware}.
+     * 
+     * @param callable
+     *            the callable to call within the system security context
+     * @param tenant
+     *            the tenant to act as system code
+     * @return the return value of the {@link Callable#call()} method.
+     */
+    public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            LOGGER.debug("entering system code execution");
-            return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), () -> {
+            logger.debug("entering system code execution");
+            return tenantAware.runAsTenant(tenant, () -> {
                 try {
-                    setSystemContext();
+                    setSystemContext(SecurityContextHolder.getContext());
                     return callable.call();
-                    // The callable API throws a Exception and not a specific
-                } catch (@SuppressWarnings("squid:S2221") final Exception e) {
+                } catch (final Exception e) {
                     throw Throwables.propagate(e);
                 }
             });
 
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            LOGGER.debug("leaving system code execution");
+            logger.debug("leaving system code execution");
         }
     }
 
@@ -92,20 +120,30 @@ public class SystemSecurityContext {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 
-    private static void setSystemContext() {
+    private static void setSystemContext(final SecurityContext oldContext) {
+        final Authentication oldAuthentication = oldContext.getAuthentication();
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
-        securityContextImpl.setAuthentication(new SystemCodeAuthentication());
+        securityContextImpl.setAuthentication(new SystemCodeAuthentication(oldAuthentication));
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
     /**
-     * Authentication with the system role.
+     * An implementation of the Spring's {@link Authentication} object which is
+     * used within a system security code block and wraps the original
+     * authentication object. The wrapped object contains the necessary
+     * {@link SpringEvalExpressions#SYSTEM_ROLE} which is allowed to execute all
+     * secured methods.
      */
     public static class SystemCodeAuthentication implements Authentication {
 
         private static final long serialVersionUID = 1L;
         private static final List<SimpleGrantedAuthority> AUTHORITIES = Collections
                 .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+        private final Authentication oldAuthentication;
+
+        private SystemCodeAuthentication(final Authentication oldAuthentication) {
+            this.oldAuthentication = oldAuthentication;
+        }
 
         @Override
         public String getName() {
@@ -119,17 +157,17 @@ public class SystemSecurityContext {
 
         @Override
         public Object getCredentials() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getCredentials() : null;
         }
 
         @Override
         public Object getDetails() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getDetails() : null;
         }
 
         @Override
         public Object getPrincipal() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getPrincipal() : null;
         }
 
         @Override

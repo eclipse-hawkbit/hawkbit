@@ -87,9 +87,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's MD5 hash.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param md5Hash
      *            the md5-hash of the file to lookup.
      * @return The gridfs file object or {@code null} if no file exists.
@@ -100,9 +98,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's object id.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param id
      *            the id of the file to lookup.
      * @return The gridfs file object or {@code null} if no file exists.
@@ -124,11 +120,9 @@ public class ArtifactStore implements ArtifactRepository {
         try {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
-            try (final FileOutputStream os = new FileOutputStream(tempFile)) {
-                try (BufferedOutputStream bos = new BufferedOutputStream(os)) {
-                    try (BufferedInputStream bis = new BufferedInputStream(content)) {
-                        return store(content, contentType, bos, tempFile, hash);
-                    }
+            try (final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile))) {
+                try (BufferedInputStream bis = new BufferedInputStream(content)) {
+                    return store(bis, contentType, bos, tempFile, hash);
                 }
             }
         } catch (final IOException | MongoException e1) {
@@ -207,6 +201,9 @@ public class ArtifactStore implements ArtifactRepository {
             throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
+        // Exception squid:S2070 - not used for hashing sensitive
+        // data
+        @SuppressWarnings("squid:S2070")
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
         try (final DigestOutputStream dos = new DigestOutputStream(os, md)) {
             ByteStreams.copy(stream, dos);
@@ -230,15 +227,13 @@ public class ArtifactStore implements ArtifactRepository {
      * @return a paged list of artifacts mapped from the given dbFiles
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
-        return dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
+        return dbFiles.stream().map(this::map).collect(Collectors.toList());
     }
 
     /**
      * Retrieves a list of {@link GridFSDBFile} from the store by all SHA1
      * hashes.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param sha1Hashes
      *            the sha1-hashes of the files to lookup.
      * @return list of artifacts
@@ -251,8 +246,6 @@ public class ArtifactStore implements ArtifactRepository {
     /**
      * Retrieves a list of {@link GridFSDBFile} from the store by all ids.
      *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
      * @param ids
      *            the ids of the files to lookup.
      * @return list of artfiacts

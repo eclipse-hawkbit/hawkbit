@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -105,14 +105,14 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
         final HorizontalLayout hlayout = new HorizontalLayout();
         hlayout.setSpacing(true);
-        saveConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "",
-                "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+        saveConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "",
+                "", "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveConfigurationBtn.setEnabled(false);
         saveConfigurationBtn.setDescription(i18n.get("configuration.savebutton.tooltip"));
         saveConfigurationBtn.addClickListener(event -> saveConfiguration());
         hlayout.addComponent(saveConfigurationBtn);
 
-        undoConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "",
+        undoConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_CANCEL, "",
                 "", "", true, FontAwesome.UNDO, SPUIButtonStyleSmallNoBorder.class);
         undoConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setDescription(i18n.get("configuration.cancellbutton.tooltip"));
@@ -143,9 +143,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     }
 
     private void undoConfiguration() {
-        configurationViews.forEach(confView -> {
-            confView.undo();
-        });
+        configurationViews.forEach(confView -> confView.undo());
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);

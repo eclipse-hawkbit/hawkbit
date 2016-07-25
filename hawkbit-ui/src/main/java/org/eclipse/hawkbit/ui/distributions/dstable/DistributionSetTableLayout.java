@@ -17,16 +17,14 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
- * Software module table layout.
- * 
- *
- * 
+ * DistributionSet table layout
  */
 @SpringComponent
 @ViewScope
 public class DistributionSetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 6464291374980641235L;
+
     /**
      * Details to be autowired before table as details listens to value change
      * of table.

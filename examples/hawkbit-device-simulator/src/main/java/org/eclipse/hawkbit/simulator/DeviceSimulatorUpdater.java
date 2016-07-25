@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.simulator;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.DigestOutputStream;
 import java.security.KeyManagementException;
@@ -34,6 +32,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
+import org.eclipse.hawkbit.dmf.json.model.Artifact.UrlProtocol;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
@@ -59,7 +58,7 @@ import com.google.common.io.ByteStreams;
 public class DeviceSimulatorUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceSimulatorUpdater.class);
 
-    private static final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(4);
+    private static final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(8);
 
     @Autowired
     private SpSenderService spSenderService;
@@ -99,7 +98,8 @@ public class DeviceSimulatorUpdater {
 
         // plug and play - non existing device will be auto created
         if (device == null) {
-            device = repository.add(deviceFactory.createSimulatedDevice(id, tenant, Protocol.DMF_AMQP, -1, null, null));
+            device = repository
+                    .add(deviceFactory.createSimulatedDevice(id, tenant, Protocol.DMF_AMQP, 1800, null, null));
         }
 
         device.setProgress(0.0);
@@ -149,6 +149,8 @@ public class DeviceSimulatorUpdater {
                     eventbus.post(new ProgressUpdate(device));
                     return;
                 }
+                // download is 80% of the game after all
+                device.setProgress(0.8);
             }
 
             final double newProgress = device.getProgress() + 0.2;
@@ -195,18 +197,14 @@ public class DeviceSimulatorUpdater {
 
         private static void handleArtifacts(final String targetToken, final List<UpdateStatus> status,
                 final Artifact artifact) {
-            artifact.getUrls().entrySet().forEach(entry -> {
-                switch (entry.getKey()) {
-                case HTTP:
-                case HTTPS:
-                    status.add(downloadUrl(entry.getValue(), targetToken, artifact.getHashes().getSha1(),
-                            artifact.getSize()));
-                    break;
-                default:
-                    // not supported yet
-                    break;
-                }
-            });
+
+            if (artifact.getUrls().containsKey(UrlProtocol.HTTPS)) {
+                status.add(downloadUrl(artifact.getUrls().get(UrlProtocol.HTTPS), targetToken,
+                        artifact.getHashes().getSha1(), artifact.getSize()));
+            } else if (artifact.getUrls().containsKey(UrlProtocol.HTTP)) {
+                status.add(downloadUrl(artifact.getUrls().get(UrlProtocol.HTTP), targetToken,
+                        artifact.getHashes().getSha1(), artifact.getSize()));
+            }
         }
 
         private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash,
@@ -233,18 +231,15 @@ public class DeviceSimulatorUpdater {
                         return new UpdateStatus(ResponseStatus.ERROR, message);
                     }
 
-                    final File tempFile = File.createTempFile("uploadFile", null);
+                    // Exception squid:S2070 - not used for hashing sensitive
+                    // data
+                    @SuppressWarnings("squid:S2070")
                     final MessageDigest md = MessageDigest.getInstance("SHA-1");
 
-                    try (final DigestOutputStream dos = new DigestOutputStream(new FileOutputStream(tempFile), md)) {
-                        try (final BufferedOutputStream bdos = new BufferedOutputStream(dos)) {
-                            try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
-                                overallread = ByteStreams.copy(bis, bdos);
-                            }
-                        }
-                    } finally {
-                        if (tempFile != null && !tempFile.delete()) {
-                            LOGGER.error("Could not delete temporary file: {}", tempFile);
+                    try (final BufferedOutputStream bdos = new BufferedOutputStream(
+                            new DigestOutputStream(ByteStreams.nullOutputStream(), md))) {
+                        try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
+                            overallread = ByteStreams.copy(bis, bdos);
                         }
                     }
 
@@ -262,7 +257,7 @@ public class DeviceSimulatorUpdater {
                 }
 
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download {} with {}", url, e.getMessage());
+                LOGGER.error("Failed to download" + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 
@@ -272,6 +267,10 @@ public class DeviceSimulatorUpdater {
         }
 
         private static String hideTokenDetails(final String targetToken) {
+            if (targetToken == null) {
+                return "<NULL!>";
+            }
+
             if (targetToken.isEmpty()) {
                 return "<EMTPTY!>";
             }

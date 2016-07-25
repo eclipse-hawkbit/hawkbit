@@ -16,8 +16,8 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +56,7 @@ public class EventDistributorTest {
     @Test
     public void distributeDistributedEventSendsToRedis() {
 
-        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 10);
+        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 500L, 100L, 200L);
         underTest.distribute(event);
 
         // origin node ID should be set by distributing the event
@@ -67,7 +67,7 @@ public class EventDistributorTest {
     @Test
     public void dontDistributeDistributedEventIfSameNode() {
         final String knownNodeId = EventDistributor.getNodeId();
-        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 10);
+        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 500L, 100L, 200L);
         event.setNodeId(knownNodeId);
 
         // test
@@ -79,7 +79,7 @@ public class EventDistributorTest {
 
     @Test
     public void handleDistributedMessageFromRedis() {
-        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 10);
+        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 500L, 100L, 200L);
         final String knownChannel = "someChannel";
 
         underTest.handleMessage(event, knownChannel);
@@ -90,7 +90,7 @@ public class EventDistributorTest {
 
     @Test
     public void handleDistributedMessageFilteredIfSameNodeId() {
-        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 10);
+        final DownloadProgressEvent event = new DownloadProgressEvent("tenant", 123L, 500L, 100L, 200L);
         final String knownChannel = "someChannel";
         event.setOriginNodeId(EventDistributor.getNodeId());
 

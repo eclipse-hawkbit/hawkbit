@@ -82,9 +82,15 @@ public class HawkbitSecurityProperties {
         private String blacklist = "";
 
         /**
-         * Name of the http header from which the remote ip is extracted.
+         * Name of the http header from which the remote ip is extracted for DDI
+         * connected clients.
          */
         private String remoteIpHeader = "X-Forwarded-For";
+
+        /**
+         * Set to <code>true</code> if DDI clients remote IP should be stored.
+         */
+        private boolean trackRemoteIp = true;
 
         public String getBlacklist() {
             return blacklist;
@@ -100,6 +106,14 @@ public class HawkbitSecurityProperties {
 
         public void setRemoteIpHeader(final String remoteIpHeader) {
             this.remoteIpHeader = remoteIpHeader;
+        }
+
+        public boolean isTrackRemoteIp() {
+            return trackRemoteIp;
+        }
+
+        public void setTrackRemoteIp(final boolean trackRemoteIp) {
+            this.trackRemoteIp = trackRemoteIp;
         }
     }
 

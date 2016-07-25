@@ -95,9 +95,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         if (values == null) {
             values = Collections.emptySet();
         }
-        if (values.contains(null)) {
-            LOG.warn("Null values in table content. How could this happen?");
-        }
         return values;
     }
 
@@ -150,6 +147,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
             } else {
                 setValue(getItemIdToSelect());
             }
+        }
+    }
+
+    /**
+     * Select all rows in the table.
+     */
+    protected void selectAll() {
+        if (isMultiSelect()) {
+            // only contains the ItemIds of the visible items in the table
+            setValue(getItemIds());
         }
     }
 

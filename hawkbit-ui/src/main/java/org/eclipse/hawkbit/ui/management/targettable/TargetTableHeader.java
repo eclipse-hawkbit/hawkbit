@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,9 +64,6 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Autowired
     private ManagementUIState managementUIState;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
@@ -175,22 +172,22 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponetIdProvider.TARGET_TEXT_FIELD;
+        return SPUIComponentIdProvider.TARGET_TEXT_FIELD;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_SEARCH_RESET_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_SEARCH_RESET_ID;
     }
 
     @Override
     protected String getAddIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_ADD_ICON_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_ADD_ICON_ID;
     }
 
     @Override
     protected String getBulkUploadIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_BULK_UPLOAD_ICON_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_BULK_UPLOAD_ICON_ID;
     }
 
     @Override
@@ -200,12 +197,12 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getDropFilterId() {
-        return SPUIComponetIdProvider.TARGET_DROP_FILTER_ICON;
+        return SPUIComponentIdProvider.TARGET_DROP_FILTER_ICON;
     }
 
     @Override
     protected String getDropFilterWrapperId() {
-        return SPUIComponetIdProvider.TARGET_FILTER_WRAPPER_ID;
+        return SPUIComponentIdProvider.TARGET_FILTER_WRAPPER_ID;
     }
 
     @Override
@@ -225,20 +222,20 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getShowFilterButtonLayoutId() {
-        return SPUIComponetIdProvider.SHOW_TARGET_TAGS;
+        return SPUIComponentIdProvider.SHOW_TARGET_TAGS;
     }
 
     @Override
     protected void showFilterButtonsLayout() {
         managementUIState.setTargetTagFilterClosed(false);
-        eventBus.publish(this, ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT);
+        eventbus.publish(this, ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT);
     }
 
     @Override
     protected void resetSearchText() {
         if (managementUIState.getTargetTableFilters().getSearchText().isPresent()) {
             managementUIState.getTargetTableFilters().setSearchText(null);
-            eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+            eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
     }
 
@@ -249,19 +246,19 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getMaxMinIconId() {
-        return SPUIComponetIdProvider.TARGET_MAX_MIN_TABLE_ICON;
+        return SPUIComponentIdProvider.TARGET_MAX_MIN_TABLE_ICON;
     }
 
     @Override
     public void maximizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.TRUE);
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED,null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED,null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.FALSE);
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED,null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED,null));
     }
 
     @Override
@@ -277,12 +274,12 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         managementUIState.getTargetTableFilters().setSearchText(newSearchText);
-        eventBus.publish(this, TargetFilterEvent.FILTER_BY_TEXT);
+        eventbus.publish(this, TargetFilterEvent.FILTER_BY_TEXT);
     }
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+        eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
         targetAddUpdateWindow.resetComponents();
         final Window addTargetWindow = targetAddUpdateWindow.getWindow();
         addTargetWindow.setCaption(i18n.get("caption.add.new.target"));
@@ -337,7 +334,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         if (doValidations(event)) {
             final TableTransferable tableTransferable = (TableTransferable) event.getTransferable();
             final Table source = tableTransferable.getSourceComponent();
-            if (source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+            if (source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
                 final Set<DistributionSetIdName> distributionIdSet = getDropppedDistributionDetails(tableTransferable);
                 if (distributionIdSet != null && !distributionIdSet.isEmpty()) {
                     final DistributionSetIdName distributionSetIdName = distributionIdSet.iterator().next();
@@ -361,7 +358,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final TableTransferable transferable = (TableTransferable) dragEvent.getTransferable();
             final Table source = transferable.getSourceComponent();
 
-            if (!source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+            if (!source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
                 notification.displayValidationError(i18n.get("message.action.not.allowed"));
                 isValid = Boolean.FALSE;
             } else {
@@ -401,13 +398,13 @@ public class TargetTableHeader extends AbstractTableHeader {
         getFilterDroppedInfo().setSizeFull();
         getFilterDroppedInfo().addComponent(filteredDistLabel);
         getFilterDroppedInfo().addComponent(filterLabelClose);
-        getFilterDroppedInfo().setExpandRatio(filteredDistLabel, 1.0f);
-        eventBus.publish(this, TargetFilterEvent.FILTER_BY_DISTRIBUTION);
+        getFilterDroppedInfo().setExpandRatio(filteredDistLabel, 1.0F);
+        eventbus.publish(this, TargetFilterEvent.FILTER_BY_DISTRIBUTION);
     }
 
     private void closeFilterByDistribution() {
 
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+        eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
         /* Remove filter by distribution information. */
         getFilterDroppedInfo().removeAllComponents();
         getFilterDroppedInfo().setSizeUndefined();
@@ -415,7 +412,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         managementUIState.getTargetTableFilters().setDistributionSet(null);
 
         /* Reload the table */
-        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
+        eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
     }
 
     @Override

@@ -88,6 +88,11 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_STATUS = "Status";
 
     /**
+     * Actions column.
+     */
+    public static final String ACTIONS_COLUMN = "Actions";
+
+    /**
      * Action history messages of particular action update.
      */
     public static final String ACTION_HIS_TBL_MSGS = "Messages";
@@ -271,7 +276,7 @@ public final class SPUIDefinitions {
     /**
      * New Target discard icon id.
      */
-    public static final String NEW_TARGET_DISCARD = "target.add.discard";
+    // public static final String NEW_TARGET_DISCARD = "target.add.discard";
     /**
      * New Target add icon id.
      */
@@ -344,14 +349,6 @@ public final class SPUIDefinitions {
      * New Target tag color lable id.
      */
     public static final String NEW_TARGET_TAG_COLOR = "target.tag.add.color";
-    /**
-     * New Target tag save icon id.
-     */
-    public static final String NEW_TARGET_TAG_SAVE = "target.tag.add.save";
-    /**
-     * New Target tag discard icon id.
-     */
-    public static final String NEW_TARGET_TAG_DISRACD = "target.tag.add.discard";
     /**
      * New Target tag add icon id.
      */
@@ -923,6 +920,11 @@ public final class SPUIDefinitions {
     public static final String CUSTOM_FILTER_ASSIGNED_DS = "Assigned DS";
 
     /**
+     * TARGET_FILTER_MANAGEMENT - header caption .
+     */
+    public static final String TARGET_FILTER_LIST_HEADER_CAPTION = "Custom Filters";
+
+    /**
      * CUSTOM_FILTER_STATUS.
      */
     public static final String TARGET_FILTER_STATUS = "Status";
@@ -1000,7 +1002,6 @@ public final class SPUIDefinitions {
      * Rollout group started date column property.
      */
     public static final String ROLLOUT_GROUP_STARTED_DATE = "Started date";
-
 
     /**
      * Rollout group status column property.

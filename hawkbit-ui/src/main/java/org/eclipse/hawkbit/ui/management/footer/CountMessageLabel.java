@@ -14,9 +14,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +95,7 @@ public class CountMessageLabel extends Label {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent event) {
-        if (TargetTableEvent.TargetComponentEvent.SELLECT_ALL == event.getTargetComponentEvent()
+        if (TargetTableEvent.TargetComponentEvent.SELECT_ALL == event.getTargetComponentEvent()
                 || TargetComponentEvent.REFRESH_TARGETS == event.getTargetComponentEvent()) {
             displayTargetCountStatus();
         }
@@ -125,7 +125,7 @@ public class CountMessageLabel extends Label {
         /* Create label for Targets count message displaying below the table */
         addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
-        setId(SPUIComponetIdProvider.COUNT_LABEL);
+        setId(SPUIComponentIdProvider.COUNT_LABEL);
     }
 
     private void displayTargetCountStatus() {

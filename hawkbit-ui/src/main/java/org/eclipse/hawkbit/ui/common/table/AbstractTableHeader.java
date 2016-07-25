@@ -36,10 +36,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Parent class for table header.
- * 
- *
- *
- * 
  */
 public abstract class AbstractTableHeader extends VerticalLayout {
 
@@ -213,7 +209,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("filter-box", "text-style filter-box-hide",
+        final TextField textField = SPUIComponentProvider.getTextField("", "filter-box", "text-style filter-box-hide",
                 false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         textField.setId(getSearchBoxId());
         textField.setWidth(100.0f, Unit.PERCENTAGE);
@@ -235,14 +231,14 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private Button createAddIcon() {
         final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
                 SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> addNewItem(event));
+        button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createBulkUploadIcon() {
         final Button button = SPUIComponentProvider.getButton(getBulkUploadIconId(), "", "", null, false,
                 FontAwesome.UPLOAD, SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> bulkUpload(event));
+        button.addClickListener(this::bulkUpload);
         return button;
     }
 

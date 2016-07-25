@@ -19,7 +19,7 @@
    </parent>
 
    <artifactId>hawkbit-device-simulator</artifactId>
-   <name>hawkBit :: Device Simulator</name>
+   <name>hawkBit-example :: Device Simulator</name>
    <description>Device Management Federation API based simulator</description>
 
    <build>
@@ -72,6 +72,10 @@
          <artifactId>spring-boot-starter-web</artifactId>
       </dependency>
       <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-logging</artifactId>
+      </dependency>
+      <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-web</artifactId>
       </dependency>
@@ -82,16 +86,6 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-log4j2</artifactId>
       </dependency>
       <dependency>
          <groupId>com.vaadin</groupId>
@@ -107,22 +101,16 @@
          <artifactId>spring-boot-autoconfigure</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-autoconfigure</artifactId>
-      </dependency>
-      <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-jackson</artifactId>
-         <version>8.14.1</version>
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
-         <version>8.12.1</version>
       </dependency>
       <dependency>
          <groupId>com.jayway.jsonpath</groupId>

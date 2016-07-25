@@ -11,8 +11,7 @@
 
   //Color picker layout position adjustment
   .rgb-vertical-layout {
-    margin-top: 100px !important;
-    padding-bottom: 50px;
+    padding-bottom: 12px;
   }
 
   //Discard icon in create/update popup
@@ -47,4 +46,15 @@
     box-shadow: none !important;
     height: 75px !important;
   }
+  
+   .v-window-fontsize .v-window-closebox,
+   .v-window-fontsize .v-window-maximizebox,
+   .v-window-fontsize .v-window-restorebox {
+  	 font-size: 16px;
+  }
+  
+   .marginTop {
+  	margin-top: 20px !important;
+  }
+  
 }

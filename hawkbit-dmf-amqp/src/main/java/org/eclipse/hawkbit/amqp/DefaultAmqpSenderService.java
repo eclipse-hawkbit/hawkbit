@@ -9,10 +9,14 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.eclipse.hawkbit.util.IpUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
 
 /**
  * A default implementation for the sender service. The service sends all amqp
@@ -20,6 +24,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * extracted from the uri.
  */
 public class DefaultAmqpSenderService implements AmqpSenderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmqpSenderService.class);
 
     private final RabbitTemplate internalAmqpTemplate;
 
@@ -39,7 +44,17 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
             return;
         }
 
-        internalAmqpTemplate.send(extractExchange(replyTo), null, message);
+        final String correlationId = UUID.randomUUID().toString();
+        final String exchange = extractExchange(replyTo);
+        message.getMessageProperties().setCorrelationId(correlationId.getBytes());
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);
+        } else {
+            LOGGER.debug("Sending message to exchange {} with correlationId {}", exchange, correlationId);
+        }
+
+        internalAmqpTemplate.send(exchange, null, message, new CorrelationData(correlationId));
     }
 
 }

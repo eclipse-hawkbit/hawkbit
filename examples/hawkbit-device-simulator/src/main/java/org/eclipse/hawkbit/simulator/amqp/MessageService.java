@@ -82,21 +82,4 @@ public class MessageService {
                 clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
-
-    /**
-     * Method to verify if lwm2m header is set.
-     *
-     * @param message
-     *            the message with the header
-     * @param header
-     *            the header to verify
-     */
-    public void checkIfLwm2mHeaderEmpty(final Message message, final String header) {
-        final Object headerObject = message.getMessageProperties().getHeaders().get(header);
-        if (null == headerObject) {
-            logAndThrowMessageError(message, "Header of " + header + "empty.");
-        }
-
-    }
-
 }

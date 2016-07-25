@@ -20,7 +20,7 @@ public class AsyncConfigurerThreadpoolProperties {
     /**
      * Max queue size for central event executor.
      */
-    private Integer queuesize = 250;
+    private Integer queuesize = 5_000;
 
     /**
      * Core processing threads for central event executor.
@@ -30,7 +30,12 @@ public class AsyncConfigurerThreadpoolProperties {
     /**
      * Maximum thread pool size for central event executor.
      */
-    private Integer maxthreads = 50;
+    private Integer maxthreads = 20;
+
+    /**
+     * Core processing threads for scheduled event executor.
+     */
+    private Integer schedulerThreads = 3;
 
     /**
      * When the number of threads is greater than the core, this is the maximum
@@ -68,6 +73,14 @@ public class AsyncConfigurerThreadpoolProperties {
 
     public void setIdletimeout(final Long idletimeout) {
         this.idletimeout = idletimeout;
+    }
+
+    public Integer getSchedulerThreads() {
+        return schedulerThreads;
+    }
+
+    public void setSchedulerThreads(final Integer schedulerThreads) {
+        this.schedulerThreads = schedulerThreads;
     }
 
 }

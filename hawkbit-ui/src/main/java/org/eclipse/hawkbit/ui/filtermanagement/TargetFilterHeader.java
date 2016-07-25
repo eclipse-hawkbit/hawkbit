@@ -13,11 +13,10 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -79,9 +78,8 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel("Custom Filters",
+        return SPUIComponentProvider.getLabel(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION,
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
     }
 
     private void buildLayout() {
@@ -110,10 +108,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton("camp.search.add.Id", "Create Filter", "Create Filter",
-                "", false, null, SPUIButtonStyleSmall.class);
+        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.TARGET_FILTER_ADD_ICON_ID, "", "",
+                null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> addNewFilter());
-        button.addStyleName("on-focus-no-border link");
         return button;
     }
 
@@ -124,7 +121,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField campSearchTextField = SPUIComponentProvider.getTextField("filter-box",
+        final TextField campSearchTextField = SPUIComponentProvider.getTextField(null, "filter-box",
                 "text-style filter-box-hide", false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         campSearchTextField.setId("target.filter.search.text.Id");
         campSearchTextField.setWidth(500.0f, Unit.PIXELS);
@@ -179,7 +176,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private String getSearchRestIconId() {
-        return SPUIComponetIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID;
+        return SPUIComponentIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID;
     }
 
     protected void resetSearchText() {

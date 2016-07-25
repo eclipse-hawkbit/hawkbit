@@ -10,17 +10,13 @@ package org.eclipse.hawkbit.util;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.AmqpTestConfiguration;
-import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
-import org.eclipse.hawkbit.TestConfiguration;
-import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,27 +31,27 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Artifact URL Handler")
 @Stories("Test to generate the artifact download URL")
-@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
-        AmqpTestConfiguration.class })
+@SpringApplicationConfiguration(classes = { AmqpTestConfiguration.class,
+        org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
+
+    private static final String HTTPS_LOCALHOST = "https://localhost:8080/";
+    private static final String HTTP_LOCALHOST = "http://localhost:8080/";
 
     @Autowired
     private ArtifactUrlHandler urlHandlerProperties;
-    @Autowired
-    private TenantAware tenantAware;
+
     private LocalArtifact localArtifact;
-    private final String controllerId = "Test";
+    private static final String CONTROLLER_ID = "Test";
     private String fileName;
     private Long softwareModuleId;
     private String sha1Hash;
 
     @Before
     public void setup() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final SoftwareModule module = dsA.getModules().iterator().next();
-        localArtifact = (LocalArtifact) TestDataUtil.generateArtifacts(artifactManagement, module.getId()).stream()
-                .findAny().get();
+        localArtifact = testdataFactory.createLocalArtifacts(module.getId()).stream().findAny().get();
         softwareModuleId = localArtifact.getSoftwareModule().getId();
         fileName = localArtifact.getFilename();
         sha1Hash = localArtifact.getSha1Hash();
@@ -66,10 +62,10 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     @Description("Tests the generation of http download url.")
     public void testHttpUrl() {
 
-        final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
+        final String url = urlHandlerProperties.getUrl(CONTROLLER_ID, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTP);
         assertEquals("http is build incorrect",
-                "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + CONTROLLER_ID
                         + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
                         + localArtifact.getFilename(),
                 url);
@@ -78,10 +74,10 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     @Test
     @Description("Tests the generation of https download url.")
     public void testHttpsUrl() {
-        final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
+        final String url = urlHandlerProperties.getUrl(CONTROLLER_ID, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTPS);
         assertEquals("https is build incorrect",
-                "https://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                HTTPS_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + CONTROLLER_ID
                         + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
                         + localArtifact.getFilename(),
                 url);
@@ -90,10 +86,10 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     @Test
     @Description("Tests the generation of coap download url.")
     public void testCoapUrl() {
-        final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
+        final String url = urlHandlerProperties.getUrl(CONTROLLER_ID, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.COAP);
 
         assertEquals("coap is build incorrect", "coap://127.0.0.1:5683/fw/" + tenantAware.getCurrentTenant() + "/"
-                + controllerId + "/sha1/" + localArtifact.getSha1Hash(), url);
+                + CONTROLLER_ID + "/sha1/" + localArtifact.getSha1Hash(), url);
     }
 }

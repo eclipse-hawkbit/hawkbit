@@ -14,12 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Auditor class that allows {@link BaseEntity}s to insert currenlt logged in
- * user for repository changes.
- *
- *
- *
- *
+ * Auditor class that allows BaseEntitys to insert current logged in user for
+ * repository changes.
  *
  */
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
@@ -29,16 +25,21 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (isAuthenticationInvalid(authentication)) {
             return null;
         }
 
-        if (authentication.getPrincipal() != null) {
-            if (authentication.getPrincipal() instanceof UserDetails) {
-                return ((UserDetails) authentication.getPrincipal()).getUsername();
-            }
-            return authentication.getPrincipal().toString();
+        return getCurrentAuditor(authentication);
+    }
+
+    private String getCurrentAuditor(final Authentication authentication) {
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            return ((UserDetails) authentication.getPrincipal()).getUsername();
         }
-        return null;
+        return authentication.getPrincipal().toString();
+    }
+
+    private static boolean isAuthenticationInvalid(final Authentication authentication) {
+        return authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null;
     }
 }

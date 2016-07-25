@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
-import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -34,11 +32,12 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,6 +47,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -57,6 +57,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
+@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
 
     private static final String TENANT = "default";
@@ -100,6 +101,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
@@ -107,8 +109,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Test
     @Description("Verfies that download and install event with 3 software moduls and no artifacts works")
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 1L, TENANT, CONTROLLER_ID, 1L, dsA.getModules(), AMQP_URI, TEST_TOKEN);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
@@ -116,6 +117,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("Expecting a size of 3 software modules in the reuqest", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
@@ -137,11 +139,10 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Test
     @Description("Verfies that download and install event with software moduls and artifacts works")
     public void testSendDownloadRequest() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final SoftwareModule module = dsA.getModules().iterator().next();
         final List<DbArtifact> receivedList = new ArrayList<>();
-        for (final Artifact artifact : TestDataUtil.generateArtifacts(artifactManagement, module.getId())) {
+        for (final Artifact artifact : testdataFactory.createLocalArtifacts(module.getId())) {
             module.addArtifact((LocalArtifact) artifact);
             receivedList.add(new DbArtifact());
         }
@@ -155,6 +156,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
+
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {

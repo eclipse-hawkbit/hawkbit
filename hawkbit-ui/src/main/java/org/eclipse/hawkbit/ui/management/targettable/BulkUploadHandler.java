@@ -26,11 +26,12 @@ import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
@@ -97,6 +98,8 @@ public class BulkUploadHandler extends CustomComponent
 
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
+    private transient EntityFactory entityFactory;
+
     /**
      *
      * @param targetBulkUpdateWindowLayout
@@ -124,6 +127,7 @@ public class BulkUploadHandler extends CustomComponent
         this.eventBus = targetBulkUpdateWindowLayout.getEventBus();
         distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         tagManagement = SpringContextHelper.getBean(TagManagement.class);
+        entityFactory = SpringContextHelper.getBean(EntityFactory.class);
     }
 
     /**
@@ -380,7 +384,7 @@ public class BulkUploadHandler extends CustomComponent
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            final Target newTarget = new Target(newControllerId);
+            final Target newTarget = entityFactory.generateTarget(newControllerId);
             setTargetValues(newTarget, newName, newDesc);
             targetManagement.createTarget(newTarget);
             managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);

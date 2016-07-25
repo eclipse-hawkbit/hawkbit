@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.eventbus.EventBusSubscriberProcessor;
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
-import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -106,8 +106,13 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (getSelectedBaseEntity() == null) {
             return;
         }
+        targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
+        // targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
+        openWindow();
+    }
+
+    private void openWindow() {
         final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-        targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
@@ -115,7 +120,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponetIdProvider.TARGET_EDIT_ICON;
+        return SPUIComponentIdProvider.TARGET_EDIT_ICON;
     }
 
     @Override
@@ -157,23 +162,23 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
         final Label controllerLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.target.id"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(controllerId) == null ? "" : controllerId);
-        controllerLabel.setId(SPUIComponetIdProvider.TARGET_CONTROLLER_ID);
+        controllerLabel.setId(SPUIComponentIdProvider.TARGET_CONTROLLER_ID);
         detailsTabLayout.addComponent(controllerLabel);
 
         final Label lastPollDtLabel = SPUIComponentProvider.createNameValueLabel(
                 getI18n().get("label.target.lastpolldate"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(lastQueryDate) == null ? "" : lastQueryDate);
-        lastPollDtLabel.setId(SPUIComponetIdProvider.TARGET_LAST_QUERY_DT);
+        lastPollDtLabel.setId(SPUIComponentIdProvider.TARGET_LAST_QUERY_DT);
         detailsTabLayout.addComponent(lastPollDtLabel);
 
         final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.ip"),
                 address == null ? StringUtils.EMPTY : address.toString());
-        typeLabel.setId(SPUIComponetIdProvider.TARGET_IP_ADDRESS);
+        typeLabel.setId(SPUIComponentIdProvider.TARGET_IP_ADDRESS);
         detailsTabLayout.addComponent(typeLabel);
 
         if (securityToken != null) {
             final HorizontalLayout securityTokenLayout = getSecurityTokenLayout(securityToken);
-            controllerLabel.setId(SPUIComponetIdProvider.TARGET_SECURITY_TOKEN);
+            controllerLabel.setId(SPUIComponentIdProvider.TARGET_SECURITY_TOKEN);
             detailsTabLayout.addComponent(securityTokenLayout);
         }
     }
@@ -240,12 +245,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected String getTabSheetId() {
-        return SPUIComponetIdProvider.TARGET_DETAILS_TABSHEET;
+        return SPUIComponentIdProvider.TARGET_DETAILS_TABSHEET;
     }
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponetIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+        return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
 
 }

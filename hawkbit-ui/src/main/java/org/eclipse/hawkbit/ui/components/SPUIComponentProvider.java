@@ -155,6 +155,8 @@ public final class SPUIComponentProvider {
     /**
      * Get Label UI component.
      * 
+     * @param caption
+     *            set the caption of the textfield
      * @param style
      *            set style
      * @param styleName
@@ -163,7 +165,7 @@ public final class SPUIComponentProvider {
      *            to set field as mandatory
      * @param data
      *            component data
-     * @param promt
+     * @param prompt
      *            prompt user for input
      * @param immediate
      *            set component's immediate mode specified mode
@@ -171,14 +173,18 @@ public final class SPUIComponentProvider {
      *            maximum characters allowed
      * @return TextField text field
      */
-    public static TextField getTextField(final String style, final String styleName, final boolean required,
-            final String data, final String promt, final boolean immediate, final int maxLengthAllowed) {
-        return SPUITextFieldDecorator.decorate(style, styleName, required, data, promt, immediate, maxLengthAllowed);
+    public static TextField getTextField(final String caption, final String style, final String styleName,
+            final boolean required, final String data, final String prompt, final boolean immediate,
+            final int maxLengthAllowed) {
+        return SPUITextFieldDecorator.decorate(caption, style, styleName, required, data, prompt, immediate,
+                maxLengthAllowed);
     }
 
     /**
      * Get Label UI component. *
      * 
+     * @param caption
+     *            set the caption of the textArea
      * @param style
      *            set style
      * @param styleName
@@ -193,14 +199,16 @@ public final class SPUIComponentProvider {
      *            maximum characters allowed
      * @return TextArea text area
      */
-    public static TextArea getTextArea(final String style, final String styleName, final boolean required,
-            final String data, final String promt, final int maxLength) {
-        return SPUITextAreaDecorator.decorate(style, styleName, required, data, promt, maxLength);
+    public static TextArea getTextArea(final String caption, final String style, final String styleName,
+            final boolean required, final String data, final String promt, final int maxLength) {
+        return SPUITextAreaDecorator.decorate(caption, style, styleName, required, data, promt, maxLength);
     }
 
     /**
      * Get Label UI component.
      * 
+     * @param caption
+     *            caption of the combo box
      * @param height
      *            combo box height
      * @param width
@@ -217,9 +225,9 @@ public final class SPUIComponentProvider {
      *            input prompt
      * @return ComboBox
      */
-    public static ComboBox getComboBox(final String height, final String width, final String style,
-            final String styleName, final boolean required, final String data, final String promt) {
-        return SPUIComboBoxDecorator.decorate(height, width, style, styleName, required, data, promt);
+    public static ComboBox getComboBox(final String caption, final String height, final String width,
+            final String style, final String styleName, final boolean required, final String data, final String promt) {
+        return SPUIComboBoxDecorator.decorate(caption, height, width, style, styleName, required, data, promt);
     }
 
     /**

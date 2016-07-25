@@ -21,13 +21,12 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -39,7 +38,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -66,7 +65,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- *
  */
 @SpringComponent
 @ViewScope
@@ -120,7 +118,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.DIST_TABLE_ID;
+        return SPUIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override
@@ -322,11 +320,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (!validateSoftwareModule(sm, ds)) {
             return false;
         }
-        try {
-            distributionSetManagement.checkDistributionSetAlreadyUse(ds);
-        } catch (final EntityLockedException exception) {
-            LOG.error("Unable to update distribution : ", exception);
-            notification.displayValidationError(exception.getMessage());
+
+        if (distributionSetManagement.isDistributionSetInUse(ds)) {
+            notification.displayValidationError(
+                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
+                            ds.getName(), ds.getVersion()));
             return false;
         }
         return true;
@@ -392,7 +390,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final Component compsource = dragEvent.getTransferable().getSourceComponent();
             final Table source = (Table) compsource;
             if (compsource instanceof Table) {
-                if (!source.getId().equals(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)) {
+                if (!source.getId().equals(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)) {
                     notification.displayValidationError(i18n.get("message.action.not.allowed"));
                     return false;
                 }
@@ -454,7 +452,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
             manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
         }
-        select(baseEntity.getDistributionSetIdName());
+        select(DistributionSetIdName.generate(baseEntity));
         return item;
     }
 
@@ -469,7 +467,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
-
     }
 
 }

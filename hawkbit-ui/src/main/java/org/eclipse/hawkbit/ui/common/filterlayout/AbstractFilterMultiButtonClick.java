@@ -22,7 +22,8 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 public abstract class AbstractFilterMultiButtonClick extends AbstractFilterButtonClickBehaviour {
 
-    protected final Set<Button> alreadyClickedButtons = new HashSet<>();
+    private static final long serialVersionUID = 1L;
+    protected final transient Set<Button> alreadyClickedButtons = new HashSet<>();
 
     /*
      * (non-Javadoc)

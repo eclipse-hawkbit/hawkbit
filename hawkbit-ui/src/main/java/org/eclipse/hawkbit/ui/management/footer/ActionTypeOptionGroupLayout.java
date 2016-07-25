@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
@@ -56,6 +57,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         createOptionGroup();
         addValueChangeListener();
         setStyleName("dist-window-actiontype-horz-layout");
+        setSizeUndefined();
     }
 
     private void addValueChangeListener() {
@@ -97,6 +99,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(forceLabel);
 
         final FlexibleOptionGroupItemComponent softItem = actionTypeOptionGroup.getItemComponent(ActionTypeOption.SOFT);
+        softItem.setId(SPUIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
         softItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(softItem);
         final Label softLabel = new Label();
@@ -127,8 +130,8 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         forcedTimeDateField.setStyleName("dist-window-forcedtime");
 
         final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-        forcedTimeDateField.setValue(Date.from(LocalDateTime.now().plusWeeks(2)
-                .atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
+        forcedTimeDateField.setValue(
+                Date.from(LocalDateTime.now().plusWeeks(2).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         forcedTimeDateField.setImmediate(true);
         forcedTimeDateField.setTimeZone(tz);
         forcedTimeDateField.setLocale(i18n.getLocale());
