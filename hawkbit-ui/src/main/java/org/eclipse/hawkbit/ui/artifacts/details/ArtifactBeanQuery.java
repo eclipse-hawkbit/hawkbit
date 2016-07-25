@@ -69,7 +69,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     @Override
     protected LocalArtifact constructBean() {
-        return entityFactory.generateLocalArtifact();
+        return getEntityFactory().generateLocalArtifact();
     }
 
     @Override
