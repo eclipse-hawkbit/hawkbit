@@ -107,4 +107,14 @@ public class BaseAmqpService {
     protected RabbitTemplate getRabbitTemplate() {
         return rabbitTemplate;
     }
+
+    /**
+     * Clean message properties before sending a message.
+     * 
+     * @param message
+     *            the message to cleaned up
+     */
+    protected void cleanMessageHeaderProperties(final Message message) {
+        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
+    }
 }
