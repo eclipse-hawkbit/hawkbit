@@ -146,7 +146,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getTabSheetId() {
-        return SPUIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
+        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
 
     @Override
