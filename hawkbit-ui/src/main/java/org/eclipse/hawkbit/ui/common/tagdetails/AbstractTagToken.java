@@ -211,11 +211,11 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             unassignTag(tagDetails.get(tokenId).getName());
         }
 
-    }
+        private Property getItemNameProperty(final Object tokenId) {
+            final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+            return item.getItemProperty("name");
+        }
 
-    private Property getItemNameProperty(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
-        return item.getItemProperty("name");
     }
 
     private String getColor(final Object tokenId) {
