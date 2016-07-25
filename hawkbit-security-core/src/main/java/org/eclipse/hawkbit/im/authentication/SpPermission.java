@@ -185,16 +185,20 @@ public final class SpPermission {
                 field.setAccessible(true);
                 try {
                     final String role = (String) field.get(null);
-                    if (!(exclusionRoles.contains(role))) {
-                        allPermissions.add(role);
-                    }
+                    addIfNotExcluded(exclusionRoles, allPermissions, role);
                 } catch (final IllegalAccessException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-
             }
         }
         return allPermissions;
+    }
+
+    private static void addIfNotExcluded(final Collection<String> exclusionRoles, final List<String> allPermissions,
+            final String role) {
+        if (!(exclusionRoles.contains(role))) {
+            allPermissions.add(role);
+        }
     }
 
     /**
