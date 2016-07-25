@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -417,7 +418,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private static String convertCorrelationId(final Message message) {
-        return new String(message.getMessageProperties().getCorrelationId());
+        return new String(message.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8);
     }
 
     private Action getUpdateActionStatus(final ActionStatus actionStatus) {
