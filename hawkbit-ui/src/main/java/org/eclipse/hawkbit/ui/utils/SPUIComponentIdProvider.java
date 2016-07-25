@@ -962,6 +962,70 @@ public final class SPUIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
+ /**
+     * Software module table - Manage metadata id.
+     */
+    public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
+    
+    
+    /**
+     * Metadata key id.
+     */
+    public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
+    
+    /**
+     * Metadata value id.
+     */
+    public static final String METADATA_VALUE_ID = "metadata.value.id";
+    /**
+     * Metadata save id.
+     */
+    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
+    
+    /**
+     * Metadata discard id.
+     */
+    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
+    
+    /**
+     * Metadata add icon id.
+     */
+    public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
+    /**
+     * Metadata table id.
+     */
+    public static final String METDATA_TABLE_ID = "metadata.table.id";
+    
+    /**
+     * Distribution set table - Manage metadata id.
+     */
+    public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
+    
+   /**
+     * DistributionSet - Metadata button id.
+     */
+    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
+    
+    /**
+     * Metadata popup id.
+     */
+    public static final String METADATA_POPUP_ID = "metadata.popup.id";
+    
+    /**
+     * DistributionSet table details tab id in Distributions .
+     */
+    public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
+    
+    /**
+     * Software module table details tab id in Distributions .
+     */
+    public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
+    
+    /**
+     * Software Module - Metadata button id.
+     */
+    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
+    
     /**
      * Table multiselect for selecting DistType
      */

@@ -190,6 +190,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
         if (null != content) {
             mainLayout.addComponent(content);
+            mainLayout.setExpandRatio(content, 1.0F);
         }
 
         createMandatoryLabel();
@@ -199,6 +200,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
 
         setCaption(caption);
+        setCaptionAsHtml(true);
         setContent(mainLayout);
         setResizable(false);
         center();
@@ -224,7 +226,21 @@ public class CommonDialogWindow extends Window implements Serializable {
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
     }
 
-    private final void addListeners() {
+    protected void addListeners() {
+        addComponenetListeners();
+        addCloseListenerForSaveButton();
+        addCloseListenerForCancelButton();
+    }
+
+    protected void addCloseListenerForSaveButton() {
+        saveButton.addClickListener(close);
+    }
+
+    protected void addCloseListenerForCancelButton() {
+        cancelButton.addClickListener(close);
+    }
+
+    protected void addComponenetListeners() {
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
@@ -236,9 +252,6 @@ public class CommonDialogWindow extends Window implements Serializable {
                 field.addValueChangeListener(new ChangeListener(field));
             }
         }
-
-        saveButton.addClickListener(close);
-        cancelButton.addClickListener(close);
     }
 
     private boolean isSaveButtonEnabledAfterValueChange(final Component currentChangedComponent,
@@ -378,6 +391,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
+        buttonsLayout.setSpacing(true);
         buttonsLayout.addStyleName("actionButtonsMargin");
 
         createSaveButton();
@@ -412,6 +426,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
                 FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
+        cancelButton.addStyleName("default-color");
         if (cancelButtonClickListener != null) {
             cancelButton.addClickListener(cancelButtonClickListener);
         }
@@ -425,6 +440,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
+        saveButton.addStyleName("default-color");
         saveButton.addClickListener(saveButtonClickListener);
         saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);
@@ -490,4 +506,15 @@ public class CommonDialogWindow extends Window implements Serializable {
         component.addValueChangeListener(new ChangeListener(component));
     }
 
+    public VerticalLayout getMainLayout() {
+        return mainLayout;
+    }
+
+    public void setSaveButtonEnabled(final boolean enabled) {
+        saveButton.setEnabled(enabled);
+    }
+
+    public void setCancelButtonEnabled(final boolean enabled) {
+        cancelButton.setEnabled(enabled);
+    }
 }

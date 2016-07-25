@@ -21,10 +21,14 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -38,8 +42,11 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
@@ -59,6 +66,9 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    
+    @Autowired
+    private SwMetadataPopupLayout swMetadataPopupLayout;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SMFilterEvent filterEvent) {
@@ -179,9 +189,25 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
+    protected void addCustomGeneratedColumns() {
+        addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
+            private static final long serialVersionUID = 117186282275044399L;
+
+            @Override
+            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
+                final String nameVersionStr = getNameAndVerion(itemId);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
+                return manageMetaDataBtn;
+            }
+        });
+    }
+    
+    @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
             return columnList;
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
@@ -211,4 +237,26 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
 
+    
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
+    }
+    
+    private String getNameAndVerion(final Object itemId) {
+        final Item item = getItem(itemId);
+        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
+        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
+        return name + "." + version;
+    }
+    
+    private void showMetadataDetails(Long itemId, String nameVersionStr) {
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+                /* display the window */
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
+    }
 }
