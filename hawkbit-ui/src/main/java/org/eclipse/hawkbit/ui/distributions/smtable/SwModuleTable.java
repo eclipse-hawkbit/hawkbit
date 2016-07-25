@@ -51,6 +51,7 @@ import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -77,6 +78,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
+    
+    @Autowired
+    private SwMetadataPopupLayout swMetadataPopupLayout;
 
     /**
      * Initialize the filter layout.
@@ -175,16 +179,19 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void addCustomGeneratedColumns() {
 
         addGeneratedColumn(SPUILabelDefinitions.ARTIFACT_ICON, new ColumnGenerator() {
-
             private static final long serialVersionUID = -5982361782989980277L;
-
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
+                HorizontalLayout iconLayout = new HorizontalLayout();
                 // add artifactory details popup
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button showArtifactDtlsBtn = createShowArtifactDtlsButton(nameVersionStr);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
                 showArtifactDtlsBtn.addClickListener(event -> showArtifactDetailsWindow((Long) itemId, nameVersionStr));
-                return showArtifactDtlsBtn;
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
+                iconLayout.addComponent(showArtifactDtlsBtn);
+                iconLayout.addComponent(manageMetaDataBtn);
+                return iconLayout;
             }
         });
     }
@@ -207,6 +214,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @Override
     protected void publishEntityAfterValueChange(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        if(selectedLastEntity!=null){
+            manageDistUIState.setSelectedBaseSwModuleId(selectedLastEntity.getId());
+        }
     }
 
     @Override
@@ -310,10 +320,19 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private Button createShowArtifactDtlsButton(final String nameVersionStr) {
         final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.FILE_O, SPUIButtonStyleSmallNoBorder.class);
         showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));
         return showArtifactDtlsBtn;
+    }
+
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
     }
 
     private String getNameAndVerion(final Object itemId) {
@@ -386,6 +405,11 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvilableSwModule(!available);
 
+    }
+
+    private void showMetadataDetails(Long itemId) {
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
     }
 
 }
