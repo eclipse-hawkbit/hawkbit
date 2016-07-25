@@ -518,6 +518,10 @@ public final class SPUIComponentIdProvider {
      * Tab sheet id.
      */
     public static final String TARGET_DETAILS_TABSHEET = "target.details.tabsheet";
+    /**
+     * Tab sheet id.
+     */
+    public static final String DISTRIBUTION_DETAILS_TABSHEET = "distribution.details.tabsheet.";
 
     /**
      * Combobox id.
