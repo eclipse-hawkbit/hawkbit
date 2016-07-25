@@ -49,49 +49,50 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Autowired
     private ManageDistUIState manageDistUIState;
-    
+
     @Autowired
     private transient SoftwareManagement softwareManagement;
-    
+
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
-    
+
     @Autowired
-    private EntityFactory entityFactory;
-    
+    private transient EntityFactory entityFactory;
+
     private SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
-   /**
+    /**
      * softwareLayout Initialize the component.
      */
     @Override
     protected void init() {
         swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
-        swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout,entityFactory);
+        swmMetadataTable.init(getI18n(), getPermissionChecker(), softwareManagement, swMetadataPopupLayout,
+                entityFactory);
         super.init();
     }
-    
+
     /**
      * MetadataEvent.
      *
      * @param event
      *            as instance of {@link MetadataEvent}
      */
-    
+
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
-        UI.getCurrent()
-                .access(() -> {
-                    SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
-                    if (softwareModuleMetadata != null
-                            && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
-                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
-                            swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
-                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
-                            swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
-                        }
-                    }
-                });
+        UI.getCurrent().access(() -> {
+            final SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
+            if (softwareModuleMetadata != null
+                    && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
+                if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
+                    swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
+                } else if (event
+                        .getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
+                    swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
+                }
+            }
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -119,7 +120,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(swmMetadataTable, getI18n().get("caption.metadata"), null);
-     }
+    }
 
     @Override
     protected String getDefaultCaption() {
@@ -196,15 +197,15 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
-    
+
     @Override
     protected void populateMetadataDetails() {
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
     }
 
-    private boolean isSoftwareModuleSelected(SoftwareModule softwareModule) {
-        final Long selectedDistSWModuleId = manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? manageDistUIState
-                .getSelectedBaseSwModuleId().get() : null;
+    private boolean isSoftwareModuleSelected(final SoftwareModule softwareModule) {
+        final Long selectedDistSWModuleId = manageDistUIState.getSelectedBaseSwModuleId().isPresent()
+                ? manageDistUIState.getSelectedBaseSwModuleId().get() : null;
         return softwareModule != null && selectedDistSWModuleId != null
                 && selectedDistSWModuleId.equals(softwareModule.getId());
     }
@@ -213,17 +214,10 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
     }
-    
-    @Override
-    protected String getShowMetadataButtonId() {
-        SoftwareModule selectedBaseEntity = getSelectedBaseEntity();
-        return SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + selectedBaseEntity.getName() + "."
-                + selectedBaseEntity.getVersion();
-    }
 
     @Override
-    protected void showMetadata(ClickEvent event) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(getSelectedBaseEntityId());
+    protected void showMetadata(final ClickEvent event) {
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(getSelectedBaseEntityId());
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 }

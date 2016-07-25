@@ -36,23 +36,24 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     @Autowired
     protected SpPermissionChecker permChecker;
 
     @Override
-    protected void checkForDuplicate(DistributionSet entity, String value) {
+    protected void checkForDuplicate(final DistributionSet entity, final String value) {
         distributionSetManagement.findOne(entity, value);
     }
-    
+
     /**
      * Create metadata for DistributionSet.
      */
     @Override
-    protected DistributionSetMetadata createMetadata(DistributionSet entity, String key, String value) {
-        DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(entityFactory
-                .generateDistributionSetMetadata(entity, key, value));
+    protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
+            final String value) {
+        final DistributionSetMetadata dsMetaData = distributionSetManagement
+                .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA, dsMetaData));
         return dsMetaData;
@@ -62,9 +63,10 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
      * Update metadata for DistributionSet.
      */
     @Override
-    protected DistributionSetMetadata updateMetadata(DistributionSet entity, String key, String value) {
-        DistributionSetMetadata dsMetaData = distributionSetManagement.updateDistributionSetMetadata(entityFactory
-                .generateDistributionSetMetadata(entity, key, value));
+    protected DistributionSetMetadata updateMetadata(final DistributionSet entity, final String key,
+            final String value) {
+        final DistributionSetMetadata dsMetaData = distributionSetManagement
+                .updateDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -73,23 +75,23 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected List<DistributionSetMetadata> getMetadataList() {
         return getSelectedEntity().getMetadata();
     }
-    
+
     /**
      * Update metadata for DistributionSet.
      */
 
     @Override
-    protected void deleteMetadata(DistributionSet entity, String key, String value) {
-        DistributionSetMetadata dsMetaData = entityFactory.generateDistributionSetMetadata(entity, key, value);
+    protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {
+        final DistributionSetMetadata dsMetaData = entityFactory.generateDistributionSetMetadata(entity, key, value);
         distributionSetManagement.deleteDistributionSetMetadata(entity, key);
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA, dsMetaData));
     }
-    
+
     @Override
     protected boolean hasCreatePermission() {
         return permChecker.hasCreateDistributionPermission();
     }
-    
+
     @Override
     protected boolean hasUpdatePermission() {
         return permChecker.hasUpdateDistributionPermission();
