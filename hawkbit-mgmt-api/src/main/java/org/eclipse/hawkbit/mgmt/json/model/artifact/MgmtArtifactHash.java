@@ -27,6 +27,7 @@ public class MgmtArtifactHash {
      * Default constructor.
      */
     public MgmtArtifactHash() {
+        // used for jackson to instantiate
     }
 
     /**
