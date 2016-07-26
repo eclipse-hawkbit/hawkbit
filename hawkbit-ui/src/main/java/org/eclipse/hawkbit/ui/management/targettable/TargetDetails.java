@@ -253,4 +253,24 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
 
+    @Override
+    protected String getShowMetadataButtonId() {
+        return null;
+    }
+
+    @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return false;
+    }
+
+    @Override
+    protected void showMetadata(ClickEvent event) {
+        //No implementation required
+    }
+
+    @Override
+    protected void populateMetadataDetails() {
+        //No implementation required
+    }
+
 }
