@@ -57,6 +57,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -82,6 +83,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @ComponentScan
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
+@EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
