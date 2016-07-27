@@ -106,8 +106,13 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (getSelectedBaseEntity() == null) {
             return;
         }
+        targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
+        // targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
+        openWindow();
+    }
+
+    private void openWindow() {
         final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-        targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
@@ -246,6 +251,26 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     @Override
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+    }
+
+    @Override
+    protected String getShowMetadataButtonId() {
+        return null;
+    }
+
+    @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return false;
+    }
+
+    @Override
+    protected void showMetadata(ClickEvent event) {
+        //No implementation required
+    }
+
+    @Override
+    protected void populateMetadataDetails() {
+        //No implementation required
     }
 
 }

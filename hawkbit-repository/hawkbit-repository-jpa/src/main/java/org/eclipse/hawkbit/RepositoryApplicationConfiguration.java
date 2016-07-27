@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManage
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -71,6 +72,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import com.google.common.eventbus.EventBus;
+
 /**
  * General configuration for hawkBit's Repository.
  *
@@ -85,6 +88,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
+    @Autowired
+    private EventBus eventBus;
+
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
      *         accessible in beans which cannot access the service directly,
@@ -249,7 +255,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public TenantStatsManagement tenantStatsManagement() {
-        return new JpaTenantStatsManagement();
+        final TenantStatsManagement mgmt = new JpaTenantStatsManagement();
+        eventBus.register(mgmt);
+        return mgmt;
     }
 
     /**

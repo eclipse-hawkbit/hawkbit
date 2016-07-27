@@ -177,6 +177,10 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_MODULE_COMBO = "dist.module.combo.";
     /**
+     * ID for Distribution Tag ComboBox
+     */
+    public static final String DIST_TAG_COMBO = "dist.tag.combo";
+    /**
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
@@ -243,6 +247,11 @@ public final class SPUIComponentIdProvider {
     public static final String DISCARD_SW_MODULE_TYPE = "save.actions.popup.discard.sw.module.type";
 
     /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
+
+    /**
      * ID - Label.
      */
     public static final String ACTION_LABEL = "save.actions.popup.actionMsg";
@@ -290,6 +299,21 @@ public final class SPUIComponentIdProvider {
     public static final String ACTION_HISTORY_TABLE_ID = "action.history.tableId";
 
     /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
+
+    /**
+     * Action history table force Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
+
+    /**
+     * Action history table force quit Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
+
+    /**
      * Target filter wrapper id.
      */
     public static final String TARGET_FILTER_WRAPPER_ID = "target-drop-filter";
@@ -302,6 +326,22 @@ public final class SPUIComponentIdProvider {
      * tag color preview button id.
      */
     public static final String TAG_COLOR_PREVIEW_ID = "tag.color.preview";
+    /**
+     * Id for ColorPickerLayout
+     */
+    public static final String COLOR_PICKER_LAYOUT = "color.picker.layout";
+    /**
+     * Id for ColorPickerLayout's red slider
+     */
+    public static final String COLOR_PICKER_RED_SLIDER = "color.picker.red.slider";
+    /**
+     * Id for Color preview field with the color code
+     */
+    public static final String COLOR_PREVIEW_FIELD = "color-preview-field";
+    /**
+     * Id for OptionGroup Create/Update tag
+     */
+    public static final String OPTION_GROUP = "create.update.tag";
     /**
      * Confirmation dialogue OK button id.
      */
@@ -817,19 +857,26 @@ public final class SPUIComponentIdProvider {
      * Rollout target filter query combo id.
      */
     public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
+
     /**
      * Rollout action button id.
      */
-    public static final String ROLLOUT_ACTION_BUTTON_ID = "rollout.action.button.id";
+    public static final String ROLLOUT_ACTION_ID = "rollout.action.button.id";
+
+    /**
+     * Rollout start button id.
+     */
+    public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
+
     /**
      * Rollout pause button id.
      */
-    public static final String ROLLOUT_PAUSE_BUTTON_ID = "rollout.pause.button.id";
+    public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
 
     /**
      * Rollout resume button id.
      */
-    public static final String ROLLOUT_RESUME_BUTTON_ID = "rollout.resume.button.id";
+    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
 
     /**
      * Rollout save or start option group id.
@@ -914,6 +961,75 @@ public final class SPUIComponentIdProvider {
      * Artifact uplaod view - uplod status popup id.
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
+
+ /**
+     * Software module table - Manage metadata id.
+     */
+    public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
+    
+    
+    /**
+     * Metadata key id.
+     */
+    public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
+    
+    /**
+     * Metadata value id.
+     */
+    public static final String METADATA_VALUE_ID = "metadata.value.id";
+    /**
+     * Metadata save id.
+     */
+    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
+    
+    /**
+     * Metadata discard id.
+     */
+    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
+    
+    /**
+     * Metadata add icon id.
+     */
+    public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
+    /**
+     * Metadata table id.
+     */
+    public static final String METDATA_TABLE_ID = "metadata.table.id";
+    
+    /**
+     * Distribution set table - Manage metadata id.
+     */
+    public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
+    
+   /**
+     * DistributionSet - Metadata button id.
+     */
+    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
+    
+    /**
+     * Metadata popup id.
+     */
+    public static final String METADATA_POPUP_ID = "metadata.popup.id";
+    
+    /**
+     * DistributionSet table details tab id in Distributions .
+     */
+    public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
+    
+    /**
+     * Software module table details tab id in Distributions .
+     */
+    public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
+    
+    /**
+     * Software Module - Metadata button id.
+     */
+    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
+    
+    /**
+     * Table multiselect for selecting DistType
+     */
+    public static final String SELECT_DIST_TYPE = "select-dist-type";
 
     /**
      * /* Private Constructor.

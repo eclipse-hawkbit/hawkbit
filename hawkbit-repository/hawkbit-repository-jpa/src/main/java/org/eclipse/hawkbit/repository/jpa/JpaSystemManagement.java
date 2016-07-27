@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
@@ -26,18 +27,20 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -108,7 +111,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private SystemSecurityContext systemSecurityContext;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
@@ -147,7 +153,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final List<String> tenants = findTenants();
 
         tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
-            report.addTenantData(systemStatsManagement.getStatsOfTenant(tenant));
+            report.addTenantData(systemStatsManagement.getStatsOfTenant());
             return null;
         }));
     }
@@ -159,25 +165,45 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "tenantMetadata", key = "#tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData getTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
-
         // Create if it does not exist
         if (result == null) {
             try {
                 currentTenantCacheKeyGenerator.getCreateInitialTenant().set(tenant);
-                cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
-                applicationContext.getBean("currentTenantKeyGenerator");
-                return tenantMetaDataRepository.save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant));
+                return createInitialTenantMetaData(tenant);
+
             } finally {
                 currentTenantCacheKeyGenerator.getCreateInitialTenant().remove();
             }
         }
-
         return result;
+    }
+
+    /**
+     * Creating the initial tenant meta-data in a new transaction. Due the
+     * {@link MultiTenantJpaTransactionManager} is using the current tenant to
+     * set the necessary tenant discriminator to the query. This is not working
+     * if we don't have a current tenant set. Due the
+     * {@link #getTenantMetadata(String)} is maybe called without having a
+     * current tenant we need to re-open a new transaction so the
+     * {@link MultiTenantJpaTransactionManager} is called again and set the
+     * tenant for this transaction.
+     * 
+     * @param tenant
+     *            the tenant to be created
+     * @return the initial created {@link TenantMetaData}
+     */
+    private TenantMetaData createInitialTenantMetaData(final String tenant) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("initial-tenant-creation");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return systemSecurityContext.runAsSystemAsTenant(
+                () -> new TransactionTemplate(txManager, def).execute(status -> tenantMetaDataRepository
+                        .save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant))),
+                tenant);
     }
 
     @Override
@@ -186,12 +212,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
-        cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
         tenantAware.runAsTenant(tenant, () -> {
             entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
@@ -214,7 +238,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData getTenantMetadata() {
@@ -226,7 +249,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator")
+    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager")
     // set transaction to not supported, due we call this in
     // BaseEntity#prePersist methods
     // and it seems that JPA committing the transaction when executing this
@@ -249,7 +272,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public TenantMetaData updateTenantMetadata(final TenantMetaData metaData) {

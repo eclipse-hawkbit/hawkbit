@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -34,12 +32,10 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
-import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -48,8 +44,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
-        implements ColorChangeListener, ColorSelector {
+public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
     private static final long serialVersionUID = -5169398523815919367L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
@@ -69,7 +64,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(this::createOptionValueChanged);
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     @Override
@@ -95,7 +90,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-
         tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
@@ -113,10 +107,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     }
 
     @Override
-    public void createWindow() {
-        reset();
-        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null);
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.type");
     }
 
     /**
@@ -126,15 +118,16 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
      *            ValueChangeEvent
      */
     @Override
-    protected void createOptionValueChanged(final ValueChangeEvent event) {
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
-        super.createOptionValueChanged(event);
+        super.optionValueChanged(event);
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
             assignOptiongroup.setEnabled(false);
         } else {
             assignOptiongroup.setEnabled(true);
         }
+        assignOptiongroup.select(singleAssignStr);
     }
 
     /**
@@ -171,12 +164,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
-                assignOptiongroup.setValue(multiAssignStr);
-            } else {
+            if (selectedTypeTag.getMaxAssignments() == 1) {
                 assignOptiongroup.setValue(singleAssignStr);
+            } else {
+                assignOptiongroup.setValue(multiAssignStr);
             }
-
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         }
     }
@@ -198,10 +190,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void save(final ClickEvent event) {
-        if (!mandatoryValuesPresent()) {
-            return;
-        }
-
         final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
                 .findSoftwareModuleTypeByKey(typeKey.getValue());
         final SoftwareModuleType existingSMTypeByName = swTypeManagementService
@@ -211,7 +199,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 createNewSWModuleType();
             }
         } else {
-
             updateSWModuleType(existingSMTypeByName);
         }
     }
@@ -233,22 +220,14 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
             SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
                     typeDescValue, assignNumber);
             newSWType.setColour(colorPicked);
-
-            if (null != typeDescValue) {
-                newSWType.setDescription(typeDescValue);
-            }
-
+            newSWType.setDescription(typeDescValue);
             newSWType.setColour(colorPicked);
-
             newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
-
         }
     }
 
@@ -258,51 +237,15 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != typeNameValue) {
             existingType.setName(typeNameValue);
-
-            existingType.setDescription(null != typeDescValue ? typeDescValue : null);
-
+            existingType.setDescription(typeDescValue);
             existingType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
             swTypeManagementService.updateSoftwareModuleType(existingType);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
-            closeWindow();
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
-
-    }
-
-    /**
-     * Open color picker on click of preview button. Auto select the color based
-     * on target tag if already selected.
-     */
-    @Override
-    protected void previewButtonClicked() {
-        if (!tagPreviewBtnClicked) {
-            final String selectedOption = (String) optiongroup.getValue();
-            if (StringUtils.isNotEmpty(selectedOption) && selectedOption.equalsIgnoreCase(updateTypeStr)) {
-                if (null != tagNameComboBox.getValue()) {
-                    final SoftwareModuleType typeSelected = swTypeManagementService
-                            .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
-                    if (null != typeSelected) {
-                        getColorPickerLayout().setSelectedColor(typeSelected.getColour() != null
-                                ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
-                                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                    }
-                } else {
-                    getColorPickerLayout().setSelectedColor(
-                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                }
-            }
-            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-            mainLayout.addComponent(colorPickerLayout, 1, 0);
-            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
-        } else {
-            mainLayout.removeComponent(colorPickerLayout);
-        }
-        tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
     @Override

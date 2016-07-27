@@ -106,7 +106,7 @@ public class TenantUsage {
     }
 
     @Override
-    public int hashCode() { // NOSONAR - as this is generated code
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (actions ^ (actions >>> 32));
@@ -118,15 +118,14 @@ public class TenantUsage {
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof TenantUsage)) {
             return false;
         }
         final TenantUsage other = (TenantUsage) obj;
@@ -154,7 +153,7 @@ public class TenantUsage {
 
     @Override
     public String toString() {
-        return "SystemUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
+        return "TenantUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
                 + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes + "]";
     }
 

@@ -37,6 +37,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("RSQL filter target")
 public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
+    private static final long LAST_TARGET_QUERY = 10000;
+    private static final long LAST_TARGET_QUERY_SMALLER = 1000;
 
     @Before
     public void seuptBeforeTest() {
@@ -48,14 +50,16 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         final TargetInfo targetInfo = target.getTargetInfo();
         targetInfo.getControllerAttributes().put("revision", "1.1");
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
-
+        ((JpaTargetInfo) target.getTargetInfo()).setLastTargetQuery(LAST_TARGET_QUERY);
         targetManagement.createTarget(target);
+
         final JpaTarget target2 = new JpaTarget("targetId1234");
         target2.setDescription("targetId1234");
-        final TargetInfo targetInfo2 = new JpaTargetInfo(target2);
+        final TargetInfo targetInfo2 = target2.getTargetInfo();
         targetInfo2.getControllerAttributes().put("revision", "1.2");
-        target2.setTargetInfo(targetInfo2);
+        ((JpaTargetInfo) target2.getTargetInfo()).setLastTargetQuery(LAST_TARGET_QUERY_SMALLER);
         targetManagement.createTarget(target2);
+
         targetManagement.createTarget(new JpaTarget("targetId1235"));
         targetManagement.createTarget(new JpaTarget("targetId1236"));
 
@@ -164,6 +168,17 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 0);
+    }
+
+    @Test
+    @Description("Test filter target by lastTargetQuery")
+    public void testFilterByLastTargetQuery() {
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + LAST_TARGET_QUERY, 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + LAST_TARGET_QUERY, 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + LAST_TARGET_QUERY, 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + LAST_TARGET_QUERY_SMALLER, 0);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + LAST_TARGET_QUERY_SMALLER, 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + LAST_TARGET_QUERY, 0);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {

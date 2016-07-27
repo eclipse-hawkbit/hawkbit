@@ -93,12 +93,12 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous
             if (targetid != null && !"anonymous".equals(targetid)) {
-                final Action action = checkAndReportDownloadByTarget(
+                final ActionStatus actionStatus = checkAndReportDownloadByTarget(
                         requestResponseContextHolder.getHttpServletRequest(), targetid, artifact);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
-                        action.getId());
+                        actionStatus.getId());
             } else {
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
@@ -131,7 +131,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private Action checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
+    private ActionStatus checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
             final LocalArtifact artifact) {
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, securityProperties));
@@ -152,8 +152,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
             actionStatus.addMessage(
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
-        controllerManagement.addInformationalActionStatus(actionStatus);
-        return action;
+
+        return controllerManagement.addInformationalActionStatus(actionStatus);
     }
 
 }

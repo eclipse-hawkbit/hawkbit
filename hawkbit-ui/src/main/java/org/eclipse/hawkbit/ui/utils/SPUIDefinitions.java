@@ -88,6 +88,11 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_STATUS = "Status";
 
     /**
+     * Actions column.
+     */
+    public static final String ACTIONS_COLUMN = "Actions";
+
+    /**
      * Action history messages of particular action update.
      */
     public static final String ACTION_HIS_TBL_MSGS = "Messages";
@@ -344,15 +349,6 @@ public final class SPUIDefinitions {
      * New Target tag color lable id.
      */
     public static final String NEW_TARGET_TAG_COLOR = "target.tag.add.color";
-    /**
-     * New Target tag save icon id.
-     */
-    // public static final String NEW_TARGET_TAG_SAVE = "target.tag.add.save";
-    /**
-     * New Target tag discard icon id.
-     */
-    // public static final String NEW_TARGET_TAG_DISRACD =
-    // "target.tag.add.discard";
     /**
      * New Target tag add icon id.
      */
@@ -1016,6 +1012,21 @@ public final class SPUIDefinitions {
      * Rollout action column property.
      */
     public static final String ROLLOUT_ACTION = "rollout-action";
+    
+    /**
+     * DistributionSet Metadata tab Id
+     */
+    public static final String DISTRIBUTIONSET_METADATA_TAB_ID = "distSet.metadata.tab.id";
+    
+    /**
+     * SoftwareModule Metadata tab Id
+     */
+    public static final String SOFTWAREMODULE_METADATA_TAB_ID = "swModule.metadata.tab.id";
+
+    /***
+     * Custom window for metadata.
+     */
+	public static final String CUSTOM_METADATA_WINDOW = "custom.metadata.window";
 
     /**
      * /** Constructor.

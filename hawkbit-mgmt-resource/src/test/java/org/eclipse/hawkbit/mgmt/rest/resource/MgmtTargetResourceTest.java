@@ -8,12 +8,14 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,7 +35,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
-import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -90,6 +91,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private static final String JSON_PATH_FIELD_CONTENT = ".content";
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
+    private static final String JSON_PATH_FIELD_LAST_REQUEST_AT = ".lastControllerRequestAt";
 
     // target
     // $.field
@@ -101,6 +103,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private static final String JSON_PATH_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
     private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
+    private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
 
     @Test
     @Description("Ensures that actions list is in exptected order.")
@@ -425,6 +428,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].controllerId", equalTo(idA)))
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].createdBy", equalTo("bumlux")))
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].updateStatus", equalTo("unknown")))
+                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()))
                 // idB
                 .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0]._links.self.href",
                         equalTo(linksHrefPrefix + idB)))
@@ -433,6 +437,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].controllerId", equalTo(idB)))
                 .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].createdBy", equalTo("bumlux")))
                 .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].updateStatus", equalTo("unknown")))
+                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()))
                 // idC
                 .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0]._links.self.href",
                         equalTo(linksHrefPrefix + idC)))
@@ -440,7 +445,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].description", equalTo(idC)))
                 .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].controllerId", equalTo(idC)))
                 .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].updateStatus", equalTo("unknown")));
+                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].updateStatus", equalTo("unknown")))
+                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()));
     }
 
     @Test
@@ -518,7 +524,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         // create first a target which can be retrieved by rest interface
         final String knownControllerId = "1";
         final String knownName = "someName";
-        createSingleTarget(knownControllerId, knownName);
+        final Target target = createSingleTarget(knownControllerId, knownName);
         final String hrefPrefix = "http://localhost/rest/v1/targets/" + knownControllerId + "/";
         // test
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
@@ -526,6 +532,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
                 .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo(knownControllerId)))
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(TARGET_DESCRIPTION_TEST)))
+                .andExpect(jsonPath(JSON_PATH_LAST_REQUEST_AT, equalTo(target.getTargetInfo().getLastTargetQuery())))
                 .andExpect(jsonPath("$.pollStatus", hasKey("lastRequestAt")))
                 .andExpect(jsonPath("$.pollStatus", hasKey("nextExpectedRequestAt")))
                 .andExpect(jsonPath("$.pollStatus.overdue", equalTo(false)))
@@ -1075,8 +1082,6 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
             throws InterruptedException {
 
-        final PageRequest pageRequest = new PageRequest(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
-
         Target target = entityFactory.generateTarget(knownTargetId);
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
@@ -1122,7 +1127,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     public void assignDistributionSetToTarget() throws Exception {
 
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
+        targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
@@ -1299,19 +1304,20 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 + "\"}]";
     }
 
-    private void createSingleTarget(final String controllerId, final String name) {
+    private Target createSingleTarget(final String controllerId, final String name) {
         final Target target = entityFactory.generateTarget(controllerId);
         target.setName(name);
         target.setDescription(TARGET_DESCRIPTION_TEST);
         targetManagement.createTarget(target);
-        controllerManagament.updateLastTargetQuery(controllerId, null);
+        return controllerManagament.updateLastTargetQuery(controllerId, null);
     }
 
     /**
-     * creating targets with the given amount by setting name, id etc from the
-     * alphabet [a-z] using the ASCII.
-     * 
+     * Creating targets with the given amount by setting name, id etc from the
+     * alphabet [a-z] using ASCII.
+     *
      * @param amount
+     *            The number of targets to create
      */
     private void createTargetsAlphabetical(final int amount) {
         char character = 'a';
@@ -1320,15 +1326,15 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
             final Target target = entityFactory.generateTarget(str);
             target.setName(str);
             target.setDescription(str);
-            final Target savedTarget = targetManagement.createTarget(target);
-            assertThat(savedTarget.getLastModifiedBy()).isNotNull();
+            targetManagement.createTarget(target);
+            controllerManagament.updateLastTargetQuery(str, null);
             character++;
         }
     }
 
     /**
-     * helper method to give feedback mark an target IN_SNCY
-     * 
+     * helper method to give feedback mark an target IN_SYNC
+     *
      */
     private void feedbackToByInSync(final Long actionId) {
         final Action action = deploymentManagement.findAction(actionId);
@@ -1339,7 +1345,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     /**
      * helper method to create a target and start an action on it.
-     * 
+     *
      * @return The targetid of the created target.
      */
     private Target createTargetAndStartAction() {
@@ -1348,7 +1354,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final Target tA = targetManagement
                 .createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
         // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
+        deploymentManagement.assignDistributionSet(dsA, newArrayList(tA));
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
         assertThat(actionsByTarget.getContent()).hasSize(1);

@@ -32,7 +32,6 @@ public class MgmtSystemTenantServiceUsage {
      * @param tenantName
      */
     public MgmtSystemTenantServiceUsage(final String tenantName) {
-        super();
         this.tenantName = tenantName;
     }
 
