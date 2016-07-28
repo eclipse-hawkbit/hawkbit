@@ -76,6 +76,25 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
         super.init();
     }
+<<<<<<< HEAD
+=======
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final MetadataEvent event) {
+        UI.getCurrent()
+                .access(() -> {
+                    final DistributionSetMetadata dsMetadata = event.getDistributionSetMetadata();
+                    if (dsMetadata != null && isDistributionSetSelected(dsMetadata.getDistributionSet())) {
+                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA) {
+                            dsMetadataTable.createMetadata(event.getDistributionSetMetadata().getKey());
+                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA) {
+                            dsMetadataTable.deleteMetadata(event.getDistributionSetMetadata().getKey());
+                        }
+                    }
+                });
+    }
+
+>>>>>>> refs/heads/master
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
@@ -195,24 +214,41 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getShowMetadataButtonId() {
+<<<<<<< HEAD
         final DistributionSetIdName lastselectedDistDS = managementUIState.getLastSelectedDistribution().isPresent()
                 ? managementUIState.getLastSelectedDistribution().get() : null;
+=======
+        final DistributionSetIdName lastselectedDistDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
+                .getLastSelectedDistribution().get() : null;
+>>>>>>> refs/heads/master
         return SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + lastselectedDistDS.getName() + "."
                 + lastselectedDistDS.getVersion();
     }
+<<<<<<< HEAD
 
     private boolean isDistributionSetSelected(final DistributionSet ds) {
         final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent()
                 ? managementUIState.getLastSelectedDistribution().get() : null;
         return ds != null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
+=======
+    private boolean isDistributionSetSelected(final DistributionSet ds) {
+        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
+                .getLastSelectedDistribution().get() : null;
+        return ds!=null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
+>>>>>>> refs/heads/master
                 && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override
     protected void showMetadata(final ClickEvent event) {
+<<<<<<< HEAD
         final DistributionSet ds = distributionSetManagement
                 .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+=======
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+>>>>>>> refs/heads/master
     }
 
 }

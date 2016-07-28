@@ -185,6 +185,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
         assignOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         assignOptiongroup.addStyleName("custom-option-group");
         assignOptiongroup.setNullSelectionAllowed(false);
+        assignOptiongroup.setId(SPUIDefinitions.ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID);
         assignOptiongroup.select(tagOptions.get(0));
     }
 

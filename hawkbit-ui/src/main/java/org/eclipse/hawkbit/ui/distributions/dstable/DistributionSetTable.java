@@ -337,7 +337,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
             final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
-        if (softwareModule.getType().getMaxAssignments() == Integer.MAX_VALUE) {
+        if (softwareModule.getType().getMaxAssignments() > 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
             }
