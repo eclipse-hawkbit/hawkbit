@@ -55,7 +55,7 @@ public interface TenantAware {
      *            the return type of the runner
      */
     @FunctionalInterface
-    public interface TenantRunner<T> {
+    interface TenantRunner<T> {
         /**
          * Called to run specific code and a given tenant.
          *

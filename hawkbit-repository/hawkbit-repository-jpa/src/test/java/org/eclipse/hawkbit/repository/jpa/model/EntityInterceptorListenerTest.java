@@ -76,7 +76,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verfies that the post remove is called after a entity deletion.")
-    public void postRemoveIsCalledWhenDeletinggATarget() {
+    public void postRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PostRemoveEntityListener());
     }
 
