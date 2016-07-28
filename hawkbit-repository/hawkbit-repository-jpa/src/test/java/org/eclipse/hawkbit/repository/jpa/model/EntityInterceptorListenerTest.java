@@ -116,10 +116,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     private Target addListenerAndCreateTarget(final AbstractEntityListener entityInterceptor,
             final Target targetToBeCreated) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
-
-        final Target createTarget = targetManagement.createTarget(targetToBeCreated);
-
-        return createTarget;
+        return targetManagement.createTarget(targetToBeCreated);
     }
 
     private static abstract class AbstractEntityListener implements EntityInterceptor {
