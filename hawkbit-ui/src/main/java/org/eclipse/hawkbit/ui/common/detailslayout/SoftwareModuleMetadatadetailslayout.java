@@ -80,7 +80,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 			return;
 		}
 		selectedSWModuleId = swModule.getId();
-		final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();
+		final List<SoftwareModuleMetadata> swMetadataList = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(selectedSWModuleId);
 		if (null != swMetadataList && !swMetadataList.isEmpty()) {
 			swMetadataList.forEach(swMetadata -> setSWMetadataProperties(swMetadata));
 		}
@@ -160,7 +160,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 	}
 
 	private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-		SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
+		final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
 		/* display the window */
 		UI.getCurrent().addWindow(
 				swMetadataPopupLayout.getWindow(swmodule,

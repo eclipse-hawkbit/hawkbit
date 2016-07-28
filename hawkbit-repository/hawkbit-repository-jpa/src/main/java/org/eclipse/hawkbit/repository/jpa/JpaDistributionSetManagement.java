@@ -173,39 +173,36 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-	public void deleteDistributionSet(final Long... distributionSetIDs) {
-		final List<Long> toHardDelete = new ArrayList<>();
+    public void deleteDistributionSet(final Long... distributionSetIDs) {
+        final List<Long> toHardDelete = new ArrayList<>();
 
-		final List<Long> assigned = distributionSetRepository
-				.findAssignedToTargetDistributionSetsById(distributionSetIDs);
-		assigned.addAll(distributionSetRepository
-				.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
+        final List<Long> assigned = distributionSetRepository
+                .findAssignedToTargetDistributionSetsById(distributionSetIDs);
+        assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
 
-		// soft delete assigned
-		if (!assigned.isEmpty()) {
-			distributionSetRepository.deleteDistributionSet(assigned
-					.toArray(new Long[assigned.size()]));
-		}
+        // soft delete assigned
+        if (!assigned.isEmpty()) {
+            distributionSetRepository.deleteDistributionSet(assigned.toArray(new Long[assigned.size()]));
+        }
 
-		// mark the rest as hard delete
-		for (final Long setId : distributionSetIDs) {
-			if (!assigned.contains(setId)) {
-				toHardDelete.add(setId);
-			}
-		}
+        // mark the rest as hard delete
+        for (final Long setId : distributionSetIDs) {
+            if (!assigned.contains(setId)) {
+                toHardDelete.add(setId);
+            }
+        }
 
-		// hard delete the rest if exixts
-		if (!toHardDelete.isEmpty()) {
-			// don't give the delete statement an empty list, JPA/Oracle cannot
-			// handle the empty list
-			distributionSetRepository.deleteByIdIn(toHardDelete);
-		}
+        // hard delete the rest if exixts
+        if (!toHardDelete.isEmpty()) {
+            // don't give the delete statement an empty list, JPA/Oracle cannot
+            // handle the empty list
+            distributionSetRepository.deleteByIdIn(toHardDelete);
+        }
 
-		afterCommit.afterCommit(() -> eventBus
-				.post(new DistributionDeletedEvent(tenantAware
-						.getCurrentTenant(), distributionSetIDs)));
+        afterCommit.afterCommit(
+                () -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), distributionSetIDs)));
 
-	}
+    }
 
     @Override
     @Modifying
@@ -530,6 +527,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteDistributionSetMetadata(final DistributionSet distributionSet, final String key) {
+        entityManager.merge((JpaDistributionSet) distributionSet).setLastModifiedAt(0L);
         distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
     }
 
@@ -542,6 +540,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
                         distributionSetId), pageable),
                 pageable);
+    }
+
+    @Override
+    public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId) {
+
+        return new ArrayList<DistributionSetMetadata>(distributionSetMetadataRepository
+                .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
+                        root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
+                        distributionSetId)));
     }
 
     @Override

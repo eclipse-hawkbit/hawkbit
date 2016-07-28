@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +85,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient EntityFactory entityFactory;
-    
-    @Autowired
-    private transient DistributionSetTable distributionSetTable;
-
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private TextArea descTextArea;
@@ -239,9 +236,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
             notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                     new Object[] { newDist.getName(), newDist.getVersion() }));
-            
+
             final Set<DistributionSetIdName> s = new HashSet<>();
-            s.add(new DistributionSetIdName(newDist.getId(),newDist.getName(),newDist.getVersion()));
+            s.add(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion()));
+            final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
             distributionSetTable.setValue(s);
         }
     }

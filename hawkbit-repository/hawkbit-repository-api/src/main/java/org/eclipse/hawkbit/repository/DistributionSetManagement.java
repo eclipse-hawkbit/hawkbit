@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -283,6 +283,16 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
             @NotNull Pageable pageable);
+
+    /**
+     * finds all meta data by the given distribution set id.
+     * 
+     * @param distributionSetId
+     *            the distribution set id to retrieve the meta data from
+     * @return list of distributionSetMetadata for a given distribution set Id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
 
     /**
      * finds all meta data by the given distribution set id.

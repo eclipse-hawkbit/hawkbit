@@ -482,5 +482,23 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
+    
+    /**
+     * finds all meta data by the given software module id.
+     *
+     * @param softwareModuleId
+     *            the software module id to retrieve the meta data from
+   
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     * @return result of all meta data entries for a given software
+     *         module id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(Long softwareModuleId);
 
 }
