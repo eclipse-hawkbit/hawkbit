@@ -182,6 +182,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @After
     public void after() {
         testRepositoryManagement.clearTestRepository();
+
+        targetManagement.findAllTargetIds();
+
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {

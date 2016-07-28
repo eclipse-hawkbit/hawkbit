@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.EntityInterceptor;
@@ -22,8 +23,8 @@ public final class EntityInterceptorHolder {
 
     private static final EntityInterceptorHolder SINGLETON = new EntityInterceptorHolder();
 
-    @Autowired
-    private List<EntityInterceptor> entityInterceptors;
+    @Autowired(required = false)
+    private final List<EntityInterceptor> entityInterceptors = new ArrayList<>();
 
     private EntityInterceptorHolder() {
 

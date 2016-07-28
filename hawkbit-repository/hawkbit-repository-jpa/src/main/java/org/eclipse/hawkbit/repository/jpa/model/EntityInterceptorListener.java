@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.function.Consumer;
+
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -17,53 +19,51 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
+import org.eclipse.hawkbit.repository.model.EntityInterceptor;
 
 /**
- * Entity listener which calls all entity interceptor for the lifecyles
- * callbacks.
+ * Entity listener which calls the callback's of all registered entity
+ * interceptors.
  */
 public class EntityInterceptorListener {
 
     @PrePersist
     protected void prePersist(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.prePersist(entity));
+        notifyAll(interceptor -> interceptor.prePersist(entity));
     }
 
     @PostPersist
     protected void postPersist(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.postPersist(entity));
+        notifyAll(interceptor -> interceptor.postPersist(entity));
     }
 
     @PostRemove
     protected void postRemove(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.postRemove(entity));
+        notifyAll(interceptor -> interceptor.postRemove(entity));
     }
 
     @PreRemove
     protected void preRemove(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.preRemove(entity));
+        notifyAll(interceptor -> interceptor.preRemove(entity));
     }
 
     @PostLoad
     protected void postLoad(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.postLoad(entity));
+        notifyAll(interceptor -> interceptor.postLoad(entity));
     }
 
     @PreUpdate
     protected void preUpdate(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.preUpdate(entity));
+        notifyAll(interceptor -> interceptor.preUpdate(entity));
     }
 
     @PostUpdate
     protected void postUpdate(final Object entity) {
-        EntityInterceptorHolder.getInstance().getEntityInterceptors()
-                .forEach(interceptor -> interceptor.postUpdate(entity));
+        notifyAll(interceptor -> interceptor.postUpdate(entity));
+    }
+
+    private void notifyAll(final Consumer<? super EntityInterceptor> action) {
+        EntityInterceptorHolder.getInstance().getEntityInterceptors().forEach(action);
     }
 
 }
