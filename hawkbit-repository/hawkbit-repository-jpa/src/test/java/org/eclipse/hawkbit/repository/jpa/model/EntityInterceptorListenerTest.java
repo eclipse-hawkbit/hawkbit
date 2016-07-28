@@ -28,6 +28,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Entity Listener Interceptor")
 public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
+    @Override
+    public void after() {
+        EntityInterceptorHolder.getInstance().getEntityInterceptors().clear();
+        super.after();
+    }
+
     @Test
     @Description("Verfies that the pre persist is called after a entity creation.")
     public void prePersistIsCalledWhenPersistingATarget() {
@@ -51,7 +57,6 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
         targetManagement.createTarget(targetToBeCreated);
 
         final Target loadedTarget = targetManagement.findTargetByControllerID(targetToBeCreated.getControllerId());
-        EntityInterceptorHolder.getInstance().getEntityInterceptors().remove(postLoadEntityListener);
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
         assertThat(postLoadEntityListener.getEntity()).isEqualTo(loadedTarget);
     }
@@ -84,7 +89,6 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
         final Target targetToBeCreated = entityFactory.generateTarget("targetToBeCreated");
         addListenerAndCreateTarget(entityInterceptor, targetToBeCreated);
 
-        EntityInterceptorHolder.getInstance().getEntityInterceptors().remove(entityInterceptor);
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(targetToBeCreated);
     }
@@ -96,7 +100,6 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
         updateTarget = targetManagement.updateTarget(updateTarget);
 
-        EntityInterceptorHolder.getInstance().getEntityInterceptors().remove(entityInterceptor);
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);
     }
