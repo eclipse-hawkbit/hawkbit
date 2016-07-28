@@ -54,6 +54,7 @@ public final class SPUILabelDefinitions {
      */
     public static final String SP_NOTIFICATION_ERROR_MESSAGE_STYLE = ValoTheme.NOTIFICATION_ERROR + " "
             + ValoTheme.NOTIFICATION_TRAY;
+
     /**
      * Style - Warning.
      */
@@ -539,13 +540,12 @@ public final class SPUILabelDefinitions {
      * Total target coulmn property name.
      */
     public static final String VAR_TOTAL_TARGETS = "totalTargetsCount";
-    
-    
+
     /**
      * Total target count status coulmn property name.
      */
     public static final String VAR_TOTAL_TARGETS_COUNT_STATUS = "totalTargetCountStatus";
-    
+
     /**
      * Rollout group started date column property.
      */
@@ -560,7 +560,7 @@ public final class SPUILabelDefinitions {
      * Rollout group installed percentage column property.
      */
     public static final String ROLLOUT_GROUP_INSTALLED_PERCENTAGE = "finishedPercentage";
-    
+
     /**
      * Add metadata icon.
      */

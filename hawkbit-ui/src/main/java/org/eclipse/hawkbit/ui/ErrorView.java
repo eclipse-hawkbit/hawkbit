@@ -30,10 +30,7 @@ import com.vaadin.ui.VerticalLayout;
  * View class that is instantiated when no other view matches the navigation
  * state.
  *
- *
- *
  * @see Navigator#setErrorView(Class)
- *
  */
 @SuppressWarnings("serial")
 @SpringComponent

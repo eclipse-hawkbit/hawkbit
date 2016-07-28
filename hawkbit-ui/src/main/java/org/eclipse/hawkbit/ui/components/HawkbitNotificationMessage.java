@@ -10,17 +10,13 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
-import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 
 /**
  * Notification message component.
- *
- *
- *
  */
-public class SPNotificationMessage extends Notification {
+public class HawkbitNotificationMessage extends Notification {
 
     /**
      * ID.
@@ -30,28 +26,8 @@ public class SPNotificationMessage extends Notification {
     /**
      * Constructor.
      */
-    public SPNotificationMessage() {
+    public HawkbitNotificationMessage() {
         super("");
-    }
-
-    /**
-     * Notification message component.
-     * 
-     * @param styleName
-     *            style name of message
-     * @param caption
-     *            message caption
-     * @param description
-     *            message description
-     * @param autoClose
-     *            flag to indicate enable close option
-     * @param page
-     *            current {@link Page}
-     */
-    public void showNotification(final String styleName, final String caption, final String description,
-            final Boolean autoClose, final Page page) {
-        decorate(styleName, caption, description, autoClose);
-        this.show(page);
     }
 
     /**
@@ -66,7 +42,7 @@ public class SPNotificationMessage extends Notification {
      * @param autoClose
      *            flag to indicate enable close option
      */
-    private void decorate(final String styleName, final String caption, final String description,
+    public void decorateWith(final String styleName, final String caption, final String description,
             final Boolean autoClose) {
         setCaption(caption);
         setDescription(description);
