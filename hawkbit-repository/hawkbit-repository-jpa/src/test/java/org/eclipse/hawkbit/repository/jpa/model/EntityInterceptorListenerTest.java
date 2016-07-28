@@ -48,7 +48,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verfies that the post load is called after a entity is loaded.")
-    public void postLoadIsCalledWhenLoadgATarget() {
+    public void postLoadIsCalledWhenLoadATarget() {
         final PostLoadEntityListener postLoadEntityListener = new PostLoadEntityListener();
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(postLoadEntityListener);
 
@@ -110,8 +110,6 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleType(entityFactory.generateSoftwareModuleType("test", "test", "test", 1));
 
         softwareManagement.deleteSoftwareModuleType(type);
-        EntityInterceptorHolder.getInstance().getEntityInterceptors().remove(entityInterceptor);
-
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(type);
     }
