@@ -100,7 +100,6 @@
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <json-path.version>0.9.1</json-path.version>
-      <aspectj.version>1.8.5</aspectj.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.4.3</mariadb-java-client.version>
       <embedded-mongo.version>1.50.2</embedded-mongo.version>
@@ -124,7 +123,6 @@
       <!-- Sonar - START-->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
-      <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
       <sonar.links.homepage>https://projects.eclipse.org/projects/iot.hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <jacoco.version>0.7.7.201606060606</jacoco.version>
