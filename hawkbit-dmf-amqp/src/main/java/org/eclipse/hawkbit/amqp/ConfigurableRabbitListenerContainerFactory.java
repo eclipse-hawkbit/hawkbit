@@ -12,6 +12,7 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.util.ErrorHandler;
 
 /**
  * {@link RabbitListenerContainerFactory} that can be configured through
@@ -30,8 +31,9 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
      *            to configure the container factory
      */
     public ConfigurableRabbitListenerContainerFactory(final AmqpProperties amqpProperties,
-            final ConnectionFactory rabbitConnectionFactory) {
+            final ConnectionFactory rabbitConnectionFactory, final ErrorHandler errorHandler) {
         this.amqpProperties = amqpProperties;
+        setErrorHandler(errorHandler);
         setDefaultRequeueRejected(true);
         setConnectionFactory(rabbitConnectionFactory);
         setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());

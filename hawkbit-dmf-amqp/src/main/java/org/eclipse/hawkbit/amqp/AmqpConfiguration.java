@@ -26,6 +26,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -37,7 +38,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ErrorHandler;;
 
 /**
  * The spring AMQP configuration which is enabled by using the profile
@@ -57,6 +59,9 @@ public class AmqpConfiguration {
 
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
+
+    @Autowired
+    private ErrorHandler errorHandler;
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
@@ -269,7 +274,7 @@ public class AmqpConfiguration {
      */
     @Bean(name = { "listenerContainerFactory" })
     public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
-        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
@@ -277,6 +282,17 @@ public class AmqpConfiguration {
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;
+    }
+
+    /**
+     * Create default error handler bean.
+     * 
+     * @return the default error handler bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ErrorHandler errorHandler() {
+        return new ConditionalRejectingErrorHandler();
     }
 
 }
