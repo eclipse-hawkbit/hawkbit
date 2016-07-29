@@ -45,7 +45,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup,EventAwareEntity<JpaRolloutGroup> {
+public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity<JpaRolloutGroup> {
 
     private static final long serialVersionUID = 1L;
 
@@ -243,19 +243,20 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Override
     public void fireCreateEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-        
+
     }
 
     @Override
     public void fireUpdateEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder.getInstance().getEventBus().
-                post(new RolloutGroupPropertyChangeEvent(jpaRolloutGroup,
-                EntityPropertyChangeHelper.getChangeSet(RolloutGroup.class, descriptorEvent))));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
+                .afterCommit(() -> EventBusHolder.getInstance().getEventBus()
+                        .post(new RolloutGroupPropertyChangeEvent(jpaRolloutGroup,
+                                EntityPropertyChangeHelper.getChangeSet(RolloutGroup.class, descriptorEvent))));
     }
 
     @Override
     public void fireDeleteEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-        
+
     }
 
 }

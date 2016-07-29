@@ -55,7 +55,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action,EventAwareEntity<JpaAction> {
+public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity<JpaAction> {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -179,21 +179,22 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireCreateEvent(final JpaAction jpaAction, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () ->EventBusHolder.getInstance().getEventBus().post(new ActionCreatedEvent(jpaAction)));
-        
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
+                .afterCommit(() -> EventBusHolder.getInstance().getEventBus().post(new ActionCreatedEvent(jpaAction)));
+
     }
 
     @Override
     public void fireUpdateEvent(final JpaAction jpaAction, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () ->EventBusHolder.getInstance().getEventBus().
-                post(new ActionPropertyChangeEvent(jpaAction, EntityPropertyChangeHelper.getChangeSet(Action.class, descriptorEvent))));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(
+                () -> EventBusHolder.getInstance().getEventBus().post(new ActionPropertyChangeEvent(jpaAction,
+                        EntityPropertyChangeHelper.getChangeSet(Action.class, descriptorEvent))));
 
     }
-    
-    
+
     @Override
     public void fireDeleteEvent(final JpaAction jpaAction, final DescriptorEvent descriptorEvent) {
-        
+
     }
 
 }

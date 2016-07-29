@@ -620,14 +620,15 @@ public class JpaSoftwareManagement implements SoftwareManagement {
                                 pageable),
                 pageable);
     }
-    
+
     @Override
     public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
-        return new ArrayList<> (  softwareModuleMetadataRepository
-                        .findAll(
-                                (Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb.and(
-                                        cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule)
-                                                .get(JpaSoftwareModule_.id), softwareModuleId))));
+        return new ArrayList<>(
+                softwareModuleMetadataRepository
+                        .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query,
+                                cb) -> cb.and(cb.equal(
+                                        root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
+                                        softwareModuleId))));
     }
 
     @Override

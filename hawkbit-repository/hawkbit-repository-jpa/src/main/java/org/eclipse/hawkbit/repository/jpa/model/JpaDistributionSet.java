@@ -69,9 +69,10 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet,EventAwareEntity<JpaDistributionSet> {
+public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity
+        implements DistributionSet, EventAwareEntity<JpaDistributionSet> {
     private static final long serialVersionUID = 1L;
-    
+
     private static final String COMPLETE = "complete";
 
     @Column(name = "required_migration_step")
@@ -291,30 +292,29 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireCreateEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () -> EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
-        
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
+                .getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
+
     }
 
     @Override
     public void fireUpdateEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-        final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper.getChangeSet(
-                JpaDistributionSet.class, descriptorEvent);
-        if (changeSet.containsKey(COMPLETE)
-                && changeSet.get(COMPLETE).getOldValue().equals(false)
+        final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper
+                .getChangeSet(JpaDistributionSet.class, descriptorEvent);
+        if (changeSet.containsKey(COMPLETE) && changeSet.get(COMPLETE).getOldValue().equals(false)
                 && changeSet.get(COMPLETE).getNewValue().equals(true)) {
-            AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(
-                    () -> EventBusHolder.getInstance().getEventBus().post(
-                            new DistributionCreatedEvent(jpaDistributionSet)));
+            AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
+                    .getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
         }
 
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(
-                () -> EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(jpaDistributionSet)));
-        
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
+                .getInstance().getEventBus().post(new DistributionSetUpdateEvent(jpaDistributionSet)));
+
     }
 
     @Override
     public void fireDeleteEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-        
+
     }
 
 }

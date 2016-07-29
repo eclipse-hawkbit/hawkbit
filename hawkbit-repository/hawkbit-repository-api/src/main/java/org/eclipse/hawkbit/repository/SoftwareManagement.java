@@ -496,7 +496,7 @@ public interface SoftwareManagement {
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
      * @return result of all meta data entries for a given software
-     *         module id
+     *         module id.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(Long softwareModuleId);

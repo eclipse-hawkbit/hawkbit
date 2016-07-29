@@ -69,7 +69,8 @@ import org.springframework.data.domain.Persistable;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target, EventAwareEntity<JpaTarget> {
+public class JpaTarget extends AbstractJpaNamedEntity
+        implements Persistable<Long>, Target, EventAwareEntity<JpaTarget> {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
@@ -239,19 +240,20 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireCreateEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () ->EventBusHolder.getInstance().getEventBus().post(new TargetCreatedEvent(jpaTarget)));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
+                .afterCommit(() -> EventBusHolder.getInstance().getEventBus().post(new TargetCreatedEvent(jpaTarget)));
     }
 
     @Override
-    public void fireUpdateEvent(final JpaTarget jpaTarget,final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () -> EventBusHolder.getInstance().getEventBus().post(new TargetUpdatedEvent(jpaTarget)));
-        
+    public void fireUpdateEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
+                .afterCommit(() -> EventBusHolder.getInstance().getEventBus().post(new TargetUpdatedEvent(jpaTarget)));
+
     }
 
     @Override
     public void fireDeleteEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
-        
-        
+
     }
 
 }

@@ -329,13 +329,14 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
     }
 
     @Override
-    public void fireCreateEvent(final JpaTargetInfo jpaTargetInfo,final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent(final JpaTargetInfo jpaTargetInfo, final DescriptorEvent descriptorEvent) {
         // there is no target info created event
     }
 
     @Override
     public void fireUpdateEvent(final JpaTargetInfo jpaTargetInfo, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit( () -> EventBusHolder.getInstance().getEventBus().post(new TargetInfoUpdateEvent(jpaTargetInfo)));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(
+                () -> EventBusHolder.getInstance().getEventBus().post(new TargetInfoUpdateEvent(jpaTargetInfo)));
     }
 
     @Override
