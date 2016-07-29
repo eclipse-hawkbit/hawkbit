@@ -289,7 +289,7 @@ public interface DistributionSetManagement {
      * 
      * @param distributionSetId
      *            the distribution set id to retrieve the meta data from
-     * @return list of distributionSetMetadata for a given distribution set Id
+     * @return list of distributionSetMetadata for a given distribution set Id.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
