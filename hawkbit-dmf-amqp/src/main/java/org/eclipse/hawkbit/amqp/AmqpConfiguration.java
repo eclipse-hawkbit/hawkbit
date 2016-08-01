@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.util.ErrorHandler;;
+import org.springframework.util.ErrorHandler;
 
 /**
  * The spring AMQP configuration which is enabled by using the profile
@@ -58,9 +58,6 @@ public class AmqpConfiguration {
 
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
-
-    // @Autowired
-    // private ErrorHandler errorHandler;
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
