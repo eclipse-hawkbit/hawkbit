@@ -267,7 +267,9 @@ public class AmqpConfiguration {
 
     /**
      * Returns the Listener factory.
-     *
+     * 
+     * @param errorHandler
+     *            the error hander
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
      *         AMQP messages
      */

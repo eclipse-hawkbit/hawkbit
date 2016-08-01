@@ -29,6 +29,8 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
      *            for the container factory
      * @param amqpProperties
      *            to configure the container factory
+     * @param errorHandler
+     *            the error handler which should be use
      */
     public ConfigurableRabbitListenerContainerFactory(final AmqpProperties amqpProperties,
             final ConnectionFactory rabbitConnectionFactory, final ErrorHandler errorHandler) {
