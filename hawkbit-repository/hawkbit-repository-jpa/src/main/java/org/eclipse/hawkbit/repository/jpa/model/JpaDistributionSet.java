@@ -36,10 +36,10 @@ import javax.persistence.UniqueConstraint;
 
 import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -69,11 +69,12 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity
-        implements DistributionSet, EventAwareEntity<JpaDistributionSet> {
+public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
-    private static final String COMPLETE = "complete";
+    private static final String COMPLETE_PROPERTY = "complete";
+
+    private static final String DELETED_PROPERTY = "deleted";
 
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
@@ -291,30 +292,30 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity
     }
 
     @Override
-    public void fireCreateEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
-                .getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
-
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(this));
     }
 
     @Override
-    public void fireUpdateEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper
                 .getChangeSet(JpaDistributionSet.class, descriptorEvent);
-        if (changeSet.containsKey(COMPLETE) && changeSet.get(COMPLETE).getOldValue().equals(false)
-                && changeSet.get(COMPLETE).getNewValue().equals(true)) {
-            AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
-                    .getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
+        if (changeSet.containsKey(COMPLETE_PROPERTY) && changeSet.get(COMPLETE_PROPERTY).getOldValue().equals(false)
+                && changeSet.get(COMPLETE_PROPERTY).getNewValue().equals(true)) {
+            EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(this));
         }
+        EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
 
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
-                .getInstance().getEventBus().post(new DistributionSetUpdateEvent(jpaDistributionSet)));
-
+        if (changeSet.containsKey(DELETED_PROPERTY)) {
+            final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
+            if (newDeleted) {
+                EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
+            }
+        }
     }
 
     @Override
-    public void fireDeleteEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
     }
-
 }

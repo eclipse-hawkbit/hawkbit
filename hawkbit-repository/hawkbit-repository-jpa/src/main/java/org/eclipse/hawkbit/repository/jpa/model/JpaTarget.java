@@ -37,8 +37,8 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -69,8 +69,7 @@ import org.springframework.data.domain.Persistable;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTarget extends AbstractJpaNamedEntity
-        implements Persistable<Long>, Target, EventAwareEntity<JpaTarget> {
+public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
@@ -239,21 +238,17 @@ public class JpaTarget extends AbstractJpaNamedEntity
     }
 
     @Override
-    public void fireCreateEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
-                .afterCommit(() -> EventBusHolder.getInstance().getEventBus().post(new TargetCreatedEvent(jpaTarget)));
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new TargetCreatedEvent(this));
     }
 
     @Override
-    public void fireUpdateEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
-                .afterCommit(() -> EventBusHolder.getInstance().getEventBus().post(new TargetUpdatedEvent(jpaTarget)));
-
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new TargetUpdatedEvent(this));
     }
 
     @Override
-    public void fireDeleteEvent(final JpaTarget jpaTarget, final DescriptorEvent descriptorEvent) {
-
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new TargetDeletedEvent(getTenant(), getId()));
     }
-
 }

@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
-public interface EventAwareEntity<T> {
+public interface EventAwareEntity {
 
-    public void fireCreateEvent(T t,DescriptorEvent descriptorEvent);
+    void fireCreateEvent(DescriptorEvent descriptorEvent);
 
-    public void fireUpdateEvent(T t,DescriptorEvent descriptorEvent);
+    void fireUpdateEvent(DescriptorEvent descriptorEvent);
 
-    public void fireDeleteEvent(T t,DescriptorEvent descriptorEvent);
+    void fireDeleteEvent(DescriptorEvent descriptorEvent);
 }

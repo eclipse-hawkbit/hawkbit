@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 
@@ -19,21 +20,34 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
     @Override
     public void postInsert(final DescriptorEvent event) {
-
         final Object object = event.getObject();
-        if (object instanceof EventAwareEntity) {
-            ((EventAwareEntity) object).fireCreateEvent(object,event);
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireCreateEvent(event));
         }
     }
 
     @Override
     public void postUpdate(final DescriptorEvent event) {
-        
         final Object object = event.getObject();
-        if (object instanceof EventAwareEntity) {
-            ((EventAwareEntity) object).fireUpdateEvent(object,event);
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireUpdateEvent(event));
         }
     }
 
+    @Override
+    public void postDelete(final DescriptorEvent event) {
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
+        }
+    }
+
+    private boolean isEventAwareEntity(final Object object) {
+        return object instanceof EventAwareEntity;
+    }
+
+    private void doNotifiy(final Runnable runnable) {
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
+    }
 
 }
