@@ -46,12 +46,12 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         }
     }
 
-    private Throwable getRootExceptionFrom(final ErrorEvent event) {
+    private static Throwable getRootExceptionFrom(final ErrorEvent event) {
 
         return getRootCauseOf(event.getThrowable());
     }
 
-    private Throwable getRootCauseOf(final Throwable exception) {
+    private static Throwable getRootCauseOf(final Throwable exception) {
 
         if (exception.getCause() != null) {
             return getRootCauseOf(exception.getCause());
@@ -60,7 +60,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return exception;
     }
 
-    private Optional<Page> getPageOriginError(final ErrorEvent event) {
+    private static Optional<Page> getPageOriginError(final ErrorEvent event) {
 
         final Component errorOrigin = findAbstractComponent(event);
 

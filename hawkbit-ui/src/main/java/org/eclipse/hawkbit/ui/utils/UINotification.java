@@ -53,22 +53,4 @@ public class UINotification implements Serializable {
                 updatedMsg.toString(), true);
     }
 
-    /**
-     * Display error type of notification message.
-     * 
-     * @param message
-     *            errorMessage
-     * @param caption
-     *            caption of the errorMessage
-     * @param autoClose
-     *            boolean, if errorMessage should be closed by clicking on the
-     *            error (false) or by clicking anywhere (true)
-     */
-    public void displayError(final String message, final String caption, final Boolean autoClose) {
-        final StringBuilder updatedMsg = new StringBuilder(FontAwesome.EXCLAMATION_TRIANGLE.getHtml());
-        updatedMsg.append(' ');
-        updatedMsg.append(message);
-        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, caption,
-                updatedMsg.toString(), autoClose);
-    }
 }
