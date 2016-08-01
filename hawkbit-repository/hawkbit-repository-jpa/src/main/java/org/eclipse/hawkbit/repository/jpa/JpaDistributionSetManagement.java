@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
@@ -55,7 +54,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -103,9 +101,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
-
-    @Autowired
-    private TenantAware tenantAware;
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
@@ -198,10 +193,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
-
-        afterCommit.afterCommit(
-                () -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), distributionSetIDs)));
-
     }
 
     @Override
@@ -527,14 +518,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteDistributionSetMetadata(final DistributionSet distributionSet, final String key) {
-        entityManager.merge((JpaDistributionSet) distributionSet).setLastModifiedAt(0L);
         distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
     }
 
     @Override
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
             final Pageable pageable) {
-
         return convertMdPage(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
@@ -544,7 +533,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId) {
-
         return new ArrayList<DistributionSetMetadata>(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
