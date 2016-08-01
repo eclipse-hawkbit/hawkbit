@@ -41,7 +41,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         final Optional<Page> originError = getPageOriginError(event);
 
         if (originError.isPresent()) {
-            final HawkbitNotificationMessage message = buildNotification(getRootExceptionFrom(event));
+            final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
             message.show(originError.get());
         }
     }
@@ -71,14 +71,11 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return Optional.absent();
     }
 
-    protected HawkbitNotificationMessage buildNotification(final Throwable exception) {
+    protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
 
-        final HawkbitNotificationMessage notification = new HawkbitNotificationMessage();
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
-        notification.decorateWith(STYLE, i18n.get("caption.error"),
+        return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
                 i18n.get("message.error.temp", exception.getClass().getSimpleName()), false);
-
-        return notification;
     }
 
 }

@@ -16,7 +16,7 @@ import com.vaadin.ui.Notification;
 /**
  * Notification message component.
  */
-public class HawkbitNotificationMessage extends Notification {
+public class HawkbitErrorNotificationMessage extends Notification {
 
     /**
      * ID.
@@ -26,34 +26,18 @@ public class HawkbitNotificationMessage extends Notification {
     /**
      * Constructor.
      */
-    public HawkbitNotificationMessage() {
-        super("");
-    }
-
-    /**
-     * Decorate.
-     * 
-     * @param styleName
-     *            style name of message
-     * @param caption
-     *            message caption
-     * @param description
-     *            message description
-     * @param autoClose
-     *            flag to indicate enable close option
-     */
-    public void decorateWith(final String styleName, final String caption, final String description,
-            final Boolean autoClose) {
-        setCaption(caption);
-        setDescription(description);
-        setStyleName(styleName);
-        setHtmlContentAllowed(true);
-        setPosition(Position.BOTTOM_RIGHT);
+    public HawkbitErrorNotificationMessage(final String style, final String caption, final String description,
+            final boolean autoClose) {
+        super(caption);
+        setStyleName(style);
         if (autoClose) {
             setDelayMsec(SPUILabelDefinitions.SP_DELAY);
         } else {
             setDelayMsec(-1);
         }
+        setHtmlContentAllowed(true);
+        setPosition(Position.BOTTOM_RIGHT);
+        setDescription(description);
     }
 
 }
