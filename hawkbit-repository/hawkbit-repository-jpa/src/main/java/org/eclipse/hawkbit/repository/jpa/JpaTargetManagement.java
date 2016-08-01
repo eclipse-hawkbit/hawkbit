@@ -29,6 +29,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -48,6 +49,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -93,6 +95,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -206,6 +211,8 @@ public class JpaTargetManagement implements TargetManagement {
             targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
             targetRepository.deleteByIdIn(targetsForCurrentTenant);
         }
+        targetsForCurrentTenant
+                .forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
     }
 
     @Override

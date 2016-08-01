@@ -108,7 +108,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Autowired
     private DsMetadataPopupLayout dsMetadataPopupLayout;
-    
+
     /**
      * Initialize the component.
      */
@@ -130,8 +130,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvents(final DistributionSetUpdateEvent event) {
         final DistributionSet ds = event.getEntity();
-        final DistributionSetIdName lastSelectedDsIdName = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
-                .getLastSelectedDistribution().get() : null;
+        final DistributionSetIdName lastSelectedDsIdName = manageDistUIState.getLastSelectedDistribution().isPresent()
+                ? manageDistUIState.getLastSelectedDistribution().get() : null;
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
 
         // refresh the details tabs only if selected ds is updated
@@ -219,10 +219,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void publishEntityAfterValueChange(final DistributionSet distributionSet) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
-        if(distributionSet!=null){
-            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(), 
-                    distributionSet.getName(),distributionSet.getVersion()));
-        }    
+        if (distributionSet != null) {
+            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(),
+                    distributionSet.getName(), distributionSet.getVersion()));
+        }
     }
 
     @Override
@@ -515,7 +515,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.setNoDataAvailableDist(!available);
 
     }
-    
+
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
@@ -525,12 +525,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
+                manageMetaDataBtn
+                        .addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
                 return manageMetaDataBtn;
             }
         });
     }
-    
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
@@ -541,7 +541,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return columnList;
     }
 
-    private Button createManageMetadataButton(String nameVersionStr) {
+    private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
@@ -550,9 +550,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return manageMetadataBtn;
     }
 
-    private void showMetadataDetails(Long itemId) {
-        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+    private void showMetadataDetails(final Long itemId) {
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
     private String getNameAndVerion(final Object itemId) {
@@ -580,24 +580,22 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {
-        final Item item = getContainerDataSource().getItem(
-                new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        final Item item = getContainerDataSource()
+                .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
         updateEntity(editedDs, item);
     }
 
-    private void onDistributionDeleteEvent(List<DistributionDeletedEvent> events) {
+    private void onDistributionDeleteEvent(final List<DistributionDeletedEvent> events) {
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
         for (final DistributionDeletedEvent deletedEvent : events) {
-            Long[] distributionSetIDs = deletedEvent.getDistributionSetIDs();
-            for (Long dsId : distributionSetIDs) {
-                final DistributionSetIdName targetIdName = new DistributionSetIdName(dsId, null, null);
-                if (visibleItemIds.contains(targetIdName)) {
-                    dsContainer.removeItem(targetIdName);
-                } else {
-                    shouldRefreshDs = true;
-                }
+            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                dsContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshDs = true;
             }
         }
 
