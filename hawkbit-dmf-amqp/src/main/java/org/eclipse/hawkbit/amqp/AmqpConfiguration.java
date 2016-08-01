@@ -60,8 +60,8 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
 
-    @Autowired
-    private ErrorHandler errorHandler;
+    // @Autowired
+    // private ErrorHandler errorHandler;
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
@@ -273,7 +273,8 @@ public class AmqpConfiguration {
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
+            final ErrorHandler errorHandler) {
         return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
