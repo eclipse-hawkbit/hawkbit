@@ -26,7 +26,6 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -45,7 +44,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity<JpaRolloutGroup> {
+public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -242,21 +241,18 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     }
 
     @Override
-    public void fireCreateEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        // there is no RolloutGroup created event
     }
 
     @Override
-    public void fireUpdateEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
-                .afterCommit(() -> EventBusHolder.getInstance().getEventBus()
-                        .post(new RolloutGroupPropertyChangeEvent(jpaRolloutGroup,
-                                EntityPropertyChangeHelper.getChangeSet(RolloutGroup.class, descriptorEvent))));
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new RolloutGroupPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(RolloutGroup.class, descriptorEvent)));
     }
 
     @Override
-    public void fireDeleteEvent(final JpaRolloutGroup jpaRolloutGroup, final DescriptorEvent descriptorEvent) {
-
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        // there is no RolloutGroup deleted event
     }
-
 }
