@@ -11,27 +11,26 @@ package org.eclipse.hawkbit.repository.eventbus.event;
 import org.eclipse.hawkbit.eventbus.event.AbstractDistributedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
-
 /**
- * * Defines the {@link AbstractDistributedEvent} for deletion of {@link DistributionSet}.
-
- *
+ * Defines the {@link AbstractDistributedEvent} for deletion of
+ * {@link DistributionSet}.
  */
-public class DistributionDeletedEvent extends AbstractDistributedEvent{
-	private static final long serialVersionUID = -3308850381757843098L;
-	final Long[] distributionSetIDs;
+public class DistributionDeletedEvent extends AbstractDistributedEvent {
+    private static final long serialVersionUID = -3308850381757843098L;
+    private final Long distributionId;
+
     /**
      * @param tenant
      *            the tenant for this event
      * @param distributionSetId
-     *            the ID of the target which has been deleted
+     *            the ID of the distribution set which has been deleted
      */
-    public DistributionDeletedEvent(final String tenant, final Long...distributionIds) {
+    public DistributionDeletedEvent(final String tenant, final Long distributionId) {
         super(-1, tenant);
-        this.distributionSetIDs = distributionIds;
+        this.distributionId = distributionId;
     }
 
-    public Long[] getDistributionSetIDs() {
-		return distributionSetIDs;
-	}
+    public Long getDistributionSetId() {
+        return distributionId;
+    }
 }

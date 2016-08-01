@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -101,6 +103,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
@@ -193,6 +198,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
+
+        Arrays.stream(distributionSetIDs)
+                .forEach(dsId -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId)));
     }
 
     @Override

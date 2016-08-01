@@ -747,14 +747,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
         for (final DistributionDeletedEvent deletedEvent : events) {
-            final Long[] distributionSetIDs = deletedEvent.getDistributionSetIDs();
-            for (final Long dsId : distributionSetIDs) {
-                final DistributionSetIdName targetIdName = new DistributionSetIdName(dsId, null, null);
-                if (visibleItemIds.contains(targetIdName)) {
-                    dsContainer.removeItem(targetIdName);
-                } else {
-                    shouldRefreshDs = true;
-                }
+            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                dsContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshDs = true;
             }
         }
 
