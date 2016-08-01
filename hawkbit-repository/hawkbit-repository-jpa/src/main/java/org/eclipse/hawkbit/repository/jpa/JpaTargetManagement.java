@@ -29,7 +29,6 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -49,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -98,10 +96,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
-    
-
-    @Autowired
-    private TenantAware tenantAware;
 
     @Override
     public Target findTargetByControllerID(final String controllerId) {
@@ -208,14 +202,12 @@ public class JpaTargetManagement implements TargetManagement {
         // hibernate session.
         final List<Long> targetsForCurrentTenant = targetRepository.findAll(Lists.newArrayList(targetIDs)).stream()
                 .map(Target::getId).collect(Collectors.toList());
-		if (!targetsForCurrentTenant.isEmpty()) {
-			targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
-			targetRepository.deleteByIdIn(targetsForCurrentTenant);
-			targetsForCurrentTenant.forEach(targetId -> notifyTargetDeleted(
-					tenantAware.getCurrentTenant(), targetId));
-		}
+        if (!targetsForCurrentTenant.isEmpty()) {
+            targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
+            targetRepository.deleteByIdIn(targetsForCurrentTenant);
+        }
     }
-    
+
     @Override
     public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID, final Pageable pageReq) {
         return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
@@ -659,9 +651,5 @@ public class JpaTargetManagement implements TargetManagement {
         }
         return resultList;
     }
-    
 
-    private void notifyTargetDeleted(final String tenant, final Long targetId) {
-        afterCommit.afterCommit(() -> eventBus.post(new TargetDeletedEvent(tenant, targetId)));
-    }
 }
