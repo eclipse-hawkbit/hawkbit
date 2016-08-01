@@ -18,8 +18,6 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Show success and error messages.
- * 
- *
  */
 @ViewScope
 @SpringComponent
@@ -33,8 +31,6 @@ public class UINotification implements Serializable {
     /**
      * Display success type of notification message.
      * 
-     * @param notificationMessage
-     *            as reference
      * @param message
      *            is the message to displayed as success.
      */
@@ -46,8 +42,6 @@ public class UINotification implements Serializable {
     /**
      * Display error type of notification message.
      * 
-     * @param notificationMessage
-     *            as reference
      * @param message
      *            as message.
      */
@@ -59,18 +53,4 @@ public class UINotification implements Serializable {
                 updatedMsg.toString(), true);
     }
 
-    /**
-     * Display error type of notification message.
-     * 
-     * @param message.
-     * @param caption.
-     * @param autoClose.
-     */
-    public void displayError(final String message, final String caption, final Boolean autoClose) {
-        final StringBuilder updatedMsg = new StringBuilder(FontAwesome.EXCLAMATION_TRIANGLE.getHtml());
-        updatedMsg.append(' ');
-        updatedMsg.append(message);
-        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, caption,
-                updatedMsg.toString(), autoClose);
-    }
 }
