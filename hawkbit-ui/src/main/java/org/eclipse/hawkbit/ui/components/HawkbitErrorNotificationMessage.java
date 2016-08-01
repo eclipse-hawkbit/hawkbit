@@ -14,17 +14,24 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 
 /**
- * Notification message component.
+ * Notification message component for displaying errors in the UI.
  */
 public class HawkbitErrorNotificationMessage extends Notification {
 
-    /**
-     * ID.
-     */
     private static final long serialVersionUID = -6512576924243195753L;
 
     /**
-     * Constructor.
+     * Constructor of HawkbitErrorNotificationMessage
+     * 
+     * @param style
+     *            style of the notification message
+     * @param caption
+     *            caption of the notification message
+     * @param description
+     *            text which is displayed in the notification
+     * @param autoClose
+     *            boolean if notification is closed after random click (true) or
+     *            closed by clicking on the notification (false)
      */
     public HawkbitErrorNotificationMessage(final String style, final String caption, final String description,
             final boolean autoClose) {
