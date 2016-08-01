@@ -26,7 +26,6 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -283,17 +282,6 @@ public class AmqpConfiguration {
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;
-    }
-
-    /**
-     * Create default error handler bean.
-     * 
-     * @return the default error handler bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public ErrorHandler errorHandler() {
-        return new ConditionalRejectingErrorHandler();
     }
 
 }
