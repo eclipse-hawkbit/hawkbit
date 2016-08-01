@@ -37,7 +37,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ErrorHandler;
 
 /**
  * The spring AMQP configuration which is enabled by using the profile
@@ -263,13 +264,16 @@ public class AmqpConfiguration {
 
     /**
      * Returns the Listener factory.
-     *
+     * 
+     * @param errorHandler
+     *            the error hander
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
-        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
+            final ErrorHandler errorHandler) {
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
