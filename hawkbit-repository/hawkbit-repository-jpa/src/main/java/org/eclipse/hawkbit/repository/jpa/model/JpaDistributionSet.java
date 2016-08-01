@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,13 +33,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -299,14 +296,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity
 
     @Override
     public void fireUpdateEvent(final JpaDistributionSet jpaDistributionSet, final DescriptorEvent descriptorEvent) {
-        final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper
-                .getChangeSet(JpaDistributionSet.class, descriptorEvent);
-        if (changeSet.containsKey(COMPLETE) && changeSet.get(COMPLETE).getOldValue().equals(false)
-                && changeSet.get(COMPLETE).getNewValue().equals(true)) {
-            AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
-                    .getInstance().getEventBus().post(new DistributionCreatedEvent(jpaDistributionSet)));
-        }
-
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> EventBusHolder
                 .getInstance().getEventBus().post(new DistributionSetUpdateEvent(jpaDistributionSet)));
 
