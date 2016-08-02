@@ -73,6 +73,7 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -328,6 +329,7 @@ public class SecurityManagedConfiguration {
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
 
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
+            httpSec.anonymous().disable();
         }
     }
 
@@ -573,7 +575,10 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
             throws IOException, ServletException {
 
         // lazy initialize tenant meta data after successful authentication
-        systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
+        }
         chain.doFilter(request, response);
 
     }
