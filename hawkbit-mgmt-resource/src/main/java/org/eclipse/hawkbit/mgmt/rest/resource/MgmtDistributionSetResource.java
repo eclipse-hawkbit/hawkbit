@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
+
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -119,8 +123,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         LOG.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
-        sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(this.systemManagement
-                .getTenantMetadata(this.currentTenant.getCurrentTenant()).getDefaultDsType().getKey()));
+        final String defaultDsKey = systemSecurityContext.runAsSystem(() -> this.systemManagement
+                .getTenantMetadata(this.currentTenant.getCurrentTenant()).getDefaultDsType().getKey());
+        sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
         final Iterable<DistributionSet> createdDSets = this.distributionSetManagement
                 .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement,
