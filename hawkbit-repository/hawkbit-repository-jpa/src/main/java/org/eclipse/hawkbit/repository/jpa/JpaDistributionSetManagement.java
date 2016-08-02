@@ -483,11 +483,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (distributionSetMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
+        
+        final DistributionSet latestDistributionSet = findDistributionSetById(metadata.getDistributionSet().getId());
         // merge base distribution set so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base distribution set itself for
         // auditing purposes.
-        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
+        entityManager.merge((JpaDistributionSet) latestDistributionSet).setLastModifiedAt(0L);
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -502,7 +504,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         for (final JpaDistributionSetMetadata distributionSetMetadata : metadata) {
             checkAndThrowAlreadyIfDistributionSetMetadataExists(distributionSetMetadata.getId());
         }
-        metadata.forEach(m -> entityManager.merge((JpaDistributionSet) m.getDistributionSet()).setLastModifiedAt(0L));
+        metadata.forEach(m -> entityManager.merge((JpaDistributionSet) findDistributionSetById(m.getDistributionSet().getId())).setLastModifiedAt(0L));
 
         return new ArrayList<>(
                 (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
@@ -518,7 +520,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         findOne(metadata.getDistributionSet(), metadata.getKey());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
+        final DistributionSet latestDistributionSet = findDistributionSetById(metadata.getDistributionSet().getId());
+        entityManager.merge((JpaDistributionSet) latestDistributionSet).setLastModifiedAt(0L);
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -526,6 +529,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteDistributionSetMetadata(final DistributionSet distributionSet, final String key) {
+        final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet.getId());
+        entityManager.merge((JpaDistributionSet) latestDistributionSet).setLastModifiedAt(0L);
         distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
     }
 
