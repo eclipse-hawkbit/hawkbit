@@ -321,7 +321,7 @@ public class SecurityManagedConfiguration {
                     userAuthenticationFilter.destroy();
                 }
             }, RequestHeaderAuthenticationFilter.class)
-                    .addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(tenantAware, systemManagement,
+                    .addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement,
                             systemSecurityContext), SessionManagementFilter.class)
                     .authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
@@ -531,8 +531,8 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
     public void onAuthenticationSuccess(final Authentication authentication) throws Exception {
 
         if (authentication.getClass().equals(TenantUserPasswordAuthenticationToken.class)) {
-            systemManagement
-                    .getTenantMetadata(((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
+            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(),
+                    ((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
         } else if (authentication.getClass().equals(UsernamePasswordAuthenticationToken.class)) {
             // TODO: vaadin4spring-ext-security does not give us the
             // fullyAuthenticatedToken
@@ -542,8 +542,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
             // vaadin4spring 0.0.7 because it
             // has been fixed.
             final String defaultTenant = "DEFAULT";
-            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(defaultTenant),
-                    defaultTenant);
+            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(), defaultTenant);
         }
 
         super.onAuthenticationSuccess(authentication);
@@ -555,13 +554,11 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
  */
 class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
 
-    private final TenantAware tenantAware;
     private final SystemManagement systemManagement;
     private final SystemSecurityContext systemSecurityContext;
 
-    AuthenticationSuccessTenantMetadataCreationFilter(final TenantAware tenantAware,
-            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext) {
-        this.tenantAware = tenantAware;
+    AuthenticationSuccessTenantMetadataCreationFilter(final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
     }
@@ -575,14 +572,10 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
 
-        final String currentTenant = tenantAware.getCurrentTenant();
-        if (currentTenant != null) {
-            // lazy initialize tenant meta data after successful authentication
-            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(currentTenant),
-                    currentTenant);
-        }
-
+        // lazy initialize tenant meta data after successful authentication
+        systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
         chain.doFilter(request, response);
+
     }
 
     @Override
