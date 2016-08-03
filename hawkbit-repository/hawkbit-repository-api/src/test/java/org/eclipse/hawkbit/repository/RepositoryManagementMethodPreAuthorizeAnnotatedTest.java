@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -94,21 +93,17 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Enumeration<URL> resources = classLoader.getResources(p.getName().replace(".", "/"));
         while (resources.hasMoreElements()) {
-            final String uriPath = new URI(resources.nextElement().toString()).getPath();
-            if (uriPath != null) {
-                final File packageDirectory = new File(uriPath);
-                final File[] filesInPackage = packageDirectory.listFiles();
-                for (final File classFile : filesInPackage) {
-                    final String classNameWithExtension = classFile.getName();
-                    final int indexOfExtension = classNameWithExtension.indexOf(".class");
-                    if (indexOfExtension > 0) {
-                        final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
-                        if (includeFilter.matcher(classNameWithoutExtension).matches()) {
-                            final Class<?> classInPackage = Class
-                                    .forName(p.getName() + "." + classNameWithoutExtension);
-                            if (classInPackage.isInterface()) {
-                                interfacesToReturn.add(classInPackage);
-                            }
+            final File packageDirectory = new File(resources.nextElement().getFile());
+            final File[] filesInPackage = packageDirectory.listFiles();
+            for (final File classFile : filesInPackage) {
+                final String classNameWithExtension = classFile.getName();
+                final int indexOfExtension = classNameWithExtension.indexOf(".class");
+                if (indexOfExtension > 0) {
+                    final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
+                    if (includeFilter.matcher(classNameWithoutExtension).matches()) {
+                        final Class<?> classInPackage = Class.forName(p.getName() + "." + classNameWithoutExtension);
+                        if (classInPackage.isInterface()) {
+                            interfacesToReturn.add(classInPackage);
                         }
                     }
                 }
