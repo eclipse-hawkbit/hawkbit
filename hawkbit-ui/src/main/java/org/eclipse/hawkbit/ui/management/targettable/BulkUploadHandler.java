@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -56,6 +57,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -99,7 +101,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient Executor executor;
     private transient EventBus.SessionEventBus eventBus;
 
-    final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
+    TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
     private transient EntityFactory entityFactory;
 
@@ -139,7 +141,7 @@ public class BulkUploadHandler extends CustomComponent
     public void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
-        upload.setEnabled(false);
+        upload.setEnabled(true);
         upload.setButtonCaption("Bulk Upload");
         upload.setReceiver(this);
         upload.setImmediate(true);
@@ -178,6 +180,7 @@ public class BulkUploadHandler extends CustomComponent
     }
 
     class UploadAsync implements Runnable {
+
         final SucceededEvent event;
 
         /**
@@ -193,7 +196,6 @@ public class BulkUploadHandler extends CustomComponent
             if (tempFile == null) {
                 return;
             }
-
             try (InputStream tempStream = new FileInputStream(tempFile)) {
                 readFileStream(tempStream);
             } catch (final FileNotFoundException e) {
@@ -201,12 +203,11 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final IOException e) {
                 LOG.error("Error while opening temorary file ", e);
             }
-
         }
 
         private void readFileStream(final InputStream tempStream) {
             String line;
-            try (BufferedReader reader = new BufferedReader(
+            try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(tempStream, Charset.defaultCharset()))) {
                 LOG.info("Bulk file upload started");
                 long innerCounter = 0;
@@ -229,6 +230,10 @@ public class BulkUploadHandler extends CustomComponent
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
+            } catch (final RuntimeException e) {
+                Optional.ofNullable(UI.getCurrent()).ifPresent(
+                        error -> UI.getCurrent().getErrorHandler().error(new ConnectorErrorEvent(upload, e)));
+                targetBulkUpdateWindowLayout.closePopupAfterFailureAndRefresh();
             } finally {
                 resetCounts();
                 deleteFile();
