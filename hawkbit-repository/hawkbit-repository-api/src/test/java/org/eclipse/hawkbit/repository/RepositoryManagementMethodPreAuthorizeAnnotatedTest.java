@@ -47,6 +47,8 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             throws ClassNotFoundException, URISyntaxException, IOException {
         final List<Class<?>> findInterfacesInPackage = findInterfacesInPackage(getClass().getPackage(),
                 Pattern.compile(".*Management"));
+
+        assertThat(findInterfacesInPackage).isNotEmpty();
         for (final Class<?> interfaceToCheck : findInterfacesInPackage) {
             assertDeclaredMethodsContainsPreAuthorizeAnnotaions(interfaceToCheck);
         }
@@ -92,17 +94,21 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Enumeration<URL> resources = classLoader.getResources(p.getName().replace(".", "/"));
         while (resources.hasMoreElements()) {
-            final File packageDirectory = new File(new URI(resources.nextElement().toString()).getPath());
-            final File[] filesInPackage = packageDirectory.listFiles();
-            for (final File classFile : filesInPackage) {
-                final String classNameWithExtension = classFile.getName();
-                final int indexOfExtension = classNameWithExtension.indexOf(".class");
-                if (indexOfExtension > 0) {
-                    final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
-                    if (includeFilter.matcher(classNameWithoutExtension).matches()) {
-                        final Class<?> classInPackage = Class.forName(p.getName() + "." + classNameWithoutExtension);
-                        if (classInPackage.isInterface()) {
-                            interfacesToReturn.add(classInPackage);
+            final String uriPath = new URI(resources.nextElement().toString()).getPath();
+            if (uriPath != null) {
+                final File packageDirectory = new File(uriPath);
+                final File[] filesInPackage = packageDirectory.listFiles();
+                for (final File classFile : filesInPackage) {
+                    final String classNameWithExtension = classFile.getName();
+                    final int indexOfExtension = classNameWithExtension.indexOf(".class");
+                    if (indexOfExtension > 0) {
+                        final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
+                        if (includeFilter.matcher(classNameWithoutExtension).matches()) {
+                            final Class<?> classInPackage = Class
+                                    .forName(p.getName() + "." + classNameWithoutExtension);
+                            if (classInPackage.isInterface()) {
+                                interfacesToReturn.add(classInPackage);
+                            }
                         }
                     }
                 }
