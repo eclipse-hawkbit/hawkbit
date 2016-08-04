@@ -108,15 +108,13 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
         return regexIncludeInterfaceFileCollector.getInterfaceClasses();
     }
 
-    private File[] listFilesInPackage(final URL resource, final RegexIncludeInterfaceFileCollector clazzCollector)
+    private void listFilesInPackage(final URL resource, final RegexIncludeInterfaceFileCollector clazzCollector)
             throws URISyntaxException {
         final String packagePath = new URI(resource.toString()).getPath();
         if (packagePath != null) {
             final File packageDirectory = new File(packagePath);
-            final File[] filesInPackage = packageDirectory.listFiles(clazzCollector);
-            return filesInPackage;
+            packageDirectory.listFiles(clazzCollector);
         }
-        return new File[0];
     }
 
     private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
