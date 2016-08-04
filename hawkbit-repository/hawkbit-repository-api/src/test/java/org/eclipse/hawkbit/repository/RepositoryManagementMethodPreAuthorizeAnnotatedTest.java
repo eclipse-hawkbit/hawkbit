@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -97,31 +98,25 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      */
     private List<Class<?>> findInterfacesInPackage(final Package p, final Pattern includeFilter)
             throws URISyntaxException, IOException, ClassNotFoundException {
-        final List<Class<?>> interfacesToReturn = new ArrayList<>();
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Enumeration<URL> resources = classLoader.getResources(p.getName().replace(".", "/"));
+        final RegexIncludeInterfaceFileCollector regexIncludeInterfaceFileCollector = new RegexIncludeInterfaceFileCollector(
+                p, includeFilter);
         while (resources.hasMoreElements()) {
-            final String uriPath = new URI(resources.nextElement().toString()).getPath();
-            if (uriPath != null) {
-                final File packageDirectory = new File(uriPath);
-                final File[] filesInPackage = packageDirectory.listFiles();
-                for (final File classFile : filesInPackage) {
-                    final String classNameWithExtension = classFile.getName();
-                    final int indexOfExtension = classNameWithExtension.indexOf(".class");
-                    if (indexOfExtension > 0) {
-                        final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
-                        if (includeFilter.matcher(classNameWithoutExtension).matches()) {
-                            final Class<?> classInPackage = Class
-                                    .forName(p.getName() + "." + classNameWithoutExtension);
-                            if (classInPackage.isInterface()) {
-                                interfacesToReturn.add(classInPackage);
-                            }
-                        }
-                    }
-                }
-            }
+            listFilesInPackage(resources.nextElement(), regexIncludeInterfaceFileCollector);
         }
-        return interfacesToReturn;
+        return regexIncludeInterfaceFileCollector.getInterfaceClasses();
+    }
+
+    private File[] listFilesInPackage(final URL resource, final RegexIncludeInterfaceFileCollector clazzCollector)
+            throws URISyntaxException {
+        final String packagePath = new URI(resource.toString()).getPath();
+        if (packagePath != null) {
+            final File packageDirectory = new File(packagePath);
+            final File[] filesInPackage = packageDirectory.listFiles(clazzCollector);
+            return filesInPackage;
+        }
+        return new File[0];
     }
 
     private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
@@ -129,6 +124,45 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             return clazz.getMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private static final class RegexIncludeInterfaceFileCollector implements FileFilter {
+
+        private final List<Class<?>> interfaceClasses = new ArrayList<>();
+        private final Pattern includeFilter;
+        private final Package basePackage;
+
+        public RegexIncludeInterfaceFileCollector(final Package basePackage, final Pattern pattern) {
+            this.basePackage = basePackage;
+            this.includeFilter = pattern;
+        }
+
+        @Override
+        public boolean accept(final File pathname) {
+            final String classNameWithExtension = pathname.getName();
+            final int indexOfExtension = classNameWithExtension.indexOf(".class");
+            if (indexOfExtension == -1) {
+                return false;
+            }
+            final String classNameWithoutExtension = classNameWithExtension.substring(0, indexOfExtension);
+            if (!includeFilter.matcher(classNameWithoutExtension).matches()) {
+                return false;
+            }
+
+            try {
+                final Class<?> classInPackage = Class.forName(basePackage.getName() + "." + classNameWithoutExtension);
+                if (classInPackage.isInterface()) {
+                    interfaceClasses.add(classInPackage);
+                }
+            } catch (final ClassNotFoundException e) {
+                // don't need to handle here
+            }
+            return false;
+        }
+
+        public List<Class<?>> getInterfaceClasses() {
+            return interfaceClasses;
         }
     }
 }
