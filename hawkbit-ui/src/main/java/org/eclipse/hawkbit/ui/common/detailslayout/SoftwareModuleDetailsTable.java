@@ -186,12 +186,19 @@ public class SoftwareModuleDetailsTable extends Table {
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
-        final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
-                unAssignedSw);
-        manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
-        eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
-        uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
+        if (distributionSetManagement.isDistributionSetInUse(distributionSet)) {
+            uiNotification.displayValidationError(
+                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
+                            distributionSet.getName(), distributionSet.getVersion()));
+        } else {
+            final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
+                    unAssignedSw);
+            manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
+            eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
+            uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
+        }
+        
     }
 
     private static boolean isSoftModAvaiableForSoftType(final Set<SoftwareModule> swModulesSet,
