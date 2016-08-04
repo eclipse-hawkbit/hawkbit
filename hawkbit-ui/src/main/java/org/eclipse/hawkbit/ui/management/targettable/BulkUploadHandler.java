@@ -214,22 +214,22 @@ public class BulkUploadHandler extends CustomComponent
                  * below event.
                  */
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
+
                 while ((line = reader.readLine()) != null) {
                     innerCounter++;
                     readEachLine(line, innerCounter, totalFileSize);
                 }
-                doAssignments();
-                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
 
-                // Clearing after assignments are done
-                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
             } catch (final RuntimeException e) {
                 Optional.ofNullable(UI.getCurrent()).ifPresent(
                         error -> UI.getCurrent().getErrorHandler().error(new ConnectorErrorEvent(upload, e)));
-                targetBulkUpdateWindowLayout.closePopupAfterFailureAndRefresh();
             } finally {
+                doAssignments();
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
+                // Clearing after assignments are done
+                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
                 resetCounts();
                 deleteFile();
             }

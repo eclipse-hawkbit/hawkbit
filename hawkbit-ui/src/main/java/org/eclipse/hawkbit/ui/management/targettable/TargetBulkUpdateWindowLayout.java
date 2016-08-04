@@ -240,15 +240,6 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     /**
-     * Close and refresh this component.
-     */
-    public void closePopupAfterFailureAndRefresh() {
-        closePopup();
-        destroy();
-        init();
-    }
-
-    /**
      * @return
      */
     private Container createContainer() {
