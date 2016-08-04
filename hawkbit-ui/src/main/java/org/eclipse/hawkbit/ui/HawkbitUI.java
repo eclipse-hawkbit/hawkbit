@@ -14,7 +14,7 @@ import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
-import org.eclipse.hawkbit.ui.components.SPUIErrorHandler;
+import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -180,7 +180,10 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         final String locale = getLocaleId(SPUIDefinitions.getAvailableLocales());
         setLocale(new Locale(locale));
 
-        UI.getCurrent().setErrorHandler(new SPUIErrorHandler());
+        if (UI.getCurrent().getErrorHandler() == null) {
+            UI.getCurrent().setErrorHandler(new HawkbitUIErrorHandler());
+        }
+
         LOG.info("Current locale of the application is : {}", i18n.getLocale());
     }
 

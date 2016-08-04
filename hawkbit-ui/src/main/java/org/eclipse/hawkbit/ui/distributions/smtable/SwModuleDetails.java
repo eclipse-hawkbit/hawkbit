@@ -150,10 +150,10 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     private void populateDetails() {
         String maxAssign = HawkbitCommonUtil.SP_STRING_EMPTY;
         if (getSelectedBaseEntity() != null) {
-            if (getSelectedBaseEntity().getType().getMaxAssignments() == Integer.MAX_VALUE) {
-                maxAssign = getI18n().get("label.multiAssign.type");
-            } else {
+            if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
+            } else {
+                maxAssign = getI18n().get("label.multiAssign.type"); 
             }
             updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);

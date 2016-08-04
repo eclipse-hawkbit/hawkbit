@@ -210,18 +210,18 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         return true;
     }
 
+
     private boolean isDistributionSetSelected(final DistributionSet ds) {
-        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent()
-                ? managementUIState.getLastSelectedDistribution().get() : null;
-        return ds != null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
+        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
+                .getLastSelectedDistribution().get() : null;
+        return ds!=null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
                 && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement
-                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 
 }

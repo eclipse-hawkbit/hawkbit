@@ -16,8 +16,6 @@ import com.vaadin.ui.Notification;
 
 /**
  * Show notification messages.
- * 
- *
  */
 @UIScope
 @SpringComponent
@@ -27,8 +25,6 @@ public class NotificationMessage extends Notification {
 
     /**
      * Default constructor of notification message.
-     * 
-     * @param caption
      */
     public NotificationMessage() {
         super("");
