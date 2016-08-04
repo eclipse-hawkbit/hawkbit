@@ -198,7 +198,7 @@ public class SoftwareModuleDetailsTable extends Table {
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
             uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
         }
-        
+
     }
 
     private static boolean isSoftModAvaiableForSoftType(final Set<SoftwareModule> swModulesSet,
