@@ -573,14 +573,16 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
+        lazyCreateTenantMetadata();
+        chain.doFilter(request, response);
 
-        // lazy initialize tenant meta data after successful authentication
+    }
+
+    private void lazyCreateTenantMetadata() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
         }
-        chain.doFilter(request, response);
-
     }
 
     @Override
