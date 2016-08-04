@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -72,9 +71,6 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    @Autowired
-    private transient UINotification uINotification;
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;

@@ -100,7 +100,7 @@ public class BulkUploadHandler extends CustomComponent
 
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
-    TargetTableHeader targetTableHeader;
+    private TargetTableHeader targetTableHeader;
 
     private transient EntityFactory entityFactory;
 
