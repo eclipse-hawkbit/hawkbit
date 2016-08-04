@@ -98,7 +98,9 @@ public class BulkUploadHandler extends CustomComponent
     private final transient Executor executor;
     private transient EventBus.SessionEventBus eventBus;
 
-    private final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
+    final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
+
+    TargetTableHeader targetTableHeader;
 
     private transient EntityFactory entityFactory;
 
@@ -223,9 +225,10 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
             } catch (final RuntimeException e) {
-                Optional.ofNullable(UI.getCurrent()).ifPresent(
-                        error -> UI.getCurrent().getErrorHandler().error(new ConnectorErrorEvent(upload, e)));
+                Optional.ofNullable(UI.getCurrent()).ifPresent(error -> UI.getCurrent().getErrorHandler()
+                        .error(new ConnectorErrorEvent(targetTableHeader, e)));
             } finally {
+                updateBulkUpload();
                 doAssignments();
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
                 // Clearing after assignments are done
@@ -283,11 +286,14 @@ public class BulkUploadHandler extends CustomComponent
             if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.05
                     || Math.abs(next - 1) < 0.00001) {
                 managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(next);
-                managementUIState.getTargetTableFilters().getBulkUpload()
-                        .setSucessfulUploadCount(successfullTargetCount);
-                managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(failedTargetCount);
-                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
+                updateBulkUpload();
             }
+        }
+
+        private void updateBulkUpload() {
+            managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(successfullTargetCount);
+            managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(failedTargetCount);
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
         }
 
         private void doAssignments() {
@@ -456,5 +462,9 @@ public class BulkUploadHandler extends CustomComponent
         } else {
             eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED));
         }
+    }
+
+    public void setTargetBulkUpdateWindowLayout(final TargetTableHeader targetTableHeader) {
+        this.targetTableHeader = targetTableHeader;
     }
 }
