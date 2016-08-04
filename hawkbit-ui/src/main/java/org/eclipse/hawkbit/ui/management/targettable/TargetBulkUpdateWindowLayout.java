@@ -296,8 +296,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         descTextArea.clear();
         targetBulkTokenTags.getTokenField().clear();
         targetBulkTokenTags.populateContainer();
-        progressBar.setValue(0f);
+        progressBar.setValue(0F);
         progressBar.setVisible(false);
+        managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(0F);
         targetsCountLabel.setVisible(false);
     }
 

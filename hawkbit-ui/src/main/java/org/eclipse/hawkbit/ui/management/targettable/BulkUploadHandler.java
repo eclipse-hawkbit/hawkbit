@@ -138,7 +138,7 @@ public class BulkUploadHandler extends CustomComponent
     public void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
-        upload.setEnabled(true);
+        upload.setEnabled(false);
         upload.setButtonCaption("Bulk Upload");
         upload.setReceiver(this);
         upload.setImmediate(true);
@@ -227,6 +227,7 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final RuntimeException e) {
                 Optional.ofNullable(UI.getCurrent()).ifPresent(error -> UI.getCurrent().getErrorHandler()
                         .error(new ConnectorErrorEvent(targetTableHeader, e)));
+
             } finally {
                 updateBulkUpload();
                 doAssignments();
