@@ -68,7 +68,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
             return Optional.fromNullable(errorOrigin.getUI().getPage());
         }
 
-        return Optional.absent();
+        return Optional.of(Page.getCurrent());
     }
 
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {

@@ -82,7 +82,6 @@ public class TargetTableHeader extends AbstractTableHeader {
         // creating add window for adding new target
         targetAddUpdateWindow.init();
         targetBulkUpdateWindow.init();
-        targetBulkUpdateWindow.getBulkUploader().setTargetBulkUpdateWindowLayout(this);
         onLoadRestoreState();
     }
 

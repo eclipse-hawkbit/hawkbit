@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -99,8 +98,6 @@ public class BulkUploadHandler extends CustomComponent
     private transient EventBus.SessionEventBus eventBus;
 
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
-
-    private TargetTableHeader targetTableHeader;
 
     private transient EntityFactory entityFactory;
 
@@ -225,9 +222,9 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
             } catch (final RuntimeException e) {
-                Optional.ofNullable(UI.getCurrent()).ifPresent(error -> UI.getCurrent().getErrorHandler()
-                        .error(new ConnectorErrorEvent(targetTableHeader, e)));
-
+                if (UI.getCurrent() != null) {
+                    UI.getCurrent().getErrorHandler().error(new com.vaadin.server.ErrorEvent(e));
+                }
             } finally {
                 updateBulkUpload();
                 doAssignments();
@@ -465,7 +462,4 @@ public class BulkUploadHandler extends CustomComponent
         }
     }
 
-    public void setTargetBulkUpdateWindowLayout(final TargetTableHeader targetTableHeader) {
-        this.targetTableHeader = targetTableHeader;
-    }
 }
