@@ -197,7 +197,7 @@ public class DeviceSimulatorUpdater {
             return result;
         }
 
-        private boolean isErrorResponse(final UpdateStatus status) {
+        private static boolean isErrorResponse(final UpdateStatus status) {
             if (status == null) {
                 return false;
             }
