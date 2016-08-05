@@ -187,9 +187,7 @@ public class SoftwareModuleDetailsTable extends Table {
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
         if (distributionSetManagement.isDistributionSetInUse(distributionSet)) {
-            uiNotification.displayValidationError(
-                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
-                            distributionSet.getName(), distributionSet.getVersion()));
+            uiNotification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",distributionSet.getName(), distributionSet.getVersion()));
         } else {
             final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                     unAssignedSw);
