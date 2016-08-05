@@ -223,7 +223,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         createTestdatabaseAndStart();
     }
 
-    private static void createTestdatabaseAndStart() {
+    private static synchronized void createTestdatabaseAndStart() {
         if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
             tesdatabase = new CIMySqlTestDatabase();
             tesdatabase.before();
