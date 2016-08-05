@@ -17,7 +17,7 @@ import org.hamcrest.Matchers;
 /**
  * Matcher for {@link BaseEntity}.
  */
-public class BaseEntityMatcher {
+public final class BaseEntityMatcher {
 
     private BaseEntityMatcher() {
     }

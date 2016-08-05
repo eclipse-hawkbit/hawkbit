@@ -12,6 +12,8 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  *
  * Look for a free port.
@@ -48,6 +50,7 @@ public class FreePortFileWriter {
     }
 
     boolean isFree(final int port) {
+        ServerSocket sock = null;
         try {
             final File portFile = new File(filePortPath + File.separator + port + ".port");
             portFile.getParentFile().mkdirs();
@@ -55,19 +58,20 @@ public class FreePortFileWriter {
                 return false;
             }
             boolean isFree = false;
-            final ServerSocket sock = new ServerSocket();
+            sock = new ServerSocket();
             sock.setReuseAddress(true);
             sock.bind(new InetSocketAddress(port));
             if (portFile.createNewFile()) {
                 portFile.deleteOnExit();
                 isFree = true;
             }
-            sock.close();
             return isFree;
             // We rely on an exception thrown to determine availability or
             // not availability and don't want to log the exception.
         } catch (@SuppressWarnings({ "squid:S2221", "squid:S1166" }) final Exception e) {
             return false;
+        } finally {
+            IOUtils.closeQuietly(sock);
         }
     }
 

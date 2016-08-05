@@ -34,7 +34,7 @@ import com.google.common.base.Throwables;
 @Service
 public class SystemSecurityContext {
 
-    private static final Logger logger = LoggerFactory.getLogger(SystemSecurityContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SystemSecurityContext.class);
 
     private final TenantAware tenantAware;
 
@@ -96,7 +96,7 @@ public class SystemSecurityContext {
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            logger.debug("entering system code execution");
+            LOG.debug("entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
@@ -110,7 +110,7 @@ public class SystemSecurityContext {
 
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            logger.debug("leaving system code execution");
+            LOG.debug("leaving system code execution");
         }
     }
 
@@ -136,7 +136,7 @@ public class SystemSecurityContext {
      * {@link SpringEvalExpressions#SYSTEM_ROLE} which is allowed to execute all
      * secured methods.
      */
-    public static class SystemCodeAuthentication implements Authentication {
+    public static final class SystemCodeAuthentication implements Authentication {
 
         private static final long serialVersionUID = 1L;
         private static final List<SimpleGrantedAuthority> AUTHORITIES = Collections
