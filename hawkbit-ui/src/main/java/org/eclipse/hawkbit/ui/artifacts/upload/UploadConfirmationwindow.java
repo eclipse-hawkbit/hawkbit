@@ -108,7 +108,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     private UploadResultWindow currentUploadResultWindow;
 
-    private int redErrorLabelCount = 0;
+    private int redErrorLabelCount;
 
     private final ArtifactUploadState artifactUploadState;
 
@@ -353,11 +353,8 @@ public class UploadConfirmationwindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private Boolean isWarningIcon(final Label icon) {
-        if (icon.isVisible() && !icon.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL)) {
-            return true;
-        }
-        return false;
+    private static Boolean isWarningIcon(final Label icon) {
+        return !isErrorIcon(icon);
     }
 
     /**
@@ -367,14 +364,11 @@ public class UploadConfirmationwindow implements Button.ClickListener {
      *            label
      * @return Boolean
      */
-    private Boolean isErrorIcon(final Label icon) {
-        if (icon.isVisible() && icon.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL)) {
-            return true;
-        }
-        return false;
+    private static Boolean isErrorIcon(final Label icon) {
+        return icon.isVisible() && icon.getStyleName().contains(SPUIStyleDefinitions.ERROR_LABEL);
     }
 
-    private Label getWarningLabel() {
+    private static Label getWarningLabel() {
         final Label warningIconLabel = new Label();
         warningIconLabel.addStyleName(ValoTheme.LABEL_SMALL);
         warningIconLabel.setHeightUndefined();
@@ -436,7 +430,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     private void hideErrorIcon(final Label warningLabel, final int errorLabelCount, final int duplicateCount,
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
-        if (warningLabel == null && (errorLabelCount > 1 || duplicateCount == 1 && errorLabelCount == 1)) {
+        if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
             final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
             final List<LocalArtifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
@@ -486,12 +480,12 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         uploadDetailsTable.setColumnHeader(SIZE, i18n.get("upload.size"));
         uploadDetailsTable.setColumnHeader(ACTION, i18n.get("upload.action"));
 
-        uploadDetailsTable.setColumnExpandRatio(FILE_NAME_LAYOUT, 0.25f);
-        uploadDetailsTable.setColumnExpandRatio(SW_MODULE_NAME, 0.17f);
-        uploadDetailsTable.setColumnExpandRatio(SHA1_CHECKSUM, 0.2f);
-        uploadDetailsTable.setColumnExpandRatio(MD5_CHECKSUM, 0.2f);
-        uploadDetailsTable.setColumnExpandRatio(SIZE, 0.12f);
-        uploadDetailsTable.setColumnExpandRatio(ACTION, 0.06f);
+        uploadDetailsTable.setColumnExpandRatio(FILE_NAME_LAYOUT, 0.25F);
+        uploadDetailsTable.setColumnExpandRatio(SW_MODULE_NAME, 0.17F);
+        uploadDetailsTable.setColumnExpandRatio(SHA1_CHECKSUM, 0.2F);
+        uploadDetailsTable.setColumnExpandRatio(MD5_CHECKSUM, 0.2F);
+        uploadDetailsTable.setColumnExpandRatio(SIZE, 0.12F);
+        uploadDetailsTable.setColumnExpandRatio(ACTION, 0.06F);
 
         final Object[] visibileColumn = { FILE_NAME_LAYOUT, SW_MODULE_NAME, SHA1_CHECKSUM, MD5_CHECKSUM, SIZE, ACTION };
         uploadDetailsTable.setVisibleColumns(visibileColumn);
@@ -548,9 +542,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
             uploadConfrimationWindow.close();
         } else if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
-        }
-
-        else if (event.getComponent().getId().startsWith(SPUIComponentIdProvider.UPLOAD_DELETE_ICON)) {
+        } else if (event.getComponent().getId().startsWith(SPUIComponentIdProvider.UPLOAD_DELETE_ICON)) {
             final String itemId = ((Button) event.getComponent()).getData().toString();
             final Item item = uploadDetailsTable.getItem(((Button) event.getComponent()).getData());
             final Long swId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
@@ -667,7 +659,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     }
 
-    private void closeFileStream(final FileInputStream fis, final File newFile) {
+    private static void closeFileStream(final FileInputStream fis, final File newFile) {
 
         if (fis != null) {
             try {

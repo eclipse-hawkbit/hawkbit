@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,21 +85,9 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     @Override
     protected void unassignTag(final String tagName) {
         final DistributionSetTagAssignmentResult result = toggleAssignment(tagName);
-        if (result.getUnassigned() >= 1 && (isClickedTagListEmpty() || getClickedTagList().contains(tagName))) {
+        if (result.getUnassigned() >= 1) {
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG);
         }
-    }
-
-    private Boolean isClickedTagListEmpty() {
-        if (getClickedTagList() == null || getClickedTagList() != null && !getClickedTagList().isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
-    /* To Be Done : this implementation will vary in views */
-    private List<String> getClickedTagList() {
-        return new ArrayList<>();
     }
 
     @Override

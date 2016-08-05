@@ -104,7 +104,7 @@ public class EntityInterceptorListener {
         notifyAll(interceptor -> interceptor.postUpdate(entity));
     }
 
-    private void notifyAll(final Consumer<? super EntityInterceptor> action) {
+    private static void notifyAll(final Consumer<? super EntityInterceptor> action) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().forEach(action);
     }
 }
