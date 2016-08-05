@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
  *
  *
  */
-public class DistributionSetTypeUndefinedException extends SpServerRtException {
+public class DistributionSetTypeUndefinedException extends AbstractServerRtException {
     /**
     *
     */

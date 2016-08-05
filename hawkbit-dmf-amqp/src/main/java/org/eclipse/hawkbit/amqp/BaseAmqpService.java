@@ -88,8 +88,7 @@ public class BaseAmqpService {
         return rabbitTemplate.getMessageConverter();
     }
 
-    protected final String getStringHeaderKey(final Message message, final String key,
-            final String errorMessageIfNull) {
+    protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
         final Map<String, Object> header = message.getMessageProperties().getHeaders();
         final Object value = header.get(key);
         if (value == null) {
@@ -117,4 +116,5 @@ public class BaseAmqpService {
     protected void cleanMessageHeaderProperties(final Message message) {
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
     }
+
 }

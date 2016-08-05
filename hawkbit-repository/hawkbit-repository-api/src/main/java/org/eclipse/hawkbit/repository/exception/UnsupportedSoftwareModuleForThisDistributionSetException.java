@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  *
  *
  */
-public class UnsupportedSoftwareModuleForThisDistributionSetException extends SpServerRtException {
+public class UnsupportedSoftwareModuleForThisDistributionSetException extends AbstractServerRtException {
     /**
     *
     */

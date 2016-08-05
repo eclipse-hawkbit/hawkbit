@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.slf4j.Logger;
@@ -75,7 +75,7 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * method for handling exception of type SpServerRtException. Called by the
+     * method for handling exception of type AbstractServerRtException. Called by the
      * Spring-Framework for exception handling.
      *
      * @param request
@@ -86,14 +86,14 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler(SpServerRtException.class)
+    @ExceptionHandler(AbstractServerRtException.class)
     public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(ex);
         final HttpStatus responseStatus;
-        if (ex instanceof SpServerRtException) {
-            responseStatus = getStatusOrDefault(((SpServerRtException) ex).getError());
+        if (ex instanceof AbstractServerRtException) {
+            responseStatus = getStatusOrDefault(((AbstractServerRtException) ex).getError());
         } else {
             responseStatus = DEFAULT_RESPONSE_STATUS;
         }
@@ -152,8 +152,8 @@ public class ResponseExceptionHandler {
         final ExceptionInfo response = new ExceptionInfo();
         response.setMessage(ex.getMessage());
         response.setExceptionClass(ex.getClass().getName());
-        if (ex instanceof SpServerRtException) {
-            response.setErrorCode(((SpServerRtException) ex).getError().getKey());
+        if (ex instanceof AbstractServerRtException) {
+            response.setErrorCode(((AbstractServerRtException) ex).getError().getKey());
         }
 
         return response;

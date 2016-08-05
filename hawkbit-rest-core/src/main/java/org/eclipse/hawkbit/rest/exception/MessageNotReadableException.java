@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.rest.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception which is thrown in case an request body is not well formaned and
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class MessageNotReadableException extends SpServerRtException {
+public class MessageNotReadableException extends AbstractServerRtException {
 
     /**
     * 

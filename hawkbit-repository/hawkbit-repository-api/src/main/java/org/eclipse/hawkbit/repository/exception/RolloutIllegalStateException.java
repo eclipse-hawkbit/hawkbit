@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * the {@link RolloutIllegalStateException} is thrown when a rollout is changing
@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  * rollout, or trying to resume a already finished rollout.
  * 
  */
-public class RolloutIllegalStateException extends SpServerRtException {
+public class RolloutIllegalStateException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_ROLLOUT_ILLEGAL_STATE;

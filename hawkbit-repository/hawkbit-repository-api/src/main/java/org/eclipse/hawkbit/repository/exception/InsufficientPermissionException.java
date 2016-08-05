@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception which is thrown in case the current security context object does
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class InsufficientPermissionException extends SpServerRtException {
+public class InsufficientPermissionException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 

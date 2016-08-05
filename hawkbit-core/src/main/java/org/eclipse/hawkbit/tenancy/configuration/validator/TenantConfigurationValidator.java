@@ -22,7 +22,7 @@ public interface TenantConfigurationValidator {
      * @throws TenantConfigurationValidatorException
      *             is thrown, when parameter is invalid.
      */
-    default void validate(final Object tenantConfigurationValue) throws TenantConfigurationValidatorException {
+    default void validate(final Object tenantConfigurationValue) {
         if (tenantConfigurationValue != null
                 && validateToClass().isAssignableFrom(tenantConfigurationValue.getClass())) {
             return;

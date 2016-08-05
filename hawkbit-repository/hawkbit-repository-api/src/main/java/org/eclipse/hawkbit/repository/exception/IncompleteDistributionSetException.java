@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if a distribution set is assigned to a a target that is incomplete
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public final class IncompleteDistributionSetException extends SpServerRtException {
+public final class IncompleteDistributionSetException extends AbstractServerRtException {
     /**
     *
     */

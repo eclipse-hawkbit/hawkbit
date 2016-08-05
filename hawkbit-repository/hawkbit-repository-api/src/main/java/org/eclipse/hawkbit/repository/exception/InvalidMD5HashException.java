@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if MD5 checksum check fails.
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class InvalidMD5HashException extends SpServerRtException {
+public class InvalidMD5HashException extends AbstractServerRtException {
     /**
     *
     */

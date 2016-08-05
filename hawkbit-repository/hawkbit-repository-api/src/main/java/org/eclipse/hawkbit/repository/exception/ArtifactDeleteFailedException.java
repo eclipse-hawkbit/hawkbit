@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if artifact deletion failed.
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public final class ArtifactDeleteFailedException extends SpServerRtException {
+public final class ArtifactDeleteFailedException extends AbstractServerRtException {
     /**
     *
     */

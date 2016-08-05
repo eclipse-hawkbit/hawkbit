@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  *
  */
 @RequestMapping(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE)
+@FunctionalInterface
 public interface MgmtDownloadRestApi {
 
     /**

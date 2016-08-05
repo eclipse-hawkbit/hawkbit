@@ -12,11 +12,10 @@ package org.eclipse.hawkbit.eventbus.event;
  * Abstract event definition class which holds the necessary revsion and tenant
  * information which every event needs.
  * 
- * @author Michael Hirsch
  * @see AbstractDistributedEvent for events which should be distributed to other
  *      cluster nodes
  */
-public class AbstractEvent implements Event {
+public class DefaultEvent implements Event {
 
     private final long revision;
     private final String tenant;
@@ -27,7 +26,7 @@ public class AbstractEvent implements Event {
      * @param tenant
      *            the tenant of the event
      */
-    protected AbstractEvent(final long revision, final String tenant) {
+    protected DefaultEvent(final long revision, final String tenant) {
         this.revision = revision;
         this.tenant = tenant;
     }

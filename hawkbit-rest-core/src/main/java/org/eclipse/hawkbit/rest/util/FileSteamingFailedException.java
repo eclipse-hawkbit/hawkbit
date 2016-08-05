@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.rest.util;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if artifact content streaming to client failed.
  */
-public final class FileSteamingFailedException extends SpServerRtException {
+public final class FileSteamingFailedException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
