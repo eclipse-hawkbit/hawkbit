@@ -226,13 +226,25 @@ public class BulkUploadHandler extends CustomComponent
                     UI.getCurrent().getErrorHandler().error(new com.vaadin.server.ErrorEvent(e));
                 }
             } finally {
-                updateBulkUpload();
-                doAssignments();
-                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
-                // Clearing after assignments are done
-                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
-                resetCounts();
                 deleteFile();
+            }
+            syncCountAfterUpload();
+            doAssignments();
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
+            // Clearing after assignments are done
+            managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
+            resetCounts();
+        }
+
+        private void syncCountAfterUpload() {
+            if (managementUIState.getTargetTableFilters().getBulkUpload()
+                    .getSucessfulUploadCount() != successfullTargetCount) {
+                managementUIState.getTargetTableFilters().getBulkUpload()
+                        .setSucessfulUploadCount(successfullTargetCount);
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
+            }
+            if (managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != failedTargetCount) {
+                managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(failedTargetCount);
             }
         }
 
@@ -284,14 +296,11 @@ public class BulkUploadHandler extends CustomComponent
             if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.05
                     || Math.abs(next - 1) < 0.00001) {
                 managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(next);
-                updateBulkUpload();
+                managementUIState.getTargetTableFilters().getBulkUpload()
+                        .setSucessfulUploadCount(successfullTargetCount);
+                managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(failedTargetCount);
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
             }
-        }
-
-        private void updateBulkUpload() {
-            managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(successfullTargetCount);
-            managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(failedTargetCount);
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
         }
 
         private void doAssignments() {
