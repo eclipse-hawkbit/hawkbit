@@ -76,6 +76,11 @@ import com.vaadin.ui.VerticalLayout;
 @SpringComponent
 public class UploadLayout extends VerticalLayout {
 
+    /**
+     * 
+     */
+    private static final String HTML_DIV = "</div>";
+
     private static final long serialVersionUID = -566164756606779220L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadLayout.class);
@@ -408,18 +413,12 @@ public class UploadLayout extends VerticalLayout {
         return checkIfSoftwareModuleIsSelected();
     }
 
-    private boolean isFilesDropped(final DragAndDropEvent event) {
+    private static boolean isFilesDropped(final DragAndDropEvent event) {
         if (event.getTransferable() instanceof WrapperTransferable) {
             final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-            // other components can also be wrapped in WrapperTransferable , so
-            // additional check on files
-            if (files == null) {
-                return false;
-            }
-            return true;
-        } else {
-            return false;
+            return files != null;
         }
+        return false;
     }
 
     Boolean checkIfSoftwareModuleIsSelected() {
@@ -443,6 +442,8 @@ public class UploadLayout extends VerticalLayout {
      *
      * @param name
      *            file name
+     * @param selectedSoftwareModule
+     *            the current selected sm module
      * @return Boolean
      */
     public Boolean checkIfFileIsDuplicate(final String name, final SoftwareModule selectedSoftwareModule) {
@@ -475,7 +476,7 @@ public class UploadLayout extends VerticalLayout {
     void updateActionCount() {
         if (!artifactUploadState.getFileSelected().isEmpty()) {
             processBtn.setCaption(SPUILabelDefinitions.PROCESS + "<div class='unread'>"
-                    + artifactUploadState.getFileSelected().size() + "</div>");
+                    + artifactUploadState.getFileSelected().size() + HTML_DIV);
         } else {
             processBtn.setCaption(SPUILabelDefinitions.PROCESS);
         }
@@ -504,6 +505,9 @@ public class UploadLayout extends VerticalLayout {
         return message.toString();
     }
 
+    /**
+     * Show the duplicated message.
+     */
     public void showDuplicateMessage() {
         uiNotification.displayValidationError(getDuplicateFileValidationMessage());
     }
@@ -810,13 +814,13 @@ public class UploadLayout extends VerticalLayout {
         final StringBuilder builder = new StringBuilder("");
         if (uploadsFailed != 0) {
             if (uploadsPending != 0) {
-                builder.append("<div class='error-count error-count-color'>" + uploadsFailed + "</div>");
+                builder.append("<div class='error-count error-count-color'>" + uploadsFailed + HTML_DIV);
             } else {
-                builder.append("<div class='unread error-count-color'>" + uploadsFailed + "</div>");
+                builder.append("<div class='unread error-count-color'>" + uploadsFailed + HTML_DIV);
             }
         }
         if (uploadsPending != 0) {
-            builder.append("<div class='unread'>" + uploadsPending + "</div>");
+            builder.append("<div class='unread'>" + uploadsPending + HTML_DIV);
         }
         uploadStatusButton.setCaption(builder.toString());
     }

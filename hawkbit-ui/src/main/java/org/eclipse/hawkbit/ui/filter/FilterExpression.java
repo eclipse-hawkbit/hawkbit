@@ -13,11 +13,9 @@ package org.eclipse.hawkbit.ui.filter;
  * mechanism. The filter expression can evaluate if e.g. Targets should
  * currently be added to the target list or if the current enabled filtered will
  * filter the target and not show the newly created target.
- * 
- *
- *
  *
  */
+@FunctionalInterface
 public interface FilterExpression {
 
     /**

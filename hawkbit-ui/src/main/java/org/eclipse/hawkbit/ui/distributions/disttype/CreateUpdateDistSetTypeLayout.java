@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -27,8 +26,6 @@ import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -59,8 +56,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
     private static final long serialVersionUID = -5169398523815877767L;
-    private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateDistSetTypeLayout.class);
-
     private static final String DIST_TYPE_NAME = "name";
     private static final String DIST_TYPE_DESCRIPTION = "description";
     private static final String DIST_TYPE_MANDATORY = "mandatory";
@@ -83,8 +78,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
     private IndexedContainer sourceTableContainer;
 
     private IndexedContainer originalSelectedTableContainer;
-
-    private Map<CheckBox, Boolean> mandatoryCheckboxMap;
 
     @Override
     protected void createRequiredComponents() {
@@ -152,9 +145,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         twinColumnLayout.setComponentAlignment(sourceTable, Alignment.MIDDLE_LEFT);
         twinColumnLayout.setComponentAlignment(selectButtonLayout, Alignment.MIDDLE_CENTER);
         twinColumnLayout.setComponentAlignment(selectedTable, Alignment.MIDDLE_RIGHT);
-        twinColumnLayout.setExpandRatio(sourceTable, 0.45f);
-        twinColumnLayout.setExpandRatio(selectButtonLayout, 0.07f);
-        twinColumnLayout.setExpandRatio(selectedTable, 0.48f);
+        twinColumnLayout.setExpandRatio(sourceTable, 0.45F);
+        twinColumnLayout.setExpandRatio(selectButtonLayout, 0.07F);
+        twinColumnLayout.setExpandRatio(selectedTable, 0.48F);
         sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
         return twinColumnLayout;
     }
@@ -226,7 +219,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
         sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
         sourceTable.setColumnHeaders(i18n.get("header.dist.twintable.available"));
-        sourceTable.setColumnExpandRatio(DIST_TYPE_NAME, 1.0f);
+        sourceTable.setColumnExpandRatio(DIST_TYPE_NAME, 1.0F);
         getSourceTableData();
         addTooltip();
         sourceTable.select(sourceTable.firstItemId());
@@ -413,7 +406,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         }
     }
 
-    private void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType updateDistSetType,
+    private static void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType updateDistSetType,
             final Boolean isMandatory, final SoftwareModuleType swModuleType) {
         if (isMandatory) {
             updateDistSetType.addMandatoryModuleType(swModuleType);
@@ -488,7 +481,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
      * 
      * @return
      */
-    private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
+    private static LazyQueryContainer getDistSetTypeLazyQueryContainer() {
 
         final LazyQueryContainer disttypeContainer = HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));

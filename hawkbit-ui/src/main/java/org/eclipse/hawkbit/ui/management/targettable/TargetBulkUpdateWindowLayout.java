@@ -178,7 +178,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private BulkUploadHandler getBulkUploadHandler() {
         final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
-                deploymentManagement, uINotification, i18n);
+                deploymentManagement, i18n);
         bulkUploadHandler.buildLayout();
         bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
         return bulkUploadHandler;

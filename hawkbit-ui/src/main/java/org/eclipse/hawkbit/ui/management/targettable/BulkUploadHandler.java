@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -83,9 +82,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final UINotification uINotification;
-
-    protected File tempFile = null;
+    protected File tempFile;
     private Upload upload;
 
     private final ProgressBar progressBar;
@@ -93,8 +90,8 @@ public class BulkUploadHandler extends CustomComponent
     private final TargetBulkTokenTags targetBulkTokenTags;
 
     private final Label targetsCountLabel;
-    private long failedTargetCount = 0;
-    private long successfullTargetCount = 0;
+    private long failedTargetCount;
+    private long successfullTargetCount;
 
     private final transient Executor executor;
     private transient EventBus.SessionEventBus eventBus;
@@ -109,12 +106,11 @@ public class BulkUploadHandler extends CustomComponent
      * @param targetManagement
      * @param managementUIState
      * @param deploymentManagement
-     * @param uINotification
      * @param i18n
      */
     public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final UINotification uINotification, final I18N i18n) {
+            final DeploymentManagement deploymentManagement, final I18N i18n) {
         this.targetBulkUpdateWindowLayout = targetBulkUpdateWindowLayout;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();
@@ -122,7 +118,6 @@ public class BulkUploadHandler extends CustomComponent
         this.progressBar = targetBulkUpdateWindowLayout.getProgressBar();
         this.managementUIState = managementUIState;
         this.deploymentManagement = deploymentManagement;
-        this.uINotification = uINotification;
         this.targetsCountLabel = targetBulkUpdateWindowLayout.getTargetsCountLabel();
         this.targetBulkTokenTags = targetBulkUpdateWindowLayout.getTargetBulkTokenTags();
         this.i18n = i18n;
@@ -396,7 +391,7 @@ public class BulkUploadHandler extends CustomComponent
 
     }
 
-    private void setTargetValues(final Target target, final String name, final String description) {
+    private static void setTargetValues(final Target target, final String name, final String description) {
         if (null == name) {
             target.setName(target.getControllerId());
         } else {
