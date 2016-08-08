@@ -13,7 +13,8 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 
 /**
- * Listens to change in property values of an entity.
+ * Listens to change in property values of an entity and calls the corresponding
+ * {@link EventAwareEntity}.
  *
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
