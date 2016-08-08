@@ -14,10 +14,10 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Random;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
@@ -29,15 +29,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("System Management")
 public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
-
-    @Test
-    @Description("Ensures that you can create a tenant without setting the necessary security context which holds a current tenant")
-    public void createInitialTenantWithoutSecurityContext() {
-        securityRule.clear();
-        final String tenantToBeCreated = "newTenantToCreate";
-        final TenantMetaData tenantMetadata = systemManagement.getTenantMetadata(tenantToBeCreated);
-        assertThat(tenantMetadata).isNotNull();
-    }
 
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")
@@ -109,26 +100,27 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "tenant" + i;
-            securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname), () -> {
-                systemManagement.getTenantMetadata(tenantname);
-                if (artifactSize > 0) {
-                    createTestArtifact(random);
-                    createDeletedTestArtifact(random);
-                }
-                if (targets > 0) {
-                    final List<Target> createdTargets = createTestTargets(targets);
-                    if (updates > 0) {
-                        for (int x = 0; x < updates; x++) {
-                            final DistributionSet ds = testdataFactory.createDistributionSet("to be deployed" + x,
-                                    true);
-
-                            deploymentManagement.assignDistributionSet(ds, createdTargets);
+            securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true,
+                    SpringEvalExpressions.SYSTEM_ROLE), () -> {
+                        systemManagement.getTenantMetadata(tenantname);
+                        if (artifactSize > 0) {
+                            createTestArtifact(random);
+                            createDeletedTestArtifact(random);
                         }
-                    }
-                }
+                        if (targets > 0) {
+                            final List<Target> createdTargets = createTestTargets(targets);
+                            if (updates > 0) {
+                                for (int x = 0; x < updates; x++) {
+                                    final DistributionSet ds = testdataFactory
+                                            .createDistributionSet("to be deployed" + x, true);
 
-                return null;
-            });
+                                    deploymentManagement.assignDistributionSet(ds, createdTargets);
+                                }
+                            }
+                        }
+
+                        return null;
+                    });
         }
 
         return random;

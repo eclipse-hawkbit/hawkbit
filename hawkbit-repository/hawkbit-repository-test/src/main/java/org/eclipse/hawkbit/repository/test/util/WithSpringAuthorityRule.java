@@ -52,10 +52,10 @@ public class WithSpringAuthorityRule implements TestRule {
             annotation = description.getTestClass().getAnnotation(WithUser.class);
         }
         if (annotation != null) {
-            setSecurityContext(annotation);
             if (annotation.autoCreateTenant()) {
-                SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(annotation.tenantId());
+                createTenant(annotation.tenantId());
             }
+            setSecurityContext(annotation);
         }
         return oldContext;
     }
@@ -139,7 +139,7 @@ public class WithSpringAuthorityRule implements TestRule {
     }
 
     /**
-     * 
+     *
      * @param withUser
      * @param callable
      * @return callable result
@@ -149,10 +149,20 @@ public class WithSpringAuthorityRule implements TestRule {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
         if (withUser.autoCreateTenant()) {
-            SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(withUser.tenantId());
+            createTenant(withUser.tenantId());
         }
         try {
             return callable.call();
+        } finally {
+            after(oldContext);
+        }
+    }
+
+    private void createTenant(final String tenantId) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        setSecurityContext(privilegedUser());
+        try {
+            SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
         } finally {
             after(oldContext);
         }
@@ -180,7 +190,7 @@ public class WithSpringAuthorityRule implements TestRule {
     }
 
     private static WithUser privilegedUser() {
-        return createWithUser("bumlux", "default", true, true, new String[] { "ROLE_CONTROLLER" });
+        return createWithUser("bumlux", "default", true, true, new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" });
     }
 
     private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,

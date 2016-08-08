@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +73,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private SystemManagement systemManagement;
 
     @Autowired
-    private TenantAware currentTenant;
-
-    @Autowired
     private EntityFactory entityFactory;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
@@ -119,8 +119,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         LOG.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
-        sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(this.systemManagement
-                .getTenantMetadata(this.currentTenant.getCurrentTenant()).getDefaultDsType().getKey()));
+        final String defaultDsKey = systemSecurityContext
+                .runAsSystem(() -> this.systemManagement.getTenantMetadata().getDefaultDsType().getKey());
+        sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
         final Iterable<DistributionSet> createdDSets = this.distributionSetManagement
                 .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement,

@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
@@ -23,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -57,7 +60,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
-    @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = "ROLE_CONTROLLER", autoCreateTenant = false)
+    @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
+            SYSTEM_ROLE }, autoCreateTenant = false)
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
@@ -91,13 +95,11 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
         // make a poll, audit information should not be changed, run as
         // controller principal!
-        securityRule.runAs(
-                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    mvc.perform(
-                            get("/{tenant}/controller/v1/" + knownTargetControllerId, tenantAware.getCurrentTenant()))
-                            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-                    return null;
-                });
+        securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            mvc.perform(get("/{tenant}/controller/v1/" + knownTargetControllerId, tenantAware.getCurrentTenant()))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+            return null;
+        });
 
         // verify that audit information has not changed
         final Target targetVerify = targetManagement.findTargetByControllerID(knownTargetControllerId);
@@ -143,22 +145,19 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
     @WithUser(principal = "knownpricipal", allSpPermissions = false)
     public void pollWithModifiedGloablPollingTime() throws Exception {
-        securityRule.runAs(
-                WithSpringAuthorityRule.withUser("tenantadmin", SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION),
-                () -> {
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                            "00:02:00");
-                    return null;
-                });
+        securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                    "00:02:00");
+            return null;
+        });
 
-        securityRule.runAs(
-                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
-                            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                            .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
-                    return null;
-                });
+        securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                    .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
+            return null;
+        });
     }
 
     @Test

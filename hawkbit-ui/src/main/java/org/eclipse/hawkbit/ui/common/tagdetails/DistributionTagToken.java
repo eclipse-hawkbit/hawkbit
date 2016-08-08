@@ -108,6 +108,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     @Override
     protected void populateContainer() {
         container.removeAllItems();
+        tagDetails.clear();
         for (final DistributionSetTag tag : tagManagement.findAllDistributionSetTags()) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }

@@ -340,6 +340,7 @@ public interface SoftwareManagement {
      *            to search for
      * @return {@link List} of found {@link SoftwareModule}s
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<SoftwareModule> findSoftwareModulesById(@NotEmpty Collection<Long> ids);
 
     /**
