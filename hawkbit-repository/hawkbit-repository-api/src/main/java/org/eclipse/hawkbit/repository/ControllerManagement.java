@@ -183,6 +183,8 @@ public interface ControllerManagement {
      * @return the security context of the target, in case no target exists for
      *         the given controllerId {@code null} is returned
      */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_TARGET_SEC_TOKEN)
     String getSecurityTokenByControllerId(@NotEmpty String controllerId);
 
     /**

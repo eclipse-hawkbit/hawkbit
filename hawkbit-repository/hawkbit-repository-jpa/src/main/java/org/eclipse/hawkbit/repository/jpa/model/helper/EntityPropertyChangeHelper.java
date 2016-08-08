@@ -18,9 +18,20 @@ import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
 
+/**
+ *Helper class to get the change set for the property changes in the Entity.
+ *
+ * @param <T>
+ */
 public class EntityPropertyChangeHelper<T extends TenantAwareBaseEntity>  {
     
     
+    /**
+     * To get the map of entity property change set
+     * @param clazz
+     * @param event
+     * @return the map of the changeSet
+     */
     public static <T extends TenantAwareBaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
             final Class<T> clazz, final DescriptorEvent event) {
         final T rolloutGroup = clazz.cast(event.getObject());

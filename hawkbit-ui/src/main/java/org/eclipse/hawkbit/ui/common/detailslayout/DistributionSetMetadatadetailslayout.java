@@ -61,11 +61,12 @@ public class DistributionSetMetadatadetailslayout extends Table {
     private Long selectedDistSetId;
 
     /**
-     * 
+     * Initialize the component.
      * @param i18n
      * @param permissionChecker
      * @param distributionSetManagement
      * @param dsMetadataPopupLayout
+     * @param entityFactory
      */
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
             final DistributionSetManagement distributionSetManagement,

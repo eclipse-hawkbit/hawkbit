@@ -22,7 +22,7 @@ public class DistributionDeletedEvent extends AbstractDistributedEvent {
     /**
      * @param tenant
      *            the tenant for this event
-     * @param distributionSetId
+     * @param distributionId
      *            the ID of the distribution set which has been deleted
      */
     public DistributionDeletedEvent(final String tenant, final Long distributionId) {

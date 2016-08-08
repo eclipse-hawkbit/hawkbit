@@ -18,11 +18,10 @@ public class DistributionSetUpdateEvent extends AbstractBaseEntityEvent<Distribu
 
     private static final long serialVersionUID = 1L;
 
+    
     /**
-     * Constructor.
-     * 
-     * @param tag
-     *            the tag which is updated
+     * Constructor
+     * @param ds Distribution Set
      */
     public DistributionSetUpdateEvent(final DistributionSet ds) {
         super(ds);

@@ -340,6 +340,7 @@ public interface SoftwareManagement {
      *            to search for
      * @return {@link List} of found {@link SoftwareModule}s
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<SoftwareModule> findSoftwareModulesById(@NotEmpty Collection<Long> ids);
 
     /**
@@ -484,7 +485,7 @@ public interface SoftwareManagement {
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
     
     /**
-     * finds all meta data by the given software module id.
+     * Finds all meta data by the given software module id.
      *
      * @param softwareModuleId
      *            the software module id to retrieve the meta data from

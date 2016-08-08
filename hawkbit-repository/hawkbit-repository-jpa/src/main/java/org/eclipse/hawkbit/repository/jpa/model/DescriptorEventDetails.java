@@ -21,12 +21,17 @@ public class DescriptorEventDetails {
 		CREATE, UPDATE;
 	}
 
-	private DescriptorEvent descriptorEvent;
+	private final DescriptorEvent descriptorEvent;
 
-	private ActionType actiontype;
+	private final ActionType actiontype;
 
-	public DescriptorEventDetails(ActionType actionType,
-			DescriptorEvent descriptorEvent) {
+	/**
+	 * Constructor
+	 * @param actionType Action type
+	 * @param descriptorEvent Descriptor Event
+	 */
+	public DescriptorEventDetails(final ActionType actionType,
+			final DescriptorEvent descriptorEvent) {
 		this.descriptorEvent = descriptorEvent;
 		this.actiontype = actionType;
 	}

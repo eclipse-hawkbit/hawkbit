@@ -73,6 +73,7 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -290,6 +291,9 @@ public class SecurityManagedConfiguration {
         @Autowired
         private SecurityProperties springSecurityProperties;
 
+        @Autowired
+        private SystemSecurityContext systemSecurityContext;
+
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
@@ -318,14 +322,14 @@ public class SecurityManagedConfiguration {
                     userAuthenticationFilter.destroy();
                 }
             }, RequestHeaderAuthenticationFilter.class)
-                    .addFilterAfter(
-                            new AuthenticationSuccessTenantMetadataCreationFilter(tenantAware, systemManagement),
-                            SessionManagementFilter.class)
+                    .addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement,
+                            systemSecurityContext), SessionManagementFilter.class)
                     .authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
 
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
+            httpSec.anonymous().disable();
         }
     }
 
@@ -522,12 +526,15 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
     @Autowired
     private SystemManagement systemManagement;
 
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
+
     @Override
     public void onAuthenticationSuccess(final Authentication authentication) throws Exception {
 
         if (authentication.getClass().equals(TenantUserPasswordAuthenticationToken.class)) {
-            systemManagement
-                    .getTenantMetadata(((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
+            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(),
+                    ((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
         } else if (authentication.getClass().equals(UsernamePasswordAuthenticationToken.class)) {
             // TODO: vaadin4spring-ext-security does not give us the
             // fullyAuthenticatedToken
@@ -536,7 +543,8 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
             // LoginView. This needs to be changed with the update of
             // vaadin4spring 0.0.7 because it
             // has been fixed.
-            systemManagement.getTenantMetadata("DEFAULT");
+            final String defaultTenant = "DEFAULT";
+            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(), defaultTenant);
         }
 
         super.onAuthenticationSuccess(authentication);
@@ -548,13 +556,13 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
  */
 class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
 
-    private final TenantAware tenantAware;
     private final SystemManagement systemManagement;
+    private final SystemSecurityContext systemSecurityContext;
 
-    AuthenticationSuccessTenantMetadataCreationFilter(final TenantAware tenantAware,
-            final SystemManagement systemManagement) {
-        this.tenantAware = tenantAware;
+    AuthenticationSuccessTenantMetadataCreationFilter(final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.systemManagement = systemManagement;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -565,14 +573,16 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
-
-        final String currentTenant = tenantAware.getCurrentTenant();
-        if (currentTenant != null) {
-            // lazy initialize tenant meta data after successful authentication
-            systemManagement.getTenantMetadata(currentTenant);
-        }
-
+        lazyCreateTenantMetadata();
         chain.doFilter(request, response);
+
+    }
+
+    private void lazyCreateTenantMetadata() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
+        }
     }
 
     @Override

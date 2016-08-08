@@ -285,7 +285,7 @@ public interface DistributionSetManagement {
             @NotNull Pageable pageable);
 
     /**
-     * finds all meta data by the given distribution set id.
+     * Finds all meta data by the given distribution set id.
      * 
      * @param distributionSetId
      *            the distribution set id to retrieve the meta data from

@@ -364,9 +364,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         if (distributionSetManagement.isDistributionSetInUse(ds)) {
-            notification.displayValidationError(
-                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
-                            ds.getName(), ds.getVersion()));
+            notification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;
         }
         return true;
@@ -472,7 +470,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
-        if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
+        if (event == SaveActionWindowEvent.DELETED_DISTRIBUTIONS || event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
             UI.getCurrent().access(() -> refreshFilter());
         }
     }
@@ -550,9 +548,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return manageMetadataBtn;
     }
 
-    private void showMetadataDetails(final Long itemId) {
+   private void showMetadataDetails(final Long itemId) {
         final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 
     private String getNameAndVerion(final Object itemId) {

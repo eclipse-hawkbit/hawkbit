@@ -292,6 +292,14 @@ public final class SpPermission {
 
         /**
          * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#READ_TARGET_SEC_TOKEN} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_READ_TARGET_SEC_TOKEN = HAS_AUTH_PREFIX + READ_TARGET_SEC_TOKEN
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#CREATE_TARGET} or
          * {@link #IS_SYSTEM_CODE}.
          */
