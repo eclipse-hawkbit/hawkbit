@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.junit.rules.TestRule;
@@ -56,10 +57,10 @@ public class WithSpringAuthorityRule implements TestRule {
             annotation = description.getTestClass().getAnnotation(WithUser.class);
         }
         if (annotation != null) {
-            setSecurityContext(annotation);
             if (annotation.autoCreateTenant()) {
-                SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(annotation.tenantId());
+                createTenant(annotation.tenantId());
             }
+            setSecurityContext(annotation);
         }
         return oldContext;
     }
@@ -158,11 +159,23 @@ public class WithSpringAuthorityRule implements TestRule {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
         if (withUser.autoCreateTenant()) {
-            SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(withUser.tenantId());
+            createTenant(withUser.tenantId());
         }
         try {
             return callable.call();
         } finally {
+            after(oldContext);
+        }
+    }
+    
+    private void createTenant(final String tenantId) throws Exception {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        setSecurityContext(privilegedUser());
+        try
+        {
+            SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
+        }finally
+        {
             after(oldContext);
         }
     }
@@ -254,7 +267,7 @@ public class WithSpringAuthorityRule implements TestRule {
 
             @Override
             public String[] authorities() {
-                return new String[] { "ROLE_CONTROLLER" };
+                return new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" };
             }
 
             @Override
