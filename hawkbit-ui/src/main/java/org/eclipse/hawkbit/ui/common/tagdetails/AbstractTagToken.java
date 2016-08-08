@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -54,7 +55,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected IndexedContainer container;
 
-    protected final transient Map<Long, TagData> tagDetails = new HashMap<>();
+    protected final transient Map<Long, TagData> tagDetails = new ConcurrentHashMap<>();
 
     protected final transient Map<Long, TagData> tokensAdded = new HashMap<>();
 
@@ -140,10 +141,12 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
-        tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
-        final Item item = container.addItem(tagId);
-        item.getItemProperty("id").setValue(tagId);
-        updateItem(tagName, tagColor, item);
+        final TagData tagData = tagDetails.putIfAbsent(tagId, new TagData(tagId, tagName, tagColor));
+        if(tagData == null){
+            final Item item = container.addItem(tagId);
+            item.getItemProperty("id").setValue(tagId);
+            updateItem(tagName, tagColor, item);
+        }
     }
 
     protected void updateItem(final String tagName, final String tagColor, final Item item) {
