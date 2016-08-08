@@ -19,15 +19,15 @@ import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
 
 /**
- *Helper class to get the change set for the property changes in the Entity.
+ * Helper class to get the change set for the property changes in the Entity.
  *
  * @param <T>
  */
-public class EntityPropertyChangeHelper<T extends TenantAwareBaseEntity>  {
-    
-    
+public class EntityPropertyChangeHelper<T extends TenantAwareBaseEntity> {
+
     /**
      * To get the map of entity property change set
+     * 
      * @param clazz
      * @param event
      * @return the map of the changeSet
@@ -35,19 +35,12 @@ public class EntityPropertyChangeHelper<T extends TenantAwareBaseEntity>  {
     public static <T extends TenantAwareBaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
             final Class<T> clazz, final DescriptorEvent event) {
         final T rolloutGroup = clazz.cast(event.getObject());
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery())
-                .getObjectChangeSet();
-        return changeSet
-                .getChanges()
-                .stream()
-                .filter(record -> record instanceof DirectToFieldChangeRecord)
+        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
+        return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)
-                .collect(
-                        Collectors.toMap(
-                                record -> record.getAttribute(),
-                                record -> new AbstractPropertyChangeEvent<T>(
-                                        rolloutGroup, null).new Values(record
-                                        .getOldValue(), record.getNewValue())));
+                .collect(Collectors.toMap(record -> record.getAttribute(),
+                        record -> new AbstractPropertyChangeEvent<T>(rolloutGroup, null).new Values(
+                                record.getOldValue(), record.getNewValue())));
     }
 
 }

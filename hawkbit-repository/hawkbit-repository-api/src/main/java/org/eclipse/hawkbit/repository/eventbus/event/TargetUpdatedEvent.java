@@ -16,14 +16,16 @@ import org.eclipse.hawkbit.repository.model.Target;
  */
 public class TargetUpdatedEvent extends AbstractBaseEntityEvent<Target> {
 
-	private static final long serialVersionUID = 5665118668865832477L;
+    private static final long serialVersionUID = 5665118668865832477L;
 
-	/**
-	 * Constructor
-	 * @param baseEntity Target entity
-	 */
-	public TargetUpdatedEvent(final Target baseEntity) {
-		super(baseEntity);
-	}
+    /**
+     * Constructor
+     * 
+     * @param baseEntity
+     *            Target entity
+     */
+    public TargetUpdatedEvent(final Target baseEntity) {
+        super(baseEntity);
+    }
 
 }

@@ -17,31 +17,33 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
  */
 public class DescriptorEventDetails {
 
-	enum ActionType {
-		CREATE, UPDATE;
-	}
+    enum ActionType {
+        CREATE, UPDATE;
+    }
 
-	private final DescriptorEvent descriptorEvent;
+    private final DescriptorEvent descriptorEvent;
 
-	private final ActionType actiontype;
+    private final ActionType actiontype;
 
-	/**
-	 * Constructor
-	 * @param actionType Action type
-	 * @param descriptorEvent Descriptor Event
-	 */
-	public DescriptorEventDetails(final ActionType actionType,
-			final DescriptorEvent descriptorEvent) {
-		this.descriptorEvent = descriptorEvent;
-		this.actiontype = actionType;
-	}
+    /**
+     * Constructor
+     * 
+     * @param actionType
+     *            Action type
+     * @param descriptorEvent
+     *            Descriptor Event
+     */
+    public DescriptorEventDetails(final ActionType actionType, final DescriptorEvent descriptorEvent) {
+        this.descriptorEvent = descriptorEvent;
+        this.actiontype = actionType;
+    }
 
-	public DescriptorEvent getDescriptorEvent() {
-		return descriptorEvent;
-	}
+    public DescriptorEvent getDescriptorEvent() {
+        return descriptorEvent;
+    }
 
-	public ActionType getActiontype() {
-		return actiontype;
-	}
+    public ActionType getActiontype() {
+        return actiontype;
+    }
 
 }
