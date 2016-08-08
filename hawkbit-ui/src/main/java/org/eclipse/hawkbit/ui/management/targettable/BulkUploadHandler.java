@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
@@ -56,6 +55,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -83,8 +83,6 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    private final UINotification uINotification;
-
     protected File tempFile = null;
     private Upload upload;
 
@@ -109,12 +107,11 @@ public class BulkUploadHandler extends CustomComponent
      * @param targetManagement
      * @param managementUIState
      * @param deploymentManagement
-     * @param uINotification
      * @param i18n
      */
     public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final UINotification uINotification, final I18N i18n) {
+            final DeploymentManagement deploymentManagement, final I18N i18n) {
         this.targetBulkUpdateWindowLayout = targetBulkUpdateWindowLayout;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();
@@ -122,7 +119,6 @@ public class BulkUploadHandler extends CustomComponent
         this.progressBar = targetBulkUpdateWindowLayout.getProgressBar();
         this.managementUIState = managementUIState;
         this.deploymentManagement = deploymentManagement;
-        this.uINotification = uINotification;
         this.targetsCountLabel = targetBulkUpdateWindowLayout.getTargetsCountLabel();
         this.targetBulkTokenTags = targetBulkUpdateWindowLayout.getTargetBulkTokenTags();
         this.i18n = i18n;
@@ -178,6 +174,7 @@ public class BulkUploadHandler extends CustomComponent
     }
 
     class UploadAsync implements Runnable {
+
         final SucceededEvent event;
 
         /**
@@ -193,7 +190,6 @@ public class BulkUploadHandler extends CustomComponent
             if (tempFile == null) {
                 return;
             }
-
             try (InputStream tempStream = new FileInputStream(tempFile)) {
                 readFileStream(tempStream);
             } catch (final FileNotFoundException e) {
@@ -201,12 +197,11 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final IOException e) {
                 LOG.error("Error while opening temorary file ", e);
             }
-
         }
 
         private void readFileStream(final InputStream tempStream) {
             String line;
-            try (BufferedReader reader = new BufferedReader(
+            try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(tempStream, Charset.defaultCharset()))) {
                 LOG.info("Bulk file upload started");
                 long innerCounter = 0;
@@ -218,20 +213,38 @@ public class BulkUploadHandler extends CustomComponent
                  * below event.
                  */
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
+
                 while ((line = reader.readLine()) != null) {
                     innerCounter++;
                     readEachLine(line, innerCounter, totalFileSize);
                 }
-                doAssignments();
-                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
 
-                // Clearing after assignments are done
-                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
+            } catch (final RuntimeException e) {
+                if (UI.getCurrent() != null) {
+                    UI.getCurrent().getErrorHandler().error(new com.vaadin.server.ErrorEvent(e));
+                }
             } finally {
-                resetCounts();
                 deleteFile();
+            }
+            syncCountAfterUpload();
+            doAssignments();
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
+            // Clearing after assignments are done
+            managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
+            resetCounts();
+        }
+
+        private void syncCountAfterUpload() {
+            if (managementUIState.getTargetTableFilters().getBulkUpload()
+                    .getSucessfulUploadCount() != successfullTargetCount) {
+                managementUIState.getTargetTableFilters().getBulkUpload()
+                        .setSucessfulUploadCount(successfullTargetCount);
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
+            }
+            if (managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != failedTargetCount) {
+                managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(failedTargetCount);
             }
         }
 
@@ -457,4 +470,5 @@ public class BulkUploadHandler extends CustomComponent
             eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED));
         }
     }
+
 }
