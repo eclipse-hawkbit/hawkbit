@@ -36,8 +36,6 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     @Override
     public void error(final ErrorEvent event) {
 
-        LOG.error("Error in UI: ", event.getThrowable());
-
         final Optional<Page> originError = getPageOriginError(event);
 
         if (originError.isPresent()) {
@@ -72,7 +70,11 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     }
 
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
+        LOG.error("Error in UI: ", exception);
+        return createHawkbitErrorNotificationMessage(exception);
+    }
 
+    protected HawkbitErrorNotificationMessage createHawkbitErrorNotificationMessage(final Throwable exception) {
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
                 i18n.get("message.error.temp", exception.getClass().getSimpleName()), false);
