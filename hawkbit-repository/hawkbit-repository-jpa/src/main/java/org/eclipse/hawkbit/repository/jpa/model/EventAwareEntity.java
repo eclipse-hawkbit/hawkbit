@@ -10,22 +10,29 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
+/**
+ * Interfaces which can be implemented by entities to be called when the entity
+ * should fire an event because the entity has been created, updated or deleted.
+ */
 public interface EventAwareEntity {
 
     /**
      * Fired for the Entity creation.
+     * 
      * @param descriptorEvent
      */
     void fireCreateEvent(DescriptorEvent descriptorEvent);
 
     /**
      * Fired for the Entity updation.
+     * 
      * @param descriptorEvent
      */
     void fireUpdateEvent(DescriptorEvent descriptorEvent);
 
     /**
      * Fired for the Entity deletion.
+     * 
      * @param descriptorEvent
      */
     void fireDeleteEvent(DescriptorEvent descriptorEvent);
