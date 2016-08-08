@@ -142,7 +142,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
         final TagData tagData = tagDetails.putIfAbsent(tagId, new TagData(tagId, tagName, tagColor));
-        if(tagData == null){
+        if (tagData == null) {
             final Item item = container.addItem(tagId);
             item.getItemProperty("id").setValue(tagId);
             updateItem(tagName, tagColor, item);
