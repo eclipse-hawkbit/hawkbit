@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Component;
 
 /**
@@ -40,7 +41,13 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         if (originError.isPresent()) {
             final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
-            message.show(originError.get());
+            final VaadinSession current = VaadinSession.getCurrent();
+            current.lock();
+            try {
+                message.show(originError.get());
+            } finally {
+                current.unlock();
+            }
         }
     }
 
