@@ -120,6 +120,8 @@ public class SecurityManagedConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    // Exception squid:S00112 - Is aspectJ proxy
+    @SuppressWarnings({ "squid:S00112" })
     public UserAuthenticationFilter userAuthenticationFilter() throws Exception {
         return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
     }

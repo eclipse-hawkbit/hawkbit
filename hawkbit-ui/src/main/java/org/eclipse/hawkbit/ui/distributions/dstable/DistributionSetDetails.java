@@ -65,7 +65,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private static final long serialVersionUID = -4595004466943546669L;
 
     private static final String SOFT_MODULE = "softwareModule";
-    
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -86,7 +85,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     @Autowired
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
 
@@ -181,7 +180,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return null;
     }
 
-    private String getUnsavedAssigedSwModule(final String name, final String version) {
+    private static String getUnsavedAssigedSwModule(final String name, final String version) {
         return HawkbitCommonUtil.getFormattedNameVersion(name, version);
     }
 
@@ -394,14 +393,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
-    }
-
-    @Override
-    protected String getShowMetadataButtonId() {
-        final DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get() : null;
-        return SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + lastselectedDistDS.getName() + "."
-                + lastselectedDistDS.getVersion();
     }
 
     private boolean isDistributionSetSelected(final DistributionSet ds) {

@@ -107,7 +107,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             return;
         }
         targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
-        // targetAddUpdateWindowLayout.populateValuesOfTarget(getSelectedBaseEntity().getControllerId());
         openWindow();
     }
 
@@ -229,7 +228,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
      *            as Module (JVM|OS|AH)
      * @return Label as UI
      */
-    private Label getSWModlabel(final String labelName, final SoftwareModule swModule) {
+    private static Label getSWModlabel(final String labelName, final SoftwareModule swModule) {
         return SPUIComponentProvider.createNameValueLabel(labelName + " : ", swModule.getName(), swModule.getVersion());
     }
 
@@ -254,23 +253,18 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected String getShowMetadataButtonId() {
-        return null;
-    }
-
-    @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return false;
     }
 
     @Override
-    protected void showMetadata(ClickEvent event) {
-        //No implementation required
+    protected void showMetadata(final ClickEvent event) {
+        // No implementation required
     }
 
     @Override
     protected void populateMetadataDetails() {
-        //No implementation required
+        // No implementation required
     }
 
 }

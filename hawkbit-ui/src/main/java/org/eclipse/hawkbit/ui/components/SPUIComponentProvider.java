@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
-import org.eclipse.hawkbit.ui.decorators.SPUIHeaderLayoutDecorator;
+import org.eclipse.hawkbit.ui.decorators.HeaderLayoutDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUILabelDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
@@ -104,7 +104,7 @@ public final class SPUIComponentProvider {
      * @return
      */
     public static HorizontalLayout getHeaderLayout(
-            final Class<? extends SPUIHeaderLayoutDecorator> tableHeaderLayoutDecorator) {
+            final Class<? extends HeaderLayoutDecorator> tableHeaderLayoutDecorator) {
         // Do we really need this???
         HorizontalLayout hLayout = getHorizontalLayout(new SPUIHorizontalLayout().getUiHorizontalLayout().getClass());
 
@@ -113,11 +113,11 @@ public final class SPUIComponentProvider {
         }
 
         try {
-            final SPUIHeaderLayoutDecorator layoutDecorator = tableHeaderLayoutDecorator.newInstance();
+            final HeaderLayoutDecorator layoutDecorator = tableHeaderLayoutDecorator.newInstance();
             hLayout = layoutDecorator.decorate(hLayout);
 
         } catch (final InstantiationException | IllegalAccessException exception) {
-            LOG.error("Error occured while creating horizontal decorator " + SPUIHeaderLayoutDecorator.class,
+            LOG.error("Error occured while creating horizontal decorator " + HeaderLayoutDecorator.class,
                     exception);
         }
 

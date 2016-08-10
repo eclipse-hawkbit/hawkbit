@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.repository.eventbus.event;
 import java.net.URI;
 import java.util.Collection;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
+import org.eclipse.hawkbit.eventbus.event.DefaultEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Event that gets sent when a distribution set gets assigned to a target.
  *
  */
-public class TargetAssignDistributionSetEvent extends AbstractEvent {
+public class TargetAssignDistributionSetEvent extends DefaultEvent {
 
     private final Collection<SoftwareModule> softwareModules;
     private final String controllerId;

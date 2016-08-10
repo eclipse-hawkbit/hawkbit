@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception which is thrown when trying to set an invalid target address.
  */
-public class InvalidTargetAddressException extends SpServerRtException {
+public class InvalidTargetAddressException extends AbstractServerRtException {
 
     /**
      * 

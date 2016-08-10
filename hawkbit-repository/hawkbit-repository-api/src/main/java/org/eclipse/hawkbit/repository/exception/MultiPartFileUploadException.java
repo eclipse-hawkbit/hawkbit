@@ -9,13 +9,13 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if a multi part exception occurred.
  *
  */
-public final class MultiPartFileUploadException extends SpServerRtException {
+public final class MultiPartFileUploadException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 

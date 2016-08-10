@@ -28,11 +28,6 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 /**
  * Simple implementation of generics bean query which dynamically loads artifact
  * beans.
- *
- *
- *
- *
- *
  */
 public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
     private static final long serialVersionUID = -333786310371208962L;
@@ -74,7 +69,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     @Override
     protected LocalArtifact constructBean() {
-        return entityFactory.generateLocalArtifact();
+        return getEntityFactory().generateLocalArtifact();
     }
 
     @Override

@@ -37,7 +37,7 @@ public class DdiControllerBase extends ResourceSupport {
     }
 
     public DdiControllerBase() {
-
+        // needed for json create
     }
 
     public DdiConfig getConfig() {

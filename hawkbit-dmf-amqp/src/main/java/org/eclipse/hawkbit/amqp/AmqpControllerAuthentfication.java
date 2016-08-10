@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- *
+ * A controller which handles the amqp authentfication.
  */
 @Component
 public class AmqpControllerAuthentfication {

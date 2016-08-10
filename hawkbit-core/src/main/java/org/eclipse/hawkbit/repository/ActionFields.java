@@ -11,11 +11,8 @@ package org.eclipse.hawkbit.repository;
 /**
  * Sort fields for {@link ActionRest}.
  *
- *
- *
- *
  */
-public enum ActionFields implements FieldNameProvider,FieldValueConverter<ActionFields> {
+public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
 
     /**
      * The status field.
@@ -42,13 +39,10 @@ public enum ActionFields implements FieldNameProvider,FieldValueConverter<Action
 
     @Override
     public Object convertValue(final ActionFields e, final String value) {
-        switch (e) {
-        case STATUS:
+        if (STATUS.equals(e)) {
             return convertStatusValue(value);
-
-        default:
-            return value;
         }
+        return value;
     }
 
     private static Object convertStatusValue(final String value) {
@@ -64,11 +58,9 @@ public enum ActionFields implements FieldNameProvider,FieldValueConverter<Action
 
     @Override
     public String[] possibleValues(final ActionFields e) {
-        switch (e) {
-        case STATUS:
+        if (STATUS.equals(e)) {
             return new String[] { ACTIVE, INACTIVE };
-        default:
-            return new String[0];
         }
+        return new String[0];
     }
 }

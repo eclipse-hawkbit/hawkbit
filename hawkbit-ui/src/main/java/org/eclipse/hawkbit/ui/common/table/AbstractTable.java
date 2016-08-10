@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
@@ -49,9 +47,9 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
-    private static final long serialVersionUID = 4856562746502217630L;
+    private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractTable.class);
+    private static final long serialVersionUID = 4856562746502217630L;
 
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
@@ -89,6 +87,13 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         eventBus.unsubscribe(this);
     }
 
+    /**
+     * Gets the selected item id or in multiselect mode a set of selected ids.
+     * 
+     * @param table
+     *            the table to retrieve the selected ID(s)
+     * @return the ID(s) which are selected in the table
+     */
     public static <T> Set<T> getTableValue(final Table table) {
         @SuppressWarnings("unchecked")
         Set<T> values = (Set<T>) table.getValue();
@@ -351,7 +356,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     }
 
     protected float getColumnNameMinimizedSize() {
-        return 0.8F;
+        return DEFAULT_COLUMN_NAME_MIN_SIZE;
     }
 
     /**

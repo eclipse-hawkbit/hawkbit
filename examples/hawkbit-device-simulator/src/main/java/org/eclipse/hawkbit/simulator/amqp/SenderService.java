@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public abstract class SenderService extends MessageService {
         }
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
         final String correlationId = UUID.randomUUID().toString();
-        message.getMessageProperties().setCorrelationId(correlationId.getBytes());
+        message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, address, correlationId);

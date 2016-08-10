@@ -118,6 +118,16 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
+        /**
+         * 
+         */
+        private static final String BUT_GOT_LOG_MESSAGE = " but got: ";
+
+        /**
+         * 
+         */
+        private static final String DOWNLOAD_LOG_MESSAGE = "Download ";
+
         private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
 
         private static final Random rndSleep = new SecureRandom();
@@ -187,7 +197,7 @@ public class DeviceSimulatorUpdater {
             return result;
         }
 
-        private boolean isErrorResponse(final UpdateStatus status) {
+        private static boolean isErrorResponse(final UpdateStatus status) {
             if (status == null) {
                 return false;
             }
@@ -212,58 +222,71 @@ public class DeviceSimulatorUpdater {
             LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
                     hideTokenDetails(targetToken), sha1Hash, size);
 
-            long overallread = 0;
             try {
-                final CloseableHttpClient httpclient = createHttpClientThatAcceptsAllServerCerts();
-                final HttpGet request = new HttpGet(url);
-                request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
-
-                final String sha1HashResult;
-                try (final CloseableHttpResponse response = httpclient.execute(request)) {
-
-                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
-                        final String message = wrongStatusCode(url, response);
-                        return new UpdateStatus(ResponseStatus.ERROR, message);
-                    }
-
-                    if (response.getEntity().getContentLength() != size) {
-                        final String message = wrongContentLength(url, size, response);
-                        return new UpdateStatus(ResponseStatus.ERROR, message);
-                    }
-
-                    // Exception squid:S2070 - not used for hashing sensitive
-                    // data
-                    @SuppressWarnings("squid:S2070")
-                    final MessageDigest md = MessageDigest.getInstance("SHA-1");
-
-                    try (final BufferedOutputStream bdos = new BufferedOutputStream(
-                            new DigestOutputStream(ByteStreams.nullOutputStream(), md))) {
-                        try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
-                            overallread = ByteStreams.copy(bis, bdos);
-                        }
-                    }
-
-                    if (overallread != size) {
-                        final String message = incompleteRead(url, size, overallread);
-                        return new UpdateStatus(ResponseStatus.ERROR, message);
-                    }
-
-                    sha1HashResult = BaseEncoding.base16().lowerCase().encode(md.digest());
-                }
-
-                if (!sha1Hash.equalsIgnoreCase(sha1HashResult)) {
-                    final String message = wrongHash(url, sha1Hash, overallread, sha1HashResult);
-                    return new UpdateStatus(ResponseStatus.ERROR, message);
-                }
-
+                return readAndCheckDownloadUrl(url, targetToken, sha1Hash, size);
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
                 LOGGER.error("Failed to download" + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 
+        }
+
+        private static UpdateStatus readAndCheckDownloadUrl(final String url, final String targetToken,
+                final String sha1Hash, final long size)
+                throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+            long overallread;
+            final CloseableHttpClient httpclient = createHttpClientThatAcceptsAllServerCerts();
+            final HttpGet request = new HttpGet(url);
+            request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
+
+            final String sha1HashResult;
+            try (final CloseableHttpResponse response = httpclient.execute(request)) {
+
+                if (response.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
+                    final String message = wrongStatusCode(url, response);
+                    return new UpdateStatus(ResponseStatus.ERROR, message);
+                }
+
+                if (response.getEntity().getContentLength() != size) {
+                    final String message = wrongContentLength(url, size, response);
+                    return new UpdateStatus(ResponseStatus.ERROR, message);
+                }
+
+                // Exception squid:S2070 - not used for hashing sensitive
+                // data
+                @SuppressWarnings("squid:S2070")
+                final MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+                overallread = getOverallRead(response, md);
+
+                if (overallread != size) {
+                    final String message = incompleteRead(url, size, overallread);
+                    return new UpdateStatus(ResponseStatus.ERROR, message);
+                }
+
+                sha1HashResult = BaseEncoding.base16().lowerCase().encode(md.digest());
+            }
+
+            if (!sha1Hash.equalsIgnoreCase(sha1HashResult)) {
+                final String message = wrongHash(url, sha1Hash, overallread, sha1HashResult);
+                return new UpdateStatus(ResponseStatus.ERROR, message);
+            }
+
             final String message = "Downloaded " + url + " (" + overallread + " bytes)";
             LOGGER.debug(message);
             return new UpdateStatus(ResponseStatus.SUCCESSFUL, message);
+        }
+
+        private static long getOverallRead(final CloseableHttpResponse response, final MessageDigest md)
+                throws IOException {
+            long overallread;
+            try (final BufferedOutputStream bdos = new BufferedOutputStream(
+                    new DigestOutputStream(ByteStreams.nullOutputStream(), md))) {
+                try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
+                    overallread = ByteStreams.copy(bis, bdos);
+                }
+            }
+            return overallread;
         }
 
         private static String hideTokenDetails(final String targetToken) {
@@ -285,29 +308,30 @@ public class DeviceSimulatorUpdater {
 
         private static String wrongHash(final String url, final String sha1Hash, final long overallread,
                 final String sha1HashResult) {
-            final String message = "Download " + url + " failed with SHA1 hash missmatch (Expected: " + sha1Hash
-                    + " but got: " + sha1HashResult + ") (" + overallread + " bytes)";
+            final String message = DOWNLOAD_LOG_MESSAGE + url + " failed with SHA1 hash missmatch (Expected: "
+                    + sha1Hash + BUT_GOT_LOG_MESSAGE + sha1HashResult + ") (" + overallread + " bytes)";
             LOGGER.error(message);
             return message;
         }
 
         private static String incompleteRead(final String url, final long size, final long overallread) {
-            final String message = "Download " + url + " is incomplete (Expected: " + size + " but got: " + overallread
-                    + ")";
+            final String message = DOWNLOAD_LOG_MESSAGE + url + " is incomplete (Expected: " + size
+                    + BUT_GOT_LOG_MESSAGE + overallread + ")";
             LOGGER.error(message);
             return message;
         }
 
         private static String wrongContentLength(final String url, final long size,
                 final CloseableHttpResponse response) {
-            final String message = "Download " + url + " has wrong content length (Expected: " + size + " but got: "
-                    + response.getEntity().getContentLength() + ")";
+            final String message = DOWNLOAD_LOG_MESSAGE + url + " has wrong content length (Expected: " + size
+                    + BUT_GOT_LOG_MESSAGE + response.getEntity().getContentLength() + ")";
             LOGGER.error(message);
             return message;
         }
 
         private static String wrongStatusCode(final String url, final CloseableHttpResponse response) {
-            final String message = "Download " + url + " failed (" + response.getStatusLine().getStatusCode() + ")";
+            final String message = DOWNLOAD_LOG_MESSAGE + url + " failed (" + response.getStatusLine().getStatusCode()
+                    + ")";
             LOGGER.error(message);
             return message;
         }
@@ -339,4 +363,5 @@ public class DeviceSimulatorUpdater {
          */
         void updateFinished(AbstractSimulatedDevice device, final Long actionId);
     }
+
 }

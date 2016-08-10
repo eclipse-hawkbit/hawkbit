@@ -104,7 +104,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     private String notAllowedMsg;
 
@@ -577,8 +577,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
-    private String getPinnedDistributionStyle(final Long installedDistItemIds, final Long assignedDistTableItemIds,
-            final Object itemId) {
+    private static String getPinnedDistributionStyle(final Long installedDistItemIds,
+            final Long assignedDistTableItemIds, final Object itemId) {
         final Long distId = ((DistributionSetIdName) itemId).getId();
         if (distId != null && distId.equals(installedDistItemIds)) {
             return SPUIDefinitions.HIGHTLIGHT_GREEN;
@@ -645,7 +645,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         resetPinStyle(eventBtn);
     }
 
-    private void resetPinStyle(final Button pinBtn) {
+    private static void resetPinStyle(final Button pinBtn) {
         pinBtn.setStyleName(getPinStyle());
     }
 
@@ -681,14 +681,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         });
     }
 
-    private void applyPinStyle(final Button eventBtn) {
+    private static void applyPinStyle(final Button eventBtn) {
         final StringBuilder style = new StringBuilder(SPUIComponentProvider.getPinButtonStyle());
         style.append(' ').append(SPUIStyleDefinitions.DIST_PIN).append(' ').append("tablePin").append(' ')
                 .append("pin-icon-red");
         eventBtn.setStyleName(style.toString());
     }
 
-    private String getPinButtonId(final String distName, final String distVersion) {
+    private static String getPinButtonId(final String distName, final String distVersion) {
         final StringBuilder pinBtnId = new StringBuilder(SPUIComponentIdProvider.DIST_PIN_BUTTON);
         pinBtnId.append('.');
         pinBtnId.append(distName);
@@ -697,7 +697,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return pinBtnId.toString();
     }
 
-    private Button getPinBtn(final Object itemId, final String distName, final String distVersion) {
+    private static Button getPinBtn(final Object itemId, final String distName, final String distVersion) {
         final Button pinBtn = new Button();
         pinBtn.setIcon(FontAwesome.THUMB_TACK);
         pinBtn.setHeightUndefined();
@@ -708,7 +708,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return pinBtn;
     }
 
-    private String getPinStyle() {
+    private static String getPinStyle() {
         final StringBuilder pinBtnStyle = new StringBuilder(SPUIComponentProvider.getPinButtonStyle());
         pinBtnStyle.append(' ');
         pinBtnStyle.append(SPUIStyleDefinitions.DIST_PIN);

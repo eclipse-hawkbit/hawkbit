@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception used by the REST API in case of invalid field name in the rsql
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class RSQLParameterUnsupportedFieldException extends SpServerRtException {
+public class RSQLParameterUnsupportedFieldException extends AbstractServerRtException {
 
     /**
     * 

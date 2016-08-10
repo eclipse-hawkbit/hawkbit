@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception which is thrown, when the validation of the configuration value has
  * not been successful.
  *
  */
-public class TenantConfigurationValidatorException extends SpServerRtException {
+public class TenantConfigurationValidatorException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_VALUE_INVALID;

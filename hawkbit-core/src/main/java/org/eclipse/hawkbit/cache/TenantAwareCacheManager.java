@@ -67,7 +67,7 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     public Collection<String> getCacheNames() {
         String currentTenant = tenantAware.getCurrentTenant();
         if (currentTenant == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         currentTenant = currentTenant.toUpperCase();

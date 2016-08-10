@@ -17,7 +17,7 @@ import java.net.URI;
  *
  *
  */
-public class CancelTargetAssignmentEvent extends AbstractEvent {
+public class CancelTargetAssignmentEvent extends DefaultEvent {
 
     private final String controllerId;
     private final Long actionId;

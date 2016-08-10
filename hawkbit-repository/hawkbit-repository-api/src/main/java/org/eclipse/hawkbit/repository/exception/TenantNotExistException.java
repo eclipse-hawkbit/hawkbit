@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * the {@link TenantNotExistException} is thrown when e.g. a controller tries to
@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class TenantNotExistException extends SpServerRtException {
+public class TenantNotExistException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_TENANT_NOT_EXISTS;

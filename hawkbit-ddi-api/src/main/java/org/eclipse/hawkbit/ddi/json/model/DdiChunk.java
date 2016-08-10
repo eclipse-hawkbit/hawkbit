@@ -29,7 +29,7 @@ public class DdiChunk {
     private List<DdiArtifact> artifacts;
 
     public DdiChunk() {
-
+        // needed for json create
     }
 
     /**

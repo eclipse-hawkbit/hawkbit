@@ -23,7 +23,7 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 
 /**
- *
+ * Auto configuration for the event bus.
  *
  */
 @Configuration

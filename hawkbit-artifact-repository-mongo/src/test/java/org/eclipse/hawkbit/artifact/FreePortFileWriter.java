@@ -12,9 +12,11 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  *
- *
+ * Look for a free port.
  */
 public class FreePortFileWriter {
 
@@ -24,7 +26,9 @@ public class FreePortFileWriter {
 
     /**
      * @param from
+     *            port range from (start point)
      * @param to
+     *            port range to (end point)
      */
     public FreePortFileWriter(final int from, final int to, final String filePortPath) {
         this.from = from;
@@ -46,29 +50,28 @@ public class FreePortFileWriter {
     }
 
     boolean isFree(final int port) {
+        ServerSocket sock = null;
         try {
             final File portFile = new File(filePortPath + File.separator + port + ".port");
             portFile.getParentFile().mkdirs();
             if (portFile.exists()) {
                 return false;
-            } else {
-                boolean isFree = false;
-                final ServerSocket sock = new ServerSocket();
-                sock.setReuseAddress(true);
-                sock.bind(new InetSocketAddress(port));
-                if (portFile.createNewFile()) {
-                    portFile.deleteOnExit();
-                    isFree = true;
-                }
-                sock.close();
-                // is free:
-                return isFree;
-                // We rely on an exception thrown to determine availability or
-                // not availability.
             }
-        } catch (final Exception e) {
-            // not free.
+            boolean isFree = false;
+            sock = new ServerSocket();
+            sock.setReuseAddress(true);
+            sock.bind(new InetSocketAddress(port));
+            if (portFile.createNewFile()) {
+                portFile.deleteOnExit();
+                isFree = true;
+            }
+            return isFree;
+            // We rely on an exception thrown to determine availability or
+            // not availability and don't want to log the exception.
+        } catch (@SuppressWarnings({ "squid:S2221", "squid:S1166" }) final Exception e) {
             return false;
+        } finally {
+            IOUtils.closeQuietly(sock);
         }
     }
 

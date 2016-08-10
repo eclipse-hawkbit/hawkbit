@@ -20,7 +20,7 @@ import com.vaadin.ui.Slider.ValueOutOfBoundsException;
  * Contains helper methods for the ColorPickerLayout to handle the ColorPicker
  *
  */
-public class ColorPickerHelper {
+public final class ColorPickerHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(ColorPickerHelper.class);
 
@@ -30,7 +30,9 @@ public class ColorPickerHelper {
 
     /**
      * Get color picked value as string.
-     *
+     * 
+     * @param preview
+     *            the color picker preview
      * @return String of color picked value.
      */
     public static String getColorPickedString(final SpColorPickerPreview preview) {
@@ -59,7 +61,7 @@ public class ColorPickerHelper {
         final int green = Integer.parseInt(colors[1]);
         final int blue = Integer.parseInt(colors[2]);
         if (colors.length > 3) {
-            final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
+            final int alpha = (int) (Double.parseDouble(colors[3]) * 255D);
             return new Color(red, green, blue, alpha);
         }
         return new Color(red, green, blue);

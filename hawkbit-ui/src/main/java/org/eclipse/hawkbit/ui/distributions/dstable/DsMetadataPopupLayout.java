@@ -34,7 +34,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     @Autowired
     protected SpPermissionChecker permChecker;

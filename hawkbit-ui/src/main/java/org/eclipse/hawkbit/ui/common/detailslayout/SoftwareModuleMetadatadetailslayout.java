@@ -47,7 +47,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
 	private SpPermissionChecker permissionChecker;
 
-	private SoftwareManagement softwareManagement;
+    private transient SoftwareManagement softwareManagement;
 
 	private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -55,19 +55,33 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
 	private Long selectedSWModuleId;
 
-	private transient EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
-	public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
-			final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
-			final EntityFactory entityFactory) {
-		this.i18n = i18n;
-		this.permissionChecker = permissionChecker;
-		this.softwareManagement = softwareManagement;
-		this.swMetadataPopupLayout = swMetadataPopupLayout;
-		this.entityFactory = entityFactory;
-		createSWMMetadataTable();
-		addCustomGeneratedColumns();
-	}
+    /**
+     * Initialize the layout.
+     * 
+     * @param i18n
+     *            the i18n service
+     * @param permissionChecker
+     *            the permission checker service
+     * @param softwareManagement
+     *            the software management service
+     * @param swMetadataPopupLayout
+     *            the software module metadata popup layout
+     * @param entityFactory
+     *            the entity factory service
+     */
+    public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
+            final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
+            final EntityFactory entityFactory) {
+        this.i18n = i18n;
+        this.permissionChecker = permissionChecker;
+        this.softwareManagement = softwareManagement;
+        this.swMetadataPopupLayout = swMetadataPopupLayout;
+        this.entityFactory = entityFactory;
+        createSWMMetadataTable();
+        addCustomGeneratedColumns();
+    }
 
 	/**
 	 * Populate software module metadata table.

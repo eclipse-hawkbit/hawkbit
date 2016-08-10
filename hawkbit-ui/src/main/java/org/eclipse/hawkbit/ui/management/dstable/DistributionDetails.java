@@ -59,7 +59,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     @Autowired
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
 
@@ -191,15 +191,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
-    }
-
-    @Override
-    protected String getShowMetadataButtonId() {
-        final DistributionSetIdName lastselectedDistDS = managementUIState.getLastSelectedDistribution().isPresent()
-                ? managementUIState.getLastSelectedDistribution().get() : null;
-
-        return SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + lastselectedDistDS.getName() + "."
-                + lastselectedDistDS.getVersion();
     }
 
     private boolean isDistributionSetSelected(final DistributionSet ds) {

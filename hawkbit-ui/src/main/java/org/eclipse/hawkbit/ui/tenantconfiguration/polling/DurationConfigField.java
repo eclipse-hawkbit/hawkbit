@@ -24,7 +24,7 @@ import com.vaadin.ui.GridLayout;
  * duration in the DurationField or he can configure using the global duration
  * by changing the CheckBox.
  */
-public class DurationConfigField extends GridLayout implements ConfigurationItem {
+public final class DurationConfigField extends GridLayout implements ConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
@@ -130,45 +130,96 @@ public class DurationConfigField extends GridLayout implements ConfigurationItem
         configurationChangeListeners.add(listener);
     }
 
+    /**
+     * Create a DurationConfigFieldBuilder.
+     * 
+     * @return the builder
+     */
     public static DurationConfigFieldBuilder builder() {
         return new DurationConfigFieldBuilder();
     }
 
-    public static class DurationConfigFieldBuilder {
+    /**
+     * Builder for the calendar widget.
+     *
+     */
+    public static final class DurationConfigFieldBuilder {
         private final DurationConfigField field;
 
-        private Duration globalDuration = null;
-        private Duration tenantDuration = null;
+        private Duration globalDuration;
+        private Duration tenantDuration;
 
         private DurationConfigFieldBuilder() {
             field = new DurationConfigField();
-        };
+        }
 
+        /**
+         * set the checkbox tooltip.
+         * 
+         * @param label
+         *            the tooltip
+         * @return the builder
+         */
         public DurationConfigFieldBuilder checkBoxTooltip(final String label) {
             field.setCheckBoxTooltip(label);
             return this;
         }
 
+        /**
+         * set the global duration.
+         * 
+         * @param globalDuration
+         *            the global duration
+         * @return the builder
+         */
         public DurationConfigFieldBuilder globalDuration(final Duration globalDuration) {
             this.globalDuration = globalDuration;
             return this;
         }
 
+        /**
+         * set the caption.
+         * 
+         * @param caption
+         *            the caption
+         * @return the builder
+         */
         public DurationConfigFieldBuilder caption(final String caption) {
             field.setCaption(caption);
             return this;
         }
 
+        /**
+         * set the range.
+         * 
+         * @param minDuration
+         *            min duration
+         * @param maxDuration
+         *            max duration
+         * @return the builder
+         */
         public DurationConfigFieldBuilder range(final Duration minDuration, final Duration maxDuration) {
             field.setAllowedRange(minDuration, maxDuration);
             return this;
         }
 
+        /**
+         * set the tenant duration.
+         * 
+         * @param tenantDuration
+         *            the duration
+         * @return the builder
+         */
         public DurationConfigFieldBuilder tenantDuration(final Duration tenantDuration) {
             this.tenantDuration = tenantDuration;
             return this;
         }
 
+        /**
+         * Create the {@link DurationConfigField}.
+         * 
+         * @return the {@link DurationConfigField}
+         */
         public DurationConfigField build() {
             if (globalDuration == null) {
                 throw new IllegalStateException(
@@ -178,5 +229,5 @@ public class DurationConfigField extends GridLayout implements ConfigurationItem
             field.init(globalDuration, tenantDuration);
             return field;
         }
-    };
+    }
 }

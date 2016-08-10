@@ -16,7 +16,7 @@ package org.eclipse.hawkbit.exception;
  *
  *
  */
-public class GenericSpServerException extends SpServerRtException {
+public class GenericSpServerException extends AbstractServerRtException {
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_GENERIC_ERROR;
 

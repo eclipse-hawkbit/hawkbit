@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  *
  *
  *
  */
-public final class ArtifactUploadFailedException extends SpServerRtException {
+public final class ArtifactUploadFailedException extends AbstractServerRtException {
 
     /**
     *

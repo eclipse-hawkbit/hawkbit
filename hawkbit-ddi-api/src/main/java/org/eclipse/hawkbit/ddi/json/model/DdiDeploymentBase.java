@@ -21,10 +21,10 @@ public class DdiDeploymentBase extends ResourceSupport {
 
     @JsonProperty("id")
     @NotNull
-    private String deplyomentId;
+    private final String deplyomentId;
 
     @NotNull
-    private DdiDeployment deployment;
+    private final DdiDeployment deployment;
 
     /**
      * Constructor.
@@ -35,12 +35,8 @@ public class DdiDeploymentBase extends ResourceSupport {
      *            details.
      */
     public DdiDeploymentBase(final String id, final DdiDeployment deployment) {
-        deplyomentId = id;
+        this.deplyomentId = id;
         this.deployment = deployment;
-    }
-
-    public DdiDeploymentBase() {
-
     }
 
     public DdiDeployment getDeployment() {

@@ -27,7 +27,7 @@ public final class DurationHelper {
      * the defined min/max range.
      *
      */
-    public static class DurationRangeValidator {
+    public static final class DurationRangeValidator {
         final Duration min;
         final Duration max;
 

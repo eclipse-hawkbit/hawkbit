@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown when force quitting an actions is not allowed. e.g. the action is not
  * active or it is not canceled before.
  *
  */
-public final class ForceQuitActionNotAllowedException extends SpServerRtException {
+public final class ForceQuitActionNotAllowedException extends AbstractServerRtException {
     /**
     *
     */

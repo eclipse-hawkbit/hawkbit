@@ -44,9 +44,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DistributionSetManagement {
 
-    // TODO rename/document the whole with details thing (document what the
-    // details are and maybe find a better name, e.g. with dependencies?)
-
     /**
      * Assigns {@link SoftwareModule} to existing {@link DistributionSet}.
      *
@@ -330,7 +327,6 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
 
-    // TODO discuss: use enum instead of the true,false,null switch ?
     /**
      * finds all {@link DistributionSet}s.
      *
