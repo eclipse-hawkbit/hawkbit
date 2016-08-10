@@ -40,16 +40,6 @@ public class BaseAmqpService {
     }
 
     /**
-     * Clean message properties before sending a message.
-     * 
-     * @param message
-     *            the message to cleaned up
-     */
-    protected void cleanMessageHeaderProperties(final Message message) {
-        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
-    }
-
-    /**
      * Is needed to convert a incoming message to is originally object type.
      *
      * @param message
@@ -68,7 +58,7 @@ public class BaseAmqpService {
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
-    private boolean isMessageBodyEmpty(final Message message) {
+    private static boolean isMessageBodyEmpty(final Message message) {
         return message == null || message.getBody() == null || message.getBody().length == 0;
     }
 
@@ -98,8 +88,7 @@ public class BaseAmqpService {
         return rabbitTemplate.getMessageConverter();
     }
 
-    protected final String getStringHeaderKey(final Message message, final String key,
-            final String errorMessageIfNull) {
+    protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
         final Map<String, Object> header = message.getMessageProperties().getHeaders();
         final Object value = header.get(key);
         if (value == null) {
@@ -117,4 +106,15 @@ public class BaseAmqpService {
     protected RabbitTemplate getRabbitTemplate() {
         return rabbitTemplate;
     }
+
+    /**
+     * Clean message properties before sending a message.
+     * 
+     * @param message
+     *            the message to cleaned up
+     */
+    protected void cleanMessageHeaderProperties(final Message message) {
+        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
+    }
+
 }

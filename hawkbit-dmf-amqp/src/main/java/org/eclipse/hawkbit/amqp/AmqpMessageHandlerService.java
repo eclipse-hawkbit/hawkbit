@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -137,6 +138,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
+    /**
+     * Executed on a authentication request.
+     * 
+     * @param message
+     *            the amqp message
+     * @return the rpc message back to supplier.
+     */
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
     public Message onAuthenticationRequest(final Message message) {
         checkContentTypeJson(message);
@@ -152,6 +160,19 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
+    /**
+     * * Executed if a amqp message arrives.
+     * 
+     * @param message
+     *            the message
+     * @param type
+     *            the type
+     * @param tenant
+     *            the tenant
+     * @param virtualHost
+     *            the virtual host
+     * @return the rpc message back to supplier.
+     */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
@@ -417,7 +438,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private static String convertCorrelationId(final Message message) {
-        return new String(message.getMessageProperties().getCorrelationId());
+        return new String(message.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8);
     }
 
     private Action getUpdateActionStatus(final ActionStatus actionStatus) {

@@ -38,7 +38,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -98,7 +97,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private HorizontalLayout mainLayout;
 
     @PostConstruct
-    private void init() {
+    void init() {
         createComponents();
         buildLayout();
 
@@ -170,7 +169,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             headerLayout.setComponentAlignment(addIcon, Alignment.MIDDLE_RIGHT);
         }
         headerLayout.setExpandRatio(headerCaption, 1.0F);
-        
 
         final HorizontalLayout headerWrapperLayout = new HorizontalLayout();
         headerWrapperLayout.addStyleName("bordered-layout" + " " + "no-border-bottom" + " " + "metadata-table-margin");
@@ -257,50 +255,56 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 i18n.get("caption.metadata.delete.action.confirmbox"), i18n.get("message.confirm.delete.metadata", key),
                 i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
-                        deleteMetadata(getSelectedEntity(), key, value);
-                        uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
-                        final Object selectedRow = metaDataGrid.getSelectedRow();
-                        metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-                        // force grid to refresh
-                        metaDataGrid.clearSortOrder();
-                        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
-                            if (selectedRow != null) {
-                                if (selectedRow.equals(event.getItemId())) {
-                                    metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
-                                } else {
-                                    metaDataGrid.select(selectedRow);
-                                }
-                            }
-                        } else {
-                            keyTextField.clear();
-                            valueTextArea.clear();
-                            metaDataGrid.select(null);
-                            if (hasCreatePermission()) {
-                                keyTextField.setEnabled(true);
-                                valueTextArea.setEnabled(true);
-                                addIcon.setEnabled(false);
-                            }
-                        }
+                        handleOkDeleteMetadata(event, key, value);
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
+    private void handleOkDeleteMetadata(final RendererClickEvent event, final String key, final String value) {
+        deleteMetadata(getSelectedEntity(), key, value);
+        uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
+        final Object selectedRow = metaDataGrid.getSelectedRow();
+        metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
+        // force grid to refresh
+        metaDataGrid.clearSortOrder();
+        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
+            if (selectedRow != null) {
+                if (selectedRow.equals(event.getItemId())) {
+                    metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                } else {
+                    metaDataGrid.select(selectedRow);
+                }
+            }
+        } else {
+            clearTextFields();
+        }
+    }
+
+    private void clearTextFields() {
+        keyTextField.clear();
+        valueTextArea.clear();
+        metaDataGrid.select(null);
+        if (hasCreatePermission()) {
+            keyTextField.setEnabled(true);
+            valueTextArea.setEnabled(true);
+            addIcon.setEnabled(false);
+        }
+    }
+
     private Button createAddIcon() {
         addIcon = SPUIComponentProvider.getButton(SPUIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
                 null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
-        addIcon.addClickListener(event -> onAdd(event));
+        addIcon.addClickListener(event -> onAdd());
         return addIcon;
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(i18n.get("caption.metadata"),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
+        return SPUIComponentProvider.getLabel(i18n.get("caption.metadata"), SPUILabelDefinitions.SP_WIDGET_CAPTION);
     }
 
-    private IndexedContainer getMetadataContainer() {
+    private static IndexedContainer getMetadataContainer() {
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty(KEY, String.class, "");
         swcontactContainer.addContainerProperty(VALUE, String.class, "");
@@ -340,7 +344,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         item.getItemProperty(VALUE).setValue(valueTextArea.getValue());
     }
 
-    private void onAdd(final ClickEvent event) {
+    private void onAdd() {
         metaDataGrid.deselect(metaDataGrid.getSelectedRow());
         valueTextArea.clear();
         keyTextField.clear();
@@ -393,7 +397,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private boolean duplicateCheck(final E entity) {
         try {
             checkForDuplicate(entity, keyTextField.getValue());
-        } catch (final EntityNotFoundException exception) {
+            // we do not want to log the exception here, does not make sense
+        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException exception) {
             return false;
         }
         uiNotification.displayValidationError(i18n.get("message.metadata.duplicate.check", keyTextField.getValue()));

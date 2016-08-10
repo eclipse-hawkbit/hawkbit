@@ -23,8 +23,11 @@ public class DdiDeployment {
 
     private List<DdiChunk> chunks;
 
+    /**
+     * Constructor.
+     */
     public DdiDeployment() {
-
+        // needed for json create.
     }
 
     /**

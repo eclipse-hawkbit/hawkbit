@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * The {@link EntityLockedException} is thrown when an entity has been locked by
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class EntityLockedException extends SpServerRtException {
+public class EntityLockedException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_ENTITY_LOCKED;

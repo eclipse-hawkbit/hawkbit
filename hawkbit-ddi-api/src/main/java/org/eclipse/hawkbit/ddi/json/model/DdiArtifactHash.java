@@ -27,6 +27,7 @@ public class DdiArtifactHash {
      * Default constructor.
      */
     public DdiArtifactHash() {
+        // needed for json create
     }
 
     /**

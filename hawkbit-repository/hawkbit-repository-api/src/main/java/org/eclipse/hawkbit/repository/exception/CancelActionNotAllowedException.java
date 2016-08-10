@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Thrown if cancelation of actions is performened where the action is not
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public final class CancelActionNotAllowedException extends SpServerRtException {
+public final class CancelActionNotAllowedException extends AbstractServerRtException {
     /**
     *
     */

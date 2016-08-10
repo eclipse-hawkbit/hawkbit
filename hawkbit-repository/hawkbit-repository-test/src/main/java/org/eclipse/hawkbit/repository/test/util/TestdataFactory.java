@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -191,16 +191,17 @@ public class TestdataFactory {
     public DistributionSet createDistributionSet(final String prefix, final String version,
             final boolean isRequiredMigrationStep) {
 
-        final SoftwareModule appMod = softwareManagement.createSoftwareModule(entityFactory.generateSoftwareModule(
-                findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE), prefix + SM_TYPE_APP,
-                version + "." + new Random().nextInt(100), LOREM.words(20), prefix + " vendor Limited, California"));
+        final SoftwareModule appMod = softwareManagement.createSoftwareModule(
+                entityFactory.generateSoftwareModule(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE),
+                        prefix + SM_TYPE_APP, version + "." + new SecureRandom().nextInt(100), LOREM.words(20),
+                        prefix + " vendor Limited, California"));
         final SoftwareModule runtimeMod = softwareManagement
                 .createSoftwareModule(entityFactory.generateSoftwareModule(findOrCreateSoftwareModuleType(SM_TYPE_RT),
-                        prefix + "app runtime", version + "." + new Random().nextInt(100), LOREM.words(20),
+                        prefix + "app runtime", version + "." + new SecureRandom().nextInt(100), LOREM.words(20),
                         prefix + " vendor GmbH, Stuttgart, Germany"));
         final SoftwareModule osMod = softwareManagement
                 .createSoftwareModule(entityFactory.generateSoftwareModule(findOrCreateSoftwareModuleType(SM_TYPE_OS),
-                        prefix + " Firmware", version + "." + new Random().nextInt(100), LOREM.words(20),
+                        prefix + " Firmware", version + "." + new SecureRandom().nextInt(100), LOREM.words(20),
                         prefix + " vendor Limited Inc, California"));
 
         return distributionSetManagement

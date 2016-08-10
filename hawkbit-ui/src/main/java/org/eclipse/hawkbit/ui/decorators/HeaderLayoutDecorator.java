@@ -13,13 +13,17 @@ import com.vaadin.ui.HorizontalLayout;
 /**
  *
  *
- *
+ * Ui header layout decorater.
  */
-public interface SPUIHeaderLayoutDecorator {
+@FunctionalInterface
+public interface HeaderLayoutDecorator {
 
     /**
+     * decorate the header
+     * 
      * @param layout
-     * @return
+     *            the layout
+     * @return the decorated layout
      */
     HorizontalLayout decorate(HorizontalLayout layout);
 }

@@ -22,7 +22,7 @@ public interface FieldNameProvider {
     /**
      * Separator for the sub attributes
      */
-    public static final String SUB_ATTRIBUTE_SEPERATOR = ".";
+    String SUB_ATTRIBUTE_SEPERATOR = ".";
 
     /**
      * @return the string representation of the underlying persistence field
@@ -30,13 +30,24 @@ public interface FieldNameProvider {
      */
     String getFieldName();
 
+    /**
+     * Contains the sub entity the given field.
+     * 
+     * @param propertyField
+     *            the given field
+     * @return <true> contains <false> contains not
+     */
     default boolean containsSubEntityAttribute(final String propertyField) {
         return FieldNameProvider.containsSubEntityAttribute(propertyField, getSubEntityAttributes());
-    };
+    }
 
+    /**
+     * 
+     * @return all sub entities attributes.
+     */
     default List<String> getSubEntityAttributes() {
         return Collections.emptyList();
-    };
+    }
 
     /**
      * the database column for the key
@@ -59,11 +70,11 @@ public interface FieldNameProvider {
     /**
      * Is the entity field a {@link Map}.
      * 
-     * @return
+     * @return <true> is a map <false> is not a map
      */
     default boolean isMap() {
         return getKeyFieldName() != null;
-    };
+    }
 
     /**
      * Check if a sub attribute exists.

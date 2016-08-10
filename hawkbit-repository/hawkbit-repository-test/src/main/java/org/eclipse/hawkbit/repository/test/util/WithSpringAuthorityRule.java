@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.junit.rules.TestRule;
@@ -29,16 +28,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class WithSpringAuthorityRule implements TestRule {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.junit.rules.TestRule#apply(org.junit.runners.model.Statement,
-     * org.junit.runner.Description)
-     */
     @Override
     public Statement apply(final Statement base, final Description description) {
         return new Statement() {
             @Override
+            // throwable comes from jnuit evaluate signature
+            @SuppressWarnings("squid:S00112")
             public void evaluate() throws Throwable {
                 final SecurityContext oldContext = before(description);
                 try {
@@ -50,7 +45,7 @@ public class WithSpringAuthorityRule implements TestRule {
         };
     }
 
-    private SecurityContext before(final Description description) throws Throwable {
+    private SecurityContext before(final Description description) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         WithUser annotation = description.getAnnotation(WithUser.class);
         if (annotation == null) {
@@ -64,19 +59,14 @@ public class WithSpringAuthorityRule implements TestRule {
         }
         return oldContext;
     }
-    
-    /**
-     * @param annotation
-     */
+
     private void setSecurityContext(final WithUser annotation) {
         SecurityContextHolder.setContext(new SecurityContext() {
-            /**
-             * 
-             */
             private static final long serialVersionUID = 1L;
 
             @Override
             public void setAuthentication(final Authentication authentication) {
+                // nothing todo
             }
 
             @Override
@@ -114,7 +104,8 @@ public class WithSpringAuthorityRule implements TestRule {
                             if (addPermission) {
                                 allPermissions.add(permissionName);
                             }
-                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            // don't want to log this exceptions.
+                        } catch (@SuppressWarnings("squid:S1166") IllegalArgumentException | IllegalAccessException e) {
                             // nope
                         }
                     }
@@ -130,18 +121,17 @@ public class WithSpringAuthorityRule implements TestRule {
     private void after(final SecurityContext oldContext) {
         SecurityContextHolder.setContext(oldContext);
     }
-    
+
     /**
      * Clears the current security context.
      */
-    public void clear()
-    {
+    public void clear() {
         SecurityContextHolder.clearContext();
     }
 
     /**
      * @param callable
-     * @return
+     * @return the callable result
      * @throws Exception
      */
     public <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
@@ -149,10 +139,10 @@ public class WithSpringAuthorityRule implements TestRule {
     }
 
     /**
-     * 
+     *
      * @param withUser
      * @param callable
-     * @return
+     * @return callable result
      * @throws Exception
      */
     public <T> T runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
@@ -167,15 +157,13 @@ public class WithSpringAuthorityRule implements TestRule {
             after(oldContext);
         }
     }
-    
-    private void createTenant(final String tenantId) throws Exception {
+
+    private void createTenant(final String tenantId) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(privilegedUser());
-        try
-        {
+        try {
             SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
-        }finally
-        {
+        } finally {
             after(oldContext);
         }
     }
@@ -183,7 +171,7 @@ public class WithSpringAuthorityRule implements TestRule {
     public static WithUser withUser(final String principal, final String... authorities) {
         return withUserAndTenant(principal, "default", true, true, authorities);
     }
-    
+
     public static WithUser withUser(final String principal, final boolean allSpPermision, final String... authorities) {
         return withUserAndTenant(principal, "default", true, allSpPermision, authorities);
     }
@@ -198,6 +186,15 @@ public class WithSpringAuthorityRule implements TestRule {
 
     public static WithUser withUserAndTenant(final String principal, final String tenant,
             final boolean autoCreateTenant, final boolean allSpPermission, final String... authorities) {
+        return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, authorities);
+    }
+
+    private static WithUser privilegedUser() {
+        return createWithUser("bumlux", "default", true, true, new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" });
+    }
+
+    private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
+            final boolean allSpPermission, final String... authorities) {
         return new WithUser() {
 
             @Override
@@ -227,7 +224,7 @@ public class WithSpringAuthorityRule implements TestRule {
 
             @Override
             public String[] removeFromAllPermission() {
-                return null;
+                return new String[0];
             }
 
             @Override
@@ -235,64 +232,9 @@ public class WithSpringAuthorityRule implements TestRule {
                 return tenant;
             }
 
-            /*
-             * (non-Javadoc)
-             * 
-             * @see org.eclipse.hawkbit.WithUser#autoCreateTenant()
-             */
             @Override
             public boolean autoCreateTenant() {
                 return autoCreateTenant;
-            }
-        };
-    }
-
-    private static WithUser privilegedUser() {
-        return new WithUser() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return WithUser.class;
-            }
-
-            @Override
-            public String principal() {
-                return "bumlux";
-            }
-
-            @Override
-            public String credentials() {
-                return null;
-            }
-
-            @Override
-            public String[] authorities() {
-                return new String[] { "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE" };
-            }
-
-            @Override
-            public boolean allSpPermissions() {
-                return true;
-            }
-
-            @Override
-            public String[] removeFromAllPermission() {
-                return null;
-            }
-
-            @Override
-            public String tenantId() {
-                return "default";
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see org.eclipse.hawkbit.WithUser#autoCreateTenant()
-             */
-            @Override
-            public boolean autoCreateTenant() {
-                return true;
             }
         };
     }

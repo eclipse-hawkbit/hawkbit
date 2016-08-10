@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
+import java.util.EnumSet;
+
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -46,12 +49,11 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleTypeEvent event) {
-        if (event.getSoftwareModuleTypeEnum() == SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE
-                || event.getSoftwareModuleTypeEnum() == SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE
-                || event.getSoftwareModuleTypeEnum() == SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.DELETE_SOFTWARE_MODULE_TYPE
-                        && event.getSoftwareModuleType() != null) {
+        if (event.getSoftwareModuleType() != null
+                && EnumSet.allOf(SoftwareModuleTypeEnum.class).contains(event.getSoftwareModuleTypeEnum())) {
             refreshTable();
         }
+
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

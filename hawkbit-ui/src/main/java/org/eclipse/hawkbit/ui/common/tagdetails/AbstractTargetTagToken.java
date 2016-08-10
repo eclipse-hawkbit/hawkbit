@@ -18,7 +18,10 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 /**
- * Abstract class for target tag token layout.
+ * /** Abstract class for target tag token layout.
+ * 
+ * @param <T>
+ *            the entity type
  */
 public abstract class AbstractTargetTagToken<T extends BaseEntity> extends AbstractTagToken<T> {
 

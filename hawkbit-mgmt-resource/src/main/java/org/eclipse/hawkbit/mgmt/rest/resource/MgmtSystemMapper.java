@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
  * A mapper which maps repository model to RESTful model representation and
  * back.
  */
-public class MgmtSystemMapper {
+public final class MgmtSystemMapper {
 
     private MgmtSystemMapper() {
         // Utility class
@@ -51,6 +51,8 @@ public class MgmtSystemMapper {
      * maps a TenantConfigurationValue from the repository model to a
      * MgmtSystemTenantConfigurationValue, the RESTful model.
      * 
+     * @param key
+     *            the key
      * @param repoConfValue
      *            configuration value as repository model
      * @return configuration value as RESTful model

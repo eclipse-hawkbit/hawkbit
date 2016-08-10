@@ -35,8 +35,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
         org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
 
-    private static final String HTTPS_LOCALHOST = "https://localhost:8080/";
-    private static final String HTTP_LOCALHOST = "http://localhost:8080/";
+    private static final String HTTPS_LOCALHOST = "https://localhost/";
+    private static final String HTTP_LOCALHOST = "http://localhost/";
 
     @Autowired
     private ArtifactUrlHandler urlHandlerProperties;

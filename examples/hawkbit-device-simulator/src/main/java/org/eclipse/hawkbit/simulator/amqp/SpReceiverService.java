@@ -67,8 +67,6 @@ public class SpReceiverService extends ReceiverService {
      *            the incoming message
      * @param type
      *            the action type
-     * @param contentType
-     *            the content type in message header
      * @param thingId
      *            the thing id in message header
      */
@@ -82,14 +80,11 @@ public class SpReceiverService extends ReceiverService {
     private void delegateMessage(final Message message, final String type, final String thingId) {
         final MessageType messageType = MessageType.valueOf(type);
 
-        switch (messageType) {
-        case EVENT:
+        if (MessageType.EVENT.equals(messageType)) {
             handleEventMessage(message, thingId);
-            break;
-        default:
-            LOGGER.info("No valid message type property.");
-            break;
+            return;
         }
+        LOGGER.info("No valid message type property.");
     }
 
     private void handleEventMessage(final Message message, final String thingId) {

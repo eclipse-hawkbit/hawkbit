@@ -135,7 +135,7 @@ public class TenantSecurityToken {
          *            the SHA1 key of the file to obtain
          * @return the {@link FileResource} with SHA1 key set
          */
-        public static FileResource sha1(final String sha1) {
+        public static FileResource createFileResourceBySha1(final String sha1) {
             final FileResource resource = new FileResource();
             resource.sha1 = sha1;
             return resource;
@@ -148,7 +148,7 @@ public class TenantSecurityToken {
          *            the filename of the file to obtain
          * @return the {@link FileResource} with filename set
          */
-        public static FileResource filename(final String filename) {
+        public static FileResource createFileResourceByFilename(final String filename) {
             final FileResource resource = new FileResource();
             resource.filename = filename;
             return resource;

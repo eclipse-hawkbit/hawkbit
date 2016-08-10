@@ -83,7 +83,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    protected File tempFile = null;
+    protected File tempFile;
     private Upload upload;
 
     private final ProgressBar progressBar;
@@ -91,8 +91,8 @@ public class BulkUploadHandler extends CustomComponent
     private final TargetBulkTokenTags targetBulkTokenTags;
 
     private final Label targetsCountLabel;
-    private long failedTargetCount = 0;
-    private long successfullTargetCount = 0;
+    private long failedTargetCount;
+    private long successfullTargetCount;
 
     private final transient Executor executor;
     private transient EventBus.SessionEventBus eventBus;
@@ -409,7 +409,7 @@ public class BulkUploadHandler extends CustomComponent
 
     }
 
-    private void setTargetValues(final Target target, final String name, final String description) {
+    private static void setTargetValues(final Target target, final String name, final String description) {
         if (null == name) {
             target.setName(target.getControllerId());
         } else {

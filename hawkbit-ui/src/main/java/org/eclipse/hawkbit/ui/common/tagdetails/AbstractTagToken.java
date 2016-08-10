@@ -44,6 +44,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
+ *
+ * @param <T>
+ *            the special entity
  */
 public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
@@ -76,6 +79,9 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     @Autowired
     protected ManagementUIState managementUIState;
 
+    // BaseEntity implements Serializable so this entity is serializable. Maybe
+    // a sonar bug
+    @SuppressWarnings("squid:S1948")
     protected T selectedEntity;
 
     @PostConstruct
@@ -214,11 +220,11 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             unassignTag(tagDetails.get(tokenId).getName());
         }
 
-    }
+        private Property getItemNameProperty(final Object tokenId) {
+            final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+            return item.getItemProperty("name");
+        }
 
-    private Property getItemNameProperty(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
-        return item.getItemProperty("name");
     }
 
     private String getColor(final Object tokenId) {
