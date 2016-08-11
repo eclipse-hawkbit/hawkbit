@@ -18,10 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 import com.vaadin.server.Page;
+import com.vaadin.shared.Connector;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
 /**
  * Default handler for SP UI.
@@ -38,10 +43,23 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         final Optional<Page> originError = getPageOriginError(event);
 
+        final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
+
         if (originError.isPresent()) {
-            final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
-            message.show(originError.get());
+            final Connector connector = ((ConnectorErrorEvent) event).getConnector();
+            // in case of BulkUpload
+            if (connector instanceof UI) {
+                ((UI) (((ConnectorErrorEvent) event).getConnector())).access(() -> message.show(originError.get()));
+                return;
+            }
+            // Other UI components
+            if (connector instanceof AbstractComponent) {
+                ((AbstractComponent) connector).getUI().access(() -> message.show(originError.get()));
+                return;
+            }
         }
+        // Default
+        HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
     }
 
     private static Throwable getRootExceptionFrom(final ErrorEvent event) {
@@ -66,7 +84,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
             return Optional.fromNullable(errorOrigin.getUI().getPage());
         }
 
-        return Optional.of(Page.getCurrent());
+        return Optional.absent();
     }
 
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
