@@ -46,7 +46,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         if (originError.isPresent()) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
-            // in case of BulkUpload: BulkUpload needs a look to show the
+            // in case of BulkUpload: BulkUpload needs a lock to show the
             // notification
             if (connector instanceof UI) {
                 ((UI) (((ConnectorErrorEvent) event).getConnector())).access(() -> message.show(originError.get()));
