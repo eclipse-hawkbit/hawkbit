@@ -23,7 +23,6 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Connector;
-import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
@@ -47,16 +46,14 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         if (originError.isPresent()) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
-            // in case of BulkUpload
+            // in case of BulkUpload: BulkUpload needs a look to show the
+            // notification
             if (connector instanceof UI) {
                 ((UI) (((ConnectorErrorEvent) event).getConnector())).access(() -> message.show(originError.get()));
                 return;
             }
-            // Other UI components
-            if (connector instanceof AbstractComponent) {
-                ((AbstractComponent) connector).getUI().access(() -> message.show(originError.get()));
-                return;
-            }
+            message.show(originError.get());
+            return;
         }
         // Default
         HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
