@@ -61,13 +61,13 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return getRootCauseOf(event.getThrowable());
     }
 
-    private static Throwable getRootCauseOf(final Throwable exception) {
+    private static Throwable getRootCauseOf(final Throwable ex) {
 
-        if (exception.getCause() != null) {
-            return getRootCauseOf(exception.getCause());
+        if (ex.getCause() != null) {
+            return getRootCauseOf(ex.getCause());
         }
 
-        return exception;
+        return ex;
     }
 
     private static Optional<Page> getPageOriginError(final ErrorEvent event) {
@@ -81,15 +81,16 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return Optional.absent();
     }
 
-    protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
-        LOG.error("Error in UI: ", exception);
-        return createHawkbitErrorNotificationMessage(exception);
-    }
+    protected HawkbitErrorNotificationMessage buildNotification(final Throwable ex) {
 
-    protected HawkbitErrorNotificationMessage createHawkbitErrorNotificationMessage(final Throwable exception) {
+        log(ex);
+
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
-                i18n.get("message.error.temp", exception.getClass().getSimpleName()), false);
+                i18n.get("message.error.temp", ex.getClass().getSimpleName()), false);
     }
 
+    protected void log(final Throwable exception) {
+        LOG.error("Error in UI: ", exception);
+    }
 }
