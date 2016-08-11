@@ -29,7 +29,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 
 /**
- * Default handler for SP UI.
+ * Default handler for Hawkbit UI.
  */
 public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 

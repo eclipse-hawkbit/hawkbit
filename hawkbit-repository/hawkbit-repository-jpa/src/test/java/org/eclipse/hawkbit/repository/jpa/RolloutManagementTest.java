@@ -34,13 +34,13 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -923,6 +923,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
             final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
+
         for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
             final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
             assertThat(countReady).isEqualTo(entry.getValue());
