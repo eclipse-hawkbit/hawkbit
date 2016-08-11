@@ -46,16 +46,13 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
         if (originError.isPresent()) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
-            // in case of BulkUpload: BulkUpload needs a lock to show the
-            // notification
             if (connector instanceof UI) {
-                ((UI) (((ConnectorErrorEvent) event).getConnector())).access(() -> message.show(originError.get()));
+                ((UI) connector).access(() -> message.show(originError.get()));
                 return;
             }
             message.show(originError.get());
             return;
         }
-        // Default
         HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
     }
 
@@ -86,10 +83,6 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
         LOG.error("Error in UI: ", exception);
-        return createHawkbitErrorNotificationMessage(exception);
-    }
-
-    protected HawkbitErrorNotificationMessage createHawkbitErrorNotificationMessage(final Throwable exception) {
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
                 i18n.get("message.error.temp", exception.getClass().getSimpleName()), false);
