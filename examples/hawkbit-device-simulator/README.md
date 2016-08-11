@@ -24,6 +24,12 @@ The simulator has user authentication enabled in **cloud profile**. Default cred
 
 This can be configured/disabled by spring boot properties
 
+## hawkBit APIs
+
+The simulator supports `DDI` as well as the `DMF` integration APIs.
+In case there is no AMQP message broker (like rabbitMQ) running, you can disable the AMQP support for the device simulator, so the simulator is not trying to connect to a amqp message broker. 
+Configuration property `hawkbit.device.simulator.amqp.enabled=true` 
+
 ## Usage
 
 ### Graphical User Interface
