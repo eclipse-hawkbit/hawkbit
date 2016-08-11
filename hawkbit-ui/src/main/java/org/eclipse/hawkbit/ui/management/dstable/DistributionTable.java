@@ -155,7 +155,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         // refresh the details tabs only if selected ds is updated
         if (lastSelectedDsIdName != null && lastSelectedDsIdName.getId().equals(ds.getId())) {
             // update table row+details layout
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, ds));
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, ds));
         }
     }
 
