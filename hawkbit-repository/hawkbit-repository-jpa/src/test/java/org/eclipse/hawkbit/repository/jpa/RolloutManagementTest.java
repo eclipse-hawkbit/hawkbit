@@ -56,9 +56,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Junit tests for RolloutManagment.
- * 
- * @author Michael Hirsch
- *
  */
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
@@ -923,7 +920,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
             final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
-
         for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
             final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
             assertThat(countReady).isEqualTo(entry.getValue());
