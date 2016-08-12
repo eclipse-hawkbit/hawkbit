@@ -100,6 +100,7 @@ public class BulkUploadHandler extends CustomComponent
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
     private transient EntityFactory entityFactory;
+    private final UI uiInstance;
 
     /**
      *
@@ -111,8 +112,9 @@ public class BulkUploadHandler extends CustomComponent
      */
     public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final I18N i18n) {
+            final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
         this.targetBulkUpdateWindowLayout = targetBulkUpdateWindowLayout;
+        this.uiInstance = uiInstance;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();
         this.targetManagement = targetManagement;
@@ -213,7 +215,6 @@ public class BulkUploadHandler extends CustomComponent
                  * below event.
                  */
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
-
                 while ((line = reader.readLine()) != null) {
                     innerCounter++;
                     readEachLine(line, innerCounter, totalFileSize);
@@ -222,9 +223,7 @@ public class BulkUploadHandler extends CustomComponent
             } catch (final IOException e) {
                 LOG.error("Error reading file {}", tempFile.getName(), e);
             } catch (final RuntimeException e) {
-                if (UI.getCurrent() != null) {
-                    UI.getCurrent().getErrorHandler().error(new com.vaadin.server.ErrorEvent(e));
-                }
+                uiInstance.getErrorHandler().error(new ConnectorErrorEvent(uiInstance, e));
             } finally {
                 deleteFile();
             }
