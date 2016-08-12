@@ -17,6 +17,4 @@ applications:
   services:
     - dmf-rabbit
   env:
-    SPRING_PROFILES_ACTIVE: cloud,amqp
-    CF_STAGING_TIMEOUT: 15
-    CF_STARTUP_TIMEOUT: 15
+    SPRING_PROFILES_ACTIVE: cloud
