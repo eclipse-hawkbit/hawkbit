@@ -40,27 +40,26 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     @Override
     public void error(final ErrorEvent event) {
 
-        final Optional<Page> originError = getPageOriginError(event);
         final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
-
-        if (!originError.isPresent()) {
-            HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(),
-                    Type.HUMANIZED_MESSAGE);
-            return;
-        }
-
         if (event instanceof ConnectorErrorEvent) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
             if (connector instanceof UI) {
-                ((UI) connector).access(() -> message.show(originError.get()));
+                final UI uiInstance = (UI) connector;
+                uiInstance.access(() -> message.show(uiInstance.getPage()));
                 return;
             }
         }
-        message.show(originError.get());
+
+        final Optional<Page> originError = getPageOriginError(event);
+        if (originError.isPresent()) {
+            message.show(originError.get());
+            return;
+        }
+
+        HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
     }
 
     private static Throwable getRootExceptionFrom(final ErrorEvent event) {
-
         return getRootCauseOf(event.getThrowable());
     }
 
@@ -84,16 +83,18 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return Optional.absent();
     }
 
+    /**
+     * Method to build a notification based on an exception.
+     * 
+     * @param ex
+     *            the throwable
+     * @return a hawkbit error notification message
+     */
     protected HawkbitErrorNotificationMessage buildNotification(final Throwable ex) {
-
-        log(ex);
-
+        LOG.error("Error in UI: ", ex);
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
                 i18n.get("message.error.temp", ex.getClass().getSimpleName()), false);
     }
 
-    protected void log(final Throwable exception) {
-        LOG.error("Error in UI: ", exception);
-    }
 }
