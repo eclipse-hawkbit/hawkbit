@@ -41,19 +41,22 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     public void error(final ErrorEvent event) {
 
         final Optional<Page> originError = getPageOriginError(event);
-
         final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
 
-        if (originError.isPresent()) {
+        if (!originError.isPresent()) {
+            HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(),
+                    Type.HUMANIZED_MESSAGE);
+            return;
+        }
+
+        if (event instanceof ConnectorErrorEvent) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
             if (connector instanceof UI) {
                 ((UI) connector).access(() -> message.show(originError.get()));
                 return;
             }
-            message.show(originError.get());
-            return;
         }
-        HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
+        message.show(originError.get());
     }
 
     private static Throwable getRootExceptionFrom(final ErrorEvent event) {
