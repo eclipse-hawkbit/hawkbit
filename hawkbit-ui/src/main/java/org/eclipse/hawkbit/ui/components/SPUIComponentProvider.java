@@ -15,9 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.decorators.HeaderLayoutDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
-import org.eclipse.hawkbit.ui.decorators.HeaderLayoutDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUILabelDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
@@ -82,8 +82,6 @@ public final class SPUIComponentProvider {
     /**
      * Get HorizontalLayout UI component.
      *
-     * @param className
-     *            as Layout
      * @return HorizontalLayout as UI
      */
     public static HorizontalLayout getHorizontalLayout() {
@@ -117,8 +115,7 @@ public final class SPUIComponentProvider {
             hLayout = layoutDecorator.decorate(hLayout);
 
         } catch (final InstantiationException | IllegalAccessException exception) {
-            LOG.error("Error occured while creating horizontal decorator " + HeaderLayoutDecorator.class,
-                    exception);
+            LOG.error("Error occured while creating horizontal decorator " + HeaderLayoutDecorator.class, exception);
         }
 
         return hLayout;
@@ -139,7 +136,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get window component.
-     * 
+     *
      * @param caption
      *            window caption
      * @param id
@@ -154,7 +151,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Label UI component.
-     * 
+     *
      * @param caption
      *            set the caption of the textfield
      * @param style
@@ -182,7 +179,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Label UI component. *
-     * 
+     *
      * @param caption
      *            set the caption of the textArea
      * @param style
@@ -206,7 +203,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Label UI component.
-     * 
+     *
      * @param caption
      *            caption of the combo box
      * @param height
@@ -252,7 +249,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Button - Factory Approach for decoration.
-     * 
+     *
      * @param id
      *            as string
      * @param buttonName
@@ -289,7 +286,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get the style required.
-     * 
+     *
      * @return String
      */
     public static String getPinButtonStyle() {
@@ -305,7 +302,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get DistributionSet Info Panel.
-     * 
+     *
      * @param distributionSet
      *            as DistributionSet
      * @param caption
@@ -323,7 +320,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Method to CreateName value labels.
-     * 
+     *
      * @param label
      *            as string
      * @param values
@@ -356,7 +353,7 @@ public final class SPUIComponentProvider {
     /**
      * Create label which represents the {@link BaseEntity#getCreatedBy()} by
      * user name
-     * 
+     *
      * @param i18n
      *            the i18n
      * @param baseEntity
@@ -371,7 +368,7 @@ public final class SPUIComponentProvider {
     /**
      * Create label which represents the
      * {@link BaseEntity#getLastModifiedBy()()} by user name
-     * 
+     *
      * @param i18n
      *            the i18n
      * @param baseEntity
@@ -385,7 +382,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Bold Text.
-     * 
+     *
      * @param text
      *            as String
      * @return String as bold
@@ -396,7 +393,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get the layout for Target:Controller Attributes.
-     * 
+     *
      * @param controllerAttibs
      *            as Map
      * @return VerticalLayout
@@ -407,7 +404,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Get Tabsheet.
-     * 
+     *
      * @return SPUITabSheet
      */
     public static TabSheet getDetailsTabSheet() {
@@ -416,7 +413,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Layout of tabs in detail tabsheet.
-     * 
+     *
      * @return VerticalLayout
      */
     public static VerticalLayout getDetailTabLayout() {
@@ -429,7 +426,7 @@ public final class SPUIComponentProvider {
 
     /**
      * Method to create a link.
-     * 
+     *
      * @param id
      *            of the link
      * @param name
@@ -465,10 +462,10 @@ public final class SPUIComponentProvider {
 
     /**
      * Generates help/documentation links from within management UI.
-     * 
+     *
      * @param uri
      *            to documentation site
-     * 
+     *
      * @return generated link
      */
     public static Link getHelpLink(final String uri) {

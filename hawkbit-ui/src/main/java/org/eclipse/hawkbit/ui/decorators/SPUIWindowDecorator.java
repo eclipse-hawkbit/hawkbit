@@ -21,9 +21,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Decorator for Window.
- * 
- *
- *
  */
 public final class SPUIWindowDecorator {
 
@@ -36,7 +33,7 @@ public final class SPUIWindowDecorator {
 
     /**
      * Decorates window based on type.
-     * 
+     *
      * @param caption
      *            window caption
      * @param id
@@ -48,36 +45,38 @@ public final class SPUIWindowDecorator {
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
             final ClickListener cancelButtonClickListener, final String helpLink, final AbstractLayout layout,
-			final I18N i18n) {
-		CommonDialogWindow window = null;
-		if (SPUIDefinitions.CUSTOM_METADATA_WINDOW.equals(type)) {
-			window = new CustomCommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-					cancelButtonClickListener, layout, i18n);
-			window.setDraggable(true);
-			window.setClosable(true);
-		} else {
-			window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-					cancelButtonClickListener, layout, i18n);
-			if (null != id) {
-				window.setId(id);
-			}
-			if (SPUIDefinitions.CONFIRMATION_WINDOW.equals(type)) {
-				window.setDraggable(false);
-				window.setClosable(true);
-				window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+            final I18N i18n) {
 
-			} else if (SPUIDefinitions.CREATE_UPDATE_WINDOW.equals(type)) {
-				window.setDraggable(true);
-				window.setClosable(true);
-			}
-		}
-		return window;
-	}
+        CommonDialogWindow window;
 
-    
+        if (SPUIDefinitions.CUSTOM_METADATA_WINDOW.equals(type)) {
+            window = new CustomCommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
+                    cancelButtonClickListener, layout, i18n);
+            window.setDraggable(true);
+            window.setClosable(true);
+        } else {
+            window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
+                    cancelButtonClickListener, layout, i18n);
+            if (null != id) {
+                window.setId(id);
+            }
+            if (SPUIDefinitions.CONFIRMATION_WINDOW.equals(type)) {
+                window.setDraggable(false);
+                window.setClosable(true);
+                window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+
+            } else if (SPUIDefinitions.CREATE_UPDATE_WINDOW.equals(type)) {
+                window.setDraggable(true);
+                window.setClosable(true);
+            }
+        }
+
+        return window;
+    }
+
     /**
      * Decorates window based on type.
-     * 
+     *
      * @param caption
      *            window caption
      * @param id

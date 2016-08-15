@@ -12,16 +12,9 @@ import java.io.Serializable;
 
 /**
  * An abstract report series.
- *
- *
- *
- *
  */
 public class AbstractReportSeries implements Serializable {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final String name;

@@ -391,22 +391,22 @@ public class BulkUploadHandler extends CustomComponent
                 eventBus.publish(this, new BulkUploadValidationMessageEvent(errorMessage.toString()));
             }
         }
-    }
 
-    private void addNewTarget(final String controllerId, final String name) {
-        final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerId);
-        if (mandatoryCheck(newControllerId) && duplicateCheck(newControllerId)) {
-            final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(name);
-            final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        private void addNewTarget(final String controllerId, final String name) {
+            final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerId);
+            if (mandatoryCheck(newControllerId) && duplicateCheck(newControllerId)) {
+                final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(name);
+                final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-            /* create new target entity */
-            final Target newTarget = entityFactory.generateTarget(newControllerId);
-            setTargetValues(newTarget, newName, newDesc);
-            targetManagement.createTarget(newTarget);
-            managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
-            successfullTargetCount++;
+                /* create new target entity */
+                final Target newTarget = entityFactory.generateTarget(newControllerId);
+                setTargetValues(newTarget, newName, newDesc);
+                targetManagement.createTarget(newTarget);
+                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
+                successfullTargetCount++;
+            }
+
         }
-
     }
 
     private static void setTargetValues(final Target target, final String name, final String description) {

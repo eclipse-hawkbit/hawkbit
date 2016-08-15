@@ -441,7 +441,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findRequiredExtraHeight(final float newBrowserHeight) {
         return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
+                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT) : 0;
     }
 
     /**
@@ -453,7 +453,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findRequiredSwModuleExtraHeight(final float newBrowserHeight) {
         return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
+                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT) : 0;
     }
 
     /**
@@ -465,7 +465,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
+                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
     }
 
     /**
@@ -528,7 +528,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
+                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) : 0;
     }
 
     /**
@@ -570,7 +570,7 @@ public final class HawkbitCommonUtil {
         final float requiredExtraWidth = findExtraWidth(newBrowserWidth);
         float expectedDistWidth = minTableWidth;
         if (requiredExtraWidth > 0) {
-            expectedDistWidth = expectedDistWidth + Math.round(requiredExtraWidth * 0.5f);
+            expectedDistWidth = expectedDistWidth + Math.round(requiredExtraWidth * 0.5F);
         }
         return expectedDistWidth;
     }
@@ -741,6 +741,8 @@ public final class HawkbitCommonUtil {
      *            base software module type
      * @param description
      *            base software module description
+     * @param entityFactory
+     *            the entity factory to create new entity instances
      * @return BaseSoftwareModule new base software module
      */
     public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,

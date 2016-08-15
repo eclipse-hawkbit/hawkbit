@@ -109,7 +109,7 @@ public class UploadLayout extends VerticalLayout {
 
     private Button discardBtn;
 
-    private UploadConfirmationwindow currentUploadConfirmationwindow;
+    private UploadConfirmationWindow currentUploadConfirmationwindow;
 
     private VerticalLayout dropAreaLayout;
 
@@ -634,7 +634,7 @@ public class UploadLayout extends VerticalLayout {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
-                currentUploadConfirmationwindow = new UploadConfirmationwindow(this, artifactUploadState);
+                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());
@@ -656,7 +656,7 @@ public class UploadLayout extends VerticalLayout {
         return spInfo;
     }
 
-    void setCurrentUploadConfirmationwindow(final UploadConfirmationwindow currentUploadConfirmationwindow) {
+    void setCurrentUploadConfirmationwindow(final UploadConfirmationWindow currentUploadConfirmationwindow) {
         this.currentUploadConfirmationwindow = currentUploadConfirmationwindow;
     }
 

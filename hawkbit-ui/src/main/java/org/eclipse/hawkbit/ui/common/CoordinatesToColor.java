@@ -13,10 +13,6 @@ import com.vaadin.ui.AbstractColorPicker.Coordinates2Color;
 
 /**
  * Converts 2d-coordinates to a Color.
- * 
- *
- *
- *
  */
 public class CoordinatesToColor implements Coordinates2Color {
 
@@ -30,32 +26,31 @@ public class CoordinatesToColor implements Coordinates2Color {
     @Override
     public int[] calculate(final Color color) {
         final float[] hsv = color.getHSV();
-        final int x = Math.round(hsv[0] * 220f);
-        int y = 0;
-        y = calculateYCoordinateOfColor(hsv);
+        final int x = Math.round(hsv[0] * 220F);
+        final int y = calculateYCoordinateOfColor(hsv);
         return new int[] { x, y };
     }
 
-    private Color calculateHSVColor(final int x, final int y) {
-        final float h = x / 220f;
-        float s = 1f;
-        float v = 1f;
+    private static Color calculateHSVColor(final int x, final int y) {
+        final float h = x / 220F;
+        float s = 1F;
+        float v = 1F;
         if (y < 110) {
-            s = y / 110f;
+            s = y / 110F;
         } else if (y > 110) {
-            v = 1f - (y - 110f) / 110f;
+            v = 1F - (y - 110F) / 110F;
         }
         return new Color(Color.HSVtoRGB(h, s, v));
     }
 
-    private int calculateYCoordinateOfColor(final float[] hsv) {
+    private static int calculateYCoordinateOfColor(final float[] hsv) {
         int y;
         // lower half
         /* Assuming hsv[] array value will have in the range of 0 to 1 */
-        if (hsv[1] < 1f) {
-            y = Math.round(hsv[1] * 110f);
+        if (hsv[1] < 1F) {
+            y = Math.round(hsv[1] * 110F);
         } else {
-            y = Math.round(110f - (hsv[1] + hsv[2]) * 110f);
+            y = Math.round(110F - (hsv[1] + hsv[2]) * 110F);
         }
         return y;
     }

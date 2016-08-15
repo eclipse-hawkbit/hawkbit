@@ -44,7 +44,7 @@ public final class IpUtil {
      * {@link HttpServletRequest} by either the
      * {@link HttpHeaders#X_FORWARDED_FOR} or by the
      * {@link HttpServletRequest#getRemoteAddr()} methods.
-     * 
+     *
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
      *            where this request has been sent from
@@ -65,21 +65,23 @@ public final class IpUtil {
      * {@link HttpServletRequest} by either the
      * {@link HttpHeaders#X_FORWARDED_FOR} or by the
      * {@link HttpServletRequest#getRemoteAddr()} methods.
-     * 
+     *
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
      *            where this request has been sent from
      * @param forwardHeader
      *            the header name containing the IP address e.g. forwarded by a
      *            proxy {@code x-forwarded-for}
-     * 
-     * @param trackRemoteIp
-     *            to <code>true</code> if remote IP should be tracked.
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
-    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
+    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader) {
+        return getClientIpFromRequest(request, forwardHeader, true);
+    }
+
+    private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
             final boolean trackRemoteIp) {
+
         String ip;
 
         if (trackRemoteIp) {
@@ -113,7 +115,7 @@ public final class IpUtil {
 
     /**
      * Create a {@link URI} with scheme and host.
-     * 
+     *
      * @param scheme
      *            the scheme
      * @param host
@@ -132,7 +134,7 @@ public final class IpUtil {
 
     /**
      * Create a {@link URI} with amqp scheme and host.
-     * 
+     *
      * @param host
      *            the host
      * @param exchange
@@ -147,7 +149,7 @@ public final class IpUtil {
 
     /**
      * Create a {@link URI} with http scheme and host.
-     * 
+     *
      * @param host
      *            the host
      * @return the {@link URI}
@@ -160,7 +162,7 @@ public final class IpUtil {
 
     /**
      * Check if scheme contains http and uri ist not <code>null</code>.
-     * 
+     *
      * @param uri
      *            the uri
      * @return true = is http host false = not
@@ -171,7 +173,7 @@ public final class IpUtil {
 
     /**
      * Check if host scheme amqp and uri ist not <code>null</code>.
-     * 
+     *
      * @param uri
      *            the uri
      * @return true = is http host false = not
@@ -183,7 +185,7 @@ public final class IpUtil {
     /**
      * Check if the IP address of that {@link URI} is known, i.e. not an AQMP
      * exchange in DMF case and not HIDDEN_IP in DDI case.
-     * 
+     *
      * @param uri
      *            the uri
      * @return <code>true</code> if IP address is actually known by the server

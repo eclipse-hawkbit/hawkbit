@@ -114,10 +114,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     /**
      * Discard the changes and close the popup.
-     *
-     * @param event
      */
-    protected void discard(final Button.ClickEvent event) {
+    protected void discard() {
         UI.getCurrent().removeWindow(window);
     }
 
@@ -463,7 +461,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     public CommonDialogWindow getWindow() {
         reset();
         window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
-                this::save, this::discard, null, mainLayout, i18n);
+                this::save, cancleEvent -> discard(), null, mainLayout, i18n);
         return window;
     }
 

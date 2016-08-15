@@ -16,7 +16,6 @@ import java.util.Map;
  * An interface for declaring the name of the field described in the database
  * which is used as string representation of the field, e.g. for sorting the
  * fields over REST.
- *
  */
 public interface FieldNameProvider {
     /**
@@ -32,64 +31,18 @@ public interface FieldNameProvider {
 
     /**
      * Contains the sub entity the given field.
-     * 
+     *
      * @param propertyField
      *            the given field
      * @return <true> contains <false> contains not
      */
     default boolean containsSubEntityAttribute(final String propertyField) {
-        return FieldNameProvider.containsSubEntityAttribute(propertyField, getSubEntityAttributes());
-    }
 
-    /**
-     * 
-     * @return all sub entities attributes.
-     */
-    default List<String> getSubEntityAttributes() {
-        return Collections.emptyList();
-    }
-
-    /**
-     * the database column for the key
-     * 
-     * @return key fieldname
-     */
-    default String getKeyFieldName() {
-        return null;
-    }
-
-    /**
-     * the database column for the value
-     * 
-     * @return key fieldname
-     */
-    default String getValueFieldName() {
-        return null;
-    }
-
-    /**
-     * Is the entity field a {@link Map}.
-     * 
-     * @return <true> is a map <false> is not a map
-     */
-    default boolean isMap() {
-        return getKeyFieldName() != null;
-    }
-
-    /**
-     * Check if a sub attribute exists.
-     * 
-     * @param propertyField
-     *            the sub property field.
-     * @param subEntityAttribues
-     *            the list of available properties
-     * @return <true> property exists <false> not exists
-     */
-    static boolean containsSubEntityAttribute(final String propertyField, final List<String> subEntityAttribues) {
-        if (subEntityAttribues.contains(propertyField)) {
+        final List<String> subEntityAttributes = getSubEntityAttributes();
+        if (subEntityAttributes.contains(propertyField)) {
             return true;
         }
-        for (final String attribute : subEntityAttribues) {
+        for (final String attribute : subEntityAttributes) {
             final String[] graph = attribute.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
 
             for (final String subAttribute : graph) {
@@ -102,4 +55,38 @@ public interface FieldNameProvider {
         return false;
     }
 
+    /**
+     *
+     * @return all sub entities attributes.
+     */
+    default List<String> getSubEntityAttributes() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * the database column for the key
+     *
+     * @return key fieldname
+     */
+    default String getKeyFieldName() {
+        return null;
+    }
+
+    /**
+     * the database column for the value
+     *
+     * @return key fieldname
+     */
+    default String getValueFieldName() {
+        return null;
+    }
+
+    /**
+     * Is the entity field a {@link Map}.
+     *
+     * @return <true> is a map <false> is not a map
+     */
+    default boolean isMap() {
+        return getKeyFieldName() != null;
+    }
 }

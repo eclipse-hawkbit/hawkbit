@@ -65,6 +65,7 @@ import org.springframework.data.domain.Persistable;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target {
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
@@ -180,7 +181,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     }
 
     /**
-     * @param isNew
+     * @param entityNew
      *            the isNew to set
      */
     public void setNew(final boolean entityNew) {
@@ -222,6 +223,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      * @param securityToken
      *            the securityToken to set
      */
+    @Override
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
     }

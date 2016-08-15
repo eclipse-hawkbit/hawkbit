@@ -117,5 +117,4 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     private void refreshTypeTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
     }
-
 }

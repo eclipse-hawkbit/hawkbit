@@ -33,45 +33,43 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
+ *
  * DistributionSet Metadata details layout.
  *
  */
 
 @SpringComponent
 @VaadinSessionScope
-public class DistributionSetMetadatadetailslayout extends Table{
-    
+public class DistributionSetMetadatadetailslayout extends Table {
+
     private static final long serialVersionUID = 2913758299611837718L;
-    
- 
-    private  DistributionSetManagement distributionSetManagement;
-    
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private static final String METADATA_KEY = "Key";
-    
-    private static final String VIEW ="view";
+
+    private static final String VIEW = "view";
+
+    private transient DistributionSetManagement distributionSetManagement;
+
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private SpPermissionChecker permissionChecker;
-    
+
     private transient EntityFactory entityFactory;
 
     private I18N i18n;
-    
-    private  Long selectedDistSetId;
-    
-  /**
-   * 
-   * @param i18n
-   * @param permissionChecker
-   * @param distributionSetManagement
-   * @param dsMetadataPopupLayout
-   */
+
+    private Long selectedDistSetId;
+
+    /**
+     *
+     * @param i18n
+     * @param permissionChecker
+     * @param distributionSetManagement
+     * @param dsMetadataPopupLayout
+     */
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
-                     final DistributionSetManagement distributionSetManagement,
-                     final DsMetadataPopupLayout dsMetadataPopupLayout,
-                     final EntityFactory entityFactory) {
+            final DistributionSetManagement distributionSetManagement,
+            final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.distributionSetManagement = distributionSetManagement;
@@ -80,45 +78,44 @@ public class DistributionSetMetadatadetailslayout extends Table{
         createDSMetadataTable();
         addCustomGeneratedColumns();
     }
-    
 
     /**
      * Populate software module metadata.
-     * 
+     *
      * @param distributionSet
      */
     public void populateDSMetadata(final DistributionSet distributionSet) {
         removeAllItems();
         if (null == distributionSet) {
-        	return;
+            return;
         }
         selectedDistSetId = distributionSet.getId();
         final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
         }
-     
+
     }
-    
+
     /**
-     * Create metadata .
-     * 
+     * Create metadata.
+     *
      * @param metadataKeyName
      */
-    public void createMetadata(final String metadataKeyName){
+    public void createMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
         final Item item = metadataContainer.addItem(metadataKeyName);
         item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
     }
-    
+
     /**
      * Delete metadata.
-     * 
+     *
      * @param metadataKeyName
      */
-    public void deleteMetadata(final String metadataKeyName){
+    public void deleteMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-         metadataContainer.removeItem(metadataKeyName);
+        metadataContainer.removeItem(metadataKeyName);
     }
 
     private void createDSMetadataTable() {
@@ -131,9 +128,9 @@ public class DistributionSetMetadatadetailslayout extends Table{
         setContainerDataSource(getDistSetContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addDSMetadataTableHeader();
-        setSizeFull(); 
-        //same as height of other tabs in details tabsheet
-        setHeight(116,Unit.PIXELS);
+        setSizeFull();
+        // same as height of other tabs in details tabsheet
+        setHeight(116, Unit.PIXELS);
     }
 
     private IndexedContainer getDistSetContainer() {
@@ -141,7 +138,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
         container.addContainerProperty(METADATA_KEY, String.class, "");
         setColumnExpandRatio(METADATA_KEY, 0.7f);
         setColumnAlignment(METADATA_KEY, Align.LEFT);
-        
+
         if (permissionChecker.hasUpdateDistributionPermission()) {
             container.addContainerProperty(VIEW, Label.class, "");
             setColumnExpandRatio(VIEW, 0.2F);
@@ -154,39 +151,36 @@ public class DistributionSetMetadatadetailslayout extends Table{
         setColumnHeader(METADATA_KEY, i18n.get("header.key"));
     }
 
-    
-    private void setDSMetadataProperties(final DistributionSetMetadata dsMetadata){
+    private void setDSMetadataProperties(final DistributionSetMetadata dsMetadata) {
         final Item item = getContainerDataSource().addItem(dsMetadata.getKey());
         item.getItemProperty(METADATA_KEY).setValue(dsMetadata.getKey());
-              
+
     }
-    
-    private void addCustomGeneratedColumns() {       
-        addGeneratedColumn(METADATA_KEY,
-                (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
+
+    private void addCustomGeneratedColumns() {
+        addGeneratedColumn(METADATA_KEY, (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
     private Button customMetadataDetailButton(final String metadataKey) {
-        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey, "View "
-                + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
+        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
+                "View " + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.BUTTON_TINY + " " + ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link"
                 + " " + "text-style");
         viewIcon.addClickListener(event -> showMetadataDetails(selectedDistSetId, metadataKey));
         return viewIcon;
     }
-    
+
     private static String getDetailLinkId(final String name) {
-        return new StringBuilder(SPUIComponentIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name)
-                .toString();
+        return new StringBuilder(SPUIComponentIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name).toString();
     }
-    
-    private void showMetadataDetails(final Long selectedDistSetId , final String metadataKey) {
-        DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
-       
+
+    private void showMetadataDetails(final Long selectedDistSetId, final String metadataKey) {
+        final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
+
         /* display the window */
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet,
-                entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "") ));
+                entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "")));
     }
-    
+
 }

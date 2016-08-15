@@ -152,7 +152,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     /**
      * Get the window.
-     * 
+     *
      * @param rolloutId
      *            the rollout id
      * @return the window
@@ -499,14 +499,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return errorThresoldPercent;
     }
 
-    private boolean validateFields() {
-        if (!noOfGroups.isValid() || !errorThreshold.isValid() || !triggerThreshold.isValid()) {
-            uiNotification.displayValidationError(i18n.get("message.correct.invalid.value"));
-            return false;
-        }
-        return true;
-    }
-
     private boolean duplicateCheck() {
         if (rolloutManagement.findRolloutByName(getRolloutName()) != null) {
             uiNotification.displayValidationError(
@@ -694,9 +686,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     /**
-     * 
+     *
      * Populate rollout details.
-     * 
+     *
      * @param rolloutId
      *            rollout id
      */

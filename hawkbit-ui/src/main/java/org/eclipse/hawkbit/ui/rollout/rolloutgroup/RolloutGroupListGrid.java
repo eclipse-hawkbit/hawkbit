@@ -52,7 +52,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
- * 
+ *
  * Rollout group list grid component.
  *
  */
@@ -86,10 +86,10 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Handles the RolloutGroupChangeEvent to refresh the item in the grid.
-     * 
-     * 
+     *
+     *
      * @param rolloutGroupChangeEvent
      *            the event which contains the rollout group which has been
      *            change
@@ -242,6 +242,12 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
     }
 
+    private void onClickOfRolloutGroupName(final RendererClickEvent event) {
+        rolloutUIState
+                .setRolloutGroup(rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
+        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+    }
+
     @Override
     protected void setHiddenColumns() {
         final List<Object> columnsToBeHidden = new ArrayList<>();
@@ -259,12 +265,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
         return this::getDescription;
-    }
-
-    private void onClickOfRolloutGroupName(final RendererClickEvent event) {
-        rolloutUIState
-                .setRolloutGroup(rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
-        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
     }
 
     private void createRolloutGroupStatusToFontMap() {
@@ -311,7 +311,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Converts {@link TotalTargetCountStatus} into formatted string with status
      * and count details.
      *
@@ -346,7 +346,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Converts {@link RolloutGroupStatus} to string.
      *
      */

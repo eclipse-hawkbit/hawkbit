@@ -46,6 +46,7 @@ import org.springframework.transaction.TransactionSystemException;
  */
 @Aspect
 public class ExceptionMappingAspectHandler implements Ordered {
+
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingAspectHandler.class);
 
     private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>();
@@ -63,6 +64,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
     private final SQLStateSQLExceptionTranslator sqlStateExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
     static {
+
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(ConcurrencyFailureException.class);
@@ -90,9 +92,11 @@ public class ExceptionMappingAspectHandler implements Ordered {
             + " || execution( * org.eclipse.hawkbit.controller.*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.rest.resource.*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.service.*.*(..)) )", throwing = "ex")
-    // Exception squid:S00112 - Is aspectJ proxy
-    @SuppressWarnings({ "squid:S00112" })
+    // Exception for squid:S00112, squid:S1162
+    // It is a AspectJ proxy which deals with exceptions.
+    @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
+
         LOG.trace("exception occured", ex);
         Exception translatedAccessException = translateEclipseLinkExceptionIfPossible(ex);
 
@@ -122,6 +126,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
                 break;
             }
         }
+
         LOG.trace("mapped exception {} to {}", translatedAccessException.getClass(), mappingException.getClass());
         throw mappingException;
     }
@@ -138,7 +143,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * translate the exception by the sql error code. Luckily, there we can use
      * {@link SQLStateSQLExceptionTranslator} if we can get a
      * {@link SQLException}.
-     * 
+     *
      * @param accessException
      *            the base access exception from jpa
      * @return the translated accessException

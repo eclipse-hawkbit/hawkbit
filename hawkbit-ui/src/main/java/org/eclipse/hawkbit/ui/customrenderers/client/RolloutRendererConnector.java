@@ -17,21 +17,22 @@ import com.vaadin.client.renderers.ClickableRenderer.RendererClickHandler;
 import com.vaadin.shared.ui.Connect;
 
 import elemental.json.JsonObject;
+
 /**
  * A connector for {@link CustomObjectRenderer }.
  *
  */
 @Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer.class)
 public class RolloutRendererConnector extends ClickableRendererConnector<RolloutRendererData> {
-	private static final long serialVersionUID = 7734682321931830566L;
+    private static final long serialVersionUID = 7734682321931830566L;
 
-	public org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer getRenderer() {
-		return (org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer) super.getRenderer();
-	}
+    @Override
+    public org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer getRenderer() {
+        return (org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer) super.getRenderer();
+    }
 
-	@Override
-	protected HandlerRegistration addClickHandler(
-			RendererClickHandler<JsonObject> handler) {
+    @Override
+    protected HandlerRegistration addClickHandler(final RendererClickHandler<JsonObject> handler) {
         return getRenderer().addClickHandler(handler);
-	}
+    }
 }

@@ -117,7 +117,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     private boolean requestControllerAttributes = true;
 
     /**
-     * Constructor for {@link TargetStatus}.
+     * Constructor for {@link JpaTargetInfo}.
      *
      * @param target
      *            related to this status.
@@ -144,7 +144,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     }
 
     /**
-     * @param isNew
+     * @param entityNew
      *            the isNew to set
      */
     public void setNew(final boolean entityNew) {
