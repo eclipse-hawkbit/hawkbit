@@ -558,6 +558,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        if (targetList.isEmpty()) {
+            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            notification.displayValidationError(actionDidNotWork);
+            return;
+        }
+
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
 
         final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
