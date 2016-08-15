@@ -202,9 +202,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
             uiNotifcation.displayValidationError(
                     i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+            window.setIsDuplicate(Boolean.TRUE);
         } else {
             final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
                     version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+            window.setIsDuplicate(Boolean.FALSE);
             if (newBaseSoftwareModule != null) {
                 /* display success message */
                 uiNotifcation.displaySuccess(i18n.get("message.save.success",

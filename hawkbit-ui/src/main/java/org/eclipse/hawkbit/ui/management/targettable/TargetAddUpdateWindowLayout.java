@@ -201,8 +201,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (existingTarget != null) {
             uINotification.displayValidationError(
                     i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
+            window.setIsDuplicate(Boolean.TRUE);
             return false;
         } else {
+            window.setIsDuplicate(Boolean.FALSE);
             return true;
         }
     }

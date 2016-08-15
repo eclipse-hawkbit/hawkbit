@@ -101,6 +101,8 @@ public class CommonDialogWindow extends Window implements Serializable {
     private final List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
+    
+    private boolean isDuplicate;
 
     /**
      * Constructor.
@@ -137,11 +139,15 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     @Override
     public void close() {
-        super.close();
-        orginalValues.clear();
-        removeListeners();
-        allComponents.clear();
-        this.saveButton.setEnabled(false);
+        if(!isDuplicate){
+            super.close();
+            orginalValues.clear();
+            removeListeners();
+            allComponents.clear();
+            this.saveButton.setEnabled(false);
+        }else{
+            isDuplicate = Boolean.FALSE;
+        }
     }
 
     private void removeListeners() {
@@ -523,4 +529,22 @@ public class CommonDialogWindow extends Window implements Serializable {
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
+
+    /**
+     * Boolean.TRUE/Boolean.FALSE based on the entity saved in the window already exists.
+     * @return isDuplicate 
+     */
+    public boolean getIsDuplicate() {
+        return isDuplicate;
+    }
+
+    /**
+     * Sets Boolean.TRUE/Boolean.FALSE based on the entity saved in the window already exists.
+     * @param isDuplicate
+     */
+    public void setIsDuplicate(final boolean isDuplicate) {
+        this.isDuplicate = isDuplicate;
+    }
+    
+    
 }

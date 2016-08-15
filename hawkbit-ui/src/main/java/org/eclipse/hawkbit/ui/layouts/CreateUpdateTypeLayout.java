@@ -260,8 +260,10 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
         if (existingType != null) {
             uiNotification.displayValidationError(
                     i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
+            window.setIsDuplicate(Boolean.TRUE);
             return Boolean.TRUE;
         }
+        window.setIsDuplicate(Boolean.FALSE);
         return Boolean.FALSE;
     }
 
@@ -271,13 +273,16 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
             if (existingType instanceof DistributionSetType) {
                 uiNotification.displayValidationError(i18n.get("message.type.key.duplicate.check",
                         new Object[] { ((DistributionSetType) existingType).getKey() }));
+                window.setIsDuplicate(Boolean.TRUE);
                 return Boolean.TRUE;
             } else if (existingType instanceof SoftwareModuleType) {
                 uiNotification.displayValidationError(i18n.get("message.type.key.swmodule.duplicate.check",
                         new Object[] { ((SoftwareModuleType) existingType).getKey() }));
+                window.setIsDuplicate(Boolean.TRUE);
                 return Boolean.TRUE;
             }
         }
+        window.setIsDuplicate(Boolean.FALSE);
         return Boolean.FALSE;
     }
 

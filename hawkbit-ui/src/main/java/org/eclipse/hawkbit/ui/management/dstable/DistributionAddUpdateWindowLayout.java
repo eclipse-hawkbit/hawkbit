@@ -273,9 +273,11 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distVersionTextField.addStyleName("v-textfield-error");
             notificationMessage.displayValidationError(
                     i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
+            window.setIsDuplicate(Boolean.TRUE);
 
             return false;
         } else {
+            window.setIsDuplicate(Boolean.FALSE);
             return true;
         }
     }

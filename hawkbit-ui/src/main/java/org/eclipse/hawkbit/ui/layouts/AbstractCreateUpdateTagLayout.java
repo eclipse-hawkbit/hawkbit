@@ -563,8 +563,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected Boolean checkIsDuplicate(final Tag existingTag) {
         if (existingTag != null) {
             displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
+            window.setIsDuplicate(Boolean.TRUE);
             return Boolean.TRUE;
         }
+        window.setIsDuplicate(Boolean.FALSE);
         return Boolean.FALSE;
     }
 
