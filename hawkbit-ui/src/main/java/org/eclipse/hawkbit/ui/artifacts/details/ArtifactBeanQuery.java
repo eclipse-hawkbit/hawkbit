@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as Def
      * @param queryConfig
@@ -53,11 +55,11 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             baseSwModuleId = (Long) queryConfig.get(SPUIDefinitions.BY_BASE_SOFTWARE_MODULE);
         }
 
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
+        if (isEmpty(sortStates)) {
             // Initalize Sor
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
             // Add sort.

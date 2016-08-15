@@ -17,7 +17,9 @@ import java.util.Map;
  * which is used as string representation of the field, e.g. for sorting the
  * fields over REST.
  */
+@FunctionalInterface
 public interface FieldNameProvider {
+
     /**
      * Separator for the sub attributes
      */
@@ -56,7 +58,6 @@ public interface FieldNameProvider {
     }
 
     /**
-     *
      * @return all sub entities attributes.
      */
     default List<String> getSubEntityAttributes() {
@@ -64,7 +65,7 @@ public interface FieldNameProvider {
     }
 
     /**
-     * the database column for the key
+     * The database column for the key
      *
      * @return key fieldname
      */
@@ -73,7 +74,7 @@ public interface FieldNameProvider {
     }
 
     /**
-     * the database column for the value
+     * The database column for the value
      *
      * @return key fieldname
      */

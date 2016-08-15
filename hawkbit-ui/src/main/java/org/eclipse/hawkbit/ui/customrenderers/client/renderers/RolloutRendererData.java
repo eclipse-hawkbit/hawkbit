@@ -22,6 +22,13 @@ public class RolloutRendererData implements Serializable {
     private String status;
 
     /**
+     * Initialize the RendererData empty.
+     */
+    public RolloutRendererData() {
+        // Needed by Vaadin for compiling the widget set.
+    }
+
+    /**
      * Initialize the RendererData.
      *
      * @param name

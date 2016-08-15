@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as Def
      * @param queryConfig
@@ -61,10 +63,10 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             filterQuery = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_QUERY);
         }
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
+        if (isEmpty(sortStates)) {
             // Initalize Sor
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
             // Add sort.
@@ -74,25 +76,12 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#constructBean()
-     */
     @Override
     protected ProxyTarget constructBean() {
 
         return new ProxyTarget();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#loadBeans(int,
-     * int)
-     */
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
         Slice<Target> targetBeans;
@@ -131,23 +120,11 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return proxyTargetBeans;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java
-     * .util.List, java.util.List, java.util.List)
-     */
     @Override
     protected void saveBeans(final List<ProxyTarget> arg0, final List<ProxyTarget> arg1, final List<ProxyTarget> arg2) {
         // CRUD operations on Target will be done through repository methods
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#size()
-     */
     @Override
     public int size() {
         long size = 0;
@@ -184,5 +161,4 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
         return i18N;
     }
-
 }

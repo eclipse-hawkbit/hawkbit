@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +59,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as Def
      * @param queryConfig
@@ -71,7 +73,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             status = (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS);
             targetTags = (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
@@ -84,7 +86,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             pinnedDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
         }
 
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
+        if (isEmpty(sortStates)) {
             // Initalize Sor
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
             // Add sort.

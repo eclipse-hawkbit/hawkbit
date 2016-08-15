@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -52,7 +53,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as QueryDefinition
      * @param queryConfig
@@ -68,7 +69,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
         rolloutId = getRolloutId();
 
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
+        if (ArrayUtils.isEmpty(sortStates)) {
             // Initalize Sor
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort.
@@ -79,9 +80,6 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         }
     }
 
-    /**
-     * @return
-     */
     private Long getRolloutId() {
         return getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
     }

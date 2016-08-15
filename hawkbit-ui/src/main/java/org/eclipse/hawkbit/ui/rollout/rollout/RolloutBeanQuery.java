@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -34,7 +37,7 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 import com.google.common.base.Strings;
 
 /**
- * 
+ *
  * Simple implementation of generics bean query which dynamically loads a batch
  * of {@link ProxyRollout} beans.
  *
@@ -55,7 +58,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as QueryDefinition
      * @param queryConfig
@@ -71,7 +74,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
         searchText = getSearchText();
 
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
+        if (isEmpty(sortStates)) {
             // Initalize Sor
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
             // Add sort.
@@ -95,7 +98,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#loadBeans(int,
      * int)
@@ -149,7 +152,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java
      * .util.List, java.util.List, java.util.List)
@@ -164,7 +167,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#size()
      */
     @Override

@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
@@ -46,7 +45,6 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
                 afterCommit.afterCommit(() -> eventBus.post(new ActionCreatedEvent(action)));
             }
         }
-
     }
 
     @Override
@@ -63,7 +61,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         }
     }
 
-    private <T extends TenantAwareBaseEntity> Map<String, PropertyChange> getChangeSet(final DescriptorEvent event) {
+    private Map<String, PropertyChange> getChangeSet(final DescriptorEvent event) {
         final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
         return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)

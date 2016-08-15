@@ -407,9 +407,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private String getMetadataCaption(final String nameVersionStr) {
         final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION + i18n.get("caption.metadata.popup") + " "
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.get("caption.metadata.popup") + " "
                 + HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
-        caption.append(HawkbitCommonUtil.DIV_CLOSE);
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
         return caption.toString();
     }
 

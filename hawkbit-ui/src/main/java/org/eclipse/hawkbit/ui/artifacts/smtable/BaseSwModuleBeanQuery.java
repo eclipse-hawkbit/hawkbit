@@ -43,7 +43,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as Def
      * @param queryConfig
@@ -56,7 +56,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     public BaseSwModuleBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             type = (SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             if (!Strings.isNullOrEmpty(searchText)) {
