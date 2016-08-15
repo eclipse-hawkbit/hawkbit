@@ -270,7 +270,6 @@ public class SimulatorView extends VerticalLayout implements View {
                         final String deviceId = namePrefix + index;
                         beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
                                 tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
-                        spSenderService.createOrUpdateThing(tenant, deviceId);
                     }
                 }, amqpProperties.isEnabled()));
     }
