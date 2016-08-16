@@ -820,8 +820,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test different assignment results, after assign a ds")
-    public void testAlreadyAssignedTargetsToDs() {
+    @Description("Verfiy that the DistributionSetAssignmentResult not contains already assigned targets.")
+    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
         DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
 
         // create assigned DS
@@ -829,8 +829,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 dsToTargetAssigned.getVersion());
         final Target target = new JpaTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
+        final List<Target> toAssign = Lists.newArrayList(savedTarget);
         DistributionSetAssignmentResult assignmentResult = deploymentManagement
                 .assignDistributionSet(dsToTargetAssigned, toAssign);
         assertThat(assignmentResult.getAssignedEntity()).hasSize(1);

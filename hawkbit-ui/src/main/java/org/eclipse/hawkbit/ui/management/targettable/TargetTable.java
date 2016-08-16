@@ -518,7 +518,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      * Set style of target table.
      *
      */
-    @SuppressWarnings("serial")
     private void styleTargetTable() {
         setCellStyleGenerator((source, itemId, propertyId) -> null);
     }
@@ -559,7 +558,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (targetList.isEmpty()) {
-            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            final String actionDidNotWork = i18n.get("message.action.did.not.work");
             notification.displayValidationError(actionDidNotWork);
             return;
         }
