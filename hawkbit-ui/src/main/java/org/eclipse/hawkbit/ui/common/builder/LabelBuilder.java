@@ -8,14 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Simple Decorator for the label.
+ * Label Builder.
  *
  */
 public class LabelBuilder {
@@ -57,7 +54,7 @@ public class LabelBuilder {
     }
 
     /**
-     * Simple builder.
+     * Build caption label.
      * 
      * @return Label
      */
@@ -69,19 +66,7 @@ public class LabelBuilder {
     }
 
     /**
-     * Simple builder.
-     * 
-     * @return Label
-     */
-    public Label buildMessageLabel() {
-        final Label label = createLabel();
-        label.setContentMode(ContentMode.HTML);
-        label.addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
-        return label;
-    }
-
-    /**
-     * Simple builder.
+     * Build label.
      * 
      * @return Label
      */

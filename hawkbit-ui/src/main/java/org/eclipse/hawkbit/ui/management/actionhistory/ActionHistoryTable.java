@@ -576,13 +576,11 @@ public class ActionHistoryTable extends TreeTable {
         final long currentTimeMillis = System.currentTimeMillis();
 
         final HorizontalLayout hLayout = new HorizontalLayout();
-        final Label autoForceLabel = new LabelBuilder().name("").buildLabel();
+        final Label autoForceLabel = new LabelBuilder().name("").id("action.history.table.timedforceId").buildLabel();
 
         actionLabel.setValue(FontAwesome.BOLT.getHtml());
         autoForceLabel.setContentMode(ContentMode.HTML);
         autoForceLabel.setValue(FontAwesome.HISTORY.getHtml());
-        // setted Id for TimedForced.
-        autoForceLabel.setId("action.history.table.timedforceId");
 
         hLayout.addComponent(actionLabel);
         hLayout.addComponent(autoForceLabel);

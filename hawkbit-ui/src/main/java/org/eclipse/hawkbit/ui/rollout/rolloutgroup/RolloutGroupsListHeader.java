@@ -149,8 +149,8 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
-        headerCaption = new LabelBuilder().name("").buildCaptionLabel();
-        headerCaption.setId(SPUIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION);
+        headerCaption = new LabelBuilder().id(SPUIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION).name("")
+                .buildCaptionLabel();
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");

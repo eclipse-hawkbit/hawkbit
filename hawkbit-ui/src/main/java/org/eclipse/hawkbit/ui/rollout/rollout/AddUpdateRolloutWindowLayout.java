@@ -283,28 +283,27 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         populateTargetFilterQuery();
 
         noOfGroups = createNoOfGroupsField();
-        groupSizeLabel = createGroupSizeLabel();
+        groupSizeLabel = createCountLabel();
         triggerThreshold = createTriggerThreshold();
         errorThreshold = createErrorThreshold();
         description = createDescription();
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         actionTypeOptionGroupLayout.selectDefaultOption();
-        totalTargetsLabel = createTotalTargetsLabel();
+        totalTargetsLabel = createCountLabel();
         targetFilterQuery = createTargetFilterQuery();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
     }
 
-    private Label createGroupSizeLabel() {
-        final Label groupSize = new LabelBuilder().name("").buildLabel();
+    private static Label createCountLabel() {
+        final Label groupSize = new LabelBuilder().visible(false).name("").buildLabel();
         groupSize.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
         groupSize.setImmediate(true);
-        groupSize.setVisible(false);
         groupSize.setSizeUndefined();
         return groupSize;
     }
 
-    private TextArea createTargetFilterQuery() {
+    private static TextArea createTargetFilterQuery() {
         final TextArea filterField = SPUIComponentProvider.getTextArea(null, "text-area-style",
                 ValoTheme.TEXTFIELD_TINY, false, null, null,
                 SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
@@ -313,15 +312,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         filterField.setEnabled(false);
         filterField.setSizeUndefined();
         return filterField;
-    }
-
-    private Label createTotalTargetsLabel() {
-        final Label targetCountLabel = new LabelBuilder().name("").buildLabel();
-        targetCountLabel.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
-        targetCountLabel.setImmediate(true);
-        targetCountLabel.setVisible(false);
-        targetCountLabel.setSizeUndefined();
-        return targetCountLabel;
     }
 
     private OptionGroup createErrorThresholdOptionGroup() {
