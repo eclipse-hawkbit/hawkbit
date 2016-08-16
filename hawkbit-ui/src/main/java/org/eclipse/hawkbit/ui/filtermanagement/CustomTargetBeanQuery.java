@@ -9,6 +9,10 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
+import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.FILTER_BY_QUERY;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,22 +67,22 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
-            filterQuery = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_QUERY);
+        if (isNotNullOrEmpty(queryConfig)) {
+            filterQuery = (String) queryConfig.get(FILTER_BY_QUERY);
         }
-        if (isEmpty(sortStates)) {
-            // Initalize Sor
-            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
-            // Add sort.
+
+        if (!isEmpty(sortStates)) {
+
+            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
             }
         }
     }
 
     @Override
     protected ProxyTarget constructBean() {
-
         return new ProxyTarget();
     }
 
