@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -124,16 +125,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Create required UI components.
      */
     private void createRequiredComponents() {
-        distNameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
-                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
-        distNameTextField.setNullRepresentation("");
-
-        distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
-                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
-        distVersionTextField.setNullRepresentation("");
+        distNameTextField = createTextField("textfield.name", SPUIComponentIdProvider.DIST_ADD_NAME);
+        distVersionTextField = createTextField("textfield.version", SPUIComponentIdProvider.DIST_ADD_VERSION);
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
                 false, "", i18n.get("label.combobox.type"));
@@ -152,6 +145,13 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
+    }
+
+    private TextField createTextField(final String in18Key, final String id) {
+        final TextField buildTextField = new TextFieldBuilder().caption(i18n.get(in18Key)).required(true)
+                .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+        buildTextField.setNullRepresentation("");
+        return buildTextField;
     }
 
     /**

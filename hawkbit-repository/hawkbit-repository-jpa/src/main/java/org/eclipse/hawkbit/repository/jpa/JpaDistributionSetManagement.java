@@ -483,7 +483,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (distributionSetMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
-        
+
         touch(metadata.getDistributionSet());
         return distributionSetMetadataRepository.save(metadata);
     }
@@ -515,7 +515,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         findOne(metadata.getDistributionSet(), metadata.getKey());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        touch(metadata.getDistributionSet());;
+        touch(metadata.getDistributionSet());
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -528,8 +528,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     /**
-     * Method to get the latest distribution set based on ds ID after the metadata changes for that distribution set. 
-     * @param distributionSet Distribution set
+     * Method to get the latest distribution set based on ds ID after the
+     * metadata changes for that distribution set.
+     * 
+     * @param distributionSet
+     *            Distribution set
      */
     private void touch(final DistributionSet distributionSet) {
         final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet.getId());
@@ -552,7 +555,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId) {
-        return new ArrayList<DistributionSetMetadata>(distributionSetMetadataRepository
+        return new ArrayList<>(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
                         distributionSetId)));

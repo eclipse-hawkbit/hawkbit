@@ -271,10 +271,6 @@ public final class SPUILabelDefinitions {
     /**
      * Text area and text field max allowed length.
      */
-    public static final int TEXT_FIELD_MAX_LENGTH = 64;
-    /**
-     * Text area and text field max allowed length.
-     */
     public static final int TEXT_AREA_MAX_LENGTH = 512;
 
     /**

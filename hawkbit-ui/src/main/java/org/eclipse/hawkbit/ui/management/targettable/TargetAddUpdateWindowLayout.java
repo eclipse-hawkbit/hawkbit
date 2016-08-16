@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -82,15 +83,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void createRequiredComponents() {
-        /* Textfield for controller Id */
-        controllerIDTextField = SPUIComponentProvider.getTextField(i18n.get("prompt.target.id"), "",
-                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("prompt.target.id"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        controllerIDTextField.setId(SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        /* Textfield for target name */
-        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
-                false, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponentIdProvider.TARGET_ADD_NAME);
+        controllerIDTextField = createTextField("prompt.target.id", SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        nameTextField = createTextField("textfield.name", SPUIComponentIdProvider.TARGET_ADD_NAME);
+        nameTextField.setRequired(false);
 
         /* Textarea for target description */
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
@@ -100,12 +95,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
     }
 
-    private void buildLayout() {
+    private TextField createTextField(final String in18Key, final String id) {
+        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+                .immediate(true).id(id).buildTextField();
+    }
 
-        /*
-         * The main layout of the window contains mandatory info, textboxes
-         * (controller Id, name & description) and action buttons layout
-         */
+    private void buildLayout() {
         setSizeUndefined();
         formLayout = new FormLayout();
         formLayout.addComponent(controllerIDTextField);

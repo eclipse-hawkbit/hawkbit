@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -152,10 +153,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         colorLabel = new LabelBuilder().name(i18n.get("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME, true, "", i18n.get("textfield.name"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
+        tagName = new TextFieldBuilder().caption(i18n.get("textfield.name"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
+                .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
+                .buildTextField();
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),

@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
-import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -54,34 +52,6 @@ public final class SPUIComponentProvider {
      */
     private SPUIComponentProvider() {
 
-    }
-
-    /**
-     * Get Label UI component.
-     *
-     * @param caption
-     *            set the caption of the textfield
-     * @param style
-     *            set style
-     * @param styleName
-     *            add style
-     * @param required
-     *            to set field as mandatory
-     * @param data
-     *            component data
-     * @param prompt
-     *            prompt user for input
-     * @param immediate
-     *            set component's immediate mode specified mode
-     * @param maxLengthAllowed
-     *            maximum characters allowed
-     * @return TextField text field
-     */
-    public static TextField getTextField(final String caption, final String style, final String styleName,
-            final boolean required, final String data, final String prompt, final boolean immediate,
-            final int maxLengthAllowed) {
-        return SPUITextFieldDecorator.decorate(caption, style, styleName, required, data, prompt, immediate,
-                maxLengthAllowed);
     }
 
     /**

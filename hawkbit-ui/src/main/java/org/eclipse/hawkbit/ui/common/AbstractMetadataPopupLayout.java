@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
@@ -206,9 +207,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextField createKeyTextField() {
-        final TextField keyField = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
-                ValoTheme.TEXTFIELD_TINY, true, "", i18n.get("textfield.key"), true, 128);
-        keyField.setId(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID);
+        final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
+                .prompt(i18n.get("textfield.key")).immediate(true).id(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID)
+                .maxLengthAllowed(128).buildTextField();
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");

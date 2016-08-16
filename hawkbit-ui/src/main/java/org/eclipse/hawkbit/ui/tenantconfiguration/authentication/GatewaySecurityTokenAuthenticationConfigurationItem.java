@@ -14,9 +14,9 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.server.FontAwesome;
@@ -46,12 +46,12 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     private Label gatewayTokenkeyLabel;
 
-    private boolean configurationEnabled = false;
-    private boolean configurationEnabledChange = false;
+    private boolean configurationEnabled;
+    private boolean configurationEnabledChange;
 
-    private boolean keyNameChanged = false;
+    private boolean keyNameChanged;
 
-    private boolean keyChanged = false;
+    private boolean keyChanged;
 
     private VerticalLayout detailLayout;
 
@@ -75,9 +75,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
         detailLayout = new VerticalLayout();
         detailLayout.setImmediate(true);
-        gatewayTokenNameTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                "", true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        gatewayTokenNameTextField.setImmediate(true);
+        gatewayTokenNameTextField = new TextFieldBuilder().immediate(true).buildTextField();
         // hide text field until we support multiple gateway tokens for a tenan
         gatewayTokenNameTextField.setVisible(false);
         gatewayTokenNameTextField.addTextChangeListener(event -> doKeyNameChanged());

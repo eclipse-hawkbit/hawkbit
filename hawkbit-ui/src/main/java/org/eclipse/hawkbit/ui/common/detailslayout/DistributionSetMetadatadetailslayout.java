@@ -48,7 +48,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final String VIEW = "view";
 
-    private DistributionSetManagement distributionSetManagement;
+    private transient DistributionSetManagement distributionSetManagement;
 
     private DsMetadataPopupLayout dsMetadataPopupLayout;
 

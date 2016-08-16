@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
@@ -248,29 +249,27 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);
 
-            final TextField sha1 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            sha1.setId(swNameVersion + "/" + customFile.getFileName() + "/sha1");
+            final TextField sha1 = createTextField(swNameVersion + "/" + customFile.getFileName() + "/sha1");
 
-            final TextField md5 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            md5.setId(swNameVersion + "/" + customFile.getFileName() + "/md5");
+            final TextField md5 = createTextField(swNameVersion + "/" + customFile.getFileName() + "/md5");
 
-            final TextField customFileName = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
-                    false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            customFileName.setId(swNameVersion + "/" + customFile.getFileName() + "/customFileName");
+            createTextField(swNameVersion + "/" + customFile.getFileName() + "/customFileName");
+
             newItem.getItemProperty(SHA1_CHECKSUM).setValue(sha1);
             newItem.getItemProperty(MD5_CHECKSUM).setValue(md5);
             newItem.getItemProperty(CUSTOM_FILE).setValue(customFile);
         }
     }
 
+    private static TextField createTextField(final String id) {
+        return new TextFieldBuilder().immediate(true).id(id).buildTextField();
+    }
+
     private void addFileNameLayout(final Item newItem, final String baseSoftwareModuleNameVersion,
             final String customFileName, final String itemId) {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        final TextField fileNameTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
-                false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        fileNameTextField.setId(baseSoftwareModuleNameVersion + "/" + customFileName + "/customFileName");
+        final TextField fileNameTextField = createTextField(
+                baseSoftwareModuleNameVersion + "/" + customFileName + "/customFileName");
         fileNameTextField.setData(baseSoftwareModuleNameVersion + "/" + customFileName);
         fileNameTextField.setValue(customFileName);
 

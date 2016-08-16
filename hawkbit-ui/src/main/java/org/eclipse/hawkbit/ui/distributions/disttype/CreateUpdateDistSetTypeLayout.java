@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
@@ -45,6 +46,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -84,15 +86,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
         super.createRequiredComponents();
 
-        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_NAME, true, "",
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        tagName.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
+        tagName = createTextField("textfield.name", SPUIDefinitions.DIST_SET_TYPE_NAME,
+                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
 
-        typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY, true, "", i18n.get("textfield.key"),
-                true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        typeKey.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
+        typeKey = createTextField("textfield.key", SPUIDefinitions.DIST_SET_TYPE_KEY,
+                SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC, false, "",
@@ -100,6 +98,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         tagDesc.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
+    }
+
+    private TextField createTextField(final String in18Key, final String id, final String styleName) {
+        return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
+                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
     }
 
     @Override

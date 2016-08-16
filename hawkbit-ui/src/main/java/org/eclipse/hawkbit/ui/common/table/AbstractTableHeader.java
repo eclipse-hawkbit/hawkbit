@@ -13,20 +13,19 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -87,7 +86,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private void createComponents() {
         headerCaption = createHeaderCaption();
-        searchField = createSearchField();
+        searchField = new TextFieldBuilder().id(getSearchBoxId()).createSearchField(event -> searchBy(event.getText()));
 
         searchResetIcon = createSearchResetIcon();
 
@@ -205,18 +204,6 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private Label createHeaderCaption() {
         return new LabelBuilder().name(getHeaderCaption()).buildCaptionLabel();
-    }
-
-    private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("", "filter-box", "text-style filter-box-hide",
-                false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        textField.setId(getSearchBoxId());
-        textField.setWidth(100.0f, Unit.PERCENTAGE);
-        textField.addTextChangeListener(event -> searchBy(event.getText()));
-        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        // 1 seconds timeout.
-        textField.setTextChangeTimeout(1000);
-        return textField;
     }
 
     private SPUIButton createSearchResetIcon() {

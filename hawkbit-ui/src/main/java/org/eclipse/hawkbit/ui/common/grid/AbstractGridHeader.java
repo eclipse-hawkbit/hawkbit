@@ -8,16 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.google.common.base.Strings;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -61,7 +60,8 @@ public abstract class AbstractGridHeader extends VerticalLayout {
     private void createComponents() {
         headerCaptionLayout = getHeaderCaptionLayout();
         if (isRollout()) {
-            searchField = createSearchField();
+            searchField = new TextFieldBuilder().id(getSearchBoxId())
+                    .createSearchField(event -> searchBy(event.getText()));
             searchResetIcon = createSearchResetIcon();
             addButton = createAddButton();
         }
@@ -92,24 +92,13 @@ public abstract class AbstractGridHeader extends VerticalLayout {
         addStyleName("no-border-bottom");
     }
 
-    private HorizontalLayout createHeaderFilterIconLayout() {
+    private static HorizontalLayout createHeaderFilterIconLayout() {
         final HorizontalLayout titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         titleFilterIconsLayout.setSpacing(false);
         titleFilterIconsLayout.setMargin(false);
         titleFilterIconsLayout.setSizeFull();
         return titleFilterIconsLayout;
-    }
-
-    private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("", "filter-box", "text-style filter-box-hide",
-                false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        textField.setId(getSearchBoxId());
-        textField.setWidth(100.0f, Unit.PERCENTAGE);
-        textField.addTextChangeListener(event -> searchBy(event.getText()));
-        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        textField.setTextChangeTimeout(1000);
-        return textField;
     }
 
     private SPUIButton createSearchResetIcon() {

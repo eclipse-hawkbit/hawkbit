@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
@@ -262,9 +263,17 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return new LabelBuilder().name(i18n.get(key)).buildLabel();
     }
 
-    private TextField getTextfield(final String key) {
-        return SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get(key), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+    private TextField createTextField(final String in18Key, final String id) {
+        return new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+    }
+
+    private TextField createIntegerTextField(final String in18Key, final String id) {
+        final TextField textField = createTextField(in18Key, id);
+        textField.setNullRepresentation("");
+        textField.setConverter(new StringToIntegerConverter());
+        textField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
+        textField.setSizeUndefined();
+        return textField;
     }
 
     private static Label getPercentHintLabel() {
@@ -514,39 +523,26 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createErrorThreshold() {
-        final TextField errorField = getTextfield("prompt.error.threshold");
-        errorField.setNullRepresentation("");
+        final TextField errorField = createIntegerTextField("prompt.error.threshold",
+                SPUIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
         errorField.addValidator(new ThresholdFieldValidator());
-        errorField.setConverter(new StringToIntegerConverter());
-        errorField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
-        errorField.setId(SPUIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
         errorField.setMaxLength(7);
-        errorField.setSizeUndefined();
         return errorField;
     }
 
     private TextField createTriggerThreshold() {
-        final TextField thresholdField = getTextfield("prompt.tigger.threshold");
-        thresholdField.setId(SPUIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
-        thresholdField.setNullRepresentation("");
+        final TextField thresholdField = createIntegerTextField("prompt.tigger.threshold",
+                SPUIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
         thresholdField.addValidator(new ThresholdFieldValidator());
-        thresholdField.setConverter(new StringToIntegerConverter());
-        thresholdField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
-        thresholdField.setSizeUndefined();
-        thresholdField.setMaxLength(3);
         return thresholdField;
     }
 
     private TextField createNoOfGroupsField() {
-        final TextField noOfGroupsField = getTextfield("prompt.number.of.groups");
-        noOfGroupsField.setId(SPUIComponentIdProvider.ROLLOUT_NO_OF_GROUPS_ID);
+        final TextField noOfGroupsField = createIntegerTextField("prompt.number.of.groups",
+                SPUIComponentIdProvider.ROLLOUT_NO_OF_GROUPS_ID);
         noOfGroupsField.addValidator(new GroupNumberValidator());
-        noOfGroupsField.setSizeUndefined();
         noOfGroupsField.setMaxLength(3);
-        noOfGroupsField.setConverter(new StringToIntegerConverter());
-        noOfGroupsField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         noOfGroupsField.addValueChangeListener(this::onGroupNumberChange);
-        noOfGroupsField.setNullRepresentation("");
         return noOfGroupsField;
     }
 
@@ -584,8 +580,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createRolloutNameField() {
-        final TextField rolloutNameField = getTextfield("textfield.name");
-        rolloutNameField.setId(SPUIComponentIdProvider.ROLLOUT_NAME_FIELD_ID);
+        final TextField rolloutNameField = createTextField("textfield.name",
+                SPUIComponentIdProvider.ROLLOUT_NAME_FIELD_ID);
         rolloutNameField.setSizeUndefined();
         return rolloutNameField;
     }
