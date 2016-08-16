@@ -34,7 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent.PropertyChange;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
@@ -299,8 +299,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
-        final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper
-                .getChangeSet(JpaDistributionSet.class, descriptorEvent);
+        final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(JpaDistributionSet.class,
+                descriptorEvent);
         EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
 
         if (changeSet.containsKey(DELETED_PROPERTY)) {
