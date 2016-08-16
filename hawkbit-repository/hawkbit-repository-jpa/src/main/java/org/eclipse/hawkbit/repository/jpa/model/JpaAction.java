@@ -28,6 +28,10 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.eclipse.hawkbit.repository.eventbus.event.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.ActionPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -35,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA implementation of {@link Action}.
@@ -49,7 +54,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action {
+public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -169,6 +174,22 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public String toString() {
         return "Action [distributionSet=" + distributionSet + ", getId()=" + getId() + "]";
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new ActionCreatedEvent(this));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new ActionPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(Action.class, descriptorEvent)));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        // there is no action deletion
     }
 
 }

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
@@ -19,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -77,21 +75,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
                 entityFactory);
 
         super.init();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-            final DistributionSetMetadata dsMetadata = event.getDistributionSetMetadata();
-            if (dsMetadata != null && isDistributionSetSelected(dsMetadata.getDistributionSet())) {
-                if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA) {
-                    dsMetadataTable.createMetadata(event.getDistributionSetMetadata().getKey());
-                } else if (event
-                        .getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA) {
-                    dsMetadataTable.deleteMetadata(event.getDistributionSetMetadata().getKey());
-                }
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -210,18 +193,18 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         return true;
     }
 
-
     private boolean isDistributionSetSelected(final DistributionSet ds) {
-        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
-                .getLastSelectedDistribution().get() : null;
-        return ds!=null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
+        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent()
+                ? managementUIState.getLastSelectedDistribution().get() : null;
+        return ds != null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
                 && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+        final DistributionSet ds = distributionSetManagement
+                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
 }

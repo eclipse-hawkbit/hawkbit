@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.event;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+
 /**
  * 
  * Metadata Events.
@@ -18,21 +19,21 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 public class MetadataEvent {
 
     public enum MetadataUIEvent {
-        CREATE_DISTRIBUTION_SET_METADATA, DELETE_DISTRIBUTION_SET_METADATA, DELETE_SOFTWARE_MODULE_METADATA, CREATE_SOFTWARE_MODULE_METADATA;
+        DELETE_SOFTWARE_MODULE_METADATA, CREATE_SOFTWARE_MODULE_METADATA;
     }
 
-    private MetadataUIEvent metadataUIEvent;
+    private final MetadataUIEvent metadataUIEvent;
 
     private DistributionSetMetadata distributionSetMetadata;
 
     private SoftwareModuleMetadata softwareModuleMetadata;
 
-    public MetadataEvent(MetadataUIEvent metadataUIEvent, final DistributionSetMetadata distributionSetMetadata) {
+    public MetadataEvent(final MetadataUIEvent metadataUIEvent, final DistributionSetMetadata distributionSetMetadata) {
         this.metadataUIEvent = metadataUIEvent;
         this.distributionSetMetadata = distributionSetMetadata;
     }
 
-    public MetadataEvent(MetadataUIEvent metadataUIEvent, final SoftwareModuleMetadata softwareModuleMetadata) {
+    public MetadataEvent(final MetadataUIEvent metadataUIEvent, final SoftwareModuleMetadata softwareModuleMetadata) {
         this.metadataUIEvent = metadataUIEvent;
         this.softwareModuleMetadata = softwareModuleMetadata;
     }

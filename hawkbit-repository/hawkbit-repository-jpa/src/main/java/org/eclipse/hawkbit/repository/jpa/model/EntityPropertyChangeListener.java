@@ -8,79 +8,47 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
-import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-
-import com.google.common.eventbus.EventBus;
 
 /**
- * Listens to change in property values of an entity.
+ * Listens to change in property values of an entity and calls the corresponding
+ * {@link EventAwareEntity}.
  *
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
     @Override
     public void postInsert(final DescriptorEvent event) {
-        if (event.getObject().getClass().equals(Action.class)) {
-            final Action action = (Action) event.getObject();
-            if (action.getRollout() != null) {
-                final EventBus eventBus = getEventBus();
-                final AfterTransactionCommitExecutor afterCommit = getAfterTransactionCommmitExecutor();
-                afterCommit.afterCommit(() -> eventBus.post(new ActionCreatedEvent(action)));
-            }
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireCreateEvent(event));
         }
-
     }
 
     @Override
     public void postUpdate(final DescriptorEvent event) {
-        if (event.getObject().getClass().equals(JpaAction.class)) {
-            getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
-                    new ActionPropertyChangeEvent((Action) event.getObject(), getChangeSet(Action.class, event))));
-        } else if (event.getObject().getClass().equals(JpaRollout.class)) {
-            getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
-                    new RolloutPropertyChangeEvent((Rollout) event.getObject(), getChangeSet(Rollout.class, event))));
-        } else if (event.getObject().getClass().equals(JpaRolloutGroup.class)) {
-            getAfterTransactionCommmitExecutor().afterCommit(
-                    () -> getEventBus().post(new RolloutGroupPropertyChangeEvent((RolloutGroup) event.getObject(),
-                            getChangeSet(RolloutGroup.class, event))));
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireUpdateEvent(event));
         }
     }
 
-    private <T extends TenantAwareBaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
-            final Class<T> clazz, final DescriptorEvent event) {
-        final T rolloutGroup = clazz.cast(event.getObject());
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
-                .map(record -> (DirectToFieldChangeRecord) record)
-                .collect(Collectors.toMap(record -> record.getAttribute(),
-                        record -> new AbstractPropertyChangeEvent<T>(rolloutGroup, null).new Values(
-                                record.getOldValue(), record.getNewValue())));
+    @Override
+    public void postDelete(final DescriptorEvent event) {
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
+        }
     }
 
-    private AfterTransactionCommitExecutor getAfterTransactionCommmitExecutor() {
-        return AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit();
+    private boolean isEventAwareEntity(final Object object) {
+        return object instanceof EventAwareEntity;
     }
 
-    private EventBus getEventBus() {
-        return EventBusHolder.getInstance().getEventBus();
+    private void doNotifiy(final Runnable runnable) {
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
     }
+
 }

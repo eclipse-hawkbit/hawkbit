@@ -17,11 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -142,6 +143,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             onTargetInfoUpdateEvents((List<TargetInfoUpdateEvent>) events);
         } else if (TargetDeletedEvent.class.isInstance(firstEvent)) {
             onTargetDeletedEvent((List<TargetDeletedEvent>) events);
+        } else if(TargetUpdatedEvent.class.isInstance(firstEvent)){
+            onTargetUpdateEvents((List<TargetUpdatedEvent>) events);
         }
     }
 
@@ -809,7 +812,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private void refreshTargets() {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final int size = targetContainer.size();
-        if (size < SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
+        if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
             refreshTablecontainer();
         } else {
             // If table is not refreshed , explicitly target total count and
@@ -829,10 +832,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             final TargetIdName targetIdName) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
-        item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
-                .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+        if (targetInfo != null) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).setValue(
+                    HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
+        }
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
@@ -879,6 +884,35 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
+
+    private void onTargetUpdateEvents(List<TargetUpdatedEvent> events) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shoulTargetsUpdated = false;
+        Target lastSelectedTarget = null;
+        for (final TargetUpdatedEvent targetUpdatedEvent : events) {
+            Target target = targetUpdatedEvent.getEntity();
+            final TargetIdName targetIdName = target.getTargetIdName();
+            if (Filters.or(getTargetTableFilters(target)).doFilter()) {
+                shoulTargetsUpdated = true;
+            } else {
+                if (visibleItemIds.contains(targetIdName)) {
+                    updateVisibleItemOnEvent(null, target, targetIdName);
+                }
+            }
+            if (isLastSelectedTarget(targetIdName)) {
+                lastSelectedTarget = target;
+            }
+        }
+        if (shoulTargetsUpdated) {
+            refreshTargets();
+        }
+        if (lastSelectedTarget != null) {
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, lastSelectedTarget));
+        }
+    }
+
+    
+    
     private void onTargetCreatedEvents() {
         refreshTargets();
     }
@@ -954,8 +988,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
                 noTagClicked, pinnedDistId);
 
-        if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+        if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
         }
     }
 
