@@ -857,7 +857,7 @@ public final class SPUIDefinitions {
      * truncates it. This protects to endless scroll to very high page numbers
      * which is very in performant.
      */
-    public static final int MAX_TARGET_TABLE_ENTRIES = 5000;
+    public static final int MAX_TABLE_ENTRIES = 5000;
 
     /**
      * New software module set type add icon id.

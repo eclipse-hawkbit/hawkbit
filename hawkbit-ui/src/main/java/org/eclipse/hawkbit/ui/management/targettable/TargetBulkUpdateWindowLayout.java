@@ -53,6 +53,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -175,7 +176,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private BulkUploadHandler getBulkUploadHandler() {
         final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
-                deploymentManagement, i18n);
+                deploymentManagement, i18n, UI.getCurrent());
         bulkUploadHandler.buildLayout();
         bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
         return bulkUploadHandler;

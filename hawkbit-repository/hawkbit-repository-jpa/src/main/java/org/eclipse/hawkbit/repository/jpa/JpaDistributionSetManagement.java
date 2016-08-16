@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -101,6 +103,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
@@ -193,6 +198,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
+
+        Arrays.stream(distributionSetIDs)
+                .forEach(dsId -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId)));
     }
 
     @Override
@@ -475,11 +483,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (distributionSetMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
-        // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
-        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
+        
+        touch(metadata.getDistributionSet());
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -494,7 +499,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         for (final JpaDistributionSetMetadata distributionSetMetadata : metadata) {
             checkAndThrowAlreadyIfDistributionSetMetadataExists(distributionSetMetadata.getId());
         }
-        metadata.forEach(m -> entityManager.merge((JpaDistributionSet) m.getDistributionSet()).setLastModifiedAt(0L));
+        metadata.forEach(m -> touch(m.getDistributionSet()));
 
         return new ArrayList<>(
                 (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
@@ -510,7 +515,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         findOne(metadata.getDistributionSet(), metadata.getKey());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
+        touch(metadata.getDistributionSet());;
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -518,18 +523,39 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteDistributionSetMetadata(final DistributionSet distributionSet, final String key) {
+        touch(distributionSet);
         distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
+    }
+
+    /**
+     * Method to get the latest distribution set based on ds ID after the metadata changes for that distribution set. 
+     * @param distributionSet Distribution set
+     */
+    private void touch(final DistributionSet distributionSet) {
+        final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet.getId());
+        // merge base distribution set so optLockRevision gets updated and audit
+        // log written because
+        // modifying metadata is modifying the base distribution set itself for
+        // auditing purposes.
+        entityManager.merge((JpaDistributionSet) latestDistributionSet).setLastModifiedAt(0L);
     }
 
     @Override
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
             final Pageable pageable) {
-
         return convertMdPage(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
                         distributionSetId), pageable),
                 pageable);
+    }
+
+    @Override
+    public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId) {
+        return new ArrayList<DistributionSetMetadata>(distributionSetMetadataRepository
+                .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
+                        root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
+                        distributionSetId)));
     }
 
     @Override

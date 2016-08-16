@@ -622,6 +622,16 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
+    public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
+        return new ArrayList<>(
+                softwareModuleMetadataRepository
+                        .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query,
+                                cb) -> cb.and(cb.equal(
+                                        root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
+                                        softwareModuleId))));
+    }
+
+    @Override
     public SoftwareModuleMetadata findSoftwareModuleMetadata(final SoftwareModule softwareModule, final String key) {
         return findSoftwareModuleMetadata(new SwMetadataCompositeKey(softwareModule, key));
     }

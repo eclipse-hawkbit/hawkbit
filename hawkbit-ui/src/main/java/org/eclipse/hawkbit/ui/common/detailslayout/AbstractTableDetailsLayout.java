@@ -222,7 +222,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
-        populateMetadataDetails();
     }
 
     protected void populateLog() {

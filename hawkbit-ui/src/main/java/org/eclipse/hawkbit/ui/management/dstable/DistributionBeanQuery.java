@@ -41,7 +41,7 @@ import com.google.common.base.Strings;
 public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     private static final long serialVersionUID = 5862679853949173536L;
-    private Sort sort = new Sort(Direction.ASC, "name", "version");
+    private Sort sort = new Sort(Direction.ASC, "createdAt");
     private Collection<String> distributionTags;
     private String searchText;
     private String pinnedControllerId;

@@ -18,13 +18,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 import com.vaadin.server.Page;
+import com.vaadin.shared.Connector;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
 /**
- * Default handler for SP UI.
+ * Default handler for Hawkbit UI.
  */
 public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
@@ -36,26 +40,36 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     @Override
     public void error(final ErrorEvent event) {
 
-        final Optional<Page> originError = getPageOriginError(event);
-
-        if (originError.isPresent()) {
-            final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
-            message.show(originError.get());
+        final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
+        if (event instanceof ConnectorErrorEvent) {
+            final Connector connector = ((ConnectorErrorEvent) event).getConnector();
+            if (connector instanceof UI) {
+                final UI uiInstance = (UI) connector;
+                uiInstance.access(() -> message.show(uiInstance.getPage()));
+                return;
+            }
         }
+
+        final Optional<Page> originError = getPageOriginError(event);
+        if (originError.isPresent()) {
+            message.show(originError.get());
+            return;
+        }
+
+        HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
     }
 
     private static Throwable getRootExceptionFrom(final ErrorEvent event) {
-
         return getRootCauseOf(event.getThrowable());
     }
 
-    private static Throwable getRootCauseOf(final Throwable exception) {
+    private static Throwable getRootCauseOf(final Throwable ex) {
 
-        if (exception.getCause() != null) {
-            return getRootCauseOf(exception.getCause());
+        if (ex.getCause() != null) {
+            return getRootCauseOf(ex.getCause());
         }
 
-        return exception;
+        return ex;
     }
 
     private static Optional<Page> getPageOriginError(final ErrorEvent event) {
@@ -66,18 +80,21 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
             return Optional.fromNullable(errorOrigin.getUI().getPage());
         }
 
-        return Optional.of(Page.getCurrent());
+        return Optional.absent();
     }
 
-    protected HawkbitErrorNotificationMessage buildNotification(final Throwable exception) {
-        LOG.error("Error in UI: ", exception);
-        return createHawkbitErrorNotificationMessage(exception);
-    }
-
-    protected HawkbitErrorNotificationMessage createHawkbitErrorNotificationMessage(final Throwable exception) {
+    /**
+     * Method to build a notification based on an exception.
+     * 
+     * @param ex
+     *            the throwable
+     * @return a hawkbit error notification message
+     */
+    protected HawkbitErrorNotificationMessage buildNotification(final Throwable ex) {
+        LOG.error("Error in UI: ", ex);
         final I18N i18n = SpringContextHelper.getBean(I18N.class);
         return new HawkbitErrorNotificationMessage(STYLE, i18n.get("caption.error"),
-                i18n.get("message.error.temp", exception.getClass().getSimpleName()), false);
+                i18n.get("message.error.temp", ex.getClass().getSimpleName()), false);
     }
 
 }

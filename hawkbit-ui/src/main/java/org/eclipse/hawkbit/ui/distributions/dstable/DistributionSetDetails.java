@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -29,7 +28,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleAssignmentDiscardEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -96,21 +94,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private VerticalLayout tagsLayout;
 
     private final Map<String, StringBuilder> assignedSWModule = new HashMap<>();
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-            final DistributionSetMetadata dsMetadata = event.getDistributionSetMetadata();
-            if (dsMetadata != null && isDistributionSetSelected(dsMetadata.getDistributionSet())) {
-                if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA) {
-                    dsMetadataTable.createMetadata(event.getDistributionSetMetadata().getKey());
-                } else if (event
-                        .getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA) {
-                    dsMetadataTable.deleteMetadata(event.getDistributionSetMetadata().getKey());
-                }
-            }
-        });
-    }
 
     /**
      * softwareLayout Initialize the component.

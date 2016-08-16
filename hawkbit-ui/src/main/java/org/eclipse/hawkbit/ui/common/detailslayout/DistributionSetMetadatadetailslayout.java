@@ -48,7 +48,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final String VIEW = "view";
 
-    private transient DistributionSetManagement distributionSetManagement;
+    private DistributionSetManagement distributionSetManagement;
 
     private DsMetadataPopupLayout dsMetadataPopupLayout;
 
@@ -61,11 +61,12 @@ public class DistributionSetMetadatadetailslayout extends Table {
     private Long selectedDistSetId;
 
     /**
-     *
+     * 
      * @param i18n
      * @param permissionChecker
      * @param distributionSetManagement
      * @param dsMetadataPopupLayout
+     * @param entityFactory
      */
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
             final DistributionSetManagement distributionSetManagement,
@@ -90,32 +91,12 @@ public class DistributionSetMetadatadetailslayout extends Table {
             return;
         }
         selectedDistSetId = distributionSet.getId();
-        final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
+        final List<DistributionSetMetadata> dsMetadataList = distributionSetManagement
+                .findDistributionSetMetadataByDistributionSetId(selectedDistSetId);
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
         }
 
-    }
-
-    /**
-     * Create metadata.
-     *
-     * @param metadataKeyName
-     */
-    public void createMetadata(final String metadataKeyName) {
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-        final Item item = metadataContainer.addItem(metadataKeyName);
-        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
-    }
-
-    /**
-     * Delete metadata.
-     *
-     * @param metadataKeyName
-     */
-    public void deleteMetadata(final String metadataKeyName) {
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-        metadataContainer.removeItem(metadataKeyName);
     }
 
     private void createDSMetadataTable() {

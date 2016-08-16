@@ -282,6 +282,16 @@ public interface DistributionSetManagement {
             @NotNull Pageable pageable);
 
     /**
+     * Finds all meta data by the given distribution set id.
+     * 
+     * @param distributionSetId
+     *            the distribution set id to retrieve the meta data from
+     * @return list of distributionSetMetadata for a given distribution set Id.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
+
+    /**
      * finds all meta data by the given distribution set id.
      *
      * @param distributionSetId

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,8 +34,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -45,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
@@ -61,8 +69,12 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet {
+public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
     private static final long serialVersionUID = 1L;
+
+    private static final String COMPLETE_PROPERTY = "complete";
+
+    private static final String DELETED_PROPERTY = "deleted";
 
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
@@ -277,6 +289,32 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public boolean isComplete() {
         return complete;
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(this));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+
+        final Map<String, AbstractPropertyChangeEvent<JpaDistributionSet>.Values> changeSet = EntityPropertyChangeHelper
+                .getChangeSet(JpaDistributionSet.class, descriptorEvent);
+        EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
+
+        if (changeSet.containsKey(DELETED_PROPERTY)) {
+            final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
+            if (newDeleted) {
+                EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
+            }
+        }
+
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
     }
 
 }
