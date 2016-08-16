@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -215,11 +216,10 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         if (!hasUnsavedActions()) {
             return;
         }
-        unsavedActionsWindow = SPUIComponentProvider.getWindow(getUnsavedActionsWindowCaption(),
-                SPUIComponentIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
+        unsavedActionsWindow = new WindowBuilder(SPUIDefinitions.CONFIRMATION_WINDOW)
+                .caption(getUnsavedActionsWindowCaption()).id(SPUIComponentIdProvider.CONFIRMATION_POPUP_ID)
+                .content(getUnsavedActionsWindowContent()).buildWindow();
         unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
-        unsavedActionsWindow.setContent(getUnsavedActionsWindowContent());
-        unsavedActionsWindow.setId(SPUIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(unsavedActionsWindow);
     }
 

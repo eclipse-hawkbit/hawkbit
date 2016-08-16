@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -181,8 +181,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         setCompositionRoot(formLayout);
 
-        window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), null, null, formLayout, i18n);
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this)
+                .saveButtonClickListener(event -> saveOrUpdate()).layout(formLayout).i18n(i18n)
+                .buildCommonDialogWindow();
+
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
 
         nameTextField.setEnabled(!editSwModule);

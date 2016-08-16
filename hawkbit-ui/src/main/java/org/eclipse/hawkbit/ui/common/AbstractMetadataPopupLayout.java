@@ -16,10 +16,10 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -115,9 +115,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     public CommonDialogWindow getWindow(final E entity, final M metaData) {
         selectedEntity = entity;
         final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
-        metadataWindow = SPUIWindowDecorator.getWindow(getMetadataCaption(nameVersion), null,
-                SPUIDefinitions.CUSTOM_METADATA_WINDOW, this, event -> onSave(), event -> onCancel(), null, mainLayout,
-                i18n);
+
+        metadataWindow = new WindowBuilder(SPUIDefinitions.CUSTOM_METADATA_WINDOW)
+                .caption(getMetadataCaption(nameVersion)).content(this).saveButtonClickListener(event -> onSave())
+                .cancelButtonClickListener(event -> onCancel()).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
+
         metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);

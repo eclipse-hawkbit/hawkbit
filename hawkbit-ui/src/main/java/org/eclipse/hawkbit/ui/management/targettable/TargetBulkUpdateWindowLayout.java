@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -357,10 +358,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     public Window getWindow() {
         managementUIState.setBulkUploadWindowMinimised(false);
-        bulkUploadWindow = SPUIComponentProvider.getWindow("", null, SPUIDefinitions.CREATE_UPDATE_WINDOW);
+
+        bulkUploadWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption("").content(this)
+                .buildWindow();
         bulkUploadWindow.addStyleName("bulk-upload-window");
         bulkUploadWindow.setImmediate(true);
-        bulkUploadWindow.setContent(this);
         if (isNoBulkUploadInProgress()) {
             bulkUploader.getUpload().setEnabled(true);
         }

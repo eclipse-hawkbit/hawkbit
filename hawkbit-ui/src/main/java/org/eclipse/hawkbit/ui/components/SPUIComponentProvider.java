@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUILabelDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
@@ -42,7 +41,6 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -132,21 +130,6 @@ public final class SPUIComponentProvider {
      */
     public static Label getLabel(final String name, final String type) {
         return SPUILabelDecorator.getDeocratedLabel(name, type);
-    }
-
-    /**
-     * Get window component.
-     *
-     * @param caption
-     *            window caption
-     * @param id
-     *            window id
-     * @param type
-     *            type of window
-     * @return Window
-     */
-    public static Window getWindow(final String caption, final String id, final String type) {
-        return SPUIWindowDecorator.getDeocratedWindow(caption, id, type);
     }
 
     /**

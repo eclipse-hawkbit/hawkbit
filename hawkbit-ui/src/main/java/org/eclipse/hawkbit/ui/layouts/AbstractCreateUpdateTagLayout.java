@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -460,8 +460,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     public CommonDialogWindow getWindow() {
         reset();
-        window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
-                this::save, cancleEvent -> discard(), null, mainLayout, i18n);
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
+                .saveButtonClickListener(this::save).cancelButtonClickListener(event -> discard()).layout(mainLayout)
+                .i18n(i18n).buildCommonDialogWindow();
+
         return window;
     }
 
