@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -65,17 +68,17 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
      */
     public RolloutGroupBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortPropertyIds, final boolean[] sortStates) {
+
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
         rolloutId = getRolloutId();
 
-        if (ArrayUtils.isEmpty(sortStates)) {
-            // Initalize Sor
-            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
-            // Add sort.
+        if (!isEmpty(sortStates)) {
+
+            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortPropertyIds[0]);
+
             for (int targetId = 1; targetId < sortPropertyIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC,
-                        (String) sortPropertyIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortPropertyIds[targetId]));
             }
         }
     }
