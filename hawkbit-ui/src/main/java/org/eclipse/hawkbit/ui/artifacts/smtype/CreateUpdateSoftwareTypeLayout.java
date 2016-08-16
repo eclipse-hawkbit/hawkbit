@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -74,8 +75,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
         singleAssignStr = i18n.get("label.singleAssign.type");
         multiAssignStr = i18n.get("label.multiAssign.type");
-        singleAssign = SPUIComponentProvider.getLabel(singleAssignStr, null);
-        multiAssign = SPUIComponentProvider.getLabel(multiAssignStr, null);
+        singleAssign = new LabelBuilder().name(singleAssignStr).buildLabel();
+
+        multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
 
         tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,

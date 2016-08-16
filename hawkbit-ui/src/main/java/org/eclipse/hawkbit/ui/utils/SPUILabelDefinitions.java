@@ -21,18 +21,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public final class SPUILabelDefinitions {
 
     /**
-     * Label - Table.
-     */
-    public static final String SP_WIDGET_CAPTION = "Label-table";
-    /**
-     * Label - Simple.
-     */
-    public static final String SP_LABEL_SIMPLE = "Label-simple";
-    /**
-     * Label - Message.
-     */
-    public static final String SP_LABEL_MESSAGE = "Label-message";
-    /**
      * Label - Message hint.
      */
     public static final String SP_LABEL_MESSAGE_HINT = "Label-message-hint";

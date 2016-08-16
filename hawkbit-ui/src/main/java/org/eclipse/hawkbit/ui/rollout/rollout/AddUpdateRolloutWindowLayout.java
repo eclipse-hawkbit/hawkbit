@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
@@ -258,7 +259,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Label getLabel(final String key) {
-        return SPUIComponentProvider.getLabel(i18n.get(key), SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        return new LabelBuilder().name(i18n.get(key)).buildLabel();
     }
 
     private TextField getTextfield(final String key) {
@@ -266,7 +267,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
     }
 
-    private Label getPercentHintLabel() {
+    private static Label getPercentHintLabel() {
         final Label percentSymbol = new Label("%");
         percentSymbol.addStyleName(ValoTheme.LABEL_TINY + " " + ValoTheme.LABEL_BOLD);
         percentSymbol.setSizeUndefined();
@@ -295,7 +296,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Label createGroupSizeLabel() {
-        final Label groupSize = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label groupSize = new LabelBuilder().name("").buildLabel();
         groupSize.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
         groupSize.setImmediate(true);
         groupSize.setVisible(false);
@@ -315,7 +316,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Label createTotalTargetsLabel() {
-        final Label targetCountLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label targetCountLabel = new LabelBuilder().name("").buildLabel();
         targetCountLabel.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
         targetCountLabel.setImmediate(true);
         targetCountLabel.setVisible(false);

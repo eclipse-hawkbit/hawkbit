@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -78,8 +79,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        return SPUIComponentProvider.getLabel(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION,
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        return new LabelBuilder().name(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION).buildCaptionLabel();
     }
 
     private void buildLayout() {

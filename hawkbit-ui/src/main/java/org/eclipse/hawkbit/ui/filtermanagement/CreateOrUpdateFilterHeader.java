@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -217,10 +218,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         breadcrumbButton = createBreadcrumbButton();
 
-        headerCaption = SPUIComponentProvider.getLabel(SPUILabelDefinitions.VAR_CREATE_FILTER,
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        headerCaption = new LabelBuilder().name(SPUILabelDefinitions.VAR_CREATE_FILTER).buildCaptionLabel();
 
-        nameLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        nameLabel = new LabelBuilder().name("").buildLabel();
         nameLabel.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
 
         nameTextField = createNameTextField();
@@ -307,7 +307,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         breadcrumbLayout = new HorizontalLayout();
         breadcrumbLayout.addComponent(breadcrumbButton);
         breadcrumbLayout.addComponent(new Label(">"));
-        breadcrumbName = SPUIComponentProvider.getLabel(null, SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        breadcrumbName = new LabelBuilder().buildCaptionLabel();
         breadcrumbLayout.addComponent(breadcrumbName);
         breadcrumbName.addStyleName("breadcrumbPaddingLeft");
 

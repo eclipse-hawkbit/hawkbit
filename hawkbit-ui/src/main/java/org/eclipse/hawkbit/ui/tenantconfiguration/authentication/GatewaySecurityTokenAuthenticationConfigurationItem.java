@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -87,8 +88,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         gatewaytokenBtn.setIcon(FontAwesome.REFRESH);
         gatewaytokenBtn.addClickListener(event -> generateGatewayToken());
 
-        gatewayTokenkeyLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
-        gatewayTokenkeyLabel.setId("gatewaysecuritytokenkey");
+        gatewayTokenkeyLabel = new LabelBuilder().id("gatewaysecuritytokenkey").name("").buildLabel();
         gatewayTokenkeyLabel.addStyleName("gateway-token-label");
         gatewayTokenkeyLabel.setImmediate(true);
 

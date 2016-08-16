@@ -15,10 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
-import org.eclipse.hawkbit.ui.decorators.HeaderLayoutDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
-import org.eclipse.hawkbit.ui.decorators.SPUILabelDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -33,7 +31,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
@@ -57,79 +54,6 @@ public final class SPUIComponentProvider {
      */
     private SPUIComponentProvider() {
 
-    }
-
-    /**
-     * @param className
-     * @return
-     */
-    public static HorizontalLayout getHorizontalLayout(final Class<? extends HorizontalLayout> className) {
-        HorizontalLayout hLayout = null;
-        try {
-
-            hLayout = className.newInstance();
-        } catch (final InstantiationException exception) {
-            LOG.error("Error occured while creating HorizontalLayout-" + className, exception);
-        } catch (final IllegalAccessException exception) {
-            LOG.error("Error occured while acessing HorizontalLayout-" + className, exception);
-        }
-
-        return hLayout;
-    }
-
-    /**
-     * Get HorizontalLayout UI component.
-     *
-     * @return HorizontalLayout as UI
-     */
-    public static HorizontalLayout getHorizontalLayout() {
-        HorizontalLayout hLayout = null;
-        try {
-            hLayout = HorizontalLayout.class.newInstance();
-        } catch (final InstantiationException exception) {
-            LOG.error("Error occured while creating HorizontalLayout-", exception);
-        } catch (final IllegalAccessException exception) {
-            LOG.error("Error occured while acessing HorizontalLayout-", exception);
-        }
-
-        return hLayout;
-    }
-
-    /**
-     * @param tableHeaderLayoutDecorator
-     * @return
-     */
-    public static HorizontalLayout getHeaderLayout(
-            final Class<? extends HeaderLayoutDecorator> tableHeaderLayoutDecorator) {
-        // Do we really need this???
-        HorizontalLayout hLayout = getHorizontalLayout(new SPUIHorizontalLayout().getUiHorizontalLayout().getClass());
-
-        if (tableHeaderLayoutDecorator == null) {
-            return hLayout;
-        }
-
-        try {
-            final HeaderLayoutDecorator layoutDecorator = tableHeaderLayoutDecorator.newInstance();
-            hLayout = layoutDecorator.decorate(hLayout);
-
-        } catch (final InstantiationException | IllegalAccessException exception) {
-            LOG.error("Error occured while creating horizontal decorator " + HeaderLayoutDecorator.class, exception);
-        }
-
-        return hLayout;
-    }
-
-    /**
-     * Get Label UI component.
-     *
-     * @param name
-     *            label caption
-     * @param type
-     *            string simple|Confirm|Message
-     * @return Label
-     */
-    public static Label getLabel(final String name, final String type) {
-        return SPUILabelDecorator.getDeocratedLabel(name, type);
     }
 
     /**
