@@ -9,6 +9,10 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
+import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +36,6 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -41,11 +44,12 @@ import com.google.common.base.Strings;
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
- *
  */
 public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
+
     private static final long serialVersionUID = -5645680058303167558L;
-    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
+
+    private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
     private transient Collection<TargetUpdateStatus> status = null;
     private String[] targetTags = null;
     private Long distributionId = null;
@@ -71,9 +75,10 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
      */
     public TargetBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortIds, final boolean[] sortStates) {
+
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
+        if (isNotNullOrEmpty(queryConfig)) {
             status = (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS);
             targetTags = (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
@@ -86,12 +91,12 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             pinnedDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
         }
 
-        if (isEmpty(sortStates)) {
-            // Initalize Sor
-            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
-            // Add sort.
+        if (!isEmpty(sortStates)) {
+
+            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
             }
         }
     }
@@ -222,5 +227,4 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
         return i18N;
     }
-
 }
