@@ -52,9 +52,7 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -80,7 +78,6 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
 
-    // json paths
     private static final String JSON_PATH_ROOT = "$";
 
     // fields, attributes
@@ -633,69 +630,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String knownName = "someName";
         createSingleTarget(knownControllerId, knownName);
 
-        // test
-
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/installedDS"))
                 .andExpect(status().isNoContent()).andExpect(content().string(""));
-
-    }
-
-    @Test
-    @Ignore
-    public void getInstalledDistributionSetOfTarget() throws JSONException, Exception {
-        // create first a target which can be retrieved by rest interface
-        final String knownControllerId = "1";
-        final String knownName = "someName";
-        createSingleTarget(knownControllerId, knownName);
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        // assign ds to target
-        final Long actionId = deploymentManagement.assignDistributionSet(ds.getId(), knownControllerId).getActions()
-                .get(0);
-        // give feedback, so installedDS is in SNYC
-        feedbackToByInSync(actionId);
-        // test
-
-        final SoftwareModule os = ds.findFirstModuleByType(osType);
-        final SoftwareModule jvm = ds.findFirstModuleByType(runtimeType);
-        final SoftwareModule bApp = ds.findFirstModuleByType(appType);
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/installedDS"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_PATH_ID, equalTo(ds.getId().intValue())))
-                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(ds.getName())))
-                .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(ds.getDescription())))
-                // os
-                .andExpect(
-                        jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].id", equalTo(os.getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].name", equalTo(os.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].description",
-                        equalTo(os.getDescription())))
-                .andExpect(
-                        jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].version", equalTo(os.getVersion())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].vendor", equalTo(os.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].type", equalTo("os")))
-                // jvm
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(jvm.getId().intValue())))
-                .andExpect(
-                        jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].name", equalTo(jvm.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].description",
-                        equalTo(jvm.getDescription())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].version",
-                        equalTo(jvm.getVersion())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].vendor",
-                        equalTo(jvm.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].type", equalTo("runtime")))
-                // baseApp
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(bApp.getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].name", equalTo(bApp.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].description",
-                        equalTo(bApp.getDescription())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].version",
-                        equalTo(bApp.getVersion())))
-                .andExpect(
-                        jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].vendor", equalTo(bApp.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].type", equalTo("application")));
     }
 
     @Test
