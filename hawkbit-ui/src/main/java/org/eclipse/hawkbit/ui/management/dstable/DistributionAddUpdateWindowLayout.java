@@ -327,10 +327,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
+        return SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), null, null, formLayout, i18n);
-        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
-        return window;
     }
 
     /**
