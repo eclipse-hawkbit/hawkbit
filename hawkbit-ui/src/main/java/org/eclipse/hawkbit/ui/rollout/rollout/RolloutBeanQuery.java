@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -74,10 +73,10 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
         searchText = getSearchText();
 
-        if (isEmpty(sortStates)) {
-            // Initalize Sor
+        if (!isEmpty(sortStates)) {
+
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
-            // Add sort.
+
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
                 sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
             }
