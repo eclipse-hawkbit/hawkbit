@@ -53,7 +53,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
+public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<DistributionSetType> {
 
     private static final long serialVersionUID = -5169398523815877767L;
     private static final String DIST_TYPE_NAME = "name";
@@ -566,17 +566,28 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
     @Override
     protected void save(final ClickEvent event) {
-        final DistributionSetType existingDistTypeByKey = distributionSetManagement
-                .findDistributionSetTypeByKey(typeKey.getValue());
-        final DistributionSetType existingDistTypeByName = distributionSetManagement
-                .findDistributionSetTypeByName(tagName.getValue());
         if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
+            if (!isDuplicate()) {
                 createNewDistributionSetType();
             }
         } else {
-            updateDistributionSetType(existingDistTypeByKey);
+            updateDistributionSetType(findEntityByKey());
         }
+    }
+
+    @Override
+    protected DistributionSetType findEntityByKey() {
+        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
+    }
+
+    @Override
+    protected DistributionSetType findEntityByName() {
+        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
+    }
+
+    @Override
+    protected String getDuplicateKeyErrorMessage(final DistributionSetType existingType) {
+        return i18n.get("message.type.key.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     @Override

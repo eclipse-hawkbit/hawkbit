@@ -13,6 +13,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
@@ -55,7 +56,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Abstract class for create/update target tag layout.
  */
-public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
+public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
     private static final long serialVersionUID = 4229177824620576456L;
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
@@ -464,6 +465,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         reset();
         window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
                 this::save, this::discard, null, mainLayout, i18n);
+        window.setCloseListener(() -> !isDuplicate());
         return window;
     }
 
@@ -560,15 +562,22 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         getPreviewButtonColor(previewColor);
     }
 
-    protected Boolean checkIsDuplicate(final Tag existingTag) {
-        if (existingTag != null) {
-            displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
-            window.setIsDuplicate(Boolean.TRUE);
-            return Boolean.TRUE;
+    private boolean isDuplicateByName() {
+        final E existingType = findEntityByName();
+        if (existingType != null) {
+            uiNotification.displayValidationError(
+                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
+            return true;
         }
-        window.setIsDuplicate(Boolean.FALSE);
-        return Boolean.FALSE;
+
+        return false;
     }
+
+    protected boolean isDuplicate() {
+        return isDuplicateByName();
+    }
+
+    protected abstract E findEntityByName();
 
     public String getColorPicked() {
         return colorPicked;

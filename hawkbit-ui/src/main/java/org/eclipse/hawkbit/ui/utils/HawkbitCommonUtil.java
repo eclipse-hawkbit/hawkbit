@@ -707,28 +707,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Duplicate check - Unique Key.
-     * 
-     * @param name
-     *            as string
-     * @param version
-     *            as string
-     * @param type
-     *            key as string
-     * @return boolean as flag
-     */
-    public static boolean isDuplicate(final String name, final String version, final String type) {
-        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type));
-        boolean duplicate = false;
-        if (swModule != null) {
-            duplicate = true;
-        }
-        return duplicate;
-    }
-
-    /**
      * Add new base software module.
      * 
      * @param bsname

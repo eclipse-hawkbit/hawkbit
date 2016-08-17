@@ -186,29 +186,30 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Update Distribution.
      */
     private void updateDistribution() {
+
+        if (isDuplicate()) {
+            return;
+        }
         final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
         final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
         final String distSetTypeName = HawkbitCommonUtil
                 .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
+        final DistributionSet currentDS = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
+        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-        if (duplicateCheck(name, version)) {
-            final DistributionSet currentDS = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
-            final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-            final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-
-            /* identify the changes */
-            setDistributionValues(currentDS, name, version, distSetTypeName, desc, isMigStepReq);
-            try {
-                distributionSetManagement.updateDistributionSet(currentDS);
-                notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
-                        new Object[] { currentDS.getName(), currentDS.getVersion() }));
-                // update table row+details layout
-                eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
-            } catch (final EntityAlreadyExistsException entityAlreadyExistsException) {
-                LOG.error("Update distribution failed {}", entityAlreadyExistsException);
-                notificationMessage.displayValidationError(
-                        i18n.get("message.distribution.no.update", currentDS.getName() + ":" + currentDS.getVersion()));
-            }
+        /* identify the changes */
+        setDistributionValues(currentDS, name, version, distSetTypeName, desc, isMigStepReq);
+        try {
+            distributionSetManagement.updateDistributionSet(currentDS);
+            notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
+                    new Object[] { currentDS.getName(), currentDS.getVersion() }));
+            // update table row+details layout
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
+        } catch (final EntityAlreadyExistsException entityAlreadyExistsException) {
+            LOG.error("Update distribution failed {}", entityAlreadyExistsException);
+            notificationMessage.displayValidationError(
+                    i18n.get("message.distribution.no.update", currentDS.getName() + ":" + currentDS.getVersion()));
         }
     }
 
@@ -217,24 +218,26 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      */
     private void addNewDistribution() {
         editDistribution = Boolean.FALSE;
+        if (isDuplicate()) {
+            return;
+        }
+
         final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
         final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
         final String distSetTypeName = HawkbitCommonUtil
                 .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
 
-        if (duplicateCheck(name, version)) {
-            final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-            final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-            DistributionSet newDist = entityFactory.generateDistributionSet();
+        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        final boolean isMigStepReq = reqMigStepCheckbox.getValue();
+        DistributionSet newDist = entityFactory.generateDistributionSet();
 
-            setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
-            newDist = distributionSetManagement.createDistributionSet(newDist);
+        setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
+        newDist = distributionSetManagement.createDistributionSet(newDist);
 
-            notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
-                    new Object[] { newDist.getName(), newDist.getVersion() }));
+        notificationMessage.displaySuccess(
+                i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
-        }
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
     }
 
     /**
@@ -260,7 +263,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distributionSet.setRequiredMigrationStep(isMigStepReq);
     }
 
-    private boolean duplicateCheck(final String name, final String version) {
+    private boolean isDuplicate() {
+        final String name = distNameTextField.getValue();
+        final String version = distVersionTextField.getValue();
+
         final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
         /*
          * Distribution should not exists with the same name & version. Display
@@ -273,13 +279,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distVersionTextField.addStyleName("v-textfield-error");
             notificationMessage.displayValidationError(
                     i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
-            window.setIsDuplicate(Boolean.TRUE);
 
-            return false;
-        } else {
-            window.setIsDuplicate(Boolean.FALSE);
             return true;
         }
+
+        return false;
+
     }
 
     /**
@@ -294,7 +299,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-
     }
 
     private void populateValuesOfDistribution(final Long editDistId) {
@@ -322,6 +326,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
+    /**
+     * Returns the dialog window for the distributions.
+     * 
+     * @param editDistId
+     * @return window
+     */
     public CommonDialogWindow getWindow(final Long editDistId) {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         resetComponents();
@@ -330,6 +340,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), null, null, formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
+        window.setCloseListener(() -> !isDuplicate());
         return window;
     }
 

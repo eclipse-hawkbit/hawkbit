@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -34,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Superclass defining common properties and methods for creating/updating
  * types.
  */
-public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
+public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
@@ -255,36 +253,26 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
         createDynamicStyleForComponents(tagName, typeKey, tagDesc, event.getColor().getCSS());
     }
 
-    protected Boolean checkIsDuplicate(final NamedEntity existingType) {
+    private boolean isDuplicateByKey() {
+
+        final E existingType = findEntityByKey();
 
         if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            window.setIsDuplicate(Boolean.TRUE);
-            return Boolean.TRUE;
+            uiNotification.displayValidationError(getDuplicateKeyErrorMessage(existingType));
+            return true;
         }
-        window.setIsDuplicate(Boolean.FALSE);
-        return Boolean.FALSE;
+
+        return false;
     }
 
-    protected Boolean checkIsDuplicateByKey(final NamedEntity existingType) {
-
-        if (existingType != null) {
-            if (existingType instanceof DistributionSetType) {
-                uiNotification.displayValidationError(i18n.get("message.type.key.duplicate.check",
-                        new Object[] { ((DistributionSetType) existingType).getKey() }));
-                window.setIsDuplicate(Boolean.TRUE);
-                return Boolean.TRUE;
-            } else if (existingType instanceof SoftwareModuleType) {
-                uiNotification.displayValidationError(i18n.get("message.type.key.swmodule.duplicate.check",
-                        new Object[] { ((SoftwareModuleType) existingType).getKey() }));
-                window.setIsDuplicate(Boolean.TRUE);
-                return Boolean.TRUE;
-            }
-        }
-        window.setIsDuplicate(Boolean.FALSE);
-        return Boolean.FALSE;
+    @Override
+    protected boolean isDuplicate() {
+        return isDuplicateByKey() || super.isDuplicate();
     }
+
+    protected abstract E findEntityByKey();
+
+    protected abstract String getDuplicateKeyErrorMessage(E existingType);
 
     @Override
     protected void save(final ClickEvent event) {

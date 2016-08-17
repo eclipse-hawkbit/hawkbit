@@ -34,7 +34,7 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout {
+public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 2446682350481560235L;
 
@@ -102,14 +102,18 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     public void save(final ClickEvent event) {
-        final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
         if (optiongroup.getValue().equals(createTagStr)) {
-            if (!checkIsDuplicate(existingTag)) {
+            if (!isDuplicate()) {
                 createNewTag();
             }
         } else {
-            updateExistingTag(existingTag);
+            updateExistingTag(findEntityByName());
         }
+    }
+
+    @Override
+    protected TargetTag findEntityByName() {
+        return tagManagement.findTargetTag(tagName.getValue());
     }
 
     /**

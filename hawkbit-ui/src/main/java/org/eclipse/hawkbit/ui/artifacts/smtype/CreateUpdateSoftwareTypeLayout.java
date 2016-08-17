@@ -44,7 +44,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
+public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<SoftwareModuleType> {
 
     private static final long serialVersionUID = -5169398523815919367L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
@@ -191,17 +191,28 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
     @Override
     protected void save(final ClickEvent event) {
-        final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
-                .findSoftwareModuleTypeByKey(typeKey.getValue());
-        final SoftwareModuleType existingSMTypeByName = swTypeManagementService
-                .findSoftwareModuleTypeByName(tagName.getValue());
         if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!checkIsDuplicateByKey(existingSMTypeByKey) && !checkIsDuplicate(existingSMTypeByName)) {
+            if (!isDuplicate()) {
                 createNewSWModuleType();
             }
         } else {
-            updateSWModuleType(existingSMTypeByName);
+            updateSWModuleType(findEntityByName());
         }
+    }
+
+    @Override
+    protected SoftwareModuleType findEntityByKey() {
+        return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
+    }
+
+    @Override
+    protected SoftwareModuleType findEntityByName() {
+        return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
+    }
+
+    @Override
+    protected String getDuplicateKeyErrorMessage(final SoftwareModuleType existingType) {
+        return i18n.get("message.type.key.swmodule.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     private void createNewSWModuleType() {

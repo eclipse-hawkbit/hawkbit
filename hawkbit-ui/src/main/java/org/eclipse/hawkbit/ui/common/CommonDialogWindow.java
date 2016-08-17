@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -70,7 +70,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
  * 
  */
-public class CommonDialogWindow extends Window implements Serializable {
+public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 
@@ -94,15 +94,15 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final ClickListener cancelButtonClickListener;
 
-    private final ClickListener closeClickListener = event -> close();
+    private final ClickListener closeClickListener = event -> onCloseEvent(event);
 
     private final transient Map<Component, Object> orginalValues;
 
     private final List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
-    
-    private boolean isDuplicate;
+
+    private transient CommonDialogWindowCloseListener closeListener;
 
     /**
      * Constructor.
@@ -137,17 +137,29 @@ public class CommonDialogWindow extends Window implements Serializable {
         init();
     }
 
+    public void setCloseListener(final CommonDialogWindowCloseListener closeListener) {
+        this.closeListener = closeListener;
+    }
+
+    private void onCloseEvent(final ClickEvent clickEvent) {
+        if (!clickEvent.getButton().equals(saveButton)) {
+            close();
+            return;
+        }
+
+        if (closeListener != null && !closeListener.canWindowClose()) {
+            return;
+        }
+        close();
+    }
+
     @Override
     public void close() {
-        if(!isDuplicate){
-            super.close();
-            orginalValues.clear();
-            removeListeners();
-            allComponents.clear();
-            this.saveButton.setEnabled(false);
-        }else{
-            isDuplicate = Boolean.FALSE;
-        }
+        super.close();
+        orginalValues.clear();
+        removeListeners();
+        allComponents.clear();
+        this.saveButton.setEnabled(false);
     }
 
     private void removeListeners() {
@@ -217,7 +229,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         setModal(true);
         addStyleName("fontsize");
         setOrginaleValues();
-        addListeners();
+        addComponenetListeners();
     }
 
     /**
@@ -234,12 +246,6 @@ public class CommonDialogWindow extends Window implements Serializable {
             orginalValues.put(field, value);
         }
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
-    }
-
-    protected void addListeners() {
-        addComponenetListeners();
-        addCloseListenerForSaveButton();
-        addCloseListenerForCancelButton();
     }
 
     protected void addCloseListenerForSaveButton() {
@@ -438,6 +444,7 @@ public class CommonDialogWindow extends Window implements Serializable {
                 FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
+        addCloseListenerForCancelButton();
         if (cancelButtonClickListener != null) {
             cancelButton.addClickListener(cancelButtonClickListener);
         }
@@ -452,6 +459,7 @@ public class CommonDialogWindow extends Window implements Serializable {
                 FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
+        addCloseListenerForSaveButton();
         saveButton.addClickListener(saveButtonClickListener);
         saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);
@@ -531,20 +539,16 @@ public class CommonDialogWindow extends Window implements Serializable {
     }
 
     /**
-     * Boolean.TRUE/Boolean.FALSE based on the entity saved in the window already exists.
-     * @return isDuplicate 
+     * Called before the save happens.
+     *
      */
-    public boolean getIsDuplicate() {
-        return isDuplicate;
+    @FunctionalInterface
+    public interface CommonDialogWindowCloseListener {
+
+        /**
+         * @return true/false based on the dialog window to be closed or not.
+         */
+        boolean canWindowClose();
     }
 
-    /**
-     * Sets Boolean.TRUE/Boolean.FALSE based on the entity saved in the window already exists.
-     * @param isDuplicate
-     */
-    public void setIsDuplicate(final boolean isDuplicate) {
-        this.isDuplicate = isDuplicate;
-    }
-    
-    
 }

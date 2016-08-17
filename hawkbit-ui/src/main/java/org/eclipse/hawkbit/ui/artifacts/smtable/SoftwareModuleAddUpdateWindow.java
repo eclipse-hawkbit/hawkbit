@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -184,6 +185,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), null, null, formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
+        window.setCloseListener(() -> !isDuplicate());
 
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
@@ -199,21 +201,30 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
+        if (isDuplicate()) {
             uiNotifcation.displayValidationError(
                     i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            window.setIsDuplicate(Boolean.TRUE);
-        } else {
-            final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
-                    version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-            window.setIsDuplicate(Boolean.FALSE);
-            if (newBaseSoftwareModule != null) {
-                /* display success message */
-                uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                        new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
-            }
+            return;
         }
+        final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name, version,
+                vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+        if (newBaseSoftwareModule != null) {
+            /* display success message */
+            uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                    new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
+        }
+    }
+
+    private boolean isDuplicate() {
+        final String name = nameTextField.getValue();
+        final String version = versionTextField.getValue();
+        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
+        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type));
+        return swModule != null;
     }
 
     /**

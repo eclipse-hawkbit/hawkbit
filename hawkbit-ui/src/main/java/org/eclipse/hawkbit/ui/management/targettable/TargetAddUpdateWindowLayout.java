@@ -143,31 +143,33 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void addNewTarget() {
-        final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
-        if (duplicateCheck(newControlllerId)) {
-            final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-            final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-
-            /* create new target entity */
-            Target newTarget = entityFactory.generateTarget(newControlllerId);
-            /* set values to the new target entity */
-            setTargetValues(newTarget, newName, newDesc);
-            /* save new target */
-            newTarget = targetManagement.createTarget(newTarget);
-            final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
-            final Set<TargetIdName> s = new HashSet<>();
-            s.add(newTarget.getTargetIdName());
-            targetTable.setValue(s);
-
-            /* display success msg */
-            uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
+        if (isDuplicate()) {
+            return;
         }
+        final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
+        final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
+        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+
+        /* create new target entity */
+        Target newTarget = entityFactory.generateTarget(newControlllerId);
+        /* set values to the new target entity */
+        setTargetValues(newTarget, newName, newDesc);
+        /* save new target */
+        newTarget = targetManagement.createTarget(newTarget);
+        final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
+        final Set<TargetIdName> s = new HashSet<>();
+        s.add(newTarget.getTargetIdName());
+        targetTable.setValue(s);
+
+        /* display success msg */
+        uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.target"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), null, null, formLayout, i18n);
+        window.setCloseListener(() -> !isDuplicate());
         return window;
     }
 
@@ -196,17 +198,17 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         target.setDescription(description);
     }
 
-    private boolean duplicateCheck(final String newControlllerId) {
+    private boolean isDuplicate() {
+        final String newControlllerId = controllerIDTextField.getValue();
         final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
         if (existingTarget != null) {
             uINotification.displayValidationError(
                     i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
-            window.setIsDuplicate(Boolean.TRUE);
-            return false;
-        } else {
-            window.setIsDuplicate(Boolean.FALSE);
             return true;
+        } else {
+            return false;
         }
+
     }
 
     /**
