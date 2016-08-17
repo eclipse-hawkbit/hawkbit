@@ -806,10 +806,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             final TargetIdName targetIdName) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
-        item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
-                .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+        if (targetInfo != null) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
+                    .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
+        }
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
@@ -854,14 +856,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-
-
-    private void onTargetUpdateEvents(List<TargetUpdatedEvent> events) {
+    private void onTargetUpdateEvents(final List<TargetUpdatedEvent> events) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shoulTargetsUpdated = false;
         Target lastSelectedTarget = null;
         for (final TargetUpdatedEvent targetUpdatedEvent : events) {
-            Target target = targetUpdatedEvent.getEntity();
+            final Target target = targetUpdatedEvent.getEntity();
             final TargetIdName targetIdName = target.getTargetIdName();
             if (Filters.or(getTargetTableFilters(target)).doFilter()) {
                 shoulTargetsUpdated = true;
@@ -882,8 +882,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-    
-    
     private void onTargetCreatedEvents() {
         refreshTargets();
     }
