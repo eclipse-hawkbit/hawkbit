@@ -52,6 +52,7 @@ public class GenerateDialog extends Window {
     private final TextField gatewayTokenTextField;
     private OptionGroup protocolGroup;
     private Button buttonOk;
+    private final boolean dmfEnabled;
 
     /**
      * Creates a new pop window for setting the configuration of simulating
@@ -60,9 +61,12 @@ public class GenerateDialog extends Window {
      * @param callback
      *            the callback which is called when the dialog has been
      *            successfully confirmed.
+     * @param dmfEnabled
+     *            indicates if the AMQP/DMF interface is enabled by
+     *            configuration and if the option DMF should be enabled or not
      */
-    public GenerateDialog(final GenerateDialogCallback callback) {
-
+    public GenerateDialog(final GenerateDialogCallback callback, final boolean dmfEnabled) {
+        this.dmfEnabled = dmfEnabled;
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
 
@@ -187,15 +191,19 @@ public class GenerateDialog extends Window {
         this.protocolGroup = new OptionGroup("Simulated Device Protocol");
         protocolGroup.addItem(Protocol.DMF_AMQP);
         protocolGroup.addItem(Protocol.DDI_HTTP);
+        protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.setItemCaption(Protocol.DMF_AMQP, "Device Management Federation API (AMQP push)");
         protocolGroup.setItemCaption(Protocol.DDI_HTTP, "Direct Device Interface (HTTP poll)");
         protocolGroup.setNullSelectionAllowed(false);
-        protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.addValueChangeListener(event -> {
             final boolean directDeviceOptionSelected = event.getProperty().getValue().equals(Protocol.DDI_HTTP);
             pollUrlTextField.setVisible(directDeviceOptionSelected);
             gatewayTokenTextField.setVisible(directDeviceOptionSelected);
         });
+        protocolGroup.setItemEnabled(Protocol.DMF_AMQP, dmfEnabled);
+        if (!dmfEnabled) {
+            protocolGroup.select(Protocol.DDI_HTTP);
+        }
     }
 
     private void createOkButton(final GenerateDialogCallback callback) {

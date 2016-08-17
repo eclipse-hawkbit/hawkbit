@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,7 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +42,7 @@ import org.springframework.retry.support.RetryTemplate;
  */
 @Configuration
 @EnableConfigurationProperties(AmqpProperties.class)
+@ConditionalOnProperty(prefix = CONFIGURATION_PREFIX, name = "enabled")
 public class AmqpConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
