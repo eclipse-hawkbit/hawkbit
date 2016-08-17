@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareMo
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -85,11 +85,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
         typeKey = createTextField("textfield.key", SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY, SPUIDefinitions.TYPE_KEY);
 
-        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
-        tagDesc.setImmediate(true);
+        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
+                .buildTextField();
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();

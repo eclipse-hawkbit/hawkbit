@@ -269,11 +269,6 @@ public final class SPUILabelDefinitions {
     public static final String UPDATE_CUSTOM_FILTER = "Update Custom Filter";
 
     /**
-     * Text area and text field max allowed length.
-     */
-    public static final int TEXT_AREA_MAX_LENGTH = 512;
-
-    /**
      * Yes label.
      */
     public static final String YES = "Yes";

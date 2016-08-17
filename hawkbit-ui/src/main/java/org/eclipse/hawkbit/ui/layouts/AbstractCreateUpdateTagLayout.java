@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -27,7 +28,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -158,11 +158,11 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
                 .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
                 .buildTextField();
 
-        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
-        tagDesc.setImmediate(true);
+        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
+                .buildTextField();
+
         tagDesc.setNullRepresentation("");
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", "", null, null, false, "",

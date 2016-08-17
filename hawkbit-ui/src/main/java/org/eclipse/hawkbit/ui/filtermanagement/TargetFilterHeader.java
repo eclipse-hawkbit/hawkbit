@@ -120,7 +120,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField campSearchTextField = new TextFieldBuilder().id("target.filter.search.text.Id")
+        final TextField campSearchTextField = new TextFieldBuilder("target.filter.search.text.Id")
                 .createSearchField(event -> searchBy(event.getText()));
         campSearchTextField.setWidth(500.0F, Unit.PIXELS);
         return campSearchTextField;
@@ -150,7 +150,6 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private void openSearchTextField() {
-        //
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.togleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);

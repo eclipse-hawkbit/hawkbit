@@ -86,7 +86,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private void createComponents() {
         headerCaption = createHeaderCaption();
-        searchField = new TextFieldBuilder().id(getSearchBoxId()).createSearchField(event -> searchBy(event.getText()));
+        searchField = new TextFieldBuilder(getSearchBoxId()).createSearchField(event -> searchBy(event.getText()));
 
         searchResetIcon = createSearchResetIcon();
 
@@ -308,7 +308,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         maxMinIcon.setData(Boolean.FALSE);
     }
 
-    private HorizontalLayout createHeaderFilterIconLayout() {
+    private static HorizontalLayout createHeaderFilterIconLayout() {
         final HorizontalLayout titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         titleFilterIconsLayout.setSpacing(false);

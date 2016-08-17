@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -313,9 +314,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private static TextArea createTargetFilterQuery() {
-        final TextArea filterField = SPUIComponentProvider.getTextArea(null, "text-area-style",
-                ValoTheme.TEXTFIELD_TINY, false, null, null,
-                SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
+        final TextArea filterField = new TextAreaBuilder().style("text-area-style")
+                .id(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
+                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextField();
+
         filterField.setId(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         filterField.setEnabled(false);
@@ -513,10 +515,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextArea createDescription() {
-        final TextArea descriptionField = SPUIComponentProvider.getTextArea(null, "text-area-style",
-                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descriptionField.setId(SPUIComponentIdProvider.ROLLOUT_DESCRIPTION_ID);
+        final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
+                .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
+                .buildTextField();
         descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         descriptionField.setSizeUndefined();
         return descriptionField;

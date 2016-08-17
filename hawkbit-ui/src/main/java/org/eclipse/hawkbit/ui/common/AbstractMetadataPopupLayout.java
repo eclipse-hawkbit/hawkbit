@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -49,7 +50,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * 
@@ -217,9 +217,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextArea createValueTextField() {
-        valueTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.value"), null, ValoTheme.TEXTAREA_TINY,
-                true, null, i18n.get("textfield.value"), 4000);
-        valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
+        valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
+                .prompt(i18n.get("textfield.value")).immediate(true).id(SPUIComponentIdProvider.METADATA_VALUE_ID)
+                .maxLengthAllowed(4000).buildTextField();
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);

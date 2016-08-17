@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
-import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
@@ -34,7 +33,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -52,30 +50,6 @@ public final class SPUIComponentProvider {
      */
     private SPUIComponentProvider() {
 
-    }
-
-    /**
-     * Get Label UI component. *
-     *
-     * @param caption
-     *            set the caption of the textArea
-     * @param style
-     *            set style
-     * @param styleName
-     *            add style
-     * @param required
-     *            to set field as mandatory
-     * @param data
-     *            component data
-     * @param promt
-     *            prompt user for input
-     * @param maxLength
-     *            maximum characters allowed
-     * @return TextArea text area
-     */
-    public static TextArea getTextArea(final String caption, final String style, final String styleName,
-            final boolean required, final String data, final String promt, final int maxLength) {
-        return SPUITextAreaDecorator.decorate(caption, style, styleName, required, data, promt, maxLength);
     }
 
     /**
