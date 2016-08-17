@@ -184,7 +184,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), null, null, formLayout, i18n);
-        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         window.setCloseListener(() -> !isDuplicate());
 
         nameTextField.setEnabled(!editSwModule);
