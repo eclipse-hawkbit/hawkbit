@@ -140,9 +140,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
-        if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            getRolloutUIState().setRolloutGroupTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
-            return SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES;
+        if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            getRolloutUIState().setRolloutGroupTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
+            return SPUIDefinitions.MAX_TABLE_ENTRIES;
         }
 
         return (int) size;

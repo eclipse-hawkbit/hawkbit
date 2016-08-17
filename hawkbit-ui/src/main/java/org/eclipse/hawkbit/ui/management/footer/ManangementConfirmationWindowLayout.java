@@ -387,7 +387,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(deletedIds, distId));
 
-        eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
         managementUIState.getDeletedDistributionList().clear();
 
     }
