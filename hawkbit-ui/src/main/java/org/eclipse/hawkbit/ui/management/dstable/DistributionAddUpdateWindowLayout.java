@@ -275,8 +275,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
          * distribution Id of the edit window is different then the "existingDs"
          */
         if (existingDs != null && !existingDs.getId().equals(editDistId)) {
-            distNameTextField.addStyleName("v-textfield-error");
-            distVersionTextField.addStyleName("v-textfield-error");
+            distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+            distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
             notificationMessage.displayValidationError(
                     i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
 
@@ -293,10 +293,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     public void resetComponents() {
         editDistribution = Boolean.FALSE;
         distNameTextField.clear();
-        distNameTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        distNameTextField.removeStyleName("v-textfield-error");
         distVersionTextField.clear();
-        distVersionTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
+        distVersionTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
+        distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
     }
