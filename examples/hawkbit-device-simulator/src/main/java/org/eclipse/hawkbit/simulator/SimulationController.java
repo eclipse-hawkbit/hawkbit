@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
-import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
+import org.eclipse.hawkbit.simulator.amqp.AmqpProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,21 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST endpoint for controlling the device simulator.
- * 
- *
- *
  */
 @RestController
 public class SimulationController {
-
-    @Autowired
-    private SpSenderService spSenderService;
 
     @Autowired
     private DeviceSimulatorRepository repository;
 
     @Autowired
     private SimulatedDeviceFactory deviceFactory;
+
+    @Autowired
+    private AmqpProperties amqpProperties;
 
     /**
      * The start resource to start a device creation.
@@ -82,6 +81,12 @@ public class SimulationController {
             return ResponseEntity.badRequest().body("query param api only allows value of 'dmf' or 'ddi'");
         }
 
+        if (protocol == Protocol.DMF_AMQP && isDmfDisabled()) {
+            return ResponseEntity.badRequest()
+                    .body("The AMQP interface has been disabled, to use DMF protocol you need to enable the AMQP interface via '"
+                            + CONFIGURATION_PREFIX + ".enabled=true'");
+        }
+
         for (int i = 0; i < amount; i++) {
             final String deviceId = name + i;
             repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
@@ -89,5 +94,9 @@ public class SimulationController {
         }
 
         return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");
+    }
+
+    private boolean isDmfDisabled() {
+        return !amqpProperties.isEnabled();
     }
 }
