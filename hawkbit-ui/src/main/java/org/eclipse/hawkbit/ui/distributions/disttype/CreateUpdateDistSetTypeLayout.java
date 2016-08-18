@@ -96,13 +96,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
         tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
                 .prompt(i18n.get("textfield.description")).immediate(true)
-                .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextField();
+                .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
         tagDesc.setNullRepresentation("");
     }
 
-    private TextField createTextField(final String in18Key, final String id, final String styleName) {
+    private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

@@ -209,7 +209,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextField createKeyTextField() {
         final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
                 .prompt(i18n.get("textfield.key")).immediate(true).id(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID)
-                .maxLengthAllowed(128).buildTextField();
+                .maxLengthAllowed(128).buildTextComponent();
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -219,7 +219,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextArea createValueTextField() {
         valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
                 .prompt(i18n.get("textfield.value")).immediate(true).id(SPUIComponentIdProvider.METADATA_VALUE_ID)
-                .maxLengthAllowed(4000).buildTextField();
+                .maxLengthAllowed(4000).buildTextComponent();
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);

@@ -196,7 +196,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private TextArea getDescriptionTextArea() {
         final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
-                .id(SPUIComponentIdProvider.BULK_UPLOAD_DESC).buildTextField();
+                .id(SPUIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
         description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         description.setWidth("100%");
         return description;

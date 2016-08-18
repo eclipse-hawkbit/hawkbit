@@ -114,7 +114,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      * 
      * @return textfield
      */
-    public E buildTextField() {
+    public E buildTextComponent() {
         final E textComponent = createTextComponent();
 
         textComponent.setRequired(required);

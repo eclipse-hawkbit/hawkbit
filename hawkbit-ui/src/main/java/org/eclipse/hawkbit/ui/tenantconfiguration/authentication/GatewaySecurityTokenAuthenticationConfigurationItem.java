@@ -75,7 +75,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
         detailLayout = new VerticalLayout();
         detailLayout.setImmediate(true);
-        gatewayTokenNameTextField = new TextFieldBuilder().immediate(true).buildTextField();
+        gatewayTokenNameTextField = new TextFieldBuilder().immediate(true).buildTextComponent();
         // hide text field until we support multiple gateway tokens for a tenan
         gatewayTokenNameTextField.setVisible(false);
         gatewayTokenNameTextField.addTextChangeListener(event -> doKeyNameChanged());

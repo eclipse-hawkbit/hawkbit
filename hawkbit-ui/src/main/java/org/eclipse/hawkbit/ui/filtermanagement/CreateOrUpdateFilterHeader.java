@@ -252,7 +252,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private TextField createNameTextField() {
         final TextField nameField = new TextFieldBuilder().caption(i18n.get("textfield.customfiltername"))
                 .prompt(i18n.get("textfield.customfiltername")).immediate(true)
-                .id(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextField();
+                .id(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(this::onFilterNameChange);
         return nameField;
@@ -452,7 +452,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static TextField createSearchField() {
         final TextField textField = new TextFieldBuilder().immediate(true).id("custom.query.text.Id")
-                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextField();
+                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);

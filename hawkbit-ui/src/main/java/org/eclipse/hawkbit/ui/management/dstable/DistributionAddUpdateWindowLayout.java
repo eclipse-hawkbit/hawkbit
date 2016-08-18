@@ -138,7 +138,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.DIST_ADD_DESC)
-                .buildTextField();
+                .buildTextComponent();
         descTextArea.setNullRepresentation("");
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
@@ -149,7 +149,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.get(in18Key)).required(true)
-                .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+                .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
         buildTextField.setNullRepresentation("");
         return buildTextField;
     }

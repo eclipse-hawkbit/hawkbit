@@ -265,7 +265,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+        return new TextFieldBuilder().prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     private TextField createIntegerTextField(final String in18Key, final String id) {
@@ -316,7 +316,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static TextArea createTargetFilterQuery() {
         final TextArea filterField = new TextAreaBuilder().style("text-area-style")
                 .id(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextField();
+                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
 
         filterField.setId(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
@@ -517,7 +517,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
                 .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
-                .buildTextField();
+                .buildTextComponent();
         descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         descriptionField.setSizeUndefined();
         return descriptionField;

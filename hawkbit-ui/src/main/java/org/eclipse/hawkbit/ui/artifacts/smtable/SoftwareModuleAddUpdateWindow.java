@@ -130,7 +130,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
-                .buildTextField();
+                .buildTextComponent();
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
                 null, i18n.get("upload.swmodule.type"));
@@ -143,7 +143,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     private TextField createTextField(final String in18Key, final String id) {
         return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
-                .immediate(true).id(id).buildTextField();
+                .immediate(true).id(id).buildTextComponent();
     }
 
     private void populateTypeNameCombo() {

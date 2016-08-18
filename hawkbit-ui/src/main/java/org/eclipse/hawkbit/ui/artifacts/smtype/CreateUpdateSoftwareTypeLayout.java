@@ -81,22 +81,22 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
         multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
 
-        tagName = createTextField("textfield.name", SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME, SPUIDefinitions.TYPE_NAME);
+        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME, SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
 
-        typeKey = createTextField("textfield.key", SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY, SPUIDefinitions.TYPE_KEY);
+        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
 
         tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
-                .buildTextField();
+                .buildTextComponent();
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
     }
 
-    private TextField createTextField(final String in18Key, final String id, final String styleName) {
+    private TextField createTextField(final String in18Key, final String styleName, final String id) {
         return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
-                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextField();
+                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

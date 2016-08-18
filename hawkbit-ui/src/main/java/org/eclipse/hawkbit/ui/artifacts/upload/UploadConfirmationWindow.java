@@ -262,7 +262,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private static TextField createTextField(final String id) {
-        return new TextFieldBuilder().immediate(true).id(id).buildTextField();
+        return new TextFieldBuilder().immediate(true).id(id).buildTextComponent();
     }
 
     private void addFileNameLayout(final Item newItem, final String baseSoftwareModuleNameVersion,

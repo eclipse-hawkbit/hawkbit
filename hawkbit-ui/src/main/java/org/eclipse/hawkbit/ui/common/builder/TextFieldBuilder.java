@@ -49,7 +49,7 @@ public class TextFieldBuilder extends AbstractTextFieldBuilder<TextField> {
      * @return the textfield
      */
     public TextField createSearchField(final TextChangeListener textChangeListener) {
-        final TextField textField = style("filter-box").styleName("text-style filter-box-hide").buildTextField();
+        final TextField textField = style("filter-box").styleName("text-style filter-box-hide").buildTextComponent();
         textField.setWidth(100.0F, Unit.PERCENTAGE);
         textField.addTextChangeListener(textChangeListener);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);

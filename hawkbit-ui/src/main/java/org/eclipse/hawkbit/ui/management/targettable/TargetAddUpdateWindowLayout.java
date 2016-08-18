@@ -87,13 +87,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.TARGET_ADD_DESC)
-                .buildTextField();
+                .buildTextComponent();
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String id) {
         return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
-                .immediate(true).id(id).buildTextField();
+                .immediate(true).id(id).buildTextComponent();
     }
 
     private void buildLayout() {

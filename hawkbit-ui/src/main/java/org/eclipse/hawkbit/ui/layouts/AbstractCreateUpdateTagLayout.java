@@ -156,12 +156,12 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         tagName = new TextFieldBuilder().caption(i18n.get("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
                 .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
-                .buildTextField();
+                .buildTextComponent();
 
         tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
-                .buildTextField();
+                .buildTextComponent();
 
         tagDesc.setNullRepresentation("");
 
