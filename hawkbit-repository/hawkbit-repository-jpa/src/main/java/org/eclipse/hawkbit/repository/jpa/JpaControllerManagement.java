@@ -299,8 +299,6 @@ public class JpaControllerManagement implements ControllerManagement {
         case CANCELED:
         case WARNING:
         case RUNNING:
-            handleIntermediateFeedback(mergedAction, mergedTarget);
-            break;
         default:
             break;
         }
@@ -310,16 +308,6 @@ public class JpaControllerManagement implements ControllerManagement {
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
 
         return actionRepository.save(mergedAction);
-    }
-
-    private void handleIntermediateFeedback(final JpaAction mergedAction, final JpaTarget mergedTarget) {
-        // we change the target state only if the action is still running
-        // otherwise this is considered as late feedback that does not have
-        // an impact on the state anymore.
-        if (mergedAction.isActive()) {
-            DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.PENDING, false, targetInfoRepository,
-                    entityManager);
-        }
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -349,15 +337,17 @@ public class JpaControllerManagement implements ControllerManagement {
         action.setStatus(Status.FINISHED);
         final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
+
         targetInfo.setInstalledDistributionSet(ds);
-        if (target.getAssignedDistributionSet() != null && targetInfo.getInstalledDistributionSet() != null && target
-                .getAssignedDistributionSet().getId().equals(targetInfo.getInstalledDistributionSet().getId())) {
+        targetInfo.setInstallationDate(System.currentTimeMillis());
+
+        // check if the assigned set is equal no to the installed set (not
+        // necessarily the case as another update might be pending already).
+        if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
+                .equals(targetInfo.getInstalledDistributionSet().getId())) {
             targetInfo.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-            targetInfo.setInstallationDate(System.currentTimeMillis());
-        } else {
-            targetInfo.setUpdateStatus(TargetUpdateStatus.PENDING);
-            targetInfo.setInstallationDate(System.currentTimeMillis());
         }
+
         targetInfoRepository.save(targetInfo);
         entityManager.detach(ds);
     }
