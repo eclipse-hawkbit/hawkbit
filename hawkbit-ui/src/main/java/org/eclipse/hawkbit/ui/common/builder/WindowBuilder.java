@@ -190,6 +190,11 @@ public class WindowBuilder {
         window.setResizable(false);
 
         decorateWindow(window);
+
+        if (SPUIDefinitions.CREATE_UPDATE_WINDOW.equals(type)) {
+            window.setClosable(false);
+        }
+
         return window;
     }
 }
