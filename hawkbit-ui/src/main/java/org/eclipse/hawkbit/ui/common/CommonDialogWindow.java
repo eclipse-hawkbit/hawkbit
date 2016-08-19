@@ -567,22 +567,4 @@ public class CommonDialogWindow extends Window {
         void saveOrUpdate();
     }
 
-    // public abstract class DefaultSaveDialogCloseListener implements
-    // SaveDialogCloseListener {
-    //
-    // private boolean canWindowSaveOrUpdate;
-    //
-    // @Override
-    // public boolean canWindowSaveOrUpdate() {
-    // return this.canWindowSaveOrUpdate;
-    // }
-    //
-    // @Override
-    // public boolean canWindowClose() {
-    // this.canWindowSaveOrUpdate =
-    // return this.canWindowSaveOrUpdate;
-    // }
-    //
-    // }
-
 }
