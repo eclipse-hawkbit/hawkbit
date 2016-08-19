@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -21,10 +22,10 @@ public class DdiDeploymentBase extends ResourceSupport {
 
     @JsonProperty("id")
     @NotNull
-    private String deplyomentId;
+    private final String deplyomentId;
 
     @NotNull
-    private DdiDeployment deployment;
+    private final DdiDeployment deployment;
 
     /**
      * Constructor.
@@ -34,13 +35,11 @@ public class DdiDeploymentBase extends ResourceSupport {
      * @param deployment
      *            details.
      */
-    public DdiDeploymentBase(final String id, final DdiDeployment deployment) {
-        deplyomentId = id;
+    @JsonCreator
+    public DdiDeploymentBase(@JsonProperty("id") final String id,
+            @JsonProperty("deplyomentId") final DdiDeployment deployment) {
+        this.deplyomentId = id;
         this.deployment = deployment;
-    }
-
-    public DdiDeploymentBase() {
-
     }
 
     public DdiDeployment getDeployment() {

@@ -443,7 +443,7 @@ public class RolloutListGrid extends AbstractGrid {
         return null;
     }
 
-    private String getDSDetails(final Item rolloutItem) {
+    private static String getDSDetails(final Item rolloutItem) {
         final StringBuilder swModuleNames = new StringBuilder();
         final StringBuilder swModuleVendors = new StringBuilder();
         final Set<SoftwareModule> swModules = (Set<SoftwareModule>) rolloutItem.getItemProperty(SW_MODULES).getValue();

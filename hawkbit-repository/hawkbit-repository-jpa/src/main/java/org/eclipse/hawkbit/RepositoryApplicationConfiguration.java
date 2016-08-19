@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
@@ -142,6 +143,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
         return SecurityTokenGeneratorHolder.getInstance();
+    }
+
+    /**
+     * @return the singleton instance of the {@link EntityInterceptorHolder}
+     */
+    @Bean
+    public EntityInterceptorHolder entityInterceptorHolder() {
+        return EntityInterceptorHolder.getInstance();
     }
 
     /**

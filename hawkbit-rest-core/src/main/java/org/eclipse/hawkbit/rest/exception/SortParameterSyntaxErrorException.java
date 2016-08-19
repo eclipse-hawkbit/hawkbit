@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.rest.exception;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * Exception used by the REST API in case of invalid sort parameter syntax.
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
  *
  *
  */
-public class SortParameterSyntaxErrorException extends SpServerRtException {
+public class SortParameterSyntaxErrorException extends AbstractServerRtException {
 
     /**
     * 

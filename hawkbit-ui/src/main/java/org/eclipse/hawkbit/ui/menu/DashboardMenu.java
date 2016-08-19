@@ -56,6 +56,11 @@ import com.vaadin.ui.themes.ValoTheme;
 @UIScope
 public final class DashboardMenu extends CustomComponent {
 
+    private static final String STYLE_VISIBLE = "valo-menu-visible";
+    public static final String ID = "dashboard-menu";
+    public static final String REPORTS_BADGE_ID = "dashboard-menu-reports-badge";
+    public static final String NOTIFICATIONS_BADGE_ID = "dashboard-menu-notifications-badge";
+
     @Autowired
     private I18N i18n;
 
@@ -66,11 +71,6 @@ public final class DashboardMenu extends CustomComponent {
     private transient HawkbitServerProperties serverProperties;
 
     private static final long serialVersionUID = 5394474618559481462L;
-
-    public static final String ID = "dashboard-menu";
-    public static final String REPORTS_BADGE_ID = "dashboard-menu-reports-badge";
-    public static final String NOTIFICATIONS_BADGE_ID = "dashboard-menu-notifications-badge";
-    private static final String STYLE_VISIBLE = "valo-menu-visible";
 
     // this should be resolved when we introduce event bus on UI to just inform
     // the buttons directly via events

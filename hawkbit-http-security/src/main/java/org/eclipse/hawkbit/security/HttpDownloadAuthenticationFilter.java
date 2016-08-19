@@ -28,7 +28,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     public static final String REQUEST_ID_REGEX_PATTERN = ".*\\/downloadId\\/.*";
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpDownloadAuthenticationFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpDownloadAuthenticationFilter.class);
 
     private final Pattern pattern;
     private final Cache cache;
@@ -50,7 +50,7 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
         if (!matcher.matches()) {
             return null;
         }
-        LOGGER.debug("retrieving id from URI request {}", requestURI);
+        LOG.debug("retrieving id from URI request {}", requestURI);
         final String[] groups = requestURI.split("\\/");
         final String id = groups[groups.length - 1];
         if (id == null) {

@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -60,7 +63,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ActiveProfiles({ "test" })
-@WithUser(principal = "bumlux", allSpPermissions = true, authorities = "ROLE_CONTROLLER")
+@WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringApplicationConfiguration(classes = { TestConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
@@ -226,7 +229,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         createTestdatabaseAndStart();
     }
 
-    private static void createTestdatabaseAndStart() {
+    private static synchronized void createTestdatabaseAndStart() {
         if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
             tesdatabase = new CIMySqlTestDatabase();
             tesdatabase.before();

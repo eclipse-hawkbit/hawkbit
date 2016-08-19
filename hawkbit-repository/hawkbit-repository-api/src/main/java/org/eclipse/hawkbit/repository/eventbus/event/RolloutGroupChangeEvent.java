@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.eventbus.event;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
+import org.eclipse.hawkbit.eventbus.event.DefaultEvent;
 
 /**
  * Event declaration for the UI to notify the UI that a rollout has been
@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
  * @author Michael Hirsch
  *
  */
-public class RolloutGroupChangeEvent extends AbstractEvent {
+public class RolloutGroupChangeEvent extends DefaultEvent {
 
     private final Long rolloutId;
     private final Long rolloutGroupId;

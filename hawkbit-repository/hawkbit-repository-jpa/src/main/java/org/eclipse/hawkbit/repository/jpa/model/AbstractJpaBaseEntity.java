@@ -31,7 +31,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  */
 @MappedSuperclass
 @Access(AccessType.FIELD)
-@EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class, EntityPropertyChangeListener.class })
+@EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class, EntityPropertyChangeListener.class,
+        EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
     private static final long serialVersionUID = 1L;
 
@@ -178,4 +179,5 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         return true;
     }
 
+    
 }

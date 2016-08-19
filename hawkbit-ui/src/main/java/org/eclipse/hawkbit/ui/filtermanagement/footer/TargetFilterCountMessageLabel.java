@@ -93,7 +93,7 @@ public class TargetFilterCountMessageLabel extends Label {
                 // set the icon
                 setIcon(FontAwesome.INFO_CIRCLE);
                 setDescription(i18n.get("label.target.filter.truncated", filterManagementUIState.getTargetsTruncated(),
-                        SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES));
+                        SPUIDefinitions.MAX_TABLE_ENTRIES));
 
             } else {
                 setIcon(null);
@@ -102,8 +102,8 @@ public class TargetFilterCountMessageLabel extends Label {
             targetMessage.append(totalTargets);
             targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
             targetMessage.append(i18n.get("label.filter.shown"));
-            if (totalTargets > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-                targetMessage.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+            if (totalTargets > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+                targetMessage.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
             } else {
                 targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
                 targetMessage.append(totalTargets);

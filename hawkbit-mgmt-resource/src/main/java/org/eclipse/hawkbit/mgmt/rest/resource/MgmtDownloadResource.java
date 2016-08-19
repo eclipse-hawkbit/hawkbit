@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
+import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
@@ -73,14 +74,11 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
 
             final DownloadArtifactCache artifactCache = (DownloadArtifactCache) cacheWrapper.get();
             DbArtifact artifact = null;
-            switch (artifactCache.getDownloadType()) {
-            case BY_SHA1:
-                artifact = artifactRepository.getArtifactBySha1(artifactCache.getId());
-                break;
 
-            default:
+            if (DownloadType.BY_SHA1.equals(artifactCache.getDownloadType())) {
+                artifact = artifactRepository.getArtifactBySha1(artifactCache.getId());
+            } else {
                 LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
-                break;
             }
 
             if (artifact == null) {

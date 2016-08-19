@@ -34,8 +34,11 @@ public class DdiConfig {
         this.polling = polling;
     }
 
+    /**
+     * Constructor.
+     */
     public DdiConfig() {
-
+        // needed for json create.
     }
 
     public DdiPolling getPolling() {

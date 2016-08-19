@@ -185,16 +185,20 @@ public final class SpPermission {
                 field.setAccessible(true);
                 try {
                     final String role = (String) field.get(null);
-                    if (!(exclusionRoles.contains(role))) {
-                        allPermissions.add(role);
-                    }
+                    addIfNotExcluded(exclusionRoles, allPermissions, role);
                 } catch (final IllegalAccessException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-
             }
         }
         return allPermissions;
+    }
+
+    private static void addIfNotExcluded(final Collection<String> exclusionRoles, final List<String> allPermissions,
+            final String role) {
+        if (!(exclusionRoles.contains(role))) {
+            allPermissions.add(role);
+        }
     }
 
     /**
@@ -289,6 +293,14 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX + HAS_AUTH_OR
                 + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#READ_TARGET_SEC_TOKEN} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_READ_TARGET_SEC_TOKEN = HAS_AUTH_PREFIX + READ_TARGET_SEC_TOKEN
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring

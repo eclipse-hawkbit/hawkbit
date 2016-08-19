@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
+
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -22,6 +24,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +35,7 @@ import com.google.common.collect.Lists;
  *
  */
 @Component
+@ConditionalOnProperty(prefix = CONFIGURATION_PREFIX, name = "enabled")
 public class SpReceiverService extends ReceiverService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
@@ -67,8 +71,6 @@ public class SpReceiverService extends ReceiverService {
      *            the incoming message
      * @param type
      *            the action type
-     * @param contentType
-     *            the content type in message header
      * @param thingId
      *            the thing id in message header
      */
@@ -82,14 +84,11 @@ public class SpReceiverService extends ReceiverService {
     private void delegateMessage(final Message message, final String type, final String thingId) {
         final MessageType messageType = MessageType.valueOf(type);
 
-        switch (messageType) {
-        case EVENT:
+        if (MessageType.EVENT.equals(messageType)) {
             handleEventMessage(message, thingId);
-            break;
-        default:
-            LOGGER.info("No valid message type property.");
-            break;
+            return;
         }
+        LOGGER.info("No valid message type property.");
     }
 
     private void handleEventMessage(final Message message, final String thingId) {

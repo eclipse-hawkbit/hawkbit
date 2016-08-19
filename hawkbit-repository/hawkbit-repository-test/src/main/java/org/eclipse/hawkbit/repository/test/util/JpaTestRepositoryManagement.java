@@ -13,11 +13,14 @@ import java.util.List;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
     @Autowired
     private TenantAwareCacheManager cacheManager;
 
@@ -28,6 +31,7 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
     private SystemManagement systemManagement;
 
     @Override
+    @Transactional
     public void clearTestRepository() {
         deleteAllRepos();
         cacheManager.getDirectCacheNames().forEach(name -> cacheManager.getDirectCache(name).clear());
@@ -43,7 +47,7 @@ public class JpaTestRepositoryManagement implements TestRepositoryManagement {
                     return null;
                 });
             } catch (final Exception e) {
-                e.printStackTrace();
+                LOGGER.error("Error hile delete tenant", e);
             }
         });
     }

@@ -16,9 +16,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
-    private static final String DEFAULT_IP_LOCALHOST = "127.0.0.1";
-    private static final String DEFAULT_PORT = "8080";
-    private static final String LOCALHOST = "localhost";
 
     private final Http http = new Http();
     private final Https https = new Https();
@@ -56,226 +53,44 @@ public class ArtifactUrlHandlerProperties {
     }
 
     /**
-     * Interface for declaring common properties through all supported protocols
-     * pattern.
-     */
-    public interface ProtocolProperties {
-        /**
-         * @return the hostname value to resolve in the pattern.
-         */
-        String getHostname();
-
-        /**
-         * @return the IP address value to resolve in the pattern.
-         */
-        String getIp();
-
-        /**
-         * @return the port value to resolve in the pattern.
-         */
-        String getPort();
-
-        /**
-         * @return the pattern to build the URL.
-         */
-        String getPattern();
-
-        /**
-         * @return <code>true</code> if the {@link ProtocolProperties} is
-         *         enabled.
-         */
-        boolean isEnabled();
-    }
-
-    /**
      * Object to hold the properties for the HTTP protocol.
      */
-    public static class Http implements ProtocolProperties {
-        private String hostname = LOCALHOST;
-        private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = DEFAULT_PORT;
-        /**
-         * An ant-URL pattern with placeholder to build the URL on. The URL can
-         * have specific artifact placeholder.
-         */
-        private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
+    public static class Http extends DefaultProtocolProperties {
 
         /**
-         * Enables HTTP URI generation in DDI and DMF.
+         * Constructor.
          */
-        private boolean enabled = true;
-
-        @Override
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(final boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String getHostname() {
-            return hostname;
-        }
-
-        public void setHostname(final String hostname) {
-            this.hostname = hostname;
-        }
-
-        @Override
-        public String getIp() {
-            return ip;
-        }
-
-        public void setIp(final String ip) {
-            this.ip = ip;
-        }
-
-        @Override
-        public String getPattern() {
-            return pattern;
-        }
-
-        public void setPattern(final String urlPattern) {
-            this.pattern = urlPattern;
-        }
-
-        @Override
-        public String getPort() {
-            return port;
-        }
-
-        public void setPort(final String port) {
-            this.port = port;
+        public Http() {
+            setPattern(
+                    "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
         }
     }
 
     /**
      * Object to hold the properties for the HTTP protocol.
      */
-    public static class Https implements ProtocolProperties {
-        private String hostname = LOCALHOST;
-        private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = DEFAULT_PORT;
-        /**
-         * An ant-URL pattern with placeholder to build the URL on. The URL can
-         * have specific artifact placeholder.
-         */
-        private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
+    public static class Https extends DefaultProtocolProperties {
 
         /**
-         * Enables HTTPS URI generation in DDI and DMF.
+         * Constructor.
          */
-        private boolean enabled = true;
-
-        @Override
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(final boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String getHostname() {
-            return hostname;
-        }
-
-        public void setHostname(final String hostname) {
-            this.hostname = hostname;
-        }
-
-        @Override
-        public String getIp() {
-            return ip;
-        }
-
-        public void setIp(final String ip) {
-            this.ip = ip;
-        }
-
-        @Override
-        public String getPattern() {
-            return pattern;
-        }
-
-        public void setPattern(final String urlPattern) {
-            this.pattern = urlPattern;
-        }
-
-        @Override
-        public String getPort() {
-            return port;
-        }
-
-        public void setPort(final String port) {
-            this.port = port;
+        public Https() {
+            setPattern(
+                    "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
         }
     }
 
     /**
      * Object to hold the properties for the HTTP protocol.
      */
-    public static class Coap implements ProtocolProperties {
-        private String hostname = LOCALHOST;
-        private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = "5683";
-        /**
-         * An ant-URL pattern with placeholder to build the URL on. The URL can
-         * have specific artifact placeholder.
-         */
-        private String pattern = "{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}";
+    public static class Coap extends DefaultProtocolProperties {
 
         /**
-         * Enables CoAP URI generation in DMF.
+         * Constructor.
          */
-        private boolean enabled = true;
-
-        @Override
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(final boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String getHostname() {
-            return hostname;
-        }
-
-        public void setHostname(final String hostname) {
-            this.hostname = hostname;
-        }
-
-        @Override
-        public String getIp() {
-            return ip;
-        }
-
-        public void setIp(final String ip) {
-            this.ip = ip;
-        }
-
-        @Override
-        public String getPattern() {
-            return pattern;
-        }
-
-        public void setPattern(final String urlPattern) {
-            this.pattern = urlPattern;
-        }
-
-        @Override
-        public String getPort() {
-            return port;
-        }
-
-        public void setPort(final String port) {
-            this.port = port;
+        public Coap() {
+            setPattern("{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}");
+            setPort("5683");
         }
     }
 

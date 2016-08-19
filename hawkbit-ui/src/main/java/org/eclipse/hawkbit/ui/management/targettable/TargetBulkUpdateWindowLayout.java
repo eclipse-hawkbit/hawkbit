@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -53,6 +52,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -72,9 +72,6 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    @Autowired
-    private transient UINotification uINotification;
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
@@ -178,7 +175,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private BulkUploadHandler getBulkUploadHandler() {
         final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
-                deploymentManagement, uINotification, i18n);
+                deploymentManagement, i18n, UI.getCurrent());
         bulkUploadHandler.buildLayout();
         bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
         return bulkUploadHandler;
@@ -296,8 +293,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         descTextArea.clear();
         targetBulkTokenTags.getTokenField().clear();
         targetBulkTokenTags.populateContainer();
-        progressBar.setValue(0f);
+        progressBar.setValue(0F);
         progressBar.setVisible(false);
+        managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(0F);
         targetsCountLabel.setVisible(false);
     }
 

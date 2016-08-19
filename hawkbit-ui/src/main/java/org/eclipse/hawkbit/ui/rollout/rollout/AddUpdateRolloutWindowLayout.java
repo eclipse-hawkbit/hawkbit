@@ -44,8 +44,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -79,8 +77,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 2999293468801479916L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
 
@@ -154,6 +150,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         buildLayout();
     }
 
+    /**
+     * Get the window.
+     * 
+     * @param rolloutId
+     *            the rollout id
+     * @return the window
+     */
     public CommonDialogWindow getWindow(final Long rolloutId) {
         window = getWindow();
         populateData(rolloutId);

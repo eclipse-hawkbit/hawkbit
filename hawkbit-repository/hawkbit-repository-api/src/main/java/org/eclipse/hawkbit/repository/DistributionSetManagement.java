@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,9 +43,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface DistributionSetManagement {
-
-    // TODO rename/document the whole with details thing (document what the
-    // details are and maybe find a better name, e.g. with dependencies?)
 
     /**
      * Assigns {@link SoftwareModule} to existing {@link DistributionSet}.
@@ -285,6 +282,16 @@ public interface DistributionSetManagement {
             @NotNull Pageable pageable);
 
     /**
+     * Finds all meta data by the given distribution set id.
+     * 
+     * @param distributionSetId
+     *            the distribution set id to retrieve the meta data from
+     * @return list of distributionSetMetadata for a given distribution set Id.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId);
+
+    /**
      * finds all meta data by the given distribution set id.
      *
      * @param distributionSetId
@@ -320,7 +327,6 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
 
-    // TODO discuss: use enum instead of the true,false,null switch ?
     /**
      * finds all {@link DistributionSet}s.
      *

@@ -47,7 +47,7 @@ import com.google.common.collect.UnmodifiableIterator;
  */
 public abstract class AbstractHttpControllerAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpControllerAuthenticationFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractHttpControllerAuthenticationFilter.class);
 
     private static final String TENANT_PLACE_HOLDER = "tenant";
     private static final String CONTROLLER_ID_PLACE_HOLDER = "controllerId";
@@ -73,10 +73,12 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
     /**
      * Constructor for sub-classes.
      * 
-     * @param systemManagement
-     *            the system management service
+     * @param tenantConfigurationManagement
+     *            the tenant configuration service
      * @param tenantAware
      *            the tenant aware service
+     * @param systemSecurityContext
+     *            the system secruity context
      */
     public AbstractHttpControllerAuthenticationFilter(final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
@@ -136,28 +138,28 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         final String requestURI = request.getRequestURI();
 
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
-            LOGGER.debug("retrieving principal from URI request {}", requestURI);
+            LOG.debug("retrieving principal from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor
                     .extractUriTemplateVariables(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI);
             final String controllerId = extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER);
             final String tenant = extractUriTemplateVariables.get(TENANT_PLACE_HOLDER);
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
                         requestURI);
             }
             return createTenantSecruityTokenVariables(request, tenant, controllerId);
         } else if (pathExtractor.match(request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI)) {
-            LOGGER.debug("retrieving path variables from URI request {}", requestURI);
+            LOG.debug("retrieving path variables from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor.extractUriTemplateVariables(
                     request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI);
             final String tenant = extractUriTemplateVariables.get(TENANT_PLACE_HOLDER);
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Parsed tenant {} from path request {}", tenant, requestURI);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Parsed tenant {} from path request {}", tenant, requestURI);
             }
             return createTenantSecruityTokenVariables(request, tenant, "anonymous");
         } else {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
                         CONTROLLER_REQUEST_ANT_PATTERN);
             }
             return null;
@@ -166,7 +168,8 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     private TenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request,
             final String tenant, final String controllerId) {
-        final TenantSecurityToken secruityToken = new TenantSecurityToken(tenant, controllerId, FileResource.sha1(""));
+        final TenantSecurityToken secruityToken = new TenantSecurityToken(tenant, controllerId,
+                FileResource.createFileResourceBySha1(""));
         final UnmodifiableIterator<String> forEnumeration = Iterators.forEnumeration(request.getHeaderNames());
         forEnumeration.forEachRemaining(header -> secruityToken.getHeaders().put(header, request.getHeader(header)));
         return secruityToken;

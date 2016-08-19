@@ -56,6 +56,10 @@ public class RedisConfiguration {
         return new TenantAwareCacheManager(directCacheManager(), tenantAware);
     }
 
+    /**
+     * 
+     * @return bean for the direct cache manager.
+     */
     @Bean(name = "directCacheManager")
     public CacheManager directCacheManager() {
         return new RedisCacheManager(redisTemplate());

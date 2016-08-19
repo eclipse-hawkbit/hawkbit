@@ -274,10 +274,6 @@ public final class SPUIDefinitions {
      */
     public static final String NEW_TARGET_SAVE = "target.add.save";
     /**
-     * New Target discard icon id.
-     */
-    // public static final String NEW_TARGET_DISCARD = "target.add.discard";
-    /**
      * New Target add icon id.
      */
     public static final String NEW_TARGET_ADD_ICON = "NewTargetAddIcon";
@@ -309,6 +305,11 @@ public final class SPUIDefinitions {
      * New Create Update option group id.
      */
     public static final String CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID = "create.option.group.dist.set.type.id";
+
+    /**
+     * Assign option group id(Firmware/Software).
+     */
+    public static final String ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID = "assign.option.group.soft.module.type.id";
     /**
      * SW Module Source Table ID.
      */
@@ -856,7 +857,7 @@ public final class SPUIDefinitions {
      * truncates it. This protects to endless scroll to very high page numbers
      * which is very in performant.
      */
-    public static final int MAX_TARGET_TABLE_ENTRIES = 5000;
+    public static final int MAX_TABLE_ENTRIES = 5000;
 
     /**
      * New software module set type add icon id.

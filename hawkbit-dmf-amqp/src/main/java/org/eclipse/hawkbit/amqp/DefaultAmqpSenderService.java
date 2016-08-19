@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.util.IpUtil;
@@ -46,7 +47,7 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
 
         final String correlationId = UUID.randomUUID().toString();
         final String exchange = extractExchange(replyTo);
-        message.getMessageProperties().setCorrelationId(correlationId.getBytes());
+        message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);

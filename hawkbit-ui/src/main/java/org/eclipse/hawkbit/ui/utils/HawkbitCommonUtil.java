@@ -591,24 +591,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * get the Last sequence of string which is after last dot in String.
-     *
-     * @param name
-     *            dotted String name
-     * @return String name
-     */
-    public static String getLastSequenceBySplitByDot(final String name) {
-        String lastSequence = null;
-        if (null != name) {
-            final String[] strArray = name.split("\\.");
-            if (strArray.length > 0) {
-                lastSequence = strArray[strArray.length - 1];
-            }
-        }
-        return lastSequence;
-    }
-
-    /**
      * Remove the prefix from text.
      *
      * @param text

@@ -94,7 +94,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final ClickListener cancelButtonClickListener;
 
-    private final ClickListener close = event -> close();
+    private final ClickListener closeClickListener = event -> close();
 
     private final transient Map<Component, Object> orginalValues;
 
@@ -115,6 +115,10 @@ public class CommonDialogWindow extends Window implements Serializable {
      *            the saveButtonClickListener
      * @param cancelButtonClickListener
      *            the cancelButtonClickListener
+     * @param layout
+     *            the abstract layout
+     * @param i18n
+     *            the i18n service
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
@@ -233,11 +237,11 @@ public class CommonDialogWindow extends Window implements Serializable {
     }
 
     protected void addCloseListenerForSaveButton() {
-        saveButton.addClickListener(close);
+        saveButton.addClickListener(closeClickListener);
     }
 
     protected void addCloseListenerForCancelButton() {
-        cancelButton.addClickListener(close);
+        cancelButton.addClickListener(closeClickListener);
     }
 
     protected void addComponenetListeners() {
@@ -275,7 +279,8 @@ public class CommonDialogWindow extends Window implements Serializable {
         return false;
     }
 
-    private boolean isValueEquals(final AbstractField<?> field, final Object orginalValue, final Object currentValue) {
+    private static boolean isValueEquals(final AbstractField<?> field, final Object orginalValue,
+            final Object currentValue) {
         if (Set.class.equals(field.getType())) {
             return CollectionUtils.isEqualCollection(CollectionUtils.emptyIfNull((Collection<?>) orginalValue),
                     CollectionUtils.emptyIfNull((Collection<?>) currentValue));
@@ -289,7 +294,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         return Objects.equals(orginalValue, currentValue);
     }
 
-    private Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
+    private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
             final AbstractField<?> field) {
         Object currentValue = field.getValue();
         if (field instanceof Table) {
@@ -365,7 +370,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         return false;
     }
 
-    private List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
+    private static List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
         final List<AbstractField<?>> components = new ArrayList<>();
 
         final Iterator<Component> iterate = abstractLayout.iterator();
@@ -464,6 +469,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private class ChangeListener implements ValueChangeListener, TextChangeListener, ItemSetChangeListener {
 
+        private static final long serialVersionUID = 1L;
         private final Field<?> field;
 
         public ChangeListener(final Field<?> field) {

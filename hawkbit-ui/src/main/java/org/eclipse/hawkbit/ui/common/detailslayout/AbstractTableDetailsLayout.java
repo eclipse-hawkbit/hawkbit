@@ -64,7 +64,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private Button editButton;
 
     private Button manageMetadataBtn;
-    
+
     private TabSheet detailsTab;
 
     private VerticalLayout detailsLayout;
@@ -140,11 +140,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
-        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
+                SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
-        manageMetadataBtn.addClickListener(this::showMetadata);    
+        manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
 
         detailsTab = SPUIComponentProvider.getDetailsTabSheet();
@@ -222,7 +222,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
-        populateMetadataDetails();
     }
 
     protected void populateLog() {
@@ -295,8 +294,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout = getTabLayout();
         return descriptionLayout;
     }
-    
-   /**
+
+    /**
      * Default caption of header to be displayed when no data row selected in
      * table.
      * 
@@ -341,7 +340,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected abstract void populateDetailsWidget();
-    
+
     protected abstract void populateMetadataDetails();
 
     protected Long getSelectedBaseEntityId() {
@@ -352,10 +351,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getName();
 
-    protected abstract String getShowMetadataButtonId();
-    
     protected abstract Boolean isMetadataIconToBeDisplayed();
-    
+
     protected abstract void showMetadata(Button.ClickEvent event);
 
 }

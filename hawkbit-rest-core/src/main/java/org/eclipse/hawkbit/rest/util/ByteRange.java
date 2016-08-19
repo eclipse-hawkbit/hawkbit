@@ -69,13 +69,10 @@ public class ByteRange {
         return total;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    // NOSONAR - as this is generated
+    @SuppressWarnings("squid:S864")
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (end ^ end >>> 32);
@@ -85,11 +82,6 @@ public class ByteRange {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {

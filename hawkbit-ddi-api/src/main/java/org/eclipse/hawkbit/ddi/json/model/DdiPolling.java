@@ -30,11 +30,15 @@ public class DdiPolling {
      *            between polls
      */
     public DdiPolling(final String sleep) {
-        super();
         this.sleep = sleep;
     }
 
+    /**
+     * Constructor.
+     *
+     */
     public DdiPolling() {
+        // needed for json create
     }
 
     public String getSleep() {

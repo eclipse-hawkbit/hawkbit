@@ -51,7 +51,9 @@ public interface UserAuthenticationFilter {
      * @throws ServletException
      *             servlet exception
      */
-
+    // this declaration of multiple checked exception is necessary so it's
+    // aligned with the servlet API.
+    @SuppressWarnings("squid:S1160")
     void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException;
 

@@ -28,11 +28,6 @@ import org.springframework.security.core.context.SecurityContextImpl;
  */
 public class SecurityContextTenantAware implements TenantAware {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.tenancy.TenantAware#getCurrentTenantId()
-     */
     @Override
     public String getCurrentTenant() {
         final SecurityContext context = SecurityContextHolder.getContext();
@@ -56,7 +51,7 @@ public class SecurityContextTenantAware implements TenantAware {
         }
     }
 
-    private SecurityContext buildSecurityContext(final String tenant) {
+    private static SecurityContext buildSecurityContext(final String tenant) {
         final SecurityContextImpl securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(
                 new AuthenticationDelegate(SecurityContextHolder.getContext().getAuthentication(), tenant));
@@ -68,7 +63,7 @@ public class SecurityContextTenantAware implements TenantAware {
      * {@link Authentication} object except setting the details specifically for
      * a specific tenant.
      */
-    private class AuthenticationDelegate implements Authentication {
+    private static final class AuthenticationDelegate implements Authentication {
         private static final long serialVersionUID = 1L;
 
         private final Authentication delegate;

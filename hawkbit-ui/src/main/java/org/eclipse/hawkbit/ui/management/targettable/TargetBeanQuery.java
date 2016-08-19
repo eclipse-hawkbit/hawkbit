@@ -190,9 +190,9 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         final ManagementUIState tmpManagementUIState = getManagementUIState();
         tmpManagementUIState.setTargetsCountAll(totSize);
-        if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            tmpManagementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
-            size = SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES;
+        if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            tmpManagementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
+            size = SPUIDefinitions.MAX_TABLE_ENTRIES;
         } else {
             tmpManagementUIState.setTargetsTruncated(null);
         }

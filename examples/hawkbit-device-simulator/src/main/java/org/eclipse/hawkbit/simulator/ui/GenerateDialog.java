@@ -33,9 +33,10 @@ import com.vaadin.ui.Window;
  * Popup dialog window for setting the values of generating the simulated
  * devices, e.g. the amount.
  * 
- * @author Michael Hirsch
  *
  */
+// Vaadin Inheritance
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class GenerateDialog extends Window {
 
     private static final long serialVersionUID = 1L;
@@ -49,8 +50,9 @@ public class GenerateDialog extends Window {
     private final TextField pollDelayTextField;
     private final TextField pollUrlTextField;
     private final TextField gatewayTokenTextField;
-    private final OptionGroup protocolGroup;
-    private final Button buttonOk;
+    private OptionGroup protocolGroup;
+    private Button buttonOk;
+    private final boolean dmfEnabled;
 
     /**
      * Creates a new pop window for setting the configuration of simulating
@@ -59,9 +61,12 @@ public class GenerateDialog extends Window {
      * @param callback
      *            the callback which is called when the dialog has been
      *            successfully confirmed.
+     * @param dmfEnabled
+     *            indicates if the AMQP/DMF interface is enabled by
+     *            configuration and if the option DMF should be enabled or not
      */
-    public GenerateDialog(final GenerateDialogCallback callback) {
-
+    public GenerateDialog(final GenerateDialogCallback callback, final boolean dmfEnabled) {
+        this.dmfEnabled = dmfEnabled;
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
 
@@ -87,8 +92,8 @@ public class GenerateDialog extends Window {
         gatewayTokenTextField.setColumns(50);
         gatewayTokenTextField.setVisible(false);
 
-        protocolGroup = createProtocolGroup();
-        buttonOk = createOkButton(callback);
+        createProtocolGroup();
+        createOkButton(callback);
 
         namePrefixTextField.addValueChangeListener(event -> checkValid());
         amountTextField.addValueChangeListener(event -> checkValid());
@@ -181,26 +186,29 @@ public class GenerateDialog extends Window {
                 final URL basePollURL, final String gatewayToken, final Protocol protocol);
     }
 
-    private OptionGroup createProtocolGroup() {
+    private void createProtocolGroup() {
 
-        final OptionGroup protocolGroup = new OptionGroup("Simulated Device Protocol");
+        this.protocolGroup = new OptionGroup("Simulated Device Protocol");
         protocolGroup.addItem(Protocol.DMF_AMQP);
         protocolGroup.addItem(Protocol.DDI_HTTP);
+        protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.setItemCaption(Protocol.DMF_AMQP, "Device Management Federation API (AMQP push)");
         protocolGroup.setItemCaption(Protocol.DDI_HTTP, "Direct Device Interface (HTTP poll)");
         protocolGroup.setNullSelectionAllowed(false);
-        protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.addValueChangeListener(event -> {
             final boolean directDeviceOptionSelected = event.getProperty().getValue().equals(Protocol.DDI_HTTP);
             pollUrlTextField.setVisible(directDeviceOptionSelected);
             gatewayTokenTextField.setVisible(directDeviceOptionSelected);
         });
-        return protocolGroup;
+        protocolGroup.setItemEnabled(Protocol.DMF_AMQP, dmfEnabled);
+        if (!dmfEnabled) {
+            protocolGroup.select(Protocol.DDI_HTTP);
+        }
     }
 
-    private Button createOkButton(final GenerateDialogCallback callback) {
+    private void createOkButton(final GenerateDialogCallback callback) {
 
-        final Button buttonOk = new Button("generate");
+        this.buttonOk = new Button("generate");
         buttonOk.setImmediate(true);
         buttonOk.setIcon(FontAwesome.GEARS);
         buttonOk.addClickListener(event -> {
@@ -210,14 +218,11 @@ public class GenerateDialog extends Window {
                         Integer.valueOf(pollDelayTextField.getValue().replace(".", "")),
                         new URL(pollUrlTextField.getValue()), gatewayTokenTextField.getValue(),
                         (Protocol) protocolGroup.getValue());
-            } catch (final NumberFormatException e) {
-                LOGGER.info(e.getMessage(), e);
-            } catch (final MalformedURLException e) {
+            } catch (final NumberFormatException | MalformedURLException e) {
                 LOGGER.info(e.getMessage(), e);
             }
             GenerateDialog.this.close();
         });
-        return buttonOk;
     }
 
     private TextField createRequiredTextfield(final String caption, final String value, final Resource icon,
@@ -226,7 +231,7 @@ public class GenerateDialog extends Window {
         return addTextFieldValues(textField, icon, validator);
     }
 
-    private TextField createRequiredTextfield(final String caption, final Property dataSource, final Resource icon,
+    private TextField createRequiredTextfield(final String caption, final Property<?> dataSource, final Resource icon,
             final Validator validator) {
         final TextField textField = new TextField(caption, dataSource);
         return addTextFieldValues(textField, icon, validator);

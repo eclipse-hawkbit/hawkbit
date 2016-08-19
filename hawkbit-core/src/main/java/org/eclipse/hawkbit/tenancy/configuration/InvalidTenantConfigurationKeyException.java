@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.tenancy.configuration;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.exception.SpServerRtException;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 
 /**
  * The {@link #InvalidTenantConfigurationKeyException} is thrown when an invalid
  * configuration key is used.
  *
  */
-public class InvalidTenantConfigurationKeyException extends SpServerRtException {
+public class InvalidTenantConfigurationKeyException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_KEY_INVALID;

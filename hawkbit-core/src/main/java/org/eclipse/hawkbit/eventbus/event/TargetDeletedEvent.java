@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.eventbus.event;
 
 /**
- *
- *
- *
+ * The event when a target is deleted.
  */
 public class TargetDeletedEvent extends AbstractDistributedEvent {
 

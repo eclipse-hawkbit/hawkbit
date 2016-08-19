@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +22,6 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -45,9 +43,6 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
-
-    @Autowired
-    private UINotification uinotification;
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -85,21 +80,9 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     @Override
     protected void unassignTag(final String tagName) {
         final TargetTagAssignmentResult result = toggleAssignment(tagName);
-        if (result.getUnassigned() >= 1 && (isClickedTagListEmpty() || getClickedTagList().contains(tagName))) {
+        if (result.getUnassigned() >= 1) {
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
         }
-    }
-
-    private Boolean isClickedTagListEmpty() {
-        if (getClickedTagList() == null || getClickedTagList() != null && !getClickedTagList().isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
-    /* To Be Done : this implementation will vary in views */
-    private List<String> getClickedTagList() {
-        return new ArrayList<>();
     }
 
     @Override
@@ -120,6 +103,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     @Override
     protected void populateContainer() {
         container.removeAllItems();
+        tagDetails.clear();
         for (final TargetTag tag : tagManagement.findAllTargetTags()) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }

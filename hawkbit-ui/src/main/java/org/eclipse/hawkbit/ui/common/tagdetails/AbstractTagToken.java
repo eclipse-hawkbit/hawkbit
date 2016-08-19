@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,6 +44,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
+ *
+ * @param <T>
+ *            the special entity
  */
 public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
@@ -54,7 +58,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected IndexedContainer container;
 
-    protected final transient Map<Long, TagData> tagDetails = new HashMap<>();
+    protected final transient Map<Long, TagData> tagDetails = new ConcurrentHashMap<>();
 
     protected final transient Map<Long, TagData> tokensAdded = new HashMap<>();
 
@@ -75,6 +79,9 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     @Autowired
     protected ManagementUIState managementUIState;
 
+    // BaseEntity implements Serializable so this entity is serializable. Maybe
+    // a sonar bug
+    @SuppressWarnings("squid:S1948")
     protected T selectedEntity;
 
     @PostConstruct
@@ -140,10 +147,12 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
-        tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
-        final Item item = container.addItem(tagId);
-        item.getItemProperty("id").setValue(tagId);
-        updateItem(tagName, tagColor, item);
+        final TagData tagData = tagDetails.putIfAbsent(tagId, new TagData(tagId, tagName, tagColor));
+        if (tagData == null) {
+            final Item item = container.addItem(tagId);
+            item.getItemProperty("id").setValue(tagId);
+            updateItem(tagName, tagColor, item);
+        }
     }
 
     protected void updateItem(final String tagName, final String tagColor, final Item item) {
@@ -211,11 +220,11 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             unassignTag(tagDetails.get(tokenId).getName());
         }
 
-    }
+        private Property getItemNameProperty(final Object tokenId) {
+            final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+            return item.getItemProperty("name");
+        }
 
-    private Property getItemNameProperty(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
-        return item.getItemProperty("name");
     }
 
     private String getColor(final Object tokenId) {
@@ -247,6 +256,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected void removeTokenItem(final Long tokenId, final String name) {
         tokenField.removeToken(tokenId);
+        tagDetails.remove(tokenId);
         setContainerPropertValues(tokenId, name, tokensAdded.get(tokenId).getColor());
     }
 

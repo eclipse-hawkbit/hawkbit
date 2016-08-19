@@ -15,8 +15,7 @@ package org.eclipse.hawkbit.exception;
  * Generic Custom Exception to wrap the Runtime and checked exception
  *
  */
-
-public abstract class SpServerRtException extends RuntimeException {
+public abstract class AbstractServerRtException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +27,7 @@ public abstract class SpServerRtException extends RuntimeException {
      * @param error
      *            detail
      */
-    public SpServerRtException(final SpServerError error) {
+    public AbstractServerRtException(final SpServerError error) {
         super(error.getMessage());
         this.error = error;
     }
@@ -41,7 +40,7 @@ public abstract class SpServerRtException extends RuntimeException {
      * @param error
      *            detail
      */
-    public SpServerRtException(final String message, final SpServerError error) {
+    public AbstractServerRtException(final String message, final SpServerError error) {
         super(message);
         this.error = error;
     }
@@ -56,7 +55,7 @@ public abstract class SpServerRtException extends RuntimeException {
      * @param cause
      *            of the exception
      */
-    public SpServerRtException(final String message, final SpServerError error, final Throwable cause) {
+    public AbstractServerRtException(final String message, final SpServerError error, final Throwable cause) {
         super(message, cause);
         this.error = error;
     }
@@ -69,7 +68,7 @@ public abstract class SpServerRtException extends RuntimeException {
      * @param cause
      *            of the exception
      */
-    public SpServerRtException(final SpServerError error, final Throwable cause) {
+    public AbstractServerRtException(final SpServerError error, final Throwable cause) {
         super(error.getMessage(), cause);
         this.error = error;
     }

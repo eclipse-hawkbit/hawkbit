@@ -21,6 +21,9 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
@@ -105,7 +108,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Autowired
     private DsMetadataPopupLayout dsMetadataPopupLayout;
-    
+
     /**
      * Initialize the component.
      */
@@ -121,6 +124,33 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
         } else if (DISPLAY_DROP_HINT_EVENTS.contains(event)) {
             UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvents(final DistributionSetUpdateEvent event) {
+        final DistributionSet ds = event.getEntity();
+        final DistributionSetIdName lastSelectedDsIdName = manageDistUIState.getLastSelectedDistribution().isPresent()
+                ? manageDistUIState.getLastSelectedDistribution().get() : null;
+        final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
+
+        // refresh the details tabs only if selected ds is updated
+        if (lastSelectedDsIdName != null && lastSelectedDsIdName.getId().equals(ds.getId())) {
+            // update table row+details layout
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, ds));
+        } else if (visibleItemIds.stream().filter(e -> e.getId().equals(ds.getId())).findFirst().isPresent()) {
+            // update the name/version details visible in table
+            UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvents(final List<?> events) {
+        final Object firstEvent = events.get(0);
+        if (DistributionCreatedEvent.class.isInstance(firstEvent)) {
+            refreshDistributions();
+        } else if (DistributionDeletedEvent.class.isInstance(firstEvent)) {
+            onDistributionDeleteEvent((List<DistributionDeletedEvent>) events);
         }
     }
 
@@ -189,10 +219,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void publishEntityAfterValueChange(final DistributionSet distributionSet) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
-        if(distributionSet!=null){
-            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(), 
-                    distributionSet.getName(),distributionSet.getVersion()));
-        }    
+        if (distributionSet != null) {
+            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(),
+                    distributionSet.getName(), distributionSet.getVersion()));
+        }
     }
 
     @Override
@@ -307,7 +337,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
             final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
-        if (softwareModule.getType().getMaxAssignments() == Integer.MAX_VALUE) {
+        if (softwareModule.getType().getMaxAssignments() > 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
             }
@@ -334,9 +364,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         if (distributionSetManagement.isDistributionSetInUse(ds)) {
-            notification.displayValidationError(
-                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
-                            ds.getName(), ds.getVersion()));
+            notification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;
         }
         return true;
@@ -434,6 +462,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent event) {
         onBaseEntityEvent(event);
+        if (BaseEntityEventType.UPDATED_ENTITY != event.getEventType()) {
+            return;
+        }
+        UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -479,8 +511,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
+
     }
-    
+
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
@@ -490,12 +523,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
+                manageMetaDataBtn
+                        .addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
                 return manageMetaDataBtn;
             }
         });
     }
-    
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
@@ -506,7 +539,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return columnList;
     }
 
-    private Button createManageMetadataButton(String nameVersionStr) {
+    private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
@@ -515,8 +548,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return manageMetadataBtn;
     }
 
-    private void showMetadataDetails(Long itemId) {
-        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
+   private void showMetadataDetails(final Long itemId) {
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 
@@ -527,4 +560,73 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return name + "." + version;
     }
 
+    private void refreshDistributions() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final int size = dsContainer.size();
+        if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            refreshTablecontainer();
+        }
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+    }
+
+    private void refreshTablecontainer() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        dsContainer.refresh();
+        selectRow();
+    }
+
+    private void updateDistributionInTable(final DistributionSet editedDs) {
+        final Item item = getContainerDataSource()
+                .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        updateEntity(editedDs, item);
+    }
+
+    private void onDistributionDeleteEvent(final List<DistributionDeletedEvent> events) {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shouldRefreshDs = false;
+        for (final DistributionDeletedEvent deletedEvent : events) {
+            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                dsContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshDs = true;
+            }
+        }
+
+        if (shouldRefreshDs) {
+            refreshOnDelete();
+        } else {
+            dsContainer.commit();
+        }
+        reSelectItemsAfterDeletionEvent();
+    }
+
+    private void refreshOnDelete() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final int size = dsContainer.size();
+        refreshTablecontainer();
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+    }
+
+    private void reSelectItemsAfterDeletionEvent() {
+        Set<Object> values = new HashSet<>();
+        if (isMultiSelect()) {
+            values = new HashSet<>((Set<?>) getValue());
+        } else {
+            values.add(getValue());
+        }
+        setValue(null);
+
+        for (final Object value : values) {
+            if (getVisibleItemIds().contains(value)) {
+                select(value);
+            }
+        }
+    }
 }

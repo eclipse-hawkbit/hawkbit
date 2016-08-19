@@ -17,6 +17,7 @@ import com.vaadin.ui.Button;
  *
  *
  */
+@FunctionalInterface
 public interface SPUIButtonDecorator {
 
     /**

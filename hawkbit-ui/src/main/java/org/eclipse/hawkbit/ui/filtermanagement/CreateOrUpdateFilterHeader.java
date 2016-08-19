@@ -60,8 +60,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- *
+ * A Vaadin layout for create or update the target filter.
  */
 @SpringComponent
 @ViewScope
@@ -494,11 +493,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             if (filterManagementUIState.isCreateFilterViewDisplayed() && !doesAlreadyExists()) {
                 createTargetFilterQuery();
             } else {
-                if (!nameTextField.getValue().equals(oldFilterName) && !doesAlreadyExists()) {
-                    updateCustomFilter();
-                } else {
-                    updateCustomFilter();
-                }
+                updateCustomFilter();
             }
         }
     }

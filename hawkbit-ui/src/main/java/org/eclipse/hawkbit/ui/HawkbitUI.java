@@ -14,7 +14,7 @@ import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
-import org.eclipse.hawkbit.ui.components.SPUIErrorHandler;
+import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -50,13 +50,11 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Vaadin management UI.
  *
- *
- *
- *
  */
-@SuppressWarnings("serial")
 @Title("hawkBit Update Server")
 public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUI.class);
 
     private static final String EMPTY_VIEW = "";
@@ -139,7 +137,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         contentVerticalLayout.addComponent(content);
         content.setStyleName("view-content");
         content.setSizeFull();
-        rootLayout.setExpandRatio(contentVerticalLayout, 1.0f);
+        rootLayout.setExpandRatio(contentVerticalLayout, 1.0F);
         contentVerticalLayout.setStyleName("main-content");
         contentVerticalLayout.setExpandRatio(content, 1.0F);
         setContent(rootLayout);
@@ -154,6 +152,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         }
         final Navigator navigator = new Navigator(this, content);
         navigator.addViewChangeListener(new ViewChangeListener() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public boolean beforeViewChange(final ViewChangeEvent event) {
                 return true;
@@ -180,7 +180,10 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         final String locale = getLocaleId(SPUIDefinitions.getAvailableLocales());
         setLocale(new Locale(locale));
 
-        UI.getCurrent().setErrorHandler(new SPUIErrorHandler());
+        if (UI.getCurrent().getErrorHandler() == null) {
+            UI.getCurrent().setErrorHandler(new HawkbitUIErrorHandler());
+        }
+
         LOG.info("Current locale of the application is : {}", i18n.getLocale());
     }
 
@@ -197,7 +200,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
      *            as set
      * @return String as preferred locale
      */
-    private String getLocaleId(final Set<String> availableLocalesInApp) {
+    private static String getLocaleId(final Set<String> availableLocalesInApp) {
         final String[] localeChain = getLocaleChain();
         String spLocale = SPUIDefinitions.DEFAULT_LOCALE;
         if (null != localeChain) {
@@ -217,22 +220,26 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
      *
      * @return String as locales
      */
-    private String[] getLocaleChain() {
+    private static String[] getLocaleChain() {
         String[] localeChain = null;
         // Fetch all cookies from the request
         final Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
-        if (cookies != null) {
-            for (final Cookie c : cookies) {
-                if (c.getName().equals(SPUIDefinitions.COOKIE_NAME) && !c.getValue().isEmpty()) {
-                    localeChain = c.getValue().split("#");
-                    break;
-                }
+        if (cookies == null) {
+            return localeChain;
+        }
+
+        for (final Cookie c : cookies) {
+            if (c.getName().equals(SPUIDefinitions.COOKIE_NAME) && !c.getValue().isEmpty()) {
+                localeChain = c.getValue().split("#");
+                break;
             }
         }
         return localeChain;
     }
 
     private class ManagementViewProvider implements ViewProvider {
+
+        private static final long serialVersionUID = 1L;
 
         @Override
         public String getViewName(final String viewAndParameters) {

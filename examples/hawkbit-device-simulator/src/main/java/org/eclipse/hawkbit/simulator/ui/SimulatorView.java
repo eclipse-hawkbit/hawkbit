@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Status;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.SimulatedDeviceFactory;
 import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
+import org.eclipse.hawkbit.simulator.amqp.AmqpProperties;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
@@ -57,6 +58,11 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimulatorView extends VerticalLayout implements View {
 
+    /**
+     * 
+     */
+    private static final String HTML_SPAN = ";</span>";
+
     private static final String NEXT_POLL_COUNTER_SEC_COL = "nextPollCounterSec";
 
     private static final String RESPONSE_STATUS_COL = "updateStatus";
@@ -84,6 +90,9 @@ public class SimulatorView extends VerticalLayout implements View {
 
     @Autowired
     private transient EventBus eventbus;
+
+    @Autowired
+    private transient AmqpProperties amqpProperties;
 
     private final Label caption = new Label("DMF/DDI Simulated Devices");
     private final HorizontalLayout toolbar = new HorizontalLayout();
@@ -261,94 +270,94 @@ public class SimulatorView extends VerticalLayout implements View {
                         final String deviceId = namePrefix + index;
                         beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
                                 tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
-                        spSenderService.createOrUpdateThing(tenant, deviceId);
                     }
-                }));
+                }, amqpProperties.isEnabled()));
     }
 
-    private Converter<String, Protocol> createProtocolConverter() {
-
-        return new Converter<String, Protocol>() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Protocol convertToModel(final String value, final Class<? extends Protocol> targetType,
-                    final Locale locale) {
-                return null;
-            }
-
-            @Override
-            public String convertToPresentation(final Protocol value, final Class<? extends String> targetType,
-                    final Locale locale) {
-                switch (value) {
-                case DDI_HTTP:
-                    return "DDI API (http)";
-                case DMF_AMQP:
-                    return "DMF API (amqp)";
-                default:
-                    return "unknown";
-                }
-            }
-
-            @Override
-            public Class<Protocol> getModelType() {
-                return Protocol.class;
-            }
-
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
-            }
-        };
-
+    private ProtocolConverter createProtocolConverter() {
+        return new ProtocolConverter();
     }
 
-    private Converter<String, Status> createStatusConverter() {
-        return new Converter<String, Status>() {
-            private static final long serialVersionUID = 1L;
+    private StatusConverter createStatusConverter() {
+        return new StatusConverter();
+    }
 
-            @Override
-            public Status convertToModel(final String value, final Class<? extends Status> targetType,
-                    final Locale locale) {
-                return null;
-            }
+    public static final class ProtocolConverter implements Converter<String, Protocol> {
+        private static final long serialVersionUID = 1L;
 
-            @Override
-            public String convertToPresentation(final Status value, final Class<? extends String> targetType,
-                    final Locale locale) {
-                switch (value) {
-                case UNKNWON:
-                    return "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"gray\";\">&#x"
-                            + Integer.toHexString(FontAwesome.QUESTION_CIRCLE.getCodepoint()) + ";</span>";
-                case PEDNING:
-                    return "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"yellow\";\">&#x" + Integer.toHexString(FontAwesome.REFRESH.getCodepoint())
-                            + ";</span>";
-                case FINISH:
-                    return "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"green\";\">&#x"
-                            + Integer.toHexString(FontAwesome.CHECK_CIRCLE.getCodepoint()) + ";</span>";
-                case ERROR:
-                    return "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"red\";\">&#x"
-                            + Integer.toHexString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()) + ";</span>";
-                default:
-                    throw new IllegalStateException("unknown value");
-                }
-            }
+        @Override
+        public Protocol convertToModel(final String value, final Class<? extends Protocol> targetType,
+                final Locale locale) {
+            return null;
+        }
 
-            @Override
-            public Class<Status> getModelType() {
-                return Status.class;
+        @Override
+        public String convertToPresentation(final Protocol value, final Class<? extends String> targetType,
+                final Locale locale) {
+            switch (value) {
+            case DDI_HTTP:
+                return "DDI API (http)";
+            case DMF_AMQP:
+                return "DMF API (amqp)";
+            default:
+                return "unknown";
             }
+        }
 
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
+        @Override
+        public Class<Protocol> getModelType() {
+            return Protocol.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
+    }
+
+    private static final class StatusConverter implements Converter<String, Status> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Status convertToModel(final String value, final Class<? extends Status> targetType,
+                final Locale locale) {
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(final Status value, final Class<? extends String> targetType,
+                final Locale locale) {
+            switch (value) {
+            case UNKNWON:
+                return "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                        + ";\"color\":\"gray\";\">&#x" + Integer.toHexString(FontAwesome.QUESTION_CIRCLE.getCodepoint())
+                        + HTML_SPAN;
+            case PEDNING:
+                return "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                        + ";\"color\":\"yellow\";\">&#x" + Integer.toHexString(FontAwesome.REFRESH.getCodepoint())
+                        + HTML_SPAN;
+            case FINISH:
+                return "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                        + ";\"color\":\"green\";\">&#x" + Integer.toHexString(FontAwesome.CHECK_CIRCLE.getCodepoint())
+                        + HTML_SPAN;
+            case ERROR:
+                return "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                        + ";\"color\":\"red\";\">&#x"
+                        + Integer.toHexString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()) + HTML_SPAN;
+            default:
+                throw new IllegalStateException("unknown value");
             }
-        };
+        }
+
+        @Override
+        public Class<Status> getModelType() {
+            return Status.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
     }
 
 }

@@ -28,7 +28,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 /**
- *
+ * The distributor for events.
  *
  */
 @EventSubscriber
@@ -100,11 +100,11 @@ public class EventDistributor {
         return topics;
     }
 
-    private void logDistributingEvent(final Event event, final String channel) {
+    private static void logDistributingEvent(final Event event, final String channel) {
         LOGGER.trace("distributing event {} from node {} to topic {}", event, NODE_ID, channel);
     }
 
-    private void logNotDistributingEvent(final Event event, final String channel) {
+    private static void logNotDistributingEvent(final Event event, final String channel) {
         LOGGER.debug("no redis template configured, event {} will not be distributed to channel {} from node {}", event,
                 channel, NODE_ID);
     }
