@@ -54,17 +54,17 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getHeaderCaption() {
-        return i18n.get("header.dist.table");
+        return distributionHeaderCaption;
     }
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
+        return distributionSearchBoxId;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponentIdProvider.DIST_SEARCH_ICON;
+        return distributionSearchResetIcon;
     }
 
     @Override

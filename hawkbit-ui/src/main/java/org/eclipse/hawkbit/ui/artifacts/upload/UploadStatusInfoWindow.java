@@ -332,6 +332,7 @@ public class UploadStatusInfoWindow extends Window {
         restoreState();
     }
 
+    @SuppressWarnings("unchecked")
     private void uploadRecevied(final String filename, final SoftwareModule softwareModule) {
         final Item item = uploads.addItem(getItemid(filename, softwareModule));
         if (item != null) {

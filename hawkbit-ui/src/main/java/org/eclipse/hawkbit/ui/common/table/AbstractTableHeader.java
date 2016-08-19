@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,13 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private Button bulkUploadIcon;
 
+    protected String distributionHeaderCaption;
+    protected String softwareHeaderCaption;
+    protected String distributionSearchBoxId;
+    protected String softwareSerachBoxId;
+    protected String distributionSearchResetIcon;
+    protected String softwareSearchResetIcon;
+
     /**
      * Initialze components.
      */
@@ -85,6 +93,12 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     private void createComponents() {
+        distributionHeaderCaption = i18n.get("header.dist.table");
+        softwareHeaderCaption = i18n.get("upload.swModuleTable.header");
+        distributionSearchBoxId = SPUIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
+        softwareSerachBoxId = SPUIComponentIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
+        distributionSearchResetIcon = SPUIComponentIdProvider.DIST_SEARCH_ICON;
+        softwareSearchResetIcon = SPUIComponentIdProvider.SW_MODULE_SEARCH_RESET_ICON;
         headerCaption = createHeaderCaption();
         searchField = new TextFieldBuilder(getSearchBoxId()).createSearchField(event -> searchBy(event.getText()));
 

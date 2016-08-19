@@ -1,6 +1,5 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +48,6 @@ import com.vaadin.ui.UI;
  * Common util class.
  */
 public final class HawkbitCommonUtil {
-
     /**
      * Define spaced string.
      */
@@ -58,21 +56,17 @@ public final class HawkbitCommonUtil {
      * Define empty string.
      */
     public static final String SP_STRING_EMPTY = "";
-
     /**
      * Html span.
      */
     public static final String SPAN_CLOSE = "</span>";
-
     public static final String HTML_LI_CLOSE_TAG = "</li>";
     public static final String HTML_LI_OPEN_TAG = "<li>";
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
     public static final String HTML_UL_OPEN_TAG = "<ul>";
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
-
     public static final String DIV_DESCRIPTION_START = "<div id=\"desc-length\"><p id=\"desciption-p\">";
-
     public static final String DIV_DESCRIPTION_END = "</p></div>";
 
     private static final String DRAG_COUNT_ELEMENT = "var x = document.getElementById('sp-drag-count'); ";
@@ -119,7 +113,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Trim the text and convert into null in case of empty string.
-     *
+     * 
      * @param text
      *            as text to be trimed
      * @return null if the text is null or if the text is blank, text.trim() if
@@ -136,7 +130,7 @@ public final class HawkbitCommonUtil {
     /**
      * Concatenate the given text all the string arguments with the given
      * delimiter.
-     *
+     * 
      * @param delimiter
      *            the delimiter text to be used while concatenation.
      * @param texts
@@ -162,7 +156,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Returns the input text within html bold tag <b>..</b>.
-     *
+     * 
      * @param text
      *            is the text to be converted in to Bold
      * @return null if the input text param is null returns text with <b>...</b>
@@ -181,7 +175,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get target label Id.
-     *
+     * 
      * @param controllerId
      *            as String
      * @return String as label name
@@ -192,7 +186,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get distribution table cell id.
-     *
+     * 
      * @param name
      *            distribution name
      * @param version
@@ -205,7 +199,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get software module label id.
-     *
+     * 
      * @param name
      *            software module name
      * @param version
@@ -218,7 +212,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get label with software module name and description.
-     *
+     * 
      * @param name
      *            software module name
      * @param desc
@@ -233,7 +227,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     *
+     * 
      * @param name
      * @return
      */
@@ -245,7 +239,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     *
+     * 
      * @param caption
      *            as caption of the details
      * @param name
@@ -260,7 +254,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Action History Details.
-     *
+     * 
      * @param name
      * @return
      */
@@ -272,7 +266,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get tool tip for Poll status.
-     *
+     * 
      * @param pollStatus
      * @param i18N
      * @return
@@ -290,7 +284,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Null check for text.
-     *
+     * 
      * @param orgText
      *            text to be formatted
      * @return String formatted text
@@ -302,7 +296,7 @@ public final class HawkbitCommonUtil {
     /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
-     *
+     * 
      * @param newBrowserHeight
      *            as current browser height.
      * @return extra height required to increase.
@@ -314,7 +308,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Find required extra height of software module.
-     *
+     * 
      * @param newBrowserHeight
      *            new browser height
      * @return float heigth of software module table
@@ -354,8 +348,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     *
-     *
      * @param newBrowserHeight
      *            new browser height
      * @param minPopupHeight
@@ -401,7 +393,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get target table width based on screen width.
-     *
+     * 
      * @param newBrowserWidth
      *            new browser width.
      * @param minTargetTableLength
@@ -553,8 +545,8 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-Duplicate check - Unique Key.
-     *
+     * Duplicate check - Unique Key.
+     * 
      * @param name
      *            as string
      * @param version
@@ -635,11 +627,9 @@ Duplicate check - Unique Key.
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
         final int unassignedCount = result.getUnassigned();
-
         if (assignedCount == 1) {
             formMsg.append(i18n.get("message.target.assigned.one",
                     new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
-
         } else if (assignedCount > 1) {
             formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, tagName }))
                     .append("<br>");
@@ -650,11 +640,9 @@ Duplicate check - Unique Key.
                 formMsg.append(alreadyAssigned).append("<br>");
             }
         }
-
         if (unassignedCount == 1) {
             formMsg.append(i18n.get("message.target.unassigned.one",
                     new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
-
         } else if (unassignedCount > 1) {
             formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
                     .append("<br>");
@@ -679,7 +667,6 @@ Duplicate check - Unique Key.
     }
 
     /**
-     *
      * Create lazy query container for DS type.
      *
      * @param queryFactory

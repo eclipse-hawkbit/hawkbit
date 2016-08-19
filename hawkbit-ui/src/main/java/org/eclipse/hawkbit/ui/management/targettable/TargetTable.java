@@ -105,9 +105,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
     private static final String TARGET_PINNED = "targetPinned";
-
     private static final long serialVersionUID = -2300392868806614568L;
-
     private static final int PROPERTY_DEPT = 3;
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
@@ -127,7 +125,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
     private Button targetPinnedBtn;
-
     private Boolean isTargetPinned = Boolean.FALSE;
 
     @Override
@@ -234,17 +231,14 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     protected Container createContainer() {
         // ADD all the filters to the query config
         final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-
         // Create TargetBeanQuery factory with the query config.
         final BeanQueryFactory<TargetBeanQuery> targetQF = new BeanQueryFactory<>(TargetBeanQuery.class);
         targetQF.setQueryConfiguration(queryConfig);
-
         // create lazy query container with lazy defination and query
         final LazyQueryContainer targetTableContainer = new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME),
                 targetQF);
         targetTableContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
-
         return targetTableContainer;
     }
 
@@ -339,7 +333,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                 shouldRefreshTargets = true;
             }
         }
-
         if (shouldRefreshTargets) {
             refreshOnDelete();
         } else {
