@@ -62,7 +62,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             } else {
                 addNewBaseSoftware();
             }
-
         }
 
         @Override

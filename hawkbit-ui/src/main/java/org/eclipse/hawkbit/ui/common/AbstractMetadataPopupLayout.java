@@ -75,14 +75,15 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         }
 
         @Override
+        public boolean canWindowClose() {
+            return false;
+        }
+
+        @Override
         public boolean canWindowSaveOrUpdate() {
             return true;
         }
 
-        @Override
-        public boolean canWindowClose() {
-            return false;
-        }
     }
 
     private static final String DELETE_BUTTON = "DELETE_BUTTON";

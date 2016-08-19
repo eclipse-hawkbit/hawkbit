@@ -61,10 +61,9 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
-    /**
-     *
-     */
+
     private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+
         @Override
         public void saveOrUpdate() {
             if (optiongroup.getValue().equals(createTagStr)) {

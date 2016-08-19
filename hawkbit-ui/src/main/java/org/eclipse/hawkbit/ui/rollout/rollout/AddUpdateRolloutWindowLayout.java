@@ -594,7 +594,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             } else {
                 createRollout();
             }
-
         }
 
         @Override

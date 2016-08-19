@@ -141,15 +141,12 @@ public class CommonDialogWindow extends Window {
             return;
         }
 
-        // check first the can window close before you save the dialog, because
-        // if you save the dialog first, the entity exist and the duplicate
-        // check is failing.
-        final boolean canWindowClose = closeListener.canWindowClose();
-        if (closeListener.canWindowSaveOrUpdate()) {
-            closeListener.saveOrUpdate();
+        if (!closeListener.canWindowSaveOrUpdate()) {
+            return;
         }
+        closeListener.saveOrUpdate();
 
-        if (canWindowClose) {
+        if (closeListener.canWindowClose()) {
             close();
         }
 
@@ -557,7 +554,7 @@ public class CommonDialogWindow extends Window {
          * @return true/false based on the dialog window to be closed or not.
          */
         default boolean canWindowClose() {
-            return canWindowSaveOrUpdate();
+            return true;
         }
 
         /**
@@ -566,23 +563,5 @@ public class CommonDialogWindow extends Window {
          */
         void saveOrUpdate();
     }
-
-    // public abstract class DefaultSaveDialogCloseListener implements
-    // SaveDialogCloseListener {
-    //
-    // private boolean canWindowSaveOrUpdate;
-    //
-    // @Override
-    // public boolean canWindowSaveOrUpdate() {
-    // return this.canWindowSaveOrUpdate;
-    // }
-    //
-    // @Override
-    // public boolean canWindowClose() {
-    // this.canWindowSaveOrUpdate =
-    // return this.canWindowSaveOrUpdate;
-    // }
-    //
-    // }
 
 }
