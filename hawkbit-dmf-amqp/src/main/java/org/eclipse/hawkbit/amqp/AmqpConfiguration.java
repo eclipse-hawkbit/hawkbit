@@ -243,12 +243,16 @@ public class AmqpConfiguration {
 
     /**
      * Create amqp handler service bean.
+     * 
+     * @param amqpMessageDispatcherService
+     *            to sending events to DMF client
      *
      * @return handler service bean
      */
     @Bean
-    public AmqpMessageHandlerService amqpMessageHandlerService() {
-        return new AmqpMessageHandlerService(rabbitTemplate());
+    public AmqpMessageHandlerService amqpMessageHandlerService(
+            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
+        return new AmqpMessageHandlerService(rabbitTemplate(), amqpMessageDispatcherService);
     }
 
     /**

@@ -73,8 +73,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.google.common.eventbus.EventBus;
-
 /**
  *
  * {@link AmqpMessageHandlerService} handles all incoming AMQP messages for the
@@ -85,6 +83,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
 
+    private final AmqpMessageDispatcherService amqpMessageDispatcherService;
+
     @Autowired
     private ControllerManagement controllerManagement;
 
@@ -93,9 +93,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     @Autowired
     private ArtifactManagement artifactManagement;
-
-    @Autowired
-    private EventBus eventBus;
 
     @Autowired
     @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
@@ -115,9 +112,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * 
      * @param defaultTemplate
      *            the configured amqp template.
+     * @param amqpMessageDispatcherService
+     *            to sending events to DMF client
      */
-    public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate) {
+    public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate,
+            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
         super(defaultTemplate);
+        this.amqpMessageDispatcherService = amqpMessageDispatcherService;
     }
 
     /**
@@ -352,9 +353,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
-        eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
-                targetSecurityToken));
+        amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
+                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.getId(),
+                softwareModuleList, target.getTargetInfo().getAddress(), targetSecurityToken));
 
     }
 
@@ -385,6 +386,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final ActionStatus actionStatus = createActionStatus(message, actionUpdateStatus, action);
+        updateLastPollTime(action);
 
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:
@@ -420,6 +422,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
+    }
+
+    private void updateLastPollTime(final Action action) {
+        controllerManagement.updateTargetStatus(action.getTarget().getTargetInfo(), null, System.currentTimeMillis(),
+                null);
     }
 
     private ActionStatus createActionStatus(final Message message, final ActionUpdateStatus actionUpdateStatus,
@@ -506,10 +513,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     void setCache(final Cache cache) {
         this.cache = cache;
-    }
-
-    void setEventBus(final EventBus eventBus) {
-        this.eventBus = eventBus;
     }
 
     void setEntityFactory(final EntityFactory entityFactory) {

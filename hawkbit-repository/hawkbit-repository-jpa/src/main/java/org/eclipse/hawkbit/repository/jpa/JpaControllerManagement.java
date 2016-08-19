@@ -341,7 +341,7 @@ public class JpaControllerManagement implements ControllerManagement {
         targetInfo.setInstalledDistributionSet(ds);
         targetInfo.setInstallationDate(System.currentTimeMillis());
 
-        // check if the assigned set is equal no to the installed set (not
+        // check if the assigned set is equal to the installed set (not
         // necessarily the case as another update might be pending already).
         if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
                 .equals(targetInfo.getInstalledDistributionSet().getId())) {
