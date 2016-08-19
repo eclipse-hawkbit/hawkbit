@@ -65,7 +65,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             distributionTags = (Collection<String>) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);

@@ -82,7 +82,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -599,11 +598,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final Target target, final Pageable pageable) {
-        final Specification<JpaAction> specification = RSQLUtility.parse(rsqlParam, ActionFields.class);
 
-        return convertAcPage(actionRepository.findAll((Specification<JpaAction>) (root, query, cb) -> cb
-                .and(specification.toPredicate(root, query, cb), cb.equal(root.get(JpaAction_.target), target)),
-                pageable), pageable);
+        final Specification<JpaAction> byTargetSpec = createSpecificationFor(target, rsqlParam);
+        final Page<JpaAction> actions = actionRepository.findAll(byTargetSpec, pageable);
+        return convertAcPage(actions, pageable);
+    }
+
+    private Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
+        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class);
+        return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
+                cb.equal(root.get(JpaAction_.target), target));
     }
 
     private static Page<Action> convertAcPage(final Page<JpaAction> findAll, final Pageable pageable) {
@@ -642,10 +646,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Long countActionsByTarget(final String rsqlParam, final Target target) {
-        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class);
-
-        return actionRepository.count((root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
-                cb.equal(root.get(JpaAction_.target), target)));
+        return actionRepository.count(createSpecificationFor(target, rsqlParam));
     }
 
     @Override

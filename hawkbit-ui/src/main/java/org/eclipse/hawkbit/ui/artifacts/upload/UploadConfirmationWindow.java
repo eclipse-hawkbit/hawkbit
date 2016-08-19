@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.FAILED;
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.SUCCESS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
@@ -56,13 +60,13 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Artifact upload confirmation popup.
- * 
+ *
  */
-public class UploadConfirmationwindow implements Button.ClickListener {
+public class UploadConfirmationWindow implements Button.ClickListener {
 
     private static final long serialVersionUID = -1679035890140031740L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(UploadConfirmationwindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadConfirmationWindow.class);
 
     private static final String MD5_CHECKSUM = "md5Checksum";
 
@@ -114,13 +118,13 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     /**
      * Initialize the upload confirmation window.
-     * 
+     *
      * @param artifactUploadView
      *            reference of upload layout.
      * @param artifactUploadState
      *            reference of session variable {@link ArtifactUploadState}.
      */
-    public UploadConfirmationwindow(final UploadLayout artifactUploadView,
+    public UploadConfirmationWindow(final UploadLayout artifactUploadView,
             final ArtifactUploadState artifactUploadState) {
         this.uploadLayout = artifactUploadView;
         this.artifactUploadState = artifactUploadState;
@@ -245,29 +249,27 @@ public class UploadConfirmationwindow implements Button.ClickListener {
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);
 
-            final TextField sha1 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            sha1.setId(swNameVersion + "/" + customFile.getFileName() + "/sha1");
+            final TextField sha1 = createTextField(swNameVersion + "/" + customFile.getFileName() + "/sha1");
 
-            final TextField md5 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            md5.setId(swNameVersion + "/" + customFile.getFileName() + "/md5");
+            final TextField md5 = createTextField(swNameVersion + "/" + customFile.getFileName() + "/md5");
 
-            final TextField customFileName = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
-                    false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-            customFileName.setId(swNameVersion + "/" + customFile.getFileName() + "/customFileName");
+            createTextField(swNameVersion + "/" + customFile.getFileName() + "/customFileName");
+
             newItem.getItemProperty(SHA1_CHECKSUM).setValue(sha1);
             newItem.getItemProperty(MD5_CHECKSUM).setValue(md5);
             newItem.getItemProperty(CUSTOM_FILE).setValue(customFile);
         }
     }
 
+    private static TextField createTextField(final String id) {
+        return new TextFieldBuilder().immediate(true).id(id).buildTextComponent();
+    }
+
     private void addFileNameLayout(final Item newItem, final String baseSoftwareModuleNameVersion,
             final String customFileName, final String itemId) {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        final TextField fileNameTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
-                false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        fileNameTextField.setId(baseSoftwareModuleNameVersion + "/" + customFileName + "/customFileName");
+        final TextField fileNameTextField = createTextField(
+                baseSoftwareModuleNameVersion + "/" + customFileName + "/customFileName");
         fileNameTextField.setData(baseSoftwareModuleNameVersion + "/" + customFileName);
         fileNameTextField.setValue(customFileName);
 
@@ -615,6 +617,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     private void createLocalArtifact(final String itemId, final String filePath,
             final ArtifactManagement artifactManagement, final SoftwareModule baseSw) {
+
         final File newFile = new File(filePath);
         final Item item = tabelContainer.getItem(itemId);
         final String sha1Checksum = ((TextField) item.getItemProperty(SHA1_CHECKSUM).getValue()).getValue();
@@ -624,27 +627,25 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         final String[] itemDet = itemId.split("/");
         final String swModuleNameVersion = itemDet[0];
 
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(newFile);
+        try (FileInputStream fis = new FileInputStream(newFile)) {
+
             artifactManagement.createLocalArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
-        } catch (final FileNotFoundException e) {
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
+            saveUploadStatus(providedFileName, swModuleNameVersion, SUCCESS, "");
+
+        } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
+                | FileNotFoundException e) {
+
+            saveUploadStatus(providedFileName, swModuleNameVersion, FAILED, e.getMessage());
             LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-        } catch (final ArtifactUploadFailedException e) {
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
-            LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-        } catch (final InvalidSHA1HashException e) {
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
-            LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-        } catch (final InvalidMD5HashException e) {
-            saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
-            LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
+
+        } catch (final IOException ex) {
+            LOG.error(ARTIFACT_UPLOAD_EXCEPTION, ex);
         } finally {
-            closeFileStream(fis, newFile);
+            if (newFile.exists() && !newFile.delete()) {
+                LOG.error("Could not delete temporary file: {}", newFile);
+            }
         }
     }
 
@@ -656,21 +657,6 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         result.setUploadResult(status);
         result.setReason(message);
         uploadResultList.add(result);
-
-    }
-
-    private static void closeFileStream(final FileInputStream fis, final File newFile) {
-
-        if (fis != null) {
-            try {
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);
-            }
-        }
-        if (newFile.exists() && !newFile.delete()) {
-            LOG.error("Could not delete temporary file: {}", newFile);
-        }
 
     }
 

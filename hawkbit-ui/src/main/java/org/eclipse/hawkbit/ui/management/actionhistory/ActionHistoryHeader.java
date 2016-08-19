@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -17,7 +18,6 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -63,8 +63,9 @@ public class ActionHistoryHeader extends VerticalLayout {
     private void buildComponent() {
         // create default title - it will be shown even when no data is
         // available
-        titleOfActionHistory = SPUIComponentProvider.getLabel(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        titleOfActionHistory = new LabelBuilder().name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""))
+                .buildCaptionLabel();
+
         titleOfActionHistory.setImmediate(true);
         titleOfActionHistory.setContentMode(ContentMode.HTML);
 

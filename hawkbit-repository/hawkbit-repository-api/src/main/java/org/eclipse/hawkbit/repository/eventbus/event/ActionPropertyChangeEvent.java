@@ -22,8 +22,7 @@ public class ActionPropertyChangeEvent extends AbstractPropertyChangeEvent<Actio
      * @param action
      * @param changeSetValues
      */
-    public ActionPropertyChangeEvent(final Action action,
-            final Map<String, AbstractPropertyChangeEvent<Action>.Values> changeSetValues) {
+    public ActionPropertyChangeEvent(final Action action, final Map<String, PropertyChange> changeSetValues) {
         super(action, changeSetValues);
     }
 

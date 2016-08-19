@@ -50,7 +50,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     private DistributionSetType distributionSetType = null;
 
     /**
-     * 
+     *
      * @param definition
      * @param queryConfig
      * @param sortPropertyIds
@@ -60,7 +60,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);

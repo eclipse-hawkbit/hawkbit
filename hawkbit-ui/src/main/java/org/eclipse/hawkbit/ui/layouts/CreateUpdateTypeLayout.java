@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -56,8 +57,9 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
 
         createTypeStr = i18n.get("label.create.type");
         updateTypeStr = i18n.get("label.update.type");
-        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
-        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
+        comboLabel = new LabelBuilder().name(i18n.get("label.choose.type")).buildLabel();
+        colorLabel = new LabelBuilder().name(i18n.get("label.choose.type.color")).buildLabel();
+
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,

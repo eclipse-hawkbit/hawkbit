@@ -131,7 +131,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isNoTagSateSelected() {
+    protected boolean isNoTagStateSelected() {
         return managementUIState.getTargetTableFilters().isNoTagSelected();
     }
 

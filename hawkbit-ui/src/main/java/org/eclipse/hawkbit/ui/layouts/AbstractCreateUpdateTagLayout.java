@@ -19,13 +19,15 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -114,10 +116,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     /**
      * Discard the changes and close the popup.
-     *
-     * @param event
      */
-    protected void discard(final Button.ClickEvent event) {
+    protected void discard() {
         UI.getCurrent().removeWindow(window);
     }
 
@@ -149,20 +149,20 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
         createTagStr = i18n.get("label.create.tag");
         updateTagStr = i18n.get("label.update.tag");
-        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag"), null);
-        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
+        comboLabel = new LabelBuilder().name(i18n.get("label.choose.tag")).buildLabel();
+        colorLabel = new LabelBuilder().name(i18n.get("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME, true, "", i18n.get("textfield.name"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
+        tagName = new TextFieldBuilder().caption(i18n.get("textfield.name"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
+                .prompt(i18n.get("textfield.name")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_NAME)
+                .buildTextComponent();
 
-        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
-        tagDesc.setImmediate(true);
+        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
+                .buildTextComponent();
+
         tagDesc.setNullRepresentation("");
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", "", null, null, false, "",
@@ -462,8 +462,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     public CommonDialogWindow getWindow() {
         reset();
-        window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
-                this::save, this::discard, null, mainLayout, i18n);
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
+                .saveButtonClickListener(this::save).cancelButtonClickListener(event -> discard()).layout(mainLayout)
+                .i18n(i18n).buildCommonDialogWindow();
+
         return window;
     }
 

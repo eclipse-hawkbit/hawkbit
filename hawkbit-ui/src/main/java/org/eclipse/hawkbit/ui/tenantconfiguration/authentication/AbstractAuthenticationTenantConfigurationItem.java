@@ -13,9 +13,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.ui.VerticalLayout;
@@ -58,7 +57,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     protected void init(final String labelText) {
         setImmediate(true);
-        addComponent(SPUIComponentProvider.getLabel(i18n.get(labelText), SPUILabelDefinitions.SP_LABEL_SIMPLE));
+        addComponent(new LabelBuilder().name(i18n.get(labelText)).buildLabel());
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -36,7 +37,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -357,7 +357,7 @@ public class ActionHistoryTable extends TreeTable {
     private Component getForcedColumn(final Object itemId) {
         final Action actionWithActiveStatus = (Action) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).getValue();
-        final Label actionLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label actionLabel = new LabelBuilder().name("").buildCaptionLabel();
         actionLabel.setContentMode(ContentMode.HTML);
         actionLabel.setStyleName("action-history-table-col-forced-label");
         if (actionWithActiveStatus != null && actionWithActiveStatus.getActionType() == ActionType.FORCED) {
@@ -522,7 +522,7 @@ public class ActionHistoryTable extends TreeTable {
      * @return Label as UI
      */
     private Label getStatusIcon(final Action.Status status) {
-        final Label label = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label label = new LabelBuilder().name("").buildLabel();
         final String statusIconPending = "statusIconPending";
         label.setContentMode(ContentMode.HTML);
         if (Action.Status.FINISHED == status) {
@@ -576,13 +576,11 @@ public class ActionHistoryTable extends TreeTable {
         final long currentTimeMillis = System.currentTimeMillis();
 
         final HorizontalLayout hLayout = new HorizontalLayout();
-        final Label autoForceLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label autoForceLabel = new LabelBuilder().name("").id("action.history.table.timedforceId").buildLabel();
 
         actionLabel.setValue(FontAwesome.BOLT.getHtml());
         autoForceLabel.setContentMode(ContentMode.HTML);
         autoForceLabel.setValue(FontAwesome.HISTORY.getHtml());
-        // setted Id for TimedForced.
-        autoForceLabel.setId("action.history.table.timedforceId");
 
         hLayout.addComponent(actionLabel);
         hLayout.addComponent(autoForceLabel);
@@ -608,8 +606,8 @@ public class ActionHistoryTable extends TreeTable {
      *            as String
      * @return Labeal as UI
      */
-    private Label createActiveStatusLabel(final String activeValue, final boolean endedWithError) {
-        final Label label = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+    private static Label createActiveStatusLabel(final String activeValue, final boolean endedWithError) {
+        final Label label = new LabelBuilder().name("").buildLabel();
         label.setContentMode(ContentMode.HTML);
         if (SPUIDefinitions.SCHEDULED.equals(activeValue)) {
             label.setDescription("Scheduled");

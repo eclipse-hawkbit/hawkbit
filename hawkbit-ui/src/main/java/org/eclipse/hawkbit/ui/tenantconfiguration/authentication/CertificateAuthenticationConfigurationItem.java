@@ -12,8 +12,8 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -22,7 +22,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * This class represents the UI item for the certificate authenticated by an
@@ -61,15 +60,12 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         final HorizontalLayout caRootAuthorityLayout = new HorizontalLayout();
         caRootAuthorityLayout.setSpacing(true);
 
-        final Label caRootAuthorityLabel = SPUIComponentProvider.getLabel("SSL Issuer Hash:",
-                SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label caRootAuthorityLabel = new LabelBuilder().name("SSL Issuer Hash:").buildLabel();
         caRootAuthorityLabel.setDescription(
                 "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
 
-        caRootAuthorityTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
-                "", true, 128);
+        caRootAuthorityTextField = new TextFieldBuilder().immediate(true).maxLengthAllowed(128).buildTextComponent();
         caRootAuthorityTextField.setWidth("500px");
-        caRootAuthorityTextField.setImmediate(true);
         caRootAuthorityTextField.addTextChangeListener(event -> caRootAuthorityChanged());
 
         caRootAuthorityLayout.addComponent(caRootAuthorityLabel);

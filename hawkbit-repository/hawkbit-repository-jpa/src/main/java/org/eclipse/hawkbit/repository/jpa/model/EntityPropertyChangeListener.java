@@ -43,11 +43,11 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         }
     }
 
-    private boolean isEventAwareEntity(final Object object) {
+    private static boolean isEventAwareEntity(final Object object) {
         return object instanceof EventAwareEntity;
     }
 
-    private void doNotifiy(final Runnable runnable) {
+    private static void doNotifiy(final Runnable runnable) {
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
     }
 

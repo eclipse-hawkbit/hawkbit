@@ -37,6 +37,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -52,14 +53,11 @@ import com.vaadin.ui.themes.ValoTheme;
  * A responsive menu component providing user information and the controls for
  * primary navigation between the views.
  */
-@SpringComponent
 @UIScope
+@SpringComponent
 public final class DashboardMenu extends CustomComponent {
 
-    private static final String STYLE_VISIBLE = "valo-menu-visible";
-    public static final String ID = "dashboard-menu";
-    public static final String REPORTS_BADGE_ID = "dashboard-menu-reports-badge";
-    public static final String NOTIFICATIONS_BADGE_ID = "dashboard-menu-notifications-badge";
+    private static final String ID = "dashboard-menu";
 
     @Autowired
     private I18N i18n;
@@ -208,13 +206,7 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private Component buildToggleButton() {
-        final Button valoMenuToggleButton = new Button("Menu", (ClickListener) event -> {
-            if (getCompositionRoot().getStyleName().contains(STYLE_VISIBLE)) {
-                getCompositionRoot().removeStyleName(STYLE_VISIBLE);
-            } else {
-                getCompositionRoot().addStyleName(STYLE_VISIBLE);
-            }
-        });
+        final Button valoMenuToggleButton = new Button("Menu", new MenuToggleClickListenerMyClickListener());
         valoMenuToggleButton.setIcon(FontAwesome.LIST);
         valoMenuToggleButton.addStyleName("valo-menu-toggle");
         valoMenuToggleButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -244,7 +236,7 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * Returns all views which are currently accessible by the current logged in
      * user.
-     * 
+     *
      * @return a list of all views which are currently visible and accessible
      *         for the current logged in user
      */
@@ -264,7 +256,7 @@ public final class DashboardMenu extends CustomComponent {
 
     /**
      * Returns the view name for the start page after login.
-     * 
+     *
      * @return the initialViewName of the start page
      */
     public String getInitialViewName() {
@@ -273,7 +265,7 @@ public final class DashboardMenu extends CustomComponent {
 
     /**
      * Is a View available.
-     * 
+     *
      * @return the accessibleViewsEmpty <true> no rights for any view <false> a
      *         view is available
      */
@@ -284,7 +276,7 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * notifies the dashboard that the view has been changed and the button
      * needs to be re-styled.
-     * 
+     *
      * @param event
      *            the post view change event
      */
@@ -294,7 +286,7 @@ public final class DashboardMenu extends CustomComponent {
 
     /**
      * Returns the dashboard view type by a given view name.
-     * 
+     *
      * @param viewName
      *            the name of the view to retrieve
      * @return the dashboard view for a given viewname or {@code null} if view
@@ -313,7 +305,7 @@ public final class DashboardMenu extends CustomComponent {
 
     /**
      * Is the given view accessible.
-     * 
+     *
      * @param viewName
      *            the view name
      * @return <true> = denied, <false> = accessible
@@ -329,14 +321,27 @@ public final class DashboardMenu extends CustomComponent {
         return accessDeined;
     }
 
+    private class MenuToggleClickListenerMyClickListener implements ClickListener {
+
+        private static final long serialVersionUID = 1L;
+        private static final String STYLE_VISIBLE = "valo-menu-visible";
+
+        @Override
+        public void buttonClick(final ClickEvent event) {
+            if (getCompositionRoot().getStyleName().contains(STYLE_VISIBLE)) {
+                getCompositionRoot().removeStyleName(STYLE_VISIBLE);
+            } else {
+                getCompositionRoot().addStyleName(STYLE_VISIBLE);
+            }
+        }
+    }
+
     /**
      * An menu item button wrapper for the dashboard menu item.
-     * 
-     *
-     *
-     *
      */
     public static final class ValoMenuItemButton extends Button {
+
+        private static final long serialVersionUID = 1L;
 
         private static final String STYLE_SELECTED = "selected";
 
@@ -345,7 +350,7 @@ public final class DashboardMenu extends CustomComponent {
         /**
          * creates a new button in case of pressed switches to the given
          * {@code view}.
-         * 
+         *
          * @param view
          *            the view to switch to in case the button is pressed
          */
@@ -358,12 +363,11 @@ public final class DashboardMenu extends CustomComponent {
             /* Avoid double click */
             setDisableOnClick(true);
             addClickListener(event -> event.getComponent().getUI().getNavigator().navigateTo(view.getViewName()));
-
         }
 
         /**
          * notifies the button to change his style.
-         * 
+         *
          * @param event
          *            the post view change event
          */
