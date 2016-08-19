@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,8 +65,10 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
+ * 
  * Table pop-up-windows including a minimize and close icon in the upper right
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
+ * 
  */
 public class CommonDialogWindow extends Window {
 
@@ -107,6 +111,8 @@ public class CommonDialogWindow extends Window {
      *            the content
      * @param helpLink
      *            the helpLinks
+     * @param closeListener
+     *            the saveDialogCloseListener
      * @param cancelButtonClickListener
      *            the cancelButtonClickListener
      * @param layout
@@ -115,24 +121,18 @@ public class CommonDialogWindow extends Window {
      *            the i18n service
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
-            final ClickListener cancelButtonClickListener, final AbstractLayout layout, final I18N i18n) {
+            final SaveDialogCloseListener closeListener, final ClickListener cancelButtonClickListener,
+            final AbstractLayout layout, final I18N i18n) {
+        checkNotNull(closeListener);
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
+        this.closeListener = closeListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.orginalValues = new HashMap<>();
         this.allComponents = getAllComponents(layout);
         this.i18n = i18n;
         init();
-    }
-
-    /**
-     * Sets the close Listener
-     * 
-     * @param closeListener
-     */
-    public void setSaveDialogCloseListener(final SaveDialogCloseListener closeListener) {
-        this.closeListener = closeListener;
     }
 
     private void onCloseEvent(final ClickEvent clickEvent) {
@@ -141,12 +141,16 @@ public class CommonDialogWindow extends Window {
             return;
         }
 
-        if (closeListener == null || closeListener.canWindowClose()) {
-            close();
-        }
-
+        // check first the can window close before you save the dialog, because
+        // if you save the dialog first, the entity exist and the duplicate
+        // check is failing.
+        final boolean canWindowClose = closeListener.canWindowClose();
         if (closeListener.canWindowSaveOrUpdate()) {
             closeListener.saveOrUpdate();
+        }
+
+        if (canWindowClose) {
+            close();
         }
 
     }
@@ -547,14 +551,14 @@ public class CommonDialogWindow extends Window {
          * 
          * @return true/false .
          */
-        default boolean canWindowSaveOrUpdate() {
-            return true;
-        }
+        boolean canWindowSaveOrUpdate();
 
         /**
          * @return true/false based on the dialog window to be closed or not.
          */
-        boolean canWindowClose();
+        default boolean canWindowClose() {
+            return canWindowSaveOrUpdate();
+        }
 
         /**
          * Saves/Updates
@@ -562,5 +566,23 @@ public class CommonDialogWindow extends Window {
          */
         void saveOrUpdate();
     }
+
+    // public abstract class DefaultSaveDialogCloseListener implements
+    // SaveDialogCloseListener {
+    //
+    // private boolean canWindowSaveOrUpdate;
+    //
+    // @Override
+    // public boolean canWindowSaveOrUpdate() {
+    // return this.canWindowSaveOrUpdate;
+    // }
+    //
+    // @Override
+    // public boolean canWindowClose() {
+    // this.canWindowSaveOrUpdate =
+    // return this.canWindowSaveOrUpdate;
+    // }
+    //
+    // }
 
 }

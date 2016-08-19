@@ -144,23 +144,8 @@ public class WindowBuilder {
      * @return the window.
      */
     public CommonDialogWindow buildCommonDialogWindow() {
-        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, cancelButtonClickListener,
-                layout, i18n);
-        window.setSaveDialogCloseListener(saveDialogCloseListener);
-        decorateWindow(window);
-        return window;
-
-    }
-
-    /**
-     * Build the common dialog window.
-     *
-     * @return the window.
-     */
-    public CommonDialogWindow buildConfirmationWindow() {
-        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, cancelButtonClickListener,
-                layout, i18n);
-        window.setSaveDialogCloseListener(saveDialogCloseListener);
+        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveDialogCloseListener,
+                cancelButtonClickListener, layout, i18n);
         decorateWindow(window);
         return window;
 

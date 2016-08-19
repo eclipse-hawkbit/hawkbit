@@ -171,27 +171,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         resetComponents();
         final CommonDialogWindow commonDialogWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.get("caption.configure.rollout")).content(this).layout(this).i18n(i18n)
-                .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView()).buildCommonDialogWindow();
-        commonDialogWindow.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
-            @Override
-            public void saveOrUpdate() {
-                if (editRolloutEnabled) {
-                    editRollout();
-                } else {
-                    createRollout();
-                }
-
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                if (editRolloutEnabled) {
-                    return duplicateCheckForEdit();
-                }
-                return duplicateCheck();
-            }
-        });
+                .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         return commonDialogWindow;
     }
 
@@ -418,26 +399,26 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void editRollout() {
-        if (duplicateCheckForEdit() && rolloutForEdit != null) {
-            rolloutForEdit.setName(rolloutName.getValue());
-            rolloutForEdit.setDescription(description.getValue());
-            final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
-            rolloutForEdit.setDistributionSet(
-                    distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
-            rolloutForEdit.setActionType(getActionType());
-            rolloutForEdit.setForcedTime(getForcedTimeStamp());
-            final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-            final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
-
-            for (final RolloutGroup rolloutGroup : rolloutForEdit.getRolloutGroups()) {
-                rolloutGroup.setErrorConditionExp(triggerThreshold.getValue());
-                rolloutGroup.setSuccessConditionExp(String.valueOf(errorThresoldPercent));
-            }
-            final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
-            uiNotification
-                    .displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
-            eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
+        if (rolloutForEdit == null) {
+            return;
         }
+        rolloutForEdit.setName(rolloutName.getValue());
+        rolloutForEdit.setDescription(description.getValue());
+        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
+        rolloutForEdit
+                .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
+        rolloutForEdit.setActionType(getActionType());
+        rolloutForEdit.setForcedTime(getForcedTimeStamp());
+        final int amountGroup = Integer.parseInt(noOfGroups.getValue());
+        final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
+
+        for (final RolloutGroup rolloutGroup : rolloutForEdit.getRolloutGroups()) {
+            rolloutGroup.setErrorConditionExp(triggerThreshold.getValue());
+            rolloutGroup.setSuccessConditionExp(String.valueOf(errorThresoldPercent));
+        }
+        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
+        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
+        eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
     }
 
     private boolean duplicateCheckForEdit() {
@@ -463,11 +444,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void createRollout() {
-        if (duplicateCheck()) {
-            final Rollout rolloutToCreate = saveRollout();
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
-            eventBus.publish(this, RolloutEvent.CREATE_ROLLOUT);
-        }
+        final Rollout rolloutToCreate = saveRollout();
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
     }
 
     private Rollout saveRollout() {
@@ -603,6 +581,29 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private String getRolloutName() {
         return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
+    }
+
+    /**
+     *
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editRolloutEnabled) {
+                editRollout();
+            } else {
+                createRollout();
+            }
+
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            if (editRolloutEnabled) {
+                return duplicateCheckForEdit();
+            }
+            return duplicateCheck();
+        }
     }
 
     class ErrorThresoldOptionValidator implements Validator {

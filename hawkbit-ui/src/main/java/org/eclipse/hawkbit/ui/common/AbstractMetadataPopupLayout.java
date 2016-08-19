@@ -65,6 +65,26 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity, M extends MetaData>
         extends CustomComponent {
 
+    /**
+     *
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            onSave();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return true;
+        }
+
+        @Override
+        public boolean canWindowClose() {
+            return false;
+        }
+    }
+
     private static final String DELETE_BUTTON = "DELETE_BUTTON";
 
     private static final long serialVersionUID = -1491218218453167613L;
@@ -120,20 +140,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
         metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(getMetadataCaption(nameVersion)).content(this).cancelButtonClickListener(event -> onCancel())
-                .id(SPUIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
-
-        metadataWindow.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
-            @Override
-            public void saveOrUpdate() {
-                onSave();
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                return false;
-            }
-        });
+                .id(SPUIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);

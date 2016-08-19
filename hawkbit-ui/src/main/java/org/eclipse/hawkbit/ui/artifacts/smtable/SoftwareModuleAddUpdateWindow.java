@@ -50,6 +50,27 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
+    /**
+     * @author Dennis Melzer
+     *
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editSwModule) {
+                updateSwModule();
+            } else {
+                addNewBaseSoftware();
+            }
+
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editSwModule || !isDuplicate();
+        }
+    }
+
     private static final long serialVersionUID = -5217675246477211483L;
 
     @Autowired
@@ -179,28 +200,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         setCompositionRoot(formLayout);
 
- window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this)
-                .layout(formLayout).i18n(i18n)
-                .buildCommonDialogWindow();
-                
-        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
-            @Override
-            public void saveOrUpdate() {
-                if (editSwModule) {
-                    updateSwModule();
-                } else {
-                    addNewBaseSoftware();
-                }
-
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                return editSwModule || !isDuplicate();
-            }
-        });
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
         typeComboBox.setEnabled(!editSwModule);
@@ -215,11 +217,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        if (isDuplicate()) {
-            uiNotifcation.displayValidationError(
-                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            return;
-        }
         final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name, version,
                 vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
         if (newBaseSoftwareModule != null) {
@@ -238,7 +235,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
         final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
                 swMgmtService.findSoftwareModuleTypeByName(type));
-        return swModule != null;
+
+        if (swModule != null) {
+            uiNotifcation.displayValidationError(
+                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+            return true;
+        }
+        return false;
     }
 
     /**

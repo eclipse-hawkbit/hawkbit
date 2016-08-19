@@ -61,6 +61,27 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
+    /**
+     *
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (optiongroup.getValue().equals(createTagStr)) {
+                createEntity();
+            } else {
+                updateEntity(findEntityByName());
+            }
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            final boolean update = !optiongroup.getValue().equals(createTagStr);
+            return update || !isDuplicate();
+
+        }
+    }
+
     private static final long serialVersionUID = 4229177824620576456L;
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
@@ -462,27 +483,8 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public CommonDialogWindow getWindow() {
         reset();
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
-                .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
-
-        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-            @Override
-            public void saveOrUpdate() {
-                if (optiongroup.getValue().equals(createTagStr)) {
-                    if (!isDuplicate()) {
-                        createEntity();
-                    }
-                } else {
-                    updateEntity(findEntityByName());
-                }
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                final boolean update = !optiongroup.getValue().equals(createTagStr);
-                return update || !isDuplicate();
-
-            }
-        });
+                .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         return window;
     }
 

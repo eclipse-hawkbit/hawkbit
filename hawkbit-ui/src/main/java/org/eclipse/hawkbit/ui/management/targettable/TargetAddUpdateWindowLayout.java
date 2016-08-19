@@ -47,6 +47,27 @@ import com.vaadin.ui.Window;
 @SpringComponent
 @VaadinSessionScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
+
+    /**
+     *
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editTarget) {
+                updateTarget();
+            } else {
+                addNewTarget();
+            }
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editTarget || !isDuplicate();
+        }
+
+    }
+
     private static final long serialVersionUID = -6659290471705262389L;
 
     @Autowired
@@ -127,9 +148,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void addNewTarget() {
-        if (isDuplicate()) {
-            return;
-        }
         final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
@@ -152,23 +170,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
-                .content(this).layout(formLayout).i18n(i18n).buildCommonDialogWindow();
-        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
-            @Override
-            public void saveOrUpdate() {
-                if (editTarget) {
-                    updateTarget();
-                } else {
-                    addNewTarget();
-                }
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                return editTarget || !isDuplicate();
-            }
-        });
+                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
+                .buildCommonDialogWindow();
 
         return window;
     }

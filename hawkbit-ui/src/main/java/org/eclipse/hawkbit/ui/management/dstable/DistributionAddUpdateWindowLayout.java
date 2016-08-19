@@ -18,7 +18,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -42,8 +41,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -68,8 +65,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -5602182034230568435L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionAddUpdateWindowLayout.class);
 
     @Autowired
     private I18N i18n;
@@ -99,6 +94,23 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private CommonDialogWindow window;
 
     private FormLayout formLayout;
+
+    private final class SaveOnCloseDialogListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editDistribution) {
+                updateDistribution();
+            } else {
+                addNewDistribution();
+            }
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return !isDuplicate();
+        }
+
+    }
 
     /**
      * Initialize Distribution Add and Edit Window.
@@ -198,17 +210,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
         /* identify the changes */
         setDistributionValues(currentDS, name, version, distSetTypeName, desc, isMigStepReq);
-        try {
-            distributionSetManagement.updateDistributionSet(currentDS);
-            notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
-                    new Object[] { currentDS.getName(), currentDS.getVersion() }));
-            // update table row+details layout
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
-        } catch (final EntityAlreadyExistsException entityAlreadyExistsException) {
-            LOG.error("Update distribution failed {}", entityAlreadyExistsException);
-            notificationMessage.displayValidationError(
-                    i18n.get("message.distribution.no.update", currentDS.getName() + ":" + currentDS.getVersion()));
-        }
+        distributionSetManagement.updateDistributionSet(currentDS);
+        notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
+                new Object[] { currentDS.getName(), currentDS.getVersion() }));
+        // update table row+details layout
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
+
     }
 
     /**
@@ -336,28 +343,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
-                .content(this).layout(formLayout).i18n(i18n).buildCommonDialogWindow();
-
-        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-            @Override
-            public void saveOrUpdate() {
-                if (editDistribution) {
-                    updateDistribution();
-                } else {
-                    addNewDistribution();
-                }
-            }
-
-            @Override
-            public boolean canWindowSaveOrUpdate() {
-                return editDistribution || !isDuplicate();
-            }
-
-            @Override
-            public boolean canWindowClose() {
-                return !isDuplicate();
-            }
-        });
+                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener())
+                .buildCommonDialogWindow();
 
         return window;
     }
