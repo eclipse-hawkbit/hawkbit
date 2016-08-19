@@ -40,7 +40,6 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -453,7 +452,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
         super.optionValueChanged(event);
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             selectedTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
             distTypeSelectLayout.setEnabled(false);
@@ -565,14 +564,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     }
 
     @Override
-    protected void save(final ClickEvent event) {
-        if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!isDuplicate()) {
-                createNewDistributionSetType();
-            }
-        } else {
-            updateDistributionSetType(findEntityByKey());
-        }
+    protected void updateEntity(final DistributionSetType entity) {
+        updateDistributionSetType(entity);
+
+    }
+
+    @Override
+    protected void createEntity() {
+        createNewDistributionSetType();
+
     }
 
     @Override

@@ -26,7 +26,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button.ClickEvent;
 
 /**
  *
@@ -101,14 +100,13 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     }
 
     @Override
-    public void save(final ClickEvent event) {
-        if (optiongroup.getValue().equals(createTagStr)) {
-            if (!isDuplicate()) {
-                createNewTag();
-            }
-        } else {
-            updateExistingTag(findEntityByName());
-        }
+    protected void updateEntity(final TargetTag entity) {
+        updateExistingTag(entity);
+    }
+
+    @Override
+    protected void createEntity() {
+        createNewTag();
     }
 
     @Override

@@ -20,7 +20,6 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -32,12 +31,10 @@ import com.vaadin.ui.themes.ValoTheme;
  * Superclass defining common properties and methods for creating/updating
  * types.
  */
-public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends AbstractCreateUpdateTagLayout {
+public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends AbstractCreateUpdateTagLayout<E> {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
-    protected String createTypeStr;
-    protected String updateTypeStr;
     protected TextField typeKey;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
@@ -52,8 +49,8 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     @Override
     protected void createRequiredComponents() {
 
-        createTypeStr = i18n.get("label.create.type");
-        updateTypeStr = i18n.get("label.update.type");
+        createTagStr = i18n.get("label.create.type");
+        updateTagStr = i18n.get("label.update.type");
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
@@ -133,7 +130,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     @Override
     protected void optionValueChanged(final ValueChangeEvent event) {
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
@@ -202,23 +199,12 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         optiongroup.setNullSelectionAllowed(false);
 
         if (hasCreatePermission) {
-            optiongroup.addItem(createTypeStr);
+            optiongroup.addItem(createTagStr);
         }
         if (hasUpdatePermission) {
-            optiongroup.addItem(updateTypeStr);
+            optiongroup.addItem(updateTagStr);
         }
         setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
-    }
-
-    @Override
-    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        if (hasCreatePermission) {
-            optiongroup.select(createTypeStr);
-        }
-        if (hasUpdatePermission && !hasCreatePermission) {
-            optiongroup.select(updateTypeStr);
-        }
     }
 
     protected void setColorPickerComponentsColor(final String color) {
@@ -273,11 +259,6 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     protected abstract E findEntityByKey();
 
     protected abstract String getDuplicateKeyErrorMessage(E existingType);
-
-    @Override
-    protected void save(final ClickEvent event) {
-        // is implemented in the inherited class
-    }
 
     @Override
     protected void populateTagNameCombo() {

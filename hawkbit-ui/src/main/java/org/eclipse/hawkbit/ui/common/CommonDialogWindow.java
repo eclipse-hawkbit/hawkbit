@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -90,8 +88,6 @@ public class CommonDialogWindow extends Window {
 
     protected ValueChangeListener buttonEnableListener;
 
-    private final ClickListener saveButtonClickListener;
-
     private final ClickListener cancelButtonClickListener;
 
     private final ClickListener closeClickListener = event -> onCloseEvent(event);
@@ -102,7 +98,7 @@ public class CommonDialogWindow extends Window {
 
     private final I18N i18n;
 
-    private transient CommonDialogWindowCloseListener closeListener;
+    private transient SaveDialogCloseListener closeListener;
 
     /**
      * Constructor.
@@ -123,13 +119,10 @@ public class CommonDialogWindow extends Window {
      *            the i18n service
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
-            final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
-            final AbstractLayout layout, final I18N i18n) {
-        checkNotNull(saveButtonClickListener);
+            final ClickListener cancelButtonClickListener, final AbstractLayout layout, final I18N i18n) {
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
-        this.saveButtonClickListener = saveButtonClickListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.orginalValues = new HashMap<>();
         this.allComponents = getAllComponents(layout);
@@ -137,7 +130,7 @@ public class CommonDialogWindow extends Window {
         init();
     }
 
-    public void setCloseListener(final CommonDialogWindowCloseListener closeListener) {
+    public void setSaveDialogCloseListener(final SaveDialogCloseListener closeListener) {
         this.closeListener = closeListener;
     }
 
@@ -147,10 +140,14 @@ public class CommonDialogWindow extends Window {
             return;
         }
 
-        if (closeListener != null && !closeListener.canWindowClose()) {
-            return;
+        if (closeListener == null || closeListener.canWindowClose()) {
+            close();
         }
-        close();
+
+        if (closeListener.canWindowSaveOrUpdate()) {
+            closeListener.saveOrUpdate();
+        }
+
     }
 
     @Override
@@ -460,7 +457,6 @@ public class CommonDialogWindow extends Window {
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
         addCloseListenerForSaveButton();
-        saveButton.addClickListener(saveButtonClickListener);
         saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
@@ -542,13 +538,28 @@ public class CommonDialogWindow extends Window {
      * Called before the save happens.
      *
      */
-    @FunctionalInterface
-    public interface CommonDialogWindowCloseListener {
+    public interface SaveDialogCloseListener {
+
+        /**
+         * Default true for all the windows except for DistributionAddUpdate
+         * window.
+         * 
+         * @return true/false .
+         */
+        default boolean canWindowSaveOrUpdate() {
+            return true;
+        }
 
         /**
          * @return true/false based on the dialog window to be closed or not.
          */
         boolean canWindowClose();
+
+        /**
+         * Saves/Updates
+         * 
+         */
+        void saveOrUpdate();
     }
 
 }

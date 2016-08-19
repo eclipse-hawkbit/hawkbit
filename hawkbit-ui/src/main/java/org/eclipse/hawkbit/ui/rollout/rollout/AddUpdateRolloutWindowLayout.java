@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
@@ -165,9 +166,30 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     public CommonDialogWindow getWindow() {
         resetComponents();
-        return SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), null,
+        final CommonDialogWindow window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null,
                 uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
+        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+            @Override
+            public void saveOrUpdate() {
+                if (editRolloutEnabled) {
+                    editRollout();
+                } else {
+                    createRollout();
+                }
+
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                if (editRolloutEnabled) {
+                    return duplicateCheckForEdit();
+                }
+                return duplicateCheck();
+            }
+        });
+        return window;
     }
 
     /**
@@ -391,14 +413,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_NAME),
                 targetFilterQF);
-    }
-
-    private void onRolloutSave() {
-        if (editRolloutEnabled) {
-            editRollout();
-        } else {
-            createRollout();
-        }
     }
 
     private void editRollout() {

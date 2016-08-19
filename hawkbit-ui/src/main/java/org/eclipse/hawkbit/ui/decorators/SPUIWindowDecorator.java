@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.decorators;
 
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -45,14 +46,33 @@ public final class SPUIWindowDecorator {
      * @return Window
      */
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
+            final Component content, final ClickListener cancelButtonClickListener, final String helpLink,
+            final AbstractLayout layout, final I18N i18n) {
+        return getWindow(caption, id, type, content, null, cancelButtonClickListener, helpLink, layout, i18n);
+    }
+
+    public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
             final ClickListener cancelButtonClickListener, final String helpLink, final AbstractLayout layout,
             final I18N i18n) {
-        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-                cancelButtonClickListener, layout, i18n);
+        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, cancelButtonClickListener,
+                layout, i18n);
 
         if (SPUIDefinitions.CUSTOM_METADATA_WINDOW.equals(type)) {
-            window.setCloseListener(() -> false);
+            window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+                @Override
+                public void saveOrUpdate() {
+                    saveButtonClickListener.buttonClick(null);
+
+                }
+
+                @Override
+                public boolean canWindowClose() {
+                    return false;
+                }
+
+            });
             window.setDraggable(true);
             window.setClosable(true);
         } else {

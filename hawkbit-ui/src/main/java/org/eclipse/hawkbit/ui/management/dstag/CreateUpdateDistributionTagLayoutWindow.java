@@ -80,18 +80,16 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
-    /**
-     * Update DistributionTag.
-     */
     @Override
-    public void save(final ClickEvent event) {
-        if (optiongroup.getValue().equals(createTagStr)) {
-            if (!isDuplicate()) {
-                createNewTag();
-            }
-        } else {
-            updateExistingTag(findEntityByName());
-        }
+    protected void createEntity() {
+        createNewTag();
+
+    }
+
+    @Override
+    protected void updateEntity(final DistributionSetTag entity) {
+        updateExistingTag(findEntityByName());
+
     }
 
     @Override

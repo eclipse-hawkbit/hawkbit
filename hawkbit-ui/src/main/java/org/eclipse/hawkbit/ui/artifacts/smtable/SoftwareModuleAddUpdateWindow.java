@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.io.Serializable;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -17,6 +15,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -47,7 +46,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Serializable {
+public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
@@ -183,9 +182,24 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         setCompositionRoot(formLayout);
 
         window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), null, null, formLayout, i18n);
-        window.setCloseListener(() -> !isDuplicate());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null, null, formLayout, i18n);
+        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
 
+            @Override
+            public void saveOrUpdate() {
+                if (editSwModule) {
+                    updateSwModule();
+                } else {
+                    addNewBaseSoftware();
+                }
+
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                return editSwModule || !isDuplicate();
+            }
+        });
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
         typeComboBox.setEnabled(!editSwModule);
@@ -263,14 +277,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-    }
-
-    private void saveOrUpdate() {
-        if (editSwModule) {
-            updateSwModule();
-        } else {
-            addNewBaseSoftware();
-        }
     }
 
     public FormLayout getFormLayout() {

@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -106,12 +107,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected abstract String getWindowCaption();
 
-    /**
-     * Save new tag / update new tag.
-     *
-     * @param event
-     */
-    protected abstract void save(final Button.ClickEvent event);
+    protected abstract void updateEntity(E entity);
+
+    protected abstract void createEntity();
 
     /**
      * Discard the changes and close the popup.
@@ -464,8 +462,29 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     public CommonDialogWindow getWindow() {
         reset();
         window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
-                this::save, this::discard, null, mainLayout, i18n);
-        window.setCloseListener(() -> !isDuplicate());
+                this::discard, null, mainLayout, i18n);
+
+        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+            @Override
+            public void saveOrUpdate() {
+                if (optiongroup.getValue().equals(createTagStr)) {
+                    if (!isDuplicate()) {
+                        createEntity();
+                    }
+                } else {
+                    updateEntity(findEntityByName());
+                }
+
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                final boolean update = !optiongroup.getValue().equals(createTagStr);
+                return update || !isDuplicate();
+
+            }
+        });
         return window;
     }
 

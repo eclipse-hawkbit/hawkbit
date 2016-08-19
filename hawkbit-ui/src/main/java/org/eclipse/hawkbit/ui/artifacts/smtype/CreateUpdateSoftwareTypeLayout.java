@@ -32,7 +32,6 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
@@ -122,7 +121,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         super.optionValueChanged(event);
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             assignOptiongroup.setEnabled(false);
         } else {
             assignOptiongroup.setEnabled(true);
@@ -190,14 +189,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     @Override
-    protected void save(final ClickEvent event) {
-        if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!isDuplicate()) {
-                createNewSWModuleType();
-            }
-        } else {
-            updateSWModuleType(findEntityByName());
-        }
+    protected void createEntity() {
+        createNewSWModuleType();
+    }
+
+    @Override
+    protected void updateEntity(final SoftwareModuleType entity) {
+        updateSWModuleType(entity);
     }
 
     @Override

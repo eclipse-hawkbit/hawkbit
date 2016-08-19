@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -179,14 +180,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         return tenantMetaData.getDefaultDsType();
     }
 
-    private void saveDistribution() {
-        if (editDistribution) {
-            updateDistribution();
-        } else {
-            addNewDistribution();
-        }
-    }
-
     /**
      * Update Distribution.
      */
@@ -223,9 +216,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      */
     private void addNewDistribution() {
         editDistribution = Boolean.FALSE;
-        if (isDuplicate()) {
-            return;
-        }
 
         final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
         final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
@@ -243,9 +233,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
         final Set<DistributionSetIdName> s = new HashSet<>();
-            s.add(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion()));
-            final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
-            distributionSetTable.setValue(s);
+        s.add(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion()));
+        final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
+        distributionSetTable.setValue(s);
     }
 
     /**
@@ -346,8 +336,30 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), null, null, formLayout, i18n);
-        window.setCloseListener(() -> !isDuplicate());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null, null, formLayout, i18n);
+
+        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+            @Override
+            public void saveOrUpdate() {
+                if (editDistribution) {
+                    updateDistribution();
+                } else {
+                    addNewDistribution();
+                }
+            }
+
+            @Override
+            public boolean canWindowSaveOrUpdate() {
+                return editDistribution || !isDuplicate();
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                return !isDuplicate();
+            }
+        });
+
         return window;
     }
 

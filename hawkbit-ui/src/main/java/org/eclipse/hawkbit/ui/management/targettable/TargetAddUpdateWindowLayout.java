@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
@@ -134,14 +135,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
     }
 
-    private void saveTargetListner() {
-        if (editTarget) {
-            updateTarget();
-        } else {
-            addNewTarget();
-        }
-    }
-
     private void addNewTarget() {
         if (isDuplicate()) {
             return;
@@ -168,8 +161,25 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), null, null, formLayout, i18n);
-        window.setCloseListener(() -> !isDuplicate());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null, null, formLayout, i18n);
+        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+            @Override
+            public void saveOrUpdate() {
+                if (editTarget) {
+                    updateTarget();
+                } else {
+                    addNewTarget();
+                }
+
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                return editTarget || !isDuplicate();
+            }
+        });
+
         return window;
     }
 
