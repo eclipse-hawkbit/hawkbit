@@ -39,7 +39,6 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 /**
@@ -161,7 +160,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 if (editTarget) {
                     updateTarget();
                 } else {
-                    UI.getCurrent().access(() -> addNewTarget());
+                    addNewTarget();
                 }
             }
 

@@ -63,10 +63,8 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Table pop-up-windows including a minimize and close icon in the upper right
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
- * 
  */
 public class CommonDialogWindow extends Window {
 
@@ -109,8 +107,6 @@ public class CommonDialogWindow extends Window {
      *            the content
      * @param helpLink
      *            the helpLinks
-     * @param saveButtonClickListener
-     *            the saveButtonClickListener
      * @param cancelButtonClickListener
      *            the cancelButtonClickListener
      * @param layout
@@ -130,6 +126,11 @@ public class CommonDialogWindow extends Window {
         init();
     }
 
+    /**
+     * Sets the close Listener
+     * 
+     * @param closeListener
+     */
     public void setSaveDialogCloseListener(final SaveDialogCloseListener closeListener) {
         this.closeListener = closeListener;
     }
