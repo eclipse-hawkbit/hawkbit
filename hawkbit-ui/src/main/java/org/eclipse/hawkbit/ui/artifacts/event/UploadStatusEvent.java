@@ -7,6 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
+
 /**
  * 
  * Holds the upload file status.
@@ -14,24 +15,36 @@ package org.eclipse.hawkbit.ui.artifacts.event;
  */
 public class UploadStatusEvent {
 
+    /**
+     * Event type definition of events during the artifact upload life-cycle
+     * from receiving the upload until the process end.
+     */
     public enum UploadStatusEventType {
-        UPLOAD_FAILED, UPLOAD_IN_PROGRESS, UPLOAD_STARTED, UPLOAD_FINISHED, UPLOAD_SUCCESSFUL, UPLOAD_STREAMING_FAILED, UPLOAD_STREAMING_FINISHED, ABORT_UPLOAD
+        RECEIVE_UPLOAD, UPLOAD_FAILED, UPLOAD_IN_PROGRESS, UPLOAD_STARTED, UPLOAD_FINISHED, UPLOAD_SUCCESSFUL, UPLOAD_STREAMING_FAILED, UPLOAD_STREAMING_FINISHED, ABORT_UPLOAD
     }
 
-    private UploadStatusEventType uploadProgressEventType;
+    private final UploadStatusEventType uploadProgressEventType;
 
     private UploadFileStatus uploadStatus;
 
-    public UploadStatusEvent(UploadStatusEventType eventType, UploadFileStatus entity) {
+    /**
+     * Constructor.
+     * 
+     * @param eventType
+     *            the type of the event
+     * @param uploadStatus
+     *            the upload status of this event
+     */
+    public UploadStatusEvent(final UploadStatusEventType eventType, final UploadFileStatus uploadStatus) {
         this.uploadProgressEventType = eventType;
-        this.uploadStatus = entity;
+        this.uploadStatus = uploadStatus;
     }
 
     public UploadFileStatus getUploadStatus() {
         return uploadStatus;
     }
 
-    public void setUploadStatus(UploadFileStatus uploadStatus) {
+    public void setUploadStatus(final UploadFileStatus uploadStatus) {
         this.uploadStatus = uploadStatus;
     }
 
