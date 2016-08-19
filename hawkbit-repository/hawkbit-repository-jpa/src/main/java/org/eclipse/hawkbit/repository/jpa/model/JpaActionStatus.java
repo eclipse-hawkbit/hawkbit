@@ -98,8 +98,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      *            the status for this action status
      * @param occurredAt
      *            the occurred timestamp
-     * @param messages
-     *            the messages which should be added to this action status
+     * @param message
+     *            the message which should be added to this action status
      */
     public JpaActionStatus(final JpaAction action, final Status status, final Long occurredAt, final String message) {
         this.action = action;

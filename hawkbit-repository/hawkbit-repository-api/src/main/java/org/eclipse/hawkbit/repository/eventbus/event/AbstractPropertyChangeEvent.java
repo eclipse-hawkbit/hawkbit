@@ -20,18 +20,18 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 public class AbstractPropertyChangeEvent<E extends TenantAwareBaseEntity> extends AbstractBaseEntityEvent<E> {
 
     private static final long serialVersionUID = -3671601415138242311L;
-    private final transient Map<String, Values> changeSet;
+    private final transient Map<String, PropertyChange> changeSet;
 
     /**
      * Initialize base entity and property changed with old and new value.
-     * 
+     *
      * @param baseEntity
      *            entity changed
      * @param changeSetValues
      *            details of properties changed and old value and new value of
      *            the changed properties
      */
-    public AbstractPropertyChangeEvent(final E baseEntity, final Map<String, Values> changeSetValues) {
+    public AbstractPropertyChangeEvent(final E baseEntity, final Map<String, PropertyChange> changeSetValues) {
         super(baseEntity);
         this.changeSet = changeSetValues;
     }
@@ -39,27 +39,27 @@ public class AbstractPropertyChangeEvent<E extends TenantAwareBaseEntity> extend
     /**
      * @return the changeSet
      */
-    public Map<String, Values> getChangeSet() {
+    public Map<String, PropertyChange> getChangeSet() {
         return changeSet;
     }
 
     /**
      * Carries old value and new value of a property .
-     *
      */
-    public class Values {
+    public static class PropertyChange {
+
         private final Object oldValue;
         private final Object newValue;
 
         /**
          * Initialize old value and new changes value of property.
-         * 
+         *
          * @param oldValue
          *            old value before change
          * @param newValue
          *            new value after change
          */
-        public Values(final Object oldValue, final Object newValue) {
+        public PropertyChange(final Object oldValue, final Object newValue) {
             super();
             this.oldValue = oldValue;
             this.newValue = newValue;
@@ -78,6 +78,5 @@ public class AbstractPropertyChangeEvent<E extends TenantAwareBaseEntity> extend
         public Object getNewValue() {
             return newValue;
         }
-
     }
 }

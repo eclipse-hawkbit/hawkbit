@@ -8,8 +8,9 @@ import java.util.Map;
 
 /**
  * {@link Map} with attributes of SP Target.
- *
  */
 public class MgmtTargetAttributes extends HashMap<String, String> {
+
+    private static final long serialVersionUID = 1L;
 
 }

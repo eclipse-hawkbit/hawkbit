@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -18,7 +19,6 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -149,8 +149,8 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
-        headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        headerCaption.setId(SPUIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION);
+        headerCaption = new LabelBuilder().id(SPUIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION).name("")
+                .buildCaptionLabel();
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");

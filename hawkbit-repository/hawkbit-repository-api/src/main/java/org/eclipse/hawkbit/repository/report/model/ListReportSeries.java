@@ -14,12 +14,10 @@ import java.util.List;
 
 /**
  * A simple list report series which just contains a list of values of a report.
- *
- *
- *
- *
  */
 public class ListReportSeries extends AbstractReportSeries {
+
+    private static final long serialVersionUID = 1L;
 
     private final List<Number> data = new ArrayList<>();
 
@@ -50,8 +48,8 @@ public class ListReportSeries extends AbstractReportSeries {
      * @param values
      */
     private void setData(final Number... values) {
-        this.data.clear();
-        Collections.addAll(this.data, values);
+        data.clear();
+        Collections.addAll(data, values);
     }
 
     /**

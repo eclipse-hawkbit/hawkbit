@@ -120,12 +120,10 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     /**
      * RESET.
-     * 
-     * @param event
      */
     @Override
-    public void discard(final ClickEvent event) {
-        super.discard(event);
+    public void discard() {
+        super.discard();
         resetDistTagValues();
     }
 
@@ -146,7 +144,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     /**
      * Select tag & set tag name & tag desc values corresponding to selected
      * tag.
-     * 
+     *
      * @param distTagSelected
      *            as the selected tag from combo
      */

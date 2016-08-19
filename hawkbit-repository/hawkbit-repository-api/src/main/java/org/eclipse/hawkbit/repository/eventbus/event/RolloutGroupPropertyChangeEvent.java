@@ -20,12 +20,12 @@ public class RolloutGroupPropertyChangeEvent extends AbstractPropertyChangeEvent
     private static final long serialVersionUID = 4026477044419472686L;
 
     /**
-     * 
+     *
      * @param rolloutGroup
      * @param changeSetValues
      */
     public RolloutGroupPropertyChangeEvent(final RolloutGroup rolloutGroup,
-            final Map<String, AbstractPropertyChangeEvent<RolloutGroup>.Values> changeSetValues) {
+            final Map<String, PropertyChange> changeSetValues) {
         super(rolloutGroup, changeSetValues);
     }
 

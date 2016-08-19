@@ -52,8 +52,8 @@ import com.vaadin.ui.UI;
 /**
  * Header of Software module table.
  */
-@SpringComponent
 @ViewScope
+@SpringComponent
 public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6469417305487144809L;
@@ -66,7 +66,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-    
+
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -162,7 +162,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -197,12 +197,12 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
                 return manageMetaDataBtn;
             }
         });
     }
-    
+
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
@@ -237,8 +237,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
 
-    
-    private Button createManageMetadataButton(String nameVersionStr) {
+    private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
@@ -246,17 +245,17 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
-    
+
     private String getNameAndVerion(final Object itemId) {
         final Item item = getItem(itemId);
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
         return name + "." + version;
     }
-    
-    private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
-                /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
+
+    private void showMetadataDetails(final Long itemId) {
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+        /* display the window */
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 }

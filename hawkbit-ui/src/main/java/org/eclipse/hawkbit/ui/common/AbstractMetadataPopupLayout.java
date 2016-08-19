@@ -16,15 +16,18 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +51,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * 
@@ -115,10 +117,24 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     public CommonDialogWindow getWindow(final E entity, final M metaData) {
         selectedEntity = entity;
         final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
-        metadataWindow = SPUIWindowDecorator.getWindow(getMetadataCaption(nameVersion), null,
-                SPUIDefinitions.CUSTOM_METADATA_WINDOW, this, event -> onSave(), event -> onCancel(), null, mainLayout,
-                i18n);
-        metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
+
+        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(getMetadataCaption(nameVersion)).content(this).cancelButtonClickListener(event -> onCancel())
+                .id(SPUIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
+
+        metadataWindow.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+
+            @Override
+            public void saveOrUpdate() {
+                onSave();
+            }
+
+            @Override
+            public boolean canWindowClose() {
+                return false;
+            }
+        });
+
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
         metadataWindow.getMainLayout().setSizeFull();
@@ -204,9 +220,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextField createKeyTextField() {
-        final TextField keyField = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
-                ValoTheme.TEXTFIELD_TINY, true, "", i18n.get("textfield.key"), true, 128);
-        keyField.setId(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID);
+        final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
+                .prompt(i18n.get("textfield.key")).immediate(true).id(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID)
+                .maxLengthAllowed(128).buildTextComponent();
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -214,9 +230,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private TextArea createValueTextField() {
-        valueTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.value"), null, ValoTheme.TEXTAREA_TINY,
-                true, null, i18n.get("textfield.value"), 4000);
-        valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
+        valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
+                .prompt(i18n.get("textfield.value")).immediate(true).id(SPUIComponentIdProvider.METADATA_VALUE_ID)
+                .maxLengthAllowed(4000).buildTextComponent();
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
@@ -301,7 +317,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Label createHeaderCaption() {
-        return SPUIComponentProvider.getLabel(i18n.get("caption.metadata"), SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        return new LabelBuilder().name(i18n.get("caption.metadata")).buildCaptionLabel();
     }
 
     private static IndexedContainer getMetadataContainer() {
@@ -407,9 +423,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private String getMetadataCaption(final String nameVersionStr) {
         final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION + i18n.get("caption.metadata.popup") + " "
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.get("caption.metadata.popup") + " "
                 + HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
-        caption.append(HawkbitCommonUtil.DIV_CLOSE);
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
         return caption.toString();
     }
 

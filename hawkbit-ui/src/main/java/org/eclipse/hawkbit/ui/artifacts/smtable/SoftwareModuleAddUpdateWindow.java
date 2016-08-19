@@ -17,9 +17,11 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -118,26 +120,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private void createRequiredComponents() {
-        /* name textfield */
-        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
-                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
 
-        /* version text field */
-        versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
-                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
+        nameTextField = createTextField("textfield.name", SPUIComponentIdProvider.SOFT_MODULE_NAME);
 
-        /* Vendor text field */
-        vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
-                false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
+        versionTextField = createTextField("textfield.version", SPUIComponentIdProvider.SOFT_MODULE_VERSION);
 
-        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
-                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
+        vendorTextField = createTextField("textfield.vendor", SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
+        vendorTextField.setRequired(false);
+
+        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
+                .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
+                .buildTextComponent();
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
                 null, i18n.get("upload.swmodule.type"));
@@ -146,6 +139,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
         populateTypeNameCombo();
+    }
+
+    private TextField createTextField(final String in18Key, final String id) {
+        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+                .immediate(true).id(id).buildTextComponent();
     }
 
     private void populateTypeNameCombo() {
@@ -181,8 +179,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         setCompositionRoot(formLayout);
 
-        window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null, null, formLayout, i18n);
+ window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this)
+                .layout(formLayout).i18n(i18n)
+                .buildCommonDialogWindow();
+                
         window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
 
             @Override

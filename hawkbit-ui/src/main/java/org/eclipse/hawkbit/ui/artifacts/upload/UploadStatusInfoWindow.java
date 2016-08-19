@@ -57,11 +57,7 @@ import elemental.json.JsonValue;
 
 /**
  * Shows upload status during upload.
- *
- *
- *
  */
-
 @ViewScope
 @SpringComponent
 public class UploadStatusInfoWindow extends Window {
@@ -369,7 +365,7 @@ public class UploadStatusInfoWindow extends Window {
 
     /**
      * Called when each file upload is success.
-     * 
+     *
      * @param filename
      *            of the uploaded file.
      * @param softwareModule
@@ -444,7 +440,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void resizeWindow(final ClickEvent event) {
-        if (event.getButton().getIcon() == FontAwesome.EXPAND) {
+        if (FontAwesome.EXPAND.equals(event.getButton().getIcon())) {
             event.getButton().setIcon(FontAwesome.COMPRESS);
             setWindowMode(WindowMode.MAXIMIZED);
             resetColumnWidth();

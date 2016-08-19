@@ -17,16 +17,16 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -39,8 +39,8 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Add and Update Target.
@@ -83,30 +83,22 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void createRequiredComponents() {
-        /* Textfield for controller Id */
-        controllerIDTextField = SPUIComponentProvider.getTextField(i18n.get("prompt.target.id"), "",
-                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("prompt.target.id"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        controllerIDTextField.setId(SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        /* Textfield for target name */
-        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
-                false, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponentIdProvider.TARGET_ADD_NAME);
+        controllerIDTextField = createTextField("prompt.target.id", SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        nameTextField = createTextField("textfield.name", SPUIComponentIdProvider.TARGET_ADD_NAME);
+        nameTextField.setRequired(false);
 
-        /* Textarea for target description */
-        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
-                ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponentIdProvider.TARGET_ADD_DESC);
+        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.TARGET_ADD_DESC)
+                .buildTextComponent();
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
     }
 
-    private void buildLayout() {
+    private TextField createTextField(final String in18Key, final String id) {
+        return new TextFieldBuilder().caption(i18n.get(in18Key)).required(true).prompt(i18n.get(in18Key))
+                .immediate(true).id(id).buildTextComponent();
+    }
 
-        /*
-         * The main layout of the window contains mandatory info, textboxes
-         * (controller Id, name & description) and action buttons layout
-         */
+    private void buildLayout() {
         setSizeUndefined();
         formLayout = new FormLayout();
         formLayout.addComponent(controllerIDTextField);
@@ -160,8 +152,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null, null, formLayout, i18n);
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
+                .content(this).layout(formLayout).i18n(i18n).buildCommonDialogWindow();
         window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
 
             @Override
@@ -169,9 +161,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 if (editTarget) {
                     updateTarget();
                 } else {
-                    addNewTarget();
+                    UI.getCurrent().access(() -> addNewTarget());
                 }
-
             }
 
             @Override

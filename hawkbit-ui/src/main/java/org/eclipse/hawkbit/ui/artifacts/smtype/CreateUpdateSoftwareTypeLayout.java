@@ -18,7 +18,9 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -34,6 +36,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -73,27 +76,26 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         singleAssignStr = i18n.get("label.singleAssign.type");
         multiAssignStr = i18n.get("label.multiAssign.type");
-        singleAssign = SPUIComponentProvider.getLabel(singleAssignStr, null);
-        multiAssign = SPUIComponentProvider.getLabel(multiAssignStr, null);
+        singleAssign = new LabelBuilder().name(singleAssignStr).buildLabel();
 
-        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        tagName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
+        multiAssign = new LabelBuilder().name(multiAssignStr).buildLabel();
 
-        typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
+        tagName = createTextField("textfield.name", SPUIDefinitions.TYPE_NAME, SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
 
-        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
-                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
-        tagDesc.setImmediate(true);
+        typeKey = createTextField("textfield.key", SPUIDefinitions.TYPE_KEY, SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
+
+        tagDesc = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC)
+                .buildTextComponent();
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
+    }
+
+    private TextField createTextField(final String in18Key, final String styleName, final String id) {
+        return new TextFieldBuilder().caption(i18n.get(in18Key)).styleName(ValoTheme.TEXTFIELD_TINY + " " + styleName)
+                .required(true).prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
     }
 
     @Override

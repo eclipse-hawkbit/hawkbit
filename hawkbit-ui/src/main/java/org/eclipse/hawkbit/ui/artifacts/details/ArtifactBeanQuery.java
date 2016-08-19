@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +20,6 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
@@ -39,7 +43,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     /**
      * Parametric Constructor.
-     * 
+     *
      * @param definition
      *            as Def
      * @param queryConfig
@@ -51,18 +55,18 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
      */
     public ArtifactBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortIds, final boolean[] sortStates) {
+
         super(definition, queryConfig, sortIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (isNotNullOrEmpty(queryConfig)) {
             baseSwModuleId = (Long) queryConfig.get(SPUIDefinitions.BY_BASE_SOFTWARE_MODULE);
         }
 
-        if (HawkbitCommonUtil.checkBolArray(sortStates)) {
-            // Initalize Sor
-            sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortIds[0]);
-            // Add sort.
+        if (!isEmpty(sortStates)) {
+            sort = new Sort(sortStates[0] ? ASC : DESC, (String) sortIds[0]);
+
             for (int targetId = 1; targetId < sortIds.length; targetId++) {
-                sort.and(new Sort(sortStates[targetId] ? Direction.ASC : Direction.DESC, (String) sortIds[targetId]));
+                sort.and(new Sort(sortStates[targetId] ? ASC : DESC, (String) sortIds[targetId]));
             }
         }
     }

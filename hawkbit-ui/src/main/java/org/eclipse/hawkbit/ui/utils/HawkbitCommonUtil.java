@@ -8,15 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -30,10 +27,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -53,9 +47,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Common util class.
- * 
- *
- *
  */
 public final class HawkbitCommonUtil {
 
@@ -78,13 +69,11 @@ public final class HawkbitCommonUtil {
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
     public static final String HTML_UL_OPEN_TAG = "<ul>";
 
-    private static final Logger LOG = LoggerFactory.getLogger(HawkbitCommonUtil.class);
-
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
 
-    public static final String DIV_DESCRIPTION = "<div id=\"desc-length\"><p id=\"desciption-p\">";
+    public static final String DIV_DESCRIPTION_START = "<div id=\"desc-length\"><p id=\"desciption-p\">";
 
-    public static final String DIV_CLOSE = "</p></div>";
+    public static final String DIV_DESCRIPTION_END = "</p></div>";
 
     private static final String DRAG_COUNT_ELEMENT = "var x = document.getElementById('sp-drag-count'); ";
     private static final String CLOSE_BRACE = "\"; }';";
@@ -112,129 +101,25 @@ public final class HawkbitCommonUtil {
     private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
-    /**
-     * Define empty string.
-     */
-    /**
-     * Private Constructor.
-     */
     private HawkbitCommonUtil() {
 
     }
 
     /**
-     * Check Map is valid.
-     * 
-     * @param mapCheck
-     *            as Map
-     * @return boolean as flag
+     * Check wether the given map is not {@code null} and not empty.
+     *
+     * @param mapToCheck
+     *            the map to validate
+     * @return {@code true} if the given map is not {@code null} and not empty.
+     *         Otherwise {@code false}
      */
-    public static boolean mapCheckObjKey(final Map<Object, Object> mapCheck) {
-        boolean validMap = false;
-        if (mapCheck != null && !mapCheck.isEmpty()) {
-            validMap = true;
-        }
-
-        return validMap;
-    }
-
-    /**
-     * Check Map is valid.
-     * 
-     * @param mapCheck
-     *            as Map
-     * @return boolean as flag
-     */
-    public static boolean mapCheckStrKey(final Map<String, Object> mapCheck) {
-        boolean validMap = false;
-        if (mapCheck != null && !mapCheck.isEmpty()) {
-            validMap = true;
-        }
-
-        return validMap;
-    }
-
-    /**
-     * Check Map is valid.
-     * 
-     * @param mapCheck
-     *            as Map
-     * @return boolean as flag
-     */
-    public static boolean mapCheckStrings(final Map<String, String> mapCheck) {
-        boolean validMap = false;
-        if (mapCheck != null && !mapCheck.isEmpty()) {
-            validMap = true;
-        }
-
-        return validMap;
-    }
-
-    /**
-     * Check List is valid.
-     * 
-     * @param listCheck
-     *            as List
-     * @return boolean as flag
-     */
-    public static boolean listCheckObj(final List<Object> listCheck) {
-        boolean validList = false;
-        if (listCheck != null && !listCheck.isEmpty()) {
-            validList = true;
-        }
-
-        return validList;
-    }
-
-    /**
-     * Check Boolean Array is valid.
-     * 
-     * @param bolArray
-     *            as List
-     * @return boolean as flag
-     */
-    public static boolean checkBolArray(final boolean[] bolArray) {
-        boolean validBolArray = false;
-        if (bolArray != null && bolArray.length > 0) {
-            validBolArray = true;
-        }
-
-        return validBolArray;
-    }
-
-    /**
-     * Check String null, return empty.
-     * 
-     * @param nString
-     *            as String
-     * @return String
-     */
-    public static String getEmptyString(final String nString) {
-        String emptyStr = SP_STRING_SPACE;
-        if (nString != null && nString.length() > 0) {
-            emptyStr = nString;
-        }
-        return emptyStr;
-    }
-
-    /**
-     * Check valid String.
-     * 
-     * @param nString
-     *            as String
-     * @return boolean as flag
-     */
-    public static boolean checkValidString(final String nString) {
-        boolean strValid = false;
-        if (nString != null && nString.length() > 0) {
-            strValid = true;
-        }
-        return strValid;
+    public static boolean isNotNullOrEmpty(final Map<?, ?> mapToCheck) {
+        return mapToCheck != null && !mapToCheck.isEmpty();
     }
 
     /**
      * Trim the text and convert into null in case of empty string.
-     * 
+     *
      * @param text
      *            as text to be trimed
      * @return null if the text is null or if the text is blank, text.trim() if
@@ -251,7 +136,7 @@ public final class HawkbitCommonUtil {
     /**
      * Concatenate the given text all the string arguments with the given
      * delimiter.
-     * 
+     *
      * @param delimiter
      *            the delimiter text to be used while concatenation.
      * @param texts
@@ -277,7 +162,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Returns the input text within html bold tag <b>..</b>.
-     * 
+     *
      * @param text
      *            is the text to be converted in to Bold
      * @return null if the input text param is null returns text with <b>...</b>
@@ -296,16 +181,13 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get target label Id.
-     * 
+     *
      * @param controllerId
      *            as String
      * @return String as label name
      */
     public static String getTargetLabelId(final String controllerId) {
-        final StringBuilder labelId = new StringBuilder("target");
-        labelId.append('.');
-        labelId.append(controllerId);
-        return labelId.toString();
+        return new StringBuilder("target").append('.').append(controllerId).toString();
     }
 
     /**
@@ -318,12 +200,7 @@ public final class HawkbitCommonUtil {
      * @return String distribution label id
      */
     public static String getDistributionLabelId(final String name, final String version) {
-        final StringBuilder labelId = new StringBuilder("dist");
-        labelId.append('.');
-        labelId.append(name);
-        labelId.append('.');
-        labelId.append(version);
-        return labelId.toString();
+        return new StringBuilder("dist").append('.').append(name).append('.').append(version).toString();
     }
 
     /**
@@ -336,12 +213,7 @@ public final class HawkbitCommonUtil {
      * @return String software module label id
      */
     public static String getSwModuleLabelId(final String name, final String version) {
-        final StringBuilder labelId = new StringBuilder("swModule");
-        labelId.append('.');
-        labelId.append(name);
-        labelId.append('.');
-        labelId.append(version);
-        return labelId.toString();
+        return new StringBuilder("swModule").append('.').append(name).append('.').append(version).toString();
     }
 
     /**
@@ -354,28 +226,26 @@ public final class HawkbitCommonUtil {
      * @return String
      */
     public static String getSwModuleNameDescLabel(final String name, final String desc) {
-        final StringBuilder labelDesc = new StringBuilder();
-        labelDesc.append(DIV_DESCRIPTION + getBoldHTMLText(getFormattedName(name)) + "<br>" + getFormattedName(desc));
-        labelDesc.append(DIV_CLOSE);
-        return labelDesc.toString();
+        return new StringBuilder().append(
+                DIV_DESCRIPTION_START + getBoldHTMLText(getFormattedName(name)) + "<br>" + getFormattedName(desc))
+                .append(DIV_DESCRIPTION_END).toString();
     }
 
     /**
      * Get Label for Artifact Details.
-     * 
+     *
      * @param name
      * @return
      */
     public static String getArtifactoryDetailsLabelId(final String name) {
-        final StringBuilder labelDesc = new StringBuilder();
-        labelDesc.append(DIV_DESCRIPTION + "Artifact Details of " + getBoldHTMLText(getFormattedName(name)));
-        labelDesc.append(DIV_CLOSE);
-        return labelDesc.toString();
+        return new StringBuilder()
+                .append(DIV_DESCRIPTION_START + "Artifact Details of " + getBoldHTMLText(getFormattedName(name)))
+                .append(DIV_DESCRIPTION_END).toString();
     }
 
     /**
      * Get Label for Artifact Details.
-     * 
+     *
      * @param caption
      *            as caption of the details
      * @param name
@@ -383,28 +253,26 @@ public final class HawkbitCommonUtil {
      * @return
      */
     public static String getSoftwareModuleName(final String caption, final String name) {
-        final StringBuilder labelDesc = new StringBuilder();
-        labelDesc.append(DIV_DESCRIPTION + caption + " : " + getBoldHTMLText(getFormattedName(name)));
-        labelDesc.append(DIV_CLOSE);
-        return labelDesc.toString();
+        return new StringBuilder()
+                .append(DIV_DESCRIPTION_START + caption + " : " + getBoldHTMLText(getFormattedName(name)))
+                .append(DIV_DESCRIPTION_END).toString();
     }
 
     /**
      * Get Label for Action History Details.
-     * 
+     *
      * @param name
      * @return
      */
     public static String getActionHistoryLabelId(final String name) {
-        final StringBuilder labelDesc = new StringBuilder();
-        labelDesc.append(DIV_DESCRIPTION + "Action History For " + getBoldHTMLText(getFormattedName(name)));
-        labelDesc.append(DIV_CLOSE);
-        return labelDesc.toString();
+        return new StringBuilder()
+                .append(DIV_DESCRIPTION_START + "Action History For " + getBoldHTMLText(getFormattedName(name)))
+                .append(DIV_DESCRIPTION_END).toString();
     }
 
     /**
      * Get tool tip for Poll status.
-     * 
+     *
      * @param pollStatus
      * @param i18N
      * @return
@@ -434,14 +302,14 @@ public final class HawkbitCommonUtil {
     /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
-     * 
+     *
      * @param newBrowserHeight
      *            as current browser height.
      * @return extra height required to increase.
      */
     public static float findRequiredExtraHeight(final float newBrowserHeight) {
         return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
+                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT) : 0;
     }
 
     /**
@@ -453,7 +321,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findRequiredSwModuleExtraHeight(final float newBrowserHeight) {
         return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
+                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT) : 0;
     }
 
     /**
@@ -465,7 +333,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
+                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
     }
 
     /**
@@ -528,7 +396,7 @@ public final class HawkbitCommonUtil {
      */
     public static float findExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
+                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) : 0;
     }
 
     /**
@@ -570,7 +438,7 @@ public final class HawkbitCommonUtil {
         final float requiredExtraWidth = findExtraWidth(newBrowserWidth);
         float expectedDistWidth = minTableWidth;
         if (requiredExtraWidth > 0) {
-            expectedDistWidth = expectedDistWidth + Math.round(requiredExtraWidth * 0.5f);
+            expectedDistWidth = expectedDistWidth + Math.round(requiredExtraWidth * 0.5F);
         }
         return expectedDistWidth;
     }
@@ -600,17 +468,16 @@ public final class HawkbitCommonUtil {
      * @return String name
      */
     public static String removePrefix(final String text, final String prefix) {
-        String str = null;
-        if (null != text) {
-            str = text.replaceFirst(prefix, "");
+        if (text != null) {
+            return text.replaceFirst(prefix, "");
         }
-        return str;
+        return null;
     }
 
     /**
      * Create javascript to display number of targets or distributions your are
      * dragging in the drag image.
-     * 
+     *
      * @param count
      * @return
      */
@@ -630,7 +497,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get formatted label.Appends ellipses if content does not fit the label.
-     * 
+     *
      * @param labelContent
      *            content
      * @return Label
@@ -640,7 +507,6 @@ public final class HawkbitCommonUtil {
         labelValue.setSizeFull();
         labelValue.addStyleName(SPUIDefinitions.TEXT_STYLE);
         labelValue.addStyleName("label-style");
-
         return labelValue;
     }
 
@@ -669,14 +535,11 @@ public final class HawkbitCommonUtil {
         final float extraBrowserHeight = HawkbitCommonUtil.findRequiredSwModuleExtraHeight(newHeight);
         final float tableHeight = SPUIDefinitions.MIN_UPLOAD_ARTIFACT_TABLE_HEIGHT + extraBrowserHeight;
         artifactDetailsLayout.setHeight(tableHeight, Unit.PIXELS);
-
     }
 
     /**
      * Set height of artifact details table and drop area layout.
      *
-     * @param dropLayout
-     *            drop area layout
      * @param artifactDetailsLayout
      *            artifact details table
      * @param newHeight
@@ -687,28 +550,32 @@ public final class HawkbitCommonUtil {
         final float tableHeight = SPUIDefinitions.MIN_TARGET_DIST_TABLE_HEIGHT
                 + HawkbitCommonUtil.findRequiredExtraHeight(newHeight) + 62;
         artifactDetailsLayout.setHeight(tableHeight, Unit.PIXELS);
-
     }
 
     /**
-     * Close output stream.
+<<<<<<< HEAD
+=======
+     * Duplicate check - Unique Key.
      *
-     * @param fos
-     *            out stream to be closed
+     * @param name
+     *            as string
+     * @param version
+     *            as string
+     * @param type
+     *            key as string
+     * @return boolean as flag
      */
-    public static void closeOutoutStream(final FileOutputStream fos) {
-        try {
-            if (fos != null) {
-                fos.close();
-            }
-        } catch (final IOException ioe) {
-            LOG.error("Colud not close output stream", ioe);
-        }
+    public static boolean isDuplicate(final String name, final String version, final String type) {
+        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
+        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type));
+        return swModule != null;
     }
 
     /**
+>>>>>>> refs/heads/master
      * Add new base software module.
-     * 
+     *
      * @param bsname
      *            base software module name
      * @param bsversion
@@ -719,6 +586,8 @@ public final class HawkbitCommonUtil {
      *            base software module type
      * @param description
      *            base software module description
+     * @param entityFactory
+     *            the entity factory to create new entity instances
      * @return BaseSoftwareModule new base software module
      */
     public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
@@ -749,20 +618,16 @@ public final class HawkbitCommonUtil {
      * @return
      */
     public static String getDistributionNameAndVersion(final String distName, final String distVersion) {
-        final StringBuilder stringBuilder = new StringBuilder(distName);
-        stringBuilder.append(':').append(distVersion);
-        return stringBuilder.toString();
+        return new StringBuilder(distName).append(':').append(distVersion).toString();
     }
 
     /**
      * Display Target Tag action message.
-     * 
+     *
      * @param tagName
      *            as tag name
      * @param result
      *            as TargetTagAssigmentResult
-     * @param tagsClickedList
-     *            as clicked tag list
      * @param i18n
      *            I18N
      * @return message
@@ -803,7 +668,7 @@ public final class HawkbitCommonUtil {
     /**
      * Create a lazy query container for the given query bean factory with empty
      * configurations.
-     * 
+     *
      * @param queryFactory
      *            is reference of {@link BeanQueryFactory<? extends
      *            AbstractBeanQuery>} on which lazy container should create.
@@ -817,9 +682,9 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * 
+     *
      * Create lazy query container for DS type.
-     * 
+     *
      * @param queryFactory
      * @return LazyQueryContainer
      */
@@ -832,7 +697,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Set distribution table column properties.
-     * 
+     *
      * @param container
      *            table container
      */
@@ -850,7 +715,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Reset the software module table rows highlight css.
-     * 
+     *
      * @return javascript to rest software module table rows highlight css.
      */
     public static String getScriptSMHighlightReset() {
@@ -859,73 +724,66 @@ public final class HawkbitCommonUtil {
 
     /**
      * Highlight software module rows with the color of sw-type.
-     * 
+     *
      * @param colorCSS
      *            color to generate the css script.
      * @return javascript to append software module table rows with highlighted
      *         color.
      */
     public static String getScriptSMHighlightWithColor(final String colorCSS) {
-        final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(SM_HIGHLIGHT_SCRIPT_CURRENT).append("smHighlightStyle = smHighlightStyle + \"")
-                .append(colorCSS).append("\";").append(SM_HIGHLIGHT_SCRIPT_APPEND);
-        return scriptBuilder.toString();
+        return new StringBuilder().append(SM_HIGHLIGHT_SCRIPT_CURRENT)
+                .append("smHighlightStyle = smHighlightStyle + \"").append(colorCSS).append("\";")
+                .append(SM_HIGHLIGHT_SCRIPT_APPEND).toString();
     }
 
     /**
      * Get javascript to reflect new color selection in color picker preview for
      * name and description fields .
-     * 
+     *
      * @param colorPickedPreview
      *            changed color
      * @return javascript for the selected color.
      */
     public static String changeToNewSelectedPreviewColor(final String colorPickedPreview) {
-        final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT).append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
+        return new StringBuilder().append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT).append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
                 .append("var newColorPreviewStyle = \".v-app .new-tag-name{ border: solid 3px ")
                 .append(colorPickedPreview)
                 .append(" !important; width:138px; margin-left:2px !important; box-shadow:none !important; } \"; ")
                 .append("newColorPreviewStyle = newColorPreviewStyle + \".v-app .new-tag-desc{ border: solid 3px ")
                 .append(colorPickedPreview)
                 .append(" !important; width:138px; height:75px !important; margin-top:4px !important; margin-left:2px !important;;box-shadow:none !important;} \"; ")
-                .append(NEW_PREVIEW_COLOR_SET_STYLE_SCRIPT);
-        return scriptBuilder.toString();
+                .append(NEW_PREVIEW_COLOR_SET_STYLE_SCRIPT).toString();
     }
 
     /**
      * Get javascript to reflect new color selection for preview button.
-     * 
+     *
      * @param color
      *            changed color
      * @return javascript for the selected color.
      */
     public static String getPreviewButtonColorScript(final String color) {
-        final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT).append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
+        return new StringBuilder().append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT).append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
                 .append("var tagColorPreviewStyle = \".v-app .tag-color-preview{ height: 15px !important; padding: 0 10px !important; border: 0px !important; margin-left:12px !important;  margin-top: 4px !important; border-width: 0 !important; background: ")
                 .append(color)
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
-                .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT);
-        return scriptBuilder.toString();
+                .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT).toString();
     }
 
     /**
      * Java script to display drop hints for tags.
-     * 
+     *
      * @return javascript
      */
     public static String dispTargetTagsDropHintScript() {
         final String targetDropStyle = "document.getElementById('show-filter-drop-hint').innerHTML = '."
                 + UI.getCurrent().getTheme() + " .target-tag-drop-hint { border: 1px dashed #26547a !important; }';";
-        final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(TARGET_TAG_DROP_CREATE_SCRIPT).append(targetDropStyle);
-        return scriptBuilder.toString();
+        return new StringBuilder().append(TARGET_TAG_DROP_CREATE_SCRIPT).append(targetDropStyle).toString();
     }
 
     /**
      * Java script to hide drop hints for tags.
-     * 
+     *
      * @return javascript
      */
     public static String hideTargetTagsDropHintScript() {
@@ -934,20 +792,18 @@ public final class HawkbitCommonUtil {
 
     /**
      * Java script to display drop hint for Delete button.
-     * 
+     *
      * @return javascript
      */
     public static String dispDeleteDropHintScript() {
         final String deleteTagDropStyle = "document.getElementById('show-delete-drop-hint').innerHTML = '."
                 + UI.getCurrent().getTheme() + " .show-delete-drop-hint { border: 1px dashed #26547a !important; }';";
-        final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(DELETE_DROP_CREATE_SCRIPT).append(deleteTagDropStyle);
-        return scriptBuilder.toString();
+        return new StringBuilder().append(DELETE_DROP_CREATE_SCRIPT).append(deleteTagDropStyle).toString();
     }
 
     /**
      * Java script to hide drop hint for delete button.
-     * 
+     *
      * @return javascript
      */
     public static String hideDeleteDropHintScript() {
@@ -955,9 +811,8 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * 
      * Add target table container properties.
-     * 
+     *
      * @param container
      *            table container
      */
@@ -989,13 +844,11 @@ public final class HawkbitCommonUtil {
 
         targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
         targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
-
     }
 
     /**
-     * 
      * Apply style for status label in target table.
-     * 
+     *
      * @param targetTable
      *            target table
      * @param pinBtn
@@ -1025,7 +878,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Set status progress bar value.
-     * 
+     *
      * @param bar
      *            DistributionBar
      * @param statusName
@@ -1044,7 +897,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Initialize status progress bar with values and number of parts on load.
-     * 
+     *
      * @param bar
      *            DistributionBar
      * @param item
@@ -1063,7 +916,6 @@ public final class HawkbitCommonUtil {
                     0);
             HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
                     1);
-
         } else {
             bar.setNumberOfParts(6);
             setProgressBarDetails(bar, item);
@@ -1073,7 +925,7 @@ public final class HawkbitCommonUtil {
     /**
      * Formats the finished percentage of a rollout group into a string with one
      * digit after comma.
-     * 
+     *
      * @param rolloutGroup
      *            the rollout group
      * @param finishedPercentage
@@ -1102,7 +954,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Reset the values of status progress bar on change of values.
-     * 
+     *
      * @param bar
      *            DistributionBar
      * @param item
@@ -1126,10 +978,7 @@ public final class HawkbitCommonUtil {
     }
 
     private static boolean isNoTargets(final Long... statusCount) {
-        if (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length > 0) {
-            return false;
-        }
-        return true;
+        return (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length) == 0;
     }
 
     private static Long getStatusCount(final String propertName, final Item item) {
@@ -1137,27 +986,9 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get the formatted string of status and target count details.
-     * 
-     * @param details
-     *            details of status and count
-     * @return String
-     */
-    public static String getFormattedString(final Map<Status, Long> details) {
-        final StringBuilder val = new StringBuilder();
-        if (details == null || details.isEmpty()) {
-            return null;
-        }
-        for (final Entry<Status, Long> entry : details.entrySet()) {
-            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-        }
-        return val.substring(0, val.length() - 1);
-    }
-
-    /**
      * Returns a formatted string as needed by label custom render .This string
      * holds the properties of a status label.
-     * 
+     *
      * @param value
      *            label value
      * @param style
@@ -1174,13 +1005,12 @@ public final class HawkbitCommonUtil {
         if (!Strings.isNullOrEmpty(style)) {
             val.append("style:").append(style).append(",");
         }
-        val.append("id:").append(id);
-        return val.toString();
+        return val.append("id:").append(id).toString();
     }
 
     /**
      * Receive the code point of a given StatusFontIcon.
-     * 
+     *
      * @param statusFontIcon
      *            the status font icon
      * @return the code point of the StatusFontIcon
@@ -1192,5 +1022,4 @@ public final class HawkbitCommonUtil {
         return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
                 : null;
     }
-
 }

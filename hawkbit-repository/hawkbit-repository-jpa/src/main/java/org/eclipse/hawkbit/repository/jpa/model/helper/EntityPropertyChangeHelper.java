@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent.PropertyChange;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
@@ -32,15 +32,14 @@ public class EntityPropertyChangeHelper<T extends TenantAwareBaseEntity> {
      * @param event
      * @return the map of the changeSet
      */
-    public static <T extends TenantAwareBaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
-            final Class<T> clazz, final DescriptorEvent event) {
+    public static <T extends TenantAwareBaseEntity> Map<String, PropertyChange> getChangeSet(final Class<T> clazz,
+            final DescriptorEvent event) {
         final T rolloutGroup = clazz.cast(event.getObject());
         final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
         return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)
                 .collect(Collectors.toMap(record -> record.getAttribute(),
-                        record -> new AbstractPropertyChangeEvent<T>(rolloutGroup, null).new Values(
-                                record.getOldValue(), record.getNewValue())));
+                        record -> new PropertyChange(record.getOldValue(), record.getNewValue())));
     }
 
 }
