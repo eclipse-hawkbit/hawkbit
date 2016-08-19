@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -816,6 +817,27 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement
                 .findDistributionSetsByDeletedAndOrCompleted(pageReq, Boolean.FALSE, Boolean.TRUE).getTotalElements())
                         .isEqualTo(2);
+    }
+
+    @Test
+    @Description("Verfiy that the DistributionSetAssignmentResult not contains already assigned targets.")
+    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
+        DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+
+        // create assigned DS
+        dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
+                dsToTargetAssigned.getVersion());
+        final Target target = new JpaTarget("4712");
+        final Target savedTarget = targetManagement.createTarget(target);
+        final List<Target> toAssign = Lists.newArrayList(savedTarget);
+        DistributionSetAssignmentResult assignmentResult = deploymentManagement
+                .assignDistributionSet(dsToTargetAssigned, toAssign);
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
+
+        assignmentResult = deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
+
+        assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
     private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
