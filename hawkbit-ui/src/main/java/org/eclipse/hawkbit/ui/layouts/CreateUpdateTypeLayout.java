@@ -21,12 +21,10 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Superclass defining common properties and methods for creating/updating
@@ -185,27 +183,6 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         super.restoreComponentStyles();
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
         typeKey.addStyleName(SPUIDefinitions.TYPE_KEY);
-    }
-
-    /**
-     * create option group with Create tag/Update tag based on permissions.
-     */
-    @Override
-    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        optiongroup = new OptionGroup("Select Action");
-        optiongroup.setId(SPUIComponentIdProvider.OPTION_GROUP);
-        optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optiongroup.addStyleName("custom-option-group");
-        optiongroup.setNullSelectionAllowed(false);
-
-        if (hasCreatePermission) {
-            optiongroup.addItem(createTagStr);
-        }
-        if (hasUpdatePermission) {
-            optiongroup.addItem(updateTagStr);
-        }
-        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
     }
 
     protected void setColorPickerComponentsColor(final String color) {

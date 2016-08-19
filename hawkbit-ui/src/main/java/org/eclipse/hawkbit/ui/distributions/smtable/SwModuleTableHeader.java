@@ -52,17 +52,17 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getHeaderCaption() {
-        return softwareHeaderCaption;
+        return i18n.get("upload.swModuleTable.header");
     }
 
     @Override
     protected String getSearchBoxId() {
-        return softwareSerachBoxId;
+        return SPUIComponentIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return softwareSearchResetIcon;
+        return SPUIComponentIdProvider.SW_MODULE_SEARCH_RESET_ICON;
     }
 
     @Override
