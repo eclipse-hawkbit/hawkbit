@@ -386,7 +386,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final ActionStatus actionStatus = createActionStatus(message, actionUpdateStatus, action);
-        updateLastPollTime(action);
+        updateLastPollTime(action.getTarget());
 
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:
@@ -424,9 +424,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void updateLastPollTime(final Action action) {
-        controllerManagement.updateTargetStatus(action.getTarget().getTargetInfo(), null, System.currentTimeMillis(),
-                null);
+    private void updateLastPollTime(final Target target) {
+        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
     }
 
     private ActionStatus createActionStatus(final Message message, final ActionUpdateStatus actionUpdateStatus,
