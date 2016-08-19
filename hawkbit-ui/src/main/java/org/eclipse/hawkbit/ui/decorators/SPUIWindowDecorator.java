@@ -43,14 +43,47 @@ public final class SPUIWindowDecorator {
      *            window id
      * @param type
      *            window type
+     * @param content
+     *            content in the window
+     * @param cancelButtonClickListener
+     *            cancel button
+     * @param helpLink
+     *            help link
+     * @param layout
+     *            layout in the window
+     * @param i18n
+     *            i18n for internationalization
      * @return Window
+     * 
      */
+
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener cancelButtonClickListener, final String helpLink,
             final AbstractLayout layout, final I18N i18n) {
         return getWindow(caption, id, type, content, null, cancelButtonClickListener, helpLink, layout, i18n);
     }
 
+    /**
+     * @param caption
+     *            window caption
+     * @param id
+     *            window id
+     * @param type
+     *            window type
+     * @param content
+     *            content in the window
+     * @param saveButtonClickListener
+     *            save button
+     * @param cancelButtonClickListener
+     *            cancel button
+     * @param helpLink
+     *            help link
+     * @param layout
+     *            layout in the window
+     * @param i18n
+     *            i18n for internationalization
+     * @return window
+     */
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
             final ClickListener cancelButtonClickListener, final String helpLink, final AbstractLayout layout,

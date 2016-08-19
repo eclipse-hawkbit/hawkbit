@@ -166,10 +166,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     public CommonDialogWindow getWindow() {
         resetComponents();
-        final CommonDialogWindow window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null,
+        final CommonDialogWindow commonDialogWindow = SPUIWindowDecorator.getWindow(
+                i18n.get("caption.configure.rollout"), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this, null,
                 uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
-        window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
+        commonDialogWindow.setSaveDialogCloseListener(new SaveDialogCloseListener() {
 
             @Override
             public void saveOrUpdate() {
@@ -189,7 +189,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 return duplicateCheck();
             }
         });
-        return window;
+        return commonDialogWindow;
     }
 
     /**
@@ -511,14 +511,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             errorThresoldPercent = (int) Math.ceil(((float) erroThresoldCount / (float) groupSize) * 100);
         }
         return errorThresoldPercent;
-    }
-
-    private boolean validateFields() {
-        if (!noOfGroups.isValid() || !errorThreshold.isValid() || !triggerThreshold.isValid()) {
-            uiNotification.displayValidationError(i18n.get("message.correct.invalid.value"));
-            return false;
-        }
-        return true;
     }
 
     private boolean duplicateCheck() {

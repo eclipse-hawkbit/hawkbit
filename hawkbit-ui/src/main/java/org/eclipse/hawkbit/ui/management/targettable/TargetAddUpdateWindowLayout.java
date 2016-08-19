@@ -183,6 +183,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         return window;
     }
 
+    /**
+     * Returns Target Update window based on the selected Entity Id in the
+     * target table.
+     * 
+     * @param entityId
+     * @return window
+     */
     public Window getWindow(final String entityId) {
         populateValuesOfTarget(entityId);
         getWindow();
