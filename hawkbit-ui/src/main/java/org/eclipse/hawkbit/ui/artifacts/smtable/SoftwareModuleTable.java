@@ -40,7 +40,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -66,7 +65,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-    
+
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -202,7 +201,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             }
         });
     }
-    
+
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
@@ -215,21 +214,13 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
+    protected AcceptCriterion getDropAcceptCriterion() {
+        return uploadViewAcceptCriteria;
+    }
 
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return uploadViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                /* Not required */
-            }
-        };
+    @Override
+    protected boolean isDropValid(final DragAndDropEvent dragEvent) {
+        return false;
     }
 
     @Override
@@ -237,8 +228,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
 
-    
-    private Button createManageMetadataButton(String nameVersionStr) {
+    private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
@@ -246,17 +236,17 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
-    
+
     private String getNameAndVerion(final Object itemId) {
         final Item item = getItem(itemId);
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
         return name + "." + version;
     }
-    
-    private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
-                /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
+
+    private void showMetadataDetails(final Long itemId, final String nameVersionStr) {
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+        /* display the window */
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 }
