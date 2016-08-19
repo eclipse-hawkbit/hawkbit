@@ -41,7 +41,7 @@ import com.google.common.base.Strings;
 public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     private static final long serialVersionUID = 5862679853949173536L;
-    private Sort sort = new Sort(Direction.ASC, "name", "version");
+    private Sort sort = new Sort(Direction.ASC, "createdAt");
     private Collection<String> distributionTags;
     private String searchText;
     private String pinnedControllerId;
@@ -65,7 +65,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
-        if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             distributionTags = (Collection<String>) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);

@@ -18,6 +18,8 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -217,10 +219,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         breadcrumbButton = createBreadcrumbButton();
 
-        headerCaption = SPUIComponentProvider.getLabel(SPUILabelDefinitions.VAR_CREATE_FILTER,
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        headerCaption = new LabelBuilder().name(SPUILabelDefinitions.VAR_CREATE_FILTER).buildCaptionLabel();
 
-        nameLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        nameLabel = new LabelBuilder().name("").buildLabel();
         nameLabel.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
 
         nameTextField = createNameTextField();
@@ -249,10 +250,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private TextField createNameTextField() {
-        final TextField nameField = SPUIComponentProvider.getTextField(i18n.get("textfield.customfiltername"), "",
-                ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.customfiltername"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameField.setId(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME);
+        final TextField nameField = new TextFieldBuilder().caption(i18n.get("textfield.customfiltername"))
+                .prompt(i18n.get("textfield.customfiltername")).immediate(true)
+                .id(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(this::onFilterNameChange);
         return nameField;
@@ -307,7 +307,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         breadcrumbLayout = new HorizontalLayout();
         breadcrumbLayout.addComponent(breadcrumbButton);
         breadcrumbLayout.addComponent(new Label(">"));
-        breadcrumbName = SPUIComponentProvider.getLabel(null, SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        breadcrumbName = new LabelBuilder().buildCaptionLabel();
         breadcrumbLayout.addComponent(breadcrumbName);
         breadcrumbName.addStyleName("breadcrumbPaddingLeft");
 
@@ -450,10 +450,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         return button;
     }
 
-    private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, "",
-                "", true, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
-        textField.setId("custom.query.text.Id");
+    private static TextField createSearchField() {
+        final TextField textField = new TextFieldBuilder().immediate(true).id("custom.query.text.Id")
+                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);

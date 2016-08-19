@@ -19,6 +19,17 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.device.simulator.amqp")
 public class AmqpProperties {
+
+    /**
+     * The prefix for this configuration.
+     */
+    public static final String CONFIGURATION_PREFIX = "hawkbit.device.simulator.amqp";
+
+    /**
+     * Indicates if the AMQP interface is enabled for the device simulator.
+     */
+    private boolean enabled;
+
     /**
      * Queue for receiving DMF messages from update server.
      */
@@ -83,5 +94,13 @@ public class AmqpProperties {
 
     public void setDeadLetterTtl(final int deadLetterTtl) {
         this.deadLetterTtl = deadLetterTtl;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
     }
 }

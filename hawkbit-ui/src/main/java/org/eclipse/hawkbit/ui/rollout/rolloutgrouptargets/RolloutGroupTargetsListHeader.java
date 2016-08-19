@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -19,7 +20,6 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -164,7 +164,7 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
-        headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        headerCaption = new LabelBuilder().name("").buildCaptionLabel();
         headerCaption.setStyleName(ValoTheme.LABEL_BOLD + " " + ValoTheme.LABEL_SMALL);
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);

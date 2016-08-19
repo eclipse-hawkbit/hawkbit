@@ -49,10 +49,11 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
- * 
+ *
  * Rollout group list grid component.
  *
  */
@@ -86,10 +87,10 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Handles the RolloutGroupChangeEvent to refresh the item in the grid.
-     * 
-     * 
+     *
+     *
      * @param rolloutGroupChangeEvent
      *            the event which contains the rollout group which has been
      *            change
@@ -238,7 +239,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
-            getColumn(ROLLOUT_RENDERER_DATA).setRenderer(new RolloutRenderer(this::onClickOfRolloutGroupName));
+            getColumn(ROLLOUT_RENDERER_DATA).setRenderer(new RolloutRenderer(new RolloutGroupClickListener()));
         }
     }
 
@@ -259,12 +260,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
         return this::getDescription;
-    }
-
-    private void onClickOfRolloutGroupName(final RendererClickEvent event) {
-        rolloutUIState
-                .setRolloutGroup(rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
-        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
     }
 
     private void createRolloutGroupStatusToFontMap() {
@@ -310,11 +305,22 @@ public class RolloutGroupListGrid extends AbstractGrid {
         });
     }
 
+    private class RolloutGroupClickListener implements RendererClickListener {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void click(final RendererClickEvent event) {
+            rolloutUIState.setRolloutGroup(
+                    rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
+            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
+        }
+    }
+
     /**
-     * 
+     *
      * Converts {@link TotalTargetCountStatus} into formatted string with status
      * and count details.
-     *
      */
     class TotalTargetCountStatusConverter implements Converter<String, TotalTargetCountStatus> {
 
@@ -322,15 +328,13 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
-                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale) {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
-                final Class<? extends String> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends String> targetType, final Locale locale) {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
@@ -346,9 +350,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     /**
-     * 
      * Converts {@link RolloutGroupStatus} to string.
-     *
      */
     class RolloutGroupStatusConverter implements Converter<String, RolloutGroupStatus> {
 

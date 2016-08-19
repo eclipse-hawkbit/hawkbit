@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -18,7 +20,6 @@ import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -26,7 +27,6 @@ import org.vaadin.spring.events.EventBus;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -78,8 +78,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        return SPUIComponentProvider.getLabel(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION,
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        return new LabelBuilder().name(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION).buildCaptionLabel();
     }
 
     private void buildLayout() {
@@ -121,14 +120,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField campSearchTextField = SPUIComponentProvider.getTextField(null, "filter-box",
-                "text-style filter-box-hide", false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        campSearchTextField.setId("target.filter.search.text.Id");
-        campSearchTextField.setWidth(500.0f, Unit.PIXELS);
-        campSearchTextField.addTextChangeListener(event -> searchBy(event.getText()));
-        campSearchTextField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        // 1 seconds timeout.
-        campSearchTextField.setTextChangeTimeout(1000);
+        final TextField campSearchTextField = new TextFieldBuilder("target.filter.search.text.Id")
+                .createSearchField(event -> searchBy(event.getText()));
+        campSearchTextField.setWidth(500.0F, Unit.PIXELS);
         return campSearchTextField;
     }
 
@@ -156,7 +150,6 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private void openSearchTextField() {
-        //
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.togleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);

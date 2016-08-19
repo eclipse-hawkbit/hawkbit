@@ -25,9 +25,13 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA entity definition of persisting a group of an rollout.
@@ -40,7 +44,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup {
+public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -236,4 +240,19 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
                 + ", getId()=" + getId() + "]";
     }
 
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        // there is no RolloutGroup created event
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventBusHolder.getInstance().getEventBus().post(new RolloutGroupPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(RolloutGroup.class, descriptorEvent)));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        // there is no RolloutGroup deleted event
+    }
 }

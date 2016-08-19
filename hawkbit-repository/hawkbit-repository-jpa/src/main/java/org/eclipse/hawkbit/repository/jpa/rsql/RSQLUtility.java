@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.eclipse.hawkbit.repository.FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -49,7 +50,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * A utility class which is able to parse RSQL strings into an spring data
  * {@link Specification} which then can be enhanced sql queries to filter
  * entities. RSQL parser library: https://github.com/jirutka/rsql-parser
- * 
+ *
  * <ul>
  * <li>Equal to : ==</li>
  * <li>Not equal to : !=</li>
@@ -83,14 +84,12 @@ public final class RSQLUtility {
     /**
      * parses an RSQL valid string into an JPA {@link Specification} which then
      * can be used to filter for JPA entities with the given RSQL query.
-     * 
+     *
      * @param rsql
      *            the rsql query
      * @param fieldNameProvider
      *            the enum class type which implements the
      *            {@link FieldNameProvider}
-     * @param entityManager
-     *            {@link EntityManager}
      * @return an specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
@@ -105,10 +104,10 @@ public final class RSQLUtility {
 
     /**
      * Validate the given rsql string regarding existence and correct syntax.
-     * 
+     *
      * @param rsql
      *            the rsql string to get validated
-     * 
+     *
      */
     public static void isValid(final String rsql) {
         parseRsql(rsql);
@@ -156,7 +155,7 @@ public final class RSQLUtility {
     /**
      * An implementation of the {@link RSQLVisitor} to visit the parsed tokens
      * and build jpa where clauses.
-     * 
+     *
      *
      *
      * @param <A>
@@ -205,7 +204,7 @@ public final class RSQLUtility {
         }
 
         private String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
-            String finalProperty = propertyEnum.getFieldName();
+
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
             validateMapParamter(propertyEnum, node, graph);
@@ -215,9 +214,12 @@ public final class RSQLUtility {
                 throw createRSQLParameterUnsupportedException(node);
             }
 
+            final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
+
             for (int i = 1; i < graph.length; i++) {
+
                 final String propertyField = graph[i];
-                finalProperty += FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + propertyField;
+                fieldNameBuilder.append(SUB_ATTRIBUTE_SEPERATOR).append(propertyField);
 
                 // the key of map is not in the graph
                 if (propertyEnum.isMap() && graph.length == (i + 1)) {
@@ -229,7 +231,7 @@ public final class RSQLUtility {
                 }
             }
 
-            return finalProperty;
+            return fieldNameBuilder.toString();
         }
 
         private void validateMapParamter(final A propertyEnum, final ComparisonNode node, final String[] graph) {

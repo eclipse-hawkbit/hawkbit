@@ -11,52 +11,49 @@ package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 import java.io.Serializable;
 
 /**
- * RendererData class with Name and Status.
- * 
+ * RendererData class with name and status.
  */
-
 public class RolloutRendererData implements Serializable {
-	private static final long serialVersionUID = -5018181529953620263L;
 
-	private String name;
+    private static final long serialVersionUID = -5018181529953620263L;
 
-	private String status;
+    private String name;
 
-	/**
-	 * Initialize the RendererData.
-	 */
-	public RolloutRendererData() {
+    private String status;
 
-	}
+    /**
+     * Initialize the RendererData empty.
+     */
+    public RolloutRendererData() {
+        // Needed by Vaadin for compiling the widget set.
+    }
 
-	/**
-	 * Initialize the RendererData.
-	 * 
-	 * @param name
-	 *            Name of the Rollout.
-	 * @param status
-	 *            Status of Rollout.
-	 */
-	public RolloutRendererData(String name, String status) {
-		super();
-		this.name = name;
-		this.status = status;
-	}
+    /**
+     * Initialize the RendererData.
+     *
+     * @param name
+     *            Name of the Rollout.
+     * @param status
+     *            Status of Rollout.
+     */
+    public RolloutRendererData(final String name, final String status) {
+        this.name = name;
+        this.status = status;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(final String name) {
+        this.name = name;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
+    public void setStatus(final String status) {
+        this.status = status;
+    }
 }

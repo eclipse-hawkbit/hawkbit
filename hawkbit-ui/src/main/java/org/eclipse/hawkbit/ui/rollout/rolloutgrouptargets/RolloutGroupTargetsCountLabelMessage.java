@@ -94,7 +94,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
             setDescription(i18n.get("rollout.group.label.target.truncated",
-                    rolloutUIState.getRolloutGroupTargetsTruncated(), SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES));
+                    rolloutUIState.getRolloutGroupTargetsTruncated(), SPUIDefinitions.MAX_TABLE_ENTRIES));
             totalTargetTableEnteries += rolloutUIState.getRolloutGroupTargetsTruncated();
         } else {
             setIcon(null);
@@ -104,9 +104,9 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
         final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
         message.append(rolloutUIState.getRolloutGroupTargetsTotalCount());
         message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        if (totalTargetTableEnteries > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
+        if (totalTargetTableEnteries > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             message.append(i18n.get("label.filter.shown"));
-            message.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+            message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
         } else {
             message.append(i18n.get("label.filter.shown"));
             message.append(rolloutGroupTargetsListGrid.getContainerDataSource().size());

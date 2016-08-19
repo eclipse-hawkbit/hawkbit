@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.distributions.state;
 
+import static java.util.Collections.emptySet;
+
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     private DistributionSetIdName lastSelectedDistribution;
 
-    private Set<Long> selectedSoftwareModules = Collections.emptySet();
+    private Set<Long> selectedSoftwareModules = emptySet();
 
     private Set<String> selectedDeleteDistSetTypes = new HashSet<>();
 
@@ -57,23 +58,23 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     private Long selectedBaseSwModuleId;
 
-    private boolean distTypeFilterClosed = Boolean.FALSE;
+    private boolean distTypeFilterClosed;
 
-    private boolean swTypeFilterClosed = Boolean.FALSE;
+    private boolean swTypeFilterClosed;
 
     private final Map<Long, String> deleteSofwareModulesList = new HashMap<>();
 
-    private boolean swModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized;
 
-    private boolean dsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized;
 
     private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<>();
 
     private final Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<>();
 
-    private boolean noDataAvilableSwModule = Boolean.FALSE;
+    private boolean noDataAvilableSwModule;
 
-    private boolean noDataAvailableDist = Boolean.FALSE;
+    private boolean noDataAvailableDist;
 
     /**
      * @return the manageDistFilters
@@ -117,6 +118,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
         this.lastSelectedDistribution = value;
     }
 
+    @Override
     public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
         selectedDistributions = values;
     }
@@ -223,7 +225,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
     /***
      * Set isDsModuleTableMaximized.
      *
-     * @param isDsModuleTableMaximized
+     * @param dsModuleTableMaximized
      */
     public void setDsTableMaximized(final boolean dsModuleTableMaximized) {
         dsTableMaximized = dsModuleTableMaximized;
@@ -241,7 +243,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
     }
 
     /**
-     * @param isSwModuleTableMaximized
+     * @param swModuleTableMaximized
      *            the isSwModuleTableMaximized to set
      */
     public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
@@ -271,8 +273,8 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
     }
 
     /**
-     * @param noDilableDist
-     *            the noDataAvailableDist to set
+     * @param noDataAvailableDist
+     *            the isNoDataAvailableDist to set
      */
     public void setNoDataAvailableDist(final boolean noDataAvailableDist) {
         this.noDataAvailableDist = noDataAvailableDist;

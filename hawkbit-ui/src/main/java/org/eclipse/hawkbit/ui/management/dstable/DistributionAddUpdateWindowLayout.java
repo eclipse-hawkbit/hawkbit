@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -21,10 +23,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
+import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -33,6 +39,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +87,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient EntityFactory entityFactory;
-
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private TextArea descTextArea;
@@ -120,16 +126,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Create required UI components.
      */
     private void createRequiredComponents() {
-        distNameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
-                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
-        distNameTextField.setNullRepresentation("");
-
-        distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
-                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
-        distVersionTextField.setNullRepresentation("");
+        distNameTextField = createTextField("textfield.name", SPUIComponentIdProvider.DIST_ADD_NAME);
+        distVersionTextField = createTextField("textfield.version", SPUIComponentIdProvider.DIST_ADD_VERSION);
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
                 false, "", i18n.get("label.combobox.type"));
@@ -138,16 +136,22 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
         populateDistSetTypeNameCombo();
 
-        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
-                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
+        descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
+                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.DIST_ADD_DESC)
+                .buildTextComponent();
         descTextArea.setNullRepresentation("");
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
+    }
+
+    private TextField createTextField(final String in18Key, final String id) {
+        final TextField buildTextField = new TextFieldBuilder().caption(i18n.get(in18Key)).required(true)
+                .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
+        buildTextField.setNullRepresentation("");
+        return buildTextField;
     }
 
     /**
@@ -233,7 +237,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                     new Object[] { newDist.getName(), newDist.getVersion() }));
 
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
+            final Set<DistributionSetIdName> s = new HashSet<>();
+            s.add(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion()));
+            final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
+            distributionSetTable.setValue(s);
         }
     }
 
@@ -325,8 +332,11 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), null, null, formLayout, i18n);
+
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
+                .content(this).saveButtonClickListener(event -> saveDistribution()).layout(formLayout).i18n(i18n)
+                .buildCommonDialogWindow();
+
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         return window;
     }

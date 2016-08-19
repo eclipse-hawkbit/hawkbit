@@ -18,8 +18,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -97,6 +101,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
 
+    @Autowired
+    private transient EntityFactory entityFactory;
+
     private String notAllowedMsg;
 
     private Boolean isDistPinned = false;
@@ -107,6 +114,47 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected void init() {
         super.init();
         notAllowedMsg = i18n.get("message.action.not.allowed");
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvents(final List<?> events) {
+        final Object firstEvent = events.get(0);
+        if (DistributionDeletedEvent.class.isInstance(firstEvent)) {
+            onDistributionDeleteEvent((List<DistributionDeletedEvent>) events);
+        } else if (DistributionCreatedEvent.class.isInstance(firstEvent)
+                && ((DistributionCreatedEvent) firstEvent).getEntity().isComplete()) {
+            refreshDistributions();
+        }
+
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvents(final DistributionSetUpdateEvent event) {
+        final DistributionSet ds = event.getEntity();
+
+        final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
+
+        final Boolean dsVisible = visibleItemIds.stream().filter(e -> e.getId().equals(ds.getId())).findFirst()
+                .isPresent();
+
+        if ((ds.isComplete() && !dsVisible)) {
+            refreshDistributions();
+        } else if ((!ds.isComplete() && dsVisible)) {
+            refreshDistributions();
+            if (ds.getId().equals(managementUIState.getLastSelectedDsIdName().getId())) {
+                managementUIState.setLastSelectedDistribution(null);
+                managementUIState.setLastSelectedEntity(null);
+            }
+
+        } else if (dsVisible) {
+            UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
+        }
+        final DistributionSetIdName lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
+        // refresh the details tabs only if selected ds is updated
+        if (lastSelectedDsIdName != null && lastSelectedDsIdName.getId().equals(ds.getId())) {
+            // update table row+details layout
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, ds));
+        }
     }
 
     /**
@@ -668,4 +716,67 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
+    private void onDistributionDeleteEvent(final List<DistributionDeletedEvent> events) {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shouldRefreshDs = false;
+        for (final DistributionDeletedEvent deletedEvent : events) {
+            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                dsContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshDs = true;
+            }
+        }
+
+        if (shouldRefreshDs) {
+            refreshOnDelete();
+        } else {
+            dsContainer.commit();
+        }
+        reSelectItemsAfterDeletionEvent();
+    }
+
+    private void reSelectItemsAfterDeletionEvent() {
+        Set<Object> values = new HashSet<>();
+        if (isMultiSelect()) {
+            values = new HashSet<>((Set<?>) getValue());
+        } else {
+            values.add(getValue());
+        }
+        setValue(null);
+
+        for (final Object value : values) {
+            if (getVisibleItemIds().contains(value)) {
+                select(value);
+            }
+        }
+    }
+
+    private void refreshDistributions() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final int size = dsContainer.size();
+        if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            refreshTablecontainer();
+        }
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+    }
+
+    private void refreshOnDelete() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final int size = dsContainer.size();
+        refreshTablecontainer();
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+    }
+
+    private void refreshTablecontainer() {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        dsContainer.refresh();
+        selectRow();
+    }
 }

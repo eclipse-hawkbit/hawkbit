@@ -179,4 +179,5 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         return true;
     }
 
+    
 }

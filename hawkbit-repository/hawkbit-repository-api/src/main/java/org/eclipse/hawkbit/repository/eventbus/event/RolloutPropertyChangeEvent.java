@@ -19,12 +19,11 @@ public class RolloutPropertyChangeEvent extends AbstractPropertyChangeEvent<Roll
     private static final long serialVersionUID = 1056221355466373514L;
 
     /**
-     * 
+     *
      * @param rollout
      * @param changeSetValues
      */
-    public RolloutPropertyChangeEvent(final Rollout rollout,
-            final Map<String, AbstractPropertyChangeEvent<Rollout>.Values> changeSetValues) {
+    public RolloutPropertyChangeEvent(final Rollout rollout, final Map<String, PropertyChange> changeSetValues) {
         super(rollout, changeSetValues);
     }
 

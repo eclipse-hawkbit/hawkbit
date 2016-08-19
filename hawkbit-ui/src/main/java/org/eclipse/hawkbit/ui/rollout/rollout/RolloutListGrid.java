@@ -8,10 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.ui.rollout.DistributionBarHelper.getTooltip;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.ACTION;
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_DIST_NAME_VERSION;
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_STATUS;
+import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,7 +127,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     /**
      * Handles the RolloutChangeEvent to refresh the item in the grid.
-     * 
+     *
      * @param rolloutChangeEvent
      *            the event which contains the rollout which has been changed
      */
@@ -428,19 +433,22 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getDescription(final CellReference cell) {
-        if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
-            return cell.getProperty().getValue().toString().toLowerCase();
-        } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
-            return SPUILabelDefinitions.ACTION.toLowerCase();
+
+        String description = null;
+
+        if (VAR_STATUS.equals(cell.getPropertyId())) {
+            description = cell.getProperty().getValue().toString().toLowerCase();
+        } else if (ACTION.equals(cell.getPropertyId())) {
+            description = ACTION.toLowerCase();
         } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
-            return ((RolloutRendererData) cell.getProperty().getValue()).getName();
-        } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
-            return DistributionBarHelper
-                    .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
-        } else if (SPUILabelDefinitions.VAR_DIST_NAME_VERSION.equals(cell.getPropertyId())) {
-            return getDSDetails(cell.getItem());
+            description = ((RolloutRendererData) cell.getProperty().getValue()).getName();
+        } else if (VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
+            description = getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
+        } else if (VAR_DIST_NAME_VERSION.equals(cell.getPropertyId())) {
+            description = getDSDetails(cell.getItem());
         }
-        return null;
+
+        return description;
     }
 
     private static String getDSDetails(final Item rolloutItem) {
@@ -497,7 +505,7 @@ public class RolloutListGrid extends AbstractGrid {
 
         /**
          * Constructor
-         * 
+         *
          * @param containerDataSource
          *            the container
          */
@@ -548,7 +556,7 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Converter to convert {@link RolloutStatus} to string.
      *
      */

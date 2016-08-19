@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
+import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -153,8 +154,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return handleAuthentifiactionMessage(message);
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException teex) {
-            throw new AmqpRejectAndDontRequeueException(teex);
+        } catch (final TenantNotExistException | ToManyStatusEntriesException e) {
+            throw new AmqpRejectAndDontRequeueException(e);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }

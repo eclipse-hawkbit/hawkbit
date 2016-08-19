@@ -15,9 +15,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorderUH;
 import org.junit.Test;
 
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -44,24 +42,6 @@ public class SPUIComponentProviderTest {
         assertThat(placeHolderButton).isInstanceOf(SPUIButton.class);
         assertThat(placeHolderButton.getCaption()).isEqualTo("Test");
         assertThat(placeHolderButton.getStyleName()).isEqualTo(SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE);
-    }
-
-    /**
-     * Test case for check Label factory.
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void checkLabelFactory() throws Exception {
-
-        Label placeHolderLabel = null;
-        placeHolderLabel = SPUIComponentProvider.getLabel("TestTable", SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        assertThat(placeHolderLabel).isInstanceOf(Label.class);
-        assertThat(placeHolderLabel.getValue()).isEqualTo("TestTable");
-        assertThat(placeHolderLabel.getContentMode()).isNotEqualTo(ContentMode.HTML);
-        placeHolderLabel = SPUIComponentProvider.getLabel("TestMSG", SPUILabelDefinitions.SP_LABEL_MESSAGE);
-        assertThat(placeHolderLabel.getValue()).isEqualTo("TestMSG");
-        assertThat(placeHolderLabel.getContentMode()).isEqualTo(ContentMode.HTML);
     }
 
 }

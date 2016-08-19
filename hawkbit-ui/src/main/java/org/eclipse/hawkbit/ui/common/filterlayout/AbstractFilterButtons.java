@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
+import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.NO_TAG_BUTTON_ID;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +52,7 @@ public abstract class AbstractFilterButtons extends Table {
 
     /**
      * Initialize layout of filter buttons.
-     * 
+     *
      * @param filterButtonClickBehaviour
      *            click behaviour of filter buttons.
      */
@@ -95,16 +97,12 @@ public abstract class AbstractFilterButtons extends Table {
         container.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, null, true, true);
     }
 
-    @SuppressWarnings("serial")
     protected void addColumn() {
         addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
     private DragAndDropWrapper addGeneratedCell(final Object itemId) {
+
         final Item item = getItem(itemId);
         final Long id = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
@@ -116,16 +114,18 @@ public abstract class AbstractFilterButtons extends Table {
                         ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString() : DEFAULT_GREEN;
         final Button typeButton = createFilterButton(id, name, desc, color, itemId);
         typeButton.addClickListener(event -> filterButtonClickBehaviour.processFilterButtonClick(event));
-        if (typeButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID) && isNoTagSateSelected()) {
-            filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
-        } else if (id != null && isClickedByDefault(name)) {
+
+        if ((NO_TAG_BUTTON_ID.equals(typeButton.getData()) && isNoTagStateSelected())
+                || (id != null && isClickedByDefault(name))) {
+
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
+
         return createDragAndDropWrapper(typeButton, name, id);
     }
 
-    protected boolean isNoTagSateSelected() {
-        return Boolean.FALSE;
+    protected boolean isNoTagStateSelected() {
+        return false;
     }
 
     private DragAndDropWrapper createDragAndDropWrapper(final Button tagButton, final String name, final Long id) {
@@ -195,21 +195,21 @@ public abstract class AbstractFilterButtons extends Table {
 
     /**
      * Id of the buttons table to be used in test cases.
-     * 
+     *
      * @return Id of the Button table.
      */
     protected abstract String getButtonsTableId();
 
     /**
      * create new lazyquery container to display the buttons.
-     * 
+     *
      * @return reference of {@link LazyQueryContainer}
      */
     protected abstract LazyQueryContainer createButtonsLazyQueryContainer();
 
     /**
      * Check if button should be displayed as clicked by default.
-     * 
+     *
      * @param buttonCaption
      *            button caption
      * @return true if button is clicked
@@ -218,7 +218,7 @@ public abstract class AbstractFilterButtons extends Table {
 
     /**
      * Get filter button Id.
-     * 
+     *
      * @param name
      * @return
      */
@@ -226,7 +226,7 @@ public abstract class AbstractFilterButtons extends Table {
 
     /**
      * Get Drop Handler for Filter Buttons.
-     * 
+     *
      * @return
      */
     protected abstract DropHandler getFilterButtonDropHandler();
@@ -234,14 +234,14 @@ public abstract class AbstractFilterButtons extends Table {
     /**
      * Get prefix Id of Button Wrapper to be used for drag and drop, delete and
      * test cases.
-     * 
+     *
      * @return prefix Id of Button Wrapper
      */
     protected abstract String getButttonWrapperIdPrefix();
 
     /**
      * Get info to be set for the button wrapper.
-     * 
+     *
      * @return button wrapper info.
      */
     protected abstract String getButtonWrapperData();

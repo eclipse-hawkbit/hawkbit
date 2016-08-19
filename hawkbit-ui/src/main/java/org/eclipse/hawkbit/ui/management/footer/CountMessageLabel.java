@@ -34,6 +34,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.base.Strings;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -43,7 +44,7 @@ import com.vaadin.ui.Label;
 /**
  * Count message label which display current filter details and details on
  * pinning.
- * 
+ *
  *
  */
 @SpringComponent
@@ -82,7 +83,7 @@ public class CountMessageLabel extends Label {
 
     /**
      * Event Listener to show the message count.
-     * 
+     *
      * @param event
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -104,7 +105,7 @@ public class CountMessageLabel extends Label {
 
     /**
      * Event Listener for Pinning Distribution.
-     * 
+     *
      * @param event
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -119,7 +120,7 @@ public class CountMessageLabel extends Label {
     }
 
     /**
-    * 
+    *
     */
     private void applyStyle() {
         /* Create label for Targets count message displaying below the table */
@@ -174,7 +175,7 @@ public class CountMessageLabel extends Label {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
             setDescription(i18n.get("label.target.filter.truncated", managementUIState.getTargetsTruncated(),
-                    SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES));
+                    SPUIDefinitions.MAX_TABLE_ENTRIES));
             totalTargetTableEnteries += managementUIState.getTargetsTruncated();
         } else {
             setIcon(null);
@@ -184,9 +185,9 @@ public class CountMessageLabel extends Label {
         final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
         message.append(managementUIState.getTargetsCountAll());
         message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        if (totalTargetTableEnteries > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
+        if (totalTargetTableEnteries > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             message.append(i18n.get("label.filter.shown"));
-            message.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+            message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
         } else {
             if (!targFilParams.hasFilter()) {
                 message.append(i18n.get("label.filter.shown"));
@@ -220,7 +221,7 @@ public class CountMessageLabel extends Label {
 
     /**
      * Get Status Message.
-     * 
+     *
      * @param status
      *            as status
      * @return String as msg.
@@ -231,7 +232,7 @@ public class CountMessageLabel extends Label {
 
     /**
      * Get Tags Message.
-     * 
+     *
      * @param noTargetTagSelected
      * @param tags
      *            as tags
@@ -244,18 +245,18 @@ public class CountMessageLabel extends Label {
 
     /**
      * Get Search Text Message.
-     * 
+     *
      * @param searchTxt
      *            as search text
      * @return String as msg.
      */
     private static String getSerachMsg(final String searchTxt, final String param) {
-        return HawkbitCommonUtil.checkValidString(searchTxt) ? param : HawkbitCommonUtil.SP_STRING_SPACE;
+        return Strings.isNullOrEmpty(searchTxt) ? HawkbitCommonUtil.SP_STRING_SPACE : param;
     }
 
     /**
      * Get Dist set Message.
-     * 
+     *
      * @param distId
      *            as serach
      * @return String as msg.
@@ -266,7 +267,7 @@ public class CountMessageLabel extends Label {
 
     /**
      * Get the custom target filter message.
-     * 
+     *
      * @param targetFilterQuery
      * @param param
      * @return

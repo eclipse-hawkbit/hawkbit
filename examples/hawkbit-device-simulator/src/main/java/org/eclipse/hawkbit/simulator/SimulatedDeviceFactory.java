@@ -72,6 +72,7 @@ public class SimulatedDeviceFactory {
             final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
         switch (protocol) {
         case DMF_AMQP:
+            spSenderService.createOrUpdateThing(tenant, id);
             return new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
         case DDI_HTTP:
             final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())

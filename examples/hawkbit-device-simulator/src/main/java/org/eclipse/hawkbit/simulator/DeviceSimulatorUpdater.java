@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -20,7 +23,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -56,9 +58,10 @@ import com.google.common.io.ByteStreams;
  */
 @Service
 public class DeviceSimulatorUpdater {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceSimulatorUpdater.class);
 
-    private static final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(8);
+    private static final ScheduledExecutorService threadPool = newScheduledThreadPool(8);
 
     @Autowired
     private SpSenderService spSenderService;
@@ -118,14 +121,9 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
-        /**
-         * 
-         */
+
         private static final String BUT_GOT_LOG_MESSAGE = " but got: ";
 
-        /**
-         * 
-         */
         private static final String DOWNLOAD_LOG_MESSAGE = "Download ";
 
         private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
@@ -279,13 +277,17 @@ public class DeviceSimulatorUpdater {
 
         private static long getOverallRead(final CloseableHttpResponse response, final MessageDigest md)
                 throws IOException {
+
             long overallread;
-            try (final BufferedOutputStream bdos = new BufferedOutputStream(
-                    new DigestOutputStream(ByteStreams.nullOutputStream(), md))) {
+
+            try (final OutputStream os = ByteStreams.nullOutputStream();
+                    final BufferedOutputStream bos = new BufferedOutputStream(new DigestOutputStream(os, md))) {
+
                 try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
-                    overallread = ByteStreams.copy(bis, bdos);
+                    overallread = ByteStreams.copy(bis, bos);
                 }
             }
+
             return overallread;
         }
 

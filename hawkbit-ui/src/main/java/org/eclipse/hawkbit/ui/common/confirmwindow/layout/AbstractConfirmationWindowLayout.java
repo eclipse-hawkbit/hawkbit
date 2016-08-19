@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -51,6 +52,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
 
+    /**
+     * PostConstruct.
+     */
     @PostConstruct
     public void initialize() {
         removeAllComponents();
@@ -65,10 +69,9 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void createActionMessgaeLabel() {
-        actionMessage = SPUIComponentProvider.getLabel("", null);
+        actionMessage = new LabelBuilder().name("").id(SPUIComponentIdProvider.ACTION_LABEL).visible(false)
+                .buildLabel();
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
-        actionMessage.setId(SPUIComponentIdProvider.ACTION_LABEL);
-        actionMessage.setVisible(false);
     }
 
     private void createAccordian() {

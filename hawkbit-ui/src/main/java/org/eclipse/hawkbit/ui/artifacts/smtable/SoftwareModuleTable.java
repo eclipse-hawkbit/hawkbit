@@ -51,8 +51,8 @@ import com.vaadin.ui.UI;
 /**
  * Header of Software module table.
  */
-@SpringComponent
 @ViewScope
+@SpringComponent
 public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6469417305487144809L;
@@ -161,7 +161,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -196,7 +196,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
                 return manageMetaDataBtn;
             }
         });
@@ -244,7 +244,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         return name + "." + version;
     }
 
-    private void showMetadataDetails(final Long itemId, final String nameVersionStr) {
+    private void showMetadataDetails(final Long itemId) {
         final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
         /* display the window */
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));

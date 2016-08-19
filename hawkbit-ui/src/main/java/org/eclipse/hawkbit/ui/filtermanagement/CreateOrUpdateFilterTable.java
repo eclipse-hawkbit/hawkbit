@@ -19,7 +19,7 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
@@ -209,7 +209,7 @@ public class CreateOrUpdateFilterTable extends Table {
         final Item row1 = getItem(itemId);
         final TargetUpdateStatus targetStatus = (TargetUpdateStatus) row1
                 .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
-        final Label label = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label label = new LabelBuilder().name("").buildLabel();
         label.setContentMode(ContentMode.HTML);
         if (targetStatus == TargetUpdateStatus.PENDING) {
             label.setDescription("Pending");

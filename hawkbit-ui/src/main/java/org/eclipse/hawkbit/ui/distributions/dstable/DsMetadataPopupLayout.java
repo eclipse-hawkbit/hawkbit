@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -55,7 +53,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         final DistributionSetMetadata dsMetaData = distributionSetManagement
                 .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA, dsMetaData));
         return dsMetaData;
     }
 
@@ -84,7 +81,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {
         final DistributionSetMetadata dsMetaData = entityFactory.generateDistributionSetMetadata(entity, key, value);
         distributionSetManagement.deleteDistributionSetMetadata(entity, key);
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA, dsMetaData));
     }
 
     @Override

@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -20,7 +21,6 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIButtonDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -84,8 +84,8 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         addStyleName("target-status-filters");
         setMargin(false);
 
-        final Label targetFilterStatusLabel = SPUIComponentProvider.getLabel(i18n.get("label.filter.by.status"),
-                SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        final Label targetFilterStatusLabel = new LabelBuilder().name(i18n.get("label.filter.by.status")).buildLabel();
+
         targetFilterStatusLabel.addStyleName("target-status-filters-title");
 
         addComponent(targetFilterStatusLabel);
