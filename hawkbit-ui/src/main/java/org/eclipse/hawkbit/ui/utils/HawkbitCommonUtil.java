@@ -553,9 +553,7 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-<<<<<<< HEAD
-=======
-     * Duplicate check - Unique Key.
+Duplicate check - Unique Key.
      *
      * @param name
      *            as string
@@ -573,7 +571,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
->>>>>>> refs/heads/master
      * Add new base software module.
      *
      * @param bsname

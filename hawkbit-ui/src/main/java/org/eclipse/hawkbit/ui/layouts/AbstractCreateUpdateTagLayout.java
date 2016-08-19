@@ -465,7 +465,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
                 .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
 
         window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
             @Override
             public void saveOrUpdate() {
                 if (optiongroup.getValue().equals(createTagStr)) {

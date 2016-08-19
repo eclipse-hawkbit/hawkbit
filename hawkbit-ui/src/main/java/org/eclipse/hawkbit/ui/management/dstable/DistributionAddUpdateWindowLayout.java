@@ -339,7 +339,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 .content(this).layout(formLayout).i18n(i18n).buildCommonDialogWindow();
 
         window.setSaveDialogCloseListener(new SaveDialogCloseListener() {
-
             @Override
             public void saveOrUpdate() {
                 if (editDistribution) {
