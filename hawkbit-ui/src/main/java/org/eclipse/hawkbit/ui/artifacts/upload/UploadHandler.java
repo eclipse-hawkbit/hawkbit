@@ -71,10 +71,10 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private transient EventBus.SessionEventBus eventBus;
     private final SoftwareModule selectedSw;
     private SoftwareModule selectedSwForUpload;
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
-            final Upload upload, final String mimeType, SoftwareModule selectedSw) {
+            final Upload upload, final String mimeType, final SoftwareModule selectedSw) {
         super();
         this.aborted = false;
         this.fileName = fileName;
@@ -142,7 +142,11 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         try {
             if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName, selectedSwForUpload)) {
                 view.increaseNumberOfFileUploadsExpected();
-                return view.saveUploadedFileDetails(fileName, 0, mimeType, selectedSwForUpload);
+                final OutputStream saveUploadedFileDetails = view.saveUploadedFileDetails(fileName, 0, mimeType,
+                        selectedSwForUpload);
+                eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.RECEIVE_UPLOAD,
+                        new UploadFileStatus(fileName, 0, -1, selectedSwForUpload)));
+                return saveUploadedFileDetails;
             }
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
@@ -163,8 +167,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadSucceeded(final SucceededEvent event) {
         LOG.debug("Streaming finished for file :{}", event.getFilename());
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL, new UploadFileStatus(
-                event.getFilename(), 0, event.getLength(), selectedSwForUpload)));
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
+                new UploadFileStatus(event.getFilename(), 0, event.getLength(), selectedSwForUpload)));
     }
 
     /**
@@ -190,8 +194,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadFinished(final FinishedEvent event) {
         LOG.debug("Upload finished for file :{}", event.getFilename());
-        eventBus.publish(this,
-                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED, new UploadFileStatus(event.getFilename())));
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED,
+                new UploadFileStatus(event.getFilename())));
     }
 
     /**
@@ -202,8 +206,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
         LOG.debug("Streaming started for file :{}", fileName);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
-                fileName, 0, 0, selectedSw)));
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED,
+                new UploadFileStatus(fileName, 0, 0, selectedSw)));
     }
 
     /**
@@ -214,8 +218,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadStarted(final StartedEvent event) {
         uploadInterrupted = false;
-        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ? artifactUploadState
-                .getSelectedBaseSoftwareModule().get() : null;
+        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
+                ? artifactUploadState.getSelectedBaseSoftwareModule().get() : null;
 
         if (view.isSoftwareModuleSelected()) {
             // single file session
@@ -223,9 +227,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
                 LOG.debug("Upload started for file :{}", event.getFilename());
                 eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED,
                         new UploadFileStatus(event.getFilename(), 0, 0, selectedSwForUpload)));
-            } 
-        }
-        else {
+            }
+        } else {
             failureReason = i18n.get("message.upload.failed");
             upload.interruptUpload();
             // actual interrupt will happen a bit late so setting the below
@@ -291,8 +294,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             interruptFileStreaming();
             return;
         }
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS, new UploadFileStatus(
-                fileName, event.getBytesReceived(), event.getContentLength(), selectedSw)));
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
+                new UploadFileStatus(fileName, event.getBytesReceived(), event.getContentLength(), selectedSw)));
         // Logging to solve sonar issue
         LOG.trace("Streaming in progress for file :{}", event.getFileName());
     }
@@ -332,8 +335,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             if (failureReason == null) {
                 failureReason = event.getReason().getMessage();
             }
-            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
-                    fileName, failureReason, selectedSwForUpload)));
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED,
+                    new UploadFileStatus(fileName, failureReason, selectedSwForUpload)));
             if (!aborted) {
                 LOG.info("Upload failed for file :{}", event.getFilename());
                 LOG.info("Upload failed for file :{}", event.getReason());
