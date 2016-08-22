@@ -395,8 +395,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     }
 
     protected Set<I> getDraggedTargetList(final DragAndDropEvent event) {
-        final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
-        final Table targetTable = (Table) taregtDet.getTarget();
+        final com.vaadin.event.dd.TargetDetails targetDet = event.getTargetDetails();
+        final Table targetTable = (Table) targetDet.getTarget();
         final Set<I> targetSelected = getTableValue(targetTable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
