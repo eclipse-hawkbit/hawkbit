@@ -95,14 +95,18 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private FormLayout formLayout;
 
+    /**
+     * Save or update distribution set.
+     *
+     */
     private final class SaveOnCloseDialogListener implements SaveDialogCloseListener {
         @Override
         public void saveOrUpdate() {
             if (editDistribution) {
                 updateDistribution();
-            } else {
-                addNewDistribution();
+                return;
             }
+            addNewDistribution();
         }
 
         @Override

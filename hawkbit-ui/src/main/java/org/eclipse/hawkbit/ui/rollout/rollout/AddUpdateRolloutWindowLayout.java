@@ -146,6 +146,28 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private final NullValidator nullValidator = new NullValidator(null, false);
 
     /**
+     * Save or update the rollout.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editRolloutEnabled) {
+                editRollout();
+                return;
+            }
+            createRollout();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            if (editRolloutEnabled) {
+                return duplicateCheckForEdit();
+            }
+            return duplicateCheck();
+        }
+    }
+
+    /**
      * Create components and layout.
      */
     public void init() {
@@ -581,28 +603,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private String getRolloutName() {
         return HawkbitCommonUtil.trimAndNullIfEmpty(rolloutName.getValue());
-    }
-
-    /**
-     *
-     */
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-        @Override
-        public void saveOrUpdate() {
-            if (editRolloutEnabled) {
-                editRollout();
-            } else {
-                createRollout();
-            }
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            if (editRolloutEnabled) {
-                return duplicateCheckForEdit();
-            }
-            return duplicateCheck();
-        }
     }
 
     class ErrorThresoldOptionValidator implements Validator {

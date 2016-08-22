@@ -57,29 +57,13 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
+ * 
  * Abstract class for create/update target tag layout.
+ *
+ * @param <E>
  */
 public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
-
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-
-        @Override
-        public void saveOrUpdate() {
-            if (optiongroup.getValue().equals(createTagStr)) {
-                createEntity();
-            } else {
-                updateEntity(findEntityByName());
-            }
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            final boolean update = !optiongroup.getValue().equals(createTagStr);
-            return update || !isDuplicate();
-
-        }
-    }
 
     private static final long serialVersionUID = 4229177824620576456L;
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
@@ -127,11 +111,32 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected String tagNameValue;
     protected String tagDescValue;
 
-    protected abstract String getWindowCaption();
+    /**
+     * 
+     * Save or update the entity.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
 
-    protected abstract void updateEntity(E entity);
+        @Override
+        public void saveOrUpdate() {
+            if (isUpdateAction()) {
+                updateEntity(findEntityByName());
+                return;
+            }
 
-    protected abstract void createEntity();
+            createEntity();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return isUpdateAction() || !isDuplicate();
+
+        }
+
+        private boolean isUpdateAction() {
+            return !optiongroup.getValue().equals(createTagStr);
+        }
+    }
 
     /**
      * Discard the changes and close the popup.
@@ -419,7 +424,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      *
      * @param colorPickedPreview
      */
-    private void getTargetDynamicStyles(final String colorPickedPreview) {
+    private static void getTargetDynamicStyles(final String colorPickedPreview) {
         Page.getCurrent().getJavaScript()
                 .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
     }
@@ -595,8 +600,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         return isDuplicateByName();
     }
 
-    protected abstract E findEntityByName();
-
     public String getColorPicked() {
         return colorPicked;
     }
@@ -636,5 +639,13 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     @Override
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
+
+    protected abstract E findEntityByName();
+
+    protected abstract String getWindowCaption();
+
+    protected abstract void updateEntity(E entity);
+
+    protected abstract void createEntity();
 
 }

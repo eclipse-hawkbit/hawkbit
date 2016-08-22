@@ -50,26 +50,6 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
-    /**
-     * @author Dennis Melzer
-     *
-     */
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-        @Override
-        public void saveOrUpdate() {
-            if (editSwModule) {
-                updateSwModule();
-            } else {
-                addNewBaseSoftware();
-            }
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            return editSwModule || !isDuplicate();
-        }
-    }
-
     private static final long serialVersionUID = -5217675246477211483L;
 
     @Autowired
@@ -104,6 +84,25 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private Long baseSwModuleId;
 
     private FormLayout formLayout;
+
+    /**
+     * Save or update the sw module.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editSwModule) {
+                updateSwModule();
+                return;
+            }
+            addNewBaseSoftware();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editSwModule || !isDuplicate();
+        }
+    }
 
     /**
      * Initialize Distribution Add and Edit Window.

@@ -48,26 +48,6 @@ import com.vaadin.ui.Window;
 @VaadinSessionScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
 
-    /**
-     *
-     */
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-        @Override
-        public void saveOrUpdate() {
-            if (editTarget) {
-                updateTarget();
-            } else {
-                addNewTarget();
-            }
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            return editTarget || !isDuplicate();
-        }
-
-    }
-
     private static final long serialVersionUID = -6659290471705262389L;
 
     @Autowired
@@ -88,10 +68,30 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
-    private boolean editTarget = Boolean.FALSE;
+    private boolean editTarget;
     private String controllerId;
     private FormLayout formLayout;
     private CommonDialogWindow window;
+
+    /**
+     * Save or update the target.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editTarget) {
+                updateTarget();
+                return;
+            }
+            addNewTarget();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editTarget || !isDuplicate();
+        }
+
+    }
 
     /**
      * Initialize the Add Update Window Component for Target.

@@ -518,7 +518,7 @@ public class CommonDialogWindow extends Window {
      * @param component
      *            AbstractField
      */
-    public void updateAllComponents(final AbstractField component) {
+    public void updateAllComponents(final AbstractField<?> component) {
 
         allComponents.add(component);
         component.addValueChangeListener(new ChangeListener(component));
@@ -537,28 +537,31 @@ public class CommonDialogWindow extends Window {
     }
 
     /**
-     * Called before the save happens.
+     * Check if the safe action can executed. After a the save action the
+     * listener checks if the dialog can closed.
      *
      */
     public interface SaveDialogCloseListener {
 
         /**
-         * Default true for all the windows except for DistributionAddUpdate
-         * window.
+         * Checks if the safe action can executed.
          * 
-         * @return true/false .
+         * @return <true> = save action can executed <false> = cannot execute
+         *         safe action .
          */
         boolean canWindowSaveOrUpdate();
 
         /**
-         * @return true/false based on the dialog window to be closed or not.
+         * Checks if the window can closed after the safe action is executed
+         * 
+         * @return <true> = window will close <false> = will not closed.
          */
         default boolean canWindowClose() {
             return true;
         }
 
         /**
-         * Saves/Updates
+         * Saves/Updates action. Is called if canWindowSaveOrUpdate is <true>.
          * 
          */
         void saveOrUpdate();

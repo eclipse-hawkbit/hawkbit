@@ -65,27 +65,6 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity, M extends MetaData>
         extends CustomComponent {
 
-    /**
-     *
-     */
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-        @Override
-        public void saveOrUpdate() {
-            onSave();
-        }
-
-        @Override
-        public boolean canWindowClose() {
-            return false;
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            return true;
-        }
-
-    }
-
     private static final String DELETE_BUTTON = "DELETE_BUTTON";
 
     private static final long serialVersionUID = -1491218218453167613L;
@@ -118,6 +97,27 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private E selectedEntity;
 
     private HorizontalLayout mainLayout;
+
+    /**
+     * Save the metadata and never close the window after saving.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            onSave();
+        }
+
+        @Override
+        public boolean canWindowClose() {
+            return false;
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return true;
+        }
+
+    }
 
     @PostConstruct
     void init() {
