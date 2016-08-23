@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -513,10 +512,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleType type) {
         if (type.getId() != null) {
             throw new EntityAlreadyExistsException("Given type contains an Id!");
-        }
-
-        if (type.getMaxAssignments() <= 0) {
-            throw new ConstraintViolationException("The value for max assignments has to be greater than 0!");
         }
 
         return softwareModuleTypeRepository.save((JpaSoftwareModuleType) type);

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
@@ -63,7 +64,6 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_MODULE_UNSUPPORTED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_TYPE_UNDEFINED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_TENANT_NOT_EXISTS, HttpStatus.BAD_REQUEST);
-        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONSTRAINT_VIOLATION, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ENTITY_LOCKED, HttpStatus.LOCKED);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ROLLOUT_ILLEGAL_STATE, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_INVALID, HttpStatus.BAD_REQUEST);
@@ -118,6 +118,27 @@ public class ResponseExceptionHandler {
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Method for handling exception of type ConstraintViolationException which
+     * is thrown in case the request is rejected due to a constraint violation.
+     * Called by the Spring-Framework for exception handling.
+     *
+     * @param request
+     *            the Http request
+     * @param ex
+     *            the exception which occurred
+     * @return the entity to be responded containing the exception information
+     *         as entity.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
+            final Exception ex) {
+        logRequest(request, ex);
+        final ExceptionInfo response = createExceptionInfo(
+                new ConstraintViolationException(((ConstraintViolationException) ex).getConstraintViolations()));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
