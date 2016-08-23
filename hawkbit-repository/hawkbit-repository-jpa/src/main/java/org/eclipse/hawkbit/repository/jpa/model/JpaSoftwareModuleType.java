@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Min;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
@@ -36,6 +37,7 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     private String key;
 
     @Column(name = "max_ds_assignments", nullable = false)
+    @Min(1)
     private int maxAssignments;
 
     @Column(name = "colour", nullable = true, length = 16)

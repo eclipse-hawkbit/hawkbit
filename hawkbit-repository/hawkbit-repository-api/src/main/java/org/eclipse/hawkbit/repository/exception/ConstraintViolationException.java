@@ -12,18 +12,18 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * the {@link EntityAlreadyExistsException} is thrown when an entity is tried to
- * be saved which already exists or which violates unique key constraints.
+ * the {@link ConstraintViolationException} is thrown when an entity is tried to
+ * be saved and violates a constraints, like value > 0
  */
-public class EntityAlreadyExistsException extends AbstractServerRtException {
+public class ConstraintViolationException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
-    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_ALRREADY_EXISTS;
+    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_CONSTRAINT_VIOLATION;
 
     /**
      * Default constructor.
      */
-    public EntityAlreadyExistsException() {
+    public ConstraintViolationException() {
         super(THIS_ERROR);
     }
 
@@ -33,7 +33,7 @@ public class EntityAlreadyExistsException extends AbstractServerRtException {
      * @param cause
      *            of the exception
      */
-    public EntityAlreadyExistsException(final Throwable cause) {
+    public ConstraintViolationException(final Throwable cause) {
         super(THIS_ERROR, cause);
     }
 
@@ -45,7 +45,7 @@ public class EntityAlreadyExistsException extends AbstractServerRtException {
      * @param cause
      *            of the exception
      */
-    public EntityAlreadyExistsException(final String message, final Throwable cause) {
+    public ConstraintViolationException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
     }
 
@@ -55,7 +55,7 @@ public class EntityAlreadyExistsException extends AbstractServerRtException {
      * @param message
      *            of the exception
      */
-    public EntityAlreadyExistsException(final String message) {
+    public ConstraintViolationException(final String message) {
         super(message, THIS_ERROR);
     }
 }
