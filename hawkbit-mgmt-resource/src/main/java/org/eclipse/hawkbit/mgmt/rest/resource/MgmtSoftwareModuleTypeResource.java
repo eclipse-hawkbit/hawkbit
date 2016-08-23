@@ -113,6 +113,12 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
+        for (final MgmtSoftwareModuleTypeRequestBodyPost softwareModuleType : softwareModuleTypes) {
+            if (softwareModuleType.getMaxAssignments() <= 0) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
         final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement.createSoftwareModuleType(
                 MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 
