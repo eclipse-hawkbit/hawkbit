@@ -22,6 +22,10 @@ public enum SpServerError {
     */
     SP_REPO_ENTITY_ALRREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists", "The given entity already exists in database"),
     /**
+    *
+    */
+    SP_REPO_CONSTRAINT_VIOLATION("hawkbit.server.error.repo.constraintViolation", "The given entity cannot be saved due to Constraint Violation"),
+    /**
      * 
      */
     SP_REPO_INVALID_TARGET_ADDRESS("hawkbit.server.error.repo.invalidTargetAddress", "The target address is not well formed"),

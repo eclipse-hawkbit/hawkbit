@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.rest.exception;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -137,8 +140,17 @@ public class ResponseExceptionHandler {
     public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
-        final ExceptionInfo response = createExceptionInfo(
-                new ConstraintViolationException(((ConstraintViolationException) ex).getConstraintViolations()));
+
+        final ExceptionInfo response = null;
+        final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
+
+        final List<String> messages = new ArrayList<>();
+        violations.stream()
+                .forEach(violation -> messages.add(violation.getPropertyPath() + " " + violation.getMessage() + ". "));
+
+        // response = createExceptionInfo(new
+        // org.eclipse.hawkbit.repository.exception.ConstraintViolationException(
+        // messages.forEach(StringBuilder::append(this))));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
