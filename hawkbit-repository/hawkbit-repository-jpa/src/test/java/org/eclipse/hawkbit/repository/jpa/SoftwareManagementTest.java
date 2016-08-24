@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -786,8 +788,19 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     @Test
+    @Description("Verifies that the creation of a softwareModuleType is failing because of invalid max assignment")
+    public void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
+        try {
+            softwareManagement.createSoftwareModuleType(new JpaSoftwareModuleType("type", "name", "desc", 0));
+            fail("should not have worked as max assignment is invalid. Should be greater than 0.");
+        } catch (final ConstraintViolationException e) {
+
+        }
+    }
+
+    @Test
     @Description("Verfies that multiple types are created as requested.")
-    public void createMultipleoftwareModuleTypes() {
+    public void createMultipleSoftwareModuleTypes() {
         final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
                 Lists.newArrayList(new JpaSoftwareModuleType("thetype", "thename", "desc", 100),
                         new JpaSoftwareModuleType("thetype2", "thename2", "desc2", 100)));
@@ -797,7 +810,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     @Test
-    @Description("Verfies that sofwtare modules are resturned that are assigned to given DS.")
+    @Description("Verfies that software modules are resturned that are assigned to given DS.")
     public void findSoftwareModuleByAssignedTo() {
         // test meta data
         final SoftwareModuleType testType = softwareManagement
@@ -810,8 +823,6 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
         final SoftwareModule one = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
-        final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
 
         // one soft deleted
         final SoftwareModule deleted = softwareManagement
