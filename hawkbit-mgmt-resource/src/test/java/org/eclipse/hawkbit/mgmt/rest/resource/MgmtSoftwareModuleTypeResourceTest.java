@@ -135,7 +135,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
-    @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 0")
+    @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 1")
     public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws JSONException, Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
