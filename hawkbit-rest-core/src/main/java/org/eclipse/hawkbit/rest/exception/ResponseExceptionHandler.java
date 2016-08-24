@@ -13,6 +13,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
@@ -141,16 +142,16 @@ public class ResponseExceptionHandler {
             final Exception ex) {
         logRequest(request, ex);
 
-        final ExceptionInfo response = null;
         final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
 
         final List<String> messages = new ArrayList<>();
         violations.stream()
-                .forEach(violation -> messages.add(violation.getPropertyPath() + " " + violation.getMessage() + ". "));
+                .forEach(violation -> messages.add(violation.getPropertyPath() + " " + violation.getMessage() + "."));
 
-        // response = createExceptionInfo(new
-        // org.eclipse.hawkbit.repository.exception.ConstraintViolationException(
-        // messages.forEach(StringBuilder::append(this))));
+        final ExceptionInfo response = createExceptionInfo(
+                new org.eclipse.hawkbit.repository.exception.ConstraintViolationException(
+                        messages.stream().collect(Collectors.joining(" "))));
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
