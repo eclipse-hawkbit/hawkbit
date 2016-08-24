@@ -16,12 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- * Interface for Pre Authenfication.
- * 
- *
- *
+ * Interface for Pre Authentification.
  */
-public interface PreAuthenficationFilter {
+public interface PreAuthentificationFilter {
 
     /**
      * Check if the filter is enabled.
@@ -60,6 +57,6 @@ public interface PreAuthenficationFilter {
      */
     default Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
         return Collections.emptyList();
-    };
+    }
 
 }

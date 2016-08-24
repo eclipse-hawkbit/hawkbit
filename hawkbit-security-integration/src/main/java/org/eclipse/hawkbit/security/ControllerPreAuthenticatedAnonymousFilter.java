@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
  * 
  * @see DdiSecurityProperties
  */
-public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenficationFilter {
+public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthentificationFilter {
 
     private final DdiSecurityProperties ddiSecurityConfiguration;
 

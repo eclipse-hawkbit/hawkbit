@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTok
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
-import org.eclipse.hawkbit.security.PreAuthenficationFilter;
+import org.eclipse.hawkbit.security.PreAuthentificationFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class AmqpControllerAuthentfication {
 
     private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider;
 
-    private final List<PreAuthenficationFilter> filterChain = new ArrayList<>();
+    private final List<PreAuthentificationFilter> filterChain = new ArrayList<>();
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -107,7 +107,7 @@ public class AmqpControllerAuthentfication {
      */
     public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
-        for (final PreAuthenficationFilter filter : filterChain) {
+        for (final PreAuthentificationFilter filter : filterChain) {
             final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
             if (authenticationRest != null) {
                 authentication = authenticationRest;
@@ -119,7 +119,7 @@ public class AmqpControllerAuthentfication {
 
     }
 
-    private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenficationFilter filter,
+    private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthentificationFilter filter,
             final TenantSecurityToken secruityToken) {
 
         if (!filter.isEnable(secruityToken)) {
