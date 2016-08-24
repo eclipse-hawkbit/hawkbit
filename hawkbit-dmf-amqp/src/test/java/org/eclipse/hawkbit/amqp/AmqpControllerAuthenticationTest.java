@@ -74,7 +74,8 @@ public class AmqpControllerAuthenticationTest {
         messageConverter = new Jackson2JsonMessageConverter();
         final RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
+                mock(AmqpMessageDispatcherService.class));
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));

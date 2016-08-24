@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -197,7 +198,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a DS is of default type if not specified explicitly at creation time.")
+    @Description("Verifies that a DS is of default type if not specified explicitly at creation time.")
     public void createDistributionSetWithImplicitType() {
         final DistributionSet set = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", null, null));
@@ -208,7 +209,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that multiple DS are of default type if not specified explicitly at creation time.")
+    @Description("Verifies that multiple DS are of default type if not specified explicitly at creation time.")
     public void createMultipleDistributionSetsWithImplicitType() {
 
         List<DistributionSet> sets = new ArrayList<>();
@@ -228,7 +229,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a DS entity cannot be used for creation.")
+    @Description("Verifies that a DS entity cannot be used for creation.")
     public void createDistributionSetFailsOnExistingEntity() {
         final DistributionSet set = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", null, null));
@@ -816,6 +817,27 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement
                 .findDistributionSetsByDeletedAndOrCompleted(pageReq, Boolean.FALSE, Boolean.TRUE).getTotalElements())
                         .isEqualTo(2);
+    }
+
+    @Test
+    @Description("Verify that the DistributionSetAssignmentResult not contains already assigned targets.")
+    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
+        DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+
+        // create assigned DS
+        dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
+                dsToTargetAssigned.getVersion());
+        final Target target = new JpaTarget("4712");
+        final Target savedTarget = targetManagement.createTarget(target);
+        final List<Target> toAssign = Lists.newArrayList(savedTarget);
+        DistributionSetAssignmentResult assignmentResult = deploymentManagement
+                .assignDistributionSet(dsToTargetAssigned, toAssign);
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
+
+        assignmentResult = deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
+
+        assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
     private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,

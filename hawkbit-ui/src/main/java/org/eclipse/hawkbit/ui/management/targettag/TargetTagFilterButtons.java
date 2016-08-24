@@ -41,6 +41,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
+import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -158,7 +159,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
                     final TableTransferable tbl = (TableTransferable) event.getTransferable();
                     final Table source = tbl.getSourceComponent();
                     if (source.getId().equals(SPUIComponentIdProvider.TARGET_TABLE_ID)) {
-                        processTargetDrop(event);
+                        UI.getCurrent().access(() -> processTargetDrop(event));
                     }
                 }
             }
@@ -183,18 +184,28 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
      * @return Boolean
      */
     private Boolean validate(final DragAndDropEvent event) {
-        final Component compsource = event.getTransferable().getSourceComponent();
-        if (!(compsource instanceof Table)) {
-
+        final Transferable transferable = event.getTransferable();
+        final Component compsource = transferable.getSourceComponent();
+        if (!(compsource instanceof AbstractTable)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
-        } else {
-            final Table source = ((TableTransferable) event.getTransferable()).getSourceComponent();
-
-            if (!validateIfSourceisTargetTable(source) && !checkForTargetUpdatePermission()) {
-                return false;
-            }
         }
+
+        final TableTransferable tabletransferable = (TableTransferable) transferable;
+
+        final AbstractTable<?, ?> source = (AbstractTable<?, ?>) tabletransferable.getSourceComponent();
+
+        if (!validateIfSourceisTargetTable(source) && !checkForTargetUpdatePermission()) {
+            return false;
+        }
+
+        final Set<?> deletedEntityByTransferable = source.getDeletedEntityByTransferable(tabletransferable);
+        if (deletedEntityByTransferable.isEmpty()) {
+            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            notification.displayValidationError(actionDidNotWork);
+            return false;
+        }
+
         return true;
     }
 
@@ -216,11 +227,13 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private void processTargetDrop(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
+
         @SuppressWarnings("unchecked")
         final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
                 .getSourceComponent();
 
         final Set<TargetIdName> targetSelected = targetTable.getDeletedEntityByTransferable(transferable);
+
         final Set<String> targetList = targetSelected.stream().map(t -> t.getControllerId())
                 .collect(Collectors.toSet());
 

@@ -60,14 +60,12 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
@@ -356,36 +354,23 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return managementViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                if (doValidation(event)) {
-                    if (event.getTransferable().getSourceComponent() instanceof Table) {
-                        assignTargetToDs(event);
-                    } else if (event.getTransferable().getSourceComponent() instanceof DragAndDropWrapper) {
-                        processWrapperDrop(event);
-                    }
-                }
-            }
-        };
+    public AcceptCriterion getDropAcceptCriterion() {
+        return managementViewAcceptCriteria;
     }
 
-    private void processWrapperDrop(final DragAndDropEvent event) {
+    @Override
+    protected void onDropEventFromTable(final DragAndDropEvent event) {
+        assignTargetToDs(event);
+    }
+
+    @Override
+    protected void onDropEventFromWrapper(final DragAndDropEvent event) {
         if (event.getTransferable().getSourceComponent().getId()
                 .startsWith(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)) {
             assignDsTag(event);
         } else {
             assignTargetTag(event);
         }
-
     }
 
     private void assignDsTag(final DragAndDropEvent event) {
@@ -458,42 +443,26 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
-    private Boolean doValidation(final DragAndDropEvent dragEvent) {
-        final Component compsource = dragEvent.getTransferable().getSourceComponent();
-        if (compsource instanceof Table) {
-            return validateTable(compsource);
-        } else if (compsource instanceof DragAndDropWrapper) {
-            return validateDragAndDropWrapper(compsource);
-        } else {
-            notification.displayValidationError(notAllowedMsg);
-            return false;
-        }
+    @Override
+    protected boolean hasDropPermission() {
+        return permissionChecker.hasUpdateTargetPermission();
     }
 
-    private Boolean validateTable(final Component compsource) {
-        if (!permissionChecker.hasUpdateTargetPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
-            return false;
-        } else {
-            if (compsource instanceof Table && !compsource.getId().equals(SPUIComponentIdProvider.TARGET_TABLE_ID)) {
-                notification.displayValidationError(notAllowedMsg);
-                return false;
-            }
-        }
-        return true;
+    @Override
+    protected String getDropTableId() {
+        return SPUIComponentIdProvider.TARGET_TABLE_ID;
     }
 
-    private Boolean validateDragAndDropWrapper(final Component compsource) {
-        final DragAndDropWrapper wrapperSource = (DragAndDropWrapper) compsource;
+    @Override
+    protected boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource) {
         final String tagData = wrapperSource.getData().toString();
         if (wrapperSource.getId().startsWith(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)) {
             return !isNoTagButton(tagData, SPUIDefinitions.DISTRIBUTION_TAG_BUTTON);
         } else if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             return !isNoTagButton(tagData, SPUIDefinitions.TARGET_TAG_BUTTON);
-        } else {
-            notification.displayValidationError(notAllowedMsg);
-            return false;
         }
+        notification.displayValidationError(notAllowedMsg);
+        return false;
     }
 
     private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {

@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.junit.Before;
@@ -69,8 +70,6 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.cache.Cache;
 import org.springframework.http.HttpStatus;
 
-import com.google.common.eventbus.EventBus;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -85,6 +84,9 @@ public class AmqpMessageHandlerServiceTest {
     private AmqpMessageHandlerService amqpMessageHandlerService;
 
     private MessageConverter messageConverter;
+
+    @Mock
+    private AmqpMessageDispatcherService amqpMessageDispatcherServiceMock;
 
     @Mock
     private ControllerManagement controllerManagementMock;
@@ -108,9 +110,6 @@ public class AmqpMessageHandlerServiceTest {
     private HostnameResolver hostnameResolverMock;
 
     @Mock
-    private EventBus eventBus;
-
-    @Mock
     private RabbitTemplate rabbitTemplate;
 
     @Mock
@@ -120,13 +119,12 @@ public class AmqpMessageHandlerServiceTest {
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock);
         amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
         amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
         amqpMessageHandlerService.setCache(cacheMock);
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
-        amqpMessageHandlerService.setEventBus(eventBus);
         amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
         amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
 
@@ -134,7 +132,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests not allowed content-type in message")
-    public void testWrongContentType() {
+    public void wrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
@@ -147,7 +145,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a target/thing by calling the same method that incoming RabbitMQ messages would access.")
-    public void testCreateThing() {
+    public void createThing() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
@@ -168,7 +166,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a thing without a 'reply to' header in message.")
-    public void testCreateThingWitoutReplyTo() {
+    public void createThingWitoutReplyTo() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED, null);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = messageConverter.toMessage("", messageProperties);
@@ -184,7 +182,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a target/thing without a thingID by calling the same method that incoming RabbitMQ messages would access.")
-    public void testCreateThingWithoutID() {
+    public void createThingWithoutID() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
         try {
@@ -197,7 +195,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the call of the same method that incoming RabbitMQ messages would access with an unknown message type.")
-    public void testUnknownMessageType() {
+    public void unknownMessageType() {
         final String type = "bumlux";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "");
@@ -213,7 +211,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests a invalid message without event topic")
-    public void testInvalidEventTopic() {
+    public void invalidEventTopic() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
         try {
@@ -241,7 +239,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
-    public void testUpdateActionStatusWithoutActionId() {
+    public void updateActionStatusWithoutActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
@@ -259,7 +257,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
-    public void testUpdateActionStatusWithoutExistActionId() {
+    public void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.DOWNLOAD);
@@ -384,9 +382,13 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
         // verify
+        verify(controllerManagementMock).updateTargetStatus(Matchers.any(TargetInfo.class),
+                Matchers.isNull(TargetUpdateStatus.class), Matchers.isNotNull(Long.class), Matchers.isNull(URI.class));
+
         final ArgumentCaptor<TargetAssignDistributionSetEvent> captorTargetAssignDistributionSetEvent = ArgumentCaptor
                 .forClass(TargetAssignDistributionSetEvent.class);
-        verify(eventBus, times(1)).post(captorTargetAssignDistributionSetEvent.capture());
+        verify(amqpMessageDispatcherServiceMock, times(1))
+                .targetAssignDistributionSet(captorTargetAssignDistributionSetEvent.capture());
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
                 .getValue();
 
