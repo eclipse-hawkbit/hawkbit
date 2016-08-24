@@ -228,7 +228,7 @@ public class CommonDialogWindow extends Window {
         setModal(true);
         addStyleName("fontsize");
         setOrginaleValues();
-        addComponenetListeners();
+        addComponentListeners();
     }
 
     /**
@@ -255,7 +255,7 @@ public class CommonDialogWindow extends Window {
         cancelButton.addClickListener(closeClickListener);
     }
 
-    protected void addComponenetListeners() {
+    protected void addComponentListeners() {
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
