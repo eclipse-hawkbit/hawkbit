@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A bean which holds a complex result of an service operation to combine the
@@ -61,6 +62,10 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
 
     @Override
     public List<Target> getAssignedEntity() {
+        if (CollectionUtils.isEmpty(assignedTargets)) {
+            return Collections.emptyList();
+        }
+
         return targetManagement.findTargetByControllerID(assignedTargets);
     }
 

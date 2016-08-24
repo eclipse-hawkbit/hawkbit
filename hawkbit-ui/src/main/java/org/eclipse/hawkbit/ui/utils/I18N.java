@@ -66,6 +66,25 @@ public class I18N implements Serializable {
      * @see #getLocale()
      */
     public String get(final String code, final Object... args) {
+        return getMessage(code, args);
+    }
+
+    /**
+     * Tries to resolve the message.
+     *
+     * @param code
+     *            the code to lookup up.
+     *
+     * @return the resolved message, or the message code if the lookup fails.
+     *
+     * @see MessageSource#getMessage(String, Object[], Locale)
+     * @see #getLocale()
+     */
+    public String get(final String code) {
+        return getMessage(code, null);
+    }
+
+    private String getMessage(final String code, final Object[] args) {
         try {
             return source.getMessage(code, args, getLocale());
         } catch (final NoSuchMessageException ex) {

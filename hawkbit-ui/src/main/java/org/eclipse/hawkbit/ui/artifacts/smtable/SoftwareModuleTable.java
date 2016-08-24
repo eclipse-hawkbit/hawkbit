@@ -40,7 +40,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -215,21 +214,13 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
+    protected AcceptCriterion getDropAcceptCriterion() {
+        return uploadViewAcceptCriteria;
+    }
 
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return uploadViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                /* Not required */
-            }
-        };
+    @Override
+    protected boolean isDropValid(final DragAndDropEvent dragEvent) {
+        return false;
     }
 
     @Override

@@ -43,7 +43,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -78,7 +77,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
-    
+
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
@@ -180,9 +179,10 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
         addGeneratedColumn(SPUILabelDefinitions.ARTIFACT_ICON, new ColumnGenerator() {
             private static final long serialVersionUID = -5982361782989980277L;
+
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                HorizontalLayout iconLayout = new HorizontalLayout();
+                final HorizontalLayout iconLayout = new HorizontalLayout();
                 // add artifactory details popup
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button showArtifactDtlsBtn = createShowArtifactDtlsButton(nameVersionStr);
@@ -214,7 +214,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @Override
     protected void publishEntityAfterValueChange(final SoftwareModule selectedLastEntity) {
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
-        if(selectedLastEntity!=null){
+        if (selectedLastEntity != null) {
             manageDistUIState.setSelectedBaseSwModuleId(selectedLastEntity.getId());
         }
     }
@@ -252,21 +252,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
+    protected AcceptCriterion getDropAcceptCriterion() {
+        return distributionsViewAcceptCriteria;
+    }
 
-            private static final long serialVersionUID = -6175865860867652573L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return distributionsViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                /* sw module dont accept drops */
-            }
-        };
+    @Override
+    protected boolean isDropValid(final DragAndDropEvent dragEvent) {
+        return false;
     }
 
     /* All Private Methods */
@@ -326,7 +318,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         return showArtifactDtlsBtn;
     }
 
-    private Button createManageMetadataButton(String nameVersionStr) {
+    private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
                 SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
@@ -407,9 +399,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     }
 
-    private void showMetadataDetails(Long itemId) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
+    private void showMetadataDetails(final Long itemId) {
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 
 }

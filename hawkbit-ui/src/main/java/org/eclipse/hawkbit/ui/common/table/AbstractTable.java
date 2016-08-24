@@ -26,13 +26,20 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.google.gwt.thirdparty.guava.common.collect.Iterables;
+import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.event.Transferable;
+import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
@@ -51,11 +58,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     private static final long serialVersionUID = 4856562746502217630L;
 
+    protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
+
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     protected I18N i18n;
+
+    @Autowired
+    protected UINotification notification;
 
     /**
      * Initialize the components.
@@ -359,12 +371,100 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         return DEFAULT_COLUMN_NAME_MIN_SIZE;
     }
 
-    /**
-     * Get drop handler for the table.
-     * 
-     * @return reference of {@link DropHandler}
-     */
-    protected abstract DropHandler getTableDropHandler();
+    private DropHandler getTableDropHandler() {
+        return new DropHandler() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public AcceptCriterion getAcceptCriterion() {
+                return getDropAcceptCriterion();
+            }
+
+            @Override
+            public void drop(final DragAndDropEvent event) {
+                if (!isDropValid(event)) {
+                    return;
+                }
+                if (event.getTransferable().getSourceComponent() instanceof Table) {
+                    onDropEventFromTable(event);
+                } else if (event.getTransferable().getSourceComponent() instanceof DragAndDropWrapper) {
+                    onDropEventFromWrapper(event);
+                }
+            }
+        };
+    }
+
+    protected Set<I> getDraggedTargetList(final DragAndDropEvent event) {
+        final com.vaadin.event.dd.TargetDetails targetDet = event.getTargetDetails();
+        final Table targetTable = (Table) targetDet.getTarget();
+        final Set<I> targetSelected = getTableValue(targetTable);
+
+        final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
+        final Object targetItemId = dropData.getItemIdOver();
+
+        if (!targetSelected.contains(targetItemId)) {
+            return Sets.newHashSet((I) targetItemId);
+        }
+
+        return targetSelected;
+    }
+
+    private Set<Object> getDraggedTargetList(final TableTransferable transferable, final Table source) {
+        @SuppressWarnings("unchecked")
+        final AbstractTable<NamedEntity, Object> table = (AbstractTable<NamedEntity, Object>) source;
+        return table.getDeletedEntityByTransferable(transferable);
+    }
+
+    private boolean validateDropList(final Set<?> droplist) {
+        if (droplist.isEmpty()) {
+            final String actionDidNotWork = i18n.get("message.action.did.not.work", new Object[] {});
+            notification.displayValidationError(actionDidNotWork);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean isDropValid(final DragAndDropEvent dragEvent) {
+        final Transferable transferable = dragEvent.getTransferable();
+        final Component compsource = transferable.getSourceComponent();
+
+        if (!hasDropPermission()) {
+            notification.displayValidationError(i18n.get("message.permission.insufficient"));
+            return false;
+        }
+
+        if (compsource instanceof Table) {
+            return validateTable((Table) compsource)
+                    && validateDropList(getDraggedTargetList((TableTransferable) transferable, (Table) compsource));
+        }
+
+        if (compsource instanceof DragAndDropWrapper) {
+            return validateDragAndDropWrapper((DragAndDropWrapper) compsource)
+                    && validateDropList(getDraggedTargetList(dragEvent));
+        }
+        notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+        return false;
+    }
+
+    private boolean validateTable(final Table compsource) {
+        if (!compsource.getId().equals(getDropTableId())) {
+            notification.displayValidationError(ACTION_NOT_ALLOWED_MSG);
+            return false;
+        }
+        return true;
+    }
+
+    protected abstract boolean hasDropPermission();
+
+    protected abstract boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource);
+
+    protected abstract void onDropEventFromWrapper(DragAndDropEvent event);
+
+    protected abstract void onDropEventFromTable(DragAndDropEvent event);
+
+    protected abstract String getDropTableId();
+
+    protected abstract AcceptCriterion getDropAcceptCriterion();
 
     protected abstract void setDataAvailable(boolean available);
 

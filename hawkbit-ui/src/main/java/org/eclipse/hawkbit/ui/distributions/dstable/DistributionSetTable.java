@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -99,9 +97,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
-    @Autowired
-    private UINotification notification;
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -231,25 +226,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return distributionsViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                if (doValidation(event)) {
-                    onDrop(event);
-                }
-            }
-        };
+    public AcceptCriterion getDropAcceptCriterion() {
+        return distributionsViewAcceptCriteria;
     }
 
-    private void onDrop(final DragAndDropEvent event) {
+    @Override
+    protected void onDropEventFromTable(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         @SuppressWarnings("unchecked")
         final AbstractTable<?, Long> source = (AbstractTable<SoftwareModule, Long>) transferable.getSourceComponent();
@@ -262,6 +244,22 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (item != null && item.getItemProperty("id") != null && item.getItemProperty("name") != null) {
             handleDropEvent(source, softwareModulesIdList, item);
         }
+
+    }
+
+    @Override
+    protected void onDropEventFromWrapper(final DragAndDropEvent event) {
+        // nothing to do
+    }
+
+    @Override
+    protected boolean isDropValid(final DragAndDropEvent dragEvent) {
+        final Component compsource = dragEvent.getTransferable().getSourceComponent();
+        if (!(compsource instanceof Table)) {
+            notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
+            return false;
+        }
+        return super.isDropValid(dragEvent);
     }
 
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Item item) {
@@ -364,7 +362,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         if (distributionSetManagement.isDistributionSetInUse(ds)) {
-            notification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
+            notification.displayValidationError(
+                    i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;
         }
         return true;
@@ -415,31 +414,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return true;
     }
 
-    /**
-     * Validate event.
-     *
-     * @param dragEvent
-     *            as event
-     * @return boolean as flag
-     */
-    private Boolean doValidation(final DragAndDropEvent dragEvent) {
-        if (!permissionChecker.hasUpdateDistributionPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
-            return false;
-        } else {
-            final Component compsource = dragEvent.getTransferable().getSourceComponent();
-            final Table source = (Table) compsource;
-            if (compsource instanceof Table) {
-                if (!source.getId().equals(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)) {
-                    notification.displayValidationError(i18n.get("message.action.not.allowed"));
-                    return false;
-                }
-            } else {
-                notification.displayValidationError(i18n.get("message.action.not.allowed"));
-                return false;
-            }
-        }
-        return true;
+    @Override
+    protected String getDropTableId() {
+        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+    }
+
+    @Override
+    protected boolean hasDropPermission() {
+        return permissionChecker.hasUpdateDistributionPermission();
     }
 
     private void addTableStyleGenerator() {
@@ -550,7 +532,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
    private void showMetadataDetails(final Long itemId) {
         final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
     private String getNameAndVerion(final Object itemId) {
