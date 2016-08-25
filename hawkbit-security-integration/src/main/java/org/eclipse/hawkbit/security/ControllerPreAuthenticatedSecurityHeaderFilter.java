@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -97,7 +101,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+    public Object getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
         final String authorityNameConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
         String controllerId = secruityToken.getControllerId();
@@ -108,7 +112,17 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
             controllerId = secruityToken.getHeader(caCommonNameHeader);
         }
 
-        return new HeaderAuthentication(controllerId, authorityNameConfigurationValue);
+        String[] knownHashes = splitMultiHash(authorityNameConfigurationValue);
+        if (knownHashes.length > 1) {
+            Set<HeaderAuthentication> multiHashes = new HashSet<>();
+            final String cntlId = controllerId;
+            Arrays.asList(knownHashes)
+                    .forEach(hashItem -> multiHashes.add(new HeaderAuthentication(cntlId, hashItem)));
+            return multiHashes;
+
+        } else {
+            return new HeaderAuthentication(controllerId, authorityNameConfigurationValue);
+        }
     }
 
     /**
@@ -117,12 +131,13 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * It's ok if we find the the hash in any the trusted CA chain to accept
      * this request for this tenant.
      */
-    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHash) {
+    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHashes) {
         // iterate over the headers until we get a null header.
+        String[] knownHashes = splitMultiHash(knownIssuerHashes);
         int iHeader = 1;
         String foundHash;
         while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
-            if (foundHash.equals(knownIssuerHash)) {
+            if (Arrays.asList(knownHashes).contains(foundHash)) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
@@ -147,5 +162,9 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
             return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(
                     TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue());
         }
+    }
+
+    private static String[] splitMultiHash(String knownIssuerHashes) {
+        return knownIssuerHashes.split(";");
     }
 }

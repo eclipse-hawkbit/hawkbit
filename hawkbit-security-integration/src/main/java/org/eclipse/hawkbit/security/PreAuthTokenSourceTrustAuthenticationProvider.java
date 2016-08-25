@@ -27,17 +27,17 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * An spring authentication provider which supports authentication tokens of
  * type {@link PreAuthenticatedAuthenticationToken} created by the
  * {@link ControllerPreAuthenticatedSecurityHeaderFilter}.
- * 
+ *
  * Additionally to the authentication token providing the principal and the
  * credentials which must be match, this authentication provider can also check
  * the remote IP address of the request.
- * 
+ *
  * E.g. The request path is /controller/v1/{controllerId} then the controllerId
  * in the path is the principal. The credentials are the extracted information
  * from e.g. a certificate provided by an reverse proxy. Due this request is
  * only allowed from a specific source address this authentication manager can
  * also check the remote IP address of the request.
- * 
+ *
  *
  *
  */
@@ -58,7 +58,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * Creates a new PreAuthTokenSourceTrustAuthenticationProvider with given
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
-     * 
+     *
      * @param authorizedSourceIps
      *            a list of IP addresses.
      */
@@ -70,7 +70,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * Creates a new PreAuthTokenSourceTrustAuthenticationProvider with given
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
-     * 
+     *
      * @param authorizedSourceIps
      *            a list of IP addresses.
      */
@@ -104,6 +104,12 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         // proxy which extracted the CN from the certificate
         if (principal.equals(credentials)) {
             successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+
+        } else if (Collection.class.isAssignableFrom(credentials.getClass())) {
+            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
+            if (multiValueCredentials.contains(principal)) {
+                successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+            }
         }
 
         if (successAuthentication) {
