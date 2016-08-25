@@ -26,6 +26,8 @@ public class ConstraintViolationException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String WHITESPACE = " ";
+
     /**
      * Constructor for {@link ConstraintViolationException}
      * 
@@ -34,16 +36,25 @@ public class ConstraintViolationException extends AbstractServerRtException {
      *            thrown
      */
     public ConstraintViolationException(final javax.validation.ConstraintViolationException ex) {
-        super(setExceptionMessage(ex), SpServerError.SP_REPO_CONSTRAINT_VIOLATION);
+        super(getExceptionMessage(ex), SpServerError.SP_REPO_CONSTRAINT_VIOLATION);
     }
 
-    public static String setExceptionMessage(final javax.validation.ConstraintViolationException ex) {
+    /**
+     * Uses the information of
+     * {@link javax.validation.ConstraintViolationException} to provide a proper
+     * error message for {@link ConstraintViolationException}
+     * 
+     * @param ex
+     *            javax.validation.ConstraintViolationException which is thrown
+     * @return message String with proper error information
+     */
+    public static String getExceptionMessage(final javax.validation.ConstraintViolationException ex) {
         final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         final List<String> messages = new ArrayList<>();
-        violations.stream()
-                .forEach(violation -> messages.add(violation.getPropertyPath() + " " + violation.getMessage() + "."));
+        violations.stream().forEach(
+                violation -> messages.add(violation.getPropertyPath() + WHITESPACE + violation.getMessage() + "."));
 
-        return messages.stream().collect(Collectors.joining(" "));
+        return messages.stream().collect(Collectors.joining(WHITESPACE));
     }
 
 }
