@@ -26,7 +26,7 @@ public class ConstraintViolationException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String WHITESPACE = " ";
+    private static final String MESSAGE_FORMATTER_SEPARATOR = " ";
 
     /**
      * Constructor for {@link ConstraintViolationException}
@@ -52,9 +52,9 @@ public class ConstraintViolationException extends AbstractServerRtException {
         final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         final List<String> messages = new ArrayList<>();
         violations.stream().forEach(
-                violation -> messages.add(violation.getPropertyPath() + WHITESPACE + violation.getMessage() + "."));
+                violation -> messages.add(violation.getPropertyPath() + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + "."));
 
-        return messages.stream().collect(Collectors.joining(WHITESPACE));
+        return messages.stream().collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
     }
 
 }
