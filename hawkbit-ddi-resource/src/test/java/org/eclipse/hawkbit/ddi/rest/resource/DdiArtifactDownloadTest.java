@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -73,7 +74,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     private volatile long shippedBytes = 0;
     private volatile long shippedBytesTotal = 0;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     @Before
     public void setup() {
