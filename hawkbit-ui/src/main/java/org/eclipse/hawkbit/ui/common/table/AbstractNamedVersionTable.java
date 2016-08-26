@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 
 import com.vaadin.data.Item;
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.ui.DragAndDropWrapper;
 
 /**
  * Abstract table to handling {@link NamedVersionedEntity}
@@ -52,6 +54,32 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     protected void updateEntity(final E baseEntity, final Item item) {
         super.updateEntity(baseEntity, item);
         item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
+    }
+
+    @Override
+    protected void onDropEventFromTable(final DragAndDropEvent event) {
+        // subclass can implement
+
+    }
+
+    @Override
+    protected void onDropEventFromWrapper(final DragAndDropEvent event) {
+        // subclass can implement
+    }
+
+    @Override
+    protected boolean hasDropPermission() {
+        return true;
+    }
+
+    @Override
+    protected String getDropTableId() {
+        return null;
+    }
+
+    @Override
+    protected boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource) {
+        return false;
     }
 
 }
