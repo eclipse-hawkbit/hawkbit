@@ -599,7 +599,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     /**
      * Get count of targets in different status in rollout.
      *
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a list of rollouts with details of targets count for different
      *         statuses

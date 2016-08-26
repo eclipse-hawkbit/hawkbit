@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
+import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -192,10 +194,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private TextArea getDescriptionTextArea() {
-        final TextArea description = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"),
-                "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        description.setId(SPUIComponentIdProvider.BULK_UPLOAD_DESC);
+        final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
+                .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
+                .id(SPUIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
         description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         description.setWidth("100%");
         return description;
@@ -358,10 +359,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     public Window getWindow() {
         managementUIState.setBulkUploadWindowMinimised(false);
-        bulkUploadWindow = SPUIComponentProvider.getWindow("", null, SPUIDefinitions.CREATE_UPDATE_WINDOW);
+
+        bulkUploadWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption("").content(this)
+                .buildWindow();
         bulkUploadWindow.addStyleName("bulk-upload-window");
         bulkUploadWindow.setImmediate(true);
-        bulkUploadWindow.setContent(this);
         if (isNoBulkUploadInProgress()) {
             bulkUploader.getUpload().setEnabled(true);
         }

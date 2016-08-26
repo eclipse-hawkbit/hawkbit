@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,7 +69,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * corner and a save and cancel button at the bottom. Is not intended to reuse.
  * 
  */
-public class CommonDialogWindow extends Window implements Serializable {
+public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 

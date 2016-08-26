@@ -121,7 +121,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isNoTagSateSelected() {
+    protected boolean isNoTagStateSelected() {
         return managementUIState.getDistributionTableFilters().isNoTagSelected();
     }
 

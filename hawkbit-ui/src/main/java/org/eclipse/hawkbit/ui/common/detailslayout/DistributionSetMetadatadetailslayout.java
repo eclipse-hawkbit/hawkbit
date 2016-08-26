@@ -33,7 +33,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
+ *
  * DistributionSet Metadata details layout.
  *
  */
@@ -44,13 +44,13 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final long serialVersionUID = 2913758299611837718L;
 
-    private DistributionSetManagement distributionSetManagement;
-
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
-
     private static final String METADATA_KEY = "Key";
 
     private static final String VIEW = "view";
+
+    private transient DistributionSetManagement distributionSetManagement;
+
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private SpPermissionChecker permissionChecker;
 
@@ -61,7 +61,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
     private Long selectedDistSetId;
 
     /**
-     * Initialize the component.
+     * 
      * @param i18n
      * @param permissionChecker
      * @param distributionSetManagement
@@ -82,7 +82,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     /**
      * Populate software module metadata.
-     * 
+     *
      * @param distributionSet
      */
     public void populateDSMetadata(final DistributionSet distributionSet) {

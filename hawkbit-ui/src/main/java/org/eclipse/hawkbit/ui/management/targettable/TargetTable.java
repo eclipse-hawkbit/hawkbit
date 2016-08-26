@@ -8,6 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_DISTRIBUTION;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TAG;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TEXT;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TAG;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TEXT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +32,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -58,7 +68,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +81,6 @@ import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -80,7 +88,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
@@ -100,7 +107,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private static final long serialVersionUID = -2300392868806614568L;
 
     private static final int PROPERTY_DEPT = 3;
-    private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -110,9 +116,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @Autowired
     private SpPermissionChecker permChecker;
-
-    @Autowired
-    private UINotification notification;
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
@@ -143,7 +146,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             onTargetInfoUpdateEvents((List<TargetInfoUpdateEvent>) events);
         } else if (TargetDeletedEvent.class.isInstance(firstEvent)) {
             onTargetDeletedEvent((List<TargetDeletedEvent>) events);
-        } else if(TargetUpdatedEvent.class.isInstance(firstEvent)){
+        } else if (TargetUpdatedEvent.class.isInstance(firstEvent)) {
             onTargetUpdateEvents((List<TargetUpdatedEvent>) events);
         }
     }
@@ -239,12 +242,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         return targetTableContainer;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
-     * (com.vaadin.data.Container )
-     */
     @Override
     protected void addContainerProperties(final Container container) {
         HawkbitCommonUtil.addTargetTableContainerProperties(container);
@@ -266,10 +263,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @Override
     protected Object getItemIdToSelect() {
-        if (managementUIState.getSelectedTargetIdName().isPresent()) {
-            return managementUIState.getSelectedTargetIdName().get();
-        }
-        return null;
+        return managementUIState.getSelectedTargetIdName().orElse(null);
     }
 
     @Override
@@ -306,26 +300,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
         }
         return columnList;
-
     }
 
     @Override
-    protected DropHandler getTableDropHandler() {
-        return new DropHandler() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                return managementViewAcceptCriteria;
-            }
-
-            @Override
-            public void drop(final DragAndDropEvent event) {
-                if (doValidations(event)) {
-                    doAssignments(event);
-                }
-            }
-        };
+    public AcceptCriterion getDropAcceptCriterion() {
+        return managementViewAcceptCriteria;
     }
 
     private void onTargetDeletedEvent(final List<TargetDeletedEvent> events) {
@@ -440,14 +419,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private boolean isPinned(final String targetId) {
-        boolean result;
-        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
-                && targetId.equals(managementUIState.getDistributionTableFilters().getPinnedTargetId().get())) {
-            result = true;
-        } else {
-            result = false;
-        }
-        return result;
+        return managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
+                && targetId.equals(managementUIState.getDistributionTableFilters().getPinnedTargetId().get());
     }
 
     /**
@@ -464,7 +437,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         } else {
             unPinTarget(event.getButton());
         }
-
     }
 
     /**
@@ -519,21 +491,21 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     /**
      * Set style of target table.
-     *
      */
-    @SuppressWarnings("serial")
     private void styleTargetTable() {
         setCellStyleGenerator((source, itemId, propertyId) -> null);
     }
 
-    private void doAssignments(final DragAndDropEvent event) {
-        if (event.getTransferable().getSourceComponent() instanceof Table) {
-            dsToTargetAssignment(event);
-        } else if (event.getTransferable().getSourceComponent() instanceof DragAndDropWrapper
-                && isNoTagAssigned(event)) {
+    @Override
+    protected void onDropEventFromTable(final DragAndDropEvent event) {
+        dsToTargetAssignment(event);
+    }
+
+    @Override
+    protected void onDropEventFromWrapper(final DragAndDropEvent event) {
+        if (isNoTagAssigned(event)) {
             tagAssignment(event);
         }
-
     }
 
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
@@ -548,19 +520,17 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private void tagAssignment(final DragAndDropEvent event) {
-        final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
-        final Table targetTable = (Table) taregtDet.getTarget();
-        final Set<TargetIdName> targetSelected = getTableValue(targetTable);
-        final Set<String> targetList = new HashSet<>();
-        final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
-        final Object targetItemId = dropData.getItemIdOver();
-        if (!targetSelected.contains(targetItemId)) {
-            targetList.add(((TargetIdName) targetItemId).getControllerId());
-        } else {
-            targetList.addAll(targetSelected.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
-        }
+        final List<String> targetList = getDraggedTargetList(event).stream()
+                .map(targetIdName -> targetIdName.getControllerId()).collect(Collectors.toList());
+
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        if (targetList.isEmpty()) {
+            final String actionDidNotWork = i18n.get("message.action.did.not.work");
+            notification.displayValidationError(actionDidNotWork);
+            return;
+        }
+
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
 
         final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
@@ -570,52 +540,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-    /**
-     * Check Validation on Drop.
-     *
-     * @param dragEvent
-     *            as drop event
-     * @return Boolean as flag
-     */
-    private Boolean doValidations(final DragAndDropEvent dragEvent) {
-        final Component compsource = dragEvent.getTransferable().getSourceComponent();
-        if (compsource instanceof Table) {
-            return validateTable(compsource, (TableTransferable) dragEvent.getTransferable());
-        } else if (compsource instanceof DragAndDropWrapper) {
-            validateDragAndDropWrapper(compsource);
-        } else {
-            notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
-            return false;
-        }
-        return true;
-    }
-
-    private Boolean validateTable(final Component compsource, final TableTransferable transferable) {
-        final Table source = (Table) compsource;
-        if (!(source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)
-                || source.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
-            notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
-            return false;
-        } else if (!permChecker.hasUpdateTargetPermission()) {
-            notification.displayValidationError(i18n.get("message.permission.insufficient"));
-            return false;
-        } else if (getDraggedDistributionSet(transferable, source).size() > 1) {
-            notification.displayValidationError(i18n.get("message.onlyone.distribution.assigned"));
-            return false;
-        }
-        return true;
-    }
-
-    private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
-            final Table source) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) source;
-        return distTable.getDeletedEntityByTransferable(transferable);
-    }
-
-    private Boolean validateDragAndDropWrapper(final Component compsource) {
-        final DragAndDropWrapper wrapperSource = (DragAndDropWrapper) compsource;
-        final String tagName = HawkbitCommonUtil.removePrefix(compsource.getId(),
+    @Override
+    protected boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource) {
+        final String tagName = HawkbitCommonUtil.removePrefix(wrapperSource.getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
@@ -626,19 +553,32 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
             return false;
         }
+
         return true;
+    }
+
+    @Override
+    protected String getDropTableId() {
+        return SPUIComponentIdProvider.DIST_TABLE_ID;
+    }
+
+    @Override
+    protected boolean hasDropPermission() {
+        return permChecker.hasUpdateTargetPermission();
     }
 
     private void dsToTargetAssignment(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
+        final AbstractTable<NamedEntity, DistributionSetIdName> source = (AbstractTable<NamedEntity, DistributionSetIdName>) transferable
+                .getSourceComponent();
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId != null) {
             final TargetIdName targetId = (TargetIdName) targetItemId;
             String message = null;
-            for (final DistributionSetIdName distributionNameId : getDraggedDistributionSet(transferable, source)) {
+
+            for (final DistributionSetIdName distributionNameId : source.getDeletedEntityByTransferable(transferable)) {
                 if (null != distributionNameId) {
                     if (managementUIState.getAssignedList().keySet().contains(targetId)
                             && managementUIState.getAssignedList().get(targetId).equals(distributionNameId)) {
@@ -730,24 +670,22 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private static boolean checkFilterEvent(final TargetFilterEvent filterEvent) {
-        boolean isFilterEvent;
-        boolean isFilter;
-        boolean isRemoveFilters;
-        boolean isStatusFilter;
-        isFilter = filterEvent == TargetFilterEvent.FILTER_BY_TEXT || filterEvent == TargetFilterEvent.FILTER_BY_TAG
-                || filterEvent == TargetFilterEvent.FILTER_BY_DISTRIBUTION
-                || filterEvent == TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
+        return isNormalFilter(filterEvent) || isRemoveFilterEvent(filterEvent) || isStatusFilterEvent(filterEvent);
+    }
 
-        isRemoveFilters = filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TEXT
-                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TAG
-                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION
-                || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
-        isStatusFilter = filterEvent == TargetFilterEvent.FILTER_BY_STATUS
+    private static boolean isStatusFilterEvent(final TargetFilterEvent filterEvent) {
+        return filterEvent == TargetFilterEvent.FILTER_BY_STATUS
                 || filterEvent == TargetFilterEvent.REMOVE_FILTER_BY_STATUS;
+    }
 
-        isFilterEvent = isFilter || isRemoveFilters || isStatusFilter;
+    private static boolean isRemoveFilterEvent(final TargetFilterEvent filterEvent) {
+        return filterEvent == REMOVE_FILTER_BY_TEXT || filterEvent == REMOVE_FILTER_BY_TAG
+                || filterEvent == REMOVE_FILTER_BY_DISTRIBUTION || filterEvent == REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
+    }
 
-        return isFilterEvent;
+    private static boolean isNormalFilter(final TargetFilterEvent filterEvent) {
+        return filterEvent == FILTER_BY_TEXT || filterEvent == FILTER_BY_TAG || filterEvent == FILTER_BY_DISTRIBUTION
+                || filterEvent == FILTER_BY_TARGET_FILTER_QUERY;
     }
 
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
@@ -760,14 +698,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             return SPUIDefinitions.HIGHTLIGHT_ORANGE;
         }
         return null;
-
     }
 
-    /**
-     * @param itemId
-     * @param propertyId
-     * @return
-     */
     private String createTargetTableStyle(final Object itemId, final Object propertyId) {
         if (null == propertyId) {
             final Item item = getItem(itemId);
@@ -778,7 +710,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             return getTargetTableStyle(assignedDistributionSetId, installedDistributionSetId);
         }
         return null;
-
     }
 
     private void styleTargetTableOnPinning() {
@@ -803,12 +734,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         });
     }
 
-    /**
-     * To add new target to the table on Top.
-     *
-     * @param newTarget
-     *            as reference
-     */
     private void refreshTargets() {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final int size = targetContainer.size();
@@ -834,8 +759,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final Item item = targetContainer.getItem(targetIdName);
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         if (targetInfo != null) {
-            item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).setValue(
-                    HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+            item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
+                    .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
             item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         }
     }
@@ -869,9 +794,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                 }
             }
             // workaround until push is available for action history, re-select
-            // the
-            // updated target so
-            // the action history gets refreshed.
+            // the updated target so the action history gets refreshed.
             if (isLastSelectedTarget(targetIdName)) {
                 lastSelectedTarget = target;
             }
@@ -884,13 +807,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-
-    private void onTargetUpdateEvents(List<TargetUpdatedEvent> events) {
+    private void onTargetUpdateEvents(final List<TargetUpdatedEvent> events) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shoulTargetsUpdated = false;
         Target lastSelectedTarget = null;
         for (final TargetUpdatedEvent targetUpdatedEvent : events) {
-            Target target = targetUpdatedEvent.getEntity();
+            final Target target = targetUpdatedEvent.getEntity();
             final TargetIdName targetIdName = target.getTargetIdName();
             if (Filters.or(getTargetTableFilters(target)).doFilter()) {
                 shoulTargetsUpdated = true;
@@ -911,8 +833,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-    
-    
     private void onTargetCreatedEvents() {
         refreshTargets();
     }
@@ -935,7 +855,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      */
     @Override
     public void selectAll() {
-
         // As Vaadin Table only returns the current ItemIds which are visible
         // you don't need to search explicit for them.
         setValue(getItemIds());
@@ -957,7 +876,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      * Set total target count and count of targets truncated in target table.
      */
     private void resetTargetCountDetails() {
-        final long size;
         final long totalTargetsCount = getTotalTargetsCount();
         managementUIState.setTargetsCountAll(totalTargetsCount);
 
@@ -965,11 +883,10 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         String[] targetTags = null;
         Long distributionId = null;
         String searchText = null;
-        Boolean noTagClicked;
         Long pinnedDistId = null;
 
         if (isFilteredByTags()) {
-            targetTags = (String[]) managementUIState.getTargetTableFilters().getClickedTargetTags().toArray();
+            targetTags = managementUIState.getTargetTableFilters().getClickedTargetTags().toArray(new String[0]);
         }
         if (isFilteredByStatus()) {
             status = managementUIState.getTargetTableFilters().getClickedStatusTargetTags();
@@ -980,12 +897,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (isFilteredByText()) {
             searchText = String.format("%%%s%%", managementUIState.getTargetTableFilters().getSearchText().get());
         }
-        noTagClicked = managementUIState.getTargetTableFilters().isNoTagSelected();
+        final boolean noTagClicked = managementUIState.getTargetTableFilters().isNoTagSelected();
         if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
             pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
         }
 
-        size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
+        final long size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
                 noTagClicked, pinnedDistId);
 
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {

@@ -20,6 +20,7 @@ import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
  * 
  */
 public final class DistributionBarHelper {
+    private static final String HTML_DIV_END = "</div>";
     private static final int PARENT_SIZE_IN_PCT = 100;
     private static final double MINIMUM_PART_SIZE = 10;
     private static final String DISTRIBUTION_BAR_PART_MAIN_STYLE = GwtDistributionBar.CLASSNAME + "-part";
@@ -38,23 +39,23 @@ public final class DistributionBarHelper {
      * 
      * @return string of format "status1:count,status2:count"
      */
-    public static String getDistributionBarAsHTMLString(Map<Status, Long> statusTotalCountMap) {
-        StringBuilder htmlString = new StringBuilder();
-        Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
-        Long totalValue = getTotalSizes(statusTotalCountMap);
+    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap) {
+        final StringBuilder htmlString = new StringBuilder();
+        final Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
+        final Long totalValue = getTotalSizes(statusTotalCountMap);
         if (statusMapWithNonZeroValues.size() <= 0) {
             return getUnintialisedBar();
         }
         int partIndex = 1;
         htmlString.append(getParentDivStart());
-        for (Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
+        for (final Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
             if (entry.getValue() > 0) {
                 htmlString.append(getPart(partIndex, entry.getKey(), entry.getValue(), totalValue,
                         statusMapWithNonZeroValues.size()));
                 partIndex++;
             }
         }
-        htmlString.append(getParentDivEnd());
+        htmlString.append(HTML_DIV_END);
         return htmlString.toString();
     }
 
@@ -65,7 +66,7 @@ public final class DistributionBarHelper {
      *            map with status and count
      * @return map with non zero values
      */
-    public static Map<Status, Long> getStatusMapWithNonZeroValues(Map<Status, Long> statusTotalCountMap) {
+    public static Map<Status, Long> getStatusMapWithNonZeroValues(final Map<Status, Long> statusTotalCountMap) {
         return statusTotalCountMap.entrySet().stream().filter(p -> p.getValue() > 0)
                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
     }
@@ -77,19 +78,20 @@ public final class DistributionBarHelper {
      *            map with status and count details
      * @return tool tip
      */
-    public static String getTooltip(Map<Status, Long> statusCountMap) {
-        Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper.getStatusMapWithNonZeroValues(statusCountMap);
-        StringBuilder tooltip = new StringBuilder();
-        for (Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
+    public static String getTooltip(final Map<Status, Long> statusCountMap) {
+        final Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper
+                .getStatusMapWithNonZeroValues(statusCountMap);
+        final StringBuilder tooltip = new StringBuilder();
+        for (final Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
             tooltip.append(entry.getKey().toString().toLowerCase()).append(" : ").append(entry.getValue())
                     .append("<br>");
         }
         return tooltip.toString();
     }
 
-    private static String getPartStyle(int partIndex, int noOfParts, String customStyle) {
-        StringBuilder mainStyle = new StringBuilder();
-        StringBuilder styleName = new StringBuilder(GwtDistributionBar.CLASSNAME);
+    private static String getPartStyle(final int partIndex, final int noOfParts, final String customStyle) {
+        final StringBuilder mainStyle = new StringBuilder();
+        final StringBuilder styleName = new StringBuilder(GwtDistributionBar.CLASSNAME);
         if (noOfParts == 1) {
             styleName.append("-only");
         } else if (partIndex == 1) {
@@ -108,15 +110,16 @@ public final class DistributionBarHelper {
         return mainStyle.toString();
     }
 
-    private static String getPartWidth(Long value, Long totalValue, int noOfParts) {
+    private static String getPartWidth(final Long value, final Long totalValue, final int noOfParts) {
         final double minTotalSize = MINIMUM_PART_SIZE * noOfParts;
         final double availableSize = PARENT_SIZE_IN_PCT - minTotalSize;
-        double val = MINIMUM_PART_SIZE + (double) value / totalValue * availableSize;
+        final double val = MINIMUM_PART_SIZE + (double) value / totalValue * availableSize;
         return String.format("%.3f", val) + "%";
     }
 
-    private static String getPart(int partIndex, Status status, Long value, Long totalValue, int noOfParts) {
-        String partValue = status.toString().toLowerCase();
+    private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,
+            final int noOfParts) {
+        final String partValue = status.toString().toLowerCase();
         return "<div class=\"" + getPartStyle(partIndex, noOfParts, partValue) + "\" style=\"width: "
                 + getPartWidth(value, totalValue, noOfParts) + ";\"><span class=\""
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">" + value + "</span></div>";
@@ -127,9 +130,9 @@ public final class DistributionBarHelper {
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">uninitialized</span></div>";
     }
 
-    private static Long getTotalSizes(Map<Status, Long> statusTotalCountMap) {
+    private static Long getTotalSizes(final Map<Status, Long> statusTotalCountMap) {
         Long total = 0L;
-        for (Long value : statusTotalCountMap.values()) {
+        for (final Long value : statusTotalCountMap.values()) {
             total = total + value;
         }
         return total;
@@ -138,9 +141,5 @@ public final class DistributionBarHelper {
     private static String getParentDivStart() {
         return "<div class=\"" + GwtDistributionBar.CLASSNAME
                 + "\" style=\"width: 100%; height: 100%;\" id=\"rollout.status.progress.bar.id\">";
-    }
-
-    private static String getParentDivEnd() {
-        return "</div>";
     }
 }

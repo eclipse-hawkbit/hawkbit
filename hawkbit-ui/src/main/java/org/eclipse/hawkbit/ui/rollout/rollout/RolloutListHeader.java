@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
@@ -134,8 +133,7 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
-        final Label headerCaption = SPUIComponentProvider.getLabel(getHeaderCaption(),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        final Label headerCaption = new LabelBuilder().name(getHeaderCaption()).buildCaptionLabel();
         final HorizontalLayout headerCaptionLayout = new HorizontalLayout();
         headerCaptionLayout.addComponent(headerCaption);
 

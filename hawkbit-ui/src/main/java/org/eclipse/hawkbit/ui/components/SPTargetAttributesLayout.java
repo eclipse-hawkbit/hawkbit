@@ -21,7 +21,7 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Attributes Vertical layout for Target.
- * 
+ *
  *
  *
  */
@@ -30,10 +30,10 @@ public class SPTargetAttributesLayout {
 
     /**
      * Parametric constructor.
-     * 
+     *
      * @param controllerAttibs
      *            controller attributes
-     * 
+     *
      */
     public SPTargetAttributesLayout(final Map<String, String> controllerAttibs) {
         targetAttributesLayout = new VerticalLayout();
@@ -44,7 +44,7 @@ public class SPTargetAttributesLayout {
 
     /**
      * Custom Decorate.
-     * 
+     *
      * @param controllerAttibs
      */
     private void decorate(final Map<String, String> controllerAttibs) {
@@ -52,7 +52,7 @@ public class SPTargetAttributesLayout {
         final Label title = new Label(i18n.get("label.target.controller.attrs"), ContentMode.HTML);
         title.addStyleName(SPUIDefinitions.TEXT_STYLE);
         targetAttributesLayout.addComponent(title);
-        if (HawkbitCommonUtil.mapCheckStrings(controllerAttibs)) {
+        if (HawkbitCommonUtil.isNotNullOrEmpty(controllerAttibs)) {
             for (final Map.Entry<String, String> entry : controllerAttibs.entrySet()) {
                 targetAttributesLayout.addComponent(
                         SPUIComponentProvider.createNameValueLabel(entry.getKey() + ": ", entry.getValue()));
@@ -62,7 +62,7 @@ public class SPTargetAttributesLayout {
 
     /**
      * GET Target Attributes Layout.
-     * 
+     *
      * @return VerticalLayout as UI
      */
     public VerticalLayout getTargetAttributesLayout() {

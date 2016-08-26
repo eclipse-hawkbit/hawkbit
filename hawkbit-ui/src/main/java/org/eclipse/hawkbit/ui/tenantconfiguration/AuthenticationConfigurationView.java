@@ -161,13 +161,13 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         final CheckBox checkBox = (CheckBox) event.getProperty();
         AuthenticationConfigurationItem configurationItem;
 
-        if (checkBox == gatewaySecTokenCheckBox) {
+        if (gatewaySecTokenCheckBox.equals(checkBox)) {
             configurationItem = gatewaySecurityTokenAuthenticationConfigurationItem;
-        } else if (checkBox == targetSecTokenCheckBox) {
+        } else if (targetSecTokenCheckBox.equals(checkBox)) {
             configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
-        } else if (checkBox == certificateAuthCheckbox) {
+        } else if (certificateAuthCheckbox.equals(checkBox)) {
             configurationItem = certificateAuthenticationConfigurationItem;
-        } else if (checkBox == downloadAnonymousCheckBox) {
+        } else if (downloadAnonymousCheckBox.equals(checkBox)) {
             configurationItem = anonymousDownloadAuthenticationConfigurationItem;
         } else {
             return;

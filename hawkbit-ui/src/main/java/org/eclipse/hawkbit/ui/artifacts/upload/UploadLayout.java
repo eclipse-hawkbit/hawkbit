@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -109,7 +110,7 @@ public class UploadLayout extends VerticalLayout {
 
     private Button discardBtn;
 
-    private UploadConfirmationwindow currentUploadConfirmationwindow;
+    private UploadConfirmationWindow currentUploadConfirmationwindow;
 
     private VerticalLayout dropAreaLayout;
 
@@ -273,6 +274,10 @@ public class UploadLayout extends VerticalLayout {
         private void processFile(final Html5File file, final SoftwareModule selectedSw) {
             if (!isDirectory(file)) {
                 if (!checkForDuplicate(file.getFileName(), selectedSw)) {
+
+                    eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.RECEIVE_UPLOAD,
+                            new UploadFileStatus(file.getFileName(), 0, -1, selectedSw)));
+
                     artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
                     file.setStreamVariable(createStreamVariable(file, selectedSw));
                 }
@@ -634,7 +639,7 @@ public class UploadLayout extends VerticalLayout {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
-                currentUploadConfirmationwindow = new UploadConfirmationwindow(this, artifactUploadState);
+                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());
@@ -656,7 +661,7 @@ public class UploadLayout extends VerticalLayout {
         return spInfo;
     }
 
-    void setCurrentUploadConfirmationwindow(final UploadConfirmationwindow currentUploadConfirmationwindow) {
+    void setCurrentUploadConfirmationwindow(final UploadConfirmationWindow currentUploadConfirmationwindow) {
         this.currentUploadConfirmationwindow = currentUploadConfirmationwindow;
     }
 
