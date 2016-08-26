@@ -8,12 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolation;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -49,12 +44,10 @@ public class ConstraintViolationException extends AbstractServerRtException {
      * @return message String with proper error information
      */
     public static String getExceptionMessage(final javax.validation.ConstraintViolationException ex) {
-        final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
-        final List<String> messages = new ArrayList<>();
-        violations.stream().forEach(
-                violation -> messages.add(violation.getPropertyPath() + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + "."));
-
-        return messages.stream().collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
+        return ex
+                .getConstraintViolations().stream().map(violation -> violation.getPropertyPath()
+                        + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
+                .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR));
     }
 
 }
