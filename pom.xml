@@ -65,7 +65,6 @@
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot-->
-      <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
       <spring-amqp.version>1.6.1.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
       <!--  Support for MongoDB 3 -->
