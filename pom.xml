@@ -67,7 +67,6 @@
       <!-- Newer versions needed than defined in Boot-->
       <spring-amqp.version>1.6.1.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
-      <jackson.version>2.8.1</jackson.version>
       <!--  Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->
