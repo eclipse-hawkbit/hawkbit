@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -67,29 +68,29 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.key==" + standardDsType.getKey() + ")][0].name",
-                        equalTo(standardDsType.getName())))
-                .andExpect(jsonPath("$content.[?(@.key==" + standardDsType.getKey() + ")][0].description",
-                        equalTo(standardDsType.getDescription())))
-                .andExpect(jsonPath("$content.[?(@.key==" + standardDsType.getKey() + ")][0].key",
-                        equalTo(standardDsType.getKey())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].lastModifiedAt",
-                        equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].key", equalTo("test123")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0]._links.self.href",
-                        equalTo("http://localhost/rest/v1/distributionsettypes/" + testType.getId())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0]._links.mandatorymodules.href",
-                        equalTo("http://localhost/rest/v1/distributionsettypes/" + testType.getId()
+                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..name",
+                        contains(standardDsType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..description",
+                        contains(standardDsType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..key",
+                        contains(standardDsType.getKey())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..id", contains(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..name", contains("TestName123")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..createdAt", contains(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..lastModifiedBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..lastModifiedAt",
+                        contains(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..key", contains("test123")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$.._links.self.href",
+                        contains("http://localhost/rest/v1/distributionsettypes/" + testType.getId())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$.._links.mandatorymodules.href",
+                        contains("http://localhost/rest/v1/distributionsettypes/" + testType.getId()
                                 + "/mandatorymoduletypes")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0]._links.optionalmodules.href", equalTo(
+                .andExpect(jsonPath("$.content.[?(@.key==test123)]$.._links.optionalmodules.href", contains(
                         "http://localhost/rest/v1/distributionsettypes/" + testType.getId() + "/optionalmoduletypes")))
-                .andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$.total", equalTo(4)));
     }
 
     @Test
@@ -106,29 +107,29 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[0].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[0].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[0].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[0].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[0].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[0].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[0].key", equalTo("zzzzz")))
-                .andExpect(jsonPath("$total", equalTo(DEFAULT_DS_TYPES + 1)));
+                .andExpect(jsonPath("$.content.[0].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[0].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.content.[0].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[0].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[0].key", equalTo("zzzzz")))
+                .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)));
 
         // ascending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[3].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[3].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[3].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[3].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[3].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[3].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[3].key", equalTo("zzzzz")))
-                .andExpect(jsonPath("$total", equalTo(DEFAULT_DS_TYPES + 1)));
+                .andExpect(jsonPath("$.content.[3].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[3].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.content.[3].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[3].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[3].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[3].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[3].key", equalTo("zzzzz")))
+                .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)));
     }
 
     @Test
@@ -141,8 +142,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         final List<DistributionSetType> types = new ArrayList<>();
         types.add(entityFactory.generateDistributionSetType("test1", "TestName1", "Desc1")
                 .addMandatoryModuleType(osType).addOptionalModuleType(runtimeType));
-        types.add(entityFactory.generateDistributionSetType("test2", "TestName2", "Desc2")
-                .addOptionalModuleType(osType).addOptionalModuleType(runtimeType).addOptionalModuleType(appType));
+        types.add(entityFactory.generateDistributionSetType("test2", "TestName2", "Desc2").addOptionalModuleType(osType)
+                .addOptionalModuleType(runtimeType).addOptionalModuleType(appType));
         types.add(entityFactory.generateDistributionSetType("test3", "TestName3", "Desc3")
                 .addMandatoryModuleType(osType).addMandatoryModuleType(runtimeType));
 
@@ -295,13 +296,13 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
                 osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$id", equalTo(osType.getId().intValue())))
-                .andExpect(jsonPath("$name", equalTo(osType.getName())))
-                .andExpect(jsonPath("$description", equalTo(osType.getDescription())))
-                .andExpect(jsonPath("$createdBy", equalTo(osType.getCreatedBy())))
-                .andExpect(jsonPath("$createdAt", equalTo(osType.getCreatedAt())))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo(osType.getLastModifiedBy())))
-                .andExpect(jsonPath("$lastModifiedAt", equalTo(osType.getLastModifiedAt())));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id", equalTo(osType.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo(osType.getName())))
+                .andExpect(jsonPath("$.description", equalTo(osType.getDescription())))
+                .andExpect(jsonPath("$.createdBy", equalTo(osType.getCreatedBy())))
+                .andExpect(jsonPath("$.createdAt", equalTo(osType.getCreatedAt())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo(osType.getLastModifiedBy())))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(osType.getLastModifiedAt())));
     }
 
     @Test
@@ -317,13 +318,13 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$id", equalTo(appType.getId().intValue())))
-                .andExpect(jsonPath("$name", equalTo(appType.getName())))
-                .andExpect(jsonPath("$description", equalTo(appType.getDescription())))
-                .andExpect(jsonPath("$createdBy", equalTo(appType.getCreatedBy())))
-                .andExpect(jsonPath("$createdAt", equalTo(appType.getCreatedAt())))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo(appType.getLastModifiedBy())))
-                .andExpect(jsonPath("$lastModifiedAt", equalTo(appType.getLastModifiedAt())));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id", equalTo(appType.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo(appType.getName())))
+                .andExpect(jsonPath("$.description", equalTo(appType.getDescription())))
+                .andExpect(jsonPath("$.createdBy", equalTo(appType.getCreatedBy())))
+                .andExpect(jsonPath("$.createdAt", equalTo(appType.getCreatedAt())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo(appType.getLastModifiedBy())))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(appType.getLastModifiedAt())));
     }
 
     @Test
@@ -383,11 +384,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$name", equalTo("TestName123")))
-                .andExpect(jsonPath("$description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo("uploadTester")));
+                .andExpect(jsonPath("$.name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")));
     }
 
     @Test
@@ -435,9 +436,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(put("/rest/v1/distributionsettypes/{smId}", testType.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$description", equalTo("foobardesc")))
-                .andExpect(jsonPath("$name", equalTo("TestName123"))).andReturn();
+                .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.description", equalTo("foobardesc")))
+                .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
     }
 
     @Test
@@ -533,8 +534,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         // Modules types at creation time invalid
 
-        final DistributionSetType testNewType = entityFactory.generateDistributionSetType("test123",
-                "TestName123", "Desc123");
+        final DistributionSetType testNewType = entityFactory.generateDistributionSetType("test123", "TestName123",
+                "Desc123");
         testNewType.addMandatoryModuleType(
                 entityFactory.generateSoftwareModuleType("foo", "bar", "test", Integer.MAX_VALUE));
 

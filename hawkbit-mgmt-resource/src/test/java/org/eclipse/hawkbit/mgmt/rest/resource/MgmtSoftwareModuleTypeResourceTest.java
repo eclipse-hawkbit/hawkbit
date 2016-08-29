@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -62,35 +63,34 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.key==" + osType.getKey() + ")][0].name", equalTo(osType.getName())))
-                .andExpect(jsonPath("$content.[?(@.key==" + osType.getKey() + ")][0].description",
-                        equalTo(osType.getDescription())))
-                .andExpect(jsonPath("$content.[?(@.key==" + osType.getKey() + ")][0].maxAssignments", equalTo(1)))
-                .andExpect(jsonPath("$content.[?(@.key==" + osType.getKey() + ")][0].key", equalTo("os")))
-                .andExpect(jsonPath("$content.[?(@.key==" + runtimeType.getKey() + ")][0].name",
-                        equalTo(runtimeType.getName())))
-                .andExpect(jsonPath("$content.[?(@.key==" + runtimeType.getKey() + ")][0].description",
-                        equalTo(runtimeType.getDescription())))
-                .andExpect(jsonPath("$content.[?(@.key==" + runtimeType.getKey() + ")][0].maxAssignments", equalTo(1)))
-                .andExpect(jsonPath("$content.[?(@.key==" + runtimeType.getKey() + ")][0].key", equalTo("runtime")))
-                .andExpect(
-                        jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].name", equalTo(appType.getName())))
-                .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].description",
-                        equalTo(appType.getDescription())))
-                .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].maxAssignments",
-                        equalTo(Integer.MAX_VALUE)))
-                .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].key", equalTo("application")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].lastModifiedAt",
-                        equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$content.[?(@.key==test123)][0].key", equalTo("test123")))
-                .andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].name", contains(osType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].description",
+                        contains(osType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].maxAssignments", contains(1)))
+                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].key", contains("os")))
+                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].name",
+                        contains(runtimeType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].description",
+                        contains(runtimeType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].maxAssignments", contains(1)))
+                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].key", contains("runtime")))
+                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].name", contains(appType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].description",
+                        contains(appType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].maxAssignments",
+                        contains(Integer.MAX_VALUE)))
+                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].key", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].id", contains(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].name", contains("TestName123")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].createdAt", contains(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].lastModifiedBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].lastModifiedAt",
+                        contains(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].maxAssignments", contains(5)))
+                .andExpect(jsonPath("$.content.[?(@.key==test123)].key", contains("test123")))
+                .andExpect(jsonPath("$.total", equalTo(4)));
     }
 
     @Test
@@ -107,30 +107,32 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:DESC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[1].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[1].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[1].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[1].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[1].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[1].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[1].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[1].maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$content.[1].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$.content.[1].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[1].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.content.[1].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[1].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[1].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[1].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[1].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[1].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$.content.[1].key", equalTo("test123")))
+                .andExpect(jsonPath("$.total", equalTo(4)));
 
         // ascending
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[2].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[2].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[2].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[2].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[2].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[2].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[2].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[2].maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$content.[2].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$.content.[2].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[2].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.content.[2].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[2].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[2].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[2].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.content.[2].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[2].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$.content.[2].key", equalTo("test123")))
+                .andExpect(jsonPath("$.total", equalTo(4)));
     }
 
     @Test
@@ -191,13 +193,13 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
         mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$name", equalTo("TestName123")))
-                .andExpect(jsonPath("$description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$lastModifiedAt", equalTo(testType.getLastModifiedAt())));
+                .andExpect(jsonPath("$.name", equalTo("TestName123")))
+                .andExpect(jsonPath("$.description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())));
     }
 
     @Test
@@ -243,9 +245,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
 
         mvc.perform(put("/rest/v1/softwaremoduletypes/{smId}", testType.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$description", equalTo("foobardesc")))
-                .andExpect(jsonPath("$name", equalTo("TestName123"))).andReturn();
+                .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$.description", equalTo("foobardesc")))
+                .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
 
     }
 

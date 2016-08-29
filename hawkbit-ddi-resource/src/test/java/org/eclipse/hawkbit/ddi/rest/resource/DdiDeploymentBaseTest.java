@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -91,9 +92,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[?(@.filename==filename0)]", hasSize(1)))
-                .andExpect(jsonPath("$[?(@.filename==filename1)]", hasSize(1)))
-                .andExpect(jsonPath("$[?(@.filename==filename2)]", hasSize(1)));
+                .andExpect(jsonPath("$.[?(@.filename==filename0)]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename==filename1)]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename==filename2)]", hasSize(1)));
 
     }
 
@@ -136,8 +137,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.deploymentBase.href", startsWith("http://localhost/"
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -155,74 +156,82 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(action.getId()))))
-                .andExpect(jsonPath("$deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].name",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].version",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].name",
-                        equalTo(ds.findFirstModuleByType(osType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].version",
-                        equalTo(ds.findFirstModuleByType(osType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].filename", equalTo("test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.md5",
-                        equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
+                .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                        contains(ds.findFirstModuleByType(osType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                        contains(artifact.getMd5Hash())))
                 .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
-                                equalTo(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                                contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
 
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.MD5SUM")))
-
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].filename",
-                        equalTo("test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.md5",
-                        equalTo(artifactSignature.getMd5Hash())))
                 .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
-                                equalTo(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.MD5SUM")))
+
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                        contains("test1.signature")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                        contains(artifactSignature.getMd5Hash())))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                                contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
-                        equalTo(ds.findFirstModuleByType(appType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].name",
-                        equalTo(ds.findFirstModuleByType(appType).getName())));
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
+                        contains(ds.findFirstModuleByType(appType).getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
@@ -313,8 +322,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.deploymentBase.href", startsWith("http://localhost/"
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -332,64 +341,68 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(action.getId()))))
-                .andExpect(jsonPath("$deployment.download", equalTo("attempt")))
-                .andExpect(jsonPath("$deployment.update", equalTo("attempt")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].name",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].version",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].name",
-                        equalTo(ds.findFirstModuleByType(osType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].version",
-                        equalTo(ds.findFirstModuleByType(osType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].filename", equalTo("test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.md5",
-                        equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
+                .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("attempt")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                        contains(ds.findFirstModuleByType(osType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                        contains(artifact.getMd5Hash())))
                 .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
-                                equalTo(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                                contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].filename",
-                        equalTo("test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.md5",
-                        equalTo(artifactSignature.getMd5Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                        contains("test1.signature")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                        contains(artifactSignature.getMd5Hash())))
                 .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
-                                equalTo(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                                contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
-                        equalTo(ds.findFirstModuleByType(appType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].name",
-                        equalTo(ds.findFirstModuleByType(appType).getName())));
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
+                        contains(ds.findFirstModuleByType(appType).getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
@@ -441,8 +454,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.deploymentBase.href", startsWith("http://localhost/"
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -458,74 +471,82 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 uaction.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(action.getId()))))
-                .andExpect(jsonPath("$deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].name",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].version",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].name",
-                        equalTo(ds.findFirstModuleByType(osType).getName())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].version",
-                        equalTo(ds.findFirstModuleByType(osType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].filename", equalTo("test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.md5",
-                        equalTo(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
-                        equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
+                .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                        contains(ds.findFirstModuleByType(runtimeType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                        contains(ds.findFirstModuleByType(osType).getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                        contains(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                        contains(artifact.getSha1Hash())))
 
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.MD5SUM")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].size", equalTo(5 * 1024)))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].filename",
-                        equalTo("test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.md5",
-                        equalTo(artifactSignature.getMd5Hash())))
                 .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
-                                equalTo(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.MD5SUM")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                        contains("test1.signature")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                        contains(artifactSignature.getMd5Hash())))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                                contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum.href",
+                        contains(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
 
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
-                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
-                                + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                        + "/artifacts/test1.signature.MD5SUM")))
 
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
-                        equalTo(ds.findFirstModuleByType(appType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].name",
-                        equalTo(ds.findFirstModuleByType(appType).getName())));
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                        contains(ds.findFirstModuleByType(appType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
+                        contains(ds.findFirstModuleByType(appType).getName())));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 

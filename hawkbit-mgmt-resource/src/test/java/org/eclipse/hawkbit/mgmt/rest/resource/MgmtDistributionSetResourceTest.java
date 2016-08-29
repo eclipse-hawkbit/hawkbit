@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -29,12 +30,12 @@ import java.util.Set;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -362,25 +363,25 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[0]._links.self.href",
+                .andExpect(jsonPath("$.content.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
-                .andExpect(jsonPath("$content.[0].id", equalTo(set.getId().intValue())))
-                .andExpect(jsonPath("$content.[0].name", equalTo(set.getName())))
-                .andExpect(jsonPath("$content.[0].requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
-                .andExpect(jsonPath("$content.[0].description", equalTo(set.getDescription())))
-                .andExpect(jsonPath("$content.[0].type", equalTo(set.getType().getKey())))
-                .andExpect(jsonPath("$content.[0].createdBy", equalTo(set.getCreatedBy())))
-                .andExpect(jsonPath("$content.[0].createdAt", equalTo(set.getCreatedAt())))
-                .andExpect(jsonPath("$content.[0].complete", equalTo(Boolean.TRUE)))
-                .andExpect(jsonPath("$content.[0].lastModifiedBy", equalTo(set.getLastModifiedBy())))
-                .andExpect(jsonPath("$content.[0].lastModifiedAt", equalTo(set.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[0].version", equalTo(set.getVersion())))
-                .andExpect(jsonPath("$content.[0].modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("$content.[0].modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("$content.[0].modules.[?(@.type==" + osType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(osType).getId().intValue())));
+                .andExpect(jsonPath("$.content.[0].id", equalTo(set.getId().intValue())))
+                .andExpect(jsonPath("$.content.[0].name", equalTo(set.getName())))
+                .andExpect(jsonPath("$.content.[0].requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
+                .andExpect(jsonPath("$.content.[0].description", equalTo(set.getDescription())))
+                .andExpect(jsonPath("$.content.[0].type", equalTo(set.getType().getKey())))
+                .andExpect(jsonPath("$.content.[0].createdBy", equalTo(set.getCreatedBy())))
+                .andExpect(jsonPath("$.content.[0].createdAt", equalTo(set.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[0].complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo(set.getLastModifiedBy())))
+                .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(set.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[0].version", equalTo(set.getVersion())))
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(osType).getId().intValue())));
     }
 
     @Test
@@ -393,25 +394,25 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$_links.self.href",
+                .andExpect(jsonPath("$._links.self.href",
                         equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
-                .andExpect(jsonPath("$id", equalTo(set.getId().intValue())))
-                .andExpect(jsonPath("$name", equalTo(set.getName())))
-                .andExpect(jsonPath("$type", equalTo(set.getType().getKey())))
-                .andExpect(jsonPath("$description", equalTo(set.getDescription())))
-                .andExpect(jsonPath("$requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
-                .andExpect(jsonPath("$createdBy", equalTo(set.getCreatedBy())))
-                .andExpect(jsonPath("$complete", equalTo(Boolean.TRUE)))
-                .andExpect(jsonPath("$createdAt", equalTo(set.getCreatedAt())))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo(set.getLastModifiedBy())))
-                .andExpect(jsonPath("$lastModifiedAt", equalTo(set.getLastModifiedAt())))
-                .andExpect(jsonPath("$version", equalTo(set.getVersion())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].id",
-                        equalTo(set.findFirstModuleByType(osType).getId().intValue())));
+                .andExpect(jsonPath("$.id", equalTo(set.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo(set.getName())))
+                .andExpect(jsonPath("$.type", equalTo(set.getType().getKey())))
+                .andExpect(jsonPath("$.description", equalTo(set.getDescription())))
+                .andExpect(jsonPath("$.requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
+                .andExpect(jsonPath("$.createdBy", equalTo(set.getCreatedBy())))
+                .andExpect(jsonPath("$.complete", equalTo(Boolean.TRUE)))
+                .andExpect(jsonPath("$.createdAt", equalTo(set.getCreatedAt())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo(set.getLastModifiedBy())))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
+                .andExpect(jsonPath("$.version", equalTo(set.getVersion())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(runtimeType).getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(appType).getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(set.findFirstModuleByType(osType).getId().intValue())));
 
     }
 
@@ -453,24 +454,24 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("[0]version", equalTo(one.getVersion())))
                 .andExpect(jsonPath("[0]complete", equalTo(Boolean.TRUE)))
                 .andExpect(jsonPath("[0]requiredMigrationStep", equalTo(one.isRequiredMigrationStep())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(one.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(one.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")][0].id",
-                        equalTo(one.findFirstModuleByType(osType).getId().intValue())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(runtimeType).getId().intValue())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(appType).getId().intValue())))
+                .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(one.findFirstModuleByType(osType).getId().intValue())))
                 .andExpect(jsonPath("[1]name", equalTo(two.getName())))
                 .andExpect(jsonPath("[1]description", equalTo(two.getDescription())))
                 .andExpect(jsonPath("[1]complete", equalTo(Boolean.TRUE)))
                 .andExpect(jsonPath("[1]type", equalTo(standardDsType.getKey())))
                 .andExpect(jsonPath("[1]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1]version", equalTo(two.getVersion())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(two.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(two.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")][0].id",
-                        equalTo(two.findFirstModuleByType(osType).getId().intValue())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(runtimeType).getId().intValue())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(appType).getId().intValue())))
+                .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(two.findFirstModuleByType(osType).getId().intValue())))
                 .andExpect(jsonPath("[1]requiredMigrationStep", equalTo(two.isRequiredMigrationStep())))
                 .andExpect(jsonPath("[2]name", equalTo(three.getName())))
                 .andExpect(jsonPath("[2]description", equalTo(three.getDescription())))
@@ -478,12 +479,12 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("[2]type", equalTo(standardDsType.getKey())))
                 .andExpect(jsonPath("[2]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[2]version", equalTo(three.getVersion())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(three.findFirstModuleByType(runtimeType).getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(three.findFirstModuleByType(appType).getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")][0].id",
-                        equalTo(three.findFirstModuleByType(osType).getId().intValue())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(runtimeType).getId().intValue())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(appType).getId().intValue())))
+                .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")].id",
+                        contains(three.findFirstModuleByType(osType).getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
 
         one = distributionSetManagement.findDistributionSetByIdWithDetails(

@@ -95,7 +95,6 @@
       <eclipselink.version>2.6.2</eclipselink.version>
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
-      <json-path.version>0.9.1</json-path.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.4.3</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
@@ -486,12 +485,6 @@
             <artifactId>rsql-parser</artifactId>
             <version>${rsql-parser.version}</version>
          </dependency>
-         <!-- JSON PATH, used to e.g. parse vcap services from environment -->
-         <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>${json-path.version}</version>
-         </dependency>
          <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
@@ -556,12 +549,6 @@
             <groupId>pl.pragmatists</groupId>
             <artifactId>JUnitParams</artifactId>
             <version>${pl.pragmatists.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path-assert</artifactId>
-            <version>${json-path.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
