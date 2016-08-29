@@ -49,6 +49,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
@@ -59,6 +61,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import de.flapdoodle.embed.mongo.MongodExecutable;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -152,6 +156,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Autowired
     protected TestdataFactory testdataFactory;
 
+    @Autowired
+    protected GridFsOperations operations;
+
+    @Autowired
+    protected MongodExecutable mongodExecutable;
+
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
 
@@ -188,6 +198,11 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @After
     public void after() {
         testRepositoryManagement.clearTestRepository();
+    }
+
+    @After
+    public void cleanCurrentCollection() {
+        operations.delete(new Query());
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {

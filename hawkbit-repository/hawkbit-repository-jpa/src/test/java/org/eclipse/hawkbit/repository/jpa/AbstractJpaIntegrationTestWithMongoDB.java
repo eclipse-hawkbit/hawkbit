@@ -12,12 +12,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
 @SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
-public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractIntegrationTestWithMongoDB {
+public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractIntegrationTest {
 
     @PersistenceContext
     protected EntityManager entityManager;
