@@ -25,6 +25,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -47,9 +49,8 @@ import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
- * A utility class which is able to parse RSQL strings into an spring data
- * {@link Specification} which then can be enhanced sql queries to filter
- * entities. RSQL parser library: https://github.com/jirutka/rsql-parser
+ * A utility class which is able to parse RSQL strings into an spring data {@link Specification} which then can be
+ * enhanced sql queries to filter entities. RSQL parser library: https://github.com/jirutka/rsql-parser
  *
  * <ul>
  * <li>Equal to : ==</li>
@@ -59,16 +60,24 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <li>Greater than operator : =gt= or ></li>
  * <li>Greater than or equal to : =ge= or >=</li>
  * </ul>
+ * <p>
  * Examples of RSQL expressions in both FIQL-like and alternative notation:
  * <ul>
  * <li>version==2.0.0</li>
  * <li>name==targetId1;description==plugAndPlay</li>
  * <li>name==targetId1 and description==plugAndPlay</li>
- * <li>name==targetId1;description==plugAndPlay</li>
- * <li>name==targetId1 and description==plugAndPlay</li>
  * <li>name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN</li>
  * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
  * </ul>
+ * <p>
+ * There is also a mechanism that allows to refer to known makros that can resolved by an optional {@link StrLookup}
+ * (cp. {@link VirtualPropertyMakroResolver}).<br>
+ * An example that queries for all overdue targets using the ${OVERDUE_TS} placeholder introduced by
+ * {@link VirtualPropertyMakroResolver} looks like this:<br>
+ * <em>lastControllerRequestAt=le=${OVERDUE_TS}</em><br>
+ * It is possible to escape a makro expression by using a second '$': $${OVERDUE_TS} would prevent the ${OVERDUE_TS}
+ * token from being expanded.
+ *
  */
 public final class RSQLUtility {
 
@@ -99,7 +108,28 @@ public final class RSQLUtility {
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider);
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, new VirtualPropertyMakroResolver());
+    }
+
+    /**
+     * parses an RSQL valid string into an JPA {@link Specification} which then can be used to filter for JPA entities
+     * with the given RSQL query.
+     *
+     * @param rsql
+     *            the rsql query
+     * @param fieldNameProvider
+     *            the enum class type which implements the {@link FieldNameProvider}
+     * @param makroLookup
+     *            holds the logic how the known makros have to be resolved; may be <code>null</code>
+     * @return an specification which can be used with JPA
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     */
+    public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
+            final Class<A> fieldNameProvider, StrLookup<String> makroLookup) {
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, makroLookup);
     }
 
     /**
@@ -130,10 +160,12 @@ public final class RSQLUtility {
 
         private final String rsql;
         private final Class<A> enumType;
+        private final StrLookup<String> makroLookup;
 
-        private RSQLSpecification(final String rsql, final Class<A> enumType) {
+        private RSQLSpecification(final String rsql, final Class<A> enumType, StrLookup<String> makroLookup) {
             this.rsql = rsql;
             this.enumType = enumType;
+            this.makroLookup = makroLookup;
         }
 
         @Override
@@ -141,7 +173,8 @@ public final class RSQLUtility {
 
             final Node rootNode = parseRsql(rsql);
 
-            final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType);
+            final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
+                    makroLookup);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (accept != null && !accept.isEmpty()) {
@@ -171,13 +204,19 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
+        private final StrLookup<String> makroLookup;
+        private final StrSubstitutor substitutor;
 
         private final SimpleTypeConverter simpleTypeConverter;
 
-        private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType) {
+        private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
+                StrLookup<String> makroLookup) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
+            this.makroLookup = makroLookup;
+            this.substitutor = new StrSubstitutor(makroLookup, StrSubstitutor.DEFAULT_PREFIX,
+                    StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
@@ -425,7 +464,14 @@ public final class RSQLUtility {
             // enums. The JPA API
             // cannot handle object types for greaterThan etc methods.
             final Object transformedValue = transformedValues.get(0);
-            final String value = values.get(0);
+
+            final String value;
+            if (makroLookup != null) { // if substitutor is available, replace makros ...
+                value = substitutor.replace(values.get(0));
+            } else {
+                value = values.get(0);
+            }
+
             final List<Predicate> singleList = new ArrayList<>();
 
             final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);

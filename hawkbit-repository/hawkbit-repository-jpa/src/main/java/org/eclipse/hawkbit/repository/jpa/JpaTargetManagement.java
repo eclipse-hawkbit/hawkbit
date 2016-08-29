@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyMakroResolver;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -102,6 +103,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
+    @Autowired
+    private VirtualPropertyMakroResolver virtualPropMakroResolver;
+
     @Override
     public Target findTargetByControllerID(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
@@ -152,12 +156,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsAll(final TargetFilterQuery targetFilterQuery, final Pageable pageable) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
+        return findTargetsBySpec(
+                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropMakroResolver),
+                pageable);
     }
 
     @Override
     public Page<Target> findTargetsAll(final String targetFilterQuery, final Pageable pageable) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
+        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropMakroResolver),
+                pageable);
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
@@ -224,7 +231,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID, final String rsqlParam,
             final Pageable pageReq) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                virtualPropMakroResolver);
 
         return convertPage(
                 targetRepository
@@ -252,7 +260,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId, final String rsqlParam,
             final Pageable pageable) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                virtualPropMakroResolver);
 
         return convertPage(
                 targetRepository
@@ -544,7 +553,8 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(JpaTarget_.id),
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropMakroResolver);
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         specList.add(spec);
 
@@ -627,13 +637,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countTargetByTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropMakroResolver);
         return targetRepository.count(specs);
     }
 
     @Override
     public Long countTargetByTargetFilterQuery(final String targetFilterQuery) {
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
+        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+                virtualPropMakroResolver);
         return targetRepository.count(specs);
     }
 
