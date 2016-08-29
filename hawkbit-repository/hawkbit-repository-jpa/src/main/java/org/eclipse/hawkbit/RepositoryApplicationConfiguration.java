@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
@@ -72,6 +73,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import com.google.common.eventbus.EventBus;
+
 /**
  * General configuration for hawkBit's Repository.
  *
@@ -86,6 +89,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
+    @Autowired
+    private EventBus eventBus;
+
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
      *         accessible in beans which cannot access the service directly,
@@ -137,6 +143,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
         return SecurityTokenGeneratorHolder.getInstance();
+    }
+
+    /**
+     * @return the singleton instance of the {@link EntityInterceptorHolder}
+     */
+    @Bean
+    public EntityInterceptorHolder entityInterceptorHolder() {
+        return EntityInterceptorHolder.getInstance();
     }
 
     /**
@@ -250,7 +264,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public TenantStatsManagement tenantStatsManagement() {
-        return new JpaTenantStatsManagement();
+        final TenantStatsManagement mgmt = new JpaTenantStatsManagement();
+        eventBus.register(mgmt);
+        return mgmt;
     }
 
     /**
