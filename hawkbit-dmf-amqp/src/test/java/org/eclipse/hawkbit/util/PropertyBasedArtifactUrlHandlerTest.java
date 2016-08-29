@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Test to generate the artifact download URL")
 @SpringApplicationConfiguration(classes = { AmqpTestConfiguration.class,
         org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
-public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
+public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest {
 
     private static final String HTTPS_LOCALHOST = "https://localhost/";
     private static final String HTTP_LOCALHOST = "http://localhost/";

@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -58,7 +58,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
 @SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
-public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
+public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
 
