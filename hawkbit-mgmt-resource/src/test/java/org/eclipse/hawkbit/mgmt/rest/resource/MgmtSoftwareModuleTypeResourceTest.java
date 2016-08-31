@@ -135,6 +135,26 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 1")
+    public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws JSONException, Exception {
+
+        final List<SoftwareModuleType> types = new ArrayList<>();
+        types.add(entityFactory.generateSoftwareModuleType("test-1", "TestName-1", "Desc-1", -1));
+
+        mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        types.clear();
+        types.add(entityFactory.generateSoftwareModuleType("test0", "TestName0", "Desc0", 0));
+
+        mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
     public void createSoftwareModuleTypes() throws JSONException, Exception {
 

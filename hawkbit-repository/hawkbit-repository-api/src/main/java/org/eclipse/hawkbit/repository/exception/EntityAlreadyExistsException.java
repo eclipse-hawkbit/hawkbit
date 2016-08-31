@@ -8,15 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * the {@link EntityAlreadyExistsException} is thrown when a entity is tried to
+ * the {@link EntityAlreadyExistsException} is thrown when an entity is tried to
  * be saved which already exists or which violates unique key constraints.
- * 
- *
- *
  */
 public class EntityAlreadyExistsException extends AbstractServerRtException {
 

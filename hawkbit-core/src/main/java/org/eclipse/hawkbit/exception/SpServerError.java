@@ -9,11 +9,7 @@
 package org.eclipse.hawkbit.exception;
 
 /**
- *
- *
- *
  * Define the Error code for Error handling
- *
  */
 
 public enum SpServerError {
@@ -25,7 +21,10 @@ public enum SpServerError {
     *
     */
     SP_REPO_ENTITY_ALRREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists", "The given entity already exists in database"),
-
+    /**
+    *
+    */
+    SP_REPO_CONSTRAINT_VIOLATION("hawkbit.server.error.repo.constraintViolation", "The given entity cannot be saved due to Constraint Violation"),
     /**
      * 
      */
