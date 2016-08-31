@@ -18,10 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.hawkbit.artifact.MongoDBTestRule;
 import org.eclipse.hawkbit.artifact.TestConfiguration;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +27,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.io.BaseEncoding;
@@ -42,10 +41,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Artifact Store MongoDB")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ArtifactStoreAutoConfiguration.class, TestConfiguration.class })
+@TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
 public class ArtifactStoreTest {
-
-    @ClassRule
-    public static final MongoDBTestRule mongoDBRule = new MongoDBTestRule();
 
     @Autowired
     private ArtifactStore artifactStoreUnderTest;

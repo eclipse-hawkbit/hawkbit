@@ -29,9 +29,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -126,7 +126,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void noRolloutReturnsEmptyList() throws Exception {
         mvc.perform(get("/rest/v1/rollouts")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(0))).andExpect(jsonPath("$total", equalTo(0)));
+                .andExpect(jsonPath("$.content", hasSize(0))).andExpect(jsonPath("$.total", equalTo(0)));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
         mvc.perform(get("/rest/v1/rollouts")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)))
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
                 .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
                 .andExpect(jsonPath("content[0].status", equalTo("ready")))
                 .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==target1")))
@@ -160,7 +160,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
         mvc.perform(get("/rest/v1/rollouts?limit=1")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(2)));
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(2)));
     }
 
     @Test
@@ -178,11 +178,11 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(4))).andExpect(jsonPath("$total", equalTo(4)))
-                .andExpect(jsonPath("$content[0].status", equalTo("ready")))
-                .andExpect(jsonPath("$content[1].status", equalTo("ready")))
-                .andExpect(jsonPath("$content[2].status", equalTo("ready")))
-                .andExpect(jsonPath("$content[3].status", equalTo("ready")));
+                .andExpect(jsonPath("$.content", hasSize(4))).andExpect(jsonPath("$.total", equalTo(4)))
+                .andExpect(jsonPath("$.content[0].status", equalTo("ready")))
+                .andExpect(jsonPath("$.content[1].status", equalTo("ready")))
+                .andExpect(jsonPath("$.content[2].status", equalTo("ready")))
+                .andExpect(jsonPath("$.content[3].status", equalTo("ready")));
     }
 
     @Test
@@ -321,9 +321,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups?sort=ID:ASC", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)))
-                .andExpect(jsonPath("$content[0].status", equalTo("running")))
-                .andExpect(jsonPath("$content[1].status", equalTo("scheduled")));
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("$.content[0].status", equalTo("running")))
+                .andExpect(jsonPath("$.content[1].status", equalTo("scheduled")));
     }
 
     @Test
@@ -368,7 +368,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(),
                 firstGroup.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
+                .andExpect(jsonPath("$.content", hasSize(5))).andExpect(jsonPath("$.total", equalTo(5)));
     }
 
     @Test
@@ -393,7 +393,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
                         .param("q", "controllerId==" + targets.get(0).getControllerId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
     }
 
     @Test
@@ -417,7 +417,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(),
                 firstGroup.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
+                .andExpect(jsonPath("$.content", hasSize(5))).andExpect(jsonPath("$.total", equalTo(5)));
     }
 
     @Test
@@ -449,12 +449,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final int amountTargetsRollout2 = 25;
         final int amountTargetsRollout3 = 25;
         final int amountTargetsOther = 25;
-        targetManagement
-                .createTargets(testdataFactory.generateTargets(amountTargetsRollout1, "rollout1", "rollout1"));
-        targetManagement
-                .createTargets(testdataFactory.generateTargets(amountTargetsRollout2, "rollout2", "rollout2"));
-        targetManagement
-                .createTargets(testdataFactory.generateTargets(amountTargetsRollout3, "rollout3", "rollout3"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout1, "rollout1", "rollout1"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout2, "rollout2", "rollout2"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout3, "rollout3", "rollout3"));
         targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsOther, "other1", "other1"));
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
@@ -466,18 +463,18 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==*2"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)))
-                .andExpect(jsonPath("$content[0].name", equalTo(rollout2.getName())));
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].name", equalTo(rollout2.getName())));
 
         mvc.perform(get("/rest/v1/rollouts").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==rollout*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(3))).andExpect(jsonPath("$total", equalTo(3)));
+                .andExpect(jsonPath("$.content", hasSize(3))).andExpect(jsonPath("$.total", equalTo(3)));
 
         mvc.perform(get("/rest/v1/rollouts").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==*1"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
 
     }
 
@@ -496,19 +493,19 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==group-1")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)))
-                .andExpect(jsonPath("$content[0].name", equalTo("group-1")));
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].name", equalTo("group-1")));
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==group*")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(4))).andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$.content", hasSize(4))).andExpect(jsonPath("$.total", equalTo(4)));
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==group-1,name==group-2"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
 
     }
 

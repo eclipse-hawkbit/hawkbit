@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -89,8 +90,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        softwareManagement
+                .createSoftwareModule(entityFactory.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         softwareManagement.createSoftwareModule(
                 entityFactory.generateSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         softwareManagement
@@ -111,12 +112,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$id", equalTo(sm.getId().intValue())))
-                .andExpect(jsonPath("$vendor", equalTo(updateVendor)))
-                .andExpect(jsonPath("$lastModifiedBy", equalTo("smUpdateTester")))
-                .andExpect(jsonPath("$lastModifiedAt", not(equalTo(sm.getLastModifiedAt()))))
-                .andExpect(jsonPath("$description", equalTo(updateDescription)))
-                .andExpect(jsonPath("$name", equalTo(knownSWName))).andReturn();
+                .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
+                .andExpect(jsonPath("$.vendor", equalTo(updateVendor)))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
+                .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(sm.getLastModifiedAt()))))
+                .andExpect(jsonPath("$.description", equalTo(updateDescription)))
+                .andExpect(jsonPath("$.name", equalTo(knownSWName))).andReturn();
 
     }
 
@@ -138,10 +139,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$hashes.md5", equalTo(md5sum)))
-                .andExpect(jsonPath("$hashes.sha1", equalTo(sha1sum)))
-                .andExpect(jsonPath("$size", equalTo(random.length)))
-                .andExpect(jsonPath("$providedFilename", equalTo("origFilename"))).andReturn();
+                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$.size", equalTo(random.length)))
+                .andExpect(jsonPath("$.providedFilename", equalTo("origFilename"))).andReturn();
 
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility
@@ -149,13 +150,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final Long artId = ((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()
                 .get(0)).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat(JsonPath.compile("$_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Link contains no self url")
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat(
-                JsonPath.compile("$_links.download.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("response contains no download url ").isEqualTo("http://localhost/rest/v1/softwaremodules/"
-                                + sm.getId() + "/artifacts/" + artId + "/download");
+        assertThat(JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).as("response contains no download url ").isEqualTo(
+                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 
         assertArtifact(sm, random);
     }
@@ -215,9 +215,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$hashes.md5", equalTo(md5sum)))
-                .andExpect(jsonPath("$hashes.sha1", equalTo(sha1sum)))
-                .andExpect(jsonPath("$providedFilename", equalTo("orig"))).andExpect(status().isCreated());
+                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$.providedFilename", equalTo("orig"))).andExpect(status().isCreated());
 
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isConflict());
@@ -239,7 +239,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .param("filename", "customFilename").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
+                .andExpect(jsonPath("$.providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
 
         // check result in db...
         // repo
@@ -343,15 +343,15 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(artifact.getId().intValue())))
-                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$size", equalTo(random.length)))
-                .andExpect(jsonPath("$hashes.md5", equalTo(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$hashes.sha1", equalTo(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$providedFilename", equalTo("file1")))
-                .andExpect(jsonPath("$_links.download.href",
+                .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.size", equalTo(random.length)))
+                .andExpect(jsonPath("$.hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
+                .andExpect(jsonPath("$._links.download.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getId() + "/download")))
-                .andExpect(jsonPath("$_links.self.href", equalTo(
+                .andExpect(jsonPath("$._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact.getId())));
     }
 
@@ -371,27 +371,27 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id", equalTo(artifact.getId().intValue())))
-                .andExpect(jsonPath("$[0].type", equalTo("local")))
-                .andExpect(jsonPath("$[0].size", equalTo(random.length)))
-                .andExpect(jsonPath("$[0].hashes.md5", equalTo(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$[0].providedFilename", equalTo("file1")))
-                .andExpect(jsonPath("$[0]._links.download.href",
+                .andExpect(jsonPath("$.[0].id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$.[0].type", equalTo("local")))
+                .andExpect(jsonPath("$.[0].size", equalTo(random.length)))
+                .andExpect(jsonPath("$.[0].hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.[0].providedFilename", equalTo("file1")))
+                .andExpect(jsonPath("$.[0]._links.download.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getId() + "/download")))
-                .andExpect(jsonPath("$[0]._links.self.href",
+                .andExpect(jsonPath("$.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getId())))
-                .andExpect(jsonPath("$[1].id", equalTo(artifact2.getId().intValue())))
-                .andExpect(jsonPath("$[1].type", equalTo("local")))
-                .andExpect(jsonPath("$[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
-                .andExpect(jsonPath("$[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
-                .andExpect(jsonPath("$[1].providedFilename", equalTo("file2")))
-                .andExpect(jsonPath("$[1]._links.download.href",
+                .andExpect(jsonPath("$.[1].id", equalTo(artifact2.getId().intValue())))
+                .andExpect(jsonPath("$.[1].type", equalTo("local")))
+                .andExpect(jsonPath("$.[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
+                .andExpect(jsonPath("$.[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
+                .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
+                .andExpect(jsonPath("$.[1]._links.download.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact2.getId() + "/download")))
-                .andExpect(jsonPath("$[1]._links.self.href", equalTo(
+                .andExpect(jsonPath("$.[1]._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
     }
 
@@ -531,55 +531,54 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].name", equalTo("name1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].version", equalTo("version1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].type", equalTo("os")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].createdAt", equalTo(os.getCreatedAt())))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.type.href",
-                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.self.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId())))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.artifacts.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.metadata.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId()
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].name", contains("name1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].version", contains("version1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].type", contains("os")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdAt", contains(os.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.type.href",
+                        contains("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.self.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + os.getId())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.artifacts.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.metadata.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + os.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].name", equalTo("name1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].version", equalTo("version1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].type", equalTo("runtime")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].createdBy", equalTo("uploadTester")))
-                .andExpect(
-                        jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].createdAt", equalTo(jvm.getCreatedAt())))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.type.href",
-                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.self.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId())))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.artifacts.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.metadata.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].name", contains("name1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].version", contains("version1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].type", contains("runtime")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].createdAt", contains(jvm.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.type.href",
+                        contains("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.self.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.artifacts.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.metadata.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].name", equalTo("name1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].version", equalTo("version1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].type", equalTo("application")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdAt", equalTo(ah.getCreatedAt())))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.artifacts.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.metadata.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId()
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].name", contains("name1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].version", contains("version1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].type", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].createdAt", contains(ah.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.artifacts.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.metadata.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.type.href",
-                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.self.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId())));
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.type.href",
+                        contains("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.self.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId())));
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
     }
@@ -591,8 +590,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 "vendor1");
         os1 = softwareManagement.createSoftwareModule(os1);
 
-        SoftwareModule jvm1 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName1", "2.0.0",
-                "description1", "vendor1");
+        SoftwareModule jvm1 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName1", "2.0.0", "description1",
+                "vendor1");
         jvm1 = softwareManagement.createSoftwareModule(jvm1);
 
         SoftwareModule ah1 = entityFactory.generateSoftwareModule(appType, "appName1", "3.0.0", "description1",
@@ -603,8 +602,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 "vendor2");
         os2 = softwareManagement.createSoftwareModule(os2);
 
-        SoftwareModule jvm2 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName2", "2.0.1",
-                "description2", "vendor2");
+        SoftwareModule jvm2 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName2", "2.0.1", "description2",
+                "vendor2");
         jvm2 = softwareManagement.createSoftwareModule(jvm2);
 
         SoftwareModule ah2 = entityFactory.generateSoftwareModule(appType, "appName2", "3.0.1", "description2",
@@ -617,52 +616,52 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules?q=name==osName1").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].name", equalTo("osName1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].version", equalTo("1.0.0")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].type", equalTo("os")))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].name", contains("osName1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].version", contains("1.0.0")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].type", contains("os")))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
 
         // by type, 2 software modules per type exists
         mvc.perform(get("/rest/v1/softwaremodules?q=type==application").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].name", equalTo("appName1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].version", equalTo("3.0.0")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].type", equalTo("application")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].name", equalTo("appName2")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].version", equalTo("3.0.1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].description", equalTo("description2")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].vendor", equalTo("vendor2")))
-                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].type", equalTo("application")))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].name", contains("appName1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].version", contains("3.0.0")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].type", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].name", contains("appName2")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].version", contains("3.0.1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].description", contains("description2")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].vendor", contains("vendor2")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].type", contains("application")))
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
 
         // by type and version=2.0.0 -> only one result
         mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version==2.0.0").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].name", equalTo("runtimeName1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].version", equalTo("2.0.0")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].name", contains("runtimeName1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].version", contains("2.0.0")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
 
         // by type and version range >=2.0.0 -> 2 result
         mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version=ge=2.0.0").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].name", equalTo("runtimeName1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].version", equalTo("2.0.0")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].description", equalTo("description1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].name", equalTo("runtimeName2")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].version", equalTo("2.0.1")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].description", equalTo("description2")))
-                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].vendor", equalTo("vendor2")))
-                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].name", contains("runtimeName1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].version", contains("2.0.0")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].description", contains("description1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].name", contains("runtimeName2")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].version", contains("2.0.1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].description", contains("description2")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].vendor", contains("vendor2")))
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
     }
 
     @Test
@@ -670,7 +669,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     public void getSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongFIQLSyntax").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")));
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")));
     }
 
     @Test
@@ -678,7 +677,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     public void getSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongField==abc").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
     }
 
     @Test
@@ -692,17 +691,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", os.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
-                .andExpect(jsonPath("$description", equalTo("description1")))
-                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("os")))
-                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$createdAt", equalTo(os.getCreatedAt())))
-                .andExpect(jsonPath("$_links.metadata.href",
+                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
+                .andExpect(jsonPath("$.description", equalTo("description1")))
+                .andExpect(jsonPath("$.vendor", equalTo("vendor1"))).andExpect(jsonPath("$.type", equalTo("os")))
+                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.createdAt", equalTo(os.getCreatedAt())))
+                .andExpect(jsonPath("$._links.metadata.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$_links.type.href",
+                .andExpect(jsonPath("$._links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
-                .andExpect(jsonPath("$_links.artifacts.href",
+                .andExpect(jsonPath("$._links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")));
 
         SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
@@ -712,17 +711,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", jvm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
-                .andExpect(jsonPath("$description", equalTo("description1")))
-                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("runtime")))
-                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$createdAt", equalTo(jvm.getCreatedAt())))
-                .andExpect(jsonPath("$_links.metadata.href",
+                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
+                .andExpect(jsonPath("$.description", equalTo("description1")))
+                .andExpect(jsonPath("$.vendor", equalTo("vendor1"))).andExpect(jsonPath("$.type", equalTo("runtime")))
+                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.createdAt", equalTo(jvm.getCreatedAt())))
+                .andExpect(jsonPath("$._links.metadata.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$_links.type.href",
+                .andExpect(jsonPath("$._links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
-                .andExpect(jsonPath("$_links.artifacts.href",
+                .andExpect(jsonPath("$._links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")));
 
         SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name1", "version1", "description1",
@@ -732,17 +731,18 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", ah.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
-                .andExpect(jsonPath("$description", equalTo("description1")))
-                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("application")))
-                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$createdAt", equalTo(ah.getCreatedAt())))
-                .andExpect(jsonPath("$_links.metadata.href",
+                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
+                .andExpect(jsonPath("$.description", equalTo("description1")))
+                .andExpect(jsonPath("$.vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$.type", equalTo("application")))
+                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$.createdAt", equalTo(ah.getCreatedAt())))
+                .andExpect(jsonPath("$._links.metadata.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$_links.type.href",
+                .andExpect(jsonPath("$._links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
-                .andExpect(jsonPath("$_links.artifacts.href",
+                .andExpect(jsonPath("$._links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")));
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
@@ -756,8 +756,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 "vendor1");
         final SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name2", "version1",
                 "description1", "vendor1");
-        final SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name3", "version1",
-                "description1", "vendor1");
+        final SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name3", "version1", "description1",
+                "vendor1");
 
         final List<SoftwareModule> modules = new ArrayList<>();
         modules.add(os);
@@ -924,8 +924,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownKey2 = "knownKey1";
         final String knownValue2 = "knownValue1";
 
-        final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
 
         final JSONArray jsonArray = new JSONArray();
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
@@ -953,10 +953,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownValue = "knownValue";
         final String updateValue = "valueForUpdate";
 
-        final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
-        softwareManagement.createSoftwareModuleMetadata(
-                entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        softwareManagement
+                .createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -977,10 +977,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
 
-        final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
-        softwareManagement.createSoftwareModuleMetadata(
-                entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        softwareManagement
+                .createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -999,13 +999,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final int totalMetadata = 10;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareManagement.createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(
-                    softwareManagement.findSoftwareModuleById(sm.getId()), knownKeyPrefix + index,
-                    knownValuePrefix + index));
+            softwareManagement.createSoftwareModuleMetadata(
+                    entityFactory.generateSoftwareModuleMetadata(softwareManagement.findSoftwareModuleById(sm.getId()),
+                            knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

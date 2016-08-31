@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -74,15 +75,15 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + updateAction.getId(),
                 tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(updateAction.getId()))))
-                .andExpect(jsonPath("$deployment.download", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==jvm)][0].version",
-                        equalTo(ds.findFirstModuleByType(runtimeType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].version",
-                        equalTo(ds.findFirstModuleByType(osType).getVersion())))
-                .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
-                        equalTo(ds.findFirstModuleByType(appType).getVersion())));
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(updateAction.getId()))))
+                .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                        contains(ds.findFirstModuleByType(runtimeType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                        contains(ds.findFirstModuleByType(osType).getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                        contains(ds.findFirstModuleByType(appType).getVersion())));
 
         // and finish it
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + updateAction.getId() + "/feedback",
@@ -118,8 +119,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.deploymentBase.href",
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/deploymentBase/" + updateAction.getId())));
         Thread.sleep(1); // is required: otherwise processing the next line is
@@ -150,8 +151,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.cancelAction.href",
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/cancelAction/" + cancelAction.getId())));
         Thread.sleep(1); // is required: otherwise processing the next line is
@@ -170,8 +171,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction.getId()))))
-                .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
@@ -360,15 +361,15 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction.getId()))))
-                .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.cancelAction.href",
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/cancelAction/" + cancelAction.getId())));
 
@@ -386,15 +387,15 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712/cancelAction/" + cancelAction2.getId(),
                 tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction2.getId()))))
-                .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction2.getId()))));
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction2.getId()))))
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction2.getId()))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$_links.cancelAction.href",
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/cancelAction/" + cancelAction2.getId())));
 
@@ -426,8 +427,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712/cancelAction/" + cancelAction3.getId(),
                 tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction3.getId()))))
-                .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction3.getId()))));
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction3.getId()))))
+                .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(updateAction3.getId()))));
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(12);
 
         // now lets return feedback for the third cancelation

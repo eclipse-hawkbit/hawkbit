@@ -11,11 +11,9 @@
 -->
 <configuration>
    <include resource="org/springframework/boot/logging/logback/base.xml" />
-      
-<!--    <Logger name="org.eclipse.hawkbit.rest.util.MockMvcResultPrinter" level="DEBUG" /> -->
 
    <Root level="INFO">
-      <AppenderRef ref="Console" />
+      <appender-ref ref="CONSOLE" />
    </Root>
 
 </configuration>

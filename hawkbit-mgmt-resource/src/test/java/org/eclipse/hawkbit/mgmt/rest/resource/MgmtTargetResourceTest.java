@@ -12,6 +12,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -172,14 +173,14 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)))
                 .andExpect(jsonPath("size", equalTo(2)))
-                .andExpect(jsonPath("$content.[?(@.controllerId==" + knownControllerId1 + ")][0].ipAddress",
-                        equalTo("127.0.0.1")))
-                .andExpect(jsonPath("$content.[?(@.controllerId==" + knownControllerId2 + ")][0].ipAddress",
-                        equalTo("127.0.0.1")))
-                .andExpect(jsonPath("$content.[?(@.controllerId==" + knownControllerId1 + ")][0].address",
-                        equalTo(IpUtil.createHttpUri("127.0.0.1").toString())))
-                .andExpect(jsonPath("$content.[?(@.controllerId==" + knownControllerId2 + ")][0].address",
-                        equalTo(IpUtil.createHttpUri("127.0.0.1").toString())));
+                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId1 + ")].ipAddress",
+                        contains("127.0.0.1")))
+                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId2 + ")].ipAddress",
+                        contains("127.0.0.1")))
+                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId1 + ")].address",
+                        contains(IpUtil.createHttpUri("127.0.0.1").toString())))
+                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId2 + ")].address",
+                        contains(IpUtil.createHttpUri("127.0.0.1").toString())));
     }
 
     private void createTarget(final String controllerId) {
@@ -418,32 +419,32 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(knownTargetAmount)))
                 // idA
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].name", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].description", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].controllerId", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].updateStatus", equalTo("unknown")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")]._links.self.href",
+                        contains(linksHrefPrefix + idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
                 // idB
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idB)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].name", equalTo(idB)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].description", equalTo(idB)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].controllerId", equalTo(idB)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idB + ")][0].updateStatus", equalTo("unknown")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")]._links.self.href",
+                        contains(linksHrefPrefix + idB)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].name", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].description", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].controllerId", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
                 // idC
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].name", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].description", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].controllerId", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].updateStatus", equalTo("unknown")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].lastControllerRequestAt", notNullValue()));
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")]._links.self.href",
+                        contains(linksHrefPrefix + idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()));
     }
 
     @Test
@@ -462,13 +463,13 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)))
                 // idA
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].name", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].description", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].controllerId", equalTo(idA)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].updateStatus", equalTo("unknown")));
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")]._links.self.href",
+                        contains(linksHrefPrefix + idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("unknown")));
     }
 
     @Test
@@ -491,29 +492,29 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)))
                 // idA
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].name", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].description", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].controllerId", equalTo(idC)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idC + ")][0].updateStatus", equalTo("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")]._links.self.href",
+                        contains(linksHrefPrefix + idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("unknown")))
                 // idB
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idD)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0].name", equalTo(idD)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0].description", equalTo(idD)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0].controllerId", equalTo(idD)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idD + ")][0].updateStatus", equalTo("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")]._links.self.href",
+                        contains(linksHrefPrefix + idD)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].name", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].description", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].controllerId", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].updateStatus", contains("unknown")))
                 // idC
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0]._links.self.href",
-                        equalTo(linksHrefPrefix + idE)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0].name", equalTo(idE)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0].description", equalTo(idE)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0].controllerId", equalTo(idE)))
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0].createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$content.[?(@.name==" + idE + ")][0].updateStatus", equalTo("unknown")));
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")]._links.self.href",
+                        contains(linksHrefPrefix + idE)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].name", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].description", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].controllerId", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].updateStatus", contains("unknown")));
     }
 
     @Test
@@ -533,9 +534,9 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.pollStatus", hasKey("lastRequestAt")))
                 .andExpect(jsonPath("$.pollStatus", hasKey("nextExpectedRequestAt")))
                 .andExpect(jsonPath("$.pollStatus.overdue", equalTo(false)))
-                .andExpect(jsonPath("$_links.assignedDS.href", equalTo(hrefPrefix + "assignedDS")))
-                .andExpect(jsonPath("$_links.installedDS.href", equalTo(hrefPrefix + "installedDS")))
-                .andExpect(jsonPath("$_links.actions.href",
+                .andExpect(jsonPath("$._links.assignedDS.href", equalTo(hrefPrefix + "assignedDS")))
+                .andExpect(jsonPath("$._links.installedDS.href", equalTo(hrefPrefix + "installedDS")))
+                .andExpect(jsonPath("$._links.actions.href",
                         equalTo(hrefPrefix + "actions" + "?offset=0&limit=50&sort=id:DESC")));
     }
 
@@ -589,37 +590,37 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(ds.getDescription())))
                 // os
                 .andExpect(
-                        jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].id", equalTo(os.getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].name", equalTo(os.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].description",
-                        equalTo(os.getDescription())))
+                        jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id", contains(os.getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].name", contains(os.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].description",
+                        contains(os.getDescription())))
                 .andExpect(
-                        jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].version", equalTo(os.getVersion())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].vendor", equalTo(os.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + osType.getKey() + ")][0].type", equalTo("os")))
+                        jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].version", contains(os.getVersion())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].vendor", contains(os.getVendor())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].type", contains("os")))
                 // jvm
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].id",
-                        equalTo(jvm.getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                        contains(jvm.getId().intValue())))
                 .andExpect(
-                        jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].name", equalTo(jvm.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].description",
-                        equalTo(jvm.getDescription())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].version",
-                        equalTo(jvm.getVersion())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].vendor",
-                        equalTo(jvm.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + runtimeType.getKey() + ")][0].type", equalTo("runtime")))
+                        jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].name", contains(jvm.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].description",
+                        contains(jvm.getDescription())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].version",
+                        contains(jvm.getVersion())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].vendor",
+                        contains(jvm.getVendor())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].type", contains("runtime")))
                 // baseApp
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].id",
-                        equalTo(bApp.getId().intValue())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].name", equalTo(bApp.getName())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].description",
-                        equalTo(bApp.getDescription())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].version",
-                        equalTo(bApp.getVersion())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
+                        contains(bApp.getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].name", contains(bApp.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].description",
+                        contains(bApp.getDescription())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].version",
+                        contains(bApp.getVersion())))
                 .andExpect(
-                        jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].vendor", equalTo(bApp.getVendor())))
-                .andExpect(jsonPath("$modules.[?(@.type==" + appType.getKey() + ")][0].type", equalTo("application")));
+                        jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].vendor", contains(bApp.getVendor())))
+                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].type", contains("application")));
 
     }
 

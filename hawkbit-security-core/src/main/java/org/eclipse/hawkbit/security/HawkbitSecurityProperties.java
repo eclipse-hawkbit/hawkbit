@@ -21,7 +21,6 @@ public class HawkbitSecurityProperties {
 
     private final Clients clients = new Clients();
     private final Dos dos = new Dos();
-    private final Xframe xframe = new Xframe();
 
     public Dos getDos() {
         return dos;
@@ -29,45 +28,6 @@ public class HawkbitSecurityProperties {
 
     public Clients getClients() {
         return clients;
-    }
-
-    public Xframe getXframe() {
-        return xframe;
-    }
-
-    /**
-     * Defines the XFrameOption policy.
-     *
-     */
-    public static class Xframe {
-
-        /**
-         * XFrame option. Allowed values: SAMEORIGIN, DENY, ALLOW-FROM
-         */
-        private String option = "DENY";
-
-        /**
-         * ALLOW-FROM defined URL, has to be filled in case ALLOW-FROM option is
-         * selected.
-         */
-        private String allowfrom = "";
-
-        public String getOption() {
-            return option;
-        }
-
-        public void setOption(final String option) {
-            this.option = option;
-        }
-
-        public String getAllowfrom() {
-            return allowfrom;
-        }
-
-        public void setAllowfrom(final String allowfrom) {
-            this.allowfrom = allowfrom;
-        }
-
     }
 
     /**

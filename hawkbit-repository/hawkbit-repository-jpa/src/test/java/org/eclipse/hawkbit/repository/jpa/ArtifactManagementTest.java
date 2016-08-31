@@ -15,14 +15,12 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
@@ -239,36 +237,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
                         .isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
-    }
-
-    @Test
-    @Description("Trys and fails to delete local artifact with a down mongodb and checks if expected ArtifactDeleteFailedException is thrown.")
-    public void deleteArtifactsWithNoMongoDb() throws UnknownHostException, IOException {
-        // ensure baseline
-        assertThat(artifactRepository.findAll()).isEmpty();
-
-        // prepare test
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
-
-        final Artifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
-                sm.getId(), "file1", false);
-
-        assertThat(artifactRepository.findAll()).hasSize(1);
-
-        internalShutDownMongo();
-        try {
-            artifactManagement.deleteLocalArtifact(result.getId());
-            fail("deletion should have failed");
-        } catch (final ArtifactDeleteFailedException e) {
-
-        }
-        setupMongo();
-
-        assertThat(artifactRepository.findAll()).hasSize(1);
-        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
-
     }
 
     @Test

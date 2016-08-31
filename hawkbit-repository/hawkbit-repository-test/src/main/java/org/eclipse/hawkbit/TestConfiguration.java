@@ -6,22 +6,25 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.test.util;
+package org.eclipse.hawkbit;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
+import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.guava.GuavaCacheManager;
@@ -45,11 +48,11 @@ import com.mongodb.MongoClientOptions;
  *
  */
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class })
 @Profile("test")
+@EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
-
     @Bean
     public TestRepositoryManagement testRepositoryManagement() {
         return new JpaTestRepositoryManagement();

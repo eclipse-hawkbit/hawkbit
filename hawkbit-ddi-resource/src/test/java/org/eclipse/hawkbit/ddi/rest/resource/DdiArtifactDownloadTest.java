@@ -21,9 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
@@ -35,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +73,13 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     private volatile int downLoadProgress = 0;
     private volatile long shippedBytes = 0;
     private volatile long shippedBytesTotal = 0;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
+
+    @Before
+    public void setup() {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     @Autowired
     private EventBus eventBus;
@@ -273,7 +285,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                                 ds.findFirstModuleByType(osType).getId(), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
@@ -386,7 +398,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isOk()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
 
         assertTrue("The same file that was uploaded is expected when downloaded",
@@ -444,7 +456,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                     .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                     .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                     .andExpect(header().string("Accept-Ranges", "bytes"))
-                    .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                    .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                     .andExpect(header().longValue("Content-Length", range))
                     .andExpect(header().string("Content-Range", "bytes " + rangeString + "/" + resultLength))
                     .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
@@ -461,7 +473,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().longValue("Content-Length", 1000))
                 .andExpect(header().string("Content-Range",
                         "bytes " + (resultLength - 1000) + "-" + (resultLength - 1) + "/" + resultLength))
@@ -477,7 +489,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().longValue("Content-Length", resultLength - 1000))
                 .andExpect(header().string("Content-Range",
                         "bytes " + 1000 + "-" + (resultLength - 1) + "/" + resultLength))
@@ -493,7 +505,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType("multipart/byteranges; boundary=THIS_STRING_SEPARATES_MULTIPART"))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
-                .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
+                .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
 
         outputStream.reset();

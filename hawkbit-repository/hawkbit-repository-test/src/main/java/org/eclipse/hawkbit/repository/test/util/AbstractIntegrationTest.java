@@ -12,6 +12,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
+import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -48,15 +49,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import de.flapdoodle.embed.mongo.MongodExecutable;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -68,6 +74,7 @@ import org.springframework.web.context.WebApplicationContext;
 // refreshed we e.g. get two instances of CacheManager which leads to very
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected static Logger LOG = null;
 
@@ -149,6 +156,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Autowired
     protected TestdataFactory testdataFactory;
 
+    @Autowired
+    protected GridFsOperations operations;
+
+    @Autowired
+    protected MongodExecutable mongodExecutable;
+
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
 
@@ -185,6 +198,11 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @After
     public void after() {
         testRepositoryManagement.clearTestRepository();
+    }
+
+    @After
+    public void cleanCurrentCollection() {
+        operations.delete(new Query());
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
