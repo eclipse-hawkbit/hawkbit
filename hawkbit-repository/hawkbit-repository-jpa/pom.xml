@@ -159,7 +159,7 @@
                   <goals>
                      <goal>weave</goal>
                   </goals>
-               </execution>               
+               </execution>
             </executions>
             <dependencies>
                <dependency>
