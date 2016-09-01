@@ -14,11 +14,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
@@ -27,7 +30,12 @@ import com.google.common.base.Strings;
 @Component
 @EnableConfigurationProperties(ArtifactUrlHandlerProperties.class)
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
+<<<<<<< HEAD
+=======
 
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyBasedArtifactUrlHandler.class);
+
+>>>>>>> branch 'fix_filename_encoding' of https://github.com/bsinno/hawkbit.git
     private static final String PROTOCOL_PLACEHOLDER = "protocol";
     private static final String TARGET_ID_PLACEHOLDER = "targetId";
     private static final String IP_PLACEHOLDER = "ip";
@@ -55,8 +63,8 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         }
 
         String urlPattern = properties.getPattern();
-        final Set<Entry<String, String>> entrySet = getReplaceMap(targetId, softwareModuleId, filename, sha1Hash,
-                protocolString, properties).entrySet();
+        final Set<Entry<String, String>> entrySet = getReplaceMap(targetId, softwareModuleId,
+                UrlEscapers.urlFragmentEscaper().escape(filename), sha1Hash, protocolString, properties).entrySet();
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
@@ -65,7 +73,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
                 urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
             }
         }
+
         return urlPattern;
+
     }
 
     private Map<String, String> getReplaceMap(final String targetId, final Long softwareModuleId, final String filename,
