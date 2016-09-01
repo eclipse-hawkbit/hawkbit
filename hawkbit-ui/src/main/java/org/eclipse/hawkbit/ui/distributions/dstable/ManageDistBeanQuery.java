@@ -20,10 +20,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
@@ -48,6 +46,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     private transient Page<DistributionSet> firstPageDistributionSets = null;
 
     private DistributionSetType distributionSetType = null;
+    private Boolean dsComplete = null;
 
     /**
      *
@@ -68,6 +67,9 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             if (null != queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE)) {
                 distributionSetType = (DistributionSetType) queryConfig
                         .get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE);
+            }
+            if(null != queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE)) {
+                dsComplete = (Boolean)queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
             }
         }
 
@@ -96,27 +98,17 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         } else if (Strings.isNullOrEmpty(searchText)) {
             // if no search filters available
             distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new OffsetBasedPageRequest(startIndex, count, sort), false, null);
+                    new OffsetBasedPageRequest(startIndex, count, sort), false, dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
+                    .setIsComplete(dsComplete)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
             distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
                     new PageRequest(startIndex / count, count, sort), distributionSetFilter);
         }
 
         for (final DistributionSet distributionSet : distBeans) {
-            final ProxyDistribution proxyDistribution = new ProxyDistribution();
-            proxyDistribution.setName(distributionSet.getName());
-            proxyDistribution.setDescription(distributionSet.getDescription());
-            proxyDistribution.setDistId(distributionSet.getId());
-            proxyDistribution.setId(distributionSet.getId());
-            proxyDistribution.setVersion(distributionSet.getVersion());
-            proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
-            proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
-            proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
-            proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
-            proxyDistribution.setIsComplete(distributionSet.isComplete());
-            proxyDistributions.add(proxyDistribution);
+            proxyDistributions.add(new ProxyDistribution(distributionSet));
         }
         return proxyDistributions;
     }
@@ -132,9 +124,10 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (Strings.isNullOrEmpty(searchText) && null == distributionSetType) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, null);
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
+                    .setIsComplete(dsComplete)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);

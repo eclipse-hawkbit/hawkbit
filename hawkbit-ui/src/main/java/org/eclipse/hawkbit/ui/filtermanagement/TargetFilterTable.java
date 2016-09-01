@@ -17,9 +17,15 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Link;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
@@ -43,15 +49,11 @@ import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
+ * Displays list of target filter queries
  *
  */
 @SpringComponent
@@ -74,6 +76,12 @@ public class TargetFilterTable extends Table {
 
     @Autowired
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
+
+    @Autowired
+    private transient DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private DistributionSetSelectWindow dsSelectWindow;
 
     private Container container;
 
@@ -141,15 +149,17 @@ public class TargetFilterTable extends Table {
         container.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, Date.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, Date.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null);
+        container.addContainerProperty(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET, String.class, null);
     }
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.15F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.15F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET, i18n.get("header.auto.assignment.ds"), 0.1F));
         columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.get("header.delete"), 0.1F));
         return columnList;
 
@@ -171,7 +181,7 @@ public class TargetFilterTable extends Table {
         return deleteIcon;
     }
 
-    private String getDeleteIconId(final String targetFilterName) {
+    private static String getDeleteIconId(final String targetFilterName) {
         return new StringBuilder(UIComponentIdProvider.CUSTOM_FILTER_DELETE_ICON).append('.').append(targetFilterName)
                 .toString();
     }
@@ -207,6 +217,9 @@ public class TargetFilterTable extends Table {
         addGeneratedColumn(SPUILabelDefinitions.NAME,
                 (source, itemId, columnId) -> customFilterDetailButton((Long) itemId));
 
+        addGeneratedColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
+                (source, itemId, columnId) -> customFilterDistributionSetButton((Long) itemId));
+
     }
 
     private Button customFilterDetailButton(final Long itemId) {
@@ -219,6 +232,34 @@ public class TargetFilterTable extends Table {
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
         updateIcon.addClickListener(this::onClickOfDetailButton);
         return updateIcon;
+    }
+
+    private Button customFilterDistributionSetButton(final Long itemId) {
+        final Item row1 = getItem(itemId);
+        final ProxyDistribution distSet = (ProxyDistribution) row1.getItemProperty(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET).getValue();
+        final String buttonId = "distSetButton";
+        Button updateIcon;
+        if(distSet == null) {
+            updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.get("button.no.auto.assignment"),
+                    i18n.get("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+        } else {
+            updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
+                    i18n.get("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleSmallNoBorder.class);
+        }
+
+        updateIcon.addClickListener(this::onClickOfDistributionSetButton);
+        updateIcon.setData(row1);
+        updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
+
+        return updateIcon;
+    }
+
+    private void onClickOfDistributionSetButton(final ClickEvent event) {
+        final Item item = (Item) ((Button) event.getComponent()).getData();
+        final Long tfqId = (Long)item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
+
+        dsSelectWindow.showForTargetFilter(tfqId);
+
     }
 
     private void onClickOfDetailButton(final ClickEvent event) {

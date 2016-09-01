@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.
@@ -67,17 +71,57 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return convertPage(targetFilterQueryRepository.findAll(pageable), pageable);
     }
 
+    @Override
+    public Long countAllTargetFilterQuery() {
+        return targetFilterQueryRepository.count();
+    }
+
     private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll,
             final Pageable pageable) {
         return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByFilters(final Pageable pageable, final String name) {
+    public Page<TargetFilterQuery> findTargetFilterQueryByName(final Pageable pageable, final String name) {
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(name)) {
             specList.add(TargetFilterQuerySpecification.likeName(name));
         }
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    @Override
+    public Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter) {
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        if (!Strings.isNullOrEmpty(rsqlFilter)) {
+            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
+        }
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    @Override
+    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
+            DistributionSet distributionSet) {
+        return findTargetFilterQueryByAutoAssignDS(pageable, distributionSet, null);
+    }
+
+    @Override
+    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
+            DistributionSet distributionSet, String rsqlFilter) {
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        if (distributionSet != null) {
+            specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
+        }
+        if (!Strings.isNullOrEmpty(rsqlFilter)) {
+            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
+        }
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    @Override
+    public Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull Pageable pageable) {
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        specList.add(TargetFilterQuerySpecification.withAutoAssignDS());
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
 

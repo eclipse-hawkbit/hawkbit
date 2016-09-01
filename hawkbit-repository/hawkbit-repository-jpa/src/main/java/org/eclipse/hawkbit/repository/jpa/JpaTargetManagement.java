@@ -26,6 +26,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -559,6 +560,31 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Object[]> resultList = getTargetIdNameResultSet(pageRequest, cb, targetRoot, multiselect);
         return resultList.parallelStream().map(o -> new TargetIdName((long) o[0], o[1].toString(), o[2].toString()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Target> findAllTargetIdsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
+            Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+
+        return findTargetsBySpec(
+                (root, cq,
+                        cb) -> cb.and(spec.toPredicate(root, cq, cb), TargetSpecifications
+                                .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
+                pageRequest);
+
+    }
+
+    @Override
+    public Long countTargetByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final List<Specification<JpaTarget>> specList = new ArrayList<>();
+        specList.add(spec);
+
+        specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
+
+        return countByCriteriaAPI(specList);
     }
 
     @PreDestroy

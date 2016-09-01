@@ -243,6 +243,35 @@ public interface TargetManagement {
             @NotNull TargetFilterQuery targetFilterQuery);
 
     /**
+     * Finds all targets for all the given parameter {@link TargetFilterQuery}
+     * and that don't have the specified assigned distribution set.
+     * and returns not the full target but {@link TargetIdName}.
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param targetFilterQuery
+     *            {@link TargetFilterQuery}
+     * @return the found {@link TargetIdName}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findAllTargetIdsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
+                                                                   Long distributionSetId,
+                                                                   @NotNull TargetFilterQuery targetFilterQuery);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery}
+     * and that don't have the specified assigned distribution set. and returns
+     * not the full target but {@link TargetIdName}.
+     *
+     * @param targetFilterQuery
+     *            {@link TargetFilterQuery}
+     * @return the found {@link TargetIdName}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countTargetByTargetFilterQueryAndNonDS(Long distributionSetId,
+                                                @NotNull TargetFilterQuery targetFilterQuery);
+
+    /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet} without
      * details, i.e. NO {@link Target#getTags()} and {@link Target#getActions()}
      * possible.

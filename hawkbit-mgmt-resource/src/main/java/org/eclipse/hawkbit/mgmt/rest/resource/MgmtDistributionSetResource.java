@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -32,12 +33,14 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
@@ -65,6 +68,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
     private DeploymentManagement deployManagament;
@@ -220,6 +226,37 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         return new ResponseEntity<>(
                 new PagedList<MgmtTarget>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
                         targetsInstalledDS.getTotalElements()),
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam) {
+        // check if distribution set exists otherwise throw exception
+        // immediately
+        DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Page<TargetFilterQuery> targetFilterQueries;
+        if (rsqlParam != null) {
+            targetFilterQueries = this.targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
+                    distributionSet, rsqlParam);
+        } else {
+            targetFilterQueries = this.targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
+                    distributionSet);
+        }
+
+        return new ResponseEntity<>(
+                new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
+                        targetFilterQueries.getTotalElements()),
                 HttpStatus.OK);
     }
 

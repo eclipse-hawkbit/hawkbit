@@ -133,6 +133,16 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
+    public TargetFilterQuery generateTargetFilterQuery(String name, String query) {
+        return new JpaTargetFilterQuery(name, query);
+    }
+
+    @Override
+    public TargetFilterQuery generateTargetFilterQuery(String name, String query, DistributionSet autoAssignDS) {
+        return new JpaTargetFilterQuery(name, query, (JpaDistributionSet) autoAssignDS);
+    }
+
+    @Override
     public SoftwareModuleType generateSoftwareModuleType() {
         return new JpaSoftwareModuleType();
     }

@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
@@ -95,6 +96,9 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @OneToMany(mappedBy = "assignedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
     private List<Target> assignedToTargets;
+
+    @OneToMany(mappedBy = "autoAssignDistributionSet", targetEntity = JpaTargetFilterQuery.class, fetch = FetchType.LAZY)
+    private List<TargetFilterQuery> autoAssignFilters;
 
     @OneToMany(mappedBy = "installedDistributionSet", targetEntity = JpaTargetInfo.class, fetch = FetchType.LAZY)
     private List<TargetInfo> installedAtTargets;
@@ -194,6 +198,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public List<Target> getAssignedTargets() {
         return assignedToTargets;
+    }
+
+    @Override
+    public List<TargetFilterQuery> getAutoAssignFilters() {
+        return autoAssignFilters;
     }
 
     @Override
