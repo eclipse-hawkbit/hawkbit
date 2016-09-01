@@ -1024,11 +1024,6 @@ public final class SPUIDefinitions {
      */
     public static final String SOFTWAREMODULE_METADATA_TAB_ID = "swModule.metadata.tab.id";
 
-    /***
-     * Custom window for metadata.
-     */
-    public static final String CUSTOM_METADATA_WINDOW = "custom.metadata.window";
-
     /**
      * /** Constructor.
      */

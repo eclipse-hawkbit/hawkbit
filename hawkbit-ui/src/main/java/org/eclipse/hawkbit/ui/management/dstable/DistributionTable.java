@@ -137,9 +137,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final Boolean dsVisible = visibleItemIds.stream().filter(e -> e.getId().equals(ds.getId())).findFirst()
                 .isPresent();
 
-        if ((ds.isComplete() && !dsVisible)) {
+        if (ds.isComplete() && !dsVisible) {
             refreshDistributions();
-        } else if ((!ds.isComplete() && dsVisible)) {
+        } else if (!ds.isComplete() && dsVisible) {
             refreshDistributions();
             if (ds.getId().equals(managementUIState.getLastSelectedDsIdName().getId())) {
                 managementUIState.setLastSelectedDistribution(null);

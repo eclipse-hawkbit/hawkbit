@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.io.Serializable;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -17,6 +15,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -28,6 +27,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -48,7 +48,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Serializable {
+public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
@@ -84,6 +84,25 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
     private Long baseSwModuleId;
 
     private FormLayout formLayout;
+
+    /**
+     * Save or update the sw module.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editSwModule) {
+                updateSwModule();
+                return;
+            }
+            addNewBaseSoftware();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editSwModule || !isDuplicate();
+        }
+    }
 
     /**
      * Initialize Distribution Add and Edit Window.
@@ -180,12 +199,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         setCompositionRoot(formLayout);
 
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this)
-                .saveButtonClickListener(event -> saveOrUpdate()).layout(formLayout).i18n(i18n)
-                .buildCommonDialogWindow();
-
-        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
-
+                .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
         typeComboBox.setEnabled(!editSwModule);
@@ -200,19 +215,31 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
+        final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name, version,
+                vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+        if (newBaseSoftwareModule != null) {
+            /* display success message */
+            uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                    new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
+        }
+    }
+
+    private boolean isDuplicate() {
+        final String name = nameTextField.getValue();
+        final String version = versionTextField.getValue();
+        final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
+        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type));
+
+        if (swModule != null) {
             uiNotifcation.displayValidationError(
                     i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-        } else {
-            final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
-                    version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-            if (newBaseSoftwareModule != null) {
-                /* display success message */
-                uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                        new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
-            }
+            return true;
         }
+        return false;
     }
 
     /**
@@ -252,14 +279,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-    }
-
-    private void saveOrUpdate() {
-        if (editSwModule) {
-            updateSwModule();
-        } else {
-            addNewBaseSoftware();
-        }
     }
 
     public FormLayout getFormLayout() {

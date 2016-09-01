@@ -36,7 +36,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout {
+public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag> {
 
     private static final long serialVersionUID = 444276149954167545L;
 
@@ -80,19 +80,21 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
-    /**
-     * Update DistributionTag.
-     */
     @Override
-    public void save(final ClickEvent event) {
-        final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
-        if (optiongroup.getValue().equals(createTagStr)) {
-            if (!checkIsDuplicate(existingDistTag)) {
-                createNewTag();
-            }
-        } else {
-            updateExistingTag(existingDistTag);
-        }
+    protected void createEntity() {
+        createNewTag();
+
+    }
+
+    @Override
+    protected void updateEntity(final DistributionSetTag entity) {
+        updateExistingTag(findEntityByName());
+
+    }
+
+    @Override
+    protected DistributionSetTag findEntityByName() {
+        return tagManagement.findDistributionSetTag(tagName.getValue());
     }
 
     /**

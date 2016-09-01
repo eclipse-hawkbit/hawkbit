@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -97,6 +98,27 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private HorizontalLayout mainLayout;
 
+    /**
+     * Save the metadata and never close the window after saving.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            onSave();
+        }
+
+        @Override
+        public boolean canWindowClose() {
+            return false;
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return true;
+        }
+
+    }
+
     @PostConstruct
     void init() {
         createComponents();
@@ -117,11 +139,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         selectedEntity = entity;
         final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
 
-        metadataWindow = new WindowBuilder(SPUIDefinitions.CUSTOM_METADATA_WINDOW)
-                .caption(getMetadataCaption(nameVersion)).content(this).saveButtonClickListener(event -> onSave())
-                .cancelButtonClickListener(event -> onCancel()).layout(mainLayout).i18n(i18n).buildCommonDialogWindow();
+        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(getMetadataCaption(nameVersion)).content(this).cancelButtonClickListener(event -> onCancel())
+                .id(SPUIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
-        metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
         metadataWindow.getMainLayout().setSizeFull();

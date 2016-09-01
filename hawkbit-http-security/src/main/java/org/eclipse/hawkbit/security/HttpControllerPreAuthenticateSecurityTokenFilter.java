@@ -55,7 +55,7 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
     }
 
     @Override
-    protected PreAuthenficationFilter createControllerAuthenticationFilter() {
+    protected PreAuthentificationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticateSecurityTokenFilter(tenantConfigurationManagement, controllerManagement,
                 tenantAware, systemSecurityContext);
     }

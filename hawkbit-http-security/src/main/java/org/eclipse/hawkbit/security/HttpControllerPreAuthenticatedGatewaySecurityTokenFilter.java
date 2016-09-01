@@ -43,7 +43,7 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
     }
 
     @Override
-    protected PreAuthenficationFilter createControllerAuthenticationFilter() {
+    protected PreAuthentificationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(tenantConfigurationManagement, tenantAware,
                 systemSecurityContext);
     }

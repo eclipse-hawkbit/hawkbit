@@ -54,7 +54,7 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
     }
 
     @Override
-    protected PreAuthenficationFilter createControllerAuthenticationFilter() {
+    protected PreAuthentificationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedSecurityHeaderFilter(caCommonNameHeader, caAuthorityNameHeader,
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }

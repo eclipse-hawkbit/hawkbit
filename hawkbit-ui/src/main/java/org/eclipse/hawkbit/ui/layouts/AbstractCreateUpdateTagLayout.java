@@ -13,12 +13,14 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -55,10 +57,14 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
+ * 
  * Abstract class for create/update target tag layout.
+ *
+ * @param <E>
  */
-public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
+public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
+
     private static final long serialVersionUID = 4229177824620576456L;
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
@@ -105,14 +111,32 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected String tagNameValue;
     protected String tagDescValue;
 
-    protected abstract String getWindowCaption();
-
     /**
-     * Save new tag / update new tag.
-     *
-     * @param event
+     * 
+     * Save or update the entity.
      */
-    protected abstract void save(final Button.ClickEvent event);
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+
+        @Override
+        public void saveOrUpdate() {
+            if (isUpdateAction()) {
+                updateEntity(findEntityByName());
+                return;
+            }
+
+            createEntity();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return isUpdateAction() || !isDuplicate();
+
+        }
+
+        private boolean isUpdateAction() {
+            return !optiongroup.getValue().equals(createTagStr);
+        }
+    }
 
     /**
      * Discard the changes and close the popup.
@@ -400,7 +424,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
      *
      * @param colorPickedPreview
      */
-    private void getTargetDynamicStyles(final String colorPickedPreview) {
+    private static void getTargetDynamicStyles(final String colorPickedPreview) {
         Page.getCurrent().getJavaScript()
                 .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
     }
@@ -463,9 +487,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     public CommonDialogWindow getWindow() {
         reset();
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
-                .saveButtonClickListener(this::save).cancelButtonClickListener(event -> discard()).layout(mainLayout)
-                .i18n(i18n).buildCommonDialogWindow();
-
+                .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         return window;
     }
 
@@ -562,12 +585,19 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         getPreviewButtonColor(previewColor);
     }
 
-    protected Boolean checkIsDuplicate(final Tag existingTag) {
-        if (existingTag != null) {
-            displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
-            return Boolean.TRUE;
+    private boolean isDuplicateByName() {
+        final E existingType = findEntityByName();
+        if (existingType != null) {
+            uiNotification.displayValidationError(
+                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
+            return true;
         }
-        return Boolean.FALSE;
+
+        return false;
+    }
+
+    protected boolean isDuplicate() {
+        return isDuplicateByName();
     }
 
     public String getColorPicked() {
@@ -609,5 +639,13 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     @Override
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
+
+    protected abstract E findEntityByName();
+
+    protected abstract String getWindowCaption();
+
+    protected abstract void updateEntity(E entity);
+
+    protected abstract void createEntity();
 
 }

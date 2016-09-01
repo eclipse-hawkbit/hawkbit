@@ -50,6 +50,7 @@ import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -89,17 +90,17 @@ public class CommonDialogWindow extends Window {
 
     protected ValueChangeListener buttonEnableListener;
 
-    private final ClickListener saveButtonClickListener;
-
     private final ClickListener cancelButtonClickListener;
 
-    private final ClickListener closeClickListener = event -> close();
+    private final ClickListener closeClickListener = event -> onCloseEvent(event);
 
     private final transient Map<Component, Object> orginalValues;
 
     private final List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
+
+    private transient SaveDialogCloseListener closeListener;
 
     /**
      * Constructor.
@@ -110,8 +111,8 @@ public class CommonDialogWindow extends Window {
      *            the content
      * @param helpLink
      *            the helpLinks
-     * @param saveButtonClickListener
-     *            the saveButtonClickListener
+     * @param closeListener
+     *            the saveDialogCloseListener
      * @param cancelButtonClickListener
      *            the cancelButtonClickListener
      * @param layout
@@ -120,18 +121,35 @@ public class CommonDialogWindow extends Window {
      *            the i18n service
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
-            final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
+            final SaveDialogCloseListener closeListener, final ClickListener cancelButtonClickListener,
             final AbstractLayout layout, final I18N i18n) {
-        checkNotNull(saveButtonClickListener);
+        checkNotNull(closeListener);
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
-        this.saveButtonClickListener = saveButtonClickListener;
+        this.closeListener = closeListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.orginalValues = new HashMap<>();
         this.allComponents = getAllComponents(layout);
         this.i18n = i18n;
         init();
+    }
+
+    private void onCloseEvent(final ClickEvent clickEvent) {
+        if (!clickEvent.getButton().equals(saveButton)) {
+            close();
+            return;
+        }
+
+        if (!closeListener.canWindowSaveOrUpdate()) {
+            return;
+        }
+        closeListener.saveOrUpdate();
+
+        if (closeListener.canWindowClose()) {
+            close();
+        }
+
     }
 
     @Override
@@ -210,7 +228,7 @@ public class CommonDialogWindow extends Window {
         setModal(true);
         addStyleName("fontsize");
         setOrginaleValues();
-        addListeners();
+        addComponentListeners();
     }
 
     /**
@@ -229,12 +247,6 @@ public class CommonDialogWindow extends Window {
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
     }
 
-    protected void addListeners() {
-        addComponenetListeners();
-        addCloseListenerForSaveButton();
-        addCloseListenerForCancelButton();
-    }
-
     protected void addCloseListenerForSaveButton() {
         saveButton.addClickListener(closeClickListener);
     }
@@ -243,7 +255,7 @@ public class CommonDialogWindow extends Window {
         cancelButton.addClickListener(closeClickListener);
     }
 
-    protected void addComponenetListeners() {
+    protected void addComponentListeners() {
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
@@ -431,6 +443,7 @@ public class CommonDialogWindow extends Window {
                 FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
+        addCloseListenerForCancelButton();
         if (cancelButtonClickListener != null) {
             cancelButton.addClickListener(cancelButtonClickListener);
         }
@@ -445,7 +458,7 @@ public class CommonDialogWindow extends Window {
                 FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
-        saveButton.addClickListener(saveButtonClickListener);
+        addCloseListenerForSaveButton();
         saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
@@ -505,7 +518,7 @@ public class CommonDialogWindow extends Window {
      * @param component
      *            AbstractField
      */
-    public void updateAllComponents(final AbstractField component) {
+    public void updateAllComponents(final AbstractField<?> component) {
 
         allComponents.add(component);
         component.addValueChangeListener(new ChangeListener(component));
@@ -522,4 +535,36 @@ public class CommonDialogWindow extends Window {
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
+
+    /**
+     * Check if the safe action can executed. After a the save action the
+     * listener checks if the dialog can closed.
+     *
+     */
+    public interface SaveDialogCloseListener {
+
+        /**
+         * Checks if the safe action can executed.
+         * 
+         * @return <true> = save action can executed <false> = cannot execute
+         *         safe action .
+         */
+        boolean canWindowSaveOrUpdate();
+
+        /**
+         * Checks if the window can closed after the safe action is executed
+         * 
+         * @return <true> = window will close <false> = will not closed.
+         */
+        default boolean canWindowClose() {
+            return true;
+        }
+
+        /**
+         * Saves/Updates action. Is called if canWindowSaveOrUpdate is <true>.
+         * 
+         */
+        void saveOrUpdate();
+    }
+
 }

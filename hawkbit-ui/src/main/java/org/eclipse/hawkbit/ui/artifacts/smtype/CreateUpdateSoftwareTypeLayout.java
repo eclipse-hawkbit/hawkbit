@@ -34,7 +34,6 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
@@ -47,7 +46,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
+public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<SoftwareModuleType> {
 
     private static final long serialVersionUID = -5169398523815919367L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
@@ -124,7 +123,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
 
         super.optionValueChanged(event);
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             assignOptiongroup.setEnabled(false);
         } else {
             assignOptiongroup.setEnabled(true);
@@ -192,18 +191,28 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout {
     }
 
     @Override
-    protected void save(final ClickEvent event) {
-        final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
-                .findSoftwareModuleTypeByKey(typeKey.getValue());
-        final SoftwareModuleType existingSMTypeByName = swTypeManagementService
-                .findSoftwareModuleTypeByName(tagName.getValue());
-        if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!checkIsDuplicateByKey(existingSMTypeByKey) && !checkIsDuplicate(existingSMTypeByName)) {
-                createNewSWModuleType();
-            }
-        } else {
-            updateSWModuleType(existingSMTypeByName);
-        }
+    protected void createEntity() {
+        createNewSWModuleType();
+    }
+
+    @Override
+    protected void updateEntity(final SoftwareModuleType entity) {
+        updateSWModuleType(entity);
+    }
+
+    @Override
+    protected SoftwareModuleType findEntityByKey() {
+        return swTypeManagementService.findSoftwareModuleTypeByKey(typeKey.getValue());
+    }
+
+    @Override
+    protected SoftwareModuleType findEntityByName() {
+        return swTypeManagementService.findSoftwareModuleTypeByName(tagName.getValue());
+    }
+
+    @Override
+    protected String getDuplicateKeyErrorMessage(final SoftwareModuleType existingType) {
+        return i18n.get("message.type.key.swmodule.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     private void createNewSWModuleType() {

@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -46,6 +47,7 @@ import com.vaadin.ui.Window;
 @SpringComponent
 @VaadinSessionScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
+
     private static final long serialVersionUID = -6659290471705262389L;
 
     @Autowired
@@ -66,10 +68,30 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
-    private boolean editTarget = Boolean.FALSE;
+    private boolean editTarget;
     private String controllerId;
     private FormLayout formLayout;
     private CommonDialogWindow window;
+
+    /**
+     * Save or update the target.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editTarget) {
+                updateTarget();
+                return;
+            }
+            addNewTarget();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editTarget || !isDuplicate();
+        }
+
+    }
 
     /**
      * Initialize the Add Update Window Component for Target.
@@ -125,45 +147,42 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
     }
 
-    private void saveTargetListner() {
-        if (editTarget) {
-            updateTarget();
-        } else {
-            addNewTarget();
-        }
-    }
-
     private void addNewTarget() {
         final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
-        if (duplicateCheck(newControlllerId)) {
-            final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-            final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
+        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-            /* create new target entity */
-            Target newTarget = entityFactory.generateTarget(newControlllerId);
-            /* set values to the new target entity */
-            setTargetValues(newTarget, newName, newDesc);
-            /* save new target */
-            newTarget = targetManagement.createTarget(newTarget);
-            final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
-            final Set<TargetIdName> s = new HashSet<>();
-            s.add(newTarget.getTargetIdName());
-            targetTable.setValue(s);
+        /* create new target entity */
+        Target newTarget = entityFactory.generateTarget(newControlllerId);
+        /* set values to the new target entity */
+        setTargetValues(newTarget, newName, newDesc);
+        /* save new target */
+        newTarget = targetManagement.createTarget(newTarget);
+        final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
+        final Set<TargetIdName> s = new HashSet<>();
+        s.add(newTarget.getTargetIdName());
+        targetTable.setValue(s);
 
-            /* display success msg */
-            uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
-        }
+        /* display success msg */
+        uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
-                .content(this).saveButtonClickListener(event -> saveTargetListner()).layout(formLayout).i18n(i18n)
+                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
                 .buildCommonDialogWindow();
 
         return window;
     }
 
+    /**
+     * Returns Target Update window based on the selected Entity Id in the
+     * target table.
+     * 
+     * @param entityId
+     * @return window
+     */
     public Window getWindow(final String entityId) {
         populateValuesOfTarget(entityId);
         getWindow();
@@ -189,15 +208,17 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         target.setDescription(description);
     }
 
-    private boolean duplicateCheck(final String newControlllerId) {
+    private boolean isDuplicate() {
+        final String newControlllerId = controllerIDTextField.getValue();
         final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
         if (existingTarget != null) {
             uINotification.displayValidationError(
                     i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
+
     }
 
     /**

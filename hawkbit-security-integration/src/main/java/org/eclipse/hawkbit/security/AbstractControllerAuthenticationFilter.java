@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
-public abstract class AbstractControllerAuthenticationFilter implements PreAuthenficationFilter {
+public abstract class AbstractControllerAuthenticationFilter implements PreAuthentificationFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractControllerAuthenticationFilter.class);
 

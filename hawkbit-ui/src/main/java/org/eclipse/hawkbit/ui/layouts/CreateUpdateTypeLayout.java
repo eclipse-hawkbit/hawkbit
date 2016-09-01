@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -23,24 +21,19 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Superclass defining common properties and methods for creating/updating
  * types.
  */
-public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
+public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends AbstractCreateUpdateTagLayout<E> {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
-    protected String createTypeStr;
-    protected String updateTypeStr;
     protected TextField typeKey;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
@@ -55,11 +48,10 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
     @Override
     protected void createRequiredComponents() {
 
-        createTypeStr = i18n.get("label.create.type");
-        updateTypeStr = i18n.get("label.update.type");
+        createTagStr = i18n.get("label.create.type");
+        updateTagStr = i18n.get("label.update.type");
         comboLabel = new LabelBuilder().name(i18n.get("label.choose.type")).buildLabel();
         colorLabel = new LabelBuilder().name(i18n.get("label.choose.type.color")).buildLabel();
-
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
@@ -137,7 +129,7 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
     @Override
     protected void optionValueChanged(final ValueChangeEvent event) {
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
@@ -193,38 +185,6 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
         typeKey.addStyleName(SPUIDefinitions.TYPE_KEY);
     }
 
-    /**
-     * create option group with Create tag/Update tag based on permissions.
-     */
-    @Override
-    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        optiongroup = new OptionGroup("Select Action");
-        optiongroup.setId(SPUIComponentIdProvider.OPTION_GROUP);
-        optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optiongroup.addStyleName("custom-option-group");
-        optiongroup.setNullSelectionAllowed(false);
-
-        if (hasCreatePermission) {
-            optiongroup.addItem(createTypeStr);
-        }
-        if (hasUpdatePermission) {
-            optiongroup.addItem(updateTypeStr);
-        }
-        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
-    }
-
-    @Override
-    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
-
-        if (hasCreatePermission) {
-            optiongroup.select(createTypeStr);
-        }
-        if (hasUpdatePermission && !hasCreatePermission) {
-            optiongroup.select(updateTypeStr);
-        }
-    }
-
     protected void setColorPickerComponentsColor(final String color) {
 
         if (null == color) {
@@ -257,36 +217,26 @@ public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayo
         createDynamicStyleForComponents(tagName, typeKey, tagDesc, event.getColor().getCSS());
     }
 
-    protected Boolean checkIsDuplicate(final NamedEntity existingType) {
+    private boolean isDuplicateByKey() {
+
+        final E existingType = findEntityByKey();
 
         if (existingType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingType.getName() }));
-            return Boolean.TRUE;
+            uiNotification.displayValidationError(getDuplicateKeyErrorMessage(existingType));
+            return true;
         }
-        return Boolean.FALSE;
-    }
 
-    protected Boolean checkIsDuplicateByKey(final NamedEntity existingType) {
-
-        if (existingType != null) {
-            if (existingType instanceof DistributionSetType) {
-                uiNotification.displayValidationError(i18n.get("message.type.key.duplicate.check",
-                        new Object[] { ((DistributionSetType) existingType).getKey() }));
-                return Boolean.TRUE;
-            } else if (existingType instanceof SoftwareModuleType) {
-                uiNotification.displayValidationError(i18n.get("message.type.key.swmodule.duplicate.check",
-                        new Object[] { ((SoftwareModuleType) existingType).getKey() }));
-                return Boolean.TRUE;
-            }
-        }
-        return Boolean.FALSE;
+        return false;
     }
 
     @Override
-    protected void save(final ClickEvent event) {
-        // is implemented in the inherited class
+    protected boolean isDuplicate() {
+        return isDuplicateByKey() || super.isDuplicate();
     }
+
+    protected abstract E findEntityByKey();
+
+    protected abstract String getDuplicateKeyErrorMessage(E existingType);
 
     @Override
     protected void populateTagNameCombo() {

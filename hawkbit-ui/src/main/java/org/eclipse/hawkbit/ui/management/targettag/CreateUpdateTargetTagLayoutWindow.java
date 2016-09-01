@@ -26,7 +26,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Button.ClickEvent;
 
 /**
  *
@@ -34,7 +33,7 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout {
+public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 2446682350481560235L;
 
@@ -101,15 +100,18 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     }
 
     @Override
-    public void save(final ClickEvent event) {
-        final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
-        if (optiongroup.getValue().equals(createTagStr)) {
-            if (!checkIsDuplicate(existingTag)) {
-                createNewTag();
-            }
-        } else {
-            updateExistingTag(existingTag);
-        }
+    protected void updateEntity(final TargetTag entity) {
+        updateExistingTag(entity);
+    }
+
+    @Override
+    protected void createEntity() {
+        createNewTag();
+    }
+
+    @Override
+    protected TargetTag findEntityByName() {
+        return tagManagement.findTargetTag(tagName.getValue());
     }
 
     /**

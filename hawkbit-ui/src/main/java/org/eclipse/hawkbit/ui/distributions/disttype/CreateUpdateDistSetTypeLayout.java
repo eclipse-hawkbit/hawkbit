@@ -42,7 +42,6 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -56,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
+public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<DistributionSetType> {
 
     private static final long serialVersionUID = -5169398523815877767L;
     private static final String DIST_TYPE_NAME = "name";
@@ -456,7 +455,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
 
         super.optionValueChanged(event);
 
-        if (updateTypeStr.equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             selectedTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
             distTypeSelectLayout.setEnabled(false);
@@ -568,18 +567,30 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout {
     }
 
     @Override
-    protected void save(final ClickEvent event) {
-        final DistributionSetType existingDistTypeByKey = distributionSetManagement
-                .findDistributionSetTypeByKey(typeKey.getValue());
-        final DistributionSetType existingDistTypeByName = distributionSetManagement
-                .findDistributionSetTypeByName(tagName.getValue());
-        if (optiongroup.getValue().equals(createTypeStr)) {
-            if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
-                createNewDistributionSetType();
-            }
-        } else {
-            updateDistributionSetType(existingDistTypeByKey);
-        }
+    protected void updateEntity(final DistributionSetType entity) {
+        updateDistributionSetType(entity);
+
+    }
+
+    @Override
+    protected void createEntity() {
+        createNewDistributionSetType();
+
+    }
+
+    @Override
+    protected DistributionSetType findEntityByKey() {
+        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
+    }
+
+    @Override
+    protected DistributionSetType findEntityByName() {
+        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
+    }
+
+    @Override
+    protected String getDuplicateKeyErrorMessage(final DistributionSetType existingType) {
+        return i18n.get("message.type.key.duplicate.check", new Object[] { existingType.getKey() });
     }
 
     @Override

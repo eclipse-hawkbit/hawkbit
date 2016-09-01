@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.common.builder;
 
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
-import org.eclipse.hawkbit.ui.common.CustomCommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -26,13 +26,14 @@ public class WindowBuilder {
 
     private String caption;
     private Component content;
-    private ClickListener saveButtonClickListener;
     private ClickListener cancelButtonClickListener;
     private String helpLink;
     private AbstractLayout layout;
     private I18N i18n;
     private final String type;
     private String id;
+
+    private SaveDialogCloseListener saveDialogCloseListener;
 
     /**
      * Constructor.
@@ -42,6 +43,18 @@ public class WindowBuilder {
      */
     public WindowBuilder(final String type) {
         this.type = type;
+    }
+
+    /**
+     * Set the SaveDialogCloseListener.
+     * 
+     * @param saveDialogCloseListener
+     *            the saveDialogCloseListener
+     * @return the window builder
+     */
+    public WindowBuilder saveDialogCloseListener(final SaveDialogCloseListener saveDialogCloseListener) {
+        this.saveDialogCloseListener = saveDialogCloseListener;
+        return this;
     }
 
     /**
@@ -65,18 +78,6 @@ public class WindowBuilder {
      */
     public WindowBuilder content(final Component content) {
         this.content = content;
-        return this;
-    }
-
-    /**
-     * Set the saveButtonClickListener.
-     * 
-     * @param saveButtonClickListener
-     *            the saveButtonClickListener
-     * @return the window builder
-     */
-    public WindowBuilder saveButtonClickListener(final ClickListener saveButtonClickListener) {
-        this.saveButtonClickListener = saveButtonClickListener;
         return this;
     }
 
@@ -143,20 +144,9 @@ public class WindowBuilder {
      * @return the window.
      */
     public CommonDialogWindow buildCommonDialogWindow() {
-        CommonDialogWindow window;
-
-        if (SPUIDefinitions.CUSTOM_METADATA_WINDOW.equals(type)) {
-            window = new CustomCommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-                    cancelButtonClickListener, layout, i18n);
-            window.setDraggable(true);
-            window.setClosable(true);
-            return window;
-        }
-        window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener, cancelButtonClickListener,
-                layout, i18n);
-
+        final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveDialogCloseListener,
+                cancelButtonClickListener, layout, i18n);
         decorateWindow(window);
-
         return window;
 
     }
