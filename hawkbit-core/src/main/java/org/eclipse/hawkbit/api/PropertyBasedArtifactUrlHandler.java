@@ -30,9 +30,12 @@ import com.google.common.net.UrlEscapers;
 @Component
 @EnableConfigurationProperties(ArtifactUrlHandlerProperties.class)
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
+<<<<<<< HEAD
+=======
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyBasedArtifactUrlHandler.class);
 
+>>>>>>> branch 'fix_filename_encoding' of https://github.com/bsinno/hawkbit.git
     private static final String PROTOCOL_PLACEHOLDER = "protocol";
     private static final String TARGET_ID_PLACEHOLDER = "targetId";
     private static final String IP_PLACEHOLDER = "ip";
