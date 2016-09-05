@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -54,26 +55,30 @@ final class MgmtDistributionSetTypeMapper {
                 smsRest.getName(), smsRest.getDescription());
 
         // Add mandatory
-        smsRest.getMandatorymodules().stream().map(mand -> {
-            final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(mand.getId());
+        if (!CollectionUtils.isEmpty(smsRest.getMandatorymodules())) {
+            smsRest.getMandatorymodules().stream().map(mand -> {
+                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(mand.getId());
 
-            if (smType == null) {
-                throw new EntityNotFoundException("SoftwareModuleType with ID " + mand.getId() + " not found");
-            }
+                if (smType == null) {
+                    throw new EntityNotFoundException("SoftwareModuleType with ID " + mand.getId() + " not found");
+                }
 
-            return smType;
-        }).forEach(result::addMandatoryModuleType);
+                return smType;
+            }).forEach(result::addMandatoryModuleType);
+        }
 
         // Add optional
-        smsRest.getOptionalmodules().stream().map(opt -> {
-            final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(opt.getId());
+        if (!CollectionUtils.isEmpty(smsRest.getOptionalmodules())) {
+            smsRest.getOptionalmodules().stream().map(opt -> {
+                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(opt.getId());
 
-            if (smType == null) {
-                throw new EntityNotFoundException("SoftwareModuleType with ID " + opt.getId() + " not found");
-            }
+                if (smType == null) {
+                    throw new EntityNotFoundException("SoftwareModuleType with ID " + opt.getId() + " not found");
+                }
 
-            return smType;
-        }).forEach(result::addOptionalModuleType);
+                return smType;
+            }).forEach(result::addOptionalModuleType);
+        }
 
         return result;
     }

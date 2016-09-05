@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -632,6 +633,19 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         mvc.perform(post("/rest/v1/distributionsets").content("sdfjsdlkjfskdjf".getBytes())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
+
+        final DistributionSet missingName = testdataFactory.generateDistributionSet("missingName");
+        missingName.setName(null);
+        mvc.perform(
+                post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Lists.newArrayList(missingName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        final DistributionSet toLongName = testdataFactory.generateDistributionSet(RandomStringUtils.randomAscii(80));
+        mvc.perform(
+                post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Lists.newArrayList(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(sets))

@@ -22,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -50,9 +51,11 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
     private final Set<DistributionSetTypeElement> elements = new HashSet<>();
 
     @Column(name = "type_key", nullable = false, length = 64)
+    @Size(max = 64)
     private String key;
 
     @Column(name = "colour", nullable = true, length = 16)
+    @Size(max = 16)
     private String colour;
 
     @Column(name = "deleted")

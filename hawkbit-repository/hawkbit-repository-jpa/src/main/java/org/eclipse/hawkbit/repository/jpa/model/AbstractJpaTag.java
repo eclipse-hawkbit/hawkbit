@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.Tag;
 
@@ -26,6 +27,7 @@ public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements T
     private static final long serialVersionUID = 1L;
 
     @Column(name = "colour", nullable = true, length = 16)
+    @Size(max = 16)
     private String colour;
 
     protected AbstractJpaTag() {
