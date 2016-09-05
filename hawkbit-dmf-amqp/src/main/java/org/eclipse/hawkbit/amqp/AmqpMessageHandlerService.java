@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,6 +33,7 @@ import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -344,18 +346,24 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final List<Action> actions = controllerManagement.findActionByTargetAndActive(target);
-        if (actions.isEmpty()) {
+        final Optional<Action> action = controllerManagement.findOldestActionByTargetAndActive(target);
+        if (!action.isPresent()) {
             return;
         }
-        // action are ordered by ASC
-        final Action action = actions.get(0);
-        final DistributionSet distributionSet = action.getDistributionSet();
+
+        if (action.get().isCancelingOrCanceled()) {
+            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
+                    new CancelTargetAssignmentEvent(target.getOptLockRevision(), target.getTenant(),
+                            target.getControllerId(), action.get().getId(), target.getTargetInfo().getAddress()));
+            return;
+        }
+
+        final DistributionSet distributionSet = action.get().getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.getId(),
+                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.get().getId(),
                 softwareModuleList, target.getTargetInfo().getAddress(), targetSecurityToken));
 
     }

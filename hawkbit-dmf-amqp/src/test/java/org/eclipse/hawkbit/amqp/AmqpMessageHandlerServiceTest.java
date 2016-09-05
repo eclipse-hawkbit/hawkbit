@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -155,6 +156,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(null);
+        when(controllerManagementMock.findOldestActionByTargetAndActive(Matchers.any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
 
@@ -362,9 +364,8 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
-        final List<Action> actionList = new ArrayList<>();
-        actionList.add(action);
-        when(controllerManagementMock.findActionByTargetAndActive(Matchers.any())).thenReturn(actionList);
+        when(controllerManagementMock.findOldestActionByTargetAndActive(Matchers.any()))
+                .thenReturn(Optional.of(action));
 
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
         when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))

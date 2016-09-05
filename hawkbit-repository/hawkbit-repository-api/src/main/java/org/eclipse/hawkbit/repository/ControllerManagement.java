@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -112,6 +113,17 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     List<Action> findActionByTargetAndActive(@NotNull Target target);
+
+    /**
+     * Retrieves oldest {@link Action} that is active and assigned to a
+     * {@link Target}.
+     *
+     * @param target
+     *            the target to retrieve the actions from
+     * @return a list of actions assigned to given target which are active
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<Action> findOldestActionByTargetAndActive(@NotNull Target target);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy

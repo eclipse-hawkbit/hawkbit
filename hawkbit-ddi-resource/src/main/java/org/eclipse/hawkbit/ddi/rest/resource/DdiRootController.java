@@ -130,7 +130,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         return new ResponseEntity<>(
-                DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
+                DataConversionHelper.fromTarget(target, controllerManagement.findOldestActionByTargetAndActive(target),
                         controllerManagement.getPollingTime(), tenantAware),
                 HttpStatus.OK);
     }
