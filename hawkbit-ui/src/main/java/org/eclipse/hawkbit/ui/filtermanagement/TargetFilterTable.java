@@ -94,7 +94,7 @@ public class TargetFilterTable extends Table {
         populateTableData();
         setColumnCollapsingAllowed(true);
         setColumnProperties();
-        setId(SPUIComponentIdProvider.TAEGET_FILTER_TABLE_ID);
+        setId(SPUIComponentIdProvider.TARGET_FILTER_TABLE_ID);
         eventBus.subscribe(this);
     }
 

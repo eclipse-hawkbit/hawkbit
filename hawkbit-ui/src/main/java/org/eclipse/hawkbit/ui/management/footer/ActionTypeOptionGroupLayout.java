@@ -113,7 +113,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
                 .getItemComponent(ActionTypeOption.AUTO_FORCED);
         autoForceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         // setted Id for Time Forced radio button.
-        autoForceItem.setId("save.action.radio.timeforced");
+        autoForceItem.setId(SPUIComponentIdProvider.ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED);
         addComponent(autoForceItem);
         final Label autoForceLabel = new Label();
         autoForceLabel.setStyleName("statusIconPending");

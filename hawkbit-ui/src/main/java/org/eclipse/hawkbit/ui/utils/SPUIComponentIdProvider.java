@@ -314,6 +314,11 @@ public final class SPUIComponentIdProvider {
     public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
 
     /**
+     * ID for option group save timeforced
+     */
+    public static final String ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED = "save.action.radio.timeforced";
+
+    /**
      * Target filter wrapper id.
      */
     public static final String TARGET_FILTER_WRAPPER_ID = "target-drop-filter";
@@ -735,9 +740,19 @@ public final class SPUIComponentIdProvider {
     public static final String CUSTOM_TARGET_TAG_TABLE_ID = "custom.target.tag.tableId";
 
     /**
+     * ID for closing custom filter
+     */
+    public static final String CUSTOM_FILTER_CLOSE = "create.custom.filter.close.Id";
+
+    /**
+     * ID for custom filter query text
+     */
+    public static final String CUSTOM_FILTER_QUERY = "custom.query.text.Id";
+
+    /**
      * Target filter table id.
      */
-    public static final String TAEGET_FILTER_TABLE_ID = "target.query.filter.table.Id";
+    public static final String TARGET_FILTER_TABLE_ID = "target.query.filter.table.Id";
 
     /**
      * create or update target filter query - name label id.
@@ -962,17 +977,16 @@ public final class SPUIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
- /**
+    /**
      * Software module table - Manage metadata id.
      */
     public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
-    
-    
+
     /**
      * Metadata key id.
      */
     public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
-    
+
     /**
      * Metadata value id.
      */
@@ -981,12 +995,12 @@ public final class SPUIComponentIdProvider {
      * Metadata save id.
      */
     public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
-    
+
     /**
      * Metadata discard id.
      */
     public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
-    
+
     /**
      * Metadata add icon id.
      */
@@ -995,41 +1009,45 @@ public final class SPUIComponentIdProvider {
      * Metadata table id.
      */
     public static final String METDATA_TABLE_ID = "metadata.table.id";
-    
+
     /**
      * Distribution set table - Manage metadata id.
      */
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
-    
-   /**
+
+    /**
      * DistributionSet - Metadata button id.
      */
     public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
-    
+
     /**
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
-    
+
     /**
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
-    
+
     /**
      * Software module table details tab id in Distributions .
      */
     public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
-    
+
     /**
      * Software Module - Metadata button id.
      */
     public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
-    
+
     /**
      * Table multiselect for selecting DistType
      */
     public static final String SELECT_DIST_TYPE = "select-dist-type";
+    /**
+     * ID for download anonymous checkbox
+     */
+    public static final String DOWNLOAD_ANONYMOUS_CHECKBOX = "downloadanonymouscheckbox";
 
     /**
      * /* Private Constructor.
