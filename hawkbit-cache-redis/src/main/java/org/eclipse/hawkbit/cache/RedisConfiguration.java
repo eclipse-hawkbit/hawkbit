@@ -10,18 +10,15 @@ package org.eclipse.hawkbit.cache;
 
 import org.eclipse.hawkbit.cache.eventbus.EventDistributor;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 /**
  * The spring Redis configuration which is enabled by using the profile
@@ -31,6 +28,11 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 @Configuration
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisConfiguration.class);
+
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     @Autowired
     private RedisProperties redisProperties;
@@ -53,6 +55,7 @@ public class RedisConfiguration {
     @Bean
     @Primary
     public CacheManager cacheManager() {
+        LOGGER.info("cache manager " + redisConnectionFactory);
         return new TenantAwareCacheManager(directCacheManager(), tenantAware);
     }
 
@@ -62,6 +65,7 @@ public class RedisConfiguration {
      */
     @Bean(name = "directCacheManager")
     public CacheManager directCacheManager() {
+        LOGGER.info("directCacheManager  " + redisConnectionFactory);
         return new RedisCacheManager(redisTemplate());
     }
 
@@ -70,7 +74,9 @@ public class RedisConfiguration {
      *         on the {@link RedisProperties}
      */
     @Bean
-    public JedisConnectionFactory jedisConnectionFactory() {
+    @ConditionalOnMissingBean
+    public RedisConnectionFactory redisConnectionFactory() {
+        LOGGER.info("redisConnectionFactory " + redisConnectionFactory);
         final JedisConnectionFactory factory = new JedisConnectionFactory();
         factory.setHostName(redisProperties.getHost());
         factory.setPort(redisProperties.getPort());
@@ -83,9 +89,11 @@ public class RedisConfiguration {
      *         object serializers
      */
     @Bean
+    @ConditionalOnMissingBean
     public RedisTemplate<String, Object> redisTemplate() {
+        LOGGER.info("redisTemplate  " + redisConnectionFactory);
         final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(jedisConnectionFactory());
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new JdkSerializationRedisSerializer());
         redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
         redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
@@ -110,7 +118,7 @@ public class RedisConfiguration {
     @Bean
     public RedisMessageListenerContainer redisContainer() {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory());
+        container.setConnectionFactory(redisConnectionFactory);
         container.addMessageListener(messageListenerAdapter(), eventDistributor().getTopics());
         return container;
     }
