@@ -76,6 +76,11 @@ public final class SPUIComponentIdProvider {
     public static final String TARGET_TEXT_FIELD = "target.search.textfield";
 
     /**
+     * ID for target filter search
+     */
+    public static final String TARGET_FILTER_SEARCH_TEXT = "target.filter.search.text.Id";
+
+    /**
      * ID for add target filter icon
      */
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
@@ -184,6 +189,11 @@ public final class SPUIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
+
+    /**
+     * ID for distribution set tag icon
+     */
+    public static final String SHOW_DIST_TAG_ICON = "show.dist.tags.icon";
     /**
      * ID - soft.module.name.
      */

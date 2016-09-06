@@ -444,8 +444,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private SPUIButton createSearchResetIcon() {
-        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton("create.custom.filter.close.Id", "", "",
-                null, false, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.CUSTOM_FILTER_CLOSE, "", "", null, false, FontAwesome.TIMES,
+                SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> closeFilterLayout());
         return button;
     }

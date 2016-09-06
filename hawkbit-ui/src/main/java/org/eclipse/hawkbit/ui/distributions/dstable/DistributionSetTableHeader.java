@@ -100,7 +100,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getShowFilterButtonLayoutId() {
-        return "show.dist.tags.icon";
+        return SPUIComponentIdProvider.SHOW_DIST_TAG_ICON;
     }
 
     @Override
