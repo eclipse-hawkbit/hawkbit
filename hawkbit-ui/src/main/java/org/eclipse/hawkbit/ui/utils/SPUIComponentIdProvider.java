@@ -68,7 +68,7 @@ public final class SPUIComponentIdProvider {
     /**
      * ID-Targ.PIN.
      */
-    public static final String TARGET_PIN_ICON = "target.pin.icon";
+    public static final String TARGET_PIN_ICON = "target.pin.icon.";
 
     /**
      * Target search text id.

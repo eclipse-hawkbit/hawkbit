@@ -398,7 +398,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         pinBtn.setStyleName(pinBtnStyle.toString());
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + itemId);
         pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
