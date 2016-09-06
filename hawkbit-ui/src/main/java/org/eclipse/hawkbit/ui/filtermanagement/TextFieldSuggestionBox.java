@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.client.TextFieldSuggestionBoxServ
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 /**
  * Extension for the AutoCompleteTexfield.
@@ -62,6 +63,15 @@ public class TextFieldSuggestionBox extends AbstractExtension implements TextFie
         final ValidationOracleContext suggest = rsqlValidationOracle.suggest(text, cursor);
         updateValidationIcon(suggest, text);
         getRpcProxy(TextFieldSuggestionBoxClientRpc.class).showSuggestions(mapToDto(suggest.getSuggestionContext()));
+    }
+
+    @Override
+    public void executeQuery(final String text, final int cursor) {
+        if (!autoCompleteTextFieldComponent.isValidationError()) {
+            autoCompleteTextFieldComponent.showValidationInProgress();
+            autoCompleteTextFieldComponent.getExecutor()
+                    .execute(autoCompleteTextFieldComponent.new StatusCircledAsync(UI.getCurrent()));
+        }
     }
 
     private static SuggestionContextDto mapToDto(final SuggestionContext suggestionContext) {

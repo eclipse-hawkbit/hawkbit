@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -24,8 +25,9 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -85,7 +87,25 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
      */
     @PostConstruct
     public void postConstruct() {
+        eventBus.subscribe(this);
         new TextFieldSuggestionBox(rsqlValidationOracle, this).extend(queryTextField);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final CustomFilterUIEvent custFUIEvent) {
+        if (custFUIEvent == CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON) {
+            validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+            if (!isValidationError()) {
+                validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
+            } else {
+                validationIcon.setStyleName(SPUIStyleDefinitions.ERROR_ICON);
+            }
+        }
     }
 
     /**
@@ -181,7 +201,6 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
         textField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         textField.setImmediate(true);
         textField.setTextChangeTimeout(100);
-        textField.addShortcutListener(new EnterShortCutListener());
         return textField;
     }
 
@@ -214,27 +233,17 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
         }
     }
 
-    private final class EnterShortCutListener extends ShortcutListener {
+    /**
+     * Sets the spinner as progress indicator.
+     */
+    public void showValidationInProgress() {
+        validationIcon.setValue(null);
+        validationIcon.addStyleName("show-status-label");
+        validationIcon.setStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
+    }
 
-        private static final long serialVersionUID = 1L;
-
-        public EnterShortCutListener() {
-            super("Enter", KeyCode.ENTER, new int[0]);
-        }
-
-        @Override
-        public void handleAction(final Object sender, final Object target) {
-            if (!isValidationError()) {
-                showValidationInProgress();
-                executor.execute(new StatusCircledAsync(UI.getCurrent()));
-            }
-        }
-
-        private void showValidationInProgress() {
-            validationIcon.setValue(null);
-            validationIcon.addStyleName("show-status-label");
-            validationIcon.setStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
-        }
+    public Executor getExecutor() {
+        return executor;
     }
 
     /**

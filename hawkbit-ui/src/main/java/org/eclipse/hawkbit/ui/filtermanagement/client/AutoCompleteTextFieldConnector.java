@@ -82,6 +82,8 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             public void onKeyUp(final KeyUpEvent event) {
                 if (panel.isAttached()) {
                     handlePanelEventDelegation(event);
+                } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    rpc.executeQuery(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
                 } else {
                     doAskForSuggestion();
                 }
