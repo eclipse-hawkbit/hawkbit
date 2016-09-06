@@ -106,6 +106,7 @@
       <commons-collections4.version>4.1</commons-collections4.version>
       <json.version>20141113</json.version>
       <rsql-parser.version>2.0.0</rsql-parser.version>
+      <spring.redis>1.7.2.RELEASE</spring.redis>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -456,7 +457,7 @@
          <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>${spring.redis}</version>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
