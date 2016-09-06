@@ -86,6 +86,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     @PostConstruct
     public void postConstruct() {
         new TextFieldSuggestionBox(rsqlValidationOracle, this).extend(queryTextField);
+        queryTextField.addShortcutListener(new EnterShortCutListener());
     }
 
     /**
