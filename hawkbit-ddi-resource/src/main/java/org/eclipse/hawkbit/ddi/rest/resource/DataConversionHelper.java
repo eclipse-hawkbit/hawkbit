@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.hawkbit.api.APIType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
@@ -85,27 +85,20 @@ public final class DataConversionHelper {
         return files;
     }
 
-    private static DdiArtifact createArtifact(final String targetid, final ArtifactUrlHandler artifactUrlHandler,
+    private static DdiArtifact createArtifact(final String controllerId, final ArtifactUrlHandler artifactUrlHandler,
             final LocalArtifact artifact) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
         file.setFilename(artifact.getFilename());
         file.setSize(artifact.getSize());
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
-            final String linkHttp = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
-                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTP);
-            file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
-        }
+        artifactUrlHandler.getUrls(controllerId, artifact.getSoftwareModule().getId(), artifact.getFilename(),
+                artifact.getSha1Hash(), artifact.getId(), APIType.DDI).forEach(entry -> {
+                    file.add(new Link(entry.getRef()).withRel(entry.getRel()));
+                });
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
-            final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
-                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
-            file.add(new Link(linkHttps).withRel("download"));
-            file.add(new Link(linkHttps + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
-        }
         return file;
+
     }
 
     static DdiControllerBase fromTarget(final Target target, final List<Action> actions,

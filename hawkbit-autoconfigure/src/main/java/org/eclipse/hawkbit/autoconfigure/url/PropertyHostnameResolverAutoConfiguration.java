@@ -12,7 +12,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.hawkbit.HawkbitServerProperties;
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
+import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,7 +32,7 @@ import com.google.common.base.Throwables;
  *
  */
 @Configuration
-@EnableConfigurationProperties(HawkbitServerProperties.class)
+@EnableConfigurationProperties({ HawkbitServerProperties.class, ArtifactUrlHandlerProperties.class })
 public class PropertyHostnameResolverAutoConfiguration {
 
     @Autowired
@@ -41,16 +45,20 @@ public class PropertyHostnameResolverAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(value = HostnameResolver.class)
     public HostnameResolver hostnameResolver() {
-        return new HostnameResolver() {
-            @Override
-            public URL resolveHostname() {
-                try {
-                    return new URL(serverProperties.getUrl());
-                } catch (final MalformedURLException e) {
-                    throw Throwables.propagate(e);
-                }
+        return () -> {
+            try {
+                return new URL(serverProperties.getUrl());
+            } catch (final MalformedURLException e) {
+                throw Throwables.propagate(e);
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ArtifactUrlHandler.class)
+    public PropertyBasedArtifactUrlHandler propertyBasedArtifactUrlHandler(
+            final ArtifactUrlHandlerProperties urlHandlerProperties, final TenantAware tenantAware) {
+        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, tenantAware);
     }
 
 }

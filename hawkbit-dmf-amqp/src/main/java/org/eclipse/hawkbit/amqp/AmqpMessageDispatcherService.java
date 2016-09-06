@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.api.APIType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -155,23 +155,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private Artifact convertArtifact(final String targetId, final LocalArtifact localArtifact) {
         final Artifact artifact = new Artifact();
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.COAP)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.COAP,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.COAP));
-        }
-
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTP));
-        }
-
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTPS));
-        }
+        artifact.setUrls(artifactUrlHandler
+                .getUrls(targetId, localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
+                        localArtifact.getSha1Hash(), localArtifact.getId(), APIType.DMF)
+                .stream().collect(Collectors.toMap(e -> e.getProtocol(), e -> e.getRef())));
 
         artifact.setFilename(localArtifact.getFilename());
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));

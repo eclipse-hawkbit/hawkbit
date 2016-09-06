@@ -8,7 +8,13 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.google.common.collect.Lists;
 
 /**
  * Artifact handler properties class for holding all supported protocols with
@@ -17,81 +23,114 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
 
-    private final Http http = new Http();
-    private final Https https = new Https();
-    private final Coap coap = new Coap();
-
-    public Http getHttp() {
-        return http;
-    }
-
-    public Https getHttps() {
-        return https;
-    }
-
-    public Coap getCoap() {
-        return coap;
-    }
+    private final Map<String, UrlProtocol> protocols = new HashMap<>();
 
     /**
-     * @param protocol
-     *            the protocol schema to retrieve the properties.
-     * @return the properties to a protocol or {@code null} if protocol does not
-     *         have properties or protocol not supported
+     * @author kaizimmerm
+     *
      */
-    public ProtocolProperties getProperties(final String protocol) {
-        switch (protocol) {
-        case "http":
-            return getHttp();
-        case "https":
-            return getHttps();
-        case "coap":
-            return getCoap();
-        default:
-            return null;
-        }
-    }
-
     /**
-     * Object to hold the properties for the HTTP protocol.
+     * @author kaizimmerm
+     *
      */
-    public static class Http extends DefaultProtocolProperties {
+    public static class UrlProtocol {
+        /**
+         * Hypermedia rel value for this protocol.
+         */
+        private String rel = "download-http";
 
         /**
-         * Constructor.
+         * Hypermedia ref pattern for this protocol. Supported place holders are
+         * protocol,controllerId,ip,port,hostname,artifactFileName,artifactSHA1,
+         * artifactIdBase62,artifactId,tenant,softwareModuleId;
          */
-        public Http() {
-            setPattern(
-                    "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
-        }
-    }
-
-    /**
-     * Object to hold the properties for the HTTP protocol.
-     */
-    public static class Https extends DefaultProtocolProperties {
+        private String ref = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
         /**
-         * Constructor.
+         * Protocol name placeholder that can be used in ref pattern.
          */
-        public Https() {
-            setPattern(
-                    "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
-        }
-    }
-
-    /**
-     * Object to hold the properties for the HTTP protocol.
-     */
-    public static class Coap extends DefaultProtocolProperties {
+        private String name = "https";
 
         /**
-         * Constructor.
+         * Hostname placeholder that can be used in ref pattern.
          */
-        public Coap() {
-            setPattern("{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}");
-            setPort("5683");
+        private String hostname = "localhost";
+
+        /**
+         * IP address placeholder that can be used in ref pattern.
+         */
+        private String ip = "127.0.0.1";
+
+        /**
+         * Port placeholder that can be used in ref pattern.
+         */
+        private int port = 8080;
+
+        /**
+         * Support for the following hawkBit API.
+         */
+        private List<APIType> supports = Lists.newArrayList(APIType.DDI, APIType.DMF);
+
+        public String getRel() {
+            return rel;
         }
+
+        public void setRel(final String rel) {
+            this.rel = rel;
+        }
+
+        public String getRef() {
+            return ref;
+        }
+
+        public void setRef(final String ref) {
+            this.ref = ref;
+        }
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        public void setHostname(final String hostname) {
+            this.hostname = hostname;
+        }
+
+        public String getIp() {
+            return ip;
+        }
+
+        public void setIp(final String ip) {
+            this.ip = ip;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(final int port) {
+            this.port = port;
+        }
+
+        public List<APIType> getSupports() {
+            return supports;
+        }
+
+        public void setSupports(final List<APIType> supports) {
+            this.supports = supports;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+    }
+
+    public Map<String, UrlProtocol> getProtocols() {
+        return protocols;
     }
 
 }

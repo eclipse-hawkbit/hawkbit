@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.util.List;
+
 /**
  * Interface declaration of the {@link ArtifactUrlHandler} which generates the
  * URLs to specific artifacts.
@@ -24,20 +26,14 @@ public interface ArtifactUrlHandler {
      * @param softwareModuleId
      *            the softwareModuleId belonging to the artifact
      * @param filename
-     *            the filename of the artifact
+     *            the filename of the artifact *
      * @param sha1Hash
      *            the sha1Hash of the artifact
-     * @param protocol
-     *            the protocol the URL should be generated
+     * @param artifactid
+     *            the ID of the artifact
+     * 
      * @return an URL for the given artifact parameters in a given protocol
      */
-    String getUrl(String controllerId, final Long softwareModuleId, final String filename, final String sha1Hash,
-            final UrlProtocol protocol);
-
-    /**
-     * @param protocol
-     *            to check support for
-     * @return <code>true</code> of the handler supports given protocol.
-     */
-    boolean protocolSupported(UrlProtocol protocol);
+    List<ArtifactUrl> getUrls(String controllerId, Long softwareModuleId, String filename, String sha1Hash,
+            Long artifactid, APIType api);
 }
