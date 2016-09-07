@@ -148,7 +148,7 @@ public final class DashboardMenu extends CustomComponent {
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
             final Link docuLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
-                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
+                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
             docuLink.setDescription(i18n.get("link.documentation.name"));
             docuLink.setSizeFull();
             links.addComponent(docuLink);
@@ -158,7 +158,7 @@ public final class DashboardMenu extends CustomComponent {
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
-                    FontAwesome.USERS, "_blank", linkStyle, true);
+                    FontAwesome.USERS, "_blank", linkStyle);
             userManagementLink.setDescription(i18n.get("link.usermanagement.name"));
             links.addComponent(userManagementLink);
             userManagementLink.setSizeFull();
@@ -168,7 +168,7 @@ public final class DashboardMenu extends CustomComponent {
         if (!uiProperties.getLinks().getSupport().isEmpty()) {
             final Link supportLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_SUPPORT,
                     i18n.get("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
-                    linkStyle, true);
+                    linkStyle);
             supportLink.setDescription(i18n.get("link.support.name"));
             supportLink.setSizeFull();
             links.addComponent(supportLink);
