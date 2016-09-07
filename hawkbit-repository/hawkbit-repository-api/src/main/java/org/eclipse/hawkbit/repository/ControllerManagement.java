@@ -112,7 +112,7 @@ public interface ControllerManagement {
      * @return a list of actions assigned to given target which are active
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> findActionByTargetAndActive(@NotNull Target target);
+    List<Action> findActiveActionByTarget(@NotNull Target target);
 
     /**
      * Retrieves oldest {@link Action} that is active and assigned to a
@@ -123,7 +123,7 @@ public interface ControllerManagement {
      * @return a list of actions assigned to given target which are active
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findOldestActionByTargetAndActive(@NotNull Target target);
+    Optional<Action> findOldestActiveActionByTarget(@NotNull Target target);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy

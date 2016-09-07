@@ -346,7 +346,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> action = controllerManagement.findOldestActionByTargetAndActive(target);
+        final Optional<Action> action = controllerManagement.findOldestActiveActionByTarget(target);
         if (!action.isPresent()) {
             return;
         }

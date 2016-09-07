@@ -157,12 +157,12 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<Action> findActionByTargetAndActive(final Target target) {
+    public List<Action> findActiveActionByTarget(final Target target) {
         return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 
     @Override
-    public Optional<Action> findOldestActionByTargetAndActive(final Target target) {
+    public Optional<Action> findOldestActiveActionByTarget(final Target target) {
         return actionRepository.findFirstByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 

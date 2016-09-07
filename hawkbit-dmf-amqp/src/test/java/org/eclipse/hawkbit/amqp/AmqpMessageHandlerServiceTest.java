@@ -156,7 +156,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(null);
-        when(controllerManagementMock.findOldestActionByTargetAndActive(Matchers.any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
 
@@ -364,7 +364,7 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActionByTargetAndActive(Matchers.any()))
+        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any()))
                 .thenReturn(Optional.of(action));
 
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
