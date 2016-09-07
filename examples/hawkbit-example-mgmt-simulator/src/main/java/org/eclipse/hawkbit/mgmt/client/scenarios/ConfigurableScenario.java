@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties;
@@ -159,12 +158,11 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
-        final byte[] artifact = generateArtifact(scenario);
 
         distributionSetResource.createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName())
                 .type("os_app").version("1.0.").buildAsList(scenario.getDistributionSets())).getBody()
                 .forEach(dsSet -> {
-                    final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
+                    final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet);
 
                     final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
                     modules.forEach(module -> assign.id(module.getModuleId()));
@@ -174,8 +172,7 @@ public class ConfigurableScenario {
         LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
-    private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
-            final byte[] artifact) {
+    private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet) {
         final List<MgmtSoftwareModule> modules = softwareModuleResource
                 .createSoftwareModules(new SoftwareModuleBuilder().name(scenario.getSmFwName() + "-os")
                         .version(dsSet.getVersion()).type("os").build())
@@ -186,21 +183,6 @@ public class ConfigurableScenario {
                 .getBody());
 
         return modules;
-    }
-
-    private static byte[] generateArtifact(final Scenario scenario) {
-
-        // Exception squid:S2245 - not used for cryptographic function
-        @SuppressWarnings("squid:S2245")
-        final Random random = new Random();
-
-        // create byte array
-        final byte[] nbyte = new byte[parseSize(scenario.getArtifactSize())];
-
-        // put the next byte in the array
-        random.nextBytes(nbyte);
-
-        return nbyte;
     }
 
     private void createTargets(final Scenario scenario) {
