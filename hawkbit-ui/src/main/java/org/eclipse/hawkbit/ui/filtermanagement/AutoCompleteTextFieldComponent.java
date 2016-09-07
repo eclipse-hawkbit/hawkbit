@@ -89,6 +89,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     public void postConstruct() {
         eventBus.subscribe(this);
         new TextFieldSuggestionBox(rsqlValidationOracle, this).extend(queryTextField);
+<<<<<<< HEAD
     }
 
     @PreDestroy
@@ -106,6 +107,9 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
                 validationIcon.setStyleName(SPUIStyleDefinitions.ERROR_ICON);
             }
         }
+=======
+        queryTextField.addShortcutListener(new EnterShortCutListener());
+>>>>>>> branch 'feature_rsql_parser_suggestion' of https://github.com/bsinno/hawkbit/
     }
 
     /**
