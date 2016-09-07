@@ -147,7 +147,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distNameTextField = createTextField("textfield.name", SPUIComponentIdProvider.DIST_ADD_NAME);
         distVersionTextField = createTextField("textfield.version", SPUIComponentIdProvider.DIST_ADD_VERSION);
 
-        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
+        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", null, "",
                 false, "", i18n.get("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);

@@ -183,8 +183,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new ActionPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(Action.class, descriptorEvent)));
+        EventBusHolder.getInstance().getEventBus()
+                .post(new ActionPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
     }
 
     @Override

@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
@@ -84,7 +83,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private SpPermissionChecker permissionChecker;
 
     @Autowired
-    private UINotification notification;
+    private UINotification uiNotification;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -100,9 +99,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
 
     private String notAllowedMsg;
 
@@ -394,7 +390,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distList,
                 distTagName);
 
-        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
+        uiNotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
         if (result.getAssigned() >= 1 && managementUIState.getDistributionTableFilters().isNoTagSelected()) {
             refreshFilter();
         }
@@ -414,7 +410,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                     .add(new TargetIdName(target.getId(), target.getControllerId(), target.getName())));
             assignTargetToDs(getItem(distItemId), targetDetailsList);
         } else {
-            notification.displaySuccess(i18n.get("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+            uiNotification
+                    .displaySuccess(i18n.get("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
         }
     }
 
@@ -461,13 +458,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         } else if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             return !isNoTagButton(tagData, SPUIDefinitions.TARGET_TAG_BUTTON);
         }
-        notification.displayValidationError(notAllowedMsg);
+        uiNotification.displayValidationError(notAllowedMsg);
         return false;
     }
 
     private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
-            notification.displayValidationError(
+            uiNotification.displayValidationError(
                     i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
             return true;
         }
@@ -505,7 +502,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             eventBus.publish(this, ManagementUIEvent.UPDATE_COUNT);
         }
         if (null != message) {
-            notification.displayValidationError(message);
+            uiNotification.displayValidationError(message);
         }
     }
 
