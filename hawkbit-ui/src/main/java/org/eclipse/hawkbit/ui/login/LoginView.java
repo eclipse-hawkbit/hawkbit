@@ -266,14 +266,14 @@ public class LoginView extends VerticalLayout implements View {
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
             final Link docuLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
-                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
+                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
             links.addComponent(docuLink);
             docuLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
         if (!uiProperties.getDemo().getUser().isEmpty()) {
             final Link demoLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DEMO,
-                    i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
+                    i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
             links.addComponent(demoLink);
             demoLink.addStyleName(ValoTheme.LINK_SMALL);
         }
@@ -281,7 +281,7 @@ public class LoginView extends VerticalLayout implements View {
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
             final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_REQUESTACCOUNT,
                     i18n.get("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
-                    FontAwesome.SHOPPING_CART, "", linkStyle, true);
+                    FontAwesome.SHOPPING_CART, "", linkStyle);
             links.addComponent(requestAccountLink);
             requestAccountLink.addStyleName(ValoTheme.LINK_SMALL);
         }
@@ -289,7 +289,7 @@ public class LoginView extends VerticalLayout implements View {
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
-                    FontAwesome.USERS, "_blank", linkStyle, true);
+                    FontAwesome.USERS, "_blank", linkStyle);
             links.addComponent(userManagementLink);
             userManagementLink.addStyleName(ValoTheme.LINK_SMALL);
         }

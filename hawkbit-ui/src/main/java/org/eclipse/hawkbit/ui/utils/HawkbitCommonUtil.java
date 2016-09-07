@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -37,10 +35,8 @@ import org.vaadin.alump.distributionbar.DistributionBar;
 import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -175,58 +171,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get target label Id.
-     * 
-     * @param controllerId
-     *            as String
-     * @return String as label name
-     */
-    public static String getTargetLabelId(final String controllerId) {
-        return new StringBuilder("target").append('.').append(controllerId).toString();
-    }
-
-    /**
-     * Get distribution table cell id.
-     * 
-     * @param name
-     *            distribution name
-     * @param version
-     *            distribution version
-     * @return String distribution label id
-     */
-    public static String getDistributionLabelId(final String name, final String version) {
-        return new StringBuilder("dist").append('.').append(name).append('.').append(version).toString();
-    }
-
-    /**
-     * Get software module label id.
-     * 
-     * @param name
-     *            software module name
-     * @param version
-     *            software module version
-     * @return String software module label id
-     */
-    public static String getSwModuleLabelId(final String name, final String version) {
-        return new StringBuilder("swModule").append('.').append(name).append('.').append(version).toString();
-    }
-
-    /**
-     * Get label with software module name and description.
-     * 
-     * @param name
-     *            software module name
-     * @param desc
-     *            software module description
-     * @return String
-     */
-    public static String getSwModuleNameDescLabel(final String name, final String desc) {
-        return new StringBuilder().append(
-                DIV_DESCRIPTION_START + getBoldHTMLText(getFormattedName(name)) + "<br>" + getFormattedName(desc))
-                .append(DIV_DESCRIPTION_END).toString();
-    }
-
-    /**
      * Get Label for Artifact Details.
      * 
      * @param name
@@ -295,31 +239,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Find extra height required to increase by all the components to utilize
-     * the full height of browser for the responsive UI.
-     * 
-     * @param newBrowserHeight
-     *            as current browser height.
-     * @return extra height required to increase.
-     */
-    public static float findRequiredExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT
-                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT) : 0;
-    }
-
-    /**
-     * Find required extra height of software module.
-     * 
-     * @param newBrowserHeight
-     *            new browser height
-     * @return float heigth of software module table
-     */
-    public static float findRequiredSwModuleExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT
-                ? (newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT) : 0;
-    }
-
-    /**
      * Find required extra width of software module.
      *
      * @param newBrowserWidth
@@ -361,94 +280,6 @@ public final class HawkbitCommonUtil {
             return SPUIDefinitions.MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT;
         }
         return extraWidth + minPopupHeight;
-    }
-
-    /**
-     * Find extra width required to increase by all the components to utilize
-     * the full width of browser for the responsive UI.
-     *
-     * @param newBrowserWidth
-     *            as current browser width.
-     * @return extra width required to be increased.
-     */
-    public static float findRequiredExtraWidth(final float newBrowserWidth) {
-        float width = 0;
-        if (newBrowserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-            width = SPUIDefinitions.REQ_MIN_BROWSER_WIDTH - newBrowserWidth;
-        }
-        return width;
-    }
-
-    /**
-     * Find extra width required to increase by all the components to utilize
-     * the full width of browser for the responsive UI.
-     *
-     * @param newBrowserWidth
-     *            as current browser width.
-     * @return extra width required to be increased.
-     */
-    public static float findExtraWidth(final float newBrowserWidth) {
-        return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH
-                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) : 0;
-    }
-
-    /**
-     * Get target table width based on screen width.
-     * 
-     * @param newBrowserWidth
-     *            new browser width.
-     * @param minTargetTableLength
-     *            minimum target table width.
-     * @param minDistTableLength
-     *            minimum distribution table width.
-     * @return float as table width
-     */
-    public static float getTargetTableWidth(final float newBrowserWidth, final float minTargetTableLength,
-            final float minDistTableLength) {
-        float width = 0;
-        final float requiredExtraWidth = findRequiredExtraWidth(newBrowserWidth);
-        // adjusting the target table width if distribution table width has
-        // reached the maximum width
-        if (requiredExtraWidth + minDistTableLength > SPUIDefinitions.MAX_DIST_TABLE_WIDTH) {
-            width = requiredExtraWidth + minDistTableLength - SPUIDefinitions.MAX_DIST_TABLE_WIDTH;
-        }
-        if (width + minTargetTableLength + requiredExtraWidth > SPUIDefinitions.MAX_TARGET_TABLE_WIDTH) {
-            return SPUIDefinitions.MAX_TARGET_TABLE_WIDTH;
-        }
-        return width + minTargetTableLength + requiredExtraWidth;
-    }
-
-    /**
-     * Get distribution table width based on screen width.
-     *
-     * @param newBrowserWidth
-     *            new browser width.
-     * @param minTableWidth
-     *            min distribution table width.
-     * @return float as distribution table width.
-     */
-    public static float getDistTableWidth(final float newBrowserWidth, final float minTableWidth) {
-        final float requiredExtraWidth = findExtraWidth(newBrowserWidth);
-        float expectedDistWidth = minTableWidth;
-        if (requiredExtraWidth > 0) {
-            expectedDistWidth = expectedDistWidth + Math.round(requiredExtraWidth * 0.5F);
-        }
-        return expectedDistWidth;
-    }
-
-    /**
-     * Get software module table width.
-     *
-     * @param newBrowserWidth
-     * @param minTableWidth
-     * @return
-     */
-    public static float getSoftwareModuleTableWidth(final float newBrowserWidth, final float minTableWidth) {
-        final float requiredExtraWidth = findRequiredExtraWidth(newBrowserWidth);
-        if (requiredExtraWidth + minTableWidth > SPUIDefinitions.MAX_UPLOAD_SW_MODULE_TABLE_WIDTH) {
-            return SPUIDefinitions.MAX_UPLOAD_SW_MODULE_TABLE_WIDTH;
-        }
-        return requiredExtraWidth + minTableWidth;
     }
 
     /**
@@ -515,55 +346,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Set height of artifact details table and drop area layout.
-     *
-     * @param dropLayout
-     *            drop area layout
-     * @param artifactDetailsLayout
-     *            artifact details table
-     * @param newHeight
-     *            new browser height
-     */
-    public static void setArtifactDetailsLayoutHeight(final Component artifactDetailsLayout, final float newHeight) {
-        final float extraBrowserHeight = HawkbitCommonUtil.findRequiredSwModuleExtraHeight(newHeight);
-        final float tableHeight = SPUIDefinitions.MIN_UPLOAD_ARTIFACT_TABLE_HEIGHT + extraBrowserHeight;
-        artifactDetailsLayout.setHeight(tableHeight, Unit.PIXELS);
-    }
-
-    /**
-     * Set height of artifact details table and drop area layout.
-     *
-     * @param artifactDetailsLayout
-     *            artifact details table
-     * @param newHeight
-     *            new browser height
-     */
-    public static void setManageDistArtifactDetailsLayoutHeight(final Component artifactDetailsLayout,
-            final float newHeight) {
-        final float tableHeight = SPUIDefinitions.MIN_TARGET_DIST_TABLE_HEIGHT
-                + HawkbitCommonUtil.findRequiredExtraHeight(newHeight) + 62;
-        artifactDetailsLayout.setHeight(tableHeight, Unit.PIXELS);
-    }
-
-    /**
-     * Duplicate check - Unique Key.
-     * 
-     * @param name
-     *            as string
-     * @param version
-     *            as string
-     * @param type
-     *            key as string
-     * @return boolean as flag
-     */
-    public static boolean isDuplicate(final String name, final String version, final String type) {
-        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type));
-        return swModule != null;
-    }
-
-    /**
      * Add new base software module.
      *
      * @param bsname
@@ -591,15 +373,6 @@ public final class HawkbitCommonUtil {
         newSWModule.setDescription(description);
         newSWModule = swMgmtService.createSoftwareModule(newSWModule);
         return newSWModule;
-    }
-
-    public static void setTargetVisibleColumns(final Table targTable) {
-        final List<Object> targColumnIds = new ArrayList<>();
-        final List<String> targColumnLabels = new ArrayList<>();
-        targColumnIds.add(SPUIDefinitions.TARGET_TABLE_VISIBILE_COLUMN_NAME);
-        targColumnLabels.add(SPUIDefinitions.TARGET_TABLE_VISIBILE_COLUMN_NAME);
-        targTable.setVisibleColumns(targColumnIds.toArray());
-        targTable.setColumnHeaders(targColumnLabels.toArray(new String[0]));
     }
 
     /**

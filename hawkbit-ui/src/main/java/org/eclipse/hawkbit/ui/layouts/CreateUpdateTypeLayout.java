@@ -54,8 +54,8 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         colorLabel = new LabelBuilder().name(i18n.get("label.choose.type.color")).buildLabel();
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
-                "", i18n.get("label.combobox.type"));
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", null, null, false, "",
+                i18n.get("label.combobox.type"));
         tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
