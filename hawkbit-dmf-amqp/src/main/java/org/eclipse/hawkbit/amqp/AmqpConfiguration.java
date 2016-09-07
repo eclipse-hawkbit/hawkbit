@@ -53,7 +53,7 @@ import org.springframework.util.ErrorHandler;
  *
  */
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
-@ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled")
+@ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
 public class AmqpConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
@@ -69,7 +69,7 @@ public class AmqpConfiguration {
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
-    @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled")
+    @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
     protected static class RabbitConnectionFactoryCreator {
 
         @Autowired
@@ -290,6 +290,7 @@ public class AmqpConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
     public AmqpControllerAuthentication amqpControllerAuthentication(final ControllerManagement controllerManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
             final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
@@ -298,6 +299,7 @@ public class AmqpConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler);
