@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.io.Serializable;
+
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -40,7 +42,8 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    <T> TenantConfigurationValue<T> addOrUpdateConfiguration(TenantConfigurationKey configurationKey, T value);
+    <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
+            TenantConfigurationKey configurationKey, T value);
 
     /**
      * Build the tenant configuration by the given key
@@ -55,8 +58,8 @@ public interface TenantConfigurationManagement {
      *         or returns the tenant configuration value
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    <T> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(TenantConfigurationKey configurationKey,
-            Class<T> propertyType, TenantConfiguration tenantConfiguration);
+    <T extends Serializable> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
+            TenantConfigurationKey configurationKey, Class<T> propertyType, TenantConfiguration tenantConfiguration);
 
     /**
      * Deletes a specific configuration for the current tenant. Does nothing in
@@ -87,7 +90,7 @@ public interface TenantConfigurationManagement {
      *             {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    <T> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey);
+    <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey);
 
     /**
      * Retrieves a configuration value from the e.g. tenant overwritten
@@ -113,7 +116,7 @@ public interface TenantConfigurationManagement {
      *             {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    <T> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey,
+    <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(TenantConfigurationKey configurationKey,
             Class<T> propertyType);
 
     /**

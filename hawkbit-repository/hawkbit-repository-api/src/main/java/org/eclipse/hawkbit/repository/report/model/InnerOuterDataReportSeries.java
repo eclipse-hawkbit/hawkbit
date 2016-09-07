@@ -19,8 +19,9 @@ import java.io.Serializable;
  * @param <T>
  *            The type parameter for the report series data
  */
-public class InnerOuterDataReportSeries<T extends Serializable> {
+public class InnerOuterDataReportSeries<T extends Serializable> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final DataReportSeries<T> innerSeries;
     private final DataReportSeries<T> outerSeries;
 

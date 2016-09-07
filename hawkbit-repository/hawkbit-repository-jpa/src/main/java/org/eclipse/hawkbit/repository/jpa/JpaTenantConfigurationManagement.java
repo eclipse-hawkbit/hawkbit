@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.io.Serializable;
+
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
@@ -46,8 +48,8 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
 
     @Override
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
-            final Class<T> propertyType) {
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
+            final TenantConfigurationKey configurationKey, final Class<T> propertyType) {
         validateTenantConfigurationDataType(configurationKey, propertyType);
 
         final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
@@ -75,7 +77,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
     }
 
     @Override
-    public <T> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
+    public <T extends Serializable> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
             final TenantConfigurationKey configurationKey, final Class<T> propertyType,
             final TenantConfiguration tenantConfiguration) {
         if (tenantConfiguration != null) {
@@ -95,7 +97,8 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
     }
 
     @Override
-    public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey) {
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
+            final TenantConfigurationKey configurationKey) {
         return getConfigurationValue(configurationKey, configurationKey.getDataType());
     }
 
@@ -122,8 +125,8 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public <T> TenantConfigurationValue<T> addOrUpdateConfiguration(final TenantConfigurationKey configurationKey,
-            final T value) {
+    public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
+            final TenantConfigurationKey configurationKey, final T value) {
 
         if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
             throw new TenantConfigurationValidatorException(String.format(
