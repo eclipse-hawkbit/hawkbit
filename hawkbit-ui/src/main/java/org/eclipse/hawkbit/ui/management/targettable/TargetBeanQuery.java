@@ -51,6 +51,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
     private transient Collection<TargetUpdateStatus> status = null;
+    private transient Boolean overdueState = null;
     private String[] targetTags = null;
     private Long distributionId = null;
     private String searchText = null;
@@ -80,6 +81,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         if (isNotNullOrEmpty(queryConfig)) {
             status = (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS);
+            overdueState = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE);
             targetTags = (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
             distributionId = (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION);
@@ -113,7 +115,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
-                    distributionId, status, searchText, noTagClicked, targetTags);
+                    distributionId, status, overdueState, searchText, noTagClicked, targetTags);
         } else if (null != targetFilterQuery) {
             targetBeans = getTargetManagement().findTargetsAll(targetFilterQuery,
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
@@ -123,7 +125,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         } else {
             targetBeans = getTargetManagement().findTargetByFilters(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort), status,
-                    searchText, distributionId, noTagClicked, targetTags);
+                    overdueState, searchText, distributionId, noTagClicked, targetTags);
         }
         for (final Target targ : targetBeans) {
             final ProxyTarget prxyTarget = new ProxyTarget();
@@ -169,6 +171,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return true;
     }
 
+    private Boolean isOverdueFilterEnabled() {
+        if (Boolean.TRUE.equals(overdueState)) {
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
     @Override
     protected void saveBeans(final List<ProxyTarget> addedTargets, final List<ProxyTarget> modifiedTargets,
             final List<ProxyTarget> removedTargets) {
@@ -176,7 +185,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     }
 
     private Boolean anyFilterSelected() {
-        if (status == null && distributionId == null && Strings.isNullOrEmpty(searchText) && !isTagSelected()) {
+        if (status == null && distributionId == null && Strings.isNullOrEmpty(searchText) && !isTagSelected()
+                && !isOverdueFilterEnabled()) {
             return false;
         }
         return true;
@@ -191,8 +201,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         } else if (!anyFilterSelected()) {
             size = totSize;
         } else {
-            size = getTargetManagement().countTargetByFilters(status, searchText, distributionId, noTagClicked,
-                    targetTags);
+            size = getTargetManagement().countTargetByFilters(status, overdueState, searchText, distributionId,
+                    noTagClicked, targetTags);
         }
 
         final ManagementUIState tmpManagementUIState = getManagementUIState();

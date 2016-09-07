@@ -369,6 +369,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .getClickedStatusTargetTags();
             queryConfig.put(SPUIDefinitions.FILTER_BY_STATUS, statusList);
         }
+        if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
+            queryConfig.put(SPUIDefinitions.FILTER_BY_OVERDUE_STATE, Boolean.TRUE);
+        }
         return queryConfig;
     }
 
@@ -873,6 +876,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         managementUIState.setTargetsCountAll(totalTargetsCount);
 
         Collection<TargetUpdateStatus> status = null;
+        Boolean overdueState = null;
         String[] targetTags = null;
         Long distributionId = null;
         String searchText = null;
@@ -883,6 +887,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
         if (isFilteredByStatus()) {
             status = managementUIState.getTargetTableFilters().getClickedStatusTargetTags();
+        }
+        if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
+            overdueState = managementUIState.getTargetTableFilters().isOverdueFilterEnabled();
         }
         if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
             distributionId = managementUIState.getTargetTableFilters().getDistributionSet().get().getId();
@@ -895,8 +902,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
         }
 
-        final long size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
-                noTagClicked, pinnedDistId);
+        final long size = getTargetsCountWithFilter(totalTargetsCount, status, overdueState, targetTags, distributionId,
+                searchText, noTagClicked, pinnedDistId);
 
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
@@ -904,8 +911,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private long getTargetsCountWithFilter(final long totalTargetsCount, final Collection<TargetUpdateStatus> status,
-            final String[] targetTags, final Long distributionId, final String searchText, final Boolean noTagClicked,
-            final Long pinnedDistId) {
+            final Boolean overdueState, final String[] targetTags, final Long distributionId, final String searchText,
+            final Boolean noTagClicked, final Long pinnedDistId) {
         final long size;
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
             size = targetManagement.countTargetByTargetFilterQuery(
@@ -913,7 +920,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         } else if (!anyFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countTargetByFilters(status, searchText, distributionId, noTagClicked, targetTags);
+            size = targetManagement.countTargetByFilters(status, overdueState, searchText, distributionId, noTagClicked,
+                    targetTags);
         }
         return size;
     }

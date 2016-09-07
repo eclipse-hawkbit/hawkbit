@@ -48,11 +48,16 @@ public class VirtualPropertyMakroResolver extends StrLookup<String> {
         if ("now_ts".equals(rhs.toLowerCase())) {
             resolved = String.valueOf(Instant.now().toEpochMilli());
         } else if ("overdue_ts".equals(rhs.toLowerCase())) {
-            resolved = String.valueOf(Instant.now().toEpochMilli() //
-                    - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis() //
-                    - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis());
+            resolved = String.valueOf(calculateOverdueTimestamp());
         }
         return resolved;
+    }
+
+    public long calculateOverdueTimestamp() {
+        long overdueTs = Instant.now().toEpochMilli() //
+                - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis() //
+                - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
+        return overdueTs;
     }
 
     private Duration getDurationForKey(TenantConfigurationKey key) {

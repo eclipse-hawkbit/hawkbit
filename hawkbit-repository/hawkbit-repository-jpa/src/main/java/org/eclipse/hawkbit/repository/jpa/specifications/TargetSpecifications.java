@@ -86,7 +86,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by "equal to given
      * {@link TargetUpdateStatus}".
-     * 
+     *
      * @param updateStatus
      *            to be filtered on
      * @param fetch
@@ -111,9 +111,33 @@ public final class TargetSpecifications {
     }
 
     /**
+     * {@link Specification} for retrieving {@link Target}s that are overdue. A
+     * target is overdue if it did not respond during the configured
+     * intervals:<br>
+     * <em>poll_itvl + overdue_itvl</em>
+     *
+     * @param overdueTimestamp
+     *            the calculated timestamp to compare with the last respond of a
+     *            target (lastTargetQuery).<br>
+     *            The <code>overdueTimestamp</code> has to be calculated with
+     *            the following expression:<br>
+     *            <em>overdueTimestamp = nowTimestamp - poll_itvl -
+     *            overdue_itvl</em>
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
+        return (targetRoot, query, cb) -> {
+            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
+            return cb.lessThanOrEqualTo(
+                    targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), overdueTimestamp);
+        };
+    }
+
+    /**
      * {@link Specification} for retrieving {@link Target}s by
      * "like controllerId or like description or like ip address".
-     * 
+     *
      * @param searchText
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
@@ -129,7 +153,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by
      * "like controllerId".
-     * 
+     *
      * @param distributionId
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
@@ -166,7 +190,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by
      * "has no tag names"or "has at least on of the given tag names".
-     * 
+     *
      * @param tagNames
      *            to be filtered on
      * @param selectTargetWithNoTag
@@ -199,7 +223,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by assigned
      * distribution set.
-     * 
+     *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}
@@ -213,7 +237,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by assigned
      * distribution set.
-     * 
+     *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}

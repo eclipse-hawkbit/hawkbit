@@ -599,7 +599,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.toggleTagAssignment(tagABCTargets, tagB);
         targetManagement.toggleTagAssignment(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "X"))
+        assertThat(targetManagement.countTargetByFilters(null, null, null, null, Boolean.FALSE, "X"))
                 .as("Target count is wrong").isEqualTo(0);
 
         // search for targets with tag tagA
@@ -629,11 +629,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "A"))
+        assertThat(targetManagement.countTargetByFilters(null, null, null, null, Boolean.FALSE, "A"))
                 .as("Target count is wrong").isEqualTo(targetWithTagA.size());
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "B"))
+        assertThat(targetManagement.countTargetByFilters(null, null, null, null, Boolean.FALSE, "B"))
                 .as("Target count is wrong").isEqualTo(targetWithTagB.size());
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "C"))
+        assertThat(targetManagement.countTargetByFilters(null, null, null, null, Boolean.FALSE, "C"))
                 .as("Target count is wrong").isEqualTo(targetWithTagC.size());
     }
 
@@ -750,7 +750,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final String[] tagNames = null;
         final List<Target> targetsListWithNoTag = targetManagement
-                .findTargetByFilters(new PageRequest(0, 500), null, null, null, Boolean.TRUE, tagNames).getContent();
+                .findTargetByFilters(new PageRequest(0, 500), null, null, null, null, Boolean.TRUE, tagNames)
+                .getContent();
 
         assertThat(50).as("Total targets").isEqualTo(targetManagement.findAllTargetIds().size());
         assertThat(25).as("Targets with no tag").isEqualTo(targetsListWithNoTag.size());

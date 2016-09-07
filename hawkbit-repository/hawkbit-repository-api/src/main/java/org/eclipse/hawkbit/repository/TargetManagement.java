@@ -67,7 +67,11 @@ public interface TargetManagement {
      * Count {@link Target}s for all the given filter parameters.
      *
      * @param status
-     *            find targets having on of these {@link TargetUpdateStatus}s.
+     *            find targets having one of these {@link TargetUpdateStatus}s.
+     *            Set to <code>null</code> in case this is not required.
+     * @param overdueState
+     *            find targets that are overdue (targets that did not respond
+     *            during the configured intervals: poll_itvl + overdue_itvl).
      *            Set to <code>null</code> in case this is not required.
      * @param searchText
      *            to find targets having the text anywhere in name or
@@ -86,7 +90,7 @@ public interface TargetManagement {
      * @return the found number {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countTargetByFilters(Collection<TargetUpdateStatus> status, String searchText,
+    Long countTargetByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
             Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
 
     /**
@@ -203,10 +207,12 @@ public interface TargetManagement {
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
-     * 
      * @param filterByStatus
      *            find targets having this {@link TargetUpdateStatus}s. Set to
      *            <code>null</code> in case this is not required.
+     * @param overdueState
+     *            find targets that are overdue (targets that did not respond
+     *            during the configured intervals: poll_itvl + overdue_itvl).
      * @param filterBySearchText
      *            to find targets having the text anywhere in name or
      *            description. Set <code>null</code> in case this is not
@@ -225,7 +231,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<TargetIdName> findAllTargetIdsByFilters(@NotNull Pageable pageRequest,
-            Collection<TargetUpdateStatus> filterByStatus, String filterBySearchText,
+            Collection<TargetUpdateStatus> filterByStatus, Boolean overdueState, String filterBySearchText,
             Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... filterByTagNames);
 
     /**
@@ -274,7 +280,7 @@ public interface TargetManagement {
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull String rsqlParam,
@@ -328,6 +334,9 @@ public interface TargetManagement {
      * @param status
      *            find targets having this {@link TargetUpdateStatus}s. Set to
      *            <code>null</code> in case this is not required.
+     * @param overdueState
+     *            find targets that are overdue (targets that did not respond
+     *            during the configured intervals: poll_itvl + overdue_itvl).
      * @param searchText
      *            to find targets having the text anywhere in name or
      *            description. Set <code>null</code> in case this is not
@@ -346,7 +355,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetByFilters(@NotNull Pageable pageable, Collection<TargetUpdateStatus> status,
-            String searchText, Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
+            Boolean overdueState, String searchText, Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
             String... tagNames);
 
     /**
@@ -375,7 +384,7 @@ public interface TargetManagement {
      * @param pageable
      *            page parameter
      * @return the found {@link Target}s, never {@code null}
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -420,9 +429,9 @@ public interface TargetManagement {
      *            in string notation
      * @param pageable
      *            pagination parameter
-     * 
+     *
      * @return the found {@link Target}s, never {@code null}
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -441,9 +450,9 @@ public interface TargetManagement {
      *            the specification for the query
      * @param pageable
      *            pagination parameter
-     * 
+     *
      * @return the found {@link Target}s, never {@code null}
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -477,6 +486,9 @@ public interface TargetManagement {
      * @param filterByStatus
      *            find targets having this {@link TargetUpdateStatus}s. Set to
      *            <code>null</code> in case this is not required.
+     * @param overdueState
+     *            find targets that are overdue (targets that did not respond
+     *            during the configured intervals: poll_itvl + overdue_itvl).
      * @param filterBySearchText
      *            to find targets having the text anywhere in name or
      *            description. Set <code>null</code> in case this is not
@@ -496,8 +508,8 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetsAllOrderByLinkedDistributionSet(@NotNull Pageable pageable,
             @NotNull Long orderByDistributionId, Long filterByDistributionId,
-            Collection<TargetUpdateStatus> filterByStatus, String filterBySearchText, Boolean selectTargetWithNoTag,
-            String... filterByTagNames);
+            Collection<TargetUpdateStatus> filterByStatus, Boolean overdueState, String filterBySearchText,
+            Boolean selectTargetWithNoTag, String... filterByTagNames);
 
     /**
      * retrieves a list of {@link Target}s by their controller ID with details,

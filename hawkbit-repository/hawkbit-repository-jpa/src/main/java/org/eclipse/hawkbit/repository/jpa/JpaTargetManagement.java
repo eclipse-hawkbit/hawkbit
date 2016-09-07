@@ -279,28 +279,32 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetByFilters(final Pageable pageable, final Collection<TargetUpdateStatus> status,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean overdueState, final String searchText, final Long installedOrAssignedDistributionSetId,
             final Boolean selectTargetWithNoTag, final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, searchText,
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, overdueState, searchText,
                 installedOrAssignedDistributionSetId, selectTargetWithNoTag, true, tagNames);
         return findByCriteriaAPI(pageable, specList);
     }
 
     @Override
-    public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final String searchText,
-            final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
-            final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, searchText,
+    public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
+            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean selectTargetWithNoTag, final String... tagNames) {
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, overdueState, searchText,
                 installedOrAssignedDistributionSetId, selectTargetWithNoTag, true, tagNames);
         return countByCriteriaAPI(specList);
     }
 
     private static List<Specification<JpaTarget>> buildSpecificationList(final Collection<TargetUpdateStatus> status,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean overdueState, final String searchText, final Long installedOrAssignedDistributionSetId,
             final Boolean selectTargetWithNoTag, final boolean fetch, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         if (status != null && !status.isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(status, fetch));
+        }
+        if (overdueState != null) {
+            specList.add(
+                    TargetSpecifications.isOverdue(new VirtualPropertyMakroResolver().calculateOverdueTimestamp()));
         }
         if (installedOrAssignedDistributionSetId != null) {
             specList.add(
@@ -425,7 +429,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findTargetsAllOrderByLinkedDistributionSet(final Pageable pageable,
             final Long orderByDistributionId, final Long filterByDistributionId,
-            final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
+            final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
+            final String filterBySearchText,
             final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
@@ -449,7 +454,7 @@ public class JpaTargetManagement implements TargetManagement {
         // build the specifications and then to predicates necessary by the
         // given filters
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterByStatus, filterBySearchText, filterByDistributionId,
+                buildSpecificationList(filterByStatus, overdueState, filterBySearchText, filterByDistributionId,
                         selectTargetWithNoTag, true, filterByTagNames),
                 targetRoot, query, cb);
 
@@ -506,7 +511,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<TargetIdName> findAllTargetIdsByFilters(final Pageable pageRequest,
-            final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
+            final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
+            final String filterBySearchText,
             final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
             final String... filterByTagNames) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -523,7 +529,8 @@ public class JpaTargetManagement implements TargetManagement {
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterByStatus, filterBySearchText, installedOrAssignedDistributionSetId,
+                buildSpecificationList(filterByStatus, overdueState, filterBySearchText,
+                        installedOrAssignedDistributionSetId,
                         selectTargetWithNoTag, false, filterByTagNames),
                 targetRoot, multiselect, cb);
 

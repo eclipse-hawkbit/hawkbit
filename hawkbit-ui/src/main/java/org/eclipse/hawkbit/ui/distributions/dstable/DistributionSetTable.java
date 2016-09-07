@@ -370,7 +370,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private boolean validateSoftwareModule(final SoftwareModule sm, final DistributionSet ds) {
-        if (targetManagement.countTargetByFilters(null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
+        if (targetManagement.countTargetByFilters(null, null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
             /* Distribution is already assigned */
             notification.displayValidationError(i18n.get("message.dist.inuse",
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));

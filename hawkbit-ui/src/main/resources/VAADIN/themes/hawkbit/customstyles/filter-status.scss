@@ -13,8 +13,9 @@
   $unknown-color: $status-unknown-color;
   $in-sync-color: $signal-green-color;
   $pending-color: $signal-yellow-color;
-  $error-color: $signal-red-color;
-  $registered-color: $bosch-color-light-blue;
+  $error-color:   $signal-red-color;
+  $overdue-color: $signal-black-color;
+  $registered-color: $signal-light-blue-color;
 
   //Filter by status buttons group alignment
   .target-status-filters {
@@ -25,6 +26,10 @@
   }
 
   .status-button-layout {
+    height: 40px !important;
+  }
+  
+  .overdue-button-layout {
     height: 40px !important;
   }
 
@@ -67,6 +72,16 @@
   .errorBtn:focus:after,
   .errorBtn:active:after {
     border-color: $error-color;
+  }
+  
+  .overdueBtn {
+    background: $overdue-color;
+    border: solid 3px $overdue-color;
+  }
+  
+  .overdueBtn:focus:after,
+  .overdueBtn:active:after {
+    border-color: $overdue-color;
   }
 
   .registeredBtn {

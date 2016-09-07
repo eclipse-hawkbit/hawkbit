@@ -44,7 +44,7 @@
 .target-filter-spinner{
     @include valo-spinner(
        $size: $v-font-size--small,
-       $color: $bosch-color-light-blue
+       $color: $signal-light-blue-color
      );
 }
 

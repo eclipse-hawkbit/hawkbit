@@ -205,6 +205,12 @@ public final class SPUIDefinitions {
      * Filter by status key.
      */
     public static final String FILTER_BY_STATUS = "FilterByStatus";
+    
+    /**
+     * Filter by overdue state key.
+     */
+    public static final String FILTER_BY_OVERDUE_STATE = "FilterByOverdueState";
+    
     /**
      * Filter by tag key.
      */
@@ -407,7 +413,7 @@ public final class SPUIDefinitions {
     /**
      * Filter by type layout width.
      */
-    public static final float FILTER_BY_TYPE_WIDTH = 150.0F;
+    public static final float FILTER_BY_TYPE_WIDTH = 190.0F;
 
     /**
      * Confirmation jukebox type.
