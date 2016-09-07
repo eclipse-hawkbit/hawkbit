@@ -41,30 +41,10 @@ public final class SPUIComponentIdProvider {
      * ID-SW.DEL.
      */
     public static final String SW_DELETE_ALL = "swmodule.delete.all";
-    /*
-     * ID-Targ.Detail.icon.
-     */
-    public static final String TARGET_DETAILS_ICON = "target.details.icon";
     /**
      * ID-Targ.Edit.icon.
      */
     public static final String TARGET_EDIT_ICON = "target.edit.icon";
-    /**
-     * ID-Targ.Edit.Name.
-     */
-    public static final String TARGET_EDIT_NAME = "target.edit.name";
-    /**
-     * ID-Targ.Edit.desc.
-     */
-    public static final String TARGET_EDIT_DESC = "target.edit.desc";
-    /**
-     * ID-Targ.Edit.Save.
-     */
-    public static final String TARGET_EDIT_SAVE = "target.edit.save";
-    /**
-     * PREFIX - JVM.
-     */
-    public static final String TARGET_EDIT_DISCARD = "target.edit.discard";
     /**
      * ID-Targ.PIN.
      */
@@ -85,10 +65,6 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_TABLE_ID = "dist.tableId";
     /**
-     * ID-Dist.Add.
-     */
-    public static final String DIST_ADD_ID = "dist.add.id";
-    /**
      * ID-Dist.Name.
      */
     public static final String DIST_ADD_NAME = "dist.add.name";
@@ -105,57 +81,9 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_ADD_DESC = "dist.add.desc";
     /**
-     * ID-Dist.JVM.
-     */
-    public static final String DIST_ADD_MODULE = "dist.add.module.";
-    /**
-     * ID-Dist.JVM delete icon.
-     */
-    public static final String DIST_DELETE_MODULE = "dist.delete.module.";
-    /**
      * /** ID-Dist.DELETE.
      */
     public static final String DIST_DELETE_ALL = "dist.delete.all";
-    /**
-     * ID-Dist.Detail.iocn.
-     */
-    public static final String DIST_DETAILS_ICON = "dist.details.icon";
-    /**
-     * ID-Dist.Edit.icon.
-     */
-    public static final String DIST_EDIT_ICON = "dist.edit.icon";
-    /**
-     * ID-Dist.Edit.name.
-     */
-    public static final String DIST_EDIT_NAME = "dist.edit.name";
-    /**
-     * ID-Dist.Edit.ver.
-     */
-    public static final String DIST_EDIT_VERSION = "dist.edit.version";
-    /**
-     * ID-Dist.Edit.desc.
-     */
-    public static final String DIST_EDIT_DESC = "dist.edit.desc";
-    /**
-     * ID-Dist.Edit.JVM.
-     */
-    public static final String DIST_EDIT_JVM = "dist.edit.jvm";
-    /**
-     * ID-Dist.Edit.AH.
-     */
-    public static final String DIST_EDIT_AGENTHUB = "dist.edit.agenthub";
-    /**
-     * ID-Dist.Edit.os.
-     */
-    public static final String DIST_EDIT_OS = "dist.edit.os";
-    /**
-     * ID-Dist.Edit.save.
-     */
-    public static final String DIST_EDIT_SAVE = "dist.edit.save";
-    /**
-     * ID-Dist.Edit.Discard.
-     */
-    public static final String DIST_EDIT_DISCARD = "dist.edit.discard";
     /**
      * ID-Dist.MigCheck.
      */
@@ -172,10 +100,6 @@ public final class SPUIComponentIdProvider {
      * ID - Dist.Add.
      */
     public static final String DIST_ADD_ICON = "dist.add.icon";
-    /**
-     * ID - Dist jvm combo.
-     */
-    public static final String DIST_MODULE_COMBO = "dist.module.combo.";
     /**
      * ID for Distribution Tag ComboBox
      */
@@ -198,25 +122,6 @@ public final class SPUIComponentIdProvider {
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
 
-    /**
-     * ID - "soft.module.save.
-     */
-    public static final String SOFT_MODULE_SAVE = "soft.module.save";
-
-    /**
-     * ID - soft.module.discar.
-     */
-    public static final String SOFT_MODULE_DISCARD = "soft.module.discard";
-
-    /** DistributionSet Components Ids ends here **/
-    /**
-     * ID- Action popup.
-     */
-    public static final String SAVE_ACTIONS_POPUP = "save.actions.popup";
-    /**
-     * ID- Delete SW Module Popup.
-     */
-    public static final String DELETE_SW_MODULE_ACTIONS_POPUP = "delete.sw.module.actions.popup";
     /**
      * ID - Save Assign.
      */
@@ -285,11 +190,6 @@ public final class SPUIComponentIdProvider {
     public static final String TARGET_DROP_FILTER_ICON = "target.drop.filter.icon";
 
     /**
-     * DROP filter icon id.
-     */
-    public static final String DROP_FILTER_ICON = "drop.filter.icon";
-
-    /**
      * Pending action button id.
      */
     public static final String PENDING_ACTION_BUTTON = "pending.action.button";
@@ -355,17 +255,9 @@ public final class SPUIComponentIdProvider {
      */
     public static final String UPLOAD_PROCESS_BUTTON = "upload.process.button";
     /**
-     * Software module No Action Button id.
-     */
-    public static final String NO_ACTION_BUTTON = "no.action.button";
-    /**
      * Upload - discard button id.
      */
     public static final String UPLOAD_DISCARD_BUTTON = "upload.discard.button";
-    /**
-     * Upload - delete button id.
-     */
-    public static final String UPLOAD_SOFTWARE_DELETE_BUTTON = "upload.software.delete.button";
 
     /**
      * Upload - artifact detail close button.
@@ -443,15 +335,7 @@ public final class SPUIComponentIdProvider {
     /**
      * ID-Targ.Detail.icon.
      */
-    public static final String SW_TABLE_DETAILS_ICON = "swmodule.details.icon";
-    /**
-     * ID-Targ.Detail.icon.
-     */
     public static final String SW_TABLE_ATRTIFACT_DETAILS_ICON = "swmodule.artifact.details.icon";
-    /**
-     * ID-swModule.Edit.Button.
-     */
-    public static final String SW_TABLE_EDIT_DETAILS = "swmodule.edit.details";
 
     /**
      * Artifact upload - sw module edit button id.
@@ -468,34 +352,15 @@ public final class SPUIComponentIdProvider {
     public static final String UPLOAD_ARTIFACT_DETAILS_TABLE_MAX = "upload.artifactdetails.table.max";
 
     /**
-     * Target tag button layout id.
-     */
-    public static final String TARGET_TAG_BUTTON_LAYOUT = "target.tag.button.layout";
-
-    /**
      * Target tag close button.
      */
     public static final String HIDE_TARGET_TAGS = "hide.target.tags";
-
-    /**
-     * Distribution Type tag close button.
-     */
-    public static final String HIDE_DIST_TYPE_TAGS = "hide.dist.type.tags";
 
     /**
      * Show target tag layout icon.
      */
     public static final String SHOW_TARGET_TAGS = "show.target.tags.icon";
 
-    /**
-     * Tag name combo box in target details layout.
-     */
-    public static final String TARGET_TAG_COMBO = "target.tag.names";
-
-    /**
-     * Target details - assign button.
-     */
-    public static final String TARGET_TAG_ASSIGN = "target.tag.assign";
     /**
      * ID-Target tag table.
      */
@@ -547,11 +412,6 @@ public final class SPUIComponentIdProvider {
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
-
-    /**
-     * Id of the anonymous download checkbox.
-     */
-    public static final String SYSTEM_CONFIGURATION_ANONYMOUS_DOWNLOAD_CHECKBOX = "system.configuration.anonymous.download.checkbox";
 
     /**
      * Id of maximize/minimize icon of table - Software module table.
@@ -691,10 +551,6 @@ public final class SPUIComponentIdProvider {
      */
     public static final String BULK_UPLOAD_TAG = "bulkupload.tag";
     /**
-     * Bulk target upload - upload button.
-     */
-    public static final String BULK_UPLOAD_BUTTON = "bulkupload.upload.button";
-    /**
      * Bulk target upload - count label.
      */
     public static final String BULK_UPLOAD_COUNT = "bulkupload.upload.count";
@@ -759,11 +615,6 @@ public final class SPUIComponentIdProvider {
     public static final String BULK_UPLOAD_STATUS_BUTTON = "bulk.upload.notification.id";
 
     /**
-     * Target Filter Status button id.
-     */
-    public static final String TARGET_FILTER_STATUS_BUTTON = "target.filter.status.button.id";
-
-    /**
      * Target bulk upload minimize button id.
      */
     public static final String BULK_UPLOAD_MINIMIZE_BUTTON_ID = "bulk.upload.minimize.button.id";
@@ -805,11 +656,6 @@ public final class SPUIComponentIdProvider {
     public static final String ROLLOUT_GROUP_TARGETS_LIST_GRID_ID = "rollout.group.targets.grid.id";
 
     /**
-     * Rollout delete button id.
-     */
-    public static final String ROLLOUT_DELETE_ICON = "rollout.delete.button.id";
-
-    /**
      * Rollout text field name id.
      */
     public static final String ROLLOUT_NAME_FIELD_ID = "rollout.name.field.id";
@@ -837,23 +683,6 @@ public final class SPUIComponentIdProvider {
      */
     public static final String ROLLOUT_DESCRIPTION_ID = "rollout.description.id";
     /**
-     * Rollout create update window - save buttopn id.
-     */
-    public static final String ROLLOUT_CREATE_UPDATE_SAVE_ID = "rollout.create.update.save.id";
-
-    /**
-     * Rollout create update - discard button id.
-     */
-    public static final String ROLLOUT_CREATE_UPDATE_DISCARD_ID = "rollout.create.update.discard.id";
-    /**
-     * Rollout name link id.
-     */
-    public static final String ROLLOUT_NAME_LINK_ID = "rollout.name.link";
-    /**
-     * Rollout Group name link id.
-     */
-    public static final String ROLLOUT_GROUP_NAME_LINK_ID = "rollout.group.name.link";
-    /**
      * Rollout target filter query combo id.
      */
     public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
@@ -879,10 +708,6 @@ public final class SPUIComponentIdProvider {
     public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
 
     /**
-     * Rollout save or start option group id.
-     */
-    public static final String ROLLOUT_SAVESTARTOPTION_ID = "rollout.savestartoption.id";
-    /**
      * Rollout status label id.
      */
     public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";
@@ -907,17 +732,9 @@ public final class SPUIComponentIdProvider {
      */
     public static final String ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID = "rollout.group.target.close.id";
     /**
-     * Rollout status progress bar id.
-     */
-    public static final String ROLLOUT_PROGRESS_BAR = "rollout.status.progress.bar.id";
-    /**
      * Rollout group header caption.
      */
     public static final String ROLLOUT_GROUP_HEADER_CAPTION = "rollout.group.header.caption";
-    /**
-     * Rollout group target header caption.
-     */
-    public static final String ROLLOUT_GROUP_TARGET_HEADER_CAPTION = "rollout.group.header.target.caption";
     /**
      * Rollout group close id.
      */
@@ -962,31 +779,21 @@ public final class SPUIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
- /**
+    /**
      * Software module table - Manage metadata id.
      */
     public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
-    
-    
+
     /**
      * Metadata key id.
      */
     public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
-    
+
     /**
      * Metadata value id.
      */
     public static final String METADATA_VALUE_ID = "metadata.value.id";
-    /**
-     * Metadata save id.
-     */
-    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
-    
-    /**
-     * Metadata discard id.
-     */
-    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
-    
+
     /**
      * Metadata add icon id.
      */
@@ -995,41 +802,36 @@ public final class SPUIComponentIdProvider {
      * Metadata table id.
      */
     public static final String METDATA_TABLE_ID = "metadata.table.id";
-    
+
     /**
      * Distribution set table - Manage metadata id.
      */
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
-    
-   /**
+
+    /**
      * DistributionSet - Metadata button id.
      */
     public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
-    
+
     /**
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
-    
+
     /**
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
-    
+
     /**
      * Software module table details tab id in Distributions .
      */
     public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
-    
+
     /**
      * Software Module - Metadata button id.
      */
     public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
-    
-    /**
-     * Table multiselect for selecting DistType
-     */
-    public static final String SELECT_DIST_TYPE = "select-dist-type";
 
     /**
      * /* Private Constructor.
