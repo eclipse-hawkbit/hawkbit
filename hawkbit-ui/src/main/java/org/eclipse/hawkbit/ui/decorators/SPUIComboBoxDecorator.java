@@ -49,7 +49,7 @@ public final class SPUIComboBoxDecorator {
      *            as promt
      * @return ComboBox as comp
      */
-    public static ComboBox decorate(final String caption, final String height, final String width, final String style,
+    public static ComboBox decorate(final String caption, final String width, final String style,
             final String styleName, final boolean required, final String data, final String prompt) {
         final ComboBox spUICombo = new ComboBox();
         // Default settings
@@ -66,10 +66,6 @@ public final class SPUIComboBoxDecorator {
         // Add style Name
         if (StringUtils.isNotEmpty(styleName)) {
             spUICombo.addStyleName(styleName);
-        }
-        // Add height
-        if (StringUtils.isNotEmpty(height)) {
-            spUICombo.setHeight(height);
         }
         // AddWidth
         if (StringUtils.isNotEmpty(width)) {

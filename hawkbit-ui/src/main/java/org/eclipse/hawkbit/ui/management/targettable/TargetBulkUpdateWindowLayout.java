@@ -204,8 +204,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private ComboBox getDsComboField() {
         final Container container = createContainer();
-        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.get("bulkupload.ds.name"), "", "", null,
-                null, false, "", i18n.get("bulkupload.ds.name"));
+        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.get("bulkupload.ds.name"), "", null, null,
+                false, "", i18n.get("bulkupload.ds.name"));
         dsComboBox.setSizeUndefined();
         dsComboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
         dsComboBox.setImmediate(true);

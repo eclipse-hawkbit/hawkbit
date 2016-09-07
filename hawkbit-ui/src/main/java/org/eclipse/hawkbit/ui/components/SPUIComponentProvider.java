@@ -57,8 +57,6 @@ public final class SPUIComponentProvider {
      *
      * @param caption
      *            caption of the combo box
-     * @param height
-     *            combo box height
      * @param width
      *            combo box width
      * @param style
@@ -73,9 +71,9 @@ public final class SPUIComponentProvider {
      *            input prompt
      * @return ComboBox
      */
-    public static ComboBox getComboBox(final String caption, final String height, final String width,
-            final String style, final String styleName, final boolean required, final String data, final String promt) {
-        return SPUIComboBoxDecorator.decorate(caption, height, width, style, styleName, required, data, promt);
+    public static ComboBox getComboBox(final String caption, final String width, final String style,
+            final String styleName, final boolean required, final String data, final String promt) {
+        return SPUIComboBoxDecorator.decorate(caption, width, style, styleName, required, data, promt);
     }
 
     /**
@@ -290,20 +288,19 @@ public final class SPUIComponentProvider {
      *            specify how the link should be open (f. e. new windows =
      *            _blank)
      * @param style
-     *            chosen style of the link
-     * @param setStyle
-     *            set true if the style should be used
+     *            chosen style of the link. Might be {@code null} if no style
+     *            should be used
      * @return a link UI component
      */
     public static Link getLink(final String id, final String name, final String resource, final FontAwesome icon,
-            final String targetOpen, final String style, final boolean setStyle) {
+            final String targetOpen, final String style) {
 
         final Link link = new Link(name, new ExternalResource(resource));
         link.setId(id);
         link.setIcon(icon);
 
         link.setTargetName(targetOpen);
-        if (setStyle) {
+        if (style != null) {
             link.setStyleName(style);
         }
 
