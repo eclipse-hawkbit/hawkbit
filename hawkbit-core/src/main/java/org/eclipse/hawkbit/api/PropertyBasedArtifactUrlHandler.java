@@ -19,6 +19,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
@@ -55,8 +56,8 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         }
 
         String urlPattern = properties.getPattern();
-        final Set<Entry<String, String>> entrySet = getReplaceMap(targetId, softwareModuleId, filename, sha1Hash,
-                protocolString, properties).entrySet();
+        final Set<Entry<String, String>> entrySet = getReplaceMap(targetId, softwareModuleId,
+                UrlEscapers.urlFragmentEscaper().escape(filename), sha1Hash, protocolString, properties).entrySet();
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
