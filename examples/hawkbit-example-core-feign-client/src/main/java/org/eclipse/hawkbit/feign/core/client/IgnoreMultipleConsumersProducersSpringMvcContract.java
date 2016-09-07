@@ -40,7 +40,7 @@ public class IgnoreMultipleConsumersProducersSpringMvcContract extends SpringMvc
             // multiple consumers and produces, see
             // https://github.com/spring-cloud/spring-cloud-netflix/issues/808
             LOGGER.trace(e.getMessage(), e);
+            data.indexToExpander(new LinkedHashMap<Integer, Param.Expander>());
         }
-        data.indexToExpander(new LinkedHashMap<Integer, Param.Expander>());
     }
 }
