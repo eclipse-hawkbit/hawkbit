@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequ
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -162,7 +161,7 @@ public interface MgmtSoftwareModuleRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
-            @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
+            final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
 
     /**
      * Handles the PUT request of updating a software module.
@@ -177,7 +176,7 @@ public interface MgmtSoftwareModuleRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule);
+            final MgmtSoftwareModuleRequestBodyPut restSoftwareModule);
 
     /**
      * Handles the DELETE request for a single software module.
@@ -246,7 +245,7 @@ public interface MgmtSoftwareModuleRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata);
+            @PathVariable("metadataKey") final String metadataKey, final MgmtMetadata metadata);
 
     /**
      * Deletes a single meta data entry from the software module.
@@ -275,6 +274,6 @@ public interface MgmtSoftwareModuleRestApi {
             MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestBody final List<MgmtMetadata> metadataRest);
+            final List<MgmtMetadata> metadataRest);
 
 }

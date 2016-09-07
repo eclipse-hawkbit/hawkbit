@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.mgmt.client.resource.builder.RolloutBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.TargetBuilder;
-import org.eclipse.hawkbit.mgmt.client.scenarios.upload.ArtifactFile;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
@@ -31,7 +30,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * 
@@ -50,8 +48,6 @@ public class ConfigurableScenario {
 
     private final MgmtSoftwareModuleClientResource softwareModuleResource;
 
-    private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
-
     private final MgmtTargetClientResource targetResource;
 
     private final MgmtRolloutClientResource rolloutResource;
@@ -59,13 +55,11 @@ public class ConfigurableScenario {
     private final ClientConfigurationProperties clientConfigurationProperties;
 
     public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
-            @Qualifier("mgmtSoftwareModuleClientResource") final MgmtSoftwareModuleClientResource softwareModuleResource,
-            @Qualifier("uploadSoftwareModule") final MgmtSoftwareModuleClientResource uploadSoftwareModule,
+            final MgmtSoftwareModuleClientResource softwareModuleResource,
             final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
         this.distributionSetResource = distributionSetResource;
         this.softwareModuleResource = softwareModuleResource;
-        this.uploadSoftwareModule = uploadSoftwareModule;
         this.targetResource = targetResource;
         this.rolloutResource = rolloutResource;
         this.clientConfigurationProperties = clientConfigurationProperties;
@@ -190,13 +184,6 @@ public class ConfigurableScenario {
                 new SoftwareModuleBuilder().name(scenario.getSmSwName() + "-app").version(dsSet.getVersion() + ".")
                         .type("application").buildAsList(scenario.getAppModulesPerDistributionSet()))
                 .getBody());
-
-        for (int x = 0; x < scenario.getArtifactsPerSM(); x++) {
-            modules.forEach(module -> {
-                final ArtifactFile file = new ArtifactFile("dummyfile.dummy", null, "multipart/form-data", artifact);
-                uploadSoftwareModule.uploadArtifact(module.getModuleId(), file, null, null, null);
-            });
-        }
 
         return modules;
     }

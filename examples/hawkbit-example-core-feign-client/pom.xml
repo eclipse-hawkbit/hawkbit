@@ -32,7 +32,6 @@
       <dependency>
          <groupId>org.springframework.cloud</groupId>
          <artifactId>spring-cloud-netflix-core</artifactId>
-         <version>1.0.7.RELEASE</version>
       </dependency>
        <dependency>
          <groupId>org.slf4j</groupId>
