@@ -189,7 +189,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
         tagDesc.setNullRepresentation("");
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", "", null, null, false, "",
+        tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
                 i18n.get("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
