@@ -392,10 +392,10 @@ public class AmqpMessageHandlerServiceTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
                 .getValue();
 
-        assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
+        assertThat(targetAssignDistributionSetEvent.getTarget().getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
-        assertThat(targetAssignDistributionSetEvent.getTargetToken()).as("targetoken not filled correctly")
-                .isEqualTo(action.getTarget().getSecurityToken());
+        assertThat(targetAssignDistributionSetEvent.getTarget().getSecurityToken())
+                .as("targetoken not filled correctly").isEqualTo(action.getTarget().getSecurityToken());
         assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
         assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
                 .isEqualTo(softwareModuleList);

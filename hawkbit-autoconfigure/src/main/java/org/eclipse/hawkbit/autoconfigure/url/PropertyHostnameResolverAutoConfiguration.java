@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,25 +25,22 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Throwables;
 
 /**
- * Autoconfiguration of the {@link HostnameResolver} based on a property.
- * 
- *
- *
+ * Auto configuration for {@link HostnameResolver} and
+ * {@link ArtifactUrlHandler} based on a properties.
  */
 @Configuration
 @EnableConfigurationProperties({ HawkbitServerProperties.class, ArtifactUrlHandlerProperties.class })
 public class PropertyHostnameResolverAutoConfiguration {
 
-    @Autowired
-    private HawkbitServerProperties serverProperties;
-
     /**
+     * @param serverProperties
+     *            to get the servers URL
      * @return the default autoconfigure hostname resolver implementation which
      *         is property based specified by the property {@link #url}
      */
     @Bean
     @ConditionalOnMissingBean(value = HostnameResolver.class)
-    public HostnameResolver hostnameResolver() {
+    public HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
         return () -> {
             try {
                 return new URL(serverProperties.getUrl());

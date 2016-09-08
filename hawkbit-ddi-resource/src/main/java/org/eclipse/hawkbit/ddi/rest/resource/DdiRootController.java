@@ -103,6 +103,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
+        final Target target = controllerManagement.updateLastTargetQuery(controllerId, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+
         final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
         if (softwareModule == null) {
@@ -111,8 +114,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         }
 
-        return new ResponseEntity<>(
-                DataConversionHelper.createArtifacts(controllerId, softwareModule, artifactUrlHandler), HttpStatus.OK);
+        return new ResponseEntity<>(DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler),
+                HttpStatus.OK);
     }
 
     @Override
@@ -236,7 +239,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<DdiChunk> chunks = DataConversionHelper.createChunks(controllerId, action, artifactUrlHandler);
+            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

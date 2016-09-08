@@ -842,8 +842,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                target.getControllerId());
+                ds.getId(), ActionType.SOFT,
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
         Action findAction = deploymentManagement.findAction(action.getId());
@@ -865,8 +865,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                target.getControllerId());
+                ds.getId(), ActionType.FORCED,
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation
         Action findAction = deploymentManagement.findAction(action.getId());
@@ -937,7 +937,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final Target myt : targets) {
             boolean found = false;
             for (final TargetAssignDistributionSetEvent event : events) {
-                if (event.getControllerId().equals(myt.getControllerId())) {
+                if (event.getTarget().getControllerId().equals(myt.getControllerId())) {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
                     assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();

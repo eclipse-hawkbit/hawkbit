@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.api;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -19,37 +18,36 @@ import com.google.common.collect.Lists;
 /**
  * Artifact handler properties class for holding all supported protocols with
  * host, ip, port and download pattern.
+ * 
+ * @see PropertyBasedArtifactUrlHandler
  */
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
 
-    private final Map<String, UrlProtocol> protocols = new HashMap<>();
+    private final List<UrlProtocol> protocols = new ArrayList<>();
 
-    /**
-     * @author kaizimmerm
-     *
-     */
-    /**
-     * @author kaizimmerm
-     *
-     */
     public static class UrlProtocol {
+
         /**
          * Hypermedia rel value for this protocol.
          */
-        private String rel = "download-http";
+        private String rel = "download";
 
         /**
          * Hypermedia ref pattern for this protocol. Supported place holders are
-         * protocol,controllerId,ip,port,hostname,artifactFileName,artifactSHA1,
-         * artifactIdBase62,artifactId,tenant,softwareModuleId;
+         * protocol,controllerId,targetId,targetIdBase62,ip,port,hostname,
+         * artifactFileName,artifactSHA1,
+         * artifactIdBase62,artifactId,tenant,softwareModuleId,
+         * softwareModuleIdBase62.
+         * 
+         * The update server itself supportes
          */
         private String ref = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
         /**
          * Protocol name placeholder that can be used in ref pattern.
          */
-        private String name = "https";
+        private String protocol = "http";
 
         /**
          * Hostname placeholder that can be used in ref pattern.
@@ -64,7 +62,7 @@ public class ArtifactUrlHandlerProperties {
         /**
          * Port placeholder that can be used in ref pattern.
          */
-        private int port = 8080;
+        private Integer port;
 
         /**
          * Support for the following hawkBit API.
@@ -103,11 +101,11 @@ public class ArtifactUrlHandlerProperties {
             this.ip = ip;
         }
 
-        public int getPort() {
+        public Integer getPort() {
             return port;
         }
 
-        public void setPort(final int port) {
+        public void setPort(final Integer port) {
             this.port = port;
         }
 
@@ -119,17 +117,17 @@ public class ArtifactUrlHandlerProperties {
             this.supports = supports;
         }
 
-        public String getName() {
-            return name;
+        public String getProtocol() {
+            return protocol;
         }
 
-        public void setName(final String name) {
-            this.name = name;
+        public void setProtocol(final String protocol) {
+            this.protocol = protocol;
         }
 
     }
 
-    public Map<String, UrlProtocol> getProtocols() {
+    public List<UrlProtocol> getProtocols() {
         return protocols;
     }
 

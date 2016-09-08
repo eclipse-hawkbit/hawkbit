@@ -21,19 +21,12 @@ public interface ArtifactUrlHandler {
      * Returns a generated download URL for a given artifact parameters for a
      * specific protocol.
      *
-     * @param controllerId
-     *            the authenticated controller id
-     * @param softwareModuleId
-     *            the softwareModuleId belonging to the artifact
-     * @param filename
-     *            the filename of the artifact *
-     * @param sha1Hash
-     *            the sha1Hash of the artifact
-     * @param artifactid
-     *            the ID of the artifact
+     * @param placeholder
+     *            data for URL generation
+     * @param api
+     *            given protocol that URL needs to support
      * 
      * @return an URL for the given artifact parameters in a given protocol
      */
-    List<ArtifactUrl> getUrls(String controllerId, Long softwareModuleId, String filename, String sha1Hash,
-            Long artifactid, APIType api);
+    List<ArtifactUrl> getUrls(URLPlaceholder placeholder, APIType api);
 }
