@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.repository.jpa.cache;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +32,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("CacheWriteNotify")
 @RunWith(MockitoJUnitRunner.class)
 public class CacheWriteNotifyTest {
+
+    private static final long KNOWN_STATUS_ID = 1;
 
     @Mock
     private EventBus eventBusMock;
@@ -58,16 +59,13 @@ public class CacheWriteNotifyTest {
 
     @Test
     public void downloadgProgressIsCachedAndEventSent() {
-        final long knownStatusId = 1;
 
-        when(cacheManagerMock.getCache(ActionStatus.class.getName())).thenReturn(cacheMock);
+        when(cacheManagerMock.getCache(JpaActionStatus.class.getName())).thenReturn(cacheMock);
         when(tenantAwareMock.getCurrentTenant()).thenReturn("default");
 
-        underTest.downloadProgress(knownStatusId, 500L, 100L, 100L);
+        underTest.downloadProgress(KNOWN_STATUS_ID, 500L, 100L, 100L);
 
-        verify(cacheManagerMock).getCache(eq(ActionStatus.class.getName()));
-        verify(cacheMock).put(knownStatusId + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, 20);
+        verify(cacheMock).put(KNOWN_STATUS_ID + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, 20);
         verify(eventBusMock).post(any(DownloadProgressEvent.class));
     }
-
 }

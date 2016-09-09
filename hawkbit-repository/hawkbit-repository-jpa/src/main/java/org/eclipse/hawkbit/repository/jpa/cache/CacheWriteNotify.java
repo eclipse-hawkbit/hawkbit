@@ -12,8 +12,9 @@ import java.math.RoundingMode;
 
 import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -26,12 +27,10 @@ import com.google.common.math.DoubleMath;
 /**
  * An service which combines the functionality for functional use cases to write
  * into the cache an notify the writing to the cache to the {@link EventBus}.
- *
- *
- *
  */
 @Service
 public class CacheWriteNotify {
+
     private static final int DOWNLOAD_PROGRESS_MAX = 100;
 
     @Autowired
@@ -44,10 +43,10 @@ public class CacheWriteNotify {
     private TenantAware tenantAware;
 
     /**
-     * writes the download progress into the cache
+     * Writes the download progress into the cache
      * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the
      * {@link EventBus} with a {@link DownloadProgressEvent}.
-     * 
+     *
      * @param statusId
      *            the ID of the {@link ActionStatus}
      * @param requestedBytes
@@ -60,7 +59,7 @@ public class CacheWriteNotify {
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
 
-        final Cache cache = cacheManager.getCache(ActionStatus.class.getName());
+        final Cache cache = cacheManager.getCache(JpaActionStatus.class.getName());
         final String cacheKey = CacheKeys.entitySpecificCacheKey(String.valueOf(statusId),
                 CacheKeys.DOWNLOAD_PROGRESS_PERCENT);
 
@@ -71,8 +70,7 @@ public class CacheWriteNotify {
             cache.put(cacheKey, progressPercent);
         } else {
             // in case we reached progress 100 delete the cache value again
-            // because otherwise he will
-            // keep there forever
+            // because otherwise he will keep there forever
             cache.evict(cacheKey);
         }
 
@@ -84,7 +82,7 @@ public class CacheWriteNotify {
      * Writes the {@link CacheKeys#ROLLOUT_GROUP_CREATED} and
      * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
      * {@link EventBus} with a {@link RolloutGroupCreatedEvent}.
-     * 
+     *
      * @param revision
      *            the revision of the event
      * @param rolloutId
@@ -99,7 +97,7 @@ public class CacheWriteNotify {
     public void rolloutGroupCreated(final long revision, final Long rolloutId, final Long rolloutGroupId,
             final int totalRolloutGroup, final int createdRolloutGroup) {
 
-        final Cache cache = cacheManager.getCache(Rollout.class.getName());
+        final Cache cache = cacheManager.getCache(JpaRollout.class.getName());
         final String cacheKeyGroupTotal = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
                 CacheKeys.ROLLOUT_GROUP_TOTAL);
         final String cacheKeyGroupCreated = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
@@ -113,6 +111,7 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupTotal);
             cache.evict(cacheKeyGroupCreated);
         }
+
         eventBus.post(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId, rolloutGroupId,
                 totalRolloutGroup, createdRolloutGroup));
     }
