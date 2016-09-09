@@ -64,7 +64,8 @@ public class EventDistributor {
             if (!NODE_ID.equals(event.getNodeId())) {
                 logDistributingEvent(event, SEND_DISTRIBUTION_CHANNEL);
                 event.setOriginNodeId(NODE_ID);
-                redisTemplate.convertAndSend(SEND_DISTRIBUTION_CHANNEL, event);
+                // redisTemplate.convertAndSend(SEND_DISTRIBUTION_CHANNEL,
+                // event);
             }
         } else {
             logNotDistributingEvent(event, SEND_DISTRIBUTION_CHANNEL);

@@ -23,6 +23,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -91,8 +92,8 @@ public class RedisConfiguration {
     @ConditionalOnMissingBean
     public RedisConnectionFactory redisConnectionFactory() {
         final JedisConnectionFactory factory = new JedisConnectionFactory();
-        factory.setHostName(redisProperties.getHost());
-        factory.setPort(redisProperties.getPort());
+        factory.setHostName("127.0.0.1");
+        factory.setPort(6379);
         factory.setUsePool(true);
         return factory;
     }
@@ -106,9 +107,10 @@ public class RedisConfiguration {
     public RedisTemplate<String, Object> redisTemplate() {
         final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
+        final GenericJackson2JsonRedisSerializer jackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
         redisTemplate.setKeySerializer(new JdkSerializationRedisSerializer());
-        redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
-        redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         return redisTemplate;
     }
 

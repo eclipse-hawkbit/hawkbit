@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadType;
+import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -59,8 +60,8 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -96,8 +97,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private ArtifactManagement artifactManagement;
 
     @Autowired
-    @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
-    private Cache cache;
+    private CacheManager cacheManager;
 
     @Autowired
     private HostnameResolver hostnameResolver;
@@ -120,6 +120,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final AmqpMessageDispatcherService amqpMessageDispatcherService) {
         super(defaultTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
+    }
+
+    // TODO So gewollt? Was soll passieren wenn der Redis weg ist? Reque der
+    // messgage? In DB schreiben?
+    // message?
+    private Cache getDownloadIdCache() {
+        if (cacheManager instanceof TenancyCacheManager) {
+            return ((TenancyCacheManager) cacheManager).getDirectCache(CacheConstants.DOWNLOAD_ID_CACHE);
+        }
+        return cacheManager.getCache(CacheConstants.DOWNLOAD_ID_CACHE);
     }
 
     /**
@@ -231,7 +241,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             // SHA1 key is set, download by SHA1
             final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1,
                     localArtifact.getSha1Hash());
-            cache.put(downloadId, downloadCache);
+            getDownloadIdCache().put(downloadId, downloadCache);
             authentificationResponse
                     .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
                             .path("/api/v1/downloadserver/downloadId/").path(downloadId).build().toUriString());
@@ -511,8 +521,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         this.artifactManagement = artifactManagement;
     }
 
-    void setCache(final Cache cache) {
-        this.cache = cache;
+    void setCacheManager(final CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     void setEntityFactory(final EntityFactory entityFactory) {
