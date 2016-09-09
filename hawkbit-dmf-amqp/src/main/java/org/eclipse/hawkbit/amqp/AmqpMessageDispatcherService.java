@@ -54,7 +54,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param rabbitTemplate
      *            the rabbitTemplate
      * @param amqpSenderService
-     *            so send AMQP message
+     *            to send AMQP message
      * @param artifactUrlHandler
      *            for generating download URLs
      */
