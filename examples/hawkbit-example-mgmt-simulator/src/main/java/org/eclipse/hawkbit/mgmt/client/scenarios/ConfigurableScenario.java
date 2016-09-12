@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties;
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.client.resource.builder.RolloutBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.TargetBuilder;
+import org.eclipse.hawkbit.mgmt.client.scenarios.upload.ArtifactFile;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
@@ -53,12 +55,16 @@ public class ConfigurableScenario {
 
     private final ClientConfigurationProperties clientConfigurationProperties;
 
+    private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
+
     public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
             final MgmtSoftwareModuleClientResource softwareModuleResource,
-            final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final MgmtSoftwareModuleClientResource uploadSoftwareModule, final MgmtTargetClientResource targetResource,
+            final MgmtRolloutClientResource rolloutResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
         this.distributionSetResource = distributionSetResource;
         this.softwareModuleResource = softwareModuleResource;
+        this.uploadSoftwareModule = uploadSoftwareModule;
         this.targetResource = targetResource;
         this.rolloutResource = rolloutResource;
         this.clientConfigurationProperties = clientConfigurationProperties;
@@ -158,11 +164,12 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
+        final byte[] artifact = generateArtifact(scenario);
 
         distributionSetResource.createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName())
                 .type("os_app").version("1.0.").buildAsList(scenario.getDistributionSets())).getBody()
                 .forEach(dsSet -> {
-                    final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet);
+                    final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
 
                     final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
                     modules.forEach(module -> assign.id(module.getModuleId()));
@@ -172,7 +179,8 @@ public class ConfigurableScenario {
         LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
-    private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet) {
+    private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
+            final byte[] artifact) {
         final List<MgmtSoftwareModule> modules = softwareModuleResource
                 .createSoftwareModules(new SoftwareModuleBuilder().name(scenario.getSmFwName() + "-os")
                         .version(dsSet.getVersion()).type("os").build())
@@ -181,6 +189,13 @@ public class ConfigurableScenario {
                 new SoftwareModuleBuilder().name(scenario.getSmSwName() + "-app").version(dsSet.getVersion() + ".")
                         .type("application").buildAsList(scenario.getAppModulesPerDistributionSet()))
                 .getBody());
+
+        for (int iArtifact = 0; iArtifact < scenario.getArtifactsPerSM(); iArtifact++) {
+            modules.forEach(module -> {
+                final ArtifactFile file = new ArtifactFile("dummyfile.dummy", null, "multipart/form-data", artifact);
+                uploadSoftwareModule.uploadArtifact(module.getModuleId(), file, null, null, null);
+            });
+        }
 
         return modules;
     }
@@ -207,5 +222,20 @@ public class ConfigurableScenario {
             return Integer.valueOf(size.substring(0, size.length() - 2)) * 1024 * 1024;
         }
         return Integer.valueOf(size);
+    }
+
+    private static byte[] generateArtifact(final Scenario scenario) {
+
+        // Exception squid:S2245 - not used for cryptographic function
+        @SuppressWarnings("squid:S2245")
+        final Random random = new Random();
+
+        // create byte array
+        final byte[] nbyte = new byte[parseSize(scenario.getArtifactSize())];
+
+        // put the next byte in the array
+        random.nextBytes(nbyte);
+
+        return nbyte;
     }
 }
