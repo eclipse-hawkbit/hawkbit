@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.cache;
 
 /**
  * Cache Object for download a Artifact.
- * 
- *
- *
  */
 public class DownloadArtifactCache {
 
@@ -21,7 +18,7 @@ public class DownloadArtifactCache {
 
     /**
      * Constructor.
-     * 
+     *
      * @param downloadType
      *            the type for searching the artifact.
      * @param id

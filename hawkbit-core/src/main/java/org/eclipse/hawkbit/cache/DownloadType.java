@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.cache;
 
 /**
  * The type of the id which is saved.
- * 
- *
- *
  */
 public enum DownloadType {
     BY_SHA1

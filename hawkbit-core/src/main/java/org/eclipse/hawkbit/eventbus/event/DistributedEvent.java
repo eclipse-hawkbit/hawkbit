@@ -13,10 +13,6 @@ import java.io.Serializable;
 /**
  * Marks an event to as an distributed event which will be distributed to other
  * nodes.
- *
- *
- *
- *
  */
 public interface DistributedEvent extends Event, NodeAware, Serializable {
 

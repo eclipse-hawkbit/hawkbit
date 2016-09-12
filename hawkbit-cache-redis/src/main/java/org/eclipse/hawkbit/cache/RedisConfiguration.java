@@ -61,11 +61,12 @@ public class RedisConfiguration {
     @Bean
     @Primary
     public CacheManager cacheManager() {
-        return new TenantAwareCacheManager(directCacheManager(), tenantAware);
+        return new ClusterableTenantAwareCacheManager(new TenantAwareCacheManager(directCacheManager(), tenantAware),
+                tenantAware);
     }
 
     /**
-     * 
+     *
      * @return bean for the direct cache manager.
      */
     @Bean(name = "directCacheManager")
@@ -76,7 +77,7 @@ public class RedisConfiguration {
     }
 
     /**
-     * 
+     *
      * @return bean for the direct cache manager.
      */
     @Bean
