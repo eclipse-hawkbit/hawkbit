@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -326,7 +326,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
                         securityProperties.getDos().getMaxStatusEntriesPerAction());
-                throw new ToManyStatusEntriesException(
+                throw new TooManyStatusEntriesException(
                         String.valueOf(securityProperties.getDos().getMaxStatusEntriesPerAction()));
             }
         }

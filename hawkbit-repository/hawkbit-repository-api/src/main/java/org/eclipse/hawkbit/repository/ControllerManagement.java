@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -95,7 +95,7 @@ public interface ControllerManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * @throws ToManyStatusEntriesException
+     * @throws TooManyStatusEntriesException
      *             if more than the allowed number of status entries are
      *             inserted
      */
