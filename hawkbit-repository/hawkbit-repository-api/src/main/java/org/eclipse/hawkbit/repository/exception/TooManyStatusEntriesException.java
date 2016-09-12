@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
  *
  *
  */
-public final class ToManyStatusEntriesException extends AbstractServerRtException {
+public final class TooManyStatusEntriesException extends AbstractServerRtException {
     /**
     *
     */
@@ -28,7 +28,7 @@ public final class ToManyStatusEntriesException extends AbstractServerRtExceptio
      * Creates a new FileUploadFailedException with
      * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
      */
-    public ToManyStatusEntriesException() {
+    public TooManyStatusEntriesException() {
         super(SpServerError.SP_ACTION_STATUS_TO_MANY_ENTRIES);
     }
 
@@ -36,7 +36,7 @@ public final class ToManyStatusEntriesException extends AbstractServerRtExceptio
      * @param cause
      *            for the exception
      */
-    public ToManyStatusEntriesException(final Throwable cause) {
+    public TooManyStatusEntriesException(final Throwable cause) {
         super(SpServerError.SP_ACTION_STATUS_TO_MANY_ENTRIES, cause);
     }
 
@@ -44,7 +44,7 @@ public final class ToManyStatusEntriesException extends AbstractServerRtExceptio
      * @param message
      *            of the error
      */
-    public ToManyStatusEntriesException(final String message) {
+    public TooManyStatusEntriesException(final String message) {
         super(message, SpServerError.SP_ACTION_STATUS_TO_MANY_ENTRIES);
     }
 }
