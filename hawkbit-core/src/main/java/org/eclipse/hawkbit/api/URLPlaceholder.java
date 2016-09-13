@@ -13,6 +13,8 @@ package org.eclipse.hawkbit.api;
  *
  */
 public class URLPlaceholder {
+    private final String tenant;
+    private final Long tenantId;
     private final String controllerId;
     private final Long targetId;
     private final Long softwareModuleId;
@@ -20,14 +22,25 @@ public class URLPlaceholder {
     private final Long artifactId;
     private final String sha1Hash;
 
-    public URLPlaceholder(final String controllerId, final Long targetId, final Long softwareModuleId,
-            final String filename, final Long artifactId, final String sha1Hash) {
+    public URLPlaceholder(final String tenant, final Long tenantId, final String controllerId, final Long targetId,
+            final Long softwareModuleId, final String filename, final Long artifactId, final String sha1Hash) {
+        super();
+        this.tenant = tenant;
+        this.tenantId = tenantId;
         this.controllerId = controllerId;
         this.targetId = targetId;
         this.softwareModuleId = softwareModuleId;
         this.filename = filename;
         this.artifactId = artifactId;
         this.sha1Hash = sha1Hash;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
     }
 
     public String getControllerId() {
@@ -64,6 +77,8 @@ public class URLPlaceholder {
         result = prime * result + ((sha1Hash == null) ? 0 : sha1Hash.hashCode());
         result = prime * result + ((softwareModuleId == null) ? 0 : softwareModuleId.hashCode());
         result = prime * result + ((targetId == null) ? 0 : targetId.hashCode());
+        result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+        result = prime * result + ((tenantId == null) ? 0 : tenantId.hashCode());
         return result;
     }
 
@@ -121,14 +136,21 @@ public class URLPlaceholder {
         } else if (!targetId.equals(other.targetId)) {
             return false;
         }
+        if (tenant == null) {
+            if (other.tenant != null) {
+                return false;
+            }
+        } else if (!tenant.equals(other.tenant)) {
+            return false;
+        }
+        if (tenantId == null) {
+            if (other.tenantId != null) {
+                return false;
+            }
+        } else if (!tenantId.equals(other.tenantId)) {
+            return false;
+        }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return "URLPlaceholder [controllerId=" + controllerId + ", targetId=" + targetId + ", softwareModuleId="
-                + softwareModuleId + ", filename=" + filename + ", artifactId=" + artifactId + ", sha1Hash=" + sha1Hash
-                + "]";
     }
 
 }

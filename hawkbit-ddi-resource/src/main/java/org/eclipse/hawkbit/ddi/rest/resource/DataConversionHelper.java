@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfig;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -48,10 +49,10 @@ public final class DataConversionHelper {
     }
 
     static List<DdiChunk> createChunks(final Target target, final Action uAction,
-            final ArtifactUrlHandler artifactUrlHandler) {
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(), createArtifacts(target, module, artifactUrlHandler)))
+                        module.getName(), createArtifacts(target, module, artifactUrlHandler, systemManagement)))
                 .collect(Collectors.toList());
 
     }
@@ -78,22 +79,24 @@ public final class DataConversionHelper {
      */
     public static List<DdiArtifact> createArtifacts(final Target target,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
-            final ArtifactUrlHandler artifactUrlHandler) {
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
         final List<DdiArtifact> files = new ArrayList<>();
 
-        module.getLocalArtifacts().forEach(artifact -> files.add(createArtifact(target, artifactUrlHandler, artifact)));
+        module.getLocalArtifacts()
+                .forEach(artifact -> files.add(createArtifact(target, artifactUrlHandler, artifact, systemManagement)));
         return files;
     }
 
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
-            final LocalArtifact artifact) {
+            final LocalArtifact artifact, final SystemManagement systemManagement) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
         file.setFilename(artifact.getFilename());
         file.setSize(artifact.getSize());
 
         artifactUrlHandler
-                .getUrls(new URLPlaceholder(target.getControllerId(), target.getId(),
+                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
                         artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                         artifact.getSha1Hash()), APIType.DDI)
                 .forEach(entry -> file.add(new Link(entry.getRef()).withRel(entry.getRel())));

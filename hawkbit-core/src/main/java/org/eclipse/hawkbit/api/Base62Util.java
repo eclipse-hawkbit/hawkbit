@@ -36,6 +36,10 @@ public final class Base62Util {
         return sb.reverse().toString();
     }
 
+    /**
+     * @param base62
+     * @return
+     */
     public static Long toBase10(final String base62) {
         return toBase10(new StringBuilder(base62).reverse().toString().toCharArray());
     }

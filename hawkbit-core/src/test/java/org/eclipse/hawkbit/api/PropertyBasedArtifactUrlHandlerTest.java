@@ -10,16 +10,13 @@ package org.eclipse.hawkbit.api;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
@@ -40,11 +37,9 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     private ArtifactUrlHandler urlHandlerUnderTest;
 
-    @Mock
-    private TenantAware tenantAwareMock;
-
     private ArtifactUrlHandlerProperties properties;
 
+    private static final Long TENANT_ID = 456789L;
     private static final String CONTROLLER_ID = "Test";
     private static final String fileName = "A file 1234";
     private static final Long softwareModuleId = 87654L;
@@ -53,14 +48,13 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private static final Long artifactId = 1345678L;
     private static final String TENANT = "TEST_TENANT";
 
-    private static URLPlaceholder placeholder = new URLPlaceholder(CONTROLLER_ID, targetId, softwareModuleId, fileName,
-            artifactId, sha1Hash);
+    private static URLPlaceholder placeholder = new URLPlaceholder(TENANT, TENANT_ID, CONTROLLER_ID, targetId,
+            softwareModuleId, fileName, artifactId, sha1Hash);
 
     @Before
     public void setup() {
         properties = new ArtifactUrlHandlerProperties();
-        urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties, tenantAwareMock);
-        when(tenantAwareMock.getCurrentTenant()).thenReturn(TENANT);
+        urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties);
 
     }
 

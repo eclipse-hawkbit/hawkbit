@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -57,6 +58,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
+
+    @Autowired
+    private SystemManagement systemManagement;
 
     /**
      * Constructor.
@@ -166,7 +170,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final Artifact artifact = new Artifact();
 
         artifact.setUrls(artifactUrlHandler
-                .getUrls(new URLPlaceholder(target.getControllerId(), target.getId(),
+                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
                         localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getId(),
                         localArtifact.getSha1Hash()), APIType.DMF)
                 .stream().collect(Collectors.toMap(e -> e.getProtocol(), e -> e.getRef())));

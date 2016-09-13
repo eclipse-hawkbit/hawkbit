@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -89,6 +90,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private TenantAware tenantAware;
 
     @Autowired
+    private SystemManagement systemManagement;
+
+    @Autowired
     private ArtifactUrlHandler artifactUrlHandler;
 
     @Autowired
@@ -114,7 +118,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         }
 
-        return new ResponseEntity<>(DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler),
+        return new ResponseEntity<>(
+                DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement),
                 HttpStatus.OK);
     }
 
@@ -239,7 +244,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler);
+            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
+                    systemManagement);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

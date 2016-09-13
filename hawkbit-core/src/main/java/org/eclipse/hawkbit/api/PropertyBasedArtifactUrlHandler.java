@@ -16,13 +16,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 
 import com.google.common.base.Strings;
 
-//TODO kaizimmerm: teach US the short URL
-//TODO kaizimmerm: write wiki on download
-//TODO kaizimmerm: rework all sp configurations controllerID!!!
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
  * based on patterns configured by {@link ArtifactUrlHandlerProperties}.
@@ -39,14 +35,6 @@ import com.google.common.base.Strings;
  * {protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}.MD5SUM
  * 
- * Short:
- * {protocol}://{hostname}:{port}/{tenant}/controller/v1/t/{targetIdBase62}/{
- * softwareModuleIdBase62}/{artifactIdBase62}
- * 
- * Short (MD5SUM files):
- * {protocol}://{hostname}:{port}/{tenant}/controller/v1/t/{targetIdBase62}/{
- * softwareModuleIdBase62}/{artifactIdBase62}.MD5SUM
- * 
  */
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
@@ -62,16 +50,15 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String ARTIFACT_ID_BASE10_PLACEHOLDER = "artifactId";
     private static final String ARTIFACT_ID_BASE62_PLACEHOLDER = "artifactIdBase62";
     private static final String TENANT_PLACEHOLDER = "tenant";
+    private static final String TENANT_ID_BASE10_PLACEHOLDER = "tenantId";
+    private static final String TENANT_ID_BASE62_PLACEHOLDER = "tenantIdBase62";
     private static final String SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER = "softwareModuleId";
     private static final String SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER = "softwareModuleIdBase62";
 
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
-    private final TenantAware tenantAware;
 
-    public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties,
-            final TenantAware tenantAware) {
+    public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
         this.urlHandlerProperties = urlHandlerProperties;
-        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -107,7 +94,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
         replaceMap.put(PORT_PLACEHOLDER, protocol.getPort() == null ? null : String.valueOf(protocol.getPort()));
-        replaceMap.put(TENANT_PLACEHOLDER, tenantAware.getCurrentTenant());
+        replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
+        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
+        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
         replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
         replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
         replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
