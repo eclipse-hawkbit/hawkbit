@@ -107,7 +107,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         buttonLayout.addComponent(registered);
         buttonLayout.setComponentAlignment(registered, Alignment.MIDDLE_CENTER);
         addComponent(buttonLayout);
-        setComponentAlignment(buttonLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(buttonLayout, Alignment.MIDDLE_LEFT);
 
         final HorizontalLayout overdueLayout = new HorizontalLayout();
         final Label overdueLabel = new LabelBuilder().name(i18n.get("label.filter.by.overdue")).buildLabel();
@@ -117,6 +117,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         overdueLayout.addComponent(overdueLabel);
         overdueLayout.setComponentAlignment(overdueLabel, Alignment.MIDDLE_LEFT);
         addComponent(overdueLayout);
+        setComponentAlignment(overdueLayout, Alignment.MIDDLE_LEFT);
 
     }
 

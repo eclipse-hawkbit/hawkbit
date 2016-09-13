@@ -14,8 +14,10 @@
   $in-sync-color: $signal-green-color;
   $pending-color: $signal-yellow-color;
   $error-color:   $signal-red-color;
-  $overdue-color: $signal-black-color;
   $registered-color: $signal-light-blue-color;
+  
+  //Overdue filter button color
+  $overdue-color: $signal-dark-blue-color;
 
   //Filter by status buttons group alignment
   .target-status-filters {
