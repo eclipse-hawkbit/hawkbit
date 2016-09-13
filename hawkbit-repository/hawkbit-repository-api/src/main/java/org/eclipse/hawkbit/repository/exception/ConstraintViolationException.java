@@ -31,7 +31,18 @@ public class ConstraintViolationException extends AbstractServerRtException {
      *            thrown
      */
     public ConstraintViolationException(final javax.validation.ConstraintViolationException ex) {
-        super(getExceptionMessage(ex), SpServerError.SP_REPO_CONSTRAINT_VIOLATION);
+        this(getExceptionMessage(ex));
+    }
+
+    /**
+     * Creates a new {@link ConstraintViolationException} with the error code
+     * {@link SpServerError#SP_REPO_CONSTRAINT_VIOLATION}.
+     * 
+     * @param msgText
+     *            the message text for this exception
+     */
+    public ConstraintViolationException(final String msgText) {
+        super(msgText, SpServerError.SP_REPO_CONSTRAINT_VIOLATION);
     }
 
     /**

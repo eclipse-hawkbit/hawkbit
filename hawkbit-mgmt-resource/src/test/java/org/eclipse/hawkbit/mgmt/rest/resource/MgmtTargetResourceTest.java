@@ -672,7 +672,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a mandatory properteis of new targets are validated as not null.")
+    @Description("Verfies that a mandatory properties of new targets are validated as not null.")
     public void createTargetWithMissingMandatoryPropertyBadRequest() throws Exception {
         final Target test1 = entityFactory.generateTarget("id1", "token");
         test1.setName(null);
