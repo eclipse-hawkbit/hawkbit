@@ -17,7 +17,6 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -88,8 +87,6 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
                 artifactUrlHandlerMock);
-        amqpMessageDispatcherService = spy(amqpMessageDispatcherService);
-
     }
 
     @Test
