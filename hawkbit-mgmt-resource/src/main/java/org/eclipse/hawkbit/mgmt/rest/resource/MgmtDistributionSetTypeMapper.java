@@ -54,20 +54,14 @@ final class MgmtDistributionSetTypeMapper {
         final DistributionSetType result = entityFactory.generateDistributionSetType(smsRest.getKey(),
                 smsRest.getName(), smsRest.getDescription());
 
-        // Add mandatory
-        if (!CollectionUtils.isEmpty(smsRest.getMandatorymodules())) {
-            smsRest.getMandatorymodules().stream().map(mand -> {
-                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(mand.getId());
+        addMandatoryModules(softwareManagement, smsRest, result);
+        addOptionalModules(softwareManagement, smsRest, result);
 
-                if (smType == null) {
-                    throw new EntityNotFoundException("SoftwareModuleType with ID " + mand.getId() + " not found");
-                }
+        return result;
+    }
 
-                return smType;
-            }).forEach(result::addMandatoryModuleType);
-        }
-
-        // Add optional
+    private static void addOptionalModules(final SoftwareManagement softwareManagement,
+            final MgmtDistributionSetTypeRequestBodyPost smsRest, final DistributionSetType result) {
         if (!CollectionUtils.isEmpty(smsRest.getOptionalmodules())) {
             smsRest.getOptionalmodules().stream().map(opt -> {
                 final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(opt.getId());
@@ -79,8 +73,21 @@ final class MgmtDistributionSetTypeMapper {
                 return smType;
             }).forEach(result::addOptionalModuleType);
         }
+    }
 
-        return result;
+    private static void addMandatoryModules(final SoftwareManagement softwareManagement,
+            final MgmtDistributionSetTypeRequestBodyPost smsRest, final DistributionSetType result) {
+        if (!CollectionUtils.isEmpty(smsRest.getMandatorymodules())) {
+            smsRest.getMandatorymodules().stream().map(mand -> {
+                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(mand.getId());
+
+                if (smType == null) {
+                    throw new EntityNotFoundException("SoftwareModuleType with ID " + mand.getId() + " not found");
+                }
+
+                return smType;
+            }).forEach(result::addMandatoryModuleType);
+        }
     }
 
     static List<MgmtDistributionSetType> toTypesResponse(final List<DistributionSetType> types) {
