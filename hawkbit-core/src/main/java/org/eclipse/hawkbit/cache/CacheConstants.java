@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.cache;
 
 /**
  * Cache Constants.
- * 
- *
- *
  */
 public final class CacheConstants {
 
@@ -23,5 +20,4 @@ public final class CacheConstants {
 
     private CacheConstants() {
     }
-
 }

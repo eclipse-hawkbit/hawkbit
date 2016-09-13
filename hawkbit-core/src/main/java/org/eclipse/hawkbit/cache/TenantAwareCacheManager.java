@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.cache;
 
+import static java.util.Collections.emptyList;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -25,10 +26,6 @@ import org.springframework.cache.CacheManager;
  *
  * Additionally it also provide functionality to retrieve all caches overall
  * tenants at once, for monitoring and system access.
- *
- *
- *
- *
  */
 public class TenantAwareCacheManager implements TenancyCacheManager {
 
@@ -39,47 +36,45 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     private final TenantAware tenantAware;
 
     /**
+     * Constructor.
+     *
      * @param delegate
      *            the {@link CacheManager} to delegate to.
      * @param tenantAware
      *            the tenant aware to retrieve the current tenant
      */
     public TenantAwareCacheManager(final CacheManager delegate, final TenantAware tenantAware) {
-        this.delegate = delegate;
         this.tenantAware = tenantAware;
+        this.delegate = delegate;
     }
 
     @Override
     public Cache getCache(final String name) {
         String currentTenant = tenantAware.getCurrentTenant();
-        if (currentTenant == null) {
+        if (isTenantInvalid(currentTenant)) {
             return null;
         }
 
         currentTenant = currentTenant.toUpperCase();
-        if (currentTenant.contains(TENANT_CACHE_DELIMITER)) {
-            return null;
-        }
-        return delegate.getCache(currentTenant + TENANT_CACHE_DELIMITER + name);
+
+        return delegate.getCache(buildKey(currentTenant, name));
     }
 
     @Override
     public Collection<String> getCacheNames() {
         String currentTenant = tenantAware.getCurrentTenant();
-        if (currentTenant == null) {
-            return Collections.emptyList();
+        if (isTenantInvalid(currentTenant)) {
+            return emptyList();
         }
 
         currentTenant = currentTenant.toUpperCase();
-        if (currentTenant.contains(TENANT_CACHE_DELIMITER)) {
-            return Collections.emptyList();
-        }
+
         return getCacheNames(currentTenant);
     }
 
     /**
      * A direct access for retrieving all cache names overall tenants.
-     * 
+     *
      * @return all cache names without tenant check
      */
     public Collection<String> getDirectCacheNames() {
@@ -91,17 +86,17 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
         return delegate.getCache(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.cache.TenancyCacheManager#evictCaches(java.
-     * lang. String)
-     */
     @Override
     public void evictCaches(final String tenant) {
-        getCacheNames(tenant)
-                .forEach(cachename -> delegate.getCache(tenant + TENANT_CACHE_DELIMITER + cachename).clear());
+        getCacheNames(tenant).forEach(cachename -> delegate.getCache(buildKey(tenant, cachename)).clear());
+    }
+
+    private boolean isTenantInvalid(final String tenant) {
+        return tenant == null || tenant.contains(TENANT_CACHE_DELIMITER);
+    }
+
+    private String buildKey(final String tenant, final String cacheName) {
+        return tenant + TENANT_CACHE_DELIMITER + cacheName;
     }
 
     private Collection<String> getCacheNames(final String tenant) {
