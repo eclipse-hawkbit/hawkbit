@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -156,8 +157,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<Action> findActionByTargetAndActive(final Target target) {
+    public List<Action> findActiveActionByTarget(final Target target) {
         return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
+    }
+
+    @Override
+    public Optional<Action> findOldestActiveActionByTarget(final Target target) {
+        return actionRepository.findFirstByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 
     @Override
