@@ -17,7 +17,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
@@ -99,7 +99,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(forceLabel);
 
         final FlexibleOptionGroupItemComponent softItem = actionTypeOptionGroup.getItemComponent(ActionTypeOption.SOFT);
-        softItem.setId(SPUIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
+        softItem.setId(UIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
         softItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(softItem);
         final Label softLabel = new Label();
@@ -113,7 +113,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
                 .getItemComponent(ActionTypeOption.AUTO_FORCED);
         autoForceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         // setted Id for Time Forced radio button.
-        autoForceItem.setId(SPUIComponentIdProvider.ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED);
+        autoForceItem.setId(UIComponentIdProvider.ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED);
         addComponent(autoForceItem);
         final Label autoForceLabel = new Label();
         autoForceLabel.setStyleName("statusIconPending");

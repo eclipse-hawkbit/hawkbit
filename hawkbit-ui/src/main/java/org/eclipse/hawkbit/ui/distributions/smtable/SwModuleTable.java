@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteri
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -129,7 +129,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected String getTableId() {
-        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+        return UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
     @Override
@@ -311,7 +311,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private Button createShowArtifactDtlsButton(final String nameVersionStr) {
         final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
+                UIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.FILE_O, SPUIButtonStyleSmallNoBorder.class);
         showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));
@@ -320,7 +320,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));

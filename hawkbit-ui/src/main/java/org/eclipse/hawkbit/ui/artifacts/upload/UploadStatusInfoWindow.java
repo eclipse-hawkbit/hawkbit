@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,7 +201,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setPopupProperties() {
-        setId(SPUIComponentIdProvider.UPLOAD_STATUS_POPUP_ID);
+        setId(UIComponentIdProvider.UPLOAD_STATUS_POPUP_ID);
         addStyleName(SPUIStyleDefinitions.UPLOAD_INFO);
         setImmediate(true);
         setResizable(false);
@@ -423,7 +423,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button getMinimizeButton() {
         final Button minimizeBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
+                UIComponentIdProvider.UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
                 SPUIButtonStyleSmallNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
@@ -433,7 +433,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button getResizeButton() {
         final Button resizeBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID, "", "", "", true, FontAwesome.EXPAND,
+                UIComponentIdProvider.UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID, "", "", "", true, FontAwesome.EXPAND,
                 SPUIButtonStyleSmallNoBorder.class);
         resizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         resizeBtn.addClickListener(event -> resizeWindow(event));
@@ -467,7 +467,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button getCloseButton() {
         final Button closeBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID, "", "", "", true, FontAwesome.TIMES,
+                UIComponentIdProvider.UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID, "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleSmallNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         closeBtn.addClickListener(event -> onClose());

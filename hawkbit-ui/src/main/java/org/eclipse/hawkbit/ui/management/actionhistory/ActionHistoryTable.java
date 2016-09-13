@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
@@ -153,7 +153,7 @@ public class ActionHistoryTable extends TreeTable {
 
     private void initializeTableSettings() {
 
-        setId(SPUIComponentIdProvider.ACTION_HISTORY_TABLE_ID);
+        setId(UIComponentIdProvider.ACTION_HISTORY_TABLE_ID);
         setSelectable(false);
         setMultiSelect(false);
         setSortEnabled(true);
@@ -406,20 +406,20 @@ public class ActionHistoryTable extends TreeTable {
         final boolean isActionActive = target != null && SPUIDefinitions.ACTIVE.equals(activeValue);
 
         final Button actionCancel = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, "", i18n.get("message.cancel.action"),
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, "", i18n.get("message.cancel.action"),
                 ValoTheme.BUTTON_TINY, true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         actionCancel.setEnabled(isActionActive && !actionWithActiveStatus.isCancelingOrCanceled());
         actionCancel.addClickListener(event -> confirmAndCancelAction(actionId));
 
         final Button actionForce = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, "", i18n.get("message.force.action"),
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, "", i18n.get("message.force.action"),
                 ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT, SPUIButtonStyleSmallNoBorder.class);
         actionForce.setEnabled(
                 isActionActive && !actionWithActiveStatus.isForce() && !actionWithActiveStatus.isCancelingOrCanceled());
         actionForce.addClickListener(event -> confirmAndForceAction(actionId));
 
         final Button actionForceQuit = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, "", i18n.get("message.forcequit.action"),
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, "", i18n.get("message.forcequit.action"),
                 ValoTheme.BUTTON_TINY + " redicon", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         actionForceQuit.setEnabled(isActionActive && actionWithActiveStatus.isCancelingOrCanceled());
         actionForceQuit.addClickListener(event -> confirmAndForceQuitAction(actionId));

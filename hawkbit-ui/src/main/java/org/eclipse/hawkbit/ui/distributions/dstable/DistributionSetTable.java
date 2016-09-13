@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -151,7 +151,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected String getTableId() {
-        return SPUIComponentIdProvider.DIST_TABLE_ID;
+        return UIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override
@@ -416,7 +416,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected String getDropTableId() {
-        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+        return UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
     @Override
@@ -523,7 +523,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));

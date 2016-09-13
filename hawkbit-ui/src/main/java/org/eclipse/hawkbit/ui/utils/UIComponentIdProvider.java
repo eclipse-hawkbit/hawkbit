@@ -10,13 +10,8 @@ package org.eclipse.hawkbit.ui.utils;
 
 /**
  * Interface to provide the unchanged constants.
- *
- *
- *
- *
- *
  */
-public final class SPUIComponentIdProvider {
+public final class UIComponentIdProvider {
     /**
      * ID-Target.
      */
@@ -885,7 +880,7 @@ public final class SPUIComponentIdProvider {
     /**
      * /* Private Constructor.
      */
-    private SPUIComponentIdProvider() {
+    private UIComponentIdProvider() {
 
     }
 }

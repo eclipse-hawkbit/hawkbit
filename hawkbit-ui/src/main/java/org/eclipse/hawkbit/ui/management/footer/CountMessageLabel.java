@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,7 +126,7 @@ public class CountMessageLabel extends Label {
         /* Create label for Targets count message displaying below the table */
         addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
-        setId(SPUIComponentIdProvider.COUNT_LABEL);
+        setId(UIComponentIdProvider.COUNT_LABEL);
     }
 
     private void displayTargetCountStatus() {

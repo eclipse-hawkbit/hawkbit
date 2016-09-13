@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +131,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         buildSelectedTable();
 
         final VerticalLayout selectButtonLayout = new VerticalLayout();
-        final Button selectButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SELECT_DIST_TYPE, "", "",
+        final Button selectButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SELECT_DIST_TYPE, "", "",
                 "arrow-button", true, FontAwesome.FORWARD, SPUIButtonStyleSmallNoBorder.class);
         selectButton.addClickListener(event -> addSMType());
         final Button unSelectButton = SPUIComponentProvider.getButton("unselect-dist-type", "", "", "arrow-button",

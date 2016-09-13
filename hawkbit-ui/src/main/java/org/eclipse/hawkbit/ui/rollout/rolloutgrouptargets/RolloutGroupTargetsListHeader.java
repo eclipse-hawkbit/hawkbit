@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -135,7 +135,7 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     @Override
     protected String getCloseButtonId() {
-        return SPUIComponentIdProvider.ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID;
+        return UIComponentIdProvider.ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID;
     }
 
     @Override

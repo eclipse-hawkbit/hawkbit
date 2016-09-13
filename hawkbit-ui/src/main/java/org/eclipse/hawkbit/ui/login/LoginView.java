@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationTok
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -264,7 +264,7 @@ public class LoginView extends VerticalLayout implements View {
         final String linkStyle = "v-link";
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
-            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DOCUMENTATION,
+            final Link docuLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
             links.addComponent(docuLink);
@@ -272,14 +272,14 @@ public class LoginView extends VerticalLayout implements View {
         }
 
         if (!uiProperties.getDemo().getUser().isEmpty()) {
-            final Link demoLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DEMO,
+            final Link demoLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DEMO,
                     i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
             links.addComponent(demoLink);
             demoLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
-            final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_REQUESTACCOUNT,
+            final Link requestAccountLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_REQUESTACCOUNT,
                     i18n.get("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
                     FontAwesome.SHOPPING_CART, "", linkStyle);
             links.addComponent(requestAccountLink);
@@ -287,7 +287,7 @@ public class LoginView extends VerticalLayout implements View {
         }
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
-            final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_USERMANAGEMENT,
+            final Link userManagementLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle);
             links.addComponent(userManagementLink);
