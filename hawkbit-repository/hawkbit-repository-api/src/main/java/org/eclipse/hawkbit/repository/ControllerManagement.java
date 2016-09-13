@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -31,9 +30,9 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.cloud.bus.event.DownloadProgressEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import com.google.common.eventbus.EventBus;
 
 /**
  * Service layer for all operations of the DDI API (with access permissions only
@@ -58,7 +57,7 @@ public interface ControllerManagement {
     Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
 
     /**
-     * Sends the download progress and notifies the {@link EventBus} with a
+     * Sends the download progress and notifies the eventbus with a
      * {@link DownloadProgressEvent}.
      * 
      * @param statusId

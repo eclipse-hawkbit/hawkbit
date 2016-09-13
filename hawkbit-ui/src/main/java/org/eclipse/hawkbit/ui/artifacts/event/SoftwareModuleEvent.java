@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.ui.artifacts.event;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
  * Event to represent software add, update or delete.
  *
  */
-public class SoftwareModuleEvent extends BaseEntityEvent<SoftwareModule> {
+public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
 
     /**
      * Software module events in the Upload UI.

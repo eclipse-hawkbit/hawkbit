@@ -24,14 +24,14 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.Subscribe;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.VaadinSession.State;
 import com.vaadin.server.WrappedSession;
@@ -59,28 +59,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     private static final int BLOCK_SIZE = 10_000;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private final BlockingDeque<org.eclipse.hawkbit.eventbus.event.Event> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
-    private final EventBus.SessionEventBus eventBus;
-    private final com.google.common.eventbus.EventBus systemEventBus;
 
+    private EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
-
-    private final UIEventProvider eventProvider;
-
-    /**
-     * Constructor.
-     *
-     * @param eventBus
-     *            the session event bus to where the events should be dispatched
-     * @param systemEventBus
-     *            the system event bus where to retrieve the events from the
-     *            back-end
-     */
-    public DelayedEventBusPushStrategy(final SessionEventBus eventBus,
-            final com.google.common.eventbus.EventBus systemEventBus, final UIEventProvider eventProvider) {
-        this.eventBus = eventBus;
-        this.systemEventBus = systemEventBus;
-        this.eventProvider = eventProvider;
-    }
 
     /**
      * An {@link com.google.common.eventbus.EventBus} subscriber which
@@ -90,9 +74,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      * @param event
      *            the entity event which has been published from the repository
      */
-    @Subscribe
-    @AllowConcurrentEvents
+    @EventListener(classes = org.eclipse.hawkbit.eventbus.event.Event.class)
     public void dispatch(final org.eclipse.hawkbit.eventbus.event.Event event) {
+
+        System.out.println("Kam an:" + event);
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
@@ -115,14 +100,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         LOG.debug("Initialize delayed event push strategy");
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
                 2000, TimeUnit.MILLISECONDS);
-        systemEventBus.register(this);
     }
 
     @Override
     public void clean() {
         LOG.debug("Cleanup resources");
         jobHandle.cancel(true);
-        systemEventBus.unregister(this);
         executorService.shutdownNow();
         queue.clear();
     }
@@ -244,6 +227,14 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                             && eventProvider.getSingleEvents().contains(event.getClass()))
                     .forEach(event -> eventBus.publish(vaadinUI, event));
         }
+    }
+
+    /**
+     * @param eventBus
+     *            the eventBus to set
+     */
+    public void setEventBus(final EventBus.SessionEventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
 }

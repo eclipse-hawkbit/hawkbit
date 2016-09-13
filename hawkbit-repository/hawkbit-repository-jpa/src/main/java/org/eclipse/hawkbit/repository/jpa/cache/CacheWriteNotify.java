@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.jpa.cache;
 
 import java.math.RoundingMode;
 
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -19,6 +17,8 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cloud.bus.event.DownloadProgressEvent;
+import org.springframework.cloud.bus.event.RolloutGroupCreatedEvent;
 import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;

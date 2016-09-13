@@ -16,12 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -30,6 +24,12 @@ import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
+import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
+import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -100,7 +100,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(targetDeletedEvent).isNotNull();
-        assertThat(targetDeletedEvent.getTargetId()).isEqualTo(createdTarget.getId());
+        assertThat(targetDeletedEvent.getEntityId()).isEqualTo(createdTarget.getId());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final DistributionDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionDeletedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(dsDeletedEvent).isNotNull();
-        assertThat(dsDeletedEvent.getDistributionSetId()).isEqualTo(createDistributionSet.getId());
+        assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());
     }
 
     private class MyEventListener {

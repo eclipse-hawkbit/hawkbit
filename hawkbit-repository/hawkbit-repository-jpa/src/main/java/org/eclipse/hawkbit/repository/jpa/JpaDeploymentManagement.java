@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -75,6 +74,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -87,7 +88,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 
 /**
  * JPA implementation for {@link DeploymentManagement}.
@@ -126,7 +126,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private AuditorAware<String> auditorProvider;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventBus;
+
+    @Autowired
+    private ClusterNodeContext clusterNodeContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -340,7 +343,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     /**
      * Sends the {@link TargetAssignDistributionSetEvent} for a specific target
-     * to the {@link EventBus}.
+     * to the eventBus.
      *
      * @param target
      *            the Target which has been assigned to a distribution set
@@ -356,8 +359,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
-            eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
-            eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
+            eventBus.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), clusterNodeContext.getNodeId()));
+            eventBus.publishEvent(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                     target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
                     targetSecurityToken));
         });
@@ -435,7 +438,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     /**
      * Sends the {@link CancelTargetAssignmentEvent} for a specific target to
-     * the {@link EventBus}.
+     * the eventBus.
      *
      * @param target
      *            the Target which has been assigned to a distribution set
@@ -443,7 +446,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventBus.post(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
+        afterCommit.afterCommit(() -> eventBus.publishEvent(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
                 target.getTenant(), target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
     }
 

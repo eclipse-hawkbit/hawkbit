@@ -20,7 +20,7 @@ package org.eclipse.hawkbit.eventbus.event;
  *
  *
  */
-public interface EntityEvent extends Event, NodeAware {
+public interface EntityEvent<I> extends Event {
 
     /**
      * A typesafe way to retrieve the entity from the event, which might be
@@ -45,4 +45,9 @@ public interface EntityEvent extends Event, NodeAware {
      *         already deleted from the database
      */
     Object getEntity();
+
+    /**
+     * TODO:
+     */
+    I getEntityId();
 }

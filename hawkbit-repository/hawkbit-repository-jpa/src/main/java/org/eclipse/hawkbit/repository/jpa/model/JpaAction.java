@@ -28,8 +28,6 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.eclipse.hawkbit.repository.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -40,6 +38,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.springframework.cloud.bus.event.entity.ActionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.ActionPropertyChangeEvent;
 
 /**
  * JPA implementation of {@link Action}.
@@ -178,13 +178,14 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new ActionCreatedEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new ActionCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus()
-                .post(new ActionPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
+        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
+                new ActionPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
     }
 
     @Override

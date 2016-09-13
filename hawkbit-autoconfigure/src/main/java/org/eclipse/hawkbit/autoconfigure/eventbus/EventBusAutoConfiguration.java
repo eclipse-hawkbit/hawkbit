@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.autoconfigure.eventbus;
 
 import java.util.concurrent.Executor;
 
-import org.eclipse.hawkbit.eventbus.EventBusSubscriberProcessor;
-import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,16 +41,6 @@ public class EventBusAutoConfiguration {
     @ConditionalOnMissingBean
     public EventBus eventBus() {
         return new AsyncEventBus(executor);
-    }
-
-    /**
-     * @return the {@link EventBusSubscriberProcessor} to find classes annotated
-     *         with {@link EventSubscriber}.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public EventBusSubscriberProcessor eventBusSubscriberProcessor() {
-        return new EventBusSubscriberProcessor();
     }
 
     /**

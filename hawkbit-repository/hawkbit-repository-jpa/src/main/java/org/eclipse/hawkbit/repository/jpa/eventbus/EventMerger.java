@@ -12,23 +12,17 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.RolloutGroupCreatedEvent;
+import org.springframework.cloud.bus.event.entity.ActionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.ActionPropertyChangeEvent;
+import org.springframework.cloud.bus.event.entity.RolloutGroupPropertyChangeEvent;
+import org.springframework.cloud.bus.event.entity.RolloutPropertyChangeEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import org.springframework.stereotype.Service;
 
 /**
  * Collects and merges fine grained events to more generic events and push them
@@ -38,15 +32,14 @@ import com.google.common.eventbus.Subscribe;
  * merge them to one event together and post them in a fixed interval is easier
  * to consume e.g. for push notifications on UI.
  * 
+ * 
+ * TODO:
  */
-@EventSubscriber
+@Service
 public class EventMerger {
 
     private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
     private static final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
-
-    @Autowired
-    private EventBus eventBus;
 
     /**
      * Checks if there are events to publish in the fixed interval.
@@ -56,14 +49,16 @@ public class EventMerger {
         final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
         while (rolloutIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutIterator.next();
-            eventBus.post(new RolloutChangeEvent(1, eventKey.tenant, eventKey.rolloutId));
+            // eventBus.post(new RolloutChangeEvent(1, eventKey.tenant,
+            // eventKey.rolloutId));
             rolloutIterator.remove();
         }
 
         final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
         while (rolloutGroupIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutGroupIterator.next();
-            eventBus.post(new RolloutGroupChangeEvent(1, eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
+            // eventBus.post(new RolloutGroupChangeEvent(1, eventKey.tenant,
+            // eventKey.rolloutId, eventKey.rolloutGroupId));
             rolloutGroupIterator.remove();
         }
     }
@@ -75,8 +70,7 @@ public class EventMerger {
      * @param event
      *            the event on the event bus
      */
-    @Subscribe
-    @AllowConcurrentEvents
+    @EventListener(classes = Event.class)
     public void onEvent(final Event event) {
         Long rolloutId = null;
         Long rolloutGroupId = null;

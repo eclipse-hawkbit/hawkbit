@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
+import org.vaadin.spring.events.EventBus;
+
 import com.vaadin.ui.UI;
 
 /**
@@ -30,4 +32,6 @@ public interface EventPushStrategy {
      * {@link UI#detach()}.
      */
     void clean();
+
+    void setEventBus(final EventBus.SessionEventBus eventBus);
 }

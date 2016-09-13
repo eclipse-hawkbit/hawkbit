@@ -34,10 +34,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent.PropertyChange;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
@@ -53,6 +49,10 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
+import org.springframework.cloud.bus.event.entity.GenericEventEntity.PropertyChange;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
@@ -291,19 +291,22 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new DistributionCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
         final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(descriptorEvent);
-        EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new DistributionSetUpdateEvent(this, EventBusHolder.getInstance().getNodeId()));
 
         if (changeSet.containsKey(DELETED_PROPERTY)) {
             final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
             if (newDeleted) {
-                EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
+                EventBusHolder.getInstance().getApplicationEventPublisher()
+                        .publishEvent(new DistributionDeletedEvent(getTenant(), getId()));
             }
         }
 
@@ -311,7 +314,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new DistributionDeletedEvent(getTenant(), getId()));
     }
 
 }

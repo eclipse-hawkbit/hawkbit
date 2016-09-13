@@ -13,14 +13,14 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.bulk.TargetTagCreatedBulkEvent;
+import org.springframework.cloud.bus.event.entity.TargetTagDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetTagUpdateEvent;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 

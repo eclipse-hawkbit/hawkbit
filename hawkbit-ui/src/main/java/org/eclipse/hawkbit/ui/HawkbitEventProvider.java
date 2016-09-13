@@ -12,21 +12,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
+import org.springframework.cloud.bus.event.bulk.DistributionSetTagCreatedBulkEvent;
+import org.springframework.cloud.bus.event.bulk.TargetTagCreatedBulkEvent;
+import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetTagDeletedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetTagUpdateEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
+import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
+import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
+import org.springframework.cloud.bus.event.entity.TargetTagDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetTagUpdateEvent;
+import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 
 /**
  * The default hawkbit event provider.

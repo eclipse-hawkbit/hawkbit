@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.google.common.eventbus.EventBus;
 
@@ -24,6 +25,9 @@ public final class EventBusHolder {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private EventBusHolder() {
 
@@ -49,6 +53,17 @@ public final class EventBusHolder {
      */
     public void setEventBus(final EventBus eventBus) {
         this.eventBus = eventBus;
+    }
+
+    /**
+     * @return the applicationEventPublisher
+     */
+    public ApplicationEventPublisher getApplicationEventPublisher() {
+        return applicationEventPublisher;
+    }
+
+    public String getNodeId() {
+        return "TODO";
     }
 
 }

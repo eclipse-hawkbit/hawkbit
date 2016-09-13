@@ -38,7 +38,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
@@ -54,6 +53,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -334,7 +334,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new TargetInfoUpdateEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(new TargetInfoUpdateEvent(this));
     }
 
     @Override

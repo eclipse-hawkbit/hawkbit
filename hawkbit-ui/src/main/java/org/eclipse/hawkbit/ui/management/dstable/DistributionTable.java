@@ -20,9 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -50,6 +47,9 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -718,7 +718,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
         for (final DistributionDeletedEvent deletedEvent : events) {
-            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final Long distributionSetId = deletedEvent.getEntityId();
             final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
             if (visibleItemIds.contains(targetIdName)) {
                 dsContainer.removeItem(targetIdName);

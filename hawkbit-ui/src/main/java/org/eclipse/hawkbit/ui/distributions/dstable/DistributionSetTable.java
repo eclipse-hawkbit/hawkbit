@@ -21,9 +21,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
@@ -51,6 +48,9 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -530,7 +530,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return manageMetadataBtn;
     }
 
-   private void showMetadataDetails(final Long itemId) {
+    private void showMetadataDetails(final Long itemId) {
         final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
@@ -570,7 +570,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
         for (final DistributionDeletedEvent deletedEvent : events) {
-            final Long distributionSetId = deletedEvent.getDistributionSetId();
+            final Long distributionSetId = deletedEvent.getEntityId();
             final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
             if (visibleItemIds.contains(targetIdName)) {
                 dsContainer.removeItem(targetIdName);

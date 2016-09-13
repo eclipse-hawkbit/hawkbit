@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
@@ -57,6 +56,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -67,7 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
-import com.google.common.eventbus.EventBus;
 
 /**
  * JPA implementation of {@link DistributionSetManagement}.
@@ -99,7 +99,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private ActionRepository actionRepository;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventBus;
+
+    @Autowired
+    private ClusterNodeContext clusterNodeContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -149,7 +152,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
+        afterCommit
+                .afterCommit(() -> eventBus.publishEvent(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -199,8 +203,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        Arrays.stream(distributionSetIDs)
-                .forEach(dsId -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId)));
+        Arrays.stream(distributionSetIDs).forEach(dsId -> eventBus.publishEvent(
+                new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId, clusterNodeContext.getNodeId())));
     }
 
     @Override
@@ -713,7 +717,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
             final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
                     save, Collections.emptyList(), tag);
-            eventBus.post(new DistributionSetTagAssigmentResultEvent(result));
+            eventBus.publishEvent(new DistributionSetTagAssigmentResultEvent(result));
         });
 
         return save;

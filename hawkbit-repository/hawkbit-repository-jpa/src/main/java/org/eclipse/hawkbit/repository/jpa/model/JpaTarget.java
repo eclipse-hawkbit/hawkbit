@@ -36,9 +36,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -50,6 +47,9 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
+import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -240,16 +240,19 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new TargetCreatedEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new TargetCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new TargetUpdatedEvent(this));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(this, EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new TargetDeletedEvent(getTenant(), getId()));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new TargetDeletedEvent(getTenant(), getId()));
     }
 }

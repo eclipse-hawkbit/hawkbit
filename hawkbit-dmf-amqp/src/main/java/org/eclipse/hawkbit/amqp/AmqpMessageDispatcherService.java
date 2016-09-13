@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
-import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -32,8 +31,8 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.eventbus.Subscribe;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
@@ -43,7 +42,7 @@ import com.google.common.eventbus.Subscribe;
  * assignment.
  *
  */
-@EventSubscriber
+@Service
 public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     @Autowired
@@ -70,7 +69,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param targetAssignDistributionSetEvent
      *            the object to be send.
      */
-    @Subscribe
+    @EventListener(classes = TargetAssignDistributionSetEvent.class)
     public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final URI targetAdress = targetAssignDistributionSetEvent.getTargetAdress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
@@ -102,7 +101,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param cancelTargetAssignmentDistributionSetEvent
      *            the object to be send.
      */
-    @Subscribe
+    @EventListener(classes = CancelTargetAssignmentEvent.class)
     public void targetCancelAssignmentToDistributionSet(
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
         final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();

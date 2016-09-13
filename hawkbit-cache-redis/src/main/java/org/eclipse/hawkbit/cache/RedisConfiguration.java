@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.cache;
 
-import org.eclipse.hawkbit.cache.eventbus.EventDistributor;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,8 +20,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -45,15 +42,6 @@ public class RedisConfiguration {
 
     @Autowired
     private TenantAware tenantAware;
-
-    /**
-     * @return the {@link EventDistributor} to distribute and consume the events
-     *         from Redis
-     */
-    @Bean
-    public EventDistributor eventDistributor() {
-        return new EventDistributor();
-    }
 
     /**
      * @return the spring redis cache manager.
@@ -92,8 +80,8 @@ public class RedisConfiguration {
     @ConditionalOnMissingBean
     public RedisConnectionFactory redisConnectionFactory() {
         final JedisConnectionFactory factory = new JedisConnectionFactory();
-        factory.setHostName("127.0.0.1");
-        factory.setPort(6379);
+        factory.setHostName(redisProperties.getHost());
+        factory.setPort(redisProperties.getPort());
         factory.setUsePool(true);
         return factory;
     }
@@ -112,29 +100,6 @@ public class RedisConfiguration {
         redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         return redisTemplate;
-    }
-
-    /**
-     * @return the spring-redis message listener adapter to consume messages
-     *         from the Redis server
-     */
-    @Bean
-    public MessageListenerAdapter messageListenerAdapter() {
-        final MessageListenerAdapter messageListenerAdapter = new MessageListenerAdapter(eventDistributor());
-        messageListenerAdapter.setSerializer(new JdkSerializationRedisSerializer());
-        return messageListenerAdapter;
-    }
-
-    /**
-     * @return the spring-redis message listener container to register the
-     *         message listener adapter
-     */
-    @Bean
-    public RedisMessageListenerContainer redisContainer() {
-        final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(messageListenerAdapter(), eventDistributor().getTopics());
-        return container;
     }
 
 }

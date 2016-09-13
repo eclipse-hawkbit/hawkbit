@@ -19,7 +19,7 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -96,7 +96,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         eventBus.unsubscribe(this);
     }
 
-    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+    protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
         if (BaseEntityEventType.SELECTED_ENTITY != baseEntityEvent.getEventType()) {
             return;
         }

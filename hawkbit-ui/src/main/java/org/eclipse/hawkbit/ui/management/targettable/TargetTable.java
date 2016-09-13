@@ -28,10 +28,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -71,6 +67,10 @@ import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
+import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
+import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
+import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -306,7 +306,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshTargets = false;
         for (final TargetDeletedEvent deletedEvent : events) {
-            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getTargetId(), null, null);
+            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getEntityId(), null, null);
             if (visibleItemIds.contains(targetIdName)) {
                 targetContainer.removeItem(targetIdName);
             } else {
