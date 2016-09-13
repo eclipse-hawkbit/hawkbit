@@ -52,6 +52,14 @@
    </scm>
 
    <repositories>
+    <repository>
+        <id>spring-milestones</id>
+        <name>Spring Milestones</name>
+        <url>http://repo.spring.io/libs-milestone</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </repository>
       <repository>
          <id>vaadin-addons</id>
          <url>http://maven.vaadin.com/vaadin-addons</url>
@@ -424,15 +432,6 @@
             <version>${jlorem.version}</version>
          </dependency>
          <!-- Spring -->
-          <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-bus-parent</artifactId>
-            <version>1.1.1.RELEASE</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-         
-         
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -494,6 +493,14 @@
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
          </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-bus-parent</artifactId>
+            <version>1.2.0.RC1</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+         
          <!-- RSQL / FIQL parser -->
          <dependency>
             <groupId>cz.jirutka.rsql</groupId>

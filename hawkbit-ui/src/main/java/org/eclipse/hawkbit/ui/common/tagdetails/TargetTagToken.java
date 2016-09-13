@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -22,7 +23,6 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.event.entity.TargetTagUpdateEvent;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 

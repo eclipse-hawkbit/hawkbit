@@ -16,6 +16,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -24,12 +30,6 @@ import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
-import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
-import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
-import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
-import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

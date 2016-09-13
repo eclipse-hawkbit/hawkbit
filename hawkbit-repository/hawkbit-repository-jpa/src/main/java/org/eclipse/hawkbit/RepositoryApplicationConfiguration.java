@@ -60,6 +60,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
+import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -88,6 +89,7 @@ import com.google.common.eventbus.EventBus;
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
+@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.eventbus.event")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Autowired
     private EventBus eventBus;

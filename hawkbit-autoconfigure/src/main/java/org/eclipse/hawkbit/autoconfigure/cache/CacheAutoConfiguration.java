@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.cache;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
@@ -197,6 +198,11 @@ public class CacheAutoConfiguration extends CachingConfigurerSupport {
         @Override
         public void clear() {
             delegate.clear();
+        }
+
+        @Override
+        public <T> T get(final Object key, final Callable<T> valueLoader) {
+            return delegate.get(key, valueLoader);
         }
 
     }

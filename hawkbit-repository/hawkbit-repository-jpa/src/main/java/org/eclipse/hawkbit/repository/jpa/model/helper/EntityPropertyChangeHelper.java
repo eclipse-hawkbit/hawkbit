@@ -11,11 +11,11 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.eventbus.event.entity.GenericEventEntity.PropertyChange;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-import org.springframework.cloud.bus.event.entity.GenericEventEntity.PropertyChange;
 
 /**
  * Helper class to get the change set for the property changes in the Entity.

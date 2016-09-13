@@ -13,13 +13,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutGroupPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.springframework.cloud.bus.event.RolloutGroupCreatedEvent;
-import org.springframework.cloud.bus.event.entity.ActionCreatedEvent;
-import org.springframework.cloud.bus.event.entity.ActionPropertyChangeEvent;
-import org.springframework.cloud.bus.event.entity.RolloutGroupPropertyChangeEvent;
-import org.springframework.cloud.bus.event.entity.RolloutPropertyChangeEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

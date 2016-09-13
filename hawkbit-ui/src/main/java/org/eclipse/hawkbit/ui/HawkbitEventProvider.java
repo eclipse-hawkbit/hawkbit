@@ -14,19 +14,19 @@ import java.util.Set;
 import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
-import org.springframework.cloud.bus.event.bulk.DistributionSetTagCreatedBulkEvent;
-import org.springframework.cloud.bus.event.bulk.TargetTagCreatedBulkEvent;
-import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionSetTagDeletedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionSetTagUpdateEvent;
-import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
-import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
-import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
-import org.springframework.cloud.bus.event.entity.TargetInfoUpdateEvent;
-import org.springframework.cloud.bus.event.entity.TargetTagDeletedEvent;
-import org.springframework.cloud.bus.event.entity.TargetTagUpdateEvent;
-import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.bulk.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.bulk.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetUpdatedEvent;
 
 /**
  * The default hawkbit event provider.

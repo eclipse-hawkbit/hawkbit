@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.springframework.cloud.bus.event.entity.RolloutPropertyChangeEvent;
 
 /**
  * JPA implementation of a {@link Rollout}.

@@ -9,11 +9,11 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.bulk.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.event.bulk.TargetTagCreatedBulkEvent;
-import org.springframework.cloud.bus.event.entity.TargetTagDeletedEvent;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 

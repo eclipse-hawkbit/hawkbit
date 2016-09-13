@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.cache;
 
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,7 +15,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,19 +37,6 @@ public class RedisConfiguration {
 
     @Autowired
     private RedisProperties redisProperties;
-
-    @Autowired
-    private TenantAware tenantAware;
-
-    /**
-     * @return the spring redis cache manager.
-     */
-    @Bean
-    @Primary
-    public CacheManager cacheManager() {
-        return new ClusterableTenantAwareCacheManager(new TenantAwareCacheManager(directCacheManager(), tenantAware),
-                tenantAware);
-    }
 
     /**
      *

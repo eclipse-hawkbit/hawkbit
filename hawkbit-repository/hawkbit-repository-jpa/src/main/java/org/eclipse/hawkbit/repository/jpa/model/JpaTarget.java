@@ -36,6 +36,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -47,9 +50,6 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.springframework.cloud.bus.event.entity.TargetCreatedEvent;
-import org.springframework.cloud.bus.event.entity.TargetDeletedEvent;
-import org.springframework.cloud.bus.event.entity.TargetUpdatedEvent;
 import org.springframework.data.domain.Persistable;
 
 /**

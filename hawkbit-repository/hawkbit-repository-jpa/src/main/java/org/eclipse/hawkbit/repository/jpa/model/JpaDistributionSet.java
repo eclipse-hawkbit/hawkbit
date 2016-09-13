@@ -34,6 +34,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.entity.GenericEventEntity.PropertyChange;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
@@ -49,10 +53,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.springframework.cloud.bus.event.entity.DistributionCreatedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionDeletedEvent;
-import org.springframework.cloud.bus.event.entity.DistributionSetUpdateEvent;
-import org.springframework.cloud.bus.event.entity.GenericEventEntity.PropertyChange;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
