@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -81,7 +80,7 @@ public interface MgmtTargetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags);
+    ResponseEntity<List<MgmtTag>> createTargetTags(final List<MgmtTagRequestBodyPut> tags);
 
     /**
      *
@@ -96,7 +95,7 @@ public interface MgmtTargetTagRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final MgmtTagRequestBodyPut restTargetTagRest);
+            final MgmtTagRequestBodyPut restTargetTagRest);
 
     /**
      * Handles the DELETE request for a single target tag.
@@ -136,7 +135,7 @@ public interface MgmtTargetTagRestApi {
             + "/toggleTagAssignment")
     ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
      * Handles the POST request to assign targets to the given tag id.
@@ -150,7 +149,7 @@ public interface MgmtTargetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
     ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
      * Handles the DELETE request to unassign all targets from the given tag id.

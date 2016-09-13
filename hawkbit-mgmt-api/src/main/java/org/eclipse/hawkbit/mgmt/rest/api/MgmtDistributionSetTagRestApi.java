@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -82,7 +81,7 @@ public interface MgmtDistributionSetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTag>> createDistributionSetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags);
+    ResponseEntity<List<MgmtTag>> createDistributionSetTags(final List<MgmtTagRequestBodyPut> tags);
 
     /**
      *
@@ -99,7 +98,7 @@ public interface MgmtDistributionSetTagRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final MgmtTagRequestBodyPut restDSTagRest);
+            final MgmtTagRequestBodyPut restDSTagRest);
 
     /**
      * Handles the DELETE request for a single distribution set tag.
@@ -142,7 +141,7 @@ public interface MgmtDistributionSetTagRestApi {
             + "/toggleTagAssignment")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 
     /**
      * Handles the POST request to assign distribution sets to the given tag id.
@@ -157,7 +156,7 @@ public interface MgmtDistributionSetTagRestApi {
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 
     /**
      * Handles the DELETE request to unassign all distribution set from the

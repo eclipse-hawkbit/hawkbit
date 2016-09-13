@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -150,7 +149,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{targetid}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
+    ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("targetid") final String targetid, @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
@@ -167,7 +166,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{targetid}/"
             + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
+    ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
             @PathVariable("targetid") final String targetid);
 
     /**
@@ -205,7 +204,7 @@ public interface DdiRootControllerRestApi {
 
     @RequestMapping(value = "/{targetid}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
+    ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("targetid") @NotEmpty final String targetid,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
