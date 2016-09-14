@@ -363,7 +363,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DistributionSet distributionSet = action.get().getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
-        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
                 target.getOptLockRevision(), target.getTenant(), target, action.get().getId(), softwareModuleList));
 

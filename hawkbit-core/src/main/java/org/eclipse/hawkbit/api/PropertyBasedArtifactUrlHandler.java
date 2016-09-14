@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
@@ -94,7 +95,8 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
-        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER, placeholder.getFilename());
+        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
+                UrlEscapers.urlFragmentEscaper().escape(placeholder.getFilename()));
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
         replaceMap.put(PORT_PLACEHOLDER, protocol.getPort() == null ? null : String.valueOf(protocol.getPort()));
