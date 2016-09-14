@@ -152,7 +152,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            return handleAuthentifiactionMessage(message);
+            return handleAuthenticationMessage(message);
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
         } catch (final TenantNotExistException | ToManyStatusEntriesException e) {
@@ -204,7 +204,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return null;
     }
 
-    private Message handleAuthentifiactionMessage(final Message message) {
+    private Message handleAuthenticationMessage(final Message message) {
         final DownloadResponse authentificationResponse = new DownloadResponse();
         final MessageProperties messageProperties = message.getMessageProperties();
         final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
@@ -289,6 +289,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } else if (fileResource.getFilename() != null) {
             return artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream().findFirst()
                     .orElse(null);
+        } else if (fileResource.getArtifactId() != null) {
+            return artifactManagement.findLocalArtifact(fileResource.getArtifactId());
         } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
             return artifactManagement
                     .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),

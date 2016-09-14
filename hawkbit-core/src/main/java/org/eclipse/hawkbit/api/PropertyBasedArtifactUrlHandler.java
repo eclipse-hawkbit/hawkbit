@@ -57,6 +57,10 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
 
+    /**
+     * @param urlHandlerProperties
+     *            for URL generation configuration
+     */
     public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
         this.urlHandlerProperties = urlHandlerProperties;
     }

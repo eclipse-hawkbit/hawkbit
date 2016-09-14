@@ -80,6 +80,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class AmqpMessageHandlerServiceTest {
 
     private static final String TENANT = "DEFAULT";
+    private static final Long TENANT_ID = 123L;
+    private static String CONTROLLLER_ID = "123";
+    private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
 
@@ -277,7 +280,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -296,7 +299,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -320,7 +323,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);

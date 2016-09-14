@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
@@ -49,6 +50,9 @@ public class AmqpControllerAuthentfication {
 
     @Autowired
     private ControllerManagement controllerManagement;
+
+    @Autowired
+    private SystemManagement systemManagement;
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
@@ -99,11 +103,11 @@ public class AmqpControllerAuthentfication {
     }
 
     /**
-     * Performs authentication with the secruity token.
+     * Performs authentication with the security token.
      *
      * @param secruityToken
      *            the authentication request object
-     * @return the authentfication object
+     * @return the authentication object
      */
     public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
@@ -111,7 +115,14 @@ public class AmqpControllerAuthentfication {
             final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
             if (authenticationRest != null) {
                 authentication = authenticationRest;
-                authentication.setDetails(new TenantAwareAuthenticationDetails(secruityToken.getTenant(), true));
+
+                String tenant = secruityToken.getTenant();
+                if (tenant == null) {
+                    tenant = systemSecurityContext.runAsSystem(
+                            () -> systemManagement.getTenantMetadata(secruityToken.getTenantId()).getTenant());
+                }
+                authentication.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
+
                 break;
             }
         }

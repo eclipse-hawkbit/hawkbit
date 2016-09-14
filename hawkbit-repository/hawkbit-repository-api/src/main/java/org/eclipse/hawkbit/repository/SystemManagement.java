@@ -94,4 +94,14 @@ public interface SystemManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(@NotNull TenantMetaData metaData);
 
+    /**
+     * Returns {@link TenantMetaData} of given tenant ID.
+     *
+     * @param tenantId
+     *            to retrieve data for
+     * @return {@link TenantMetaData} of given tenant
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    TenantMetaData getTenantMetadata(@NotNull Long tenantId);
+
 }
