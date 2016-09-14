@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -94,7 +93,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
-            @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
+            final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
 
     /**
      * Handles the POST request of creating new SoftwareModuleTypes. The request
@@ -110,6 +109,6 @@ public interface MgmtSoftwareModuleTypeRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
-            @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
+            final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
 
 }

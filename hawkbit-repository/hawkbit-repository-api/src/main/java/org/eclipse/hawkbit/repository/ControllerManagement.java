@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -19,7 +20,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -95,7 +96,7 @@ public interface ControllerManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * @throws ToManyStatusEntriesException
+     * @throws TooManyStatusEntriesException
      *             if more than the allowed number of status entries are
      *             inserted
      */
@@ -111,7 +112,18 @@ public interface ControllerManagement {
      * @return a list of actions assigned to given target which are active
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> findActionByTargetAndActive(@NotNull Target target);
+    List<Action> findActiveActionByTarget(@NotNull Target target);
+
+    /**
+     * Retrieves oldest {@link Action} that is active and assigned to a
+     * {@link Target}.
+     *
+     * @param target
+     *            the target to retrieve the actions from
+     * @return a list of actions assigned to given target which are active
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<Action> findOldestActiveActionByTarget(@NotNull Target target);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy
