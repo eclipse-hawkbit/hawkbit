@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -26,7 +27,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
-import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -156,8 +157,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<Action> findActionByTargetAndActive(final Target target) {
+    public List<Action> findActiveActionByTarget(final Target target) {
         return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
+    }
+
+    @Override
+    public Optional<Action> findOldestActiveActionByTarget(final Target target) {
+        return actionRepository.findFirstByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 
     @Override
@@ -326,7 +332,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
                         securityProperties.getDos().getMaxStatusEntriesPerAction());
-                throw new ToManyStatusEntriesException(
+                throw new TooManyStatusEntriesException(
                         String.valueOf(securityProperties.getDos().getMaxStatusEntriesPerAction()));
             }
         }
