@@ -93,7 +93,7 @@ public class SimulationController {
                     gatewayToken));
         }
 
-        return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");
+        return ResponseEntity.ok("Updated " + amount + " " + protocol + " connected targets!");
     }
 
     private boolean isDmfDisabled() {

@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -99,7 +98,7 @@ public interface MgmtDistributionSetTypeRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
+            final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
 
     /**
      * Handles the POST request of creating new DistributionSetTypes. The
@@ -115,7 +114,7 @@ public interface MgmtDistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
-            @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
+            final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**
      * Handles the GET request of retrieving the list of mandatory software
@@ -229,7 +228,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json",
                             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @RequestBody final MgmtId smtId);
+            final MgmtId smtId);
 
     /**
      * Handles the POST request for adding an optional software module type to a
@@ -247,6 +246,6 @@ public interface MgmtDistributionSetTypeRestApi {
                     MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json",
                             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
-            @RequestBody final MgmtId smtId);
+            final MgmtId smtId);
 
 }

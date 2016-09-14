@@ -20,18 +20,6 @@
 
    <name>hawkBit-example :: DDI Feign Client</name>
 
-   <dependencyManagement>
-      <dependencies>
-         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix</artifactId>
-            <version>1.0.7.RELEASE</version>
-            <type>pom</type>
-            <scope>import</scope>
-         </dependency>
-      </dependencies>
-   </dependencyManagement>
-
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>

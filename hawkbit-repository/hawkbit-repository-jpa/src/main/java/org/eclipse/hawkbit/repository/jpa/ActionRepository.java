@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -79,20 +80,30 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Slice<Action> findByTarget(Pageable pageable, JpaTarget target);
 
     /**
-     * Retrieves all {@link Action}s which are active and referring the given
-     * {@link Target} in a specified order. Loads also the lazy
-     * {@link Action#getDistributionSet()} field.
+     * Retrieves all {@link Action}s which are active and referring to the given
+     * {@link Target} order by ID ascending.
      *
-     * @param pageable
-     *            page parameters
      * @param target
      *            the target to find assigned actions
      * @param active
      *            the action active flag
      * @return the found {@link Action}s
      */
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
     List<Action> findByTargetAndActiveOrderByIdAsc(final JpaTarget target, boolean active);
+
+    /**
+     * Retrieves the oldest {@link Action} that is active and referring to the
+     * given {@link Target}.
+     *
+     * @param target
+     *            the target to find assigned actions
+     * @param active
+     *            the action active flag
+     * 
+     * @return the found {@link Action}
+     */
+    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
+    Optional<Action> findFirstByTargetAndActiveOrderByIdAsc(final JpaTarget target, boolean active);
 
     /**
      * Retrieves latest {@link UpdateAction} for given target and

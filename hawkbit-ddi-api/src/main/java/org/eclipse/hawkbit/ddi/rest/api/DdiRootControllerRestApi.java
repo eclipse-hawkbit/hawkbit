@@ -150,7 +150,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
+    ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
@@ -168,7 +168,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{controllerId}/"
             + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
+    ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
             @PathVariable("controllerId") final String controllerId);
 
     /**
@@ -207,7 +207,7 @@ public interface DdiRootControllerRestApi {
 
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
+    ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 

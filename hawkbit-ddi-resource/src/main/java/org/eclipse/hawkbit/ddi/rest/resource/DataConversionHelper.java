@@ -14,6 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -105,30 +105,25 @@ public final class DataConversionHelper {
 
     }
 
-    static DdiControllerBase fromTarget(final Target target, final List<Action> actions,
+    static DdiControllerBase fromTarget(final Target target, final Optional<Action> action,
             final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
-        boolean addedUpdate = false;
-        boolean addedCancel = false;
-        final long countCancelingActions = actions.stream().filter(a -> a.getStatus() == Status.CANCELING).count();
-        for (final Action action : actions) {
-            if (countCancelingActions <= 0 && !action.isCancelingOrCanceled() && !addedUpdate) {
+        if (action.isPresent()) {
+            if (action.get().isCancelingOrCanceled()) {
+                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                        .getControllerCancelAction(target.getControllerId(), action.get().getId()))
+                                .withRel(DdiRestConstants.CANCEL_ACTION));
+            } else {
                 // we need to add the hashcode here of the actionWithStatus
                 // because the action might
                 // have changed from 'soft' to 'forced' type and we need to
                 // change the payload of the
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(target.getControllerId(), action.getId(),
-                                calculateEtag(action))).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
-                addedUpdate = true;
-            } else if (action.isCancelingOrCanceled() && !addedCancel) {
-                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerCancelAction(target.getControllerId(), action.getId()))
-                                .withRel(DdiRestConstants.CANCEL_ACTION));
-                addedCancel = true;
+                        .getControllerBasedeploymentAction(target.getControllerId(), action.get().getId(),
+                                calculateEtag(action.get()))).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }
 
