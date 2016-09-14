@@ -102,7 +102,7 @@ public class AmqpMessageHandlerServiceTest {
     private ArtifactManagement artifactManagementMock;
 
     @Mock
-    private AmqpControllerAuthentfication authenticationManagerMock;
+    private AmqpControllerAuthentication authenticationManagerMock;
 
     @Mock
     private ArtifactRepository artifactRepositoryMock;

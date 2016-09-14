@@ -30,47 +30,56 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * A controller which handles the amqp authentfication.
+ * A controller which handles the DMF AMQP authentication.
  */
-@Component
-public class AmqpControllerAuthentfication {
+public class AmqpControllerAuthentication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpControllerAuthentfication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpControllerAuthentication.class);
 
-    private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider;
+    private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider = new PreAuthTokenSourceTrustAuthenticationProvider();
 
     private final List<PreAuthentificationFilter> filterChain = new ArrayList<>();
 
-    @Autowired
-    private ControllerManagement controllerManagement;
+    private final ControllerManagement controllerManagement;
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemManagement systemManagement;
 
-    @Autowired
-    private TenantConfigurationManagement tenantConfigurationManagement;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
 
-    @Autowired
-    private TenantAware tenantAware;
+    private final TenantAware tenantAware;
 
-    @Autowired
-    private DdiSecurityProperties ddiSecruityProperties;
+    private final DdiSecurityProperties ddiSecruityProperties;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final SystemSecurityContext systemSecurityContext;
 
     /**
      * Constructor.
+     * 
+     * @param systemManagement
+     * @param controllerManagement
+     * @param tenantConfigurationManagement
+     * @param tenantAware
+     *            current tenant
+     * @param ddiSecruityProperties
+     *            security configurations
+     * @param systemSecurityContext
+     *            security context
      */
-    public AmqpControllerAuthentfication() {
-        preAuthenticatedAuthenticationProvider = new PreAuthTokenSourceTrustAuthenticationProvider();
+    public AmqpControllerAuthentication(final SystemManagement systemManagement,
+            final ControllerManagement controllerManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
+        this.controllerManagement = controllerManagement;
+        this.systemManagement = systemManagement;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.tenantAware = tenantAware;
+        this.ddiSecruityProperties = ddiSecruityProperties;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     /**
@@ -103,11 +112,11 @@ public class AmqpControllerAuthentfication {
     }
 
     /**
-     * Performs authentication with the security token.
+     * Performs authentication with the secruity token.
      *
      * @param secruityToken
      *            the authentication request object
-     * @return the authentication object
+     * @return the authentfication object
      */
     public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
@@ -122,7 +131,6 @@ public class AmqpControllerAuthentfication {
                             () -> systemManagement.getTenantMetadata(secruityToken.getTenantId()).getTenant());
                 }
                 authentication.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
-
                 break;
             }
         }
@@ -150,23 +158,4 @@ public class AmqpControllerAuthentfication {
         return new PreAuthenticatedAuthenticationToken(principal, credentials);
     }
 
-    public void setControllerManagement(final ControllerManagement controllerManagement) {
-        this.controllerManagement = controllerManagement;
-    }
-
-    public void setSecruityProperties(final DdiSecurityProperties secruityProperties) {
-        this.ddiSecruityProperties = secruityProperties;
-    }
-
-    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-    }
-
-    public void setTenantAware(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
-
-    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
-        this.systemSecurityContext = systemSecurityContext;
-    }
 }

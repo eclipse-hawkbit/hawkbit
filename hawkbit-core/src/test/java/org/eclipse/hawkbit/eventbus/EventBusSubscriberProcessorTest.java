@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -56,6 +57,7 @@ public class EventBusSubscriberProcessorTest {
     }
 
     @EventSubscriber
+    @Service
     private class TestEventSubscriberClass {
         @Subscribe
         public void subscribe(final String s) {
@@ -64,6 +66,7 @@ public class EventBusSubscriberProcessorTest {
     }
 
     @EventSubscriber
+    @Service
     private class TestWrongEventSubscriberClass {
         public void methodWithoutAnnotation(final String s) {
 

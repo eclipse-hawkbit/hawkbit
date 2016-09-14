@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.eventbus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -22,6 +23,7 @@ import com.google.common.eventbus.Subscribe;
  *
  */
 @EventSubscriber
+@Service
 public class DeadEventListener {
     private static final Logger LOG = LoggerFactory.getLogger(DeadEventListener.class);
 

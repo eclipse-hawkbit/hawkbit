@@ -41,7 +41,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     private static final Long TENANT_ID = 456789L;
     private static final String CONTROLLER_ID = "Test";
-    private static final String fileName = "A file 1234";
+    private static final String fileName = "Afile1234";
     private static final Long softwareModuleId = 87654L;
     private static final Long targetId = 3474366L;
     private static final String sha1Hash = "test12345";

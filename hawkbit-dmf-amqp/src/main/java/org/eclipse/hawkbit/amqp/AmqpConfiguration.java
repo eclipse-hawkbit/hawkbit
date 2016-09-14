@@ -14,7 +14,14 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
+import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
@@ -33,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,11 +49,12 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
 
 /**
- * The spring AMQP configuration which is enabled by using the profile
- * {@code amqp} to use a AMQP for communication with SP enabled devices.
+ * Spring configuration for AMQP 0.9 based DMF communication for indirect device
+ * integration.
  *
  */
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
+@ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
 public class AmqpConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
@@ -61,6 +70,7 @@ public class AmqpConfiguration {
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
+    @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
     protected static class RabbitConnectionFactoryCreator {
 
         @Autowired
@@ -278,6 +288,25 @@ public class AmqpConfiguration {
     public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
             final ErrorHandler errorHandler) {
         return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
+    public AmqpControllerAuthentication amqpControllerAuthentication(final SystemManagement systemManagement,
+            final ControllerManagement controllerManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
+        return new AmqpControllerAuthentication(systemManagement, controllerManagement, tenantConfigurationManagement,
+                tenantAware, ddiSecruityProperties, systemSecurityContext);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
+    public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+            final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {
+        return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
+                systemSecurityContext, systemManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

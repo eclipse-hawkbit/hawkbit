@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -31,12 +30,14 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
@@ -63,6 +64,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
+    private static final Long TENANT_ID = 4711L;
 
     private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");
 
@@ -73,6 +75,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private RabbitTemplate rabbitTemplate;
 
     private DefaultAmqpSenderService senderService;
+
+    private SystemManagement systemManagement;
 
     private static final String CONTROLLER_ID = "1";
 
@@ -86,19 +90,22 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
-        amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate);
-        amqpMessageDispatcherService = spy(amqpMessageDispatcherService);
 
         senderService = Mockito.mock(DefaultAmqpSenderService.class);
-        amqpMessageDispatcherService.setAmqpSenderService(senderService);
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(anyObject(), anyObject()))
                 .thenReturn(Lists.newArrayList(new ArtifactUrl("http", "download", "http://mockurl")));
 
-        amqpMessageDispatcherService.setArtifactUrlHandler(artifactUrlHandlerMock);
+        systemManagement = Mockito.mock(SystemManagement.class);
+        final TenantMetaData tenantMetaData = Mockito.mock(TenantMetaData.class);
+        when(tenantMetaData.getId()).thenReturn(TENANT_ID);
+        when(tenantMetaData.getTenant()).thenReturn(TENANT);
 
-        amqpMessageDispatcherService.setSystemSecurityContext(systemSecurityContext);
+        when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
+
+        amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement);
 
     }
 

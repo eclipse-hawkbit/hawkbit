@@ -23,6 +23,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -32,6 +33,7 @@ import com.google.common.eventbus.Subscribe;
  *
  */
 @EventSubscriber
+@Service
 public class EventDistributor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventDistributor.class);
