@@ -9,13 +9,12 @@
 package org.eclipse.hawkbit.ddi.client.resource;
 
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
-import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  * Client binding for the artifact store controller resource of the DDI-DL API.
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + DdiDlRestConstants.ARTIFACTS_V1_REQUEST_MAPPING)
+@FeignClient(name = "DdiDlArtifactStoreControllerClient", url = "${hawkbit.url:localhost:8080}")
 public interface DdiDlArtifactStoreControllerResourceClient extends DdiDlArtifactStoreControllerRestApi {
 
 }
