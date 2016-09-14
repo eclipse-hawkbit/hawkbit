@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * 
@@ -50,18 +49,18 @@ public class ConfigurableScenario {
 
     private final MgmtSoftwareModuleClientResource softwareModuleResource;
 
-    private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
-
     private final MgmtTargetClientResource targetResource;
 
     private final MgmtRolloutClientResource rolloutResource;
 
     private final ClientConfigurationProperties clientConfigurationProperties;
 
+    private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
+
     public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
-            @Qualifier("mgmtSoftwareModuleClientResource") final MgmtSoftwareModuleClientResource softwareModuleResource,
-            @Qualifier("uploadSoftwareModule") final MgmtSoftwareModuleClientResource uploadSoftwareModule,
-            final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final MgmtSoftwareModuleClientResource softwareModuleResource,
+            final MgmtSoftwareModuleClientResource uploadSoftwareModule, final MgmtTargetClientResource targetResource,
+            final MgmtRolloutClientResource rolloutResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
         this.distributionSetResource = distributionSetResource;
         this.softwareModuleResource = softwareModuleResource;
@@ -191,7 +190,7 @@ public class ConfigurableScenario {
                         .type("application").buildAsList(scenario.getAppModulesPerDistributionSet()))
                 .getBody());
 
-        for (int x = 0; x < scenario.getArtifactsPerSM(); x++) {
+        for (int iArtifact = 0; iArtifact < scenario.getArtifactsPerSM(); iArtifact++) {
             modules.forEach(module -> {
                 final ArtifactFile file = new ArtifactFile("dummyfile.dummy", null, "multipart/form-data", artifact);
                 uploadSoftwareModule.uploadArtifact(module.getModuleId(), file, null, null, null);
@@ -199,21 +198,6 @@ public class ConfigurableScenario {
         }
 
         return modules;
-    }
-
-    private static byte[] generateArtifact(final Scenario scenario) {
-
-        // Exception squid:S2245 - not used for cryptographic function
-        @SuppressWarnings("squid:S2245")
-        final Random random = new Random();
-
-        // create byte array
-        final byte[] nbyte = new byte[parseSize(scenario.getArtifactSize())];
-
-        // put the next byte in the array
-        random.nextBytes(nbyte);
-
-        return nbyte;
     }
 
     private void createTargets(final Scenario scenario) {
@@ -238,5 +222,20 @@ public class ConfigurableScenario {
             return Integer.valueOf(size.substring(0, size.length() - 2)) * 1024 * 1024;
         }
         return Integer.valueOf(size);
+    }
+
+    private static byte[] generateArtifact(final Scenario scenario) {
+
+        // Exception squid:S2245 - not used for cryptographic function
+        @SuppressWarnings("squid:S2245")
+        final Random random = new Random();
+
+        // create byte array
+        final byte[] nbyte = new byte[parseSize(scenario.getArtifactSize())];
+
+        // put the next byte in the array
+        random.nextBytes(nbyte);
+
+        return nbyte;
     }
 }

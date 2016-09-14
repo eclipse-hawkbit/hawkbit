@@ -120,39 +120,6 @@ public class GenerateDialog extends Window {
 
     }
 
-    @Override
-    public int hashCode() {// NOSONAR - as this is generated
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((formLayout == null) ? 0 : formLayout.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {// NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final GenerateDialog other = (GenerateDialog) obj;
-        if (formLayout == null) {
-            if (other.formLayout != null) {
-                return false;
-            }
-        } else if (!formLayout.equals(other.formLayout)) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Callback interface to retrieve the result from the dialog window.
      * 
@@ -225,19 +192,20 @@ public class GenerateDialog extends Window {
         });
     }
 
-    private TextField createRequiredTextfield(final String caption, final String value, final Resource icon,
+    private static TextField createRequiredTextfield(final String caption, final String value, final Resource icon,
             final Validator validator) {
         final TextField textField = new TextField(caption, value);
         return addTextFieldValues(textField, icon, validator);
     }
 
-    private TextField createRequiredTextfield(final String caption, final Property<?> dataSource, final Resource icon,
-            final Validator validator) {
+    private static TextField createRequiredTextfield(final String caption, final Property<?> dataSource,
+            final Resource icon, final Validator validator) {
         final TextField textField = new TextField(caption, dataSource);
         return addTextFieldValues(textField, icon, validator);
     }
 
-    private TextField addTextFieldValues(final TextField textField, final Resource icon, final Validator validator) {
+    private static TextField addTextFieldValues(final TextField textField, final Resource icon,
+            final Validator validator) {
         textField.setIcon(icon);
         textField.setRequired(true);
         if (validator != null) {

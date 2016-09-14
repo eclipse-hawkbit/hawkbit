@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.mgmt.client.resource;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE)
+@FeignClient(name = "MgmtDownloadClient", url = "${hawkbit.url:localhost:8080}")
 public interface MgmtDownloadClientResource extends MgmtDownloadRestApi {
 }

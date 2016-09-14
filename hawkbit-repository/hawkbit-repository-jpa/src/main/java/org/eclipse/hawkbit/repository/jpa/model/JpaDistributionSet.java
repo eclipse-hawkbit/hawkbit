@@ -73,8 +73,6 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
-    private static final String COMPLETE_PROPERTY = "complete";
-
     private static final String DELETED_PROPERTY = "deleted";
 
     @Column(name = "required_migration_step")
@@ -301,8 +299,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
-        final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(JpaDistributionSet.class,
-                descriptorEvent);
+        final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(descriptorEvent);
         EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
 
         if (changeSet.containsKey(DELETED_PROPERTY)) {

@@ -214,8 +214,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new RolloutPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(Rollout.class, descriptorEvent)));
+        EventBusHolder.getInstance().getEventBus()
+                .post(new RolloutPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
 
     }
 
