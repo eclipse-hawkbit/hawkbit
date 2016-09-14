@@ -124,20 +124,23 @@ public final class DataConversionHelper {
                 // change the payload of the
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(target.getControllerId(), action.getId(),
-                                calculateEtag(action))).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                        .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                action.getId(), calculateEtag(action)))
+                                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
                 addedUpdate = true;
             } else if (action.isCancelingOrCanceled() && !addedCancel) {
-                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerCancelAction(target.getControllerId(), action.getId()))
-                                .withRel(DdiRestConstants.CANCEL_ACTION));
+                result.add(linkTo(
+                        methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).getControllerCancelAction(
+                                tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()))
+                                        .withRel(DdiRestConstants.CANCEL_ACTION));
                 addedCancel = true;
             }
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
-            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
-                    target.getControllerId())).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
+            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                    .putConfigData(tenantAware.getCurrentTenant(), null, target.getControllerId()))
+                            .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
     }
