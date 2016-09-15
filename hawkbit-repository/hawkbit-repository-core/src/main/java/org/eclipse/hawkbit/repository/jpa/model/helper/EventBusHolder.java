@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.google.common.eventbus.EventBus;
@@ -28,6 +29,9 @@ public final class EventBusHolder {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private EventBusHolder() {
 
@@ -63,7 +67,7 @@ public final class EventBusHolder {
     }
 
     public String getNodeId() {
-        return "TODO";
+        return applicationContext.getId();
     }
 
 }

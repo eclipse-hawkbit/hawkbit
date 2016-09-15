@@ -18,7 +18,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;

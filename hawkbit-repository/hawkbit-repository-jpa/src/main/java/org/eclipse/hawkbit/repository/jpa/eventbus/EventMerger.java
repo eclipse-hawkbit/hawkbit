@@ -13,11 +13,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.RolloutGroupPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.springframework.context.event.EventListener;

@@ -13,9 +13,9 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.bulk.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.bulk.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;

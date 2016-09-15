@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -842,8 +842,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                target.getControllerId());
+                ds.getId(), ActionType.SOFT,
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
         Action findAction = deploymentManagement.findAction(action.getId());
@@ -865,8 +865,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                target.getControllerId());
+                ds.getId(), ActionType.FORCED,
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation
         Action findAction = deploymentManagement.findAction(action.getId());

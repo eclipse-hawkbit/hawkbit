@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.repository.jpa.cache;
 
 import java.math.RoundingMode;
 
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.ActionStatus;

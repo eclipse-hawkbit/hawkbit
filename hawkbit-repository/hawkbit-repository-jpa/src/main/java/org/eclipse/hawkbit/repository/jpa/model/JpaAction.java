@@ -28,8 +28,8 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.ActionPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -184,8 +184,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
-                new ActionPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
+        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(new ActionPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override

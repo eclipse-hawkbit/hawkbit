@@ -34,10 +34,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.GenericEventEntity.PropertyChange;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.json.GenericEventEntity.PropertyChange;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
@@ -305,8 +305,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         if (changeSet.containsKey(DELETED_PROPERTY)) {
             final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
             if (newDeleted) {
-                EventBusHolder.getInstance().getApplicationEventPublisher()
-                        .publishEvent(new DistributionDeletedEvent(getTenant(), getId()));
+                EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
+                        new DistributionDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
             }
         }
 
@@ -314,8 +314,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new DistributionDeletedEvent(getTenant(), getId()));
+        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
+                new DistributionDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
     }
 
 }

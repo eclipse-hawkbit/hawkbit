@@ -32,11 +32,6 @@ public class DefaultEvent implements Event {
     }
 
     @Override
-    public long getRevision() {
-        return revision;
-    }
-
-    @Override
     public String getTenant() {
         return tenant;
     }

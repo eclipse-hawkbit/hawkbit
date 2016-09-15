@@ -75,6 +75,7 @@
       <!-- Newer versions needed than defined in Boot-->
       <spring-amqp.version>1.6.1.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
+      <spring-core.version>4.3.2.RELEASE</spring-core.version>
       <!--  Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->
@@ -115,6 +116,8 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.0.0</rsql-parser.version>
       <spring.redis>1.7.2.RELEASE</spring.redis>
+      <spring-cloud-bus.version>1.2.0.RC1</spring-cloud-bus.version>
+      
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -496,9 +499,15 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-bus-parent</artifactId>
-            <version>1.2.0.RC1</version>
+            <version>${spring-cloud-bus.version}</version>
             <type>pom</type>
             <scope>import</scope>
+        </dependency>
+        <!-- Remove after Upgrade to SpringBoot 1.4.0 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring-core.version}</version>
         </dependency>
          
          <!-- RSQL / FIQL parser -->

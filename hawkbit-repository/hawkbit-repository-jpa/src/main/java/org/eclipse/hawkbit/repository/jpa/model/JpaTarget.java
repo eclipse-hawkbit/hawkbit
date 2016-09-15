@@ -36,9 +36,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -253,6 +253,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new TargetDeletedEvent(getTenant(), getId()));
+                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
     }
 }

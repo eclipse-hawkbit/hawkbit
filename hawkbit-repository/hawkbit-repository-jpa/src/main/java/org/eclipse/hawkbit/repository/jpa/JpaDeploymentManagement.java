@@ -33,8 +33,8 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -75,6 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -129,7 +130,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private ApplicationEventPublisher eventBus;
 
     @Autowired
-    private ClusterNodeContext clusterNodeContext;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -359,7 +360,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
-            eventBus.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), clusterNodeContext.getNodeId()));
+            eventBus.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), applicationContext.getId()));
             eventBus.publishEvent(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                     target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
                     targetSecurityToken));

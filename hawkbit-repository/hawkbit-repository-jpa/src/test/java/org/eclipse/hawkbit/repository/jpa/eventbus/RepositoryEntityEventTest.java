@@ -16,12 +16,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;

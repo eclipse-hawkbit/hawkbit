@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;

@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -41,6 +43,20 @@ public class EventBusAutoConfiguration {
     @ConditionalOnMissingBean
     public EventBus eventBus() {
         return new AsyncEventBus(executor);
+    }
+
+    /**
+     * Server internal eventBus that allows parallel event processing if the
+     * subscriber is marked as so.
+     *
+     * @return eventbus bean
+     */
+    @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+    @ConditionalOnMissingBean
+    public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new SimpleApplicationEventMulticaster();
+        simpleApplicationEventMulticaster.setTaskExecutor(executor);
+        return simpleApplicationEventMulticaster;
     }
 
     /**

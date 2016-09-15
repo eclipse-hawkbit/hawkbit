@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;

@@ -29,7 +29,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;

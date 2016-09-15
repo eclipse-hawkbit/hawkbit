@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -29,8 +28,8 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.TargetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -52,6 +51,8 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -68,7 +69,6 @@ import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -94,7 +94,10 @@ public class JpaTargetManagement implements TargetManagement {
     private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventBus;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private TenantAware tenantAware;
@@ -211,8 +214,8 @@ public class JpaTargetManagement implements TargetManagement {
             targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
             targetRepository.deleteByIdIn(targetsForCurrentTenant);
         }
-        targetsForCurrentTenant
-                .forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
+        targetsForCurrentTenant.forEach(targetId -> eventBus.publishEvent(
+                new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId, applicationContext.getId())));
     }
 
     @Override
@@ -346,7 +349,7 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
+            afterCommit.afterCommit(() -> eventBus.publishEvent(new TargetTagAssigmentResultEvent(result)));
             return result;
         }
 
@@ -356,7 +359,7 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
                 allTargets.size(), 0, new ArrayList<>(targetRepository.save(allTargets)), Collections.emptyList(), tag);
 
-        afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
+        afterCommit.afterCommit(() -> eventBus.publishEvent(new TargetTagAssigmentResultEvent(result)));
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -376,7 +379,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
-            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
         });
 
         return save;
@@ -391,7 +394,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
-            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
         });
         return save;
     }
@@ -559,11 +562,6 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Object[]> resultList = getTargetIdNameResultSet(pageRequest, cb, targetRoot, multiselect);
         return resultList.parallelStream().map(o -> new TargetIdName((long) o[0], o[1].toString(), o[2].toString()))
                 .collect(Collectors.toList());
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unregister(this);
     }
 
     @Override

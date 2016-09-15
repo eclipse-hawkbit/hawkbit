@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;

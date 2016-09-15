@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.bulk.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;

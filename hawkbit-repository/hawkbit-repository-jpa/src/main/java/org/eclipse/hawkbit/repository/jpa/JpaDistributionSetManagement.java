@@ -28,8 +28,8 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.local.DistributionSetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -57,6 +57,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -102,7 +103,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private ApplicationEventPublisher eventBus;
 
     @Autowired
-    private ClusterNodeContext clusterNodeContext;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -204,7 +205,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         Arrays.stream(distributionSetIDs).forEach(dsId -> eventBus.publishEvent(
-                new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId, clusterNodeContext.getNodeId())));
+                new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
     }
 
     @Override

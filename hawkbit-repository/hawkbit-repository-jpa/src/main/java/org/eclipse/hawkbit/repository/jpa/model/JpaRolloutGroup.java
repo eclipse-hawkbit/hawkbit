@@ -25,7 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.entity.RolloutGroupPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -247,8 +247,10 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
-                new RolloutGroupPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
+        EventBusHolder.getInstance().getApplicationEventPublisher()
+                .publishEvent(new RolloutGroupPropertyChangeEvent(this,
+                        EntityPropertyChangeHelper.getChangeSet(descriptorEvent),
+                        EventBusHolder.getInstance().getNodeId()));
     }
 
     @Override

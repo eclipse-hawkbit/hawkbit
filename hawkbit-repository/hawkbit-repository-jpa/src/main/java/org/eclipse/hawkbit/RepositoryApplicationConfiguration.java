@@ -89,7 +89,7 @@ import com.google.common.eventbus.EventBus;
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.eventbus.event")
+@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.eventbus.event.remote")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Autowired
     private EventBus eventBus;

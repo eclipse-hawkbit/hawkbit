@@ -12,7 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
