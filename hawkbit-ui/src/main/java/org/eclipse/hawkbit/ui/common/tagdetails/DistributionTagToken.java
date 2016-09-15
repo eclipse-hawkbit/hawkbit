@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.local.DistributionSetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.local.DistributionSetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;

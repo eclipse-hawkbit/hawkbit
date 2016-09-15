@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.event.Event;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.spring.events.EventBus;

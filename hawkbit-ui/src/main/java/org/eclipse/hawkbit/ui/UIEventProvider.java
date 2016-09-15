@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.event.Event;
 
 /**
  * The UI event provider hold all supported repository events which will

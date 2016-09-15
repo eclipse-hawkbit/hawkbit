@@ -28,10 +28,10 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.ActionPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -178,14 +178,14 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(new ActionPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new ActionPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

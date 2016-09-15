@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -32,13 +32,13 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import com.mongodb.MongoClientOptions;
 
 /**
@@ -90,14 +90,16 @@ public class TestConfiguration implements AsyncConfigurer {
         return cacheManager().getDirectCache(CacheConstants.DOWNLOAD_ID_CACHE);
     }
 
-    @Bean
-    public EventBus eventBus() {
-        return new AsyncEventBus(asyncExecutor());
+    @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+    public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new SimpleApplicationEventMulticaster();
+        simpleApplicationEventMulticaster.setTaskExecutor(asyncExecutor());
+        return simpleApplicationEventMulticaster;
     }
 
     @Bean
-    public EventBusHolder eventBusHolder() {
-        return EventBusHolder.getInstance();
+    public EventPublisherHolder eventBusHolder() {
+        return EventPublisherHolder.getInstance();
     }
 
     @Bean

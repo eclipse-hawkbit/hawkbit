@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
  * Class which contains the Event when selecting all entries of the target table

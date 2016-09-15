@@ -17,19 +17,19 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.bulk.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.event.remote.bulk.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -141,7 +141,7 @@ public class JpaTagManagement implements TagManagement {
         targetTagRepository.deleteByName(targetTagName);
 
         afterCommit.afterCommit(
-                () -> eventBus.publishEvent(new TargetTagDeletedEvent(tag, EventBusHolder.getInstance().getNodeId())));
+                () -> eventBus.publishEvent(new TargetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
 
     }
 
@@ -179,7 +179,7 @@ public class JpaTagManagement implements TagManagement {
         checkNotNull(targetTag.getId());
         final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
         afterCommit.afterCommit(
-                () -> eventBus.publishEvent(new TargetTagUpdateEvent(save, EventBusHolder.getInstance().getNodeId())));
+                () -> eventBus.publishEvent(new TargetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
         return save;
     }
 
@@ -246,7 +246,7 @@ public class JpaTagManagement implements TagManagement {
         distributionSetTagRepository.deleteByName(tagName);
 
         afterCommit.afterCommit(() -> eventBus
-                .publishEvent(new DistributionSetTagDeletedEvent(tag, EventBusHolder.getInstance().getNodeId())));
+                .publishEvent(new DistributionSetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
     }
 
     @Override
@@ -257,7 +257,7 @@ public class JpaTagManagement implements TagManagement {
         checkNotNull(distributionSetTag.getId());
         final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
         afterCommit.afterCommit(() -> eventBus
-                .publishEvent(new DistributionSetTagUpdateEvent(save, EventBusHolder.getInstance().getNodeId())));
+                .publishEvent(new DistributionSetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
 
         return save;
     }

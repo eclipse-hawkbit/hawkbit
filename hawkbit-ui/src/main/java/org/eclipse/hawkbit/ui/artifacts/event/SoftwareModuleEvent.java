@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.artifacts.event;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
  * Event to represent software add, update or delete.

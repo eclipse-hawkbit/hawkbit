@@ -15,13 +15,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.hawkbit.eventbus.event.Event;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -29,9 +29,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -42,15 +40,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Entity Events")
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
-    @Autowired
-    private EventBus eventBus;
-
     private final MyEventListener eventListener = new MyEventListener();
 
     @Before
     public void beforeTest() {
         eventListener.queue.clear();
-        eventBus.register(eventListener);
     }
 
     @Test

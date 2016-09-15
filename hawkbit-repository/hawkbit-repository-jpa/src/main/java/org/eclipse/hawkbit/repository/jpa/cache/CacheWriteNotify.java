@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.repository.jpa.cache;
 
 import java.math.RoundingMode;
 
-import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -19,14 +19,14 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.math.DoubleMath;
 
 /**
  * An service which combines the functionality for functional use cases to write
- * into the cache an notify the writing to the cache to the {@link EventBus}.
+ * into the cache an notify the writing to the cache to the event bus.
  */
 @Service
 public class CacheWriteNotify {
@@ -37,15 +37,15 @@ public class CacheWriteNotify {
     private CacheManager cacheManager;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventBus;
 
     @Autowired
     private TenantAware tenantAware;
 
     /**
      * Writes the download progress into the cache
-     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the
-     * {@link EventBus} with a {@link DownloadProgressEvent}.
+     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the eventBus
+     * with a {@link DownloadProgressEvent}.
      *
      * @param statusId
      *            the ID of the {@link ActionStatus}
@@ -74,14 +74,14 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
+        eventBus.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
                 shippedBytesSinceLast, shippedBytesOverall));
     }
 
     /**
      * Writes the {@link CacheKeys#ROLLOUT_GROUP_CREATED} and
      * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
-     * {@link EventBus} with a {@link RolloutGroupCreatedEvent}.
+     * eventBus with a {@link RolloutGroupCreatedEvent}.
      *
      * @param revision
      *            the revision of the event
@@ -112,8 +112,8 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupCreated);
         }
 
-        eventBus.post(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId, rolloutGroupId,
-                totalRolloutGroup, createdRolloutGroup));
+        eventBus.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId,
+                rolloutGroupId, totalRolloutGroup, createdRolloutGroup));
     }
 
     /**
@@ -128,7 +128,7 @@ public class CacheWriteNotify {
      * @param eventBus
      *            the eventBus to set
      */
-    void setEventBus(final EventBus eventBus) {
+    void setEventBus(final ApplicationEventPublisher eventBus) {
         this.eventBus = eventBus;
     }
 

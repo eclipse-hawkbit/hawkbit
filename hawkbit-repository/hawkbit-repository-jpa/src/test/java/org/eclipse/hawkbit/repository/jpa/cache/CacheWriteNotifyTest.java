@@ -12,7 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
@@ -22,8 +22,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-
-import com.google.common.eventbus.EventBus;
+import org.springframework.context.ApplicationEventPublisher;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -36,7 +35,7 @@ public class CacheWriteNotifyTest {
     private static final long KNOWN_STATUS_ID = 1;
 
     @Mock
-    private EventBus eventBusMock;
+    private ApplicationEventPublisher eventBusMock;
 
     @Mock
     private CacheManager cacheManagerMock;
@@ -66,6 +65,6 @@ public class CacheWriteNotifyTest {
         underTest.downloadProgress(KNOWN_STATUS_ID, 500L, 100L, 100L);
 
         verify(cacheMock).put(KNOWN_STATUS_ID + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, 20);
-        verify(eventBusMock).post(any(DownloadProgressEvent.class));
+        verify(eventBusMock).publishEvent(any(DownloadProgressEvent.class));
     }
 }

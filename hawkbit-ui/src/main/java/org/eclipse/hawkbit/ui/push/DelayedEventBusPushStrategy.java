@@ -19,8 +19,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.EntityEvent;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.repository.event.EntityEvent;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     private static final int BLOCK_SIZE = 10_000;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private final BlockingDeque<org.eclipse.hawkbit.eventbus.event.Event> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
+    private final BlockingDeque<org.eclipse.hawkbit.repository.event.Event> queue = new LinkedBlockingDeque<>(
+            BLOCK_SIZE);
 
     private EventBus.SessionEventBus eventBus;
 
@@ -67,15 +68,15 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     private ScheduledFuture<?> jobHandle;
 
     /**
-     * An {@link com.google.common.eventbus.EventBus} subscriber which
-     * subscribes {@link EntityEvent} from the repository to dispatch these
-     * events to the UI {@link SessionEventBus}.
+     * An application event publisher subscriber which subscribes
+     * {@link EntityEvent} from the repository to dispatch these events to the
+     * UI {@link SessionEventBus} .
      *
      * @param event
      *            the entity event which has been published from the repository
      */
-    @EventListener(classes = org.eclipse.hawkbit.eventbus.event.Event.class)
-    public void dispatch(final org.eclipse.hawkbit.eventbus.event.Event event) {
+    @EventListener(classes = org.eclipse.hawkbit.repository.event.Event.class)
+    public void dispatch(final org.eclipse.hawkbit.repository.event.Event event) {
 
         System.out.println("Kam an:" + event);
         // to dispatch too many events which are not interested on the UI
@@ -90,7 +91,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         }
     }
 
-    private boolean isEventProvided(final org.eclipse.hawkbit.eventbus.event.Event event) {
+    private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.Event event) {
         return eventProvider.getSingleEvents().contains(event.getClass())
                 || eventProvider.getBulkEvents().contains(event.getClass());
     }
@@ -122,7 +123,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      *         {@code false}
      */
     protected boolean eventSecurityCheck(final SecurityContext userContext,
-            final org.eclipse.hawkbit.eventbus.event.Event event) {
+            final org.eclipse.hawkbit.repository.event.Event event) {
         if (userContext == null || userContext.getAuthentication() == null) {
             return false;
         }
@@ -148,9 +149,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         public void run() {
             LOG.debug("UI EventBus aggregator started");
             final long timestamp = System.currentTimeMillis();
-            final List<org.eclipse.hawkbit.eventbus.event.Event> events = new LinkedList<>();
+            final List<org.eclipse.hawkbit.repository.event.Event> events = new LinkedList<>();
             for (int i = 0; i < BLOCK_SIZE; i++) {
-                final org.eclipse.hawkbit.eventbus.event.Event pollEvent = queue.poll();
+                final org.eclipse.hawkbit.repository.event.Event pollEvent = queue.poll();
                 if (pollEvent == null) {
                     continue;
                 }
@@ -181,7 +182,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
         }
 
-        private void doDispatch(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+        private void doDispatch(final List<org.eclipse.hawkbit.repository.event.Event> events,
                 final WrappedSession wrappedSession) {
             final SecurityContext userContext = (SecurityContext) wrappedSession
                     .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
@@ -201,16 +202,16 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             }
         }
 
-        private void fowardBulkEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+        private void fowardBulkEvents(final List<org.eclipse.hawkbit.repository.event.Event> events,
                 final SecurityContext userContext) {
             final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
             publishBulkEvent(events, userContext, filterBulkEvenTypes);
         }
 
-        private void publishBulkEvent(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+        private void publishBulkEvent(final List<org.eclipse.hawkbit.repository.event.Event> events,
                 final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
             for (final Class<?> bulkType : filterBulkEvenTypes) {
-                final List<org.eclipse.hawkbit.eventbus.event.Event> listBulkEvents = events.stream()
+                final List<org.eclipse.hawkbit.repository.event.Event> listBulkEvents = events.stream()
                         .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
                                 && bulkType.isInstance(event))
                         .collect(Collectors.toList());
@@ -220,7 +221,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             }
         }
 
-        private void fowardSingleEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+        private void fowardSingleEvents(final List<org.eclipse.hawkbit.repository.event.Event> events,
                 final SecurityContext userContext) {
             events.stream()
                     .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)

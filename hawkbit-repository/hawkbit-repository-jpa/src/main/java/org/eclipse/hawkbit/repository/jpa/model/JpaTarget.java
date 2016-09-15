@@ -36,10 +36,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
@@ -240,19 +240,19 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new TargetCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(this, EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

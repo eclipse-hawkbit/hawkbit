@@ -21,10 +21,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.eventbus.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -46,14 +46,12 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -68,9 +66,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
-
-    @Autowired
-    private EventBus eventBus;
 
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
@@ -379,7 +374,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void assignDistributionSet2Targets() throws InterruptedException {
 
         final EventHandlerMock eventHandlerMock = new EventHandlerMock(20);
-        eventBus.register(eventHandlerMock);
 
         final String myCtrlIDPref = "myCtrlID";
         final Iterable<Target> savedNakedTargets = targetManagement
@@ -434,7 +428,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
         final EventHandlerMock eventHandlerMock = new EventHandlerMock(0);
-        eventBus.register(eventHandlerMock);
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -463,7 +456,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(events).as("events should be empty").isEmpty();
 
         final EventHandlerMock eventHandlerMockAfterCompletionOfDs = new EventHandlerMock(10);
-        eventBus.register(eventHandlerMockAfterCompletionOfDs);
 
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
@@ -486,14 +478,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // Each of the four targets get one assignment (4 * 1 = 4)
         final int expectedNumberOfEventsForAssignment = 4;
         final EventHandlerMock eventHandlerMock = new EventHandlerMock(expectedNumberOfEventsForAssignment);
-        eventBus.register(eventHandlerMock);
 
         // Each of the four targets get two more assignment the which are
         // cancelled (4 * 2 = 8)
         final int expectedNumberOfEventsForCancel = 8;
         final CancelEventHandlerMock cancelEventHandlerMock = new CancelEventHandlerMock(
                 expectedNumberOfEventsForCancel);
-        eventBus.register(cancelEventHandlerMock);
 
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");

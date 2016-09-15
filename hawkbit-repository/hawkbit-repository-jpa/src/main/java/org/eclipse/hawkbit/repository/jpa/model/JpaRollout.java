@@ -25,11 +25,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -208,8 +208,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(new RolloutPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutPropertyChangeEvent(this,
+                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventPublisherHolder.getInstance().getApplicationId()));
 
     }
 

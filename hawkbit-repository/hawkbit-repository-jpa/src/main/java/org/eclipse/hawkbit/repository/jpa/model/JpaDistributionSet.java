@@ -34,14 +34,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.entity.DistributionSetUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.json.GenericEventEntity.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity.PropertyChange;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -291,22 +291,22 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new DistributionCreatedEvent(this, EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new DistributionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
         final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(descriptorEvent);
-        EventBusHolder.getInstance().getApplicationEventPublisher()
-                .publishEvent(new DistributionSetUpdateEvent(this, EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new DistributionSetUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
         if (changeSet.containsKey(DELETED_PROPERTY)) {
             final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
             if (newDeleted) {
-                EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
-                        new DistributionDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
+                EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                        new DistributionDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
             }
         }
 
@@ -314,8 +314,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getApplicationEventPublisher().publishEvent(
-                new DistributionDeletedEvent(getTenant(), getId(), EventBusHolder.getInstance().getNodeId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new DistributionDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
 }
