@@ -29,8 +29,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.eventbus.Subscribe;
+import org.springframework.context.event.EventListener;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -134,7 +133,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         private final BlockingQueue<Event> queue = new LinkedBlockingQueue<>();
 
-        @Subscribe
+        @EventListener(classes = Event.class)
         public void onEvent(final Event event) {
             queue.offer(event);
         }

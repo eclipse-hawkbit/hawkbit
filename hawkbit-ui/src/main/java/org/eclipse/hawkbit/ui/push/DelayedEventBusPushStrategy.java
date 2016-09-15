@@ -39,7 +39,7 @@ import com.vaadin.ui.UI;
 
 /**
  * A {@link EventPushStrategy} implementation which retrieves events from
- * {@link com.google.common.eventbus.EventBus} and store them first in an queue
+ * {@link com.google.common.eventbus.EventBus} and store them first in a queue
  * where they will dispatched every 2 seconds to the {@link EventBus} in a
  * Vaadin access thread {@link UI#access(Runnable)}.
  *
