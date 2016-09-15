@@ -28,7 +28,7 @@ public class TenantSecurityToken {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @JsonProperty(required = false)
-    private final String tenant;
+    private String tenant;
     @JsonProperty(required = false)
     private final Long tenantId;
     @JsonProperty(required = false)
@@ -66,6 +66,10 @@ public class TenantSecurityToken {
         this.controllerId = controllerId;
         this.targetId = targetId;
         this.fileResource = fileResource;
+    }
+
+    public void setTenant(final String tenant) {
+        this.tenant = tenant;
     }
 
     public String getTenant() {
@@ -216,7 +220,7 @@ public class TenantSecurityToken {
 
         @Override
         public String toString() {
-            return "FileResource [sha1=" + sha1 + ", filename=" + filename + "]";
+            return "FileResource [sha1=" + sha1 + ", artifactId=" + artifactId + ", filename=" + filename + "]";
         }
 
         /**

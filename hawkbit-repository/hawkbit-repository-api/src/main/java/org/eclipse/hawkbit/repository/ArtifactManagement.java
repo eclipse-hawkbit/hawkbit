@@ -215,7 +215,8 @@ public interface ArtifactManagement {
      * @return found {@link LocalArtifact} or <code>null</code> is it could not
      *         be found.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
     LocalArtifact findLocalArtifact(@NotNull Long id);
 
     /**
