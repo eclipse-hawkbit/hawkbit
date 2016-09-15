@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
@@ -79,10 +80,9 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public Object getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
         // retrieve the common name header and the authority name header from
-        // the http request and
-        // combine them together
+        // the http request and combine them together
         final String commonNameValue = secruityToken.getHeader(caCommonNameHeader);
         final String knownSslIssuerConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
@@ -106,23 +106,17 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
                 sslIssuerNameConfigTenantRunner);
         String controllerId = secruityToken.getControllerId();
         // in case of legacy download artifact, the controller ID is not in the
-        // URL path, so then
-        // we just use the common name header
+        // URL path, so then we just use the common name header
         if (controllerId == null || "anonymous".equals(controllerId)) {
             controllerId = secruityToken.getHeader(caCommonNameHeader);
         }
 
-        String[] knownHashes = splitMultiHash(authorityNameConfigurationValue);
-        if (knownHashes.length > 1) {
-            Set<HeaderAuthentication> multiHashes = new HashSet<>();
-            final String cntlId = controllerId;
-            Arrays.asList(knownHashes)
-                    .forEach(hashItem -> multiHashes.add(new HeaderAuthentication(cntlId, hashItem)));
-            return multiHashes;
+        List<String> knownHashes = splitMultiHash(authorityNameConfigurationValue);
 
-        } else {
-            return new HeaderAuthentication(controllerId, authorityNameConfigurationValue);
-        }
+        Set<HeaderAuthentication> multiHashes = new HashSet<>();
+        final String cntlId = controllerId;
+        knownHashes.forEach(hashItem -> multiHashes.add(new HeaderAuthentication(cntlId, hashItem)));
+        return multiHashes;
     }
 
     /**
@@ -132,12 +126,15 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * this request for this tenant.
      */
     private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHashes) {
+        // there may be several knownIssuerHashes configured for the tenant
+        // separated by a semicolon
+        List<String> knownHashes = splitMultiHash(knownIssuerHashes);
+
         // iterate over the headers until we get a null header.
-        String[] knownHashes = splitMultiHash(knownIssuerHashes);
         int iHeader = 1;
         String foundHash;
         while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
-            if (Arrays.asList(knownHashes).contains(foundHash)) {
+            if (knownHashes.contains(foundHash)) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
@@ -164,7 +161,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         }
     }
 
-    private static String[] splitMultiHash(String knownIssuerHashes) {
-        return knownIssuerHashes.split(";");
+    private static List<String> splitMultiHash(String knownIssuerHashes) {
+        return Arrays.asList(knownIssuerHashes.split(";"));
     }
 }

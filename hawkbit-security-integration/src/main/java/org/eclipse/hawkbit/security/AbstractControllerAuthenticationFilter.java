@@ -47,7 +47,7 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     }
 
     @Override
-    public abstract HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
+    public abstract Object getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
 
     @Override
     public abstract Object getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);

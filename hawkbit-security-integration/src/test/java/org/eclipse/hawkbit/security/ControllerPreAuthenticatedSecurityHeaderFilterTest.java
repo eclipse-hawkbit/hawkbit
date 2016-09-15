@@ -12,6 +12,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -102,10 +104,41 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         assertNull(underTest.getPreAuthenticatedPrincipal(securityToken));
     }
 
+    @Test
+    @Description("Tests different values for issuer hash header and inspects the credentials")
+    public void useDifferentValuesForIssuerHashHeader() {
+
+        // prepare security token
+        TenantSecurityToken securityToken = prepareSecurityToken();
+        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash1");
+
+        when(tenantConfigurationManagementMock.getConfigurationValue(
+                eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
+                        .thenReturn(CONFIG_VALUE_MULTI_HASH);
+
+        HeaderAuthentication expected = new HeaderAuthentication("box1", "hash1");
+        Collection<HeaderAuthentication> credentials = (Collection<HeaderAuthentication>) underTest
+                .getPreAuthenticatedCredentials(securityToken);
+        assertTrue(credentials.contains(expected));
+
+        Object principal = underTest.getPreAuthenticatedPrincipal(securityToken);
+        assertEquals(expected, principal);
+
+        securityToken = prepareSecurityToken();
+        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash2");
+        expected = new HeaderAuthentication("box1", "hash2");
+        credentials = (Collection<HeaderAuthentication>) underTest.getPreAuthenticatedCredentials(securityToken);
+        assertTrue(credentials.contains(expected));
+
+        principal = underTest.getPreAuthenticatedPrincipal(securityToken);
+        assertEquals(expected, principal);
+
+    }
+
     private static TenantSecurityToken prepareSecurityToken() {
-        final TenantSecurityToken securityToken = new TenantSecurityToken("default", "1234",
+        final TenantSecurityToken securityToken = new TenantSecurityToken("DEFAULT", "box1",
                 FileResource.createFileResourceBySha1("12345"));
-        securityToken.getHeaders().put(CA_COMMON_NAME, "any");
+        securityToken.getHeaders().put(CA_COMMON_NAME, "box1");
 
         return securityToken;
     }
