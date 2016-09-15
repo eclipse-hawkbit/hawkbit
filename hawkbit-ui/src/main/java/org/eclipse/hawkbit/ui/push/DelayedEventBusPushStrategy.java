@@ -79,7 +79,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     @EventListener(classes = org.eclipse.hawkbit.repository.event.Event.class)
     public void dispatch(final org.eclipse.hawkbit.repository.event.Event event) {
 
-        System.out.println("Kam an:" + event);
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
