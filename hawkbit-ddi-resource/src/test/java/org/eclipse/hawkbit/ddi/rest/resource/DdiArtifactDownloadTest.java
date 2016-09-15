@@ -70,7 +70,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
     private volatile int downLoadProgress = 0;
     private volatile long shippedBytes = 0;
-    private volatile long shippedBytesTotal = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -248,7 +247,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
@@ -288,7 +286,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -327,7 +324,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -351,7 +347,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         assertThat(downLoadProgress).isEqualTo(1);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(0L);
     }
 
     @Test
@@ -360,7 +355,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -407,7 +401,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -570,7 +563,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void listen(final DownloadProgressEvent event) {
         downLoadProgress++;
         shippedBytes += event.getShippedBytesSinceLast();
-        shippedBytesTotal = event.getShippedBytesOverall();
 
     }
 }

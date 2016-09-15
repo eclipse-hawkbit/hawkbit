@@ -273,8 +273,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             targetGroup
                     .forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target)));
-            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
-                    amountGroupValidated, groupIndex);
+            cacheWriteNotify.rolloutGroupCreated(savedRollout.getId(), savedGroup.getId(), amountGroupValidated,
+                    groupIndex);
             pageIndex += groupSize;
         }
 

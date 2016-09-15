@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -40,12 +41,15 @@ public class CacheWriteNotify {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
     private TenantAware tenantAware;
 
     /**
      * Writes the download progress into the cache
-     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the eventPublisher
-     * with a {@link DownloadProgressEvent}.
+     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the
+     * eventPublisher with a {@link DownloadProgressEvent}.
      *
      * @param statusId
      *            the ID of the {@link ActionStatus}
@@ -74,8 +78,8 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
-                shippedBytesSinceLast, shippedBytesOverall));
+        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
+                applicationContext.getId()));
     }
 
     /**
@@ -83,8 +87,6 @@ public class CacheWriteNotify {
      * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
      * eventPublisher with a {@link RolloutGroupCreatedEvent}.
      *
-     * @param revision
-     *            the revision of the event
      * @param rolloutId
      *            the ID of the rollout the group has been created
      * @param rolloutGroupId
@@ -94,8 +96,8 @@ public class CacheWriteNotify {
      * @param createdRolloutGroup
      *            the number of already created groups of the rollout
      */
-    public void rolloutGroupCreated(final long revision, final Long rolloutId, final Long rolloutGroupId,
-            final int totalRolloutGroup, final int createdRolloutGroup) {
+    public void rolloutGroupCreated(final Long rolloutId, final Long rolloutGroupId, final int totalRolloutGroup,
+            final int createdRolloutGroup) {
 
         final Cache cache = cacheManager.getCache(JpaRollout.class.getName());
         final String cacheKeyGroupTotal = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
@@ -112,8 +114,8 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupCreated);
         }
 
-        eventPublisher.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId,
-                rolloutGroupId, totalRolloutGroup, createdRolloutGroup));
+        eventPublisher.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), rolloutId,
+                rolloutGroupId, applicationContext.getId()));
     }
 
     /**
@@ -124,12 +126,13 @@ public class CacheWriteNotify {
         this.cacheManager = cacheManager;
     }
 
-/**
- * @param eventPublisher the eventPublisher to set
- */
-public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
-    this.eventPublisher = eventPublisher;
-}
+    /**
+     * @param eventPublisher
+     *            the eventPublisher to set
+     */
+    public void setEventPublisher(final ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     /**
      * @param tenantAware

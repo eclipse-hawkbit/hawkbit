@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Event that contains an updated download progress for a given ActionStatus
  * that was written for a download request.
@@ -17,70 +20,29 @@ public class DownloadProgressEvent extends TenantAwareDistributedEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private Long statusId;
-    private long requestedBytes;
-    private long shippedBytesSinceLast;
-    private long shippedBytesOverall;
+    @JsonProperty(required = true)
+    private final Long shippedBytesSinceLast;
 
     /**
-     * TODO Build Json Object Constructor. Add orfing Service
-     *
-     * @param tenant
-     *            the tenant for this event
-     * @param statusId
-     *            of ActionStatus that was written for the download request
-     * @param requestedBytes
-     *            bytes requested
-     * @param shippedBytesSinceLast
-     *            bytes since last event
-     * @param shippedBytesOverall
-     *            on the download request
-     */
-    public DownloadProgressEvent(final String tenant, final Long statusId, final Long requestedBytes,
-            final Long shippedBytesSinceLast, final Long shippedBytesOverall) {
-        // the revision of the DownloadProgressEvent is just equal the
-        // shippedBytesOverall as this is a growing number.
-        super(shippedBytesOverall, tenant, "TODO NODEID");
-        this.statusId = statusId;
-        this.requestedBytes = requestedBytes;
-        this.shippedBytesSinceLast = shippedBytesSinceLast;
-        this.shippedBytesOverall = shippedBytesOverall;
-    }
-
-    /**
-     * TODO remove just fu compilation
+     * Constructor.
      * 
-     * @param knownTenant
-     * @param l
-     * @param m
-     * @param n
-     * @param o
-     * @param myNodeId
+     * @param tenant
+     *            the tenant
+     * @param shippedBytesSinceLast
+     *            the shippedBytesSinceLast
+     * @param applicationId
+     *            the application id.
      */
-    public DownloadProgressEvent(final String knownTenant, final long l, final long m, final long n, final long o,
-            final String myNodeId) {
-        super(l, knownTenant, "TODO NODEID");
+    @JsonCreator
+    public DownloadProgressEvent(final @JsonProperty("tenant") String tenant,
+            final @JsonProperty("shippedBytesSinceLast") Long shippedBytesSinceLast,
+            final @JsonProperty("originService") String applicationId) {
+        super(shippedBytesSinceLast, tenant, applicationId);
+        this.shippedBytesSinceLast = shippedBytesSinceLast;
     }
 
-    public Long getStatusId() {
-        return statusId;
-    }
-
-    public long getRequestedBytes() {
-        return requestedBytes;
-    }
-
-    public long getShippedBytesSinceLast() {
+    public Long getShippedBytesSinceLast() {
         return shippedBytesSinceLast;
     }
 
-    public long getShippedBytesOverall() {
-        return shippedBytesOverall;
-    }
-
-    @Override
-    public String getTenant() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

@@ -8,43 +8,43 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Event definition which is been published in case a rollout group has been
  * created for a specific rollout.
- * 
- * @author Michael Hirsch
  *
  */
 public class RolloutGroupCreatedEvent extends TenantAwareDistributedEvent {
 
     private static final long serialVersionUID = 1L;
+
+    @JsonProperty(required = true)
     private final Long rolloutId;
+
+    @JsonProperty(required = true)
     private final Long rolloutGroupId;
-    private final int totalRolloutGroup;
-    private final int createdRolloutGroup;
 
     /**
-     * TODO: JSON OBject Creating a new rollout group created event for a
-     * specific rollout.
+     * Creating a new rollout group created event for a specific rollout.
      * 
      * @param tenant
      *            the tenant of this event
-     * @param revision
-     *            the revision of the event
      * @param rolloutId
+     *            the ID of the rollout has been created
+     * @param rolloutGroupId
      *            the ID of the rollout the group has been created
-     * @param totalRolloutGroup
-     *            the total number of rollout groups for this rollout
-     * @param createdRolloutGroup
-     *            the number of already created groups of the rollout
+     * @param applicationId
+     *            the applicationId
      */
-    public RolloutGroupCreatedEvent(final String tenant, final long revision, final Long rolloutId,
-            final Long rolloutGroupId, final int totalRolloutGroup, final int createdRolloutGroup) {
-        super(revision, tenant, "TODO");
+    @JsonCreator
+    public RolloutGroupCreatedEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("rolloutId") final Long rolloutId, @JsonProperty("rolloutGroupId") final Long rolloutGroupId,
+            @JsonProperty("originService") final String applicationId) {
+        super(rolloutId, tenant, applicationId);
         this.rolloutId = rolloutId;
         this.rolloutGroupId = rolloutGroupId;
-        this.totalRolloutGroup = totalRolloutGroup;
-        this.createdRolloutGroup = createdRolloutGroup;
 
     }
 
@@ -52,21 +52,8 @@ public class RolloutGroupCreatedEvent extends TenantAwareDistributedEvent {
         return rolloutId;
     }
 
-    public int getTotalRolloutGroup() {
-        return totalRolloutGroup;
-    }
-
-    public int getCreatedRolloutGroup() {
-        return createdRolloutGroup;
-    }
-
     public Long getRolloutGroupId() {
         return rolloutGroupId;
     }
 
-    @Override
-    public String getTenant() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
