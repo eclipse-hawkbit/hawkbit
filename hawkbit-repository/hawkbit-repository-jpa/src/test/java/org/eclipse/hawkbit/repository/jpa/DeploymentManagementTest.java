@@ -46,13 +46,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -1026,7 +1026,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
-        @Subscribe
+        @EventListener(classes = TargetAssignDistributionSetEvent.class)
         public void handleEvent(final TargetAssignDistributionSetEvent event) {
             events.add(event);
             latch.countDown();
@@ -1053,7 +1053,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
-        @Subscribe
+        @EventListener(classes = CancelTargetAssignmentEvent.class)
         public void handleEvent(final CancelTargetAssignmentEvent event) {
             events.add(event);
             latch.countDown();

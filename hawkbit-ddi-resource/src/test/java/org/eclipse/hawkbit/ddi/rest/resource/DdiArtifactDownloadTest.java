@@ -42,13 +42,13 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
-import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HttpHeaders;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -566,7 +566,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .isEqualTo(new String(artifact.getMd5Hash() + "  file1.tar.bz2").getBytes(Charsets.US_ASCII));
     }
 
-    @Subscribe
+    @EventListener(classes = DownloadProgressEvent.class)
     public void listen(final DownloadProgressEvent event) {
         downLoadProgress++;
         shippedBytes += event.getShippedBytesSinceLast();

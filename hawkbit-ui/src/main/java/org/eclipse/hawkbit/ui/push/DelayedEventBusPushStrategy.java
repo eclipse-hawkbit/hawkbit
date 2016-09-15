@@ -68,10 +68,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     private ScheduledFuture<?> jobHandle;
 
     /**
-     * An application event publisher subscriber which subscribes
-     * {@link EntityEvent} from the repository to dispatch these events to the
-     * UI {@link SessionEventBus} .
-     *
+     * Upstream, based on branch 'Feature_Horizontal_Scalability' of
+     * https://github.com/bsinno/hawkbit.git An application event publisher
+     * subscriber which subscribes {@link EntityEvent} from the repository to
+     * dispatch these events to the UI {@link SessionEventBus} .
+     * 
      * @param event
      *            the entity event which has been published from the repository
      */
@@ -234,6 +235,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      * @param eventBus
      *            the eventBus to set
      */
+    @Override
     public void setEventBus(final EventBus.SessionEventBus eventBus) {
         this.eventBus = eventBus;
     }
