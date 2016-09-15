@@ -35,7 +35,7 @@ public class CacheWriteNotifyTest {
     private static final long KNOWN_STATUS_ID = 1;
 
     @Mock
-    private ApplicationEventPublisher eventBusMock;
+    private ApplicationEventPublisher eventPublisherMock;
 
     @Mock
     private CacheManager cacheManagerMock;
@@ -51,7 +51,7 @@ public class CacheWriteNotifyTest {
     @Before
     public void before() {
         underTest = new CacheWriteNotify();
-        underTest.setEventBus(eventBusMock);
+        underTest.setEventPublisher(eventPublisherMock);
         underTest.setCacheManager(cacheManagerMock);
         underTest.setTenantAware(tenantAwareMock);
     }
@@ -65,6 +65,6 @@ public class CacheWriteNotifyTest {
         underTest.downloadProgress(KNOWN_STATUS_ID, 500L, 100L, 100L);
 
         verify(cacheMock).put(KNOWN_STATUS_ID + "." + CacheKeys.DOWNLOAD_PROGRESS_PERCENT, 20);
-        verify(eventBusMock).publishEvent(any(DownloadProgressEvent.class));
+        verify(eventPublisherMock).publishEvent(any(DownloadProgressEvent.class));
     }
 }

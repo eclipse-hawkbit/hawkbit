@@ -124,13 +124,12 @@ public class CacheWriteNotify {
         this.cacheManager = cacheManager;
     }
 
-    /**
-     * @param eventPublisher
-     *            the eventPublisher to set
-     */
-    void setEventBus(final ApplicationEventPublisher eventBus) {
-        this.eventPublisher = eventBus;
-    }
+/**
+ * @param eventPublisher the eventPublisher to set
+ */
+public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+    this.eventPublisher = eventPublisher;
+}
 
     /**
      * @param tenantAware
