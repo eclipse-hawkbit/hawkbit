@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyMakroResolver;
+import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyLookup;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -46,7 +46,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private TargetFilterQueryRepository targetFilterQueryRepository;
 
     @Autowired
-    private VirtualPropertyMakroResolver virtualPropMakroResolver;
+    private VirtualPropertyLookup virtualPropertyLookup;
 
     @Override
     @Modifying
@@ -115,7 +115,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
-        RSQLUtility.parse(query, TargetFields.class, virtualPropMakroResolver);
+        RSQLUtility.parse(query, TargetFields.class, virtualPropertyLookup);
         return true;
     }
 

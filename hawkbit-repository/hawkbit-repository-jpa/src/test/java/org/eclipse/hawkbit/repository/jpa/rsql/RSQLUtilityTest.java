@@ -20,7 +20,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 
-import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -28,6 +27,7 @@ import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -49,10 +49,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RSQLUtilityTest {
 
     @Spy
-    VirtualPropertyMakroResolver makroResolver = new VirtualPropertyMakroResolver();
+    VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
 
     @Mock
     TenantConfigurationManagement confMgmt;
+
+    @Mock
+    TimestampCalculator timestampCalculator;
 
     @Mock
     private Root<Object> baseSoftwareModuleRootMock;
@@ -271,7 +274,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Tests the resolution of overdue_ts placeholder in context of a RSQL expression.")
-    public void correctRsqlWithOverdueMakro() {
+    public void correctRsqlWithOverdueMacro() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "overdue_ts";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -283,12 +286,12 @@ public class RSQLUtilityTest {
                 .thenReturn(mock(Predicate.class));
 
         // test
-        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMakroLookup())
+        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
         // verfication
-        verify(makroResolver, times(1)).lookup(overdueProp);
-        // the makro is already replaced when passed to #lessThanOrEqualTo -> the method is never invoked with the
+        verify(macroResolver, times(1)).lookup(overdueProp);
+        // the macro is already replaced when passed to #lessThanOrEqualTo -> the method is never invoked with the
         // placeholder:
         verify(criteriaBuilderMock, never()).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq(overduePropPlaceholder));
@@ -296,7 +299,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Tests RSQL expression with an unknown placeholder.")
-    public void correctRsqlWithUnknownMakro() {
+    public void correctRsqlWithUnknownMacro() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "unknown";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -308,24 +311,30 @@ public class RSQLUtilityTest {
                 .thenReturn(mock(Predicate.class));
 
         // test
-        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMakroLookup())
+        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
         // verfication
-        verify(makroResolver, times(1)).lookup(overdueProp);
-        // the makro is unknown and hence never replaced -> #lessThanOrEqualTo is invoked with the placeholder:
+        verify(macroResolver, times(1)).lookup(overdueProp);
+        // the macro is unknown and hence never replaced -> #lessThanOrEqualTo is invoked with the placeholder:
         verify(criteriaBuilderMock, times(1)).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq(overduePropPlaceholder));
     }
 
-    public StrLookup<String> setupMakroLookup() {
+    public VirtualPropertyLookup setupMacroLookup() {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
-        when(makroResolver.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
-        return makroResolver;
+        when(macroResolver.getTimestampCalculator()).thenReturn(new TimestampCalculator() {
+            @Override
+            protected TenantConfigurationManagement getTenantConfigurationManagement() {
+                return confMgmt;
+            }
+        });
+
+        return macroResolver;
     }
 
     @SuppressWarnings("unchecked")

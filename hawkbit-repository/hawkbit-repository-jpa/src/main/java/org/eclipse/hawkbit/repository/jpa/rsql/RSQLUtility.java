@@ -70,12 +70,12 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
  * </ul>
  * <p>
- * There is also a mechanism that allows to refer to known makros that can resolved by an optional {@link StrLookup}
- * (cp. {@link VirtualPropertyMakroResolver}).<br>
+ * There is also a mechanism that allows to refer to known macros that can resolved by an optional {@link StrLookup}
+ * (cp. {@link VirtualPropertyResolver}).<br>
  * An example that queries for all overdue targets using the ${OVERDUE_TS} placeholder introduced by
- * {@link VirtualPropertyMakroResolver} looks like this:<br>
+ * {@link VirtualPropertyResolver} looks like this:<br>
  * <em>lastControllerRequestAt=le=${OVERDUE_TS}</em><br>
- * It is possible to escape a makro expression by using a second '$': $${OVERDUE_TS} would prevent the ${OVERDUE_TS}
+ * It is possible to escape a macro expression by using a second '$': $${OVERDUE_TS} would prevent the ${OVERDUE_TS}
  * token from being expanded.
  *
  */
@@ -99,6 +99,9 @@ public final class RSQLUtility {
      * @param fieldNameProvider
      *            the enum class type which implements the
      *            {@link FieldNameProvider}
+     * @param virtualPropertyLookup
+     *            holds the logic how the known macros have to be resolved; may
+     *            be <code>null</code>
      * @return an specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
@@ -107,29 +110,8 @@ public final class RSQLUtility {
      *             if the RSQL syntax is wrong
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, new VirtualPropertyMakroResolver());
-    }
-
-    /**
-     * parses an RSQL valid string into an JPA {@link Specification} which then can be used to filter for JPA entities
-     * with the given RSQL query.
-     *
-     * @param rsql
-     *            the rsql query
-     * @param fieldNameProvider
-     *            the enum class type which implements the {@link FieldNameProvider}
-     * @param makroLookup
-     *            holds the logic how the known makros have to be resolved; may be <code>null</code>
-     * @return an specification which can be used with JPA
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider, StrLookup<String> makroLookup) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, makroLookup);
+            final Class<A> fieldNameProvider, VirtualPropertyLookup virtualPropertyLookup) {
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyLookup);
     }
 
     /**
@@ -160,12 +142,13 @@ public final class RSQLUtility {
 
         private final String rsql;
         private final Class<A> enumType;
-        private final StrLookup<String> makroLookup;
+        private final VirtualPropertyLookup virtualPropertyLookup;
 
-        private RSQLSpecification(final String rsql, final Class<A> enumType, StrLookup<String> makroLookup) {
+        private RSQLSpecification(final String rsql, final Class<A> enumType,
+                VirtualPropertyLookup virtualPropertyLookup) {
             this.rsql = rsql;
             this.enumType = enumType;
-            this.makroLookup = makroLookup;
+            this.virtualPropertyLookup = virtualPropertyLookup;
         }
 
         @Override
@@ -174,7 +157,7 @@ public final class RSQLUtility {
             final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
-                    makroLookup);
+                    virtualPropertyLookup);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (accept != null && !accept.isEmpty()) {
@@ -204,18 +187,19 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
-        private final StrLookup<String> makroLookup;
+        private final VirtualPropertyLookup virtualPropertyLookup;
         private final StrSubstitutor substitutor;
 
         private final SimpleTypeConverter simpleTypeConverter;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-                StrLookup<String> makroLookup) {
+                VirtualPropertyLookup virtualPropertyLookup) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
-            this.makroLookup = makroLookup;
-            this.substitutor = new StrSubstitutor(makroLookup, StrSubstitutor.DEFAULT_PREFIX,
+            this.virtualPropertyLookup = virtualPropertyLookup;
+            this.substitutor = new StrSubstitutor(new StrLookupAdapter(virtualPropertyLookup),
+                    StrSubstitutor.DEFAULT_PREFIX,
                     StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
             simpleTypeConverter = new SimpleTypeConverter();
         }
@@ -387,13 +371,10 @@ public final class RSQLUtility {
         private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
                 final Path<Object> fieldPath) {
             // in case the value of an rsql query e.g. type==application is an
-            // enum we need to
-            // handle it separately because JPA needs the correct java-type to
-            // build an
-            // expression. So String and numeric values JPA can do it by it's
-            // own but not for
-            // classes like enums. So we need to transform the given value
-            // string into the enum
+            // enum we need to handle it separately because JPA needs the
+            // correct java-type to build an expression. So String and numeric
+            // values JPA can do it by it's own but not for classes like enums.
+            // So we need to transform the given value string into the enum
             // class.
             final Class<? extends Object> javaType = fieldPath.getJavaType();
             if (javaType != null && javaType.isEnum()) {
@@ -445,8 +426,7 @@ public final class RSQLUtility {
                 return Enum.valueOf(tmpEnumType, value.toUpperCase());
             } catch (final IllegalArgumentException e) {
                 // we could not transform the given string value into the enum
-                // type, so ignore
-                // it and return null and do not filter
+                // type, so ignore it and return null and do not filter
                 LOGGER.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
                         javaType);
                 LOGGER.debug("value cannot be transformed to an enum", e);
@@ -461,12 +441,13 @@ public final class RSQLUtility {
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<String> values, final List<Object> transformedValues, final A enumField) {
             // only 'equal' and 'notEqual' can handle transformed value like
-            // enums. The JPA API
-            // cannot handle object types for greaterThan etc methods.
+            // enums. The JPA API cannot handle object types for greaterThan etc
+            // methods.
             final Object transformedValue = transformedValues.get(0);
 
             final String value;
-            if (makroLookup != null) { // if substitutor is available, replace makros ...
+            if (virtualPropertyLookup != null) { // if lookup is available,
+                                                 // replace macros ...
                 value = substitutor.replace(values.get(0));
             } else {
                 value = values.get(0);
@@ -608,6 +589,30 @@ public final class RSQLUtility {
                 }
             }
             return childs;
+        }
+
+    }
+
+    /**
+     * Adapts the <code>VirtualPropertyLookup</code> to <code>StrLookup</code>.
+     */
+    final static class StrLookupAdapter extends StrLookup<String> {
+
+        private VirtualPropertyLookup virtualPropertyLookup;
+
+        /**
+         * Constructor.
+         *
+         * @param virtualPropertyLookup
+         *            the lookup to adapt.
+         */
+        StrLookupAdapter(VirtualPropertyLookup virtualPropertyLookup) {
+            this.virtualPropertyLookup = virtualPropertyLookup;
+        }
+
+        @Override
+        public String lookup(String key) {
+            return virtualPropertyLookup.lookup(key);
         }
 
     }

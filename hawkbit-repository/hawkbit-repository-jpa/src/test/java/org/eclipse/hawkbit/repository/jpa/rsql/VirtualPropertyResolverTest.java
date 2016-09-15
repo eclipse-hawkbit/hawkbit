@@ -15,6 +15,7 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Before;
@@ -31,10 +32,10 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Unit Tests - Repository")
 @Stories("Placeholder resolution for virtual properties")
 @RunWith(MockitoJUnitRunner.class)
-public class VirtualPropertyMakroResolverTest {
+public class VirtualPropertyResolverTest {
 
     @Spy
-    VirtualPropertyMakroResolver resolverUnderTest = new VirtualPropertyMakroResolver();
+    VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
 
     @Mock
     TenantConfigurationManagement confMgmt;
@@ -55,14 +56,21 @@ public class VirtualPropertyMakroResolverTest {
             .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
             .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
-        when(resolverUnderTest.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
-        this.substitutor = new StrSubstitutor(resolverUnderTest, StrSubstitutor.DEFAULT_PREFIX,
+        when(resolverUnderTest.getTimestampCalculator()).thenReturn(new TimestampCalculator() {
+            @Override
+            protected TenantConfigurationManagement getTenantConfigurationManagement() {
+                return confMgmt;
+            }
+        });
+
+        this.substitutor = new StrSubstitutor(new RSQLUtility.StrLookupAdapter(resolverUnderTest),
+                StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
      }
 
     @Test
-    @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyMakroResolver.")
+    @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
     public void resolveNowTimestampPlaceholder() {
         String placeholder = "${NOW_TS}";
         String testString = "lhs=lt=" + placeholder;
@@ -72,7 +80,7 @@ public class VirtualPropertyMakroResolverTest {
     }
 
     @Test
-    @Description("Tests resolution of OVERDUE_TS by using a StrSubstitutor configured with the VirtualPropertyMakroResolver.")
+    @Description("Tests resolution of OVERDUE_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
     public void resolveOverdueTimestampPlaceholder() {
         String placeholder = "${OVERDUE_TS}";
         String testString = "lhs=lt=" + placeholder;
@@ -82,7 +90,7 @@ public class VirtualPropertyMakroResolverTest {
     }
 
     @Test
-    @Description("Tests case insensititity of VirtualPropertyMakroResolver.")
+    @Description("Tests case insensititity of VirtualPropertyResolver.")
     public void resolveOverdueTimestampPlaceholderLowerCase() {
         String placeholder = "${overdue_ts}";
         String testString = "lhs=lt=" + placeholder;
@@ -92,7 +100,7 @@ public class VirtualPropertyMakroResolverTest {
     }
 
     @Test
-    @Description("Tests VirtualPropertyMakroResolver with a placeholder unknown to VirtualPropertyMakroResolver.")
+    @Description("Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.")
     public void handleUnknownPlaceholder() {
         String placeholder = "${unknown}";
         String testString = "lhs=lt=" + placeholder;
