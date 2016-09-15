@@ -127,7 +127,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private AuditorAware<String> auditorProvider;
 
     @Autowired
-    private ApplicationEventPublisher eventBus;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -344,7 +344,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     /**
      * Sends the {@link TargetAssignDistributionSetEvent} for a specific target
-     * to the eventBus.
+     * to the eventPublisher.
      *
      * @param target
      *            the Target which has been assigned to a distribution set
@@ -360,8 +360,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
-            eventBus.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), applicationContext.getId()));
-            eventBus.publishEvent(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
+            eventPublisher.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), applicationContext.getId()));
+            eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                     target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
                     targetSecurityToken));
         });
@@ -439,7 +439,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     /**
      * Sends the {@link CancelTargetAssignmentEvent} for a specific target to
-     * the eventBus.
+     * the eventPublisher.
      *
      * @param target
      *            the Target which has been assigned to a distribution set
@@ -447,7 +447,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventBus.publishEvent(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
                 target.getTenant(), target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
     }
 

@@ -100,7 +100,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private ActionRepository actionRepository;
 
     @Autowired
-    private ApplicationEventPublisher eventBus;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -154,7 +154,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
         afterCommit
-                .afterCommit(() -> eventBus.publishEvent(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
+                .afterCommit(() -> eventPublisher.publishEvent(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -204,7 +204,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        Arrays.stream(distributionSetIDs).forEach(dsId -> eventBus.publishEvent(
+        Arrays.stream(distributionSetIDs).forEach(dsId -> eventPublisher.publishEvent(
                 new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
     }
 
@@ -718,7 +718,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
             final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
                     save, Collections.emptyList(), tag);
-            eventBus.publishEvent(new DistributionSetTagAssigmentResultEvent(result));
+            eventPublisher.publishEvent(new DistributionSetTagAssigmentResultEvent(result));
         });
 
         return save;

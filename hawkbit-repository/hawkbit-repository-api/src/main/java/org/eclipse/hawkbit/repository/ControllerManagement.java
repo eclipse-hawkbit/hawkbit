@@ -57,7 +57,7 @@ public interface ControllerManagement {
     Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
 
     /**
-     * Sends the download progress and notifies the eventbus with a
+     * Sends the download progress and notifies the event publisher with a
      * {@link DownloadProgressEvent}.
      * 
      * @param statusId

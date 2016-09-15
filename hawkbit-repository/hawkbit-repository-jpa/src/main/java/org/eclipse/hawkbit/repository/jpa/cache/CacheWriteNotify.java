@@ -37,14 +37,14 @@ public class CacheWriteNotify {
     private CacheManager cacheManager;
 
     @Autowired
-    private ApplicationEventPublisher eventBus;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private TenantAware tenantAware;
 
     /**
      * Writes the download progress into the cache
-     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the eventBus
+     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the eventPublisher
      * with a {@link DownloadProgressEvent}.
      *
      * @param statusId
@@ -74,14 +74,14 @@ public class CacheWriteNotify {
             cache.evict(cacheKey);
         }
 
-        eventBus.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
+        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, requestedBytes,
                 shippedBytesSinceLast, shippedBytesOverall));
     }
 
     /**
      * Writes the {@link CacheKeys#ROLLOUT_GROUP_CREATED} and
      * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
-     * eventBus with a {@link RolloutGroupCreatedEvent}.
+     * eventPublisher with a {@link RolloutGroupCreatedEvent}.
      *
      * @param revision
      *            the revision of the event
@@ -112,7 +112,7 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupCreated);
         }
 
-        eventBus.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId,
+        eventPublisher.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId,
                 rolloutGroupId, totalRolloutGroup, createdRolloutGroup));
     }
 
@@ -125,11 +125,11 @@ public class CacheWriteNotify {
     }
 
     /**
-     * @param eventBus
-     *            the eventBus to set
+     * @param eventPublisher
+     *            the eventPublisher to set
      */
     void setEventBus(final ApplicationEventPublisher eventBus) {
-        this.eventBus = eventBus;
+        this.eventPublisher = eventBus;
     }
 
     /**

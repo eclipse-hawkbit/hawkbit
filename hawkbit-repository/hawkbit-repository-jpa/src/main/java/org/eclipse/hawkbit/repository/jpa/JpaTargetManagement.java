@@ -94,7 +94,7 @@ public class JpaTargetManagement implements TargetManagement {
     private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
-    private ApplicationEventPublisher eventBus;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -214,7 +214,7 @@ public class JpaTargetManagement implements TargetManagement {
             targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
             targetRepository.deleteByIdIn(targetsForCurrentTenant);
         }
-        targetsForCurrentTenant.forEach(targetId -> eventBus.publishEvent(
+        targetsForCurrentTenant.forEach(targetId -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId, applicationContext.getId())));
     }
 
@@ -349,7 +349,7 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            afterCommit.afterCommit(() -> eventBus.publishEvent(new TargetTagAssigmentResultEvent(result)));
+            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(result)));
             return result;
         }
 
@@ -359,7 +359,7 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
                 allTargets.size(), 0, new ArrayList<>(targetRepository.save(allTargets)), Collections.emptyList(), tag);
 
-        afterCommit.afterCommit(() -> eventBus.publishEvent(new TargetTagAssigmentResultEvent(result)));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(result)));
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -379,7 +379,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
-            eventBus.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
         });
 
         return save;
@@ -394,7 +394,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
-            eventBus.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
         });
         return save;
     }
