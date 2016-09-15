@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
+import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
@@ -20,6 +22,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupPropertyCh
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -32,14 +36,15 @@ import org.springframework.stereotype.Service;
  * merge them to one event together and post them in a fixed interval is easier
  * to consume e.g. for push notifications on UI.
  * 
- * 
- * TODO:
  */
 @Service
 public class EventMerger {
 
     private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
     private static final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Checks if there are events to publish in the fixed interval.
@@ -49,16 +54,15 @@ public class EventMerger {
         final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
         while (rolloutIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutIterator.next();
-            // eventBus.post(new RolloutChangeEvent(1, eventKey.tenant,
-            // eventKey.rolloutId));
+            applicationEventPublisher.publishEvent(new RolloutChangeEvent(1, eventKey.tenant, eventKey.rolloutId));
             rolloutIterator.remove();
         }
 
         final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
         while (rolloutGroupIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutGroupIterator.next();
-            // eventBus.post(new RolloutGroupChangeEvent(1, eventKey.tenant,
-            // eventKey.rolloutId, eventKey.rolloutGroupId));
+            applicationEventPublisher.publishEvent(
+                    new RolloutGroupChangeEvent(1, eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
             rolloutGroupIterator.remove();
         }
     }
@@ -99,14 +103,14 @@ public class EventMerger {
         }
     }
 
-    private Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
+    private static Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
         if (rolloutGroup != null) {
             return rolloutGroup.getId();
         }
         return null;
     }
 
-    private Long getRolloutId(final Rollout rollout) {
+    private static Long getRolloutId(final Rollout rollout) {
         if (rollout != null) {
             return rollout.getId();
         }
