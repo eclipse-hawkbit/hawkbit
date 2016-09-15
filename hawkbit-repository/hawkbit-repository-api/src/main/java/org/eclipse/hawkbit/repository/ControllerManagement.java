@@ -219,6 +219,25 @@ public interface ControllerManagement {
     boolean hasTargetArtifactAssigned(@NotNull String controllerId, @NotNull LocalArtifact localArtifact);
 
     /**
+     * Checks if a given target has currently or has even been assigned to the
+     * given artifact through the action history list. This can e.g. indicate if
+     * a target is allowed to download a given artifact because it has currently
+     * assigned or had ever been assigned to the target and so it's visible to a
+     * specific target e.g. for downloading.
+     * 
+     * @param targetId
+     *            the ID of the target to check
+     * @param localArtifact
+     *            the artifact to verify if the given target had even been
+     *            assigned to
+     * @return {@code true} if the given target has currently or had ever a
+     *         relation to the given artifact through the action history,
+     *         otherwise {@code false}
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotNull LocalArtifact localArtifact);
+
+    /**
      * Registers retrieved status for given {@link Target} and {@link Action} if
      * it does not exist yet.
      *

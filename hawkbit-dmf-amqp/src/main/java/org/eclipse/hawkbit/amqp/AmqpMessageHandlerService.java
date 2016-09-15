@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -51,7 +50,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +58,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.Header;
@@ -88,27 +84,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
-    @Autowired
-    private ControllerManagement controllerManagement;
+    private final ControllerManagement controllerManagement;
 
-    @Autowired
-    private AmqpControllerAuthentication authenticationManager;
+    private final AmqpControllerAuthentication authenticationManager;
 
-    @Autowired
-    private ArtifactManagement artifactManagement;
+    private final ArtifactManagement artifactManagement;
 
-    @Autowired
-    @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
-    private Cache cache;
+    private final Cache cache;
 
-    @Autowired
-    private HostnameResolver hostnameResolver;
+    private final HostnameResolver hostnameResolver;
 
-    @Autowired
-    private EntityFactory entityFactory;
-
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final EntityFactory entityFactory;
 
     /**
      * Constructor.
@@ -117,11 +103,32 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the configured amqp template.
      * @param amqpMessageDispatcherService
      *            to sending events to DMF client
+     * @param artifactManagement
+     *            for artifact URI generation
+     * @param cache
+     *            for download Ids
+     * @param hostnameResolver
+     *            for resolving the host for downloads
+     * @param controllerManagement
+     *            for target repo access
+     * @param authenticationManager
+     *            for target authentication
+     * @param entityFactory
+     *            to create entities
      */
     public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate,
-            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
+            final AmqpMessageDispatcherService amqpMessageDispatcherService,
+            final ArtifactManagement artifactManagement, final Cache cache, final HostnameResolver hostnameResolver,
+            final ControllerManagement controllerManagement, final AmqpControllerAuthentication authenticationManager,
+            final EntityFactory entityFactory) {
         super(defaultTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
+        this.artifactManagement = artifactManagement;
+        this.cache = cache;
+        this.hostnameResolver = hostnameResolver;
+        this.controllerManagement = controllerManagement;
+        this.authenticationManager = authenticationManager;
+        this.entityFactory = entityFactory;
     }
 
     /**
@@ -210,6 +217,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DownloadResponse authentificationResponse = new DownloadResponse();
         final MessageProperties messageProperties = message.getMessageProperties();
         final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
+
         final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
@@ -270,11 +278,30 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
             final LocalArtifact localArtifact) {
-        final String controllerId = secruityToken.getControllerId();
-        if (controllerId == null) {
+
+        if (secruityToken.getControllerId() != null) {
+            checkByControllerId(localArtifact, secruityToken.getControllerId());
+        } else if (secruityToken.getTargetId() != null) {
+            checkByTargetId(localArtifact, secruityToken.getTargetId());
+        } else {
             LOG.info("anonymous download no authentication check for artifact {}", localArtifact);
             return;
         }
+
+    }
+
+    private void checkByTargetId(final LocalArtifact localArtifact, final Long targetId) {
+        LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}", targetId,
+                localArtifact);
+        if (!controllerManagement.hasTargetArtifactAssigned(targetId, localArtifact)) {
+            LOG.info("target {} tried to download artifact {} which is not assigned to the target", targetId,
+                    localArtifact);
+            throw new EntityNotFoundException();
+        }
+        LOG.info("download security check for target {} and artifact {} granted", targetId, localArtifact);
+    }
+
+    private void checkByControllerId(final LocalArtifact localArtifact, final String controllerId) {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
                 controllerId, localArtifact);
         if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
@@ -501,33 +528,5 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return;
         }
         throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
-    }
-
-    void setControllerManagement(final ControllerManagement controllerManagement) {
-        this.controllerManagement = controllerManagement;
-    }
-
-    void setHostnameResolver(final HostnameResolver hostnameResolver) {
-        this.hostnameResolver = hostnameResolver;
-    }
-
-    void setAuthenticationManager(final AmqpControllerAuthentication authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-
-    void setArtifactManagement(final ArtifactManagement artifactManagement) {
-        this.artifactManagement = artifactManagement;
-    }
-
-    void setCache(final Cache cache) {
-        this.cache = cache;
-    }
-
-    void setEntityFactory(final EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
-    }
-
-    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
-        this.systemSecurityContext = systemSecurityContext;
     }
 }

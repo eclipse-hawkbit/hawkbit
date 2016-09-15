@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.hawkbit.api.APIType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.URLPlaceholder;
+import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
@@ -97,8 +98,9 @@ public final class DataConversionHelper {
         artifactUrlHandler
                 .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
                         systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
-                        artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
-                        artifact.getSha1Hash()), APIType.DDI)
+                        new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
+                                artifact.getSha1Hash())),
+                        APIType.DDI)
                 .forEach(entry -> file.add(new Link(entry.getRef()).withRel(entry.getRel())));
 
         return file;

@@ -75,7 +75,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     }
 
-    private String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder) {
+    private static String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder) {
         final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder).entrySet();
 
         String urlPattern = protocol.getRef();
@@ -91,13 +91,13 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         return urlPattern;
     }
 
-    private Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder) {
+    private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder) {
         final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
         replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
-                UrlEscapers.urlFragmentEscaper().escape(placeholder.getFilename()));
-        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSha1Hash());
+                UrlEscapers.urlFragmentEscaper().escape(placeholder.getSoftwareData().getFilename()));
+        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
         replaceMap.put(PORT_PLACEHOLDER, protocol.getPort() == null ? null : String.valueOf(protocol.getPort()));
         replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
@@ -106,11 +106,13 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
         replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
         replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
-        replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getArtifactId()));
-        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getArtifactId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER, String.valueOf(placeholder.getSoftwareModuleId()));
+        replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
+                Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER,
+                String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
         replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER,
-                Base62Util.fromBase10(placeholder.getSoftwareModuleId()));
+                Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
         return replaceMap;
     }
 

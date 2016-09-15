@@ -54,7 +54,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -116,22 +115,13 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
-    @Mock
-    private SystemSecurityContext systemSecurityContextMock;
-
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock);
-        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
-        amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
-        amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
-        amqpMessageHandlerService.setCache(cacheMock);
-        amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
-        amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
-        amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
-
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
+                artifactManagementMock, cacheMock, hostnameResolverMock, controllerManagementMock,
+                authenticationManagerMock, entityFactoryMock);
     }
 
     @Test
@@ -367,14 +357,11 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any()))
-                .thenReturn(Optional.of(action));
+        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
         when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
                 .thenReturn(softwareModuleList);
-
-        when(systemSecurityContextMock.runAsSystem(anyObject())).thenReturn("securityToken");
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
