@@ -17,6 +17,10 @@ public final class Base62Util {
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE62_BASE = BASE62_ALPHABET.length();
 
+    private Base62Util() {
+        // Utility class
+    }
+
     /**
      * @param base10
      *            number

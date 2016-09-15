@@ -15,8 +15,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.HostnameResolver;
+import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -42,6 +46,7 @@ import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.Cache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -252,17 +257,33 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create amqp handler service bean.
+     * Create AMQP handler service bean.
      * 
      * @param amqpMessageDispatcherService
      *            to sending events to DMF client
+     * @param artifactManagement
+     *            for artifact URI generation
+     * @param cache
+     *            for download IDs
+     * @param hostnameResolver
+     *            for resolving the host for downloads
+     * @param controllerManagement
+     *            for target repo access
+     * @param authenticationManager
+     *            for target authentication
+     * @param entityFactory
+     *            to create entities
      *
      * @return handler service bean
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService(
-            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
-        return new AmqpMessageHandlerService(rabbitTemplate(), amqpMessageDispatcherService);
+            final AmqpMessageDispatcherService amqpMessageDispatcherService,
+            final ArtifactManagement artifactManagement, @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE) final Cache cache,
+            final HostnameResolver hostnameResolver, final ControllerManagement controllerManagement,
+            final AmqpControllerAuthentication authenticationManager, final EntityFactory entityFactory) {
+        return new AmqpMessageHandlerService(rabbitTemplate(), amqpMessageDispatcherService, artifactManagement, cache,
+                hostnameResolver, controllerManagement, authenticationManager, entityFactory);
     }
 
     /**

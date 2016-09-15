@@ -15,6 +15,7 @@ import java.util.List;
  * URLs to specific artifacts.
  *
  */
+@FunctionalInterface
 public interface ArtifactUrlHandler {
 
     /**

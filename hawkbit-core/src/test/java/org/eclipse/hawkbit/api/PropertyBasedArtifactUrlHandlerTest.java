@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
+import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +50,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private static final String TENANT = "TEST_TENANT";
 
     private static URLPlaceholder placeholder = new URLPlaceholder(TENANT, TENANT_ID, CONTROLLER_ID, targetId,
-            softwareModuleId, fileName, artifactId, sha1Hash);
+            new SoftwareData(softwareModuleId, fileName, artifactId, sha1Hash));
 
     @Before
     public void setup() {

@@ -18,7 +18,7 @@ public class ArtifactUrl {
     private final String rel;
     private final String ref;
 
-    public ArtifactUrl(final String protocol, final String rel, final String ref) {
+    ArtifactUrl(final String protocol, final String rel, final String ref) {
         this.protocol = protocol;
         this.rel = rel;
         this.ref = ref;
