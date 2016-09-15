@@ -29,7 +29,7 @@ public class CacheClearedEvent extends TenantAwareDistributedEvent {
      *            the applicationId
      */
     @JsonCreator
-    protected CacheClearedEvent(@JsonProperty("tenant") final String tenant,
+    public CacheClearedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("cacheName") final String cacheName,
             @JsonProperty("originService") final String applicationId) {
         super(tenant, cacheName, applicationId);
