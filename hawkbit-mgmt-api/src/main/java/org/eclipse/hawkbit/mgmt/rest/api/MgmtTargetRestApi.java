@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -84,7 +83,7 @@ public interface MgmtTargetRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets);
+    ResponseEntity<List<MgmtTarget>> createTargets(final List<MgmtTargetRequestBody> targets);
 
     /**
      * Handles the PUT request of updating a target. The ID is within the URL
@@ -103,7 +102,7 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{controllerId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
-            @RequestBody final MgmtTargetRequestBody targetRest);
+            final MgmtTargetRequestBody targetRest);
 
     /**
      * Handles the DELETE request of deleting a target.
@@ -247,7 +246,7 @@ public interface MgmtTargetRestApi {
             "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("controllerId") final String controllerId,
-            @RequestBody final MgmtDistributionSetAssigment dsId);
+            final MgmtDistributionSetAssigment dsId);
 
     /**
      * Handles the GET request of retrieving the installed distribution set of

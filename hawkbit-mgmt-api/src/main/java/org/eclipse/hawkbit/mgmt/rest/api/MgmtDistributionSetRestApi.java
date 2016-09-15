@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,7 +87,7 @@ public interface MgmtDistributionSetRestApi {
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
-            @RequestBody final List<MgmtDistributionSetRequestBodyPost> sets);
+            final List<MgmtDistributionSetRequestBodyPost> sets);
 
     /**
      * Handles the DELETE request for a single DistributionSet .
@@ -116,7 +115,7 @@ public interface MgmtDistributionSetRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate);
+            final MgmtDistributionSetRequestBodyPut toUpdate);
 
     /**
      * Handles the GET request of retrieving assigned targets to a specific
@@ -198,7 +197,7 @@ public interface MgmtDistributionSetRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtTargetAssignmentRequestBody> targetIds);
+            final List<MgmtTargetAssignmentRequestBody> targetIds);
 
     /**
      * Gets a paged list of meta data for a distribution set.
@@ -256,7 +255,7 @@ public interface MgmtDistributionSetRestApi {
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata);
+            @PathVariable("metadataKey") final String metadataKey, final MgmtMetadata metadata);
 
     /**
      * Deletes a single meta data entry from the distribution set.
@@ -285,7 +284,7 @@ public interface MgmtDistributionSetRestApi {
             MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtMetadata> metadataRest);
+            final List<MgmtMetadata> metadataRest);
 
     /**
      * Assigns a list of software modules to a distribution set.
@@ -301,7 +300,7 @@ public interface MgmtDistributionSetRestApi {
             MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs);
+            final List<MgmtSoftwareModuleAssigment> softwareModuleIDs);
 
     /**
      * Deletes the assignment of the software module form the distribution set.

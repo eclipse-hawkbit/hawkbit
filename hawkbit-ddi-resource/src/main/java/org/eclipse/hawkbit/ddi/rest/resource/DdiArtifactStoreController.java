@@ -69,8 +69,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
-            @AuthenticationPrincipal final String targetid) {
+    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
+            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
@@ -110,7 +110,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName) {
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
+            @PathVariable("fileName") final String fileName) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {

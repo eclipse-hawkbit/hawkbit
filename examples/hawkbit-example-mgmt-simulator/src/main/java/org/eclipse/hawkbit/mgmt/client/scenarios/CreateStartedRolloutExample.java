@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Example for creating and starting a Rollout.
@@ -46,7 +45,6 @@ public class CreateStartedRolloutExample {
     private MgmtDistributionSetClientResource distributionSetResource;
 
     @Autowired
-    @Qualifier("mgmtSoftwareModuleClientResource")
     private MgmtSoftwareModuleClientResource softwareModuleResource;
 
     @Autowired

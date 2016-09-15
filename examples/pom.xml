@@ -8,7 +8,8 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -28,33 +29,21 @@
       <module>hawkbit-example-ddi-feign-client</module>
       <module>hawkbit-example-mgmt-feign-client</module>
       <module>hawkbit-example-mgmt-simulator</module>
-  </modules>
-  
-  
-   <properties>
-      <feign.version>8.14.2</feign.version>
-   </properties>
+   </modules>
 
    <dependencyManagement>
       <dependencies>
          <dependency>
-            <groupId>com.netflix.feign</groupId>
-            <artifactId>feign-core</artifactId>
-            <!-- need to overwrite for the interface inheritance feature of feign-core -->
-            <!-- <version>8.16.0</version> -->
-            <version>${feign.version}</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>Brixton.SR5</version>
+            <type>pom</type>
+            <scope>import</scope>
          </dependency>
          <dependency>
             <groupId>com.netflix.feign</groupId>
             <artifactId>feign-jackson</artifactId>
-            <!-- need to overwrite for the interface inheritance feature of feign-core -->
-            <!-- <version>8.16.0</version> -->
-            <version>${feign.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.netflix.feign</groupId>
-            <artifactId>feign-slf4j</artifactId>
-            <version>${feign.version}</version>
+            <version>8.16.2</version>
          </dependency>
       </dependencies>
    </dependencyManagement>
