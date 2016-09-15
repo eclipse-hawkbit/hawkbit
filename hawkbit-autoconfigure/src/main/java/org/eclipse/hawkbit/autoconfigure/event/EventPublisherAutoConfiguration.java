@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.autoconfigure.eventbus;
+package org.eclipse.hawkbit.autoconfigure.event;
 
 import java.util.concurrent.Executor;
 
