@@ -11,7 +11,8 @@ package org.eclipse.hawkbit;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.eclipse.hawkbit.cache.CacheConstants;
+import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
@@ -26,7 +27,6 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.Cache;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
@@ -85,9 +85,8 @@ public class TestConfiguration implements AsyncConfigurer {
      * 
      * @return the cache
      */
-    @Bean(name = CacheConstants.DOWNLOAD_ID_CACHE)
-    public Cache downloadIdCache() {
-        return cacheManager().getDirectCache(CacheConstants.DOWNLOAD_ID_CACHE);
+    public DownloadIdCache downloadIdCache() {
+        return new DefaultDownloadIdCache(cacheManager());
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)

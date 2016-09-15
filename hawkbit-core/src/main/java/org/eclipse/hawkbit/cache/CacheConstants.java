@@ -13,11 +13,6 @@ package org.eclipse.hawkbit.cache;
  */
 public final class CacheConstants {
 
-    /**
-     * Constant for download cache id.
-     */
-    public static final String DOWNLOAD_ID_CACHE = "DowonloadIdCache";
-
     private CacheConstants() {
     }
 }

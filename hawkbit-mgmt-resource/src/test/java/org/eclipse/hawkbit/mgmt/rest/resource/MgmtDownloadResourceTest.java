@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -23,8 +23,6 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
 import org.springframework.context.annotation.Description;
 
 import ru.yandex.qatools.allure.annotations.Features;
@@ -35,8 +33,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class MgmtDownloadResourceTest extends AbstractRestIntegrationTestWithMongoDB {
 
     @Autowired
-    @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
-    private Cache downloadIdCache;
+    private DownloadIdCache downloadIdCache;
 
     private final String downloadIdSha1 = "downloadIdSha1";
 
@@ -47,7 +44,8 @@ public class MgmtDownloadResourceTest extends AbstractRestIntegrationTestWithMon
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");
         final SoftwareModule softwareModule = distributionSet.getModules().stream().findFirst().get();
-        final Artifact artifact = testdataFactory.createLocalArtifacts(softwareModule.getId()).stream().findFirst().get();
+        final Artifact artifact = testdataFactory.createLocalArtifacts(softwareModule.getId()).stream().findFirst()
+                .get();
 
         downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
     }

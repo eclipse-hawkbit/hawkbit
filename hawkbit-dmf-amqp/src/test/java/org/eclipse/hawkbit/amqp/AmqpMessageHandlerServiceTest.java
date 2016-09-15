@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -67,7 +68,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -104,7 +104,7 @@ public class AmqpMessageHandlerServiceTest {
     private ArtifactRepository artifactRepositoryMock;
 
     @Mock
-    private CacheManager cacheManager;
+    private DownloadIdCache downloadIdCache;
 
     @Mock
     private HostnameResolver hostnameResolverMock;
@@ -123,7 +123,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
         amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
-        amqpMessageHandlerService.setCacheManager(cacheManager);
+        amqpMessageHandlerService.setDownloadIdCache(downloadIdCache);
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
         amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
         amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
