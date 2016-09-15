@@ -17,13 +17,13 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private final Long statusId;
-    private final long requestedBytes;
-    private final long shippedBytesSinceLast;
-    private final long shippedBytesOverall;
+    private Long statusId;
+    private long requestedBytes;
+    private long shippedBytesSinceLast;
+    private long shippedBytesOverall;
 
     /**
-     * TODO Build Json Object Constructor.
+     * TODO Build Json Object Constructor. Add orfing Service
      *
      * @param tenant
      *            the tenant for this event
@@ -45,6 +45,21 @@ public class DownloadProgressEvent extends AbstractDistributedEvent {
         this.requestedBytes = requestedBytes;
         this.shippedBytesSinceLast = shippedBytesSinceLast;
         this.shippedBytesOverall = shippedBytesOverall;
+    }
+
+    /**
+     * TODO remove just fu compilation
+     * 
+     * @param knownTenant
+     * @param l
+     * @param m
+     * @param n
+     * @param o
+     * @param myNodeId
+     */
+    public DownloadProgressEvent(final String knownTenant, final long l, final long m, final long n, final long o,
+            final String myNodeId) {
+        super(l, knownTenant, "TODO NODEID");
     }
 
     public Long getStatusId() {
