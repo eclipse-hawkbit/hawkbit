@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.eventbus.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -42,14 +42,12 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HttpHeaders;
 
@@ -80,9 +78,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void setup() {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-
-    @Autowired
-    private EventBus eventBus;
 
     @Test
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
@@ -254,7 +249,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         downLoadProgress = 1;
         shippedBytes = 0;
         shippedBytesTotal = 0;
-        eventBus.register(this);
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
@@ -334,7 +328,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         downLoadProgress = 1;
         shippedBytes = 0;
         shippedBytesTotal = 0;
-        eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -368,7 +361,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         downLoadProgress = 1;
         shippedBytes = 0;
         shippedBytesTotal = 0;
-        eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 

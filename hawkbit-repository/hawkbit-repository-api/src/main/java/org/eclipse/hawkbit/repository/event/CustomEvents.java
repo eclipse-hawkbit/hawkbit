@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.eventbus.event;
+package org.eclipse.hawkbit.repository.event;
 
 /**
  * Events to be published to refresh data on UI.

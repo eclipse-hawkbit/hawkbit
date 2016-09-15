@@ -6,19 +6,22 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.eventbus.event;
+package org.eclipse.hawkbit.repository.event.local;
+
+import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 
 /**
  * Abstract event definition class which holds the necessary revsion and tenant
  * information which every event needs.
  * 
- * @see AbstractDistributedEvent for events which should be distributed to other
+ * @see TenantAwareDistributedEvent for events which should be distributed to other
  *      cluster nodes
  */
 public class DefaultEvent implements Event {
 
-    private final long revision;
     private final String tenant;
+    private final long revision;
 
     /**
      * @param revision
