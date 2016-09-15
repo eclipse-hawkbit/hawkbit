@@ -15,18 +15,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of creating a new {@link Target}.
- *
+ * Defines the remote event of creating a new {@link Target}.
  *
  */
 public class TargetCreatedEvent extends TenantAwareBaseEntityEvent<Target> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TargetCreatedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -34,6 +37,14 @@ public class TargetCreatedEvent extends TenantAwareBaseEntityEvent<Target> {
         super(entitySource, tenant, applicationId);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param baseEntity
+     *            the target
+     * @param applicationId
+     *            the origin application id
+     */
     public TargetCreatedEvent(final Target baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }

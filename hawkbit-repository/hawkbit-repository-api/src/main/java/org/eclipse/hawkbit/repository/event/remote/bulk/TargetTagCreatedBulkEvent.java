@@ -25,10 +25,14 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TargetTagCreatedBulkEvent(@JsonProperty("entitySource") final GenericEventEntity<List<Long>> entitySource,
@@ -43,6 +47,8 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
      *            the tenant
      * @param entities
      *            the new ds tags
+     * @param applicationId
+     *            the origin application id
      */
     public TargetTagCreatedBulkEvent(final String tenant, final List<TargetTag> entities, final String applicationId) {
         super(tenant, entities, DistributionSetTag.class, applicationId);
@@ -51,10 +57,11 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
     /**
      * Constructor.
      * 
-     * @param tenant
-     *            the tenant.
      * @param entity
      *            the new ds tag
+     * 
+     * @param applicationId
+     *            the origin application id
      */
     public TargetTagCreatedBulkEvent(final TargetTag entity, final String applicationId) {
         super(entity, applicationId);

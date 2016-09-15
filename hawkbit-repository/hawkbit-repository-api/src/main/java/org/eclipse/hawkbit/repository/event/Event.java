@@ -16,6 +16,7 @@ package org.eclipse.hawkbit.repository.event;
  *
  *
  */
+@FunctionalInterface
 public interface Event {
 
     /**

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of updating a {@link Target}.
+ * Defines the remote event of updating a {@link Target}.
  *
  */
 public class TargetUpdatedEvent extends TenantAwareBaseEntityEvent<Target> {
@@ -23,10 +23,14 @@ public class TargetUpdatedEvent extends TenantAwareBaseEntityEvent<Target> {
     private static final long serialVersionUID = 5665118668865832477L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TargetUpdatedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -35,10 +39,12 @@ public class TargetUpdatedEvent extends TenantAwareBaseEntityEvent<Target> {
     }
 
     /**
-     * Constructor
+     * Constructor.
      * 
      * @param baseEntity
      *            Target entity
+     * @param applicationId
+     *            the origin application id
      */
     public TargetUpdatedEvent(final Target baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

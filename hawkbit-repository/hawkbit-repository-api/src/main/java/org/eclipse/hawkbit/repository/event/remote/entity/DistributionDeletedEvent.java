@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
@@ -16,17 +15,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link TenantAwareDistributedEvent} for deletion of
- * {@link DistributionSet}.
+ * Defines the remote event for deletion of {@link DistributionSet}.
  */
 public class DistributionDeletedEvent extends BaseEntityEvent<DistributionSet, Long> {
-    private static final long serialVersionUID = -3308850381757843098L;
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected DistributionDeletedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -35,10 +38,14 @@ public class DistributionDeletedEvent extends BaseEntityEvent<DistributionSet, L
     }
 
     /**
+     * Constructor.
+     * 
      * @param tenant
-     *            the tenant for this event
+     *            the tenant
      * @param distributionId
-     *            the ID of the distribution set which has been deleted
+     *            the distributionId which is deleted applicationId the origin
+     * @param applicationId
+     *            the origin application id
      */
     public DistributionDeletedEvent(final String tenant, final Long distributionId, final String applicationId) {
         super(tenant, distributionId, DistributionSet.class, applicationId);

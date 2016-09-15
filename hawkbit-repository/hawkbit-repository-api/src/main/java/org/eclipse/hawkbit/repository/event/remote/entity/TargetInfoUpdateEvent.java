@@ -22,10 +22,14 @@ public class TargetInfoUpdateEvent extends BaseEntityEvent<TargetInfo, Long> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TargetInfoUpdateEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -34,10 +38,12 @@ public class TargetInfoUpdateEvent extends BaseEntityEvent<TargetInfo, Long> {
     }
 
     /**
-     * @param tenant
-     *            the tenant for this event
-     * @param targetId
-     *            the ID of the target which has been deleted
+     * Constructor.
+     * 
+     * @param targetInfo
+     *            the target info
+     * @param applicationId
+     *            the origin application id
      */
     public TargetInfoUpdateEvent(final TargetInfo targetInfo, final String applicationId) {
         super(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), targetInfo, applicationId);

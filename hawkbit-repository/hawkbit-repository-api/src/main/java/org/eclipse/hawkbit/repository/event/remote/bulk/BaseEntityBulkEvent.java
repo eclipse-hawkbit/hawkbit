@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A abstract typesafe bulkevent which contains all changed base entities.
  * 
  * @param <E>
+ *            the entity
  */
 public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
         extends BaseEntityEvent<List<E>, List<Long>> {
@@ -31,10 +32,14 @@ public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected BaseEntityBulkEvent(@JsonProperty("entitySource") final GenericEventEntity<List<Long>> entitySource,
@@ -42,6 +47,18 @@ public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
         super(entitySource, tenant, applicationId);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param tenant
+     *            the tenant
+     * @param entities
+     *            the entities
+     * @param entityClass
+     *            the entities class
+     * @param pplicationId
+     *            the origin application id
+     */
     protected BaseEntityBulkEvent(final String tenant, final List<E> entities, final Class<?> entityClass,
             final String applicationId) {
         super(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), entityClass,
@@ -49,6 +66,14 @@ public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
 
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param entitiy
+     *            the entity
+     * @param pplicationId
+     *            the origin application id
+     */
     protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
         this(entitiy.getTenant(), Arrays.asList(entitiy), entitiy.getClass(), applicationId);
     }

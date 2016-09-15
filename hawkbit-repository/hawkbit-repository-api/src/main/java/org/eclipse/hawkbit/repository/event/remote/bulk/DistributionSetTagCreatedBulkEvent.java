@@ -24,10 +24,14 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected DistributionSetTagCreatedBulkEvent(
@@ -43,6 +47,8 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
      *            the tenant
      * @param entities
      *            the new ds tags
+     * @param applicationId
+     *            the origin application id
      */
     public DistributionSetTagCreatedBulkEvent(final String tenant, final List<DistributionSetTag> entities,
             final String applicationId) {
@@ -52,10 +58,10 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
     /**
      * Constructor.
      * 
-     * @param tenant
-     *            the tenant.
      * @param entity
      *            the new ds tag
+     * @param applicationId
+     *            the origin application id
      */
     public DistributionSetTagCreatedBulkEvent(final DistributionSetTag entity, final String applicationId) {
         super(entity, applicationId);

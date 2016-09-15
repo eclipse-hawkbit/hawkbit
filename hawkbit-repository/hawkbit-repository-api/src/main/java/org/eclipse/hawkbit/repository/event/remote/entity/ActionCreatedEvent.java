@@ -15,16 +15,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of creating a new {@link Action}.
+ * Defines the remote event of creating a new {@link Action}.
  */
 public class ActionCreatedEvent extends TenantAwareBaseEntityEvent<Action> {
     private static final long serialVersionUID = 181780358321768629L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected ActionCreatedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -32,6 +36,14 @@ public class ActionCreatedEvent extends TenantAwareBaseEntityEvent<Action> {
         super(entitySource, tenant, applicationId);
     }
 
+    /**
+     * Constructor
+     * 
+     * @param action
+     *            the created action
+     * @param applicationId
+     *            the origin application id
+     */
     public ActionCreatedEvent(final Action action, final String applicationId) {
         super(action, applicationId);
     }

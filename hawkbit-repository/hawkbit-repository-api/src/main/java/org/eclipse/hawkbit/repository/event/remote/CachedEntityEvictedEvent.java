@@ -15,6 +15,10 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * Defines the remote event of clear a cache event for a cache key.
+ */
 public class CachedEntityEvictedEvent extends TenantAwareDistributedEvent {
 
     private static final long serialVersionUID = 1L;
@@ -27,11 +31,14 @@ public class CachedEntityEvictedEvent extends TenantAwareDistributedEvent {
 
     /**
      * Constructor.
-     *
+     * 
      * @param tenant
-     *            the tenant for this event
      * @param cacheName
      *            the name of the cache which was cleared
+     * @param cacheKey
+     *            the key of the cache entry which was cleared
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     public CachedEntityEvictedEvent(@JsonProperty("tenant") final String tenant,

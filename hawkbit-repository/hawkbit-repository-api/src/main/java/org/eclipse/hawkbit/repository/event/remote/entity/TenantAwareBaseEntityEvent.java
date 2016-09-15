@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An abstract definition class for {@link EntityEvent} for some object
+ * An base definition class for {@link EntityEvent} for some object.
  *
  * @param <E>
  *            the type of the entity
@@ -26,13 +26,14 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
-     * 
+     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TenantAwareBaseEntityEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -40,6 +41,14 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
         super(entitySource, tenant, applicationId);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param baseEntity
+     *            the base entity
+     * @param applicationId
+     *            the origin application id
+     */
     protected TenantAwareBaseEntityEvent(final E baseEntity, final String applicationId) {
         super(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass(), applicationId);
     }

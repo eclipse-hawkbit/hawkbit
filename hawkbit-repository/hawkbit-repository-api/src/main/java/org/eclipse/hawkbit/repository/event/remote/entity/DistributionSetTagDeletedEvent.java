@@ -15,8 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of update a
- * {@link DistributionSetTag}.
+ * Defines the the remote event of update a {@link DistributionSetTag}.
  *
  */
 public class DistributionSetTagDeletedEvent extends TenantAwareBaseEntityEvent<DistributionSetTag> {
@@ -24,10 +23,14 @@ public class DistributionSetTagDeletedEvent extends TenantAwareBaseEntityEvent<D
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected DistributionSetTagDeletedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -40,6 +43,8 @@ public class DistributionSetTagDeletedEvent extends TenantAwareBaseEntityEvent<D
      * 
      * @param tag
      *            the tag which is deleted
+     * @param applicationId
+     *            the origin application id
      */
     public DistributionSetTagDeletedEvent(final DistributionSetTag tag, final String applicationId) {
         super(tag, applicationId);

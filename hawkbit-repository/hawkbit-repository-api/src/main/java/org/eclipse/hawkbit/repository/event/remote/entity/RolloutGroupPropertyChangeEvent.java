@@ -18,17 +18,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractPropertyChangeEvent} of {@link RolloutGroup}.
+ * Defines the remote event of {@link RolloutGroup} proeprty changes.
  */
 public class RolloutGroupPropertyChangeEvent extends BasePropertyChangeEvent<RolloutGroup> {
 
     private static final long serialVersionUID = 4026477044419472686L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected RolloutGroupPropertyChangeEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -36,6 +40,16 @@ public class RolloutGroupPropertyChangeEvent extends BasePropertyChangeEvent<Rol
         super(entitySource, tenant, applicationId);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param entity
+     *            the entity
+     * @param changeSetValues
+     *            the changeSetValues
+     * @param applicationId
+     *            the origin application id
+     */
     public RolloutGroupPropertyChangeEvent(final RolloutGroup entity, final Map<String, PropertyChange> changeSetValues,
             final String applicationId) {
         super(entity, changeSetValues, applicationId);

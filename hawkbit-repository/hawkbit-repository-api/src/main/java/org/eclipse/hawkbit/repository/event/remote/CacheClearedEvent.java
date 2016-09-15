@@ -11,6 +11,10 @@ package org.eclipse.hawkbit.repository.event.remote;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * Defines the remote event of clear a cache event.
+ */
 public class CacheClearedEvent extends TenantAwareDistributedEvent {
 
     private static final long serialVersionUID = 1L;

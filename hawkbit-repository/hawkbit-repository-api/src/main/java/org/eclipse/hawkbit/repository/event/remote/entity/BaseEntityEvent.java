@@ -33,14 +33,14 @@ public class BaseEntityEvent<E, I> extends TenantAwareDistributedEvent implement
     private transient E entity;
 
     /**
-     * * for serialization libs like jackson
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the entity source
+     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
      * @param applicationId
-     *            th application id
+     *            the origin application id
      */
     @JsonCreator
     protected BaseEntityEvent(@JsonProperty("entitySource") final GenericEventEntity<I> entitySource,
@@ -55,8 +55,11 @@ public class BaseEntityEvent<E, I> extends TenantAwareDistributedEvent implement
      * @param tenant
      *            the tenant
      * @param entityId
+     *            the id
      * @param entity
-     * @param applicationId
+     *            the entity
+     * @param the
+     *            origin application id
      */
     protected BaseEntityEvent(final String tenant, final I entityId, final E entity, final String applicationId) {
         this(new GenericEventEntity<I>(entityId, entity.getClass().getName()), tenant, applicationId);
@@ -64,11 +67,16 @@ public class BaseEntityEvent<E, I> extends TenantAwareDistributedEvent implement
     }
 
     /**
+     * Constructor.
      * 
      * @param tenant
+     *            the tenant
      * @param entityId
+     *            the entity id
      * @param entityClass
+     *            the entity class
      * @param applicationId
+     *            the origin application id
      */
     protected BaseEntityEvent(final String tenant, final I entityId, final Class<?> entityClass,
             final String applicationId) {

@@ -15,8 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of creating a new
- * {@link DistributionSet}.
+ * Defines the the remote of creating a new {@link DistributionSet}.
  *
  */
 public class DistributionCreatedEvent extends TenantAwareBaseEntityEvent<DistributionSet> {
@@ -24,10 +23,14 @@ public class DistributionCreatedEvent extends TenantAwareBaseEntityEvent<Distrib
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected DistributionCreatedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -36,8 +39,12 @@ public class DistributionCreatedEvent extends TenantAwareBaseEntityEvent<Distrib
     }
 
     /**
+     * Constructor.
+     * 
      * @param distributionSet
-     *            the distributionSet which has been created
+     *            the created distributionSet
+     * @param applicationId
+     *            the origin application id
      */
     public DistributionCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
         super(distributionSet, applicationId);

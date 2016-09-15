@@ -16,17 +16,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
- * Defines the {@link AbstractBaseEntityEvent} of deleting a {@link Target}.
+ * Defines the remote event of deleting a {@link Target}.
  */
 public class TargetDeletedEvent extends BaseEntityEvent<Target, Long> {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization
+     * Constructor for json serialization.
      * 
      * @param entitySource
-     *            the json infos
+     *            the entity source within the json entity information
+     * @param tenant
+     *            the tenant
+     * @param applicationId
+     *            the origin application id
      */
     @JsonCreator
     protected TargetDeletedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
@@ -39,6 +43,8 @@ public class TargetDeletedEvent extends BaseEntityEvent<Target, Long> {
      *            the tenant for this event
      * @param targetId
      *            the ID of the target which has been deleted
+     * @param applicationId
+     *            the origin application id
      */
     public TargetDeletedEvent(final String tenant, final Long targetId, final String applicationId) {
         super(tenant, targetId, Target.class, applicationId);
