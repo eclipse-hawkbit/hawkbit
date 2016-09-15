@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.json;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,16 +18,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * The json model for the entity events.
  *
+ * @param <I>
+ *            the id type
  */
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GenericEventEntity<E> implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class GenericEventEntity<I> {
 
     @JsonProperty(required = true)
-    private final E genericId;
+    private final I genericId;
 
     @JsonProperty(required = true)
     private final String entityClass;
@@ -36,34 +36,28 @@ public class GenericEventEntity<E> implements Serializable {
     private Map<String, PropertyChange> changeSetValues = new HashMap<>();
 
     /**
-     * @param tenant
-     * @param entityId
+     * Constructor.
+     * 
+     * @param genericId
+     *            the generic id.
+     * @param entityClass
+     *            the entity class.
      */
     @JsonCreator
-    public GenericEventEntity(@JsonProperty("genericId") final E genericId,
+    public GenericEventEntity(@JsonProperty("genericId") final I genericId,
             @JsonProperty("entityClass") final String entityClass) {
         this.genericId = genericId;
         this.entityClass = entityClass;
     }
 
-    /**
-     * @return the genericId
-     */
-    public E getGenericId() {
+    public I getGenericId() {
         return genericId;
     }
 
-    /**
-     * @param changeSetValues
-     *            the changeSetValues to set
-     */
     public void setChangeSetValues(final Map<String, PropertyChange> changeSetValues) {
         this.changeSetValues = changeSetValues;
     }
 
-    /**
-     * @return the changeSetValues
-     */
     public Map<String, PropertyChange> getChangeSetValues() {
         return changeSetValues;
     }
@@ -73,9 +67,8 @@ public class GenericEventEntity<E> implements Serializable {
      */
     @JsonInclude(Include.NON_EMPTY)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PropertyChange implements Serializable {
+    public static class PropertyChange {
 
-        private static final long serialVersionUID = 1L;
         @JsonProperty(required = true)
         private final Object oldValue;
         @JsonProperty(required = true)
@@ -97,16 +90,10 @@ public class GenericEventEntity<E> implements Serializable {
             this.newValue = newValue;
         }
 
-        /**
-         * @return the oldValue
-         */
         public Object getOldValue() {
             return oldValue;
         }
 
-        /**
-         * @return the newValue
-         */
         public Object getNewValue() {
             return newValue;
         }
