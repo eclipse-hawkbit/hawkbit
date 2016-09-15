@@ -116,7 +116,7 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.0.0</rsql-parser.version>
       <spring.redis>1.7.2.RELEASE</spring.redis>
-      <spring-cloud-bus.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-bus.version>
+      <spring-cloud-bus.version>1.2.0.RC1</spring-cloud-bus.version>
       
       <!-- Misc libraries versions - END -->
 
