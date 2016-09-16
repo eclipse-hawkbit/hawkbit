@@ -41,7 +41,7 @@ public class DownloadProgressEvent extends TenantAwareDistributedEvent {
         this.shippedBytesSinceLast = shippedBytesSinceLast;
     }
 
-    public Long getShippedBytesSinceLast() {
+    public long getShippedBytesSinceLast() {
         return shippedBytesSinceLast;
     }
 

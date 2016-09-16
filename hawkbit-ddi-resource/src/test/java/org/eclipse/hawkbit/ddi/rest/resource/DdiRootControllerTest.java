@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import static org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
@@ -41,7 +42,6 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -122,7 +122,9 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
         final long current = System.currentTimeMillis();
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content()
+                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -154,7 +156,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                    .andExpect(content()
+                            .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
                     .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
             return null;
         });
@@ -165,7 +168,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content()
+                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00"))).andReturn().getResponse()
                 .getHeader("ETag");
 
@@ -236,8 +240,11 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
+
+        // {"config":{"polling":{}},"_links":{"configData":{"href":"http://localhost/default/controller/v1/4711/configData"}}}
+
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())

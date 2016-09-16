@@ -691,7 +691,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo("testname1")))
                 .andExpect(jsonPath("[0].controllerId", equalTo("id1")))
                 .andExpect(jsonPath("[0].description", equalTo("testid1")))
