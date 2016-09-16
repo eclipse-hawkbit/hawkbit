@@ -61,7 +61,7 @@ public class AmqpControllerAuthenticationTest {
     private AmqpMessageHandlerService amqpMessageHandlerService;
     private MessageConverter messageConverter;
     private TenantConfigurationManagement tenantConfigurationManagement;
-    private AmqpControllerAuthentfication authenticationManager;
+    private AmqpControllerAuthentication authenticationManager;
 
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_FALSE = TenantConfigurationValue
             .<Boolean> builder().value(Boolean.FALSE).build();
@@ -77,9 +77,6 @@ public class AmqpControllerAuthenticationTest {
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class));
 
-        authenticationManager = new AmqpControllerAuthentfication();
-        authenticationManager.setControllerManagement(mock(ControllerManagement.class));
-
         final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
         final Rp rp = mock(Rp.class);
         final org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication ddiAuthentication = mock(
@@ -90,23 +87,22 @@ public class AmqpControllerAuthenticationTest {
         when(secruityProperties.getAuthentication()).thenReturn(ddiAuthentication);
         when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
         when(anonymous.isEnabled()).thenReturn(false);
-        authenticationManager.setSecruityProperties(secruityProperties);
 
         tenantConfigurationManagement = mock(TenantConfigurationManagement.class);
-        authenticationManager.setTenantConfigurationManagement(tenantConfigurationManagement);
 
         when(tenantConfigurationManagement.getConfigurationValue(any(), eq(Boolean.class)))
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
         when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLLER_ID);
-        authenticationManager.setControllerManagement(controllerManagement);
         amqpMessageHandlerService.setArtifactManagement(mock(ArtifactManagement.class));
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
-        authenticationManager.setTenantAware(tenantAware);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
-        authenticationManager.setSystemSecurityContext(systemSecurityContext);
+
+        authenticationManager = new AmqpControllerAuthentication(controllerManagement, tenantConfigurationManagement,
+                tenantAware, secruityProperties, systemSecurityContext);
+
         authenticationManager.postConstruct();
         amqpMessageHandlerService.setAuthenticationManager(authenticationManager);
     }

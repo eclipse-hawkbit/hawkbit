@@ -92,7 +92,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private AmqpControllerAuthentfication authenticationManager;
+    private AmqpControllerAuthentication authenticationManager;
 
     @Autowired
     private ArtifactManagement artifactManagement;
@@ -511,7 +511,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         this.hostnameResolver = hostnameResolver;
     }
 
-    void setAuthenticationManager(final AmqpControllerAuthentfication authenticationManager) {
+    void setAuthenticationManager(final AmqpControllerAuthentication authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
