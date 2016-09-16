@@ -54,6 +54,10 @@ public class GenericEventEntity<I> {
         return genericId;
     }
 
+    public String getEntityClass() {
+        return entityClass;
+    }
+
     public void setChangeSetValues(final Map<String, PropertyChange> changeSetValues) {
         this.changeSetValues = changeSetValues;
     }

@@ -86,10 +86,14 @@ public class BaseEntityEvent<E, I> extends TenantAwareDistributedEvent implement
     @Override
     public E getEntity() {
         if (entity == null) {
-            System.out.println("Remote Event loading");
+            // TODO: Events überprüfen vielleicht eins ohne entität dabei wird
+            // falsch aufgerufen
+            System.out.println(this);
+            System.out.println(entitySource.getGenericId());
+            System.out.println(entitySource.getEntityClass());
+            System.out.println(getTenant());
             // Idee entity manager zum laden verwenden entitySource.getId +
             // entitySource.getTenant
-
         }
         return entity;
     }
