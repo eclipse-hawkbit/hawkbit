@@ -120,7 +120,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the virtual host
      * @return the rpc message back to supplier.
      */
-    Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
+    public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
