@@ -27,6 +27,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
+import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
@@ -60,12 +63,15 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.repository.support.Repositories;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -87,7 +93,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event.remote")
-public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
+public class RepositoryApplicationConfiguration extends JpaBaseConfiguration implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
@@ -385,4 +393,35 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     public EntityFactory entityFactory() {
         return new JpaEntityFactory();
     }
+
+    /**
+     * {@link EventEntityManagerHolder} bean.
+     * 
+     * @return a new {@link EventEntityManagerHolder}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EventEntityManagerHolder eventEntityManagerHolder() {
+        return EventEntityManagerHolder.getInstance();
+    }
+
+    /**
+     * {@link EventEntityManager} bean.
+     * 
+     * @param aware
+     *            the tenant aware
+     * @return a new {@link EventEntityManager}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EventEntityManager eventEntityManager(final TenantAware aware) {
+        return new JpaEventEntityManager(aware, new Repositories(applicationContext));
+    }
+
+    @Override
+    public void setApplicationContext(final ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+
+    }
+
 }

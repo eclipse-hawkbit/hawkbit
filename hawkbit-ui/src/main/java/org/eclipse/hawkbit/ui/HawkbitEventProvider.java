@@ -14,6 +14,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.event.Event;
 import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.repository.event.remote.bulk.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;

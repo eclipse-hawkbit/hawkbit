@@ -38,10 +38,10 @@ public class RolloutPropertyChangeEvent extends BasePropertyChangeEvent<Rollout>
     @JsonCreator
     protected RolloutPropertyChangeEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends Rollout> entityClass,
             @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClassName, changeSetValues, applicationId);
+        super(tenant, entityId, entityClass, changeSetValues, applicationId);
     }
 
     /**

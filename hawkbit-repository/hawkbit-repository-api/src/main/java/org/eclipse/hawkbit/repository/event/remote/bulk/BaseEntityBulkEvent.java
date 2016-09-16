@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.event.EntityEvent;
 import org.eclipse.hawkbit.repository.event.EntityIdEvent;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
@@ -37,10 +38,10 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     private final List<Long> entitiyIds;
 
     @JsonProperty(required = true)
-    private String entityClassName;
+    private Class<? extends E> entityClass;
 
     @JsonIgnore
-    private List<E> entities;
+    private List<? extends E> entities;
 
     /**
      * Constructor for json serialization.
@@ -57,10 +58,10 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     @JsonCreator
     protected BaseEntityBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entitiyIds, tenant, applicationId);
-        this.entityClassName = entityClassName;
+        this.entityClass = entityClass;
         this.entitiyIds = entitiyIds;
     }
 
@@ -91,23 +92,22 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
         this(entitiy.getTenant(), Arrays.asList(entitiy), applicationId);
     }
 
-    public String getEntityClassName() {
-        return entityClassName;
+    protected Class<? extends E> getEntityClass() {
+        return entityClass;
     }
 
     @Override
-    public List<E> getEntity() {
-        if (entities == null) {
-            System.out.println("Remote Event loading");
-            // Idee entity manager zum laden verwenden entitySource.getId +
-            // entitySource.getTenant
-            // setEntity(entity);
-            // TODO Entitymanager findAll or someting like that
+    @JsonIgnore
+    public List<? extends E> getEntity() {
+        if (entities == null && entityClass != null) {
+            entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
+                    entitiyIds, getEntityClass());
         }
         return null;
     }
 
-    public List<E> getEntities() {
+    @JsonIgnore
+    public List<? extends E> getEntities() {
         return getEntity();
     }
 
@@ -117,6 +117,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     }
 
     @Override
+    @JsonIgnore
     public <E> E getEntity(final Class<E> entityClass) {
         return null;
     }

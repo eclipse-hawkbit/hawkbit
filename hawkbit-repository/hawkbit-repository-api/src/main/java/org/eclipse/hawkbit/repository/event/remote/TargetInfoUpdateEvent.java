@@ -6,12 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.remote.entity;
+package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.EntityEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.BaseEntityIdEvent;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -20,22 +22,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEvent {
 
     private static final long serialVersionUID = 1L;
-    private TargetInfo targetInfo;
+
+    @JsonProperty(required = true)
+    private final Class<? extends TargetInfo> entityClass;
+
+    @JsonIgnore
+    private transient TargetInfo targetInfo;
 
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClass
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected TargetInfoUpdateEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
+    public TargetInfoUpdateEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId,
+            @JsonProperty("entityClass") final Class<? extends TargetInfo> entityClass,
+            @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
+        this.entityClass = entityClass;
     }
 
     /**
@@ -47,17 +59,27 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
      *            the origin application id
      */
     public TargetInfoUpdateEvent(final TargetInfo targetInfo, final String applicationId) {
-        this(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), applicationId);
+        this(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), targetInfo.getClass(), applicationId);
         this.targetInfo = targetInfo;
     }
 
     @Override
+    @JsonIgnore
     public <E> E getEntity(final Class<E> entityClass) {
         return entityClass.cast(targetInfo);
     }
 
+    protected Class<? extends TargetInfo> getEntityClass() {
+        return entityClass;
+    }
+
     @Override
+    @JsonIgnore
     public TargetInfo getEntity() {
+        if (targetInfo == null) {
+            targetInfo = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
+                    getEntityId(), getEntityClass());
+        }
         return targetInfo;
     }
 

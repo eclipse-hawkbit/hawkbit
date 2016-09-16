@@ -26,7 +26,7 @@ public class ActionCreatedEvent extends TenantAwareBaseEntityEvent<Action> {
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
      * @param applicationId
      *            the origin application id
@@ -34,9 +34,9 @@ public class ActionCreatedEvent extends TenantAwareBaseEntityEvent<Action> {
     @JsonCreator
     protected ActionCreatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends Action> entityClass,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClassName, applicationId);
+        super(tenant, entityId, entityClass, applicationId);
     }
 
     /**

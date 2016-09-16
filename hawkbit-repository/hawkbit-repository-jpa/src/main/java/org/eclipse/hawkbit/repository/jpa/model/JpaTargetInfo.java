@@ -38,7 +38,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
@@ -334,6 +334,12 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+
+        final TargetInfoUpdateEvent event = new TargetInfoUpdateEvent(getTarget().getTenant(), getTarget().getId(),
+                JpaTargetInfo.class, EventPublisherHolder.getInstance().getApplicationId());
+        event.getEntity();
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
+
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetInfoUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }

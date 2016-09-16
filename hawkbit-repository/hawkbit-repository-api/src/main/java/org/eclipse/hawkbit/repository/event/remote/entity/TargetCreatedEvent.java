@@ -27,17 +27,17 @@ public class TargetCreatedEvent extends TenantAwareBaseEntityEvent<Target> {
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected TargetCreatedEvent(@JsonProperty("tenant") final String tenant,
+    public TargetCreatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends Target> entityClass,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClassName, applicationId);
+        super(tenant, entityId, entityClass, applicationId);
     }
 
     /**

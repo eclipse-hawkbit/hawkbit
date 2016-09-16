@@ -37,9 +37,9 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
     @JsonCreator
     protected TargetTagCreatedBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends TargetTag> entityClass,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entitiyIds, entityClassName, applicationId);
+        super(tenant, entitiyIds, entityClass, applicationId);
     }
 
     /**

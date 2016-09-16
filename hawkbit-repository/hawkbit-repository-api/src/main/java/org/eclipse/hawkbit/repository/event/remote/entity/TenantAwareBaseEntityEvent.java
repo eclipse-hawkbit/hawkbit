@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.EntityEvent;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,7 +27,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
 
     private static final long serialVersionUID = 1L;
 
-    private String entityClassName;
+    private Class<? extends E> entityClass;
 
     @JsonIgnore
     private transient E entity;
@@ -38,7 +39,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
      * @param applicationId
      *            the origin application id
@@ -46,10 +47,10 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
     @JsonCreator
     protected TenantAwareBaseEntityEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
-        this.entityClassName = entityClassName;
+        this.entityClass = entityClass;
     }
 
     /**
@@ -61,30 +62,32 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
      *            the origin application id
      */
     protected TenantAwareBaseEntityEvent(final E baseEntity, final String applicationId) {
-        this(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass().getName(), applicationId);
+        this(baseEntity.getTenant(), baseEntity.getId(), null, applicationId);
         this.entity = baseEntity;
     }
 
     @Override
+    @JsonIgnore
     public E getEntity() {
+        // TODO Check entityClass null
         if (entity == null) {
             // TODO: Events überprüfen vielleicht eins ohne entität dabei wird
             // falsch aufgerufen
             System.out.println(this);
             System.out.println(getEntityId());
-            System.out.println(entityClassName);
+            System.out.println(entityClass);
             System.out.println(getTenant());
+            entity = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
+                    getEntityId(), entityClass);
+
             // Idee entity manager zum laden verwenden entitySource.getId +
             // entitySource.getTenant
         }
         return entity;
     }
 
-    /**
-     * @return the entityClassName
-     */
-    public String getEntityClassName() {
-        return entityClassName;
+    protected Class<?> getEntityClass() {
+        return entityClass;
     }
 
     @Override

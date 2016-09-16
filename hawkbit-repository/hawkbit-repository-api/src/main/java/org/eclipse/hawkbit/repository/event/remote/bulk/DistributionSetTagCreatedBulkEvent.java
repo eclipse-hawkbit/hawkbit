@@ -37,9 +37,9 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
     @JsonCreator
     protected DistributionSetTagCreatedBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends DistributionSetTag> entityClass,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entitiyIds, entityClassName, applicationId);
+        super(tenant, entitiyIds, entityClass, applicationId);
     }
 
     /**

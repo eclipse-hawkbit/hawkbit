@@ -39,20 +39,18 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
-     * @param changeSetValues
-     *            the changeSetValues
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
     protected BasePropertyChangeEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClassName, applicationId);
+        super(tenant, entityId, entityClass, applicationId);
         this.changeSetValues = changeSetValues;
     }
 
@@ -64,7 +62,7 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
      */
     public BasePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
             final String applicationId) {
-        this(entity.getTenant(), entity.getId(), entity.getClass().getName(), changeSetValues, applicationId);
+        this(entity.getTenant(), entity.getId(), null, changeSetValues, applicationId);
     }
 
     public Map<String, PropertyChange> getChangeSetValues() {
