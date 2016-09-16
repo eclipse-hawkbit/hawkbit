@@ -131,7 +131,7 @@ public interface SoftwareManagement {
      * @return created {@link Entity}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModuleType> createSoftwareModuleType(@NotNull final Collection<SoftwareModuleType> types);
+    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleType> types);
 
     /**
      * Creates new {@link SoftwareModuleType}.
@@ -483,21 +483,20 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
-    
+
     /**
      * Finds all meta data by the given software module id.
      *
      * @param softwareModuleId
      *            the software module id to retrieve the meta data from
-   
+     * 
      * 
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
-     * @return result of all meta data entries for a given software
-     *         module id.
+     * @return result of all meta data entries for a given software module id.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(Long softwareModuleId);

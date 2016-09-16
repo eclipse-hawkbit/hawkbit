@@ -24,6 +24,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
@@ -57,10 +59,13 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private List<RolloutGroup> rolloutGroups;
 
     @Column(name = "target_filter", length = 1024, nullable = false)
+    @Size(max = 1024)
+    @NotNull
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
+    @NotNull
     private JpaDistributionSet distributionSet;
 
     @Column(name = "status")
@@ -69,8 +74,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "last_check")
     private long lastCheck;
 
-    @Column(name = "action_type", nullable = false)
+    @Column(name = "action_type", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
+    @NotNull
     private ActionType actionType = ActionType.FORCED;
 
     @Column(name = "forced_time")

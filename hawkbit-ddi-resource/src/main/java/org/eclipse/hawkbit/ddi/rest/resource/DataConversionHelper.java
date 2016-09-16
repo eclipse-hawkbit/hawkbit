@@ -76,6 +76,10 @@ public final class DataConversionHelper {
      *            to convert
      * @param module
      *            the software module
+     * @param artifactUrlHandler
+     *            for generating download URLs
+     * @param systemManagement
+     *            for accessing the tenant ID
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
     public static List<DdiArtifact> createArtifacts(final Target target,
@@ -114,9 +118,10 @@ public final class DataConversionHelper {
 
         if (action.isPresent()) {
             if (action.get().isCancelingOrCanceled()) {
-                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerCancelAction(target.getControllerId(), action.get().getId()))
-                                .withRel(DdiRestConstants.CANCEL_ACTION));
+                result.add(linkTo(
+                        methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).getControllerCancelAction(
+                                tenantAware.getCurrentTenant(), target.getControllerId(), action.get().getId()))
+                                        .withRel(DdiRestConstants.CANCEL_ACTION));
             } else {
                 // we need to add the hashcode here of the actionWithStatus
                 // because the action might
@@ -124,14 +129,16 @@ public final class DataConversionHelper {
                 // change the payload of the
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(target.getControllerId(), action.get().getId(),
-                                calculateEtag(action.get()))).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                        .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                action.get().getId(), calculateEtag(action.get())))
+                                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
             result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
-                    target.getControllerId())).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
+                    tenantAware.getCurrentTenant(), target.getControllerId()))
+                            .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
     }

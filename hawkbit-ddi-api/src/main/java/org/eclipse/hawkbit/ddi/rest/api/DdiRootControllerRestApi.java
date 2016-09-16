@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +37,9 @@ public interface DdiRootControllerRestApi {
 
     /**
      * Returns all artifacts of a given software module and target.
-     *
+     * 
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            of the target that matches to controller id
      * @param softwareModuleId
@@ -48,12 +49,14 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
      * Root resource for an individual {@link Target}.
      *
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            of the target that matches to controller id
      * @param request
@@ -62,12 +65,15 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("controllerId") final String controllerId);
+    ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId);
 
     /**
      * Handles GET {@link DdiArtifact} download request. This could be full or
      * partial (as specified by RFC7233 (Range Requests)) download request.
      *
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            of the target
      * @param softwareModuleId
@@ -84,13 +90,16 @@ public interface DdiRootControllerRestApi {
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
-    ResponseEntity<InputStream> downloadArtifact(@PathVariable("controllerId") final String controllerId,
+    ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName);
 
     /**
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
      *
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            of the target
      * @param softwareModuleId
@@ -107,13 +116,16 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
             + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
-    ResponseEntity<Void> downloadArtifactMd5(@PathVariable("controllerId") final String controllerId,
+    ResponseEntity<Void> downloadArtifactMd5(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName);
 
     /**
      * Resource for software module.
      *
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            of the target
      * @param actionId
@@ -129,7 +141,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
             + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
+    ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource);
@@ -137,6 +149,8 @@ public interface DdiRootControllerRestApi {
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.
      *
+     * @param tenant
+     *            of the client
      * @param feedback
      *            to provide
      * @param controllerId
@@ -151,12 +165,14 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid final DdiActionFeedback feedback,
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
      * This is the feedback channel for the config data action.
      *
+     * @param tenant
+     *            of the client
      * @param configData
      *            as body
      * @param controllerId
@@ -169,11 +185,13 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{controllerId}/"
             + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
-            @PathVariable("controllerId") final String controllerId);
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 
     /**
      * RequestMethod.GET method for the {@link DdiCancel} action.
      *
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            ID of the calling target
      * @param actionId
@@ -185,7 +203,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
             + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<DdiCancel> getControllerCancelAction(
+    ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
@@ -193,6 +211,8 @@ public interface DdiRootControllerRestApi {
      * RequestMethod.POST method receiving the {@link DdiActionFeedback} from
      * the target.
      *
+     * @param tenant
+     *            of the client
      * @param feedback
      *            the {@link DdiActionFeedback} from the target.
      * @param controllerId
@@ -208,6 +228,7 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
+            @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 

@@ -74,7 +74,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
-    @Size(min = 1)
+    @Size(min = 1, max = 64)
     @NotNull
     private String controllerId;
 
@@ -107,6 +107,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      * with this security token.
      */
     @Column(name = "sec_token", insertable = true, updatable = true, nullable = false, length = 128)
+    @Size(max = 64)
+    @NotNull
     private String securityToken;
 
     @CascadeOnDelete

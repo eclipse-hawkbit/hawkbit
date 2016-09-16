@@ -12,6 +12,8 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
 
@@ -25,9 +27,12 @@ public abstract class AbstractJpaMetaData implements MetaData {
 
     @Id
     @Column(name = "meta_key", length = 128)
+    @Size(min = 1, max = 128)
+    @NotNull
     private String key;
 
     @Column(name = "meta_value", length = 4000)
+    @Size(max = 4000)
     @Basic
     private String value;
 
