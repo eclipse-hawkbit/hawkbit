@@ -24,8 +24,6 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,10 +102,8 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             return handleAuthenticationMessage(message);
-        } catch (final IllegalArgumentException ex) {
-            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException | TooManyStatusEntriesException e) {
-            throw new AmqpRejectAndDontRequeueException(e);
+        } catch (final RuntimeException ex) {
+            throw new AmqpRejectAndDontRequeueException(ex);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
