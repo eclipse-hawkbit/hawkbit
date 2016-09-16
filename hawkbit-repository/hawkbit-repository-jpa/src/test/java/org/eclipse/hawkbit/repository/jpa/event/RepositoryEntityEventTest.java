@@ -81,7 +81,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final TargetInfoUpdateEvent targetInfoUpdatedEvent = eventListener.waitForEvent(TargetInfoUpdateEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(targetInfoUpdatedEvent).isNotNull();
-        assertThat(targetInfoUpdatedEvent.getEntity().getTarget().getId()).isEqualTo(createdTarget.getId());
+        assertThat(targetInfoUpdatedEvent.getEntityId()).isEqualTo(createdTarget.getId());
     }
 
     @Test

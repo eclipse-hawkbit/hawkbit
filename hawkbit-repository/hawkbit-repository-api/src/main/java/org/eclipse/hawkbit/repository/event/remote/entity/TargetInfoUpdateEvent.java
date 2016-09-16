@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
+import org.eclipse.hawkbit.repository.event.EntityEvent;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,9 +17,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Event for update the targets info.
  */
-public class TargetInfoUpdateEvent extends BaseEntityEvent<TargetInfo, Long> {
+public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEvent {
 
     private static final long serialVersionUID = 1L;
+    private TargetInfo targetInfo;
 
     /**
      * Constructor for json serialization.
@@ -32,9 +33,9 @@ public class TargetInfoUpdateEvent extends BaseEntityEvent<TargetInfo, Long> {
      *            the origin application id
      */
     @JsonCreator
-    protected TargetInfoUpdateEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected TargetInfoUpdateEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
+        super(entityId, tenant, applicationId);
     }
 
     /**
@@ -46,7 +47,18 @@ public class TargetInfoUpdateEvent extends BaseEntityEvent<TargetInfo, Long> {
      *            the origin application id
      */
     public TargetInfoUpdateEvent(final TargetInfo targetInfo, final String applicationId) {
-        super(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), targetInfo, applicationId);
+        this(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), applicationId);
+        this.targetInfo = targetInfo;
+    }
+
+    @Override
+    public <E> E getEntity(final Class<E> entityClass) {
+        return entityClass.cast(targetInfo);
+    }
+
+    @Override
+    public TargetInfo getEntity() {
+        return targetInfo;
     }
 
 }

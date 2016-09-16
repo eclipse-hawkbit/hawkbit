@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,17 +24,21 @@ public class TargetTagDeletedEvent extends TenantAwareBaseEntityEvent<TargetTag>
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClassName
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected TargetTagDeletedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected TargetTagDeletedEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entityId, entityClassName, applicationId);
     }
 
     /**

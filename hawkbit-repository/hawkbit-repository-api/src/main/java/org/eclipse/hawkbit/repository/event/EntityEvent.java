@@ -19,10 +19,8 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
  * Retrieving an {@link EntityEvent} on a different node the entity will be load
  * lazy.
  * 
- * @param <I>
- *            the type of the id
  */
-public interface EntityEvent<I> extends Event {
+public interface EntityEvent extends Event {
 
     /**
      * A typesafe way to retrieve the entity from the event, which might be
@@ -48,9 +46,4 @@ public interface EntityEvent<I> extends Event {
      */
     Object getEntity();
 
-    /**
-     * 
-     * @return the entity id
-     */
-    I getEntityId();
 }

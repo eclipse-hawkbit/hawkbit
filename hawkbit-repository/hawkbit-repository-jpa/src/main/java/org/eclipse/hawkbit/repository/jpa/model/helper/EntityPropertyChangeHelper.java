@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.entity.BasePropertyChangeEvent.PropertyChange;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
@@ -39,6 +40,7 @@ public final class EntityPropertyChangeHelper {
         return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)
                 .collect(Collectors.toMap(record -> record.getAttribute(),
-                        record -> new PropertyChange(record.getOldValue(), record.getNewValue())));
+                        record -> new PropertyChange((Serializable) record.getOldValue(),
+                                (Serializable) record.getNewValue())));
     }
 }

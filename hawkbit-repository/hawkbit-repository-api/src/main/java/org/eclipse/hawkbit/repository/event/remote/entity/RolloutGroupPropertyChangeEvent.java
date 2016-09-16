@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity.PropertyChange;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,17 +25,24 @@ public class RolloutGroupPropertyChangeEvent extends BasePropertyChangeEvent<Rol
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClassName
+     *            the entity entityClassName
+     * @param changeSetValues
+     *            the changeSetValues
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected RolloutGroupPropertyChangeEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected RolloutGroupPropertyChangeEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entityId, entityClassName, changeSetValues, applicationId);
     }
 
     /**

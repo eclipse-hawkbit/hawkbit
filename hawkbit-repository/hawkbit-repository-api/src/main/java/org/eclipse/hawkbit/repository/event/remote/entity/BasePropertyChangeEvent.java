@@ -8,13 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity.PropertyChange;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -27,36 +30,84 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
 
     private static final long serialVersionUID = -3671601415138242311L;
 
+    private Map<String, PropertyChange> changeSetValues = new HashMap<>();
+
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClassName
+     *            the entity entityClassName
+     * @param changeSetValues
+     *            the changeSetValues
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected BasePropertyChangeEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected BasePropertyChangeEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entityId, entityClassName, applicationId);
+        this.changeSetValues = changeSetValues;
     }
 
     /**
-     * Constructor.
      * 
      * @param entity
-     *            the entity
      * @param changeSetValues
-     *            the change values
      * @param applicationId
-     *            the origin application id
      */
-    protected BasePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
+    public BasePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
             final String applicationId) {
-        super(entity, applicationId);
-        getEntitySource().setChangeSetValues(changeSetValues);
+        this(entity.getTenant(), entity.getId(), entity.getClass().getName(), changeSetValues, applicationId);
+    }
+
+    public Map<String, PropertyChange> getChangeSetValues() {
+        return changeSetValues;
+    }
+
+    /**
+     * Carries old value and new value of a property .
+     */
+    @JsonInclude(Include.NON_EMPTY)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PropertyChange implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        @JsonProperty(required = true)
+        private final Serializable oldValue;
+        @JsonProperty(required = true)
+        private final Serializable newValue;
+
+        /**
+         * Initialize old value and new changes value of property.
+         *
+         * @param oldValue
+         *            old value before change
+         * @param newValue
+         *            new value after change
+         */
+        @JsonCreator
+        public PropertyChange(@JsonProperty("oldValue") final Serializable oldValue,
+                @JsonProperty("newValue") final Serializable newValue) {
+            super();
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+        }
+
+        public Object getOldValue() {
+            return oldValue;
+        }
+
+        public Object getNewValue() {
+            return newValue;
+        }
     }
 
 }

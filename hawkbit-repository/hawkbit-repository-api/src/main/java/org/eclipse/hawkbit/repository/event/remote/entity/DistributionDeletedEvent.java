@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,38 +16,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the remote event for deletion of {@link DistributionSet}.
  */
-public class DistributionDeletedEvent extends BaseEntityEvent<DistributionSet, Long> {
+public class DistributionDeletedEvent extends BaseEntityIdEvent {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected DistributionDeletedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    public DistributionDeletedEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
+        super(entityId, tenant, applicationId);
     }
-
-    /**
-     * Constructor.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param distributionId
-     *            the distributionId which is deleted applicationId the origin
-     * @param applicationId
-     *            the origin application id
-     */
-    public DistributionDeletedEvent(final String tenant, final Long distributionId, final String applicationId) {
-        super(tenant, distributionId, DistributionSet.class, applicationId);
-    }
-
 }

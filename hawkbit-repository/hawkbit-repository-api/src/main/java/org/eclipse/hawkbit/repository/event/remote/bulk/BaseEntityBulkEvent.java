@@ -12,11 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.BaseEntityEvent;
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
+import org.eclipse.hawkbit.repository.event.EntityEvent;
+import org.eclipse.hawkbit.repository.event.EntityIdEvent;
+import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -26,25 +28,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <E>
  *            the entity
  */
-public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
-        extends BaseEntityEvent<List<E>, List<Long>> {
+public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends TenantAwareDistributedEvent
+        implements EntityEvent, EntityIdEvent<List<Long>> {
 
     private static final long serialVersionUID = 1L;
+
+    @JsonProperty(required = true)
+    private final List<Long> entitiyIds;
+
+    @JsonProperty(required = true)
+    private String entityClassName;
+
+    @JsonIgnore
+    private List<E> entities;
 
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityIds
+     *            the entity ids
+     * @param entityClassName
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected BaseEntityBulkEvent(@JsonProperty("entitySource") final GenericEventEntity<List<Long>> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected BaseEntityBulkEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entitiyIds") final List<Long> entitiyIds,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("originService") final String applicationId) {
+        super(entitiyIds, tenant, applicationId);
+        this.entityClassName = entityClassName;
+        this.entitiyIds = entitiyIds;
     }
 
     /**
@@ -53,17 +70,13 @@ public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
      * @param tenant
      *            the tenant
      * @param entities
-     *            the entities
-     * @param entityClass
-     *            the entities class
-     * @param pplicationId
+     *            the new ds tags
+     * @param applicationId
      *            the origin application id
      */
-    protected BaseEntityBulkEvent(final String tenant, final List<E> entities, final Class<?> entityClass,
-            final String applicationId) {
-        super(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), entityClass,
-                applicationId);
-
+    protected BaseEntityBulkEvent(final String tenant, final List<E> entities, final String applicationId) {
+        this(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), null, applicationId);
+        this.entities = entities;
     }
 
     /**
@@ -71,27 +84,41 @@ public abstract class BaseEntityBulkEvent<E extends TenantAwareBaseEntity>
      * 
      * @param entitiy
      *            the entity
-     * @param pplicationId
+     * @param applicationId
      *            the origin application id
      */
     protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
-        this(entitiy.getTenant(), Arrays.asList(entitiy), entitiy.getClass(), applicationId);
+        this(entitiy.getTenant(), Arrays.asList(entitiy), applicationId);
+    }
+
+    public String getEntityClassName() {
+        return entityClassName;
     }
 
     @Override
     public List<E> getEntity() {
-        if (getEntity() == null) {
+        if (entities == null) {
             System.out.println("Remote Event loading");
             // Idee entity manager zum laden verwenden entitySource.getId +
             // entitySource.getTenant
             // setEntity(entity);
             // TODO Entitymanager findAll or someting like that
         }
-        return super.getEntity();
+        return null;
     }
 
     public List<E> getEntities() {
         return getEntity();
+    }
+
+    @Override
+    public List<Long> getEntityId() {
+        return entitiyIds;
+    }
+
+    @Override
+    public <E> E getEntity(final Class<E> entityClass) {
+        return null;
     }
 
 }

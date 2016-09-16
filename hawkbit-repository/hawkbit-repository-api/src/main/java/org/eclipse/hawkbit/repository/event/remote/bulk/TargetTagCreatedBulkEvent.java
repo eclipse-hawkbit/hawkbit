@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.bulk;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,17 +25,21 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityIds
+     *            the entity ids
+     * @param entityClassName
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected TargetTagCreatedBulkEvent(@JsonProperty("entitySource") final GenericEventEntity<List<Long>> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected TargetTagCreatedBulkEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entitiyIds") final List<Long> entitiyIds,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entitiyIds, entityClassName, applicationId);
     }
 
     /**
@@ -51,7 +53,7 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
      *            the origin application id
      */
     public TargetTagCreatedBulkEvent(final String tenant, final List<TargetTag> entities, final String applicationId) {
-        super(tenant, entities, DistributionSetTag.class, applicationId);
+        super(tenant, entities, applicationId);
     }
 
     /**

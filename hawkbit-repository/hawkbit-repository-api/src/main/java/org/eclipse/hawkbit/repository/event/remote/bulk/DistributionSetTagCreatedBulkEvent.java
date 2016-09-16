@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.bulk;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,18 +25,21 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityIds
+     *            the entity ids
+     * @param entityClassName
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected DistributionSetTagCreatedBulkEvent(
-            @JsonProperty("entitySource") final GenericEventEntity<List<Long>> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected DistributionSetTagCreatedBulkEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entitiyIds") final List<Long> entitiyIds,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entitiyIds, entityClassName, applicationId);
     }
 
     /**
@@ -52,7 +54,7 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
      */
     public DistributionSetTagCreatedBulkEvent(final String tenant, final List<DistributionSetTag> entities,
             final String applicationId) {
-        super(tenant, entities, DistributionSetTag.class, applicationId);
+        super(tenant, entities, applicationId);
     }
 
     /**

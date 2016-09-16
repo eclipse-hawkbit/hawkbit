@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.json.GenericEventEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,17 +23,21 @@ public class TargetCreatedEvent extends TenantAwareBaseEntityEvent<Target> {
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClassName
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected TargetCreatedEvent(@JsonProperty("entitySource") final GenericEventEntity<Long> entitySource,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
-        super(entitySource, tenant, applicationId);
+    protected TargetCreatedEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId,
+            @JsonProperty("entityClassName") final String entityClassName,
+            @JsonProperty("originService") final String applicationId) {
+        super(tenant, entityId, entityClassName, applicationId);
     }
 
     /**
