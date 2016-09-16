@@ -81,6 +81,8 @@ public class AmqpControllerAuthenticationTest {
     private static final String CONTROLLER_ID = "123";
     private static final Long TARGET_ID = 123L;
     private AmqpMessageHandlerService amqpMessageHandlerService;
+    private AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandlerService;
+
     private MessageConverter messageConverter;
 
     private AmqpControllerAuthentication authenticationManager;
@@ -156,8 +158,11 @@ public class AmqpControllerAuthenticationTest {
         when(artifactManagementMock.loadLocalArtifactBinary(testArtifact)).thenReturn(artifact);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
-                mock(AmqpMessageDispatcherService.class), artifactManagementMock, cacheMock, hostnameResolverMock,
-                controllerManagementMock, authenticationManager, new JpaEntityFactory());
+                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
+
+        amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
+                authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,
+                controllerManagementMock);
 
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
@@ -221,7 +226,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -243,7 +248,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -265,7 +270,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -293,7 +298,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -321,7 +326,7 @@ public class AmqpControllerAuthenticationTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);

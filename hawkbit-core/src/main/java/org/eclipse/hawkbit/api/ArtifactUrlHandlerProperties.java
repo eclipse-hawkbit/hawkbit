@@ -40,7 +40,7 @@ public class ArtifactUrlHandlerProperties {
          * artifactIdBase62,artifactId,tenant,softwareModuleId,
          * softwareModuleIdBase62.
          * 
-         * The update server itself supportes
+         * The update server itself supports
          */
         private String ref = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
@@ -57,7 +57,7 @@ public class ArtifactUrlHandlerProperties {
         /**
          * IP address placeholder that can be used in ref pattern.
          */
-        private String ip = "127.0.0.1";
+        private String ip;
 
         /**
          * Port placeholder that can be used in ref pattern.

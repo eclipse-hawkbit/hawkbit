@@ -259,8 +259,32 @@ public class AmqpConfiguration {
     /**
      * Create AMQP handler service bean.
      * 
+     * @param rabbitTemplate
+     *            for converting messages
      * @param amqpMessageDispatcherService
      *            to sending events to DMF client
+     * @param controllerManagement
+     *            for target repo access
+     * @param entityFactory
+     *            to create entities
+     *
+     * @return handler service bean
+     */
+    @Bean
+    public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+            final AmqpMessageDispatcherService amqpMessageDispatcherService,
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+        return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
+                entityFactory);
+    }
+
+    /**
+     * Create AMQP handler service bean for authentication messages.
+     * 
+     * @param rabbitTemplate
+     *            for converting messages
+     * @param authenticationManager
+     *            for target authentication
      * @param artifactManagement
      *            for artifact URI generation
      * @param cache
@@ -269,21 +293,15 @@ public class AmqpConfiguration {
      *            for resolving the host for downloads
      * @param controllerManagement
      *            for target repo access
-     * @param authenticationManager
-     *            for target authentication
-     * @param entityFactory
-     *            to create entities
-     *
      * @return handler service bean
      */
     @Bean
-    public AmqpMessageHandlerService amqpMessageHandlerService(
-            final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ArtifactManagement artifactManagement, @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE) final Cache cache,
-            final HostnameResolver hostnameResolver, final ControllerManagement controllerManagement,
-            final AmqpControllerAuthentication authenticationManager, final EntityFactory entityFactory) {
-        return new AmqpMessageHandlerService(rabbitTemplate(), amqpMessageDispatcherService, artifactManagement, cache,
-                hostnameResolver, controllerManagement, authenticationManager, entityFactory);
+    public AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
+            final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
+            @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE) final Cache cache, final HostnameResolver hostnameResolver,
+            final ControllerManagement controllerManagement) {
+        return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement, cache,
+                hostnameResolver, controllerManagement);
     }
 
     /**

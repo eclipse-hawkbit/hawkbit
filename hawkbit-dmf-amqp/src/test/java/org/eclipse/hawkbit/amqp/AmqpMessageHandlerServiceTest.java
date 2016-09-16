@@ -85,6 +85,7 @@ public class AmqpMessageHandlerServiceTest {
     private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
+    private AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandlerService;
 
     private MessageConverter messageConverter;
 
@@ -119,9 +120,12 @@ public class AmqpMessageHandlerServiceTest {
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                artifactManagementMock, cacheMock, hostnameResolverMock, controllerManagementMock,
-                authenticationManagerMock, entityFactoryMock);
+                controllerManagementMock, entityFactoryMock);
+        amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
+                authenticationManagerMock, artifactManagementMock, cacheMock, hostnameResolverMock,
+                controllerManagementMock);
     }
 
     @Test
@@ -278,7 +282,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -302,7 +306,7 @@ public class AmqpMessageHandlerServiceTest {
                 .thenThrow(EntityNotFoundException.class);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -333,7 +337,7 @@ public class AmqpMessageHandlerServiceTest {
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
