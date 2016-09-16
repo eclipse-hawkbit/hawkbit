@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -26,9 +28,12 @@ public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseE
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", nullable = false, length = 64)
+    @Size(max = 64)
+    @NotNull
     private String name;
 
     @Column(name = "description", nullable = true, length = 512)
+    @Size(max = 512)
     private String description;
 
     /**

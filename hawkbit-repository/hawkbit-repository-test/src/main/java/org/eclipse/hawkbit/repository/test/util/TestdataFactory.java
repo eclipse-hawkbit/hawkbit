@@ -507,6 +507,21 @@ public class TestdataFactory {
     }
 
     /**
+     * builder method for generating a {@link DistributionSet}.
+     *
+     * @param name
+     *            {@link DistributionSet#getName()}
+     * 
+     * @return the generated {@link DistributionSet}
+     */
+    public DistributionSet generateDistributionSet(final String name) {
+        final DistributionSet distributionSet = entityFactory.generateDistributionSet(name, DEFAULT_VERSION, null,
+                findOrCreateDefaultTestDsType(), null);
+        distributionSet.setDescription(LOREM.words(10));
+        return distributionSet;
+    }
+
+    /**
      * Creates {@link DistributionSetTag}s in repository.
      * 
      * @param number

@@ -13,6 +13,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 
@@ -29,11 +31,15 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "conf_key", length = 128)
+    @Column(name = "conf_key", length = 128, nullable = false)
+    @Size(max = 128)
+    @NotNull
     private String key;
 
-    @Column(name = "conf_value", length = 512)
+    @Column(name = "conf_value", length = 512, nullable = false)
     @Basic
+    @Size(max = 512)
+    @NotNull
     private String value;
 
     /**

@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -43,6 +44,9 @@ public final class MgmtSoftwareModuleMapper {
 
     private static SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type,
             final SoftwareManagement softwareManagement) {
+        if (type == null) {
+            throw new ConstraintViolationException("type cannot be null");
+        }
 
         final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeByKey(type.trim());
 

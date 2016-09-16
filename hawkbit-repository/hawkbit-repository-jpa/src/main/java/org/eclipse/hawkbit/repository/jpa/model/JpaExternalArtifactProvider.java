@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
@@ -30,9 +31,11 @@ public class JpaExternalArtifactProvider extends AbstractJpaNamedEntity implemen
     private static final long serialVersionUID = 1L;
 
     @Column(name = "base_url", length = 512, nullable = false)
+    @Size(max = 512)
     private String basePath;
 
     @Column(name = "default_url_suffix", length = 512, nullable = true)
+    @Size(max = 512)
     private String defaultSuffix;
 
     /**
