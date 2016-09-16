@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.api;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -24,14 +25,26 @@ import com.google.common.collect.Lists;
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
 
-    private final List<UrlProtocol> protocols = new ArrayList<>();
+    /**
+     * Rel as key and complete protocol as value.
+     */
+    private final Map<String, UrlProtocol> protocols = new HashMap<>();
 
+    /**
+     * Protocol specific properties to generate URLs accordingly.
+     *
+     */
     public static class UrlProtocol {
+
+        /**
+         * Set to true if enabled.
+         */
+        private boolean enabled = true;
 
         /**
          * Hypermedia rel value for this protocol.
          */
-        private String rel = "download";
+        private String rel = "download-http";
 
         /**
          * Hypermedia ref pattern for this protocol. Supported place holders are
@@ -57,17 +70,27 @@ public class ArtifactUrlHandlerProperties {
         /**
          * IP address placeholder that can be used in ref pattern.
          */
-        private String ip;
+        // Exception squid:S1313 - default only, can be configured
+        @SuppressWarnings("squid:S1313")
+        private String ip = "127.0.0.1";
 
         /**
          * Port placeholder that can be used in ref pattern.
          */
-        private Integer port;
+        private Integer port = 8080;
 
         /**
          * Support for the following hawkBit API.
          */
         private List<APIType> supports = Lists.newArrayList(APIType.DDI, APIType.DMF);
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public String getRel() {
             return rel;
@@ -127,7 +150,7 @@ public class ArtifactUrlHandlerProperties {
 
     }
 
-    public List<UrlProtocol> getProtocols() {
+    public Map<String, UrlProtocol> getProtocols() {
         return protocols;
     }
 

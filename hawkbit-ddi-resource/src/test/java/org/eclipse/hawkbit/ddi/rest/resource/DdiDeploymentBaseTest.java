@@ -61,7 +61,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Deployment Action Resource")
 public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoDB {
 
-    private static final String HTTP_LOCALHOST = "http://localhost/";
+    private static final String HTTP_LOCALHOST = "http://localhost:8080/";
 
     @Test()
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
