@@ -10,64 +10,72 @@ package org.eclipse.hawkbit.repository.jpa.event;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.support.Repositories;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
+ * A Event entity manager, which loads a entity for remote events.
  */
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class JpaEventEntityManager implements EventEntityManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaEventEntityManager.class);
 
     private final TenantAware tenantAware;
-    private final Repositories repositories;
+
+    @Autowired
+    private final EntityManager entityManager;
 
     /**
+     * Constructor.
+     * 
      * @param tenantAware
-     * @param repositories
+     *            the tenant aware
+     * @param entityManager
+     *            the entity manager
      */
-    public JpaEventEntityManager(final TenantAware tenantAware, final Repositories repositories) {
+    public JpaEventEntityManager(final TenantAware tenantAware, final EntityManager entityManager) {
         this.tenantAware = tenantAware;
-        this.repositories = repositories;
+        this.entityManager = entityManager;
     }
 
     @Override
     @Transactional
     public <E> E findEntity(final String tenant, final Long id, final Class<E> entityType) {
-        return tenantAware.runAsTenant(tenant, () -> getRepositoryFor(entityType).findOne(id));
-    }
-
-    @Override
-    @Transactional
-    public <E> List<E> findEntities(final String tenant, final List<Long> ids, final Class<E> entityType) {
-        return tenantAware.runAsTenant(tenant, () -> getRepositoryFor(entityType).findAll(ids));
+        return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 
     @SuppressWarnings("unchecked")
-    private <E> JpaRepository<E, Long> getRepositoryFor(final Class<E> entityType) {
-        try {
-            return (JpaRepository<E, Long>) getTargetObject(repositories.getRepositoryFor(entityType));
-        } catch (final Exception e) {
-            LOGGER.error("Could not get target JpaRepository from proxy", e);
-            throw new IllegalStateException("Could not get parent JpaRepository", e);
-        }
-    }
+    @Override
+    public <E> List<E> findEntities(final String tenant, final List<Long> ids, final Class<E> entityType) {
 
-    @SuppressWarnings({ "unchecked" })
-    protected <T> T getTargetObject(final Object proxy) throws Exception {
-        while (AopUtils.isJdkDynamicProxy(proxy)) {
-            return (T) getTargetObject(((Advised) proxy).getTargetSource().getTarget());
-        }
-        return (T) proxy;
+        return tenantAware.runAsTenant(tenant, () -> {
+
+            final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            final CriteriaQuery<E> query = builder.createQuery(entityType);
+            final Root<AbstractJpaBaseEntity> root = (Root<AbstractJpaBaseEntity>) query.from(entityType);
+            query.select((Selection<? extends E>) root);
+
+            final Path<Long> path = root.get(AbstractJpaBaseEntity_.id);
+            final Predicate in = path.in(ids);
+            query.where(in);
+            return entityManager.createQuery(query).getResultList();
+        });
     }
 
 }

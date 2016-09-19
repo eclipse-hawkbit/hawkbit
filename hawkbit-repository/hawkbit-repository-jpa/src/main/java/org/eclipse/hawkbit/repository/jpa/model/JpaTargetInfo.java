@@ -334,12 +334,6 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-
-        final TargetInfoUpdateEvent event = new TargetInfoUpdateEvent(getTarget().getTenant(), getTarget().getId(),
-                JpaTargetInfo.class, EventPublisherHolder.getInstance().getApplicationId());
-        event.getEntity();
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
-
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetInfoUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event;
 
+import org.springframework.cloud.bus.event.RemoteApplicationEvent;
+
 /**
  * An event interface which declares event types that an entity has been
  * changed. {@link EntityEvent}s should not implement

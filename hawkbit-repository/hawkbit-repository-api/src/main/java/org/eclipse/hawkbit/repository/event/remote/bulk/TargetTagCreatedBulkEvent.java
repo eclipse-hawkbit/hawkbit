@@ -29,7 +29,7 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
      *            the tenant
      * @param entityIds
      *            the entity ids
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
      * @param applicationId
      *            the origin application id

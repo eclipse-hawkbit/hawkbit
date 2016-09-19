@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.event.remote.bulk;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,7 +103,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
             entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
                     entitiyIds, getEntityClass());
         }
-        return Collections.emptyList();
+        return entities;
     }
 
     @JsonIgnore

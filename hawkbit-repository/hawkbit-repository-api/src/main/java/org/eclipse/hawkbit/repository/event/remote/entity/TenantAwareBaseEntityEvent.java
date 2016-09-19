@@ -27,6 +27,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
 
     private static final long serialVersionUID = 1L;
 
+    @JsonProperty(required = true)
     private Class<? extends E> entityClass;
 
     @JsonIgnore
@@ -69,25 +70,11 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
     @Override
     @JsonIgnore
     public E getEntity() {
-        // TODO Check entityClass null
-        if (entity == null) {
-            // TODO: Events überprüfen vielleicht eins ohne entität dabei wird
-            // falsch aufgerufen
-            System.out.println(this);
-            System.out.println(getEntityId());
-            System.out.println(entityClass);
-            System.out.println(getTenant());
+        if (entity == null && entityClass != null) {
             entity = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
                     getEntityId(), entityClass);
-
-            // Idee entity manager zum laden verwenden entitySource.getId +
-            // entitySource.getTenant
         }
         return entity;
-    }
-
-    protected Class<?> getEntityClass() {
-        return entityClass;
     }
 
     @Override

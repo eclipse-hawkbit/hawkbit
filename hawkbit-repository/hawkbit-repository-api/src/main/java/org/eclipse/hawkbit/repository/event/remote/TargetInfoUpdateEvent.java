@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.EntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.BaseEntityIdEvent;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,7 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
     private static final long serialVersionUID = 1L;
 
     @JsonProperty(required = true)
-    private final Class<? extends TargetInfo> entityClass;
+    private final Class<? extends Target> entityClass;
 
     @JsonIgnore
     private transient TargetInfo targetInfo;
@@ -42,9 +43,9 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
      *            the origin application id
      */
     @JsonCreator
-    public TargetInfoUpdateEvent(@JsonProperty("tenant") final String tenant,
+    protected TargetInfoUpdateEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends TargetInfo> entityClass,
+            @JsonProperty("entityClass") final Class<? extends Target> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
         this.entityClass = entityClass;
@@ -59,7 +60,8 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
      *            the origin application id
      */
     public TargetInfoUpdateEvent(final TargetInfo targetInfo, final String applicationId) {
-        this(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), targetInfo.getClass(), applicationId);
+        this(targetInfo.getTarget().getTenant(), targetInfo.getTarget().getId(), targetInfo.getTarget().getClass(),
+                applicationId);
         this.targetInfo = targetInfo;
     }
 
@@ -69,16 +71,13 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
         return entityClass.cast(targetInfo);
     }
 
-    protected Class<? extends TargetInfo> getEntityClass() {
-        return entityClass;
-    }
-
     @Override
     @JsonIgnore
     public TargetInfo getEntity() {
         if (targetInfo == null) {
-            targetInfo = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
-                    getEntityId(), getEntityClass());
+            final Target target = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
+                    getEntityId(), entityClass);
+            targetInfo = target == null ? null : target.getTargetInfo();
         }
         return targetInfo;
     }

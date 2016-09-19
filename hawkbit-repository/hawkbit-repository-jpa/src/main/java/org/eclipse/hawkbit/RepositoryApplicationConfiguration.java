@@ -11,6 +11,8 @@ package org.eclipse.hawkbit;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -63,15 +65,12 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.repository.support.Repositories;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -92,10 +91,8 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event.remote")
-public class RepositoryApplicationConfiguration extends JpaBaseConfiguration implements ApplicationContextAware {
-
-    private ApplicationContext applicationContext;
+@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event.remote.remote")
+public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
@@ -410,18 +407,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration imp
      * 
      * @param aware
      *            the tenant aware
+     * @param entityManager
+     *            the entitymanager
      * @return a new {@link EventEntityManager}
      */
     @Bean
     @ConditionalOnMissingBean
-    public EventEntityManager eventEntityManager(final TenantAware aware) {
-        return new JpaEventEntityManager(aware, new Repositories(applicationContext));
-    }
-
-    @Override
-    public void setApplicationContext(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-
+    public EventEntityManager eventEntityManager(final TenantAware aware, final EntityManager entityManager) {
+        return new JpaEventEntityManager(aware, entityManager);
     }
 
 }
