@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -57,17 +57,17 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponentIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
+        return UIComponentIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponentIdProvider.SW_MODULE_SEARCH_RESET_ICON;
+        return UIComponentIdProvider.SW_MODULE_SEARCH_RESET_ICON;
     }
 
     @Override
     protected String getAddIconId() {
-        return SPUIComponentIdProvider.SW_MODULE_ADD_BUTTON;
+        return UIComponentIdProvider.SW_MODULE_ADD_BUTTON;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getMaxMinIconId() {
-        return SPUIComponentIdProvider.SW_MAX_MIN_TABLE_ICON;
+        return UIComponentIdProvider.SW_MAX_MIN_TABLE_ICON;
     }
 
     @Override

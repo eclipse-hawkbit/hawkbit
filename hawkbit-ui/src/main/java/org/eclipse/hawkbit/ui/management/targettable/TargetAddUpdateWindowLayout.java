@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -103,12 +103,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void createRequiredComponents() {
-        controllerIDTextField = createTextField("prompt.target.id", SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        nameTextField = createTextField("textfield.name", SPUIComponentIdProvider.TARGET_ADD_NAME);
+        controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.TARGET_ADD_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
                 .buildTextComponent();
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
     }

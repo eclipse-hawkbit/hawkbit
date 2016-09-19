@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -124,7 +124,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     @Override
     protected String getCloseButtonId() {
-        return SPUIComponentIdProvider.ROLLOUT_GROUP_CLOSE;
+        return UIComponentIdProvider.ROLLOUT_GROUP_CLOSE;
     }
 
     @Override
@@ -149,7 +149,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
-        headerCaption = new LabelBuilder().id(SPUIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION).name("")
+        headerCaption = new LabelBuilder().id(UIComponentIdProvider.ROLLOUT_GROUP_HEADER_CAPTION).name("")
                 .buildCaptionLabel();
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);

@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -90,7 +90,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         filterByButtons.addStyleName(SPUIStyleDefinitions.NO_TOP_BORDER);
         targetFilterQueryButtonsTab.init(customTargetTagFilterButtonClick);
         if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
-            config = SPUIComponentProvider.getButton(SPUIComponentIdProvider.ADD_TARGET_TAG, "", "", "", true,
+            config = SPUIComponentProvider.getButton(UIComponentIdProvider.ADD_TARGET_TAG, "", "", "", true,
                     FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
             config.addClickListener(event -> settingsIconClicked());
         }

@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -124,7 +124,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private ConfirmationTab createSMDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.SW_DELETE_ALL);
+        tab.getConfirmAll().setId(UIComponentIdProvider.SW_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
@@ -232,13 +232,13 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private ConfirmationTab createSMtypeDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
+        tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
 
         tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().setId(SPUIComponentIdProvider.DISCARD_SW_MODULE_TYPE);
+        tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_SW_MODULE_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
         // Add items container to the table.
@@ -324,7 +324,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private ConfirmationTab createDistDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.DIST_DELETE_ALL);
+        tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistAll(tab));
@@ -423,13 +423,13 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private ConfirmationTab createDistSetTypeDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.SAVE_DELETE_DIST_SET_TYPE);
+        tab.getConfirmAll().setId(UIComponentIdProvider.SAVE_DELETE_DIST_SET_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistSetTypeAll(tab));
 
         tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        tab.getDiscardAll().setId(SPUIComponentIdProvider.DISCARD_DIST_SET_TYPE);
+        tab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_DIST_SET_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardDistSetTypeAll(tab));
 
         // Add items container to the table.
@@ -511,13 +511,13 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         assignmnetTab = new ConfirmationTab();
 
-        assignmnetTab.getConfirmAll().setId(SPUIComponentIdProvider.SAVE_ASSIGNMENT);
+        assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
         assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
         assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
         assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
 
         assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        assignmnetTab.getDiscardAll().setId(SPUIComponentIdProvider.DISCARD_ASSIGNMENT);
+        assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
         assignmnetTab.getDiscardAll().addClickListener(event -> discardAllSWAssignments(assignmnetTab));
 
         // Add items container to the table.
