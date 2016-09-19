@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
  * Abstract event definition class which holds the necessary revsion and tenant
  * information which every event needs.
  * 
- * @see TenantAwareDistributedEvent for events which should be distributed to other
- *      cluster nodes
+ * @see TenantAwareDistributedEvent for events which should be distributed to
+ *      other cluster nodes
  */
 public class DefaultEvent implements Event {
 
@@ -37,6 +37,11 @@ public class DefaultEvent implements Event {
     @Override
     public String getTenant() {
         return tenant;
+    }
+
+    public long getRevision() {
+
+        return revision;
     }
 
 }
