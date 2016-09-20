@@ -12,7 +12,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import com.google.gwt.thirdparty.guava.common.collect.Maps;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -129,8 +129,8 @@ public class CommonDialogWindow extends Window {
         this.helpLink = helpLink;
         this.closeListener = closeListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
-        this.orginalValues = new HashMap<>();
         this.allComponents = getAllComponents(layout);
+        this.orginalValues = Maps.newHashMapWithExpectedSize(allComponents.size());
         this.i18n = i18n;
         init();
     }

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -151,7 +150,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<>();
+        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
         int successAssignmentCount = 0;
         int duplicateAssignmentCount = 0;
