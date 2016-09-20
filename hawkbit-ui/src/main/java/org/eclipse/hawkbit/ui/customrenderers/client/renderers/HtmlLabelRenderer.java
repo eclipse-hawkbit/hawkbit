@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
 import com.google.gwt.core.client.GWT;
 import com.vaadin.client.renderers.WidgetRenderer;
 import com.vaadin.client.ui.VLabel;
@@ -29,11 +29,11 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
     }
 
     @Override
-    public void render(final RendererCellReference cell, final String input, final VLabel label) {
-        final Map<String, String> map = formatInput(input);
-        final String value = map.containsKey("value") ? map.get("value") : null;
-        final String style = map.containsKey("style") ? map.get("style") : null;
-        final String id = map.containsKey("id") ? map.get("id") : null;
+    public void render(RendererCellReference cell, String input, VLabel label) {
+        Map<String, String> map = formatInput(input);
+        String value = map.containsKey("value") ? map.get("value") : null;
+        String style = map.containsKey("style") ? map.get("style") : null;
+        String id = map.containsKey("id") ? map.get("id") : null;
 
         if (value != null) {
             label.setHTML("<span>&#x" + Integer.toHexString(Integer.parseInt(value)) + ";</span>");
@@ -44,7 +44,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         label.getElement().setId(id);
     }
 
-    private void applyStyle(final VLabel label, final String style) {
+    private void applyStyle(VLabel label, String style) {
         label.setStyleName(VLabel.CLASSNAME);
         label.addStyleName(getStyle("small"));
         label.addStyleName(getStyle("font-icon"));
@@ -57,12 +57,11 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         return new StringBuilder(style).append(" ").append(VLabel.CLASSNAME).append("-").append(style).toString();
     }
 
-    private Map<String, String> formatInput(final String input) {
-
-        final String[] tempData = input.split(",");
-        final Map<String, String> details = Maps.newHashMapWithExpectedSize(tempData.length);
-        for (final String statusWithCount : tempData) {
-            final String[] statusWithCountList = statusWithCount.split(":");
+    private Map<String, String> formatInput(String input) {
+        Map<String, String> details = new HashMap<>();
+        String[] tempData = input.split(",");
+        for (String statusWithCount : tempData) {
+            String[] statusWithCountList = statusWithCount.split(":");
             details.put(statusWithCountList[0], statusWithCountList[1]);
         }
         return details;
