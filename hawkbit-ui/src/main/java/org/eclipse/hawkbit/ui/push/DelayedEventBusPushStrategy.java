@@ -240,11 +240,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         private void fowardBulkEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
                 final SecurityContext userContext) {
             final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
-            publishBulkEvent(events, userContext, filterBulkEvenTypes);
 
             for (final Class<?> bulkType : filterBulkEvenTypes) {
                 final List<org.eclipse.hawkbit.eventbus.event.Event> listBulkEvents = events.stream()
-                        .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                        .filter(event -> DelayedEventBusPushStrategy.eventSecurityCheck(userContext, event)
                                 && bulkType.isInstance(event))
                         .collect(Collectors.toList());
                 if (!listBulkEvents.isEmpty()) {
@@ -253,15 +252,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             }
         }
 
-        private void publishBulkEvent(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
-                final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
-
-        }
-
         private void fowardSingleEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
                 final SecurityContext userContext) {
             events.stream()
-                    .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                    .filter(event -> DelayedEventBusPushStrategy.eventSecurityCheck(userContext, event)
                             && eventProvider.getSingleEvents().contains(event.getClass()))
                     .forEach(event -> eventBus.publish(vaadinUI, event));
         }

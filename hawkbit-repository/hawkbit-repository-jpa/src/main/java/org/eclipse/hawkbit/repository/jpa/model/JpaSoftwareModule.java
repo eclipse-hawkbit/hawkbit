@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,7 +91,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      * Default constructor.
      */
     public JpaSoftwareModule() {
-
+        // Default constructor for JPA
     }
 
     /**
@@ -121,7 +122,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Override
     public void addArtifact(final LocalArtifact artifact) {
         if (null == artifacts) {
-            artifacts = new LinkedList<>();
+            artifacts = new ArrayList<>(4);
             artifacts.add(artifact);
             return;
         }

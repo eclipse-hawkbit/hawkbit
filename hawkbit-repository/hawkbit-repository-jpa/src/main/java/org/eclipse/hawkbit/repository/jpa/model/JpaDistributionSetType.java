@@ -130,16 +130,24 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
-        if (!(dsType instanceof JpaDistributionSetType)) {
+        if (!(dsType instanceof JpaDistributionSetType) || isOneModuleListEmpty(dsType)) {
             return false;
-        } else if (CollectionUtils.isEmpty(elements)
-                && CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)) {
+        } else if (areBothModuleListsEmpty(dsType)) {
             return true;
-        } else if (CollectionUtils.isEmpty(elements)) {
-            return false;
         }
 
         return new HashSet<DistributionSetTypeElement>(((JpaDistributionSetType) dsType).elements).equals(elements);
+    }
+
+    private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
+        return (!CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)
+                && CollectionUtils.isEmpty(elements))
+                || (CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)
+                        && !CollectionUtils.isEmpty(elements));
+    }
+
+    private boolean areBothModuleListsEmpty(final DistributionSetType dsType) {
+        return CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements);
     }
 
     @Override

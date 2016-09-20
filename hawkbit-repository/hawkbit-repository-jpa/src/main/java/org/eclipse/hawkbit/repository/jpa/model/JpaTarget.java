@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -116,7 +115,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
     @JoinColumn(name = "target_Id", insertable = false, updatable = false)
-    private final List<RolloutTargetGroup> rolloutTargetGroup = new ArrayList<>();
+    private List<RolloutTargetGroup> rolloutTargetGroup;
 
     /**
      * Constructor.
@@ -166,6 +165,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return tags;
     }
 
+    public List<RolloutTargetGroup> getRolloutTargetGroup() {
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(rolloutTargetGroup);
+    }
+
     public boolean addTag(final TargetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -201,7 +208,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     public boolean addAction(final Action action) {
         if (actions == null) {
-            actions = new LinkedList<>();
+            actions = new ArrayList<>(4);
         }
 
         return actions.add(action);

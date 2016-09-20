@@ -119,7 +119,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
      * Default constructor.
      */
     public JpaDistributionSet() {
-        super();
+        // Default constructor for JPA
     }
 
     /**
@@ -252,15 +252,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
             modules = new HashSet<>();
         }
 
-        // we cannot allow that modules are added without a type defined
-        if (type == null) {
-            throw new DistributionSetTypeUndefinedException();
-        }
-
-        // check if it is allowed to such a module to this DS type
-        if (!type.containsModuleType(softwareModule.getType())) {
-            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
-        }
+        checkTypeCompatability(softwareModule);
 
         final Optional<SoftwareModule> found = modules.stream()
                 .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
@@ -284,6 +276,18 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
 
         return false;
+    }
+
+    private void checkTypeCompatability(final SoftwareModule softwareModule) {
+        // we cannot allow that modules are added without a type defined
+        if (type == null) {
+            throw new DistributionSetTypeUndefinedException();
+        }
+
+        // check if it is allowed to such a module to this DS type
+        if (!type.containsModuleType(softwareModule.getType())) {
+            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
+        }
     }
 
     @Override

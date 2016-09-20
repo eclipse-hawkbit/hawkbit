@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
@@ -136,11 +136,10 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     @Override
     public final void addMessage(final String message) {
-        if (messages == null) {
-            messages = new LinkedList<>();
-        }
-
         if (message != null) {
+            if (messages == null) {
+                messages = new ArrayList<>((message.length() / 512) + 1);
+            }
             Splitter.fixedLength(512).split(message).forEach(messages::add);
         }
     }
