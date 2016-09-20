@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -50,7 +50,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getHideButtonId() {
-        return SPUIComponentIdProvider.HIDE_TARGET_TAGS;
+        return UIComponentIdProvider.HIDE_TARGET_TAGS;
     }
 
     @Override

@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -224,7 +224,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected String getTableId() {
-        return SPUIComponentIdProvider.DIST_TABLE_ID;
+        return UIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override
@@ -288,7 +288,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private Button createManageMetadataButton(final String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
@@ -447,7 +447,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected String getDropTableId() {
-        return SPUIComponentIdProvider.TARGET_TABLE_ID;
+        return UIComponentIdProvider.TARGET_TABLE_ID;
     }
 
     @Override
@@ -655,7 +655,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private static String getPinButtonId(final String distName, final String distVersion) {
-        final StringBuilder pinBtnId = new StringBuilder(SPUIComponentIdProvider.DIST_PIN_BUTTON);
+        final StringBuilder pinBtnId = new StringBuilder(UIComponentIdProvider.DIST_PIN_BUTTON);
         pinBtnId.append('.');
         pinBtnId.append(distName);
         pinBtnId.append('.');

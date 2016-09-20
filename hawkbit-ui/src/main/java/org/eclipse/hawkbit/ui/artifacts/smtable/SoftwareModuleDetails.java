@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -91,7 +91,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponentIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
+        return UIComponentIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
     }
 
     @Override
@@ -137,19 +137,19 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
         final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.vendor"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(vendor) == null ? "" : vendor);
-        vendorLabel.setId(SPUIComponentIdProvider.DETAILS_VENDOR_LABEL_ID);
+        vendorLabel.setId(UIComponentIdProvider.DETAILS_VENDOR_LABEL_ID);
         detailsTabLayout.addComponent(vendorLabel);
 
         if (type != null) {
             final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
-            typeLabel.setId(SPUIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
+            typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         final Label assignLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.assigned.type"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(maxAssign) == null ? "" : maxAssign);
-        assignLabel.setId(SPUIComponentIdProvider.SWM_DTLS_MAX_ASSIGN);
+        assignLabel.setId(UIComponentIdProvider.SWM_DTLS_MAX_ASSIGN);
         detailsTabLayout.addComponent(assignLabel);
 
     }
@@ -186,7 +186,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+        return UIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
 
     @Override

@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -333,7 +333,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void createProcessButton() {
-        processBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_PROCESS_BUTTON,
+        processBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_PROCESS_BUTTON,
                 SPUILabelDefinitions.PROCESS, SPUILabelDefinitions.PROCESS, null, false, null,
                 SPUIButtonStyleSmall.class);
         processBtn.setIcon(FontAwesome.BELL);
@@ -344,7 +344,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void createDiscardBtn() {
-        discardBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_DISCARD_BUTTON,
+        discardBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_DISCARD_BUTTON,
                 SPUILabelDefinitions.DISCARD, SPUILabelDefinitions.DISCARD, null, false, null,
                 SPUIButtonStyleSmall.class);
         discardBtn.setIcon(FontAwesome.TRASH_O);
@@ -635,7 +635,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void displayConfirmWindow(final Button.ClickEvent event) {
-        if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_PROCESS_BUTTON)) {
+        if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_PROCESS_BUTTON)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
@@ -802,7 +802,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void createUploadStatusButton() {
-        uploadStatusButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
+        uploadStatusButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
         uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);

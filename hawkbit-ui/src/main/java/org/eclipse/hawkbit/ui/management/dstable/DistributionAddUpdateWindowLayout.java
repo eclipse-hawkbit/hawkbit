@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -143,25 +143,25 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Create required UI components.
      */
     private void createRequiredComponents() {
-        distNameTextField = createTextField("textfield.name", SPUIComponentIdProvider.DIST_ADD_NAME);
-        distVersionTextField = createTextField("textfield.version", SPUIComponentIdProvider.DIST_ADD_VERSION);
+        distNameTextField = createTextField("textfield.name", UIComponentIdProvider.DIST_ADD_NAME);
+        distVersionTextField = createTextField("textfield.version", UIComponentIdProvider.DIST_ADD_VERSION);
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", null, "",
                 false, "", i18n.get("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
-        distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
+        distsetTypeNameComboBox.setId(UIComponentIdProvider.DIST_ADD_DISTSETTYPE);
         populateDistSetTypeNameCombo();
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIComponentIdProvider.DIST_ADD_DESC)
+                .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
                 .buildTextComponent();
         descTextArea.setNullRepresentation("");
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
+        reqMigStepCheckbox.setId(UIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
     }
 
     private TextField createTextField(final String in18Key, final String id) {

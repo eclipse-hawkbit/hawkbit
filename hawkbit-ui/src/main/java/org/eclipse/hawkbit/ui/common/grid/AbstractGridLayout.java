@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.ui.Alignment;
@@ -71,7 +71,7 @@ public abstract class AbstractGridLayout extends VerticalLayout {
     private HorizontalLayout createCountMessageComponent() {
         final HorizontalLayout rolloutGroupTargetsCountLayout = new HorizontalLayout();
         final Label countMessageLabel = getCountMessageLabel();
-        countMessageLabel.setId(SPUIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
+        countMessageLabel.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
         rolloutGroupTargetsCountLayout.addComponent(getCountMessageLabel());
         rolloutGroupTargetsCountLayout.setStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         rolloutGroupTargetsCountLayout.setWidth("100%");

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.google.gwt.user.client.ui.Button;
 import com.vaadin.client.renderers.ButtonRenderer;
@@ -31,7 +31,7 @@ public class HtmlButtonRenderer extends ButtonRenderer {
         applystyles(button, buttonEnable);
         // this is to allow the button to disappear, if the text is null
         button.setVisible(text != null);
-        button.getElement().setId(SPUIComponentIdProvider.ROLLOUT_ACTION_ID + "." + cell.getColumnIndex());
+        button.getElement().setId(UIComponentIdProvider.ROLLOUT_ACTION_ID + "." + cell.getColumnIndex());
         button.setEnabled(buttonEnable);
     }
 

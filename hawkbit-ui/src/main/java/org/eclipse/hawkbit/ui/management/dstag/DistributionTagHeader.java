@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -87,7 +87,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     @Override
     protected String getConfigureFilterButtonId() {
-        return SPUIComponentIdProvider.ADD_DISTRIBUTION_TAG;
+        return UIComponentIdProvider.ADD_DISTRIBUTION_TAG;
     }
 
     @Override
