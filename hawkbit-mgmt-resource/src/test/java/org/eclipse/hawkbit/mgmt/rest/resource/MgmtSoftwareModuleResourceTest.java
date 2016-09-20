@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -457,7 +458,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModule missingName = entityFactory.generateSoftwareModule(osType, null, "version 1", null, null);
+        final SoftwareModule missingName = new JpaSoftwareModule(osType, null, "version 1", null, null);
         mvc.perform(
                 post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(missingName)))
                         .contentType(MediaType.APPLICATION_JSON))

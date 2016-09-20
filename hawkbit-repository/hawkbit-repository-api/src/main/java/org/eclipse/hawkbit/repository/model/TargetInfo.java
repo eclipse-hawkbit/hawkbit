@@ -36,7 +36,8 @@ public interface TargetInfo extends Serializable {
 
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} GMT when the {@link Target}
-     *         polled the server the last time.
+     *         polled the server the last time or <code>null</code> if target
+     *         has never queried yet.
      */
     Long getLastTargetQuery();
 

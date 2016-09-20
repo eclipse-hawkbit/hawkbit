@@ -21,7 +21,6 @@ import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_TOTAL_TARGET
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,6 +56,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
@@ -495,7 +495,8 @@ public class RolloutListGrid extends AbstractGrid {
          * Contains all expected rollout status per column to enable or disable
          * the button.
          */
-        private static final Map<String, RolloutStatus> EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON = new HashMap<>();
+        private static final Map<String, RolloutStatus> EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON = Maps
+                .newHashMapWithExpectedSize(2);
         private final Container.Indexed containerDataSource;
 
         static {

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +54,8 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
@@ -163,12 +165,13 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final Target target) {
-        return actionRepository.findFirstByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
+        return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
     }
 
     @Override
     public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return new ArrayList<>(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
+        return Collections
+                .unmodifiableList(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
     }
 
     @Override

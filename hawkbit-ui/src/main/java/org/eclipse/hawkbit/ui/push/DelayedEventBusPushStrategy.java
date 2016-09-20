@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -57,10 +57,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
     private static final int BLOCK_SIZE = 10_000;
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executorService;
     private final BlockingDeque<org.eclipse.hawkbit.eventbus.event.Event> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
     private final EventBus.SessionEventBus eventBus;
     private final com.google.common.eventbus.EventBus systemEventBus;
+    private int uiid = -1;
 
     private ScheduledFuture<?> jobHandle;
 
@@ -68,15 +69,20 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     /**
      * Constructor.
-     *
+     * 
+     * @param executorService
+     *            for scheduled execution of event forwarding to the UI
      * @param eventBus
      *            the session event bus to where the events should be dispatched
      * @param systemEventBus
      *            the system event bus where to retrieve the events from the
      *            back-end
+     * @param eventProvider
+     *            for event delegation to UI
      */
-    public DelayedEventBusPushStrategy(final SessionEventBus eventBus,
+    public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final SessionEventBus eventBus,
             final com.google.common.eventbus.EventBus systemEventBus, final UIEventProvider eventProvider) {
+        this.executorService = executorService;
         this.eventBus = eventBus;
         this.systemEventBus = systemEventBus;
         this.eventProvider = eventProvider;
@@ -100,7 +106,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         }
 
         if (!queue.offer(event)) {
-            LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
+            LOG.trace("Deque limit is reached, cannot add more events for UI {}! Dropped event is {}", uiid, event);
             return;
         }
     }
@@ -112,7 +118,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     @Override
     public void init(final UI vaadinUI) {
-        LOG.debug("Initialize delayed event push strategy");
+        uiid = vaadinUI.getUIId();
+        LOG.info("Initialize delayed event push strategy for UI {}", uiid);
+        if (vaadinUI.getSession() == null) {
+            LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
+        }
+
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
                 2000, TimeUnit.MILLISECONDS);
         systemEventBus.register(this);
@@ -120,10 +131,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     @Override
     public void clean() {
-        LOG.debug("Cleanup resources");
-        jobHandle.cancel(true);
+        LOG.info("Cleanup delayed event push strategy for UI", uiid);
         systemEventBus.unregister(this);
-        executorService.shutdownNow();
+        jobHandle.cancel(true);
         queue.clear();
     }
 
@@ -138,7 +148,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      * @return {@code true} if the event can be dispatched to the UI otherwise
      *         {@code false}
      */
-    protected boolean eventSecurityCheck(final SecurityContext userContext,
+    protected static boolean eventSecurityCheck(final SecurityContext userContext,
             final org.eclipse.hawkbit.eventbus.event.Event event) {
         if (userContext == null || userContext.getAuthentication() == null) {
             return false;
@@ -163,26 +173,28 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
         @Override
         public void run() {
-            LOG.debug("UI EventBus aggregator started");
+            LOG.debug("UI EventBus aggregator started for UI {}", uiid);
             final long timestamp = System.currentTimeMillis();
-            final List<org.eclipse.hawkbit.eventbus.event.Event> events = new LinkedList<>();
-            for (int i = 0; i < BLOCK_SIZE; i++) {
+
+            final int size = queue.size();
+            if (size <= 0) {
+                LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", uiid);
+                return;
+            }
+
+            final List<org.eclipse.hawkbit.eventbus.event.Event> events = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
                 final org.eclipse.hawkbit.eventbus.event.Event pollEvent = queue.poll();
                 if (pollEvent == null) {
                     continue;
                 }
-                events.add(pollEvent);
+                events.add(i, pollEvent);
             }
 
             if (events.isEmpty()) {
+                LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", uiid);
                 return;
             }
-
-            if (vaadinSession == null) {
-                return;
-            }
-
-            LOG.debug("UI EventBus aggregator session: {}", vaadinSession);
 
             final WrappedSession wrappedSession = vaadinSession.getSession();
             if (wrappedSession == null) {
@@ -191,10 +203,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
             final int eventsSize = events.size();
 
+            LOG.debug("UI EventBus aggregator dispatches {} events for session {} for UI {}", eventsSize, vaadinSession,
+                    uiid);
+
             doDispatch(events, wrappedSession);
 
-            LOG.debug("UI EventBus aggregator done with sending {} events in {} ms", eventsSize,
-                    System.currentTimeMillis() - timestamp);
+            LOG.debug("UI EventBus aggregator done with sending {} events in {} ms for UI {}", eventsSize,
+                    System.currentTimeMillis() - timestamp, uiid);
 
         }
 
@@ -210,9 +225,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
                     }
+                    LOG.debug("UI EventBus aggregator of UI {} got lock on session.", uiid);
                     fowardSingleEvents(events, userContext);
                     fowardBulkEvents(events, userContext);
-                });
+                    LOG.debug("UI EventBus aggregator of UI {} left lock on session.", uiid);
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.error("Wait for Vaadin session for UI {} interrupted!", uiid, e);
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }
@@ -222,10 +241,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                 final SecurityContext userContext) {
             final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
             publishBulkEvent(events, userContext, filterBulkEvenTypes);
-        }
 
-        private void publishBulkEvent(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
-                final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
             for (final Class<?> bulkType : filterBulkEvenTypes) {
                 final List<org.eclipse.hawkbit.eventbus.event.Event> listBulkEvents = events.stream()
                         .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
@@ -235,6 +251,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                     eventBus.publish(vaadinUI, listBulkEvents);
                 }
             }
+        }
+
+        private void publishBulkEvent(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+                final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
+
         }
 
         private void fowardSingleEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,

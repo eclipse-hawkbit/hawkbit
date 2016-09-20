@@ -47,7 +47,7 @@ public interface ActionStatus extends TenantAwareBaseEntity {
      * @return current {@link Status#DOWNLOAD} progress if known by the update
      *         server.
      */
-    int getDownloadProgressPercent();
+    short getDownloadProgressPercent();
 
     /**
      * @return list of message entries that can be added to the

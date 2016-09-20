@@ -37,6 +37,6 @@ public interface Artifact extends TenantAwareBaseEntity {
     /**
      * @return size of the artifact in bytes.
      */
-    Long getSize();
+    long getSize();
 
 }

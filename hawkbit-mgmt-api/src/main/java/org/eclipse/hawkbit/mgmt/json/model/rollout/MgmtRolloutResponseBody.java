@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
@@ -38,7 +37,7 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Long totalTargets;
 
     @JsonProperty(required = true)
-    private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
+    private Map<String, Long> totalTargetsPerStatus;
 
     /**
      * @return the status

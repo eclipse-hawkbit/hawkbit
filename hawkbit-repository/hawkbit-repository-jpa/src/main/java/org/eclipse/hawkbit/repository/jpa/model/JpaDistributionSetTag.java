@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -68,7 +69,11 @@ public class JpaDistributionSetTag extends AbstractJpaTag implements Distributio
 
     @Override
     public List<DistributionSet> getAssignedToDistributionSet() {
-        return assignedToDistributionSet;
+        if (assignedToDistributionSet == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(assignedToDistributionSet);
     }
 
     @Override

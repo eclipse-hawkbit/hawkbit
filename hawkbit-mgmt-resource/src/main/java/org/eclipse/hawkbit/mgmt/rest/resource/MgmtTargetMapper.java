@@ -13,9 +13,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
@@ -92,17 +94,17 @@ public final class MgmtTargetMapper {
      *            the targets
      * @return the response
      */
-    public static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Iterable<Target> targets) {
-        final List<MgmtTarget> mappedList = new ArrayList<>();
-        if (targets != null) {
-            for (final Target target : targets) {
-                final MgmtTarget response = toResponse(target);
-                addPollStatus(target, response);
-                addTargetLinks(response);
-                mappedList.add(response);
-            }
+    public static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
+        if (targets == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return targets.stream().map(target -> {
+            final MgmtTarget response = toResponse(target);
+            addPollStatus(target, response);
+            addTargetLinks(response);
+            return response;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -112,15 +114,12 @@ public final class MgmtTargetMapper {
      *            list of targets
      * @return the response
      */
-    public static List<MgmtTarget> toResponse(final Iterable<Target> targets) {
-        final List<MgmtTarget> mappedList = new ArrayList<>();
-        if (targets != null) {
-            for (final Target target : targets) {
-                final MgmtTarget response = toResponse(target);
-                mappedList.add(response);
-            }
+    public static List<MgmtTarget> toResponse(final Collection<Target> targets) {
+        if (targets == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList());
     }
 
     /**
@@ -173,12 +172,13 @@ public final class MgmtTargetMapper {
     }
 
     static List<Target> fromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtTargetRequestBody> targetsRest) {
-        final List<Target> mappedList = new ArrayList<>();
-        for (final MgmtTargetRequestBody targetRest : targetsRest) {
-            mappedList.add(fromRequest(entityFactory, targetRest));
+            final Collection<MgmtTargetRequestBody> targetsRest) {
+        if (targetsRest == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return targetsRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest))
+                .collect(Collectors.toList());
     }
 
     static Target fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
@@ -190,17 +190,12 @@ public final class MgmtTargetMapper {
         return target;
     }
 
-    static List<MgmtActionStatus> toActionStatusRestResponse(final List<ActionStatus> actionStatus) {
-        final List<MgmtActionStatus> mappedList = new ArrayList<>();
-
-        if (actionStatus != null) {
-            for (final ActionStatus status : actionStatus) {
-                final MgmtActionStatus response = toResponse(status);
-                mappedList.add(response);
-            }
+    static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus) {
+        if (actionStatus == null) {
+            return Collections.emptyList();
         }
 
-        return mappedList;
+        return actionStatus.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList());
     }
 
     static MgmtAction toResponse(final String targetId, final Action action, final boolean isActive) {
@@ -222,14 +217,13 @@ public final class MgmtTargetMapper {
         return result;
     }
 
-    static List<MgmtAction> toResponse(final String targetId, final List<Action> actions) {
-        final List<MgmtAction> mappedList = new ArrayList<>();
-
-        for (final Action action : actions) {
-            final MgmtAction response = toResponse(targetId, action, action.isActive());
-            mappedList.add(response);
+    static List<MgmtAction> toResponse(final String targetId, final Collection<Action> actions) {
+        if (actions == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return actions.stream().map(action -> toResponse(targetId, action, action.isActive()))
+                .collect(Collectors.toList());
     }
 
     private static String getNameOfActionStatusType(final Action.Status type) {

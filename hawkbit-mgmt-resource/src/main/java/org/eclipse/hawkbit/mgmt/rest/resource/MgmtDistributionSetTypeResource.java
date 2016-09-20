@@ -146,7 +146,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
-        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toListResponse(foundType.getMandatoryModuleTypes()),
+        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getMandatoryModuleTypes()),
                 HttpStatus.OK);
     }
 
@@ -190,7 +190,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
-        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toListResponse(foundType.getOptionalModuleTypes()),
+        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getOptionalModuleTypes()),
                 HttpStatus.OK);
     }
 

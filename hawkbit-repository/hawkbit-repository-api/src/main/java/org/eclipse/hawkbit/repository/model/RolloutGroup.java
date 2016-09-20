@@ -155,7 +155,7 @@ public interface RolloutGroup extends NamedEntity {
     /**
      * @return the total amount of targets containing in this group
      */
-    long getTotalTargets();
+    int getTotalTargets();
 
     /**
      * @return the totalTargetCountStatus

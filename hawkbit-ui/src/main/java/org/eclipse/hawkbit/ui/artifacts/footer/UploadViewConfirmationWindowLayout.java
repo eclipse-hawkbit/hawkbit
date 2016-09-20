@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.footer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gwt.thirdparty.guava.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -64,7 +64,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<>();
+        final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(2);
         if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
             tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }

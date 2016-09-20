@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
@@ -88,7 +89,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<>();
+        final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(3);
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
         }

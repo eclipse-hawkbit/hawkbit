@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -178,10 +177,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * @return
      */
     private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<>();
         final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
                 DistributionSetTypeBeanQuery.class);
-        dtQF.setQueryConfiguration(queryConfig);
+        dtQF.setQueryConfiguration(Collections.emptyMap());
 
         final LazyQueryContainer disttypeContainer = new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_NAME), dtQF);

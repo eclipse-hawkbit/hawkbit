@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -108,11 +109,11 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public List<RolloutGroup> getRolloutGroups() {
-        return rolloutGroups;
-    }
+        if (rolloutGroups == null) {
+            return Collections.emptyList();
+        }
 
-    public void setRolloutGroups(final List<RolloutGroup> rolloutGroups) {
-        this.rolloutGroups = rolloutGroups;
+        return Collections.unmodifiableList(rolloutGroups);
     }
 
     @Override

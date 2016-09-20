@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
@@ -158,12 +159,11 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
         LOG.debug("creating {} softwareModules", softwareModules.size());
-        final Iterable<SoftwareModule> createdSoftwareModules = softwareManagement.createSoftwareModule(
+        final Collection<SoftwareModule> createdSoftwareModules = softwareManagement.createSoftwareModule(
                 MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules, softwareManagement));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
-        return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponseSoftwareModules(createdSoftwareModules),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponse(createdSoftwareModules), HttpStatus.CREATED);
     }
 
     @Override

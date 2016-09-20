@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,11 +81,11 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     private static Page<RolloutGroup> convertPage(final Page<JpaRolloutGroup> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     private static Page<Target> convertTPage(final Page<JpaTarget> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -114,7 +114,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         for (final RolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                    allStatesForRollout.get(rolloutGroup.getId()), rolloutGroup.getTotalTargets());
+                    allStatesForRollout.get(rolloutGroup.getId()), new Long(rolloutGroup.getTotalTargets()));
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         }
 
@@ -128,7 +128,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rolloutGroup.getTotalTargets());
+                new Long(rolloutGroup.getTotalTargets()));
         rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 

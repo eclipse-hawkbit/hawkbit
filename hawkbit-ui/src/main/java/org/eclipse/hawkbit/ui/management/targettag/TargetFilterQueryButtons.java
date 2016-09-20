@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.ui.management.targettag;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PreDestroy;
 
@@ -102,8 +101,7 @@ public class TargetFilterQueryButtons extends Table {
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
         final BeanQueryFactory<TargetFilterBeanQuery> queryFactory = new BeanQueryFactory<>(
                 TargetFilterBeanQuery.class);
-        final Map<String, Object> queryConfig = new HashMap<>();
-        queryFactory.setQueryConfiguration(queryConfig);
+        queryFactory.setQueryConfiguration(Collections.emptyMap());
         return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "id"), queryFactory);
     }
 

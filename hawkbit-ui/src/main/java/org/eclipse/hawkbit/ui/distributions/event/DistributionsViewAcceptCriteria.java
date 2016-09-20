@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions.event;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +16,7 @@ import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
+import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
@@ -66,7 +66,7 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, List<String>> createDropConfigurations() {
-        final Map<String, List<String>> config = new HashMap<>();
+        final Map<String, List<String>> config = Maps.newHashMapWithExpectedSize(2);
 
         // Delete drop area droppable components
         config.put(SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID,
@@ -82,7 +82,7 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
-        final Map<String, Object> config = new HashMap<>();
+        final Map<String, Object> config = Maps.newHashMapWithExpectedSize(4);
         config.put(SPUIDefinitions.DISTRIBUTION_TYPE_ID_PREFIXS, DragEvent.DISTRIBUTION_TYPE_DRAG);
         config.put(SPUIComponentIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
         config.put(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, DragEvent.SOFTWAREMODULE_DRAG);

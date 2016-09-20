@@ -19,10 +19,10 @@ import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_F
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,12 +43,6 @@ import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.filter.FilterExpression;
-import org.eclipse.hawkbit.ui.filter.Filters;
-import org.eclipse.hawkbit.ui.filter.target.CustomTargetFilter;
-import org.eclipse.hawkbit.ui.filter.target.TargetSearchTextFilter;
-import org.eclipse.hawkbit.ui.filter.target.TargetStatusFilter;
-import org.eclipse.hawkbit.ui.filter.target.TargetTagFilter;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
@@ -78,6 +72,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -140,11 +135,14 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (TargetCreatedEvent.class.isInstance(firstEvent)) {
             onTargetCreatedEvents();
         } else if (TargetInfoUpdateEvent.class.isInstance(firstEvent)) {
-            onTargetInfoUpdateEvents((List<TargetInfoUpdateEvent>) events);
+            onTargetUpdateEvents(((List<TargetInfoUpdateEvent>) events).stream()
+                    .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
+                    .collect(Collectors.toList()));
         } else if (TargetDeletedEvent.class.isInstance(firstEvent)) {
             onTargetDeletedEvent((List<TargetDeletedEvent>) events);
         } else if (TargetUpdatedEvent.class.isInstance(firstEvent)) {
-            onTargetUpdateEvents((List<TargetUpdatedEvent>) events);
+            onTargetUpdateEvents(((List<TargetUpdatedEvent>) events).stream()
+                    .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
         }
     }
 
@@ -348,7 +346,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(7);
         managementUIState.getTargetTableFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         managementUIState.getTargetTableFilters().getDistributionSet()
@@ -746,16 +744,17 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @SuppressWarnings("unchecked")
-    private void updateVisibleItemOnEvent(final TargetInfo targetInfo, final Target target,
-            final TargetIdName targetIdName) {
+    private void updateVisibleItemOnEvent(final TargetInfo targetInfo) {
+        final Target target = targetInfo.getTarget();
+        final TargetIdName targetIdName = target.getTargetIdName();
+
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
+
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
-        if (targetInfo != null) {
-            item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
-                    .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
-            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
-        }
+        item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
+                .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
@@ -767,62 +766,30 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      * EventListener method which is called by the event bus to notify about a
      * list of {@link TargetInfoUpdateEvent}.
      *
-     * @param targetInfoUpdateEvents
-     *            list of target info update event
+     * @param updatedTargets
+     *            list of updated targets
      */
-    private void onTargetInfoUpdateEvents(final List<TargetInfoUpdateEvent> targetInfoUpdateEvents) {
+    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
         @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shoulTargetsUpdated = false;
-        Target lastSelectedTarget = null;
-        for (final TargetInfoUpdateEvent targetInfoUpdateEvent : targetInfoUpdateEvents) {
-            final TargetInfo targetInfo = targetInfoUpdateEvent.getEntity();
-            final Target target = targetInfo.getTarget();
-            final TargetIdName targetIdName = target.getTargetIdName();
-            if (Filters.or(getTargetTableFilters(target)).doFilter()) {
-                shoulTargetsUpdated = true;
-            } else {
-                if (visibleItemIds.contains(targetIdName)) {
-                    updateVisibleItemOnEvent(targetInfo, target, targetIdName);
-                }
-            }
-            // workaround until push is available for action history, re-select
-            // the updated target so the action history gets refreshed.
-            if (isLastSelectedTarget(targetIdName)) {
-                lastSelectedTarget = target;
-            }
-        }
-        if (shoulTargetsUpdated) {
-            refreshTargets();
-        }
-        if (lastSelectedTarget != null) {
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, lastSelectedTarget));
-        }
-    }
 
-    private void onTargetUpdateEvents(final List<TargetUpdatedEvent> events) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shoulTargetsUpdated = false;
-        Target lastSelectedTarget = null;
-        for (final TargetUpdatedEvent targetUpdatedEvent : events) {
-            final Target target = targetUpdatedEvent.getEntity();
-            final TargetIdName targetIdName = target.getTargetIdName();
-            if (Filters.or(getTargetTableFilters(target)).doFilter()) {
-                shoulTargetsUpdated = true;
-            } else {
-                if (visibleItemIds.contains(targetIdName)) {
-                    updateVisibleItemOnEvent(null, target, targetIdName);
-                }
-            }
-            if (isLastSelectedTarget(targetIdName)) {
-                lastSelectedTarget = target;
-            }
-        }
-        if (shoulTargetsUpdated) {
+        if (isFilterEnabled()) {
+            LOG.debug("Filter enabled on UI {}. Refresh targets from database.", getUI().getUIId());
             refreshTargets();
+        } else {
+            updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
+                    .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
         }
-        if (lastSelectedTarget != null) {
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, lastSelectedTarget));
+
+        // workaround until push is available for action
+        // history, re-select
+        // the updated target so the action history gets
+        // refreshed.
+        final Optional<Target> selected = updatedTargets.stream()
+                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
+        if (selected.isPresent()) {
+            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
         }
     }
 
@@ -830,17 +797,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         refreshTargets();
     }
 
-    private List<FilterExpression> getTargetTableFilters(final Target target) {
+    private boolean isFilterEnabled() {
         final TargetTableFilters targetTableFilters = managementUIState.getTargetTableFilters();
-        final List<FilterExpression> filters = new ArrayList<>();
-        if (targetTableFilters.getSearchText().isPresent()) {
-            filters.add(new TargetSearchTextFilter(target, targetTableFilters.getSearchText().get()));
-        }
-        filters.add(new TargetStatusFilter(targetTableFilters.getClickedStatusTargetTags()));
-        filters.add(new TargetTagFilter(target, targetTableFilters.getClickedTargetTags(),
-                targetTableFilters.isNoTagSelected()));
-        filters.add(new CustomTargetFilter(targetTableFilters.getTargetFilterQuery()));
-        return filters;
+        return targetTableFilters.getSearchText().isPresent() || !targetTableFilters.getClickedTargetTags().isEmpty()
+                || !targetTableFilters.getClickedStatusTargetTags().isEmpty()
+                || targetTableFilters.getTargetFilterQuery().isPresent();
     }
 
     /**

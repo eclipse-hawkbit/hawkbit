@@ -44,6 +44,6 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
     /**
      * @return version of the {@link BaseEntity}.
      */
-    long getOptLockRevision();
+    int getOptLockRevision();
 
 }

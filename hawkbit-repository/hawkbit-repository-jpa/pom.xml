@@ -89,6 +89,10 @@
          <groupId>cz.jirutka.rsql</groupId>
          <artifactId>rsql-parser</artifactId>
       </dependency>
+      <dependency>
+      	<groupId>org.apache.commons</groupId>
+      	<artifactId>commons-collections4</artifactId>
+      </dependency>
 
       <!-- Test -->
       <dependency>
