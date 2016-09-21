@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -57,17 +57,17 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
+        return UIComponentIdProvider.DIST_SEARCH_TEXTFIELD;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponentIdProvider.DIST_SEARCH_ICON;
+        return UIComponentIdProvider.DIST_SEARCH_ICON;
     }
 
     @Override
     protected String getAddIconId() {
-        return SPUIComponentIdProvider.DIST_ADD_ICON;
+        return UIComponentIdProvider.DIST_ADD_ICON;
     }
 
     @Override
@@ -100,7 +100,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getShowFilterButtonLayoutId() {
-        return "show.dist.tags.icon";
+        return UIComponentIdProvider.SHOW_DIST_TAG_ICON;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getMaxMinIconId() {
-        return SPUIComponentIdProvider.DS_MAX_MIN_TABLE_ICON;
+        return UIComponentIdProvider.DS_MAX_MIN_TABLE_ICON;
     }
 
     @Override

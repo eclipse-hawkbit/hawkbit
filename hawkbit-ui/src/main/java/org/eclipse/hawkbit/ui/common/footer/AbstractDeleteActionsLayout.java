@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -155,7 +155,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createActionsButton() {
-        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.PENDING_ACTION_BUTTON,
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.PENDING_ACTION_BUTTON,
                 getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName("del-action-button");
@@ -166,7 +166,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createBulkUploadStatusButton() {
-        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
                 "", false, null, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
@@ -217,7 +217,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             return;
         }
         unsavedActionsWindow = new WindowBuilder(SPUIDefinitions.CONFIRMATION_WINDOW)
-                .caption(getUnsavedActionsWindowCaption()).id(SPUIComponentIdProvider.CONFIRMATION_POPUP_ID)
+                .caption(getUnsavedActionsWindowCaption()).id(UIComponentIdProvider.CONFIRMATION_POPUP_ID)
                 .content(getUnsavedActionsWindowContent()).buildWindow();
         unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
         UI.getCurrent().addWindow(unsavedActionsWindow);

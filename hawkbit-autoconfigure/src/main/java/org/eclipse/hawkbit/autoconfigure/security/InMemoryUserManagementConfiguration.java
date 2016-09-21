@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @ConditionalOnMissingBean(UserDetailsService.class)
 public class InMemoryUserManagementConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
+    @Autowired
+    private SecurityProperties securityProperties;
+
     @Override
     public void configure(final AuthenticationManagerBuilder auth) throws Exception {
         final DaoAuthenticationProvider userDaoAuthenticationProvider = new TenantDaoAuthenticationProvider();
@@ -49,7 +54,8 @@ public class InMemoryUserManagementConfiguration extends GlobalAuthenticationCon
     public UserDetailsService userDetailsService() {
         final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager(new ArrayList<>());
         inMemoryUserDetailsManager.setAuthenticationManager(null);
-        inMemoryUserDetailsManager.createUser(new User("admin", "admin", PermissionUtils.createAllAuthorityList()));
+        inMemoryUserDetailsManager.createUser(new User(securityProperties.getUser().getName(),
+                securityProperties.getUser().getPassword(), PermissionUtils.createAllAuthorityList()));
         return inMemoryUserDetailsManager;
     }
 

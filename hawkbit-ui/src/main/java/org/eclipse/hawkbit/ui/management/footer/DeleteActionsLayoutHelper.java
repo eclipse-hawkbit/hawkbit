@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.ui.Component;
@@ -68,7 +68,7 @@ public final class DeleteActionsLayoutHelper {
      * @return true if it component is target table
      */
     public static boolean isTargetTable(final Component source) {
-        return SPUIComponentIdProvider.TARGET_TABLE_ID.equalsIgnoreCase(source.getId());
+        return UIComponentIdProvider.TARGET_TABLE_ID.equalsIgnoreCase(source.getId());
     }
 
     /**
@@ -79,7 +79,7 @@ public final class DeleteActionsLayoutHelper {
      * @return true if it component is distribution table
      */
     public static boolean isDistributionTable(final Component source) {
-        return SPUIComponentIdProvider.DIST_TABLE_ID.equalsIgnoreCase(source.getId());
+        return UIComponentIdProvider.DIST_TABLE_ID.equalsIgnoreCase(source.getId());
     }
 
     /**

@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -62,7 +62,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
         tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(UIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
