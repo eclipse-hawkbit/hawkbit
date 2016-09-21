@@ -21,7 +21,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class Base62UtilTest {
 
     @Test
-    @Description("Convert Base10 numbres to Base62 ASCI strings.")
+    @Description("Convert Base10 numbres to Base62 ASCII strings.")
     public void fromBase10() {
         assertThat(Base62Util.fromBase10(0L)).isEqualTo("0");
         assertThat(Base62Util.fromBase10(11L)).isEqualTo("B");
@@ -30,12 +30,11 @@ public class Base62UtilTest {
     }
 
     @Test
-    @Description("Convert Base62 ASCI strings to Base10 numbers.")
+    @Description("Convert Base62 ASCII strings to Base10 numbers.")
     public void toBase10() {
         assertThat(Base62Util.toBase10("0")).isEqualTo(0L);
         assertThat(Base62Util.toBase10("B")).isEqualTo(11);
         assertThat(Base62Util.toBase10("a")).isEqualTo(36L);
         assertThat(Base62Util.toBase10("G7")).isEqualTo(999L);
     }
-
 }
