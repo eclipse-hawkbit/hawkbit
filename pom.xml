@@ -40,7 +40,6 @@
       <module>hawkbit-ui</module>
       <module>hawkbit-artifact-repository-mongo</module>
       <module>hawkbit-autoconfigure</module>
-      <module>hawkbit-cache-redis</module>
       <module>hawkbit-test-report</module>
       <module>examples</module>
    </modules>
@@ -52,14 +51,11 @@
    </scm>
 
    <repositories>
-    <repository>
-        <id>spring-milestones</id>
-        <name>Spring Milestones</name>
-        <url>http://repo.spring.io/libs-milestone</url>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-    </repository>
+   <repository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/libs-snapshot</url>
+   </repository>
       <repository>
          <id>vaadin-addons</id>
          <url>http://maven.vaadin.com/vaadin-addons</url>
@@ -116,7 +112,7 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.0.0</rsql-parser.version>
       <spring.redis>1.7.2.RELEASE</spring.redis>
-      <spring-cloud-bus.version>1.2.0.RC1</spring-cloud-bus.version>
+      <spring-cloud-bus.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-bus.version>
       
       <!-- Misc libraries versions - END -->
 

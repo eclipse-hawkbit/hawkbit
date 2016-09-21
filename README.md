@@ -62,7 +62,6 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
 * `examples` : hawkBit examples 
 * `hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
 * `hawkbit-autoconfigure` : Spring-boot auto-configuration. 
-* `hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
 * `hawkbit-core` : Core elements for internal interfaces and utility classes.
 * `hawkbit-ddi-api` : The hawkBit DDI API.
 * `hawkbit-ddi-dl-api` : The hawkBit DDI Download API.
