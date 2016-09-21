@@ -87,7 +87,6 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             return null;
         }
 
-        boolean successAuthentication = false;
         final PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) authentication;
         final Object credentials = token.getCredentials();
         final Object principal = token.getPrincipal();
@@ -97,22 +96,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             throw new BadCredentialsException("The provided principal and credentials are not match");
         }
 
-        // The credentials may either be of type HeaderAuthentication or of type
-        // Collection<HeaderAuthentication> depending on the authentication mode
-        // in use (the latter is used in case of trusted reverse-proxy).
-        // It is checked whether principal equals credentials (respectively if
-        // credentials contains principal in case of collection) because we want
-        // to check if e.g. controllerId containing in the URL equals the
-        // controllerId in the special header set by the reverse-proxy which
-        // extracted the CN from the certificate.
-        if (principal.equals(credentials)) {
-            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
-        } else if (Collection.class.isAssignableFrom(credentials.getClass())) {
-            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
-            if (multiValueCredentials.contains(principal)) {
-                successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
-            }
-        }
+        boolean successAuthentication = calculateAuthenticationSuccess(principal, credentials, tokenDetails);
 
         if (successAuthentication) {
             final Collection<GrantedAuthority> controllerAuthorities = new ArrayList<>();
@@ -125,6 +109,36 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         }
 
         throw new BadCredentialsException("The provided principal and credentials are not match");
+    }
+    
+	/**
+	 * 
+	 * The credentials may either be of type HeaderAuthentication or of type
+	 * Collection<HeaderAuthentication> depending on the authentication mode in
+	 * use (the latter is used in case of trusted reverse-proxy). It is checked
+	 * whether principal equals credentials (respectively if credentials
+	 * contains principal in case of collection) because we want to check if
+	 * e.g. controllerId containing in the URL equals the controllerId in the
+	 * special header set by the reverse-proxy which extracted the CN from the
+	 * certificate.
+	 * 
+	 * @param principal
+	 * @param credentials
+	 * @param tokenDetails
+	 * @return
+	 */
+    private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
+    	boolean successAuthentication = false;
+    	if (principal.equals(credentials)) {
+            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+        } else if (Collection.class.isAssignableFrom(credentials.getClass())) {
+            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
+            if (multiValueCredentials.contains(principal)) {
+                successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+            }
+        }
+    	
+    	return successAuthentication;
     }
 
     private boolean checkSourceIPAddressIfNeccessary(final Object tokenDetails) {
