@@ -26,10 +26,6 @@ public class SuggestToken {
      *            the character position of the start of the token
      * @param end
      *            the character position of the end of the token
-     * @param the
-     *            token image name which is currently parsed, e.g. entered image
-     *            name is {@code na} which the suggestion can be based on and
-     *            e.g. filter the suggestions.
      * @param tokenImageName
      *            the entered name of the token, e.g. could be the beginning of
      *            the suggestion like 'na' or 'name'
@@ -61,6 +57,7 @@ public class SuggestToken {
 
     @Override
     public String toString() {
-        return "SuggestToken [start=" + start + ", end=" + end + ", suggestion=" + suggestion + "]";
+        return "SuggestToken [start=" + start + ", end=" + end + ", suggestion=" + suggestion + ", tokenImageName="
+                + tokenImageName + "]";
     }
 }

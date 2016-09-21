@@ -19,7 +19,8 @@ import cz.jirutka.rsql.parser.ParseException;
  * A {@link ParseException} wrapper which allows to access the parsing
  * information from the exception using reflection due there is no other access
  * of this information. See issue for requesting feature
- * {@link https://github.com/jirutka/rsql-parser/issues/22}
+ * <a href="https://github.com/jirutka/rsql-parser/issues/22">https://github.com
+ * /jirutka/rsql-parser/issues/22</a>
  */
 public class ParseExceptionWrapper {
 

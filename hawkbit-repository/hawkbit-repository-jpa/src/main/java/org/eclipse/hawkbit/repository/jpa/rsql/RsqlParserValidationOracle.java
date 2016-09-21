@@ -51,7 +51,9 @@ import cz.jirutka.rsql.parser.RSQLParserException;
  * {@link ParseException}.
  * 
  * There is a feature request on the GitHub project
- * {@link https://github.com/jirutka/rsql-parser/issues/22}.
+ * <a href="https://github.com/jirutka/rsql-parser/issues/22">https://github.com
+ * /jirutka/rsql-parser/issues/22</a>
+ * 
  */
 public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
