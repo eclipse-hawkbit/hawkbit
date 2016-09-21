@@ -20,6 +20,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
@@ -44,6 +45,7 @@ public class JpaExternalArtifact extends AbstractJpaArtifact implements External
     private JpaExternalArtifactProvider externalArtifactProvider;
 
     @Column(name = "url_suffix", length = 512)
+    @Size(max = 512)
     private String urlSuffix;
 
     // CascadeType.PERSIST as we register ourself at the BSM

@@ -25,6 +25,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
@@ -54,9 +55,11 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "action", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
+    @NotNull
     private JpaAction action;
 
     @Column(name = "status")
+    @NotNull
     private Status status;
 
     @CascadeOnDelete

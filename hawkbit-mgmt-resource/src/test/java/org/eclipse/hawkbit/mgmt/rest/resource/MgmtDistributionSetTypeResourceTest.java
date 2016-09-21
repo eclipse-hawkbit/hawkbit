@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -550,6 +551,19 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         // bad request - bad content
         mvc.perform(post("/rest/v1/distributionsettypes").content("sdfjsdlkjfskdjf".getBytes())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        final DistributionSetType missingName = entityFactory.generateDistributionSetType("test123", null, "Desc123");
+        mvc.perform(post("/rest/v1/distributionsettypes")
+                .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(missingName)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        final DistributionSetType toLongName = entityFactory.generateDistributionSetType("test123",
+                RandomStringUtils.randomAscii(80), "Desc123");
+        mvc.perform(post("/rest/v1/distributionsettypes")
+                .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 

@@ -14,8 +14,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.springframework.stereotype.Service;
-
 /**
  * Marks an class as an event subscriber to listen on event on the event bus
  * without explicit register this class to the event bus.
@@ -36,7 +34,6 @@ import org.springframework.stereotype.Service;
  */
 @Target({ TYPE })
 @Retention(RUNTIME)
-@Service
 public @interface EventSubscriber {
 
 }

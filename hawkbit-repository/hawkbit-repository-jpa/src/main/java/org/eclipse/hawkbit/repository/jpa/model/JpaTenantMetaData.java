@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -43,6 +44,7 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, length = 40)
+    @Size(max = 40)
     private String tenant;
 
     @OneToOne(fetch = FetchType.LAZY)

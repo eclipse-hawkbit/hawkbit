@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.artifacts.smtype.CreateUpdateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getHideButtonId() {
-        return SPUIComponentIdProvider.SM_SHOW_FILTER_BUTTON_ID;
+        return UIComponentIdProvider.SM_SHOW_FILTER_BUTTON_ID;
     }
 
     @Override

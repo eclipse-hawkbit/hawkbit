@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,6 +33,7 @@ import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -41,7 +43,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -90,7 +92,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private AmqpControllerAuthentfication authenticationManager;
+    private AmqpControllerAuthentication authenticationManager;
 
     @Autowired
     private ArtifactManagement artifactManagement;
@@ -155,7 +157,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return handleAuthentifiactionMessage(message);
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException | ToManyStatusEntriesException e) {
+        } catch (final TenantNotExistException | TooManyStatusEntriesException e) {
             throw new AmqpRejectAndDontRequeueException(e);
         } finally {
             SecurityContextHolder.setContext(oldContext);
@@ -196,8 +198,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             }
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException teex) {
-            throw new AmqpRejectAndDontRequeueException(teex);
+        } catch (final TenantNotExistException | TooManyStatusEntriesException e) {
+            throw new AmqpRejectAndDontRequeueException(e);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -344,18 +346,24 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final List<Action> actions = controllerManagement.findActionByTargetAndActive(target);
-        if (actions.isEmpty()) {
+        final Optional<Action> action = controllerManagement.findOldestActiveActionByTarget(target);
+        if (!action.isPresent()) {
             return;
         }
-        // action are ordered by ASC
-        final Action action = actions.get(0);
-        final DistributionSet distributionSet = action.getDistributionSet();
+
+        if (action.get().isCancelingOrCanceled()) {
+            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
+                    new CancelTargetAssignmentEvent(target.getOptLockRevision(), target.getTenant(),
+                            target.getControllerId(), action.get().getId(), target.getTargetInfo().getAddress()));
+            return;
+        }
+
+        final DistributionSet distributionSet = action.get().getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.getId(),
+                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.get().getId(),
                 softwareModuleList, target.getTargetInfo().getAddress(), targetSecurityToken));
 
     }
@@ -503,7 +511,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         this.hostnameResolver = hostnameResolver;
     }
 
-    void setAuthenticationManager(final AmqpControllerAuthentfication authenticationManager) {
+    void setAuthenticationManager(final AmqpControllerAuthentication authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 

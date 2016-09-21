@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.EventBus;
@@ -40,6 +41,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  */
 @EventSubscriber
+@Service
 public class EventMerger {
 
     private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();

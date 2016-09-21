@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,7 +76,7 @@ public interface MgmtRolloutRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtRolloutResponseBody> create(@RequestBody final MgmtRolloutRestRequestBody rolloutRequestBody);
+    ResponseEntity<MgmtRolloutResponseBody> create(final MgmtRolloutRestRequestBody rolloutRequestBody);
 
     /**
      * Handles the POST request for starting a rollout.

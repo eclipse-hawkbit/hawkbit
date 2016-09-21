@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -37,6 +38,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -332,6 +334,19 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
 
         // bad request - bad content
         mvc.perform(post("/rest/v1/softwaremoduletypes").content("sdfjsdlkjfskdjf".getBytes())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        final SoftwareModuleType missingName = entityFactory.generateSoftwareModuleType("test123", null, "Desc123", 5);
+        mvc.perform(post("/rest/v1/softwaremoduletypes")
+                .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(missingName)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        final SoftwareModuleType toLongName = entityFactory.generateSoftwareModuleType("test123",
+                RandomStringUtils.randomAscii(80), "Desc123", 5);
+        mvc.perform(post("/rest/v1/softwaremoduletypes")
+                .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 

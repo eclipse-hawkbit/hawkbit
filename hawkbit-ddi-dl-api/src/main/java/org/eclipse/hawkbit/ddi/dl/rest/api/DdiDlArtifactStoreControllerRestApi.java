@@ -40,8 +40,8 @@ public interface DdiDlArtifactStoreControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
             + "/{fileName}")
     @ResponseBody
-    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
-            @AuthenticationPrincipal final String targetid);
+    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
+            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid);
 
     /**
      * Handles GET MD5 checksum file download request.
@@ -54,6 +54,7 @@ public interface DdiDlArtifactStoreControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}"
             + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName);
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
+            @PathVariable("fileName") final String fileName);
 
 }

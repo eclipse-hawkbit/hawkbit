@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
@@ -30,10 +32,14 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery {
     private static final long serialVersionUID = 7493966984413479089L;
 
-    @Column(name = "name", length = 64)
+    @Column(name = "name", length = 64, nullable = false)
+    @Size(max = 64)
+    @NotNull
     private String name;
 
-    @Column(name = "query", length = 1024)
+    @Column(name = "query", length = 1024, nullable = false)
+    @Size(max = 1024)
+    @NotNull
     private String query;
 
     public JpaTargetFilterQuery() {

@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class TargetFilterCountMessageLabel extends Label {
     private void applyStyle() {
         addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
-        setId(SPUIComponentIdProvider.COUNT_LABEL);
+        setId(UIComponentIdProvider.COUNT_LABEL);
     }
 
     private void displayTargetFilterMessage() {

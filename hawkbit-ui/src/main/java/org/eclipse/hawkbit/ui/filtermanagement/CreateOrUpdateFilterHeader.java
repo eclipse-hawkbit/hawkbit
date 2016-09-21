@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.AutoCompleteTextFieldComponent.Fi
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -189,7 +189,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         headerCaption = new LabelBuilder().name(SPUILabelDefinitions.VAR_CREATE_FILTER).buildCaptionLabel();
 
         nameLabel = new LabelBuilder().name("").buildLabel();
-        nameLabel.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
+        nameLabel.setId(UIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
 
         nameTextField = createNameTextField();
         nameTextField.setWidth(380, Unit.PIXELS);
@@ -215,7 +215,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private TextField createNameTextField() {
         final TextField nameField = new TextFieldBuilder().caption(i18n.get("textfield.customfiltername"))
                 .prompt(i18n.get("textfield.customfiltername")).immediate(true)
-                .id(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
+                .id(UIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(this::onFilterNameChange);
         return nameField;
@@ -269,7 +269,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private void buildLayout() {
         captionLayout = new HorizontalLayout();
         captionLayout.setDescription(i18n.get("tooltip.click.to.edit"));
-        captionLayout.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LAYOUT_ID);
+        captionLayout.setId(UIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LAYOUT_ID);
 
         titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addComponents(headerCaption, captionLayout);
@@ -339,8 +339,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private SPUIButton createSearchResetIcon() {
-        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton("create.custom.filter.close.Id", "", "",
-                null, false, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
+                UIComponentIdProvider.CUSTOM_FILTER_CLOSE, "", "", null, false, FontAwesome.TIMES,
+                SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> closeFilterLayout());
         return button;
     }
@@ -354,8 +355,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private Button createSaveButton() {
-        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON,
-                SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
+        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON,
+                UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
                 SPUIButtonStyleSmallNoBorder.class);
         saveButton.addClickListener(this);
         saveButton.setEnabled(false);
@@ -370,7 +371,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
      */
     @Override
     public void buttonClick(final ClickEvent event) {
-        if (SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
+        if (UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
                 && manadatoryFieldsPresent()) {
             if (filterManagementUIState.isCreateFilterViewDisplayed() && !doesAlreadyExists()) {
                 createTargetFilterQuery();
