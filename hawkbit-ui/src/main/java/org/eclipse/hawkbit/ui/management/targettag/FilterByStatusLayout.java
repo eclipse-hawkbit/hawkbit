@@ -54,7 +54,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
     @Autowired
     private ManagementUIState managementUIState;
 
-    private static final String overdueCaption = "overdue";
+    private static final String OVERDUE_CAPTION = "overdue";
 
     private Button unknown;
     private Button inSync;
@@ -168,8 +168,8 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         registered = SPUIComponentProvider.getButton(UIComponentIdProvider.REGISTERED_STATUS_ICON,
                 TargetUpdateStatus.REGISTERED.toString(), i18n.get("tooltip.status.registered"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        overdue = SPUIComponentProvider.getButton(SPUIComponentIdProvider.OVERDUE_STATUS_ICON,
-                overdueCaption, i18n.get("tooltip.status.overdue"),
+        overdue = SPUIComponentProvider.getButton(UIComponentIdProvider.OVERDUE_STATUS_ICON,
+                OVERDUE_CAPTION, i18n.get("tooltip.status.overdue"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
         applyStatusBtnStyle();
         unknown.setData("filterStatusOne");
@@ -212,7 +212,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
             processErrorFilterStatus();
         } else if (event.getButton().getCaption().equalsIgnoreCase(TargetUpdateStatus.REGISTERED.toString())) {
             processRegisteredFilterStatus();
-        } else if (event.getButton().getCaption().equalsIgnoreCase(overdueCaption)) {
+        } else if (event.getButton().getCaption().equalsIgnoreCase(OVERDUE_CAPTION)) {
             processOverdueFilterStatus();
         }
     }
