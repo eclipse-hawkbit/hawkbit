@@ -204,7 +204,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     public Long countSoftwareModulesByType(final SoftwareModuleType type) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new LinkedList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(2);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.equalType((JpaSoftwareModuleType) type);
         specList.add(spec);

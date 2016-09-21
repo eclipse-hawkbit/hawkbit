@@ -165,6 +165,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final Target target) {
+        // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
+        // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
     }
 

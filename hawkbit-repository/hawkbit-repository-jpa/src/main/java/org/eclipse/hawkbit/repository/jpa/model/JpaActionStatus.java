@@ -49,6 +49,8 @@ import com.google.common.base.Splitter;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
+    private static final int MESSAGE_ENTRY_LENGTH = 512;
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
@@ -138,9 +140,9 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     public final void addMessage(final String message) {
         if (message != null) {
             if (messages == null) {
-                messages = new ArrayList<>((message.length() / 512) + 1);
+                messages = new ArrayList<>((message.length() / MESSAGE_ENTRY_LENGTH) + 1);
             }
-            Splitter.fixedLength(512).split(message).forEach(messages::add);
+            Splitter.fixedLength(MESSAGE_ENTRY_LENGTH).split(message).forEach(messages::add);
         }
     }
 
