@@ -91,7 +91,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event.remote.remote")
+@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
