@@ -22,10 +22,10 @@ import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.Converter;
@@ -169,7 +169,7 @@ public class SimulatorView extends VerticalLayout implements View {
     }
 
     @SuppressWarnings("unchecked")
-    @EventListener(classes = NextPollCounterUpdate.class)
+    @Subscribe
     public void pollCounterUpdate(final NextPollCounterUpdate update) {
         final Collection<AbstractSimulatedDevice> devices = update.getDevices();
         this.getUI().access(() -> devices.forEach(device -> {
@@ -187,7 +187,7 @@ public class SimulatorView extends VerticalLayout implements View {
      *            the update event posted on the event bus
      */
     @SuppressWarnings("unchecked")
-    @EventListener(classes = InitUpdate.class)
+    @Subscribe
     public void initUpdate(final InitUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
         this.getUI().access(() -> {
@@ -209,7 +209,7 @@ public class SimulatorView extends VerticalLayout implements View {
      *            the update event posted on the event bus
      */
     @SuppressWarnings("unchecked")
-    @EventListener(classes = ProgressUpdate.class)
+    @Subscribe
     public void progessUpdate(final ProgressUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
         this.getUI().access(() -> {
