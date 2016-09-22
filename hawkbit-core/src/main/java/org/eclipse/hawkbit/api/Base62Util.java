@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.api;
 
 /**
  * Utility class for Base10 to Base62 conversion and vice versa. Base62 has the
- * benefit of being shorter in ASCI representation than Base10.
- *
+ * benefit of being shorter in ASCII representation than Base10.
  */
 public final class Base62Util {
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
