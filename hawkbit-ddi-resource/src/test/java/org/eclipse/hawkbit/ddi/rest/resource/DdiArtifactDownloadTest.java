@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -42,6 +43,8 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -60,6 +63,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
+@SpringApplicationConfiguration(classes = DownloadTestConfiguration.class)
 public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMongoDB {
 
     private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
@@ -68,8 +72,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);
     }
 
-    private volatile int downLoadProgress = 0;
-    private volatile long shippedBytes = 0;
+    private volatile static int downLoadProgress = 0;
+    private volatile static long shippedBytes = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -286,6 +290,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -347,6 +352,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         assertThat(downLoadProgress).isEqualTo(1);
+        assertThat(shippedBytes).isEqualTo(0L);
     }
 
     @Test
@@ -401,6 +407,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -559,10 +566,23 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .isEqualTo(new String(artifact.getMd5Hash() + "  file1.tar.bz2").getBytes(Charsets.US_ASCII));
     }
 
-    @EventListener(classes = DownloadProgressEvent.class)
-    public void listen(final DownloadProgressEvent event) {
-        downLoadProgress++;
-        shippedBytes += event.getShippedBytesSinceLast();
+    public static class DownloadTestConfiguration {
+
+        @Bean
+        public Listener bancelEventHandlerStubBean() {
+            return new Listener();
+        }
 
     }
+
+    private static class Listener {
+
+        @EventListener(classes = DownloadProgressEvent.class)
+        public void listen(final DownloadProgressEvent event) {
+            downLoadProgress++;
+            shippedBytes += event.getShippedBytesSinceLast();
+
+        }
+    }
+
 }

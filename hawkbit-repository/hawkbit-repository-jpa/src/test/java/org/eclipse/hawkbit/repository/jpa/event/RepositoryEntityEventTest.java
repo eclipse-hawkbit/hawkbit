@@ -23,12 +23,16 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -37,9 +41,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Entity Events")
+@SpringApplicationConfiguration(classes = RepositoryTestConfiguration.class)
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
-    private final MyEventListener eventListener = new MyEventListener();
+    @Autowired
+    private MyEventListener eventListener;
 
     @Before
     public void beforeTest() {
@@ -129,7 +135,16 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());
     }
 
-    private class MyEventListener {
+    public static class RepositoryTestConfiguration {
+
+        @Bean
+        public MyEventListener myEventListenerBean() {
+            return new MyEventListener();
+        }
+
+    }
+
+    private static class MyEventListener {
 
         private final BlockingQueue<Event> queue = new LinkedBlockingQueue<>();
 

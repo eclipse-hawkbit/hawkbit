@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.jpa.DeploymentManagementTest.DeploymentTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -46,6 +47,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -65,7 +69,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
+@SpringApplicationConfiguration(classes = { DeploymentTestConfiguration.class })
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
+
+    @Autowired
+    private EventHandlerStub eventHandlerStub;
+
+    @Autowired
+    private CancelEventHandlerStub cancelEventHandlerStub;
 
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
@@ -81,6 +92,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(action.getTarget()).as("Target in action").isNotNull();
         assertThat(action.getTarget().getAssignedDistributionSet()).as("AssignedDistributionSet of target in action")
                 .isNotNull();
+
     }
 
     @Test
@@ -372,8 +384,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
     public void assignDistributionSet2Targets() throws InterruptedException {
-
-        final EventHandlerMock eventHandlerMock = new EventHandlerMock(20);
+        eventHandlerStub.setExpectedNumberOfEvents(20);
 
         final String myCtrlIDPref = "myCtrlID";
         final Iterable<Target> savedNakedTargets = targetManagement
@@ -419,7 +430,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             }
         }
 
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerMock.getEvents(10, TimeUnit.SECONDS);
+        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(10, TimeUnit.SECONDS);
 
         assertTargetAssignDistributionSetEvents(savedDeployedTargets, ds, events);
     }
@@ -427,7 +438,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
-        final EventHandlerMock eventHandlerMock = new EventHandlerMock(0);
+        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -452,15 +463,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         // give some chance to receive events asynchronously
         Thread.sleep(300);
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerMock.getEvents(1, TimeUnit.MILLISECONDS);
+        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(1, TimeUnit.MILLISECONDS);
         assertThat(events).as("events should be empty").isEmpty();
 
-        final EventHandlerMock eventHandlerMockAfterCompletionOfDs = new EventHandlerMock(10);
+        eventHandlerStub.setExpectedNumberOfEvents(10);
 
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
-        assertTargetAssignDistributionSetEvents(targets, nowComplete,
-                eventHandlerMockAfterCompletionOfDs.getEvents(10, TimeUnit.SECONDS));
+        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(10, TimeUnit.SECONDS));
     }
 
     @Test
@@ -477,13 +487,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         // Each of the four targets get one assignment (4 * 1 = 4)
         final int expectedNumberOfEventsForAssignment = 4;
-        final EventHandlerMock eventHandlerMock = new EventHandlerMock(expectedNumberOfEventsForAssignment);
+        eventHandlerStub.setExpectedNumberOfEvents(expectedNumberOfEventsForAssignment);
 
         // Each of the four targets get two more assignment the which are
         // cancelled (4 * 2 = 8)
         final int expectedNumberOfEventsForCancel = 8;
-        final CancelEventHandlerMock cancelEventHandlerMock = new CancelEventHandlerMock(
-                expectedNumberOfEventsForCancel);
+        cancelEventHandlerStub.setExpectedNumberOfEvents(expectedNumberOfEventsForCancel);
 
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
@@ -525,10 +534,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
 
         // For each of the 4 targets 1 distribution sets gets assigned
-        eventHandlerMock.getEvents(10, TimeUnit.SECONDS);
+        eventHandlerStub.getEvents(10, TimeUnit.SECONDS);
 
         // For each of the 4 targets 2 distribution sets gets cancelled
-        cancelEventHandlerMock.getEvents(10, TimeUnit.SECONDS);
+        cancelEventHandlerStub.getEvents(10, TimeUnit.SECONDS);
 
     }
 
@@ -1016,18 +1025,40 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    private static class EventHandlerMock {
-        private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
-        private final CountDownLatch latch;
-        private final int expectedNumberOfEvents;
+    public static class DeploymentTestConfiguration {
 
-        private EventHandlerMock(final int expectedNumberOfEvents) {
+        @Bean
+        public EventHandlerStub eventHandlerStubBean() {
+            return new EventHandlerStub();
+        }
+
+        @Bean
+        public CancelEventHandlerStub bancelEventHandlerStubBean() {
+            return new CancelEventHandlerStub();
+        }
+
+    }
+
+    protected static class EventHandlerStub {
+        private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
+        private CountDownLatch latch;
+        private int expectedNumberOfEvents;
+
+        /**
+         * @param expectedNumberOfEvents
+         *            the expectedNumberOfEvents to set
+         */
+        public void setExpectedNumberOfEvents(final int expectedNumberOfEvents) {
+            events.clear();
             this.expectedNumberOfEvents = expectedNumberOfEvents;
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
         @EventListener(classes = TargetAssignDistributionSetEvent.class)
         public void handleEvent(final TargetAssignDistributionSetEvent event) {
+            if (latch == null) {
+                return;
+            }
             events.add(event);
             latch.countDown();
         }
@@ -1043,18 +1074,22 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private static class CancelEventHandlerMock {
+    private static class CancelEventHandlerStub {
         private final List<CancelTargetAssignmentEvent> events = Collections.synchronizedList(new LinkedList<>());
-        private final CountDownLatch latch;
-        private final int expectedNumberOfEvents;
+        private CountDownLatch latch;
+        private int expectedNumberOfEvents;
 
-        private CancelEventHandlerMock(final int expectedNumberOfEvents) {
+        public void setExpectedNumberOfEvents(final int expectedNumberOfEvents) {
+            events.clear();
             this.expectedNumberOfEvents = expectedNumberOfEvents;
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
         @EventListener(classes = CancelTargetAssignmentEvent.class)
         public void handleEvent(final CancelTargetAssignmentEvent event) {
+            if (latch == null) {
+                return;
+            }
             events.add(event);
             latch.countDown();
         }

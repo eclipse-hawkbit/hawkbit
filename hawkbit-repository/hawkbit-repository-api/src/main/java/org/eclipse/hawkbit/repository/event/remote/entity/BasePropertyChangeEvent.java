@@ -41,6 +41,8 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
      *            the entity id
      * @param entityClass
      *            the entity entityClassName
+     * @param changeSetValues
+     *            the property changes
      * @param applicationId
      *            the origin application id
      */
@@ -55,14 +57,20 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
     }
 
     /**
+     * Constructor.
      * 
      * @param entity
+     *            the entity
      * @param changeSetValues
+     *            the property changes
      * @param applicationId
+     *            the origin application id
      */
     public BasePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
             final String applicationId) {
-        this(entity.getTenant(), entity.getId(), null, changeSetValues, applicationId);
+        super(entity, applicationId);
+        this.changeSetValues = changeSetValues;
+
     }
 
     public Map<String, PropertyChange> getChangeSetValues() {
