@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -105,6 +106,9 @@ public class AmqpControllerAuthenticationTest {
     @Mock
     private ControllerManagement controllerManagementMock;
 
+    @Mock
+    private Target targteMock;
+
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_FALSE = TenantConfigurationValue
             .<Boolean> builder().value(Boolean.FALSE).build();
 
@@ -132,7 +136,11 @@ public class AmqpControllerAuthenticationTest {
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLER_ID);
+        when(controllerManagement.findByControllerId(anyString())).thenReturn(targteMock);
+        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(targteMock);
+
+        when(targteMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
+        when(targteMock.getControllerId()).thenReturn(CONTROLLER_ID);
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);

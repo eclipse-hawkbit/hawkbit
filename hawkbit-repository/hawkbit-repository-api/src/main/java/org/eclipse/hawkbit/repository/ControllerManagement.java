@@ -184,22 +184,6 @@ public interface ControllerManagement {
     String getPollingTime();
 
     /**
-     * An direct access to the security token of an
-     * {@link Target#getSecurityToken()} without authorization. This is
-     * necessary to be able to access the security-token without any
-     * security-context information because the security-token is used for
-     * authentication.
-     *
-     * @param controllerId
-     *            the ID of the controller to retrieve the security token for
-     * @return the security context of the target, in case no target exists for
-     *         the given controllerId {@code null} is returned
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_TARGET_SEC_TOKEN)
-    String getSecurityTokenByControllerId(@NotEmpty String controllerId);
-
-    /**
      * Checks if a given target has currently or has even been assigned to the
      * given artifact through the action history list. This can e.g. indicate if
      * a target is allowed to download a given artifact because it has currently
@@ -318,5 +302,33 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     TargetInfo updateTargetStatus(@NotNull TargetInfo targetInfo, TargetUpdateStatus status, Long lastTargetQuery,
             URI address);
+
+    /**
+     * Finds {@link Target} based on given controller ID returns found Target
+     * without details, i.e. NO {@link Target#getTags()} and
+     * {@link Target#getActions()} possible.
+     *
+     * @param controllerId
+     *            to look for.
+     * @return {@link Target} or {@code null} if it does not exist
+     * @see Target#getControllerId()
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    Target findByControllerId(@NotEmpty final String controllerId);
+
+    /**
+     * Finds {@link Target} based on given ID returns found Target without
+     * details, i.e. NO {@link Target#getTags()} and {@link Target#getActions()}
+     * possible.
+     *
+     * @param targetId
+     *            to look for.
+     * @return {@link Target} or {@code null} if it does not exist
+     * @see Target#getId()
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    Target findByTargetId(final long targetId);
 
 }

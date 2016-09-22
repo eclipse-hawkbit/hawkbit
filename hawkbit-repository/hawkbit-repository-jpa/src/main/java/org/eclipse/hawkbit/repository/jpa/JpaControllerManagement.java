@@ -461,12 +461,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public String getSecurityTokenByControllerId(final String controllerId) {
-        final Target target = targetRepository.findByControllerId(controllerId);
-        return target != null ? target.getSecurityToken() : null;
-    }
-
-    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
@@ -477,6 +471,16 @@ public class JpaControllerManagement implements ControllerManagement {
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
         cacheWriteNotify.downloadProgress(statusId, requestedBytes, shippedBytesSinceLast, shippedBytesOverall);
+    }
+
+    @Override
+    public Target findByControllerId(final String controllerId) {
+        return targetRepository.findByControllerId(controllerId);
+    }
+
+    @Override
+    public Target findByTargetId(final long targetId) {
+        return targetRepository.findOne(targetId);
     }
 
 }
