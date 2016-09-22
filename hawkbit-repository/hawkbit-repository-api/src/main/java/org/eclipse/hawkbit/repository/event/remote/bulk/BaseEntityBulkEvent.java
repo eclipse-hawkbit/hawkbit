@@ -125,7 +125,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     @Override
     @JsonIgnore
     public <E> E getEntity(final Class<E> entityClass) {
-        return null;
+        throw new UnsupportedOperationException("Need to be implmented");
     }
 
 }

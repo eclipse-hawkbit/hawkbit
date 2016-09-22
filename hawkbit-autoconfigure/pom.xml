@@ -26,6 +26,12 @@
          <version>${project.version}</version>
          <optional>true</optional>
       </dependency>
+       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-dmf-amqp</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ui</artifactId>
