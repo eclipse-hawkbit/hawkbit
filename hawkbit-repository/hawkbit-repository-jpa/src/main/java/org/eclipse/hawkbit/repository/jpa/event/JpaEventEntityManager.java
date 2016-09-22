@@ -16,11 +16,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity_;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +65,10 @@ public class JpaEventEntityManager implements EventEntityManager {
 
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
             final CriteriaQuery<E> query = builder.createQuery(entityType);
-            final Root<AbstractJpaBaseEntity> root = (Root<AbstractJpaBaseEntity>) query.from(entityType);
-            query.select((Selection<? extends E>) root);
+            final Root<E> root = query.from(entityType);
+            query.select(root);
 
-            final Path<Long> path = root.get(AbstractJpaBaseEntity_.id);
+            final Path<Long> path = root.get((SingularAttribute<? super E, Long>) AbstractJpaTenantAwareBaseEntity_.id);
             final Predicate in = path.in(ids);
             query.where(in);
             return entityManager.createQuery(query).getResultList();
