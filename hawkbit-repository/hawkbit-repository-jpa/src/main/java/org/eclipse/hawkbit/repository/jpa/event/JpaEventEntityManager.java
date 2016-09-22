@@ -21,6 +21,7 @@ import javax.persistence.criteria.Selection;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Isolation;
@@ -50,20 +51,22 @@ public class JpaEventEntityManager implements EventEntityManager {
         this.entityManager = entityManager;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    @Transactional
-    public <E> E findEntity(final String tenant, final Long id, final Class<E> entityType) {
-        return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
+    public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id,
+            final Class<? extends TenantAwareBaseEntity> entityType) {
+        return (E) tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> List<E> findEntities(final String tenant, final List<Long> ids, final Class<E> entityType) {
+    public <E extends TenantAwareBaseEntity> List<E> findEntities(final String tenant, final List<Long> ids,
+            final Class<? extends TenantAwareBaseEntity> entityType) {
 
         return tenantAware.runAsTenant(tenant, () -> {
 
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-            final CriteriaQuery<E> query = builder.createQuery(entityType);
+            final CriteriaQuery<E> query = (CriteriaQuery<E>) builder.createQuery(entityType);
             final Root<AbstractJpaBaseEntity> root = (Root<AbstractJpaBaseEntity>) query.from(entityType);
             query.select((Selection<? extends E>) root);
 

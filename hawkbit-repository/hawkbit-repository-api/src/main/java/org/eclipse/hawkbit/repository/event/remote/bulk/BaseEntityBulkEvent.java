@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.event.EntityIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,10 +40,10 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     private final List<Long> entitiyIds;
 
     @JsonProperty(required = true)
-    private Class<? extends E> entityClass;
+    private Class<? extends TenantAwareBaseEntity> entityClass;
 
     @JsonIgnore
-    private List<? extends E> entities;
+    private List<E> entities;
 
     /**
      * Constructor for json serialization.
@@ -59,7 +60,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     @JsonCreator
     protected BaseEntityBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
-            @JsonProperty("entityClass") final Class<? extends E> entityClass,
+            @JsonProperty("entityClass") final Class<? extends TenantAwareBaseEntity> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entitiyIds, tenant, applicationId);
         this.entityClass = entityClass;
@@ -73,11 +74,15 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      *            the tenant
      * @param entities
      *            the new ds tags
+     * @param entityClass
+     *            the entity entityClassName
      * @param applicationId
      *            the origin application id
      */
-    protected BaseEntityBulkEvent(final String tenant, final List<E> entities, final String applicationId) {
-        this(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), null, applicationId);
+    protected BaseEntityBulkEvent(final String tenant, final Class<? extends TenantAwareBaseEntity> entityClass,
+            final List<E> entities, final String applicationId) {
+        this(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), entityClass,
+                applicationId);
         this.entities = entities;
     }
 
@@ -90,11 +95,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      *            the origin application id
      */
     protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
-        this(entitiy.getTenant(), asList(entitiy), applicationId);
-    }
-
-    protected Class<? extends E> getEntityClass() {
-        return entityClass;
+        this(entitiy.getTenant(), entitiy.getClass(), asList(entitiy), applicationId);
     }
 
     @Override
@@ -104,9 +105,9 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     // method. So returning a generic type is totally fine.
     @SuppressWarnings("squid:S1452")
     public List<? extends E> getEntity() {
-        if (entities == null && entityClass != null) {
+        if (CollectionUtils.isEmpty(entities)) {
             entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
-                    entitiyIds, getEntityClass());
+                    entitiyIds, entityClass);
         }
         return unmodifiableList(entities);
     }

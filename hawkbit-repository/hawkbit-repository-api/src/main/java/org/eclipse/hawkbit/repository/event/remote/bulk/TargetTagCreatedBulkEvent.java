@@ -30,7 +30,7 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
      * @param entityIds
      *            the entity ids
      * @param entityClass
-     *            the entity entityClassName
+     *            the entity entityClass
      * @param applicationId
      *            the origin application id
      */
@@ -47,13 +47,16 @@ public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
      * 
      * @param tenant
      *            the tenant
+     * @param entityClass
+     *            the entity entityClass
      * @param entities
      *            the new ds tags
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagCreatedBulkEvent(final String tenant, final List<TargetTag> entities, final String applicationId) {
-        super(tenant, entities, applicationId);
+    public TargetTagCreatedBulkEvent(final String tenant, final Class<? extends TargetTag> entityClass,
+            final List<TargetTag> entities, final String applicationId) {
+        super(tenant, entityClass, entities, applicationId);
     }
 
     /**

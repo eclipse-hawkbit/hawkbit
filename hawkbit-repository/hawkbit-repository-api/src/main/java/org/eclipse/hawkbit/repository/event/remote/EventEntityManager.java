@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+
 /**
  * Loads a entity e.g. if a remote event is received.
  */
@@ -26,7 +28,8 @@ public interface EventEntityManager {
      *            the entity type
      * @return the entity
      */
-    <E> E findEntity(String tenant, Long id, Class<E> entityType);
+    <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id,
+            Class<? extends TenantAwareBaseEntity> entityType);
 
     /**
      * Finds all entities by given ids.
@@ -39,5 +42,6 @@ public interface EventEntityManager {
      *            the entity type
      * @return the entities
      */
-    <E> List<E> findEntities(String tenant, List<Long> ids, Class<E> entityType);
+    <E extends TenantAwareBaseEntity> List<E> findEntities(String tenant, List<Long> ids,
+            Class<? extends TenantAwareBaseEntity> entityType);
 }

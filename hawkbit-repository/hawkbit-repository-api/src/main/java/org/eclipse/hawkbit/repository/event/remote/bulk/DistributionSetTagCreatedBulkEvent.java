@@ -47,14 +47,18 @@ public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<Dist
      * 
      * @param tenant
      *            the tenant
+     * 
+     * @param entityClass
+     *            the entity entityClassName
      * @param entities
      *            the new ds tags
      * @param applicationId
      *            the origin application id
      */
-    public DistributionSetTagCreatedBulkEvent(final String tenant, final List<DistributionSetTag> entities,
+    public DistributionSetTagCreatedBulkEvent(final String tenant,
+            final Class<? extends DistributionSetTag> entityClass, final List<DistributionSetTag> entities,
             final String applicationId) {
-        super(tenant, entities, applicationId);
+        super(tenant, entityClass, entities, applicationId);
     }
 
     /**

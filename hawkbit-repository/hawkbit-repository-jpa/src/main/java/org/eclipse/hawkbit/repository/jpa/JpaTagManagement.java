@@ -117,8 +117,9 @@ public class JpaTagManagement implements TagManagement {
         });
 
         final List<TargetTag> save = new ArrayList<>(targetTagRepository.save(targetTags));
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save, applicationContext.getId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(),
+                        JpaTargetTag.class, save, applicationContext.getId())));
         return save;
     }
 
@@ -140,8 +141,8 @@ public class JpaTagManagement implements TagManagement {
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
 
     }
 
@@ -178,8 +179,8 @@ public class JpaTagManagement implements TagManagement {
         checkNotNull(targetTag.getName());
         checkNotNull(targetTag.getId());
         final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
         return save;
     }
 
@@ -202,8 +203,8 @@ public class JpaTagManagement implements TagManagement {
 
         final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
 
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new DistributionSetTagCreatedBulkEvent(save, applicationContext.getId())));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new DistributionSetTagCreatedBulkEvent(save, applicationContext.getId())));
         return save;
     }
 
@@ -222,8 +223,8 @@ public class JpaTagManagement implements TagManagement {
         }
         final List<DistributionSetTag> save = new ArrayList<>(distributionSetTagRepository.save(distributionSetTags));
         afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save,
-                        applicationContext.getId())));
+                () -> eventPublisher.publishEvent(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(),
+                        JpaDistributionSetTag.class, save, applicationContext.getId())));
 
         return save;
     }
@@ -245,8 +246,8 @@ public class JpaTagManagement implements TagManagement {
 
         distributionSetTagRepository.deleteByName(tagName);
 
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new DistributionSetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new DistributionSetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
     }
 
     @Override
@@ -256,8 +257,8 @@ public class JpaTagManagement implements TagManagement {
         checkNotNull(distributionSetTag.getName());
         checkNotNull(distributionSetTag.getId());
         final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new DistributionSetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new DistributionSetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
 
         return save;
     }
