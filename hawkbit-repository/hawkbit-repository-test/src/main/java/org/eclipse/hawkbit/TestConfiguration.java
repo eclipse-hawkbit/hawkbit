@@ -85,6 +85,7 @@ public class TestConfiguration implements AsyncConfigurer {
      * 
      * @return the cache
      */
+    @Bean
     public DownloadIdCache downloadIdCache() {
         return new DefaultDownloadIdCache(cacheManager());
     }
