@@ -28,8 +28,7 @@ public interface EventEntityManager {
      *            the entity type
      * @return the entity
      */
-    <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id,
-            Class<? extends TenantAwareBaseEntity> entityType);
+    <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id, Class<E> entityType);
 
     /**
      * Finds all entities by given ids.
@@ -42,6 +41,5 @@ public interface EventEntityManager {
      *            the entity type
      * @return the entities
      */
-    <E extends TenantAwareBaseEntity> List<E> findEntities(String tenant, List<Long> ids,
-            Class<? extends TenantAwareBaseEntity> entityType);
+    <E extends TenantAwareBaseEntity> List<E> findEntities(String tenant, List<Long> ids, Class<E> entityType);
 }

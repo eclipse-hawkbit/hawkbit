@@ -40,10 +40,10 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     private final List<Long> entitiyIds;
 
     @JsonProperty(required = true)
-    private Class<? extends TenantAwareBaseEntity> entityClass;
+    private Class<? extends E> entityClass;
 
     @JsonIgnore
-    private List<E> entities;
+    private List<? extends E> entities;
 
     /**
      * Constructor for json serialization.
@@ -60,7 +60,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     @JsonCreator
     protected BaseEntityBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
-            @JsonProperty("entityClass") final Class<? extends TenantAwareBaseEntity> entityClass,
+            @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entitiyIds, tenant, applicationId);
         this.entityClass = entityClass;
@@ -79,8 +79,8 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      * @param applicationId
      *            the origin application id
      */
-    protected BaseEntityBulkEvent(final String tenant, final Class<? extends TenantAwareBaseEntity> entityClass,
-            final List<E> entities, final String applicationId) {
+    protected BaseEntityBulkEvent(final String tenant, final Class<? extends E> entityClass, final List<E> entities,
+            final String applicationId) {
         this(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), entityClass,
                 applicationId);
         this.entities = entities;
@@ -94,17 +94,14 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      * @param applicationId
      *            the origin application id
      */
+    @SuppressWarnings("unchecked")
     protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
-        this(entitiy.getTenant(), entitiy.getClass(), asList(entitiy), applicationId);
+        this(entitiy.getTenant(), (Class<? extends E>) entitiy.getClass(), asList(entitiy), applicationId);
     }
 
     @Override
     @JsonIgnore
-    // Exception squid:S1452: This is an immutable JSON model class an thus only
-    // created by constructor. There is no need to add/modify entities via this
-    // method. So returning a generic type is totally fine.
-    @SuppressWarnings("squid:S1452")
-    public List<? extends E> getEntity() {
+    public List<E> getEntity() {
         if (CollectionUtils.isEmpty(entities)) {
             entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
                     entitiyIds, entityClass);
@@ -113,8 +110,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     }
 
     @JsonIgnore
-    @SuppressWarnings("squid:S1452") // see method above
-    public List<? extends E> getEntities() {
+    public List<E> getEntities() {
         return getEntity();
     }
 

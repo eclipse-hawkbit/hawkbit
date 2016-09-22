@@ -28,7 +28,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
     private static final long serialVersionUID = 1L;
 
     @JsonProperty(required = true)
-    private Class<? extends TenantAwareBaseEntity> entityClass;
+    private Class<? extends E> entityClass;
 
     @JsonIgnore
     private transient E entity;
@@ -48,7 +48,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
     @JsonCreator
     protected TenantAwareBaseEntityEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends TenantAwareBaseEntity> entityClass,
+            @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
         this.entityClass = entityClass;
@@ -62,8 +62,9 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
      * @param applicationId
      *            the origin application id
      */
+    @SuppressWarnings("unchecked")
     protected TenantAwareBaseEntityEvent(final E baseEntity, final String applicationId) {
-        this(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass(), applicationId);
+        this(baseEntity.getTenant(), baseEntity.getId(), (Class<? extends E>) baseEntity.getClass(), applicationId);
         this.entity = baseEntity;
     }
 

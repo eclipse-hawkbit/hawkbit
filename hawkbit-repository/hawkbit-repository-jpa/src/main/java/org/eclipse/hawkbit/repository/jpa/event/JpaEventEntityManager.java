@@ -51,22 +51,21 @@ public class JpaEventEntityManager implements EventEntityManager {
         this.entityManager = entityManager;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id,
-            final Class<? extends TenantAwareBaseEntity> entityType) {
-        return (E) tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
+            final Class<E> entityType) {
+        return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <E extends TenantAwareBaseEntity> List<E> findEntities(final String tenant, final List<Long> ids,
-            final Class<? extends TenantAwareBaseEntity> entityType) {
+            final Class<E> entityType) {
 
         return tenantAware.runAsTenant(tenant, () -> {
 
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-            final CriteriaQuery<E> query = (CriteriaQuery<E>) builder.createQuery(entityType);
+            final CriteriaQuery<E> query = builder.createQuery(entityType);
             final Root<AbstractJpaBaseEntity> root = (Root<AbstractJpaBaseEntity>) query.from(entityType);
             query.select((Selection<? extends E>) root);
 
