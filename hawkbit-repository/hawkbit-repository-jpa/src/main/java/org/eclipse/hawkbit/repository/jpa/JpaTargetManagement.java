@@ -343,7 +343,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
-            alreadyAssignedTargets.forEach(target -> ((JpaTarget) target).removeTag(tag));
+            alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
@@ -385,6 +385,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTarget> toUnassign = (Collection) targets;
 
         toUnassign.forEach(target -> target.removeTag(tag));

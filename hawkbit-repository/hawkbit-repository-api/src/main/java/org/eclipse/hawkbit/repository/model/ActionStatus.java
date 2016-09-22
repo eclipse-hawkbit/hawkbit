@@ -50,7 +50,7 @@ public interface ActionStatus extends TenantAwareBaseEntity {
     short getDownloadProgressPercent();
 
     /**
-     * @return list of message entries that can be added to the
+     * @return immutable list of message entries that in the
      *         {@link ActionStatus}.
      */
     List<String> getMessages();

@@ -17,7 +17,7 @@ import java.util.List;
 public interface TargetTag extends Tag {
 
     /**
-     * @return {@link List} of targets assigned to this {@link Tag}.
+     * @return immutable {@link List} of targets assigned to this {@link Tag}.
      */
     List<Target> getAssignedToTargets();
 
