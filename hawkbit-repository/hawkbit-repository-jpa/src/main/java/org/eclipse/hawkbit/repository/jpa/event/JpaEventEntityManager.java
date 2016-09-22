@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class JpaEventEntityManager implements EventEntityManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaEventEntityManager.class);
-
     private final TenantAware tenantAware;
 
     @Autowired
@@ -43,7 +39,7 @@ public class JpaEventEntityManager implements EventEntityManager {
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenantAware
      *            the tenant aware
      * @param entityManager

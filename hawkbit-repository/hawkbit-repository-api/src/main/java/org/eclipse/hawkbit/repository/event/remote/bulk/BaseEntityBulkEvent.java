@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.bulk;
 
-import java.util.Arrays;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +25,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 
+ *
  * A abstract typesafe bulkevent which contains all changed base entities.
- * 
+ *
  * @param <E>
  *            the entity
  */
@@ -45,7 +47,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
 
     /**
      * Constructor for json serialization.
-     * 
+     *
      * @param tenant
      *            the tenant
      * @param entityIds
@@ -67,7 +69,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenant
      *            the tenant
      * @param entities
@@ -82,14 +84,14 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
 
     /**
      * Constructor.
-     * 
+     *
      * @param entitiy
      *            the entity
      * @param applicationId
      *            the origin application id
      */
     protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
-        this(entitiy.getTenant(), Arrays.asList(entitiy), applicationId);
+        this(entitiy.getTenant(), asList(entitiy), applicationId);
     }
 
     protected Class<? extends E> getEntityClass() {
@@ -98,12 +100,16 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
 
     @Override
     @JsonIgnore
+    // Exception squid:S1452: This is an immutable JSON model class an thus only
+    // created by constructor. There is no need to add/modify entities via this
+    // method. So returning a generic type is totally fine.
+    @SuppressWarnings("squid:S1452")
     public List<? extends E> getEntity() {
         if (entities == null && entityClass != null) {
             entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
                     entitiyIds, getEntityClass());
         }
-        return entities;
+        return unmodifiableList(entities);
     }
 
     @JsonIgnore
