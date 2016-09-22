@@ -13,6 +13,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
  * <p>
  * This is used in context of string replacement.
  */
+@FunctionalInterface
 public interface VirtualPropertyLookup {
 
     /**

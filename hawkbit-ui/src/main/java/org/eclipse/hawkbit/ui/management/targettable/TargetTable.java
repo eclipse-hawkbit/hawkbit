@@ -8,14 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_DISTRIBUTION;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TAG;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TEXT;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TAG;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TEXT;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
@@ -63,11 +57,11 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -902,26 +896,33 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
         }
 
-        final long size = getTargetsCountWithFilter(totalTargetsCount, status, overdueState, targetTags, distributionId,
-                searchText, noTagClicked, pinnedDistId);
+        final long size = getTargetsCountWithFilter(totalTargetsCount, pinnedDistId,
+                new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
 
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
         }
     }
 
-    private long getTargetsCountWithFilter(final long totalTargetsCount, final Collection<TargetUpdateStatus> status,
-            final Boolean overdueState, final String[] targetTags, final Long distributionId, final String searchText,
-            final Boolean noTagClicked, final Long pinnedDistId) {
+    private long getTargetsCountWithFilter(final long totalTargetsCount,
+            // final Collection<TargetUpdateStatus> status,
+            // final Boolean overdueState, final String[] targetTags, final Long
+            // distributionId, final String searchText,
+            // final Boolean noTagClicked
+            final Long pinnedDistId, final FilterParams filterParams) {
         final long size;
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
             size = targetManagement.countTargetByTargetFilterQuery(
                     managementUIState.getTargetTableFilters().getTargetFilterQuery().get());
-        } else if (!anyFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
+        } else if (!anyFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
+                filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
+                filterParams.getFilterBySearchText())) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countTargetByFilters(status, overdueState, searchText, distributionId, noTagClicked,
-                    targetTags);
+            size = targetManagement.countTargetByFilters(filterParams.getFilterByStatus(),
+                    filterParams.getOverdueState(), filterParams.getFilterBySearchText(),
+                    filterParams.getFilterByDistributionId(), filterParams.getSelectTargetWithNoTag(),
+                    filterParams.getFilterByTagNames());
         }
         return size;
     }

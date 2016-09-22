@@ -16,21 +16,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -39,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
 import com.google.common.collect.Lists;
@@ -746,7 +740,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
-                null, null, null, null, Boolean.FALSE, new String[0]);
+                new FilterParams(null, null, null, null, Boolean.FALSE, new String[0]));
 
         final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
 
@@ -801,7 +795,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
-                null, null, Boolean.TRUE, null, Boolean.FALSE, new String[0]);
+                new FilterParams(null, null, Boolean.TRUE, null, Boolean.FALSE, new String[0]));
 
         final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
 

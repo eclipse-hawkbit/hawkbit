@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
 import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.data.domain.Sort.Direction.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -40,6 +40,7 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
 import com.google.common.base.Strings;
+import com.google.common.primitives.Booleans;
 
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
@@ -115,7 +116,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
-                    distributionId, status, overdueState, searchText, noTagClicked, targetTags);
+                    new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
         } else if (null != targetFilterQuery) {
             targetBeans = getTargetManagement().findTargetsAll(targetFilterQuery,
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
@@ -185,8 +186,9 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     }
 
     private Boolean anyFilterSelected() {
-        if (status == null && distributionId == null && Strings.isNullOrEmpty(searchText) && !isTagSelected()
-                && !isOverdueFilterEnabled()) {
+        int enabledFiltersCount = Booleans.countTrue(status != null, distributionId != null,
+                !Strings.isNullOrEmpty(searchText), isTagSelected(), isOverdueFilterEnabled());
+        if (enabledFiltersCount == 0) {
             return false;
         }
         return true;

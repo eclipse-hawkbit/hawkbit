@@ -50,9 +50,9 @@ public class VirtualPropertyResolver implements VirtualPropertyLookup {
     public String lookup(String rhs) {
         String resolved = null;
 
-        if ("now_ts".equals(rhs.toLowerCase())) {
+        if ("now_ts".equalsIgnoreCase(rhs)) {
             resolved = String.valueOf(Instant.now().toEpochMilli());
-        } else if ("overdue_ts".equals(rhs.toLowerCase())) {
+        } else if ("overdue_ts".equalsIgnoreCase(rhs)) {
             resolved = String.valueOf(getTimestampCalculator().calculateOverdueTimestamp());
         }
         return resolved;
