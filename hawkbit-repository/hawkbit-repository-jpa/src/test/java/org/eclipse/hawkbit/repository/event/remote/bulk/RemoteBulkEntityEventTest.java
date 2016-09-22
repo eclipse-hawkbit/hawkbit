@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.hamcrest.Matchers;
@@ -36,8 +35,8 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
         final List<Long> ids = targetTags.stream().map(tag -> tag.getId()).collect(Collectors.toList());
 
         final TargetTag targetTag = targetTags.get(0);
-        final TargetTagCreatedBulkEvent bulkEvent = new TargetTagCreatedBulkEvent(targetTag.getTenant(),
-                JpaTargetTag.class, targetTags, "node");
+        final TargetTagCreatedBulkEvent bulkEvent = new TargetTagCreatedBulkEvent(targetTag.getTenant(), ids,
+                targetTag.getClass(), "node");
         assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(targetTags.toArray()));
 
     }

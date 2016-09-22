@@ -34,7 +34,7 @@ public class TargetUpdatedEvent extends TenantAwareBaseEntityEvent<Target> {
      *            the origin application id
      */
     @JsonCreator
-    protected TargetUpdatedEvent(@JsonProperty("tenant") final String tenant,
+    public TargetUpdatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends Target> entityClass,
             @JsonProperty("originService") final String applicationId) {
