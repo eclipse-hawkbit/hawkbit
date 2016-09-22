@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- *
  * A abstract typesafe bulkevent which contains all changed base entities.
  *
  * @param <E>
@@ -113,6 +112,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
     }
 
     @JsonIgnore
+    @SuppressWarnings("squid:S1452") // see method above
     public List<? extends E> getEntities() {
         return getEntity();
     }
@@ -124,8 +124,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
 
     @Override
     @JsonIgnore
-    public <E> E getEntity(final Class<E> entityClass) {
+    public <T> T getEntity(final Class<T> entityClass) {
         throw new UnsupportedOperationException("Need to be implmented");
     }
-
 }
