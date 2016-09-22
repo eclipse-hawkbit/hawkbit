@@ -24,15 +24,15 @@ public final class Base62Util {
     /**
      * @param base10
      *            number
-     * @return converted number into Base62 ASCI string
+     * @return converted number into Base62 ASCII string
      */
-    public static String fromBase10(final Long base10) {
+    public static String fromBase10(final long base10) {
         if (base10 == 0) {
             return "0";
         }
 
-        Long temp = base10;
-        final StringBuilder sb = new StringBuilder("");
+        long temp = base10;
+        final StringBuilder sb = new StringBuilder();
 
         while (temp > 0) {
             temp = fromBase10(temp, sb);
@@ -42,20 +42,21 @@ public final class Base62Util {
 
     /**
      * @param base62
-     * @return
+     *            number
+     * @return converted number into Base10
      */
     public static Long toBase10(final String base62) {
         return toBase10(new StringBuilder(base62).reverse().toString().toCharArray());
     }
 
-    private static Long fromBase10(final Long base10, final StringBuilder sb) {
+    private static Long fromBase10(final long base10, final StringBuilder sb) {
         final int rem = (int) (base10 % BASE62_BASE);
         sb.append(BASE62_ALPHABET.charAt(rem));
         return base10 / BASE62_BASE;
     }
 
     private static Long toBase10(final char[] chars) {
-        Long base10 = 0L;
+        long base10 = 0L;
         for (int i = chars.length - 1; i >= 0; i--) {
             base10 += toBase10(BASE62_ALPHABET.indexOf(chars[i]), i);
         }

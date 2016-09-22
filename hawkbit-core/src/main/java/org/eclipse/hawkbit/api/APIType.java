@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.api;
 
 /**
- * Type of hawkBit API that
+ * hawkBit API type.
  *
  */
 public enum APIType {

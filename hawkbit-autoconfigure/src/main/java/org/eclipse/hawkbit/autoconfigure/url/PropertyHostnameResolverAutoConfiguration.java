@@ -50,10 +50,9 @@ public class PropertyHostnameResolverAutoConfiguration {
     }
 
     /**
-     * 
-     * 
      * @param urlHandlerProperties
-     * @return
+     *            for bean configuration
+     * @return PropertyBasedArtifactUrlHandler bean
      */
     @Bean
     @ConditionalOnMissingBean(ArtifactUrlHandler.class)
