@@ -20,6 +20,8 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 /**
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
@@ -113,7 +115,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
 
         List<String> knownHashes = splitMultiHash(authorityNameConfigurationValue);
 
-        Set<HeaderAuthentication> multiHashes = new HashSet<>();
+        Set<HeaderAuthentication> multiHashes = Sets.newHashSetWithExpectedSize(knownHashes.size());
         final String cntlId = controllerId;
         knownHashes.forEach(hashItem -> multiHashes.add(new HeaderAuthentication(cntlId, hashItem)));
         return multiHashes;

@@ -110,34 +110,35 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
 
         throw new BadCredentialsException("The provided principal and credentials are not match");
     }
-    
+
 	/**
-	 * 
-	 * The credentials may either be of type HeaderAuthentication or of type
-	 * Collection<HeaderAuthentication> depending on the authentication mode in
-	 * use (the latter is used in case of trusted reverse-proxy). It is checked
-	 * whether principal equals credentials (respectively if credentials
-	 * contains principal in case of collection) because we want to check if
-	 * e.g. controllerId containing in the URL equals the controllerId in the
-	 * special header set by the reverse-proxy which extracted the CN from the
-	 * certificate.
-	 * 
-	 * @param principal
-	 * @param credentials
-	 * @param tokenDetails
-	 * @return
-	 */
+     *
+     * The credentials may either be of type HeaderAuthentication or of type
+     * Collection<HeaderAuthentication> depending on the authentication mode in
+     * use (the latter is used in case of trusted reverse-proxy). It is checked
+     * whether principal equals credentials (respectively if credentials
+     * contains principal in case of collection) because we want to check if
+     * e.g. controllerId containing in the URL equals the controllerId in the
+     * special header set by the reverse-proxy which extracted the CN from the
+     * certificate.
+     *
+     * @param principal
+     * @param credentials
+     * @param tokenDetails
+     * @return <code>true</code> if authentication succeeded, otherwise
+     *         <code>false</code>
+     */
     private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
     	boolean successAuthentication = false;
-    	if (principal.equals(credentials)) {
-            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
-        } else if (Collection.class.isAssignableFrom(credentials.getClass())) {
+        if (Collection.class.isAssignableFrom(credentials.getClass())) {
             final Collection<?> multiValueCredentials = (Collection<?>) credentials;
             if (multiValueCredentials.contains(principal)) {
                 successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
             }
+        } else if (principal.equals(credentials)) {
+            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
         }
-    	
+
     	return successAuthentication;
     }
 

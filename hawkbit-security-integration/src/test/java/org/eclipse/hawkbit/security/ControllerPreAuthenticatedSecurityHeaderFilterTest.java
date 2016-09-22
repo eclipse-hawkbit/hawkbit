@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
-import static org.junit.Assert.*;
+
+//import static org.junit.Assert.*;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +78,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_SINGLE_HASH);
-        assertNotNull(underTest.getPreAuthenticatedPrincipal(securityToken));
+        assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNotNull();
     }
 
     @Test
@@ -88,7 +91,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
-        assertNotNull(underTest.getPreAuthenticatedPrincipal(securityToken));
+        assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNotNull();
     }
 
     @Test
@@ -101,7 +104,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
-        assertNull(underTest.getPreAuthenticatedPrincipal(securityToken));
+        assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNull();
+        ;
     }
 
     @Test
@@ -119,7 +123,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         HeaderAuthentication expected = new HeaderAuthentication("box1", "hash1");
         Collection<HeaderAuthentication> credentials = (Collection<HeaderAuthentication>) underTest
                 .getPreAuthenticatedCredentials(securityToken);
-        assertTrue(credentials.contains(expected));
+        assertThat(credentials.contains(expected)).isTrue();
 
         Object principal = underTest.getPreAuthenticatedPrincipal(securityToken);
         assertEquals(expected, principal);
@@ -128,7 +132,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash2");
         expected = new HeaderAuthentication("box1", "hash2");
         credentials = (Collection<HeaderAuthentication>) underTest.getPreAuthenticatedCredentials(securityToken);
-        assertTrue(credentials.contains(expected));
+        assertThat(credentials.contains(expected)).isTrue();
 
         principal = underTest.getPreAuthenticatedPrincipal(securityToken);
         assertEquals(expected, principal);
