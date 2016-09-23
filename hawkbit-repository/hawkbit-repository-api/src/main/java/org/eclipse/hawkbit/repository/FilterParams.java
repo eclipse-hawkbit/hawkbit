@@ -28,6 +28,25 @@ public class FilterParams {
     String[] filterByTagNames;
     Long filterByDistributionId;
 
+    /**
+     * Constructor.
+     *
+     * @param filterByDistributionId
+     *            if set, a filter is added for the given
+     *            {@link DistributionSet#getId()}
+     * @param filterByStatus
+     *            if set, a filter is added for target states included by the
+     *            collection
+     * @param overdueState
+     *            if set, a filter is added for overdued devices
+     * @param filterBySearchText
+     *            if set, a filter is added for the given search text
+     * @param selectTargetWithNoTag
+     *            if set, tag-filtering is enabled
+     * @param filterByTagNames
+     *            if tag-filtering is enabled, a filter is added for the given
+     *            tag-names
+     */
     public FilterParams(Long filterByDistributionId, Collection<TargetUpdateStatus> filterByStatus,
             Boolean overdueState, String filterBySearchText, Boolean selectTargetWithNoTag,
             String... filterByTagNames) {
