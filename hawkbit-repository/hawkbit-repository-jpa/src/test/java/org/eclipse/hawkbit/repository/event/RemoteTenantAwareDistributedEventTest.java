@@ -89,7 +89,7 @@ public class RemoteTenantAwareDistributedEventTest extends AbstractJpaIntegratio
     }
 
     @Test
-    @Description("Verifies that the target info reloading by remote events works")
+    @Description("Verifies that the rollout reloading by remote events works")
     public void reloadRolloutGroupCreatedEventByRemoteEvent() throws JsonProcessingException {
 
         targetManagement.createTarget(entityFactory.generateTarget("12345"));
