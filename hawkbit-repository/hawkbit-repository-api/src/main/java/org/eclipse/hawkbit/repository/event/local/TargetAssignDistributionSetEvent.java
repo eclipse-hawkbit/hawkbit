@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  */
 public class TargetAssignDistributionSetEvent extends DefaultEvent {
 
+    private static final long serialVersionUID = 1L;
     private final Collection<SoftwareModule> softwareModules;
     private final String controllerId;
     private final Long actionId;

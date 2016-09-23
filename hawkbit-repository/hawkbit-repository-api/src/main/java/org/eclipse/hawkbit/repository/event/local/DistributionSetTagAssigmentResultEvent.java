@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 /**
  * A event for assignment target tag.
  */
-public class DistributionSetTagAssigmentResultEvent {
+public class DistributionSetTagAssigmentResultEvent extends DefaultEvent {
 
     private final DistributionSetTagAssignmentResult assigmentResult;
 
@@ -24,6 +24,7 @@ public class DistributionSetTagAssigmentResultEvent {
      *            the assignment result-
      */
     public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult) {
+        super(-1, null);
         this.assigmentResult = assigmentResult;
     }
 

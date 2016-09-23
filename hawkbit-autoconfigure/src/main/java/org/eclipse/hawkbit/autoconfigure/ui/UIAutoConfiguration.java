@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.SessionScope;
@@ -54,13 +55,18 @@ public class UIAutoConfiguration {
     /**
      * A event provider bean which hold the supported events for the UI.
      * 
+     * @param applicationContext
+     *            the context to add the listener
+     * 
      * @return the provider bean
      */
     @Bean
     @ConditionalOnMissingBean
     @SessionScope
-    public EventPushStrategy eventPushStrategy() {
-        return new DelayedEventBusPushStrategy();
+    public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext) {
+        final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy();
+        applicationContext.addApplicationListener(delayedEventBusPushStrategy);
+        return delayedEventBusPushStrategy;
     }
 
 }

@@ -17,6 +17,7 @@ package org.eclipse.hawkbit.repository.event.local;
  */
 public class RolloutGroupChangeEvent extends DefaultEvent {
 
+    private static final long serialVersionUID = 1L;
     private final Long rolloutId;
     private final Long rolloutGroupId;
 

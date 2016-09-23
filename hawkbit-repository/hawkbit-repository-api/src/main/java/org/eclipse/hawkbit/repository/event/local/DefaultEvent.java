@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.event.local;
 
 import org.eclipse.hawkbit.repository.event.Event;
 import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * Abstract event definition class which holds the necessary revsion and tenant
@@ -18,8 +19,9 @@ import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
  * @see TenantAwareDistributedEvent for events which should be distributed to
  *      other cluster nodes
  */
-public class DefaultEvent implements Event {
+public class DefaultEvent extends ApplicationEvent implements Event {
 
+    private static final long serialVersionUID = 1L;
     private final String tenant;
     private final long revision;
 
@@ -30,6 +32,7 @@ public class DefaultEvent implements Event {
      *            the tenant of the event
      */
     protected DefaultEvent(final long revision, final String tenant) {
+        super("LOCAL_EVENT");
         this.revision = revision;
         this.tenant = tenant;
     }

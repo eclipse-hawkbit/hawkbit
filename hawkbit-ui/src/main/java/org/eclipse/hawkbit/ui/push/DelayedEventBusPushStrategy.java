@@ -21,13 +21,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.event.EntityEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.Event;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,7 +55,7 @@ import com.vaadin.ui.UI;
  * in the event and only forwards event from the right tenant to the UI.
  *
  */
-public class DelayedEventBusPushStrategy implements EventPushStrategy, ApplicationListener<TargetCreatedEvent> {
+public class DelayedEventBusPushStrategy implements EventPushStrategy, ApplicationListener<ApplicationEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
@@ -64,36 +64,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.Event> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
 
+    @Autowired
     private EventBus.SessionEventBus eventBus;
 
     @Autowired
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
-
-    /**
-     * Upstream, based on branch 'Feature_Horizontal_Scalability' of
-     * https://github.com/bsinno/hawkbit.git An application event publisher
-     * subscriber which subscribes {@link EntityEvent} from the repository to
-     * dispatch these events to the UI {@link SessionEventBus} .
-     * 
-     * @param event
-     *            the entity event which has been published from the repository
-     */
-    @EventListener(classes = org.eclipse.hawkbit.repository.event.Event.class)
-    @Async
-    public void dispatch(final org.eclipse.hawkbit.repository.event.Event event) {
-        System.out.println(UI.getCurrent());
-        // to dispatch too many events which are not interested on the UI
-        if (!isEventProvided(event)) {
-            LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
-            return;
-        }
-
-        if (!queue.offer(event)) {
-            LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
-            return;
-        }
-    }
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.Event event) {
         return eventProvider.getSingleEvents().contains(event.getClass())
@@ -235,17 +211,31 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     }
 
     /**
-     * @param eventBus
-     *            the eventBus to set
+     * An application event publisher subscriber which subscribes
+     * {@link EntityEvent} from the repository to dispatch these events to the
+     * UI {@link SessionEventBus} .
+     * 
+     * @param applicationEvent
+     *            the entity event which has been published from the repository
      */
     @Override
-    public void setEventBus(final EventBus.SessionEventBus eventBus) {
-        this.eventBus = eventBus;
-    }
+    @Async
+    public void onApplicationEvent(final ApplicationEvent applicationEvent) {
+        if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.Event)) {
+            return;
+        }
 
-    @Override
-    public void onApplicationEvent(final TargetCreatedEvent event) {
-        System.out.println("de rnormal spring wahnsinn");
+        final org.eclipse.hawkbit.repository.event.Event event = (Event) applicationEvent;
+        // to dispatch too many events which are not interested on the UI
+        if (!isEventProvided(event)) {
+            LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
+            return;
+        }
+
+        if (!queue.offer(event)) {
+            LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
+            return;
+        }
 
     }
 

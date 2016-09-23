@@ -98,7 +98,6 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     public HawkbitUI(final EventPushStrategy pushStrategy, final EventBus.SessionEventBus eventBus) {
         this(eventBus);
         this.pushStrategy = pushStrategy;
-        this.pushStrategy.setEventBus(eventBus);
     }
 
     @Override
