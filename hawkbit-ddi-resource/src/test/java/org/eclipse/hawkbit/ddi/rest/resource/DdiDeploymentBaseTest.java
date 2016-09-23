@@ -45,7 +45,6 @@ import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -157,7 +156,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 get("/{tenant}/controller/v1/4712/deploymentBase/" + uaction.getId(), tenantAware.getCurrentTenant())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
@@ -269,7 +268,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         // Time is not yet over, so we should see the same URL
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+                .andExpect(content()
+                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
                         .startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -280,7 +281,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
 
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+                .andExpect(content()
+                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andReturn();
 
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isNotEqualTo(urlBeforeSwitch);
@@ -345,7 +348,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 get("/{tenant}/controller/v1/4712/deploymentBase/" + uaction.getId(), tenantAware.getCurrentTenant())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("attempt")))
@@ -475,7 +478,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
 
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 uaction.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))

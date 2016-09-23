@@ -186,7 +186,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
                 .perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                         .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -219,7 +219,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                 .header("If-None-Match", etagWithFirstUpdate).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
