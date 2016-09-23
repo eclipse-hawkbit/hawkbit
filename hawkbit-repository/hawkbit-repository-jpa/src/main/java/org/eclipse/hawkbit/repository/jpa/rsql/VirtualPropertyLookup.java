@@ -24,5 +24,5 @@ public interface VirtualPropertyLookup {
      * @return the value for the placeholder; may be <code>null</code> if no
      *         value could be found for the given placeholder;
      */
-    public String lookup(String placeholder);
+    String lookup(String placeholder);
 }

@@ -76,7 +76,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse(resolvedPlaceholders.contains(placeholder));
+        assertFalse("NOW_TS has to be resolved!", resolvedPlaceholders.contains(placeholder));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse(resolvedPlaceholders.contains(placeholder));
+        assertFalse("OVERDUE_TS has to be resolved!", resolvedPlaceholders.contains(placeholder));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse(resolvedPlaceholders.contains(placeholder));
+        assertFalse("overdue_ts has to be resolved!", resolvedPlaceholders.contains(placeholder));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertTrue(resolvedPlaceholders.contains(placeholder));
+        assertTrue("unknown should not be resolved!", resolvedPlaceholders.contains(placeholder));
     }
 
     @Test
@@ -117,6 +117,6 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + escaptedPlaceholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertTrue(resolvedPlaceholders.contains(placeholder));
+        assertTrue("Escaped OVERDUE_TS should not be resolved!", resolvedPlaceholders.contains(placeholder));
     }
 }

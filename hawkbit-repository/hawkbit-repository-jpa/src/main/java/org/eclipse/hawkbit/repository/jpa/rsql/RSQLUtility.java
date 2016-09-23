@@ -446,8 +446,8 @@ public final class RSQLUtility {
             final Object transformedValue = transformedValues.get(0);
 
             final String value;
-            if (virtualPropertyLookup != null) { // if lookup is available,
-                                                 // replace macros ...
+            // if lookup is available, replace macros ...
+            if (virtualPropertyLookup != null) {
                 value = substitutor.replace(values.get(0));
             } else {
                 value = values.get(0);
@@ -596,7 +596,7 @@ public final class RSQLUtility {
     /**
      * Adapts the <code>VirtualPropertyLookup</code> to <code>StrLookup</code>.
      */
-    final static class StrLookupAdapter extends StrLookup<String> {
+    static final class StrLookupAdapter extends StrLookup<String> {
 
         private VirtualPropertyLookup virtualPropertyLookup;
 

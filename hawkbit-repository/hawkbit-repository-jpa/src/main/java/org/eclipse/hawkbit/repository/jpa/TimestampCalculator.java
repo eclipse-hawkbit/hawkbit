@@ -17,6 +17,12 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service that calculates non-persistent timestamps , e.g. the point a time a
+ * target is declared as overdue.<br>
+ * Therefore tenant specific configuration may be considered.
+ *
+ */
 @Service
 public class TimestampCalculator {
 
@@ -33,10 +39,8 @@ public class TimestampCalculator {
      *         value
      */
     public long calculateOverdueTimestamp() {
-        long overdueTs = Instant.now().toEpochMilli() //
-                - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis() //
+        return Instant.now().toEpochMilli() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()
                 - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
-        return overdueTs;
     }
 
     private Duration getDurationForKey(TenantConfigurationKey key) {

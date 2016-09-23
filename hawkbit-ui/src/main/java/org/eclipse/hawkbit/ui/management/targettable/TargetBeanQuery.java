@@ -52,7 +52,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
     private transient Collection<TargetUpdateStatus> status = null;
-    private transient Boolean overdueState = null;
+    private transient Boolean overdueState;
     private String[] targetTags = null;
     private Long distributionId = null;
     private String searchText = null;
