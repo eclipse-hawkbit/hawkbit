@@ -126,7 +126,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         assertThat(credentials.contains(expected)).isTrue();
 
         Object principal = underTest.getPreAuthenticatedPrincipal(securityToken);
-        assertEquals(expected, principal);
+        assertEquals("hash1 expected in principal!", expected, principal);
 
         securityToken = prepareSecurityToken();
         securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash2");
@@ -135,7 +135,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         assertThat(credentials.contains(expected)).isTrue();
 
         principal = underTest.getPreAuthenticatedPrincipal(securityToken);
-        assertEquals(expected, principal);
+        assertEquals("hash2 expected in principal!", expected, principal);
 
     }
 

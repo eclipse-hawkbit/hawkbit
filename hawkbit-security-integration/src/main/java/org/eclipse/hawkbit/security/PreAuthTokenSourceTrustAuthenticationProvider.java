@@ -111,7 +111,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         throw new BadCredentialsException("The provided principal and credentials are not match");
     }
 
-	/**
+    /**
      *
      * The credentials may either be of type HeaderAuthentication or of type
      * Collection<HeaderAuthentication> depending on the authentication mode in
@@ -129,7 +129,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      *         <code>false</code>
      */
     private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
-    	boolean successAuthentication = false;
+        boolean successAuthentication = false;
         if (Collection.class.isAssignableFrom(credentials.getClass())) {
             final Collection<?> multiValueCredentials = (Collection<?>) credentials;
             if (multiValueCredentials.contains(principal)) {
@@ -139,7 +139,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
         }
 
-    	return successAuthentication;
+        return successAuthentication;
     }
 
     private boolean checkSourceIPAddressIfNeccessary(final Object tokenDetails) {
