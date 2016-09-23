@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 import ru.yandex.qatools.allure.annotations.Features;
@@ -46,6 +47,9 @@ public class CacheWriteNotifyTest {
     @Mock
     private TenantAware tenantAwareMock;
 
+    @Mock
+    private ApplicationContext applicationContextMock;
+
     private CacheWriteNotify underTest;
 
     @Before
@@ -54,6 +58,7 @@ public class CacheWriteNotifyTest {
         underTest.setEventPublisher(eventPublisherMock);
         underTest.setCacheManager(cacheManagerMock);
         underTest.setTenantAware(tenantAwareMock);
+        underTest.setApplicationContext(applicationContextMock);
     }
 
     @Test

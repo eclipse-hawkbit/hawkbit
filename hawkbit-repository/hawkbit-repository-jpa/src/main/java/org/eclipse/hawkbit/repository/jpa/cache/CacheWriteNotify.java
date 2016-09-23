@@ -127,6 +127,14 @@ public class CacheWriteNotify {
     }
 
     /**
+     * @param applicationContext
+     *            the applicationContext to set
+     */
+    public void setApplicationContext(final ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    /**
      * @param eventPublisher
      *            the eventPublisher to set
      */

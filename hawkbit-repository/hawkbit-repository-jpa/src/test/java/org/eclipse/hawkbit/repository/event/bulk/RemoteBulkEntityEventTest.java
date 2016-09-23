@@ -101,7 +101,7 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetTagCreatedBulkEvent createdBulkEvent = new DistributionSetTagCreatedBulkEvent(
                 dsTag.getTenant(), dsTag.getClass(), dsTags, "Node");
-        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags));
+        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags.toArray()));
 
         final Message<?> message = createMessage(createdBulkEvent);
 
