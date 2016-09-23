@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.annotation.SessionScope;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
 import org.vaadin.spring.events.annotation.EnableEventBus;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
@@ -57,6 +58,7 @@ public class UIAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @SessionScope
     public EventPushStrategy eventPushStrategy() {
         return new DelayedEventBusPushStrategy();
     }

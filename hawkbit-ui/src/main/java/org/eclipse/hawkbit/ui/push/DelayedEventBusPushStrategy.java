@@ -21,11 +21,14 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.event.EntityEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -52,7 +55,7 @@ import com.vaadin.ui.UI;
  * in the event and only forwards event from the right tenant to the UI.
  *
  */
-public class DelayedEventBusPushStrategy implements EventPushStrategy {
+public class DelayedEventBusPushStrategy implements EventPushStrategy, ApplicationListener<TargetCreatedEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
@@ -77,8 +80,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      *            the entity event which has been published from the repository
      */
     @EventListener(classes = org.eclipse.hawkbit.repository.event.Event.class)
+    @Async
     public void dispatch(final org.eclipse.hawkbit.repository.event.Event event) {
-
+        System.out.println(UI.getCurrent());
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
@@ -237,6 +241,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     @Override
     public void setEventBus(final EventBus.SessionEventBus eventBus) {
         this.eventBus = eventBus;
+    }
+
+    @Override
+    public void onApplicationEvent(final TargetCreatedEvent event) {
+        System.out.println("de rnormal spring wahnsinn");
+
     }
 
 }
