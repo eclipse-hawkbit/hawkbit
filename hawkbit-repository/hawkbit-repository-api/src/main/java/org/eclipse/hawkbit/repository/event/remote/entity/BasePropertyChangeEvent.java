@@ -100,11 +100,10 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
          *            new value after change
          */
         @JsonCreator
-        public PropertyChange(@JsonProperty("oldValue") final Serializable oldValue,
-                @JsonProperty("newValue") final Serializable newValue) {
-            super();
-            this.oldValue = oldValue;
-            this.newValue = newValue;
+        public PropertyChange(@JsonProperty("oldValue") final Object oldValue,
+                @JsonProperty("newValue") final Object newValue) {
+            this.oldValue = (Serializable) oldValue;
+            this.newValue = (Serializable) newValue;
         }
 
         public Object getOldValue() {
@@ -114,6 +113,45 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
         public Object getNewValue() {
             return newValue;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((newValue == null) ? 0 : newValue.hashCode());
+            result = prime * result + ((oldValue == null) ? 0 : oldValue.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final PropertyChange other = (PropertyChange) obj;
+            if (newValue == null) {
+                if (other.newValue != null) {
+                    return false;
+                }
+            } else if (!newValue.equals(other.newValue)) {
+                return false;
+            }
+            if (oldValue == null) {
+                if (other.oldValue != null) {
+                    return false;
+                }
+            } else if (!oldValue.equals(other.oldValue)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }
