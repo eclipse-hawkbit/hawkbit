@@ -183,6 +183,8 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(entity);
 
         final Map<String, PropertyChange> changeSetValues = new HashMap<>();
+        final PropertyChange value = new PropertyChange("TEST", "TEST1");
+        changeSetValues.put("TEST", value);
         final ActionPropertyChangeEvent actionPropertyChangeEvent = new ActionPropertyChangeEvent(entity,
                 changeSetValues, "Node");
         assertThat(actionPropertyChangeEvent.getEntity()).isSameAs(entity);
@@ -190,7 +192,8 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
         final ActionPropertyChangeEvent underTestChangeEvent = (ActionPropertyChangeEvent) abstractMessageConverter
                 .fromMessage(message, ActionPropertyChangeEvent.class);
         assertThat(underTestChangeEvent.getEntity()).isEqualTo(entity);
-        assertThat(underTestChangeEvent.getChangeSetValues()).isNotNull();
+        assertThat(underTestChangeEvent.getChangeSetValues()).isNotEmpty();
+        assertThat(underTestChangeEvent.getChangeSetValues().get("TEST")).isEqualTo(value);
     }
 
     @Test
@@ -207,10 +210,10 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
                         .build());
 
         final Map<String, PropertyChange> changeSetValues = new HashMap<>();
-        final RolloutPropertyChangeEvent actionPropertyChangeEvent = new RolloutPropertyChangeEvent(entity,
-                changeSetValues, "Node");
-        assertThat(actionPropertyChangeEvent.getEntity()).isSameAs(entity);
-        Message<?> message = createMessage(actionPropertyChangeEvent);
+        final RolloutPropertyChangeEvent propertyChangeEvent = new RolloutPropertyChangeEvent(entity, changeSetValues,
+                "Node");
+        assertThat(propertyChangeEvent.getEntity()).isSameAs(entity);
+        Message<?> message = createMessage(propertyChangeEvent);
 
         final RolloutPropertyChangeEvent underTestRolloutPropertyChangeEvent = (RolloutPropertyChangeEvent) abstractMessageConverter
                 .fromMessage(message, RolloutPropertyChangeEvent.class);
@@ -218,7 +221,6 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
         assertThat(rolloutReload).isEqualTo(entity);
         assertThat(underTestRolloutPropertyChangeEvent.getChangeSetValues()).isNotNull();
 
-        // RolloutGroupPropertyChangeEvent
         final RolloutGroup rolloutGroup = rolloutReload.getRolloutGroups().get(0);
         final RolloutGroupPropertyChangeEvent rolloutGroupPropertyChangeEvent = new RolloutGroupPropertyChangeEvent(
                 rolloutGroup, changeSetValues, "Node");
