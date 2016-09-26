@@ -26,8 +26,11 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +41,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.util.AntPathMatcher;
 
 import com.mongodb.MongoClientOptions;
 
@@ -120,6 +124,15 @@ public class TestConfiguration implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceMatcher serviceMatcher(final ApplicationContext applicationContext) {
+        final ServiceMatcher serviceMatcher = new ServiceMatcher();
+        serviceMatcher.setMatcher(new AntPathMatcher(":"));
+        serviceMatcher.setApplicationContext(applicationContext);
+        return serviceMatcher;
     }
 
 }
