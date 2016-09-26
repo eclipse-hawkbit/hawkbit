@@ -16,7 +16,6 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -83,6 +82,6 @@ public interface MgmtSystemRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateConfigurationValue(
             @PathVariable("keyName") final String keyName,
-            @RequestBody final MgmtSystemTenantConfigurationValueRequest configurationValueRest);
+            final MgmtSystemTenantConfigurationValueRequest configurationValueRest);
 
 }

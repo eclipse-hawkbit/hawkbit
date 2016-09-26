@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -141,7 +141,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
         metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(getMetadataCaption(nameVersion)).content(this).cancelButtonClickListener(event -> onCancel())
-                .id(SPUIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
+                .id(UIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         metadataWindow.setHeight(550, Unit.PIXELS);
@@ -230,7 +230,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private TextField createKeyTextField() {
         final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
-                .prompt(i18n.get("textfield.key")).immediate(true).id(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID)
+                .prompt(i18n.get("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
                 .maxLengthAllowed(128).buildTextComponent();
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
@@ -240,7 +240,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private TextArea createValueTextField() {
         valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
-                .prompt(i18n.get("textfield.value")).immediate(true).id(SPUIComponentIdProvider.METADATA_VALUE_ID)
+                .prompt(i18n.get("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
@@ -256,7 +256,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.setImmediate(true);
         metadataGrid.setHeight("100%");
         metadataGrid.setWidth("100%");
-        metadataGrid.setId(SPUIComponentIdProvider.METDATA_TABLE_ID);
+        metadataGrid.setId(UIComponentIdProvider.METDATA_TABLE_ID);
         metadataGrid.setSelectionMode(SelectionMode.SINGLE);
         metadataGrid.setColumnReorderingAllowed(true);
         metadataGrid.setContainerDataSource(getMetadataContainer());
@@ -319,7 +319,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Button createAddIcon() {
-        addIcon = SPUIComponentProvider.getButton(SPUIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
+        addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
                 null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         addIcon.addClickListener(event -> onAdd());
         return addIcon;

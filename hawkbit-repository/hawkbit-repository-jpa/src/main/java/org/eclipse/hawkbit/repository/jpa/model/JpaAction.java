@@ -27,6 +27,7 @@ import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
@@ -63,13 +64,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
+    @NotNull
     private JpaTarget target;
 
     @Column(name = "active")
     private boolean active;
 
-    @Column(name = "action_type", nullable = false)
+    @Column(name = "action_type", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
+    @NotNull
     private ActionType actionType;
 
     @Column(name = "forced_time")

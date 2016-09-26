@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -340,10 +340,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static TextArea createTargetFilterQuery() {
         final TextArea filterField = new TextAreaBuilder().style("text-area-style")
-                .id(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
+                .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
                 .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
 
-        filterField.setId(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
+        filterField.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         filterField.setEnabled(false);
         filterField.setSizeUndefined();
@@ -355,7 +355,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         for (final ERRORTHRESOLDOPTIONS option : ERRORTHRESOLDOPTIONS.values()) {
             errorThresoldOptions.addItem(option.getValue());
         }
-        errorThresoldOptions.setId(SPUIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_OPTION_ID);
+        errorThresoldOptions.setId(UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_OPTION_ID);
         errorThresoldOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         errorThresoldOptions.addStyleName(SPUIStyleDefinitions.ROLLOUT_OPTION_GROUP);
         errorThresoldOptions.setSizeUndefined();
@@ -380,7 +380,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         targetFilter.setImmediate(true);
         targetFilter.setPageLength(7);
         targetFilter.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        targetFilter.setId(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID);
+        targetFilter.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID);
         targetFilter.setSizeUndefined();
         targetFilter.addValueChangeListener(this::onTargetFilterChange);
         return targetFilter;
@@ -530,7 +530,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
-                .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
+                .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
                 .buildTextComponent();
         descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         descriptionField.setSizeUndefined();
@@ -539,7 +539,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createErrorThreshold() {
         final TextField errorField = createIntegerTextField("prompt.error.threshold",
-                SPUIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
+                UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
         errorField.addValidator(new ThresholdFieldValidator());
         errorField.setMaxLength(7);
         return errorField;
@@ -547,14 +547,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createTriggerThreshold() {
         final TextField thresholdField = createIntegerTextField("prompt.tigger.threshold",
-                SPUIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
+                UIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
         thresholdField.addValidator(new ThresholdFieldValidator());
         return thresholdField;
     }
 
     private TextField createNoOfGroupsField() {
         final TextField noOfGroupsField = createIntegerTextField("prompt.number.of.groups",
-                SPUIComponentIdProvider.ROLLOUT_NO_OF_GROUPS_ID);
+                UIComponentIdProvider.ROLLOUT_NO_OF_GROUPS_ID);
         noOfGroupsField.addValidator(new GroupNumberValidator());
         noOfGroupsField.setMaxLength(3);
         noOfGroupsField.addValueChangeListener(this::onGroupNumberChange);
@@ -576,7 +576,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         dsSet.setImmediate(true);
         dsSet.setPageLength(7);
         dsSet.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        dsSet.setId(SPUIComponentIdProvider.ROLLOUT_DS_ID);
+        dsSet.setId(UIComponentIdProvider.ROLLOUT_DS_ID);
         dsSet.setSizeUndefined();
         return dsSet;
     }
@@ -596,7 +596,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createRolloutNameField() {
         final TextField rolloutNameField = createTextField("textfield.name",
-                SPUIComponentIdProvider.ROLLOUT_NAME_FIELD_ID);
+                UIComponentIdProvider.ROLLOUT_NAME_FIELD_ID);
         rolloutNameField.setSizeUndefined();
         return rolloutNameField;
     }

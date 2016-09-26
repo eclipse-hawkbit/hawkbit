@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -107,7 +107,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponentIdProvider.DS_EDIT_BUTTON;
+        return UIComponentIdProvider.DS_EDIT_BUTTON;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getTabSheetId() {
-        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
+        return UIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
 
     @Override
@@ -159,7 +159,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         if (type != null) {
             final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
-            typeLabel.setId(SPUIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
+            typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
@@ -185,7 +185,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
+        return UIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
 
     @Override

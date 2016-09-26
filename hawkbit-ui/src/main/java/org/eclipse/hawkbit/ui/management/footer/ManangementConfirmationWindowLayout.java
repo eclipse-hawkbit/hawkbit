@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,13 +105,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private ConfirmationTab createAssignmentTab() {
 
         assignmnetTab = new ConfirmationTab();
-        assignmnetTab.getConfirmAll().setId(SPUIComponentIdProvider.SAVE_ASSIGNMENT);
+        assignmnetTab.getConfirmAll().setId(UIComponentIdProvider.SAVE_ASSIGNMENT);
         assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
         assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
         assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
 
         assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        assignmnetTab.getDiscardAll().setId(SPUIComponentIdProvider.DISCARD_ASSIGNMENT);
+        assignmnetTab.getDiscardAll().setId(UIComponentIdProvider.DISCARD_ASSIGNMENT);
         assignmnetTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmnetTab));
 
         // Add items container to the table.
@@ -275,7 +275,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final ConfirmationTab tab = new ConfirmationTab();
 
         // TobeDone ? y to set caption every time??
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.TARGET_DELETE_ALL);
+        tab.getConfirmAll().setId(UIComponentIdProvider.TARGET_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteAllTargets(tab));
@@ -308,7 +308,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final ConfirmationTab tab = new ConfirmationTab();
 
         // TobeDone ? y to set caption every time??
-        tab.getConfirmAll().setId(SPUIComponentIdProvider.DIST_DELETE_ALL);
+        tab.getConfirmAll().setId(UIComponentIdProvider.DIST_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteAllDistributions(tab));

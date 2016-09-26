@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -158,7 +158,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private Button getCloseButton() {
-        final Button closeBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
+        final Button closeBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
                 "", "", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         closeBtn.addClickListener(event -> closePopup());
@@ -167,7 +167,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private Button getMinimizeButton() {
         final Button minimizeBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
+                UIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
                 SPUIButtonStyleSmallNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
@@ -189,14 +189,14 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         countLabel.addStyleName("bulk-upload-label");
         countLabel.setVisible(false);
         countLabel.setCaptionAsHtml(true);
-        countLabel.setId(SPUIComponentIdProvider.BULK_UPLOAD_COUNT);
+        countLabel.setId(UIComponentIdProvider.BULK_UPLOAD_COUNT);
         return countLabel;
     }
 
     private TextArea getDescriptionTextArea() {
         final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
-                .id(SPUIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
+                .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
         description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         description.setWidth("100%");
         return description;
@@ -213,7 +213,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         dsComboBox.setPageLength(7);
         dsComboBox.setContainerDataSource(container);
         dsComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME_VERSION);
-        dsComboBox.setId(SPUIComponentIdProvider.BULK_UPLOAD_DS_COMBO);
+        dsComboBox.setId(UIComponentIdProvider.BULK_UPLOAD_DS_COMBO);
         dsComboBox.setWidth("100%");
         return dsComboBox;
     }
@@ -227,7 +227,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         tokenLayout.setMargin(false);
         tokenLayout.setSizeFull();
         tokenLayout.setHeight("100px");
-        tokenLayout.setId(SPUIComponentIdProvider.BULK_UPLOAD_TAG);
+        tokenLayout.setId(UIComponentIdProvider.BULK_UPLOAD_TAG);
         return tokenLayout;
     }
 

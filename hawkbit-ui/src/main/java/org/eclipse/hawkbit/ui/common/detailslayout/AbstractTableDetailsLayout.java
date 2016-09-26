@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -251,7 +251,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
          * it as we need full description.
          */
         descLabel.removeStyleName("label-style");
-        descLabel.setId(SPUIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
+        descLabel.setId(UIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
         descriptionLayout.addComponent(descLabel);
     }
 

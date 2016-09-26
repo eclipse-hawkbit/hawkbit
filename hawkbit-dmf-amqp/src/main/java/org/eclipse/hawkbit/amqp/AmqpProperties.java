@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.amqp;
 
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -20,6 +19,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
+
+    /**
+     * Enable DMF API based on AMQP 0.9
+     */
+    private boolean enabled = true;
+
     /**
      * DMF API dead letter queue.
      */
@@ -76,17 +81,10 @@ public class AmqpProperties {
      */
     private int declarationRetries = 50;
 
-    /**
-     * @return the declarationRetries
-     */
     public int getDeclarationRetries() {
         return declarationRetries;
     }
 
-    /**
-     * @param declarationRetries
-     *            the declarationRetries to set
-     */
     public void setDeclarationRetries(final int declarationRetries) {
         this.declarationRetries = declarationRetries;
     }
@@ -123,59 +121,26 @@ public class AmqpProperties {
         this.maxConcurrentConsumers = maxConcurrentConsumers;
     }
 
-    /**
-     * Is missingQueuesFatal enabled
-     * 
-     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
-     * @return the missingQueuesFatal <true> enabled <false> disabled
-     */
     public boolean isMissingQueuesFatal() {
         return missingQueuesFatal;
     }
 
-    /**
-     * @param missingQueuesFatal
-     *            the missingQueuesFatal to set.
-     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
-     */
     public void setMissingQueuesFatal(final boolean missingQueuesFatal) {
         this.missingQueuesFatal = missingQueuesFatal;
     }
 
-    /**
-     * Returns the dead letter exchange.
-     * 
-     * @return dead letter exchange
-     */
     public String getDeadLetterExchange() {
         return deadLetterExchange;
     }
 
-    /**
-     * Sets the dead letter exchange.
-     * 
-     * @param deadLetterExchange
-     *            the deadLetterExchange to be set
-     */
     public void setDeadLetterExchange(final String deadLetterExchange) {
         this.deadLetterExchange = deadLetterExchange;
     }
 
-    /**
-     * Returns the dead letter queue.
-     * 
-     * @return the dead letter queue
-     */
     public String getDeadLetterQueue() {
         return deadLetterQueue;
     }
 
-    /**
-     * Sets the dead letter queue.
-     * 
-     * @param deadLetterQueue
-     *            the deadLetterQueue ro be set
-     */
     public void setDeadLetterQueue(final String deadLetterQueue) {
         this.deadLetterQueue = deadLetterQueue;
     }
@@ -196,4 +161,11 @@ public class AmqpProperties {
         this.receiverQueue = receiverQueue;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+    }
 }

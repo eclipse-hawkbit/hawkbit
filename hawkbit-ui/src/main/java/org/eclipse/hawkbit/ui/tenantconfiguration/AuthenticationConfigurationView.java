@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuth
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.GatewaySecurityTokenAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.TargetSecurityTokenAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -112,7 +113,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, 2);
 
         downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        downloadAnonymousCheckBox.setId("downloadanonymouscheckbox");
+        downloadAnonymousCheckBox.setId(UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX);
         downloadAnonymousCheckBox.setValue(anonymousDownloadAuthenticationConfigurationItem.isConfigEnabled());
         downloadAnonymousCheckBox.addValueChangeListener(this);
         anonymousDownloadAuthenticationConfigurationItem.addChangeListener(this);

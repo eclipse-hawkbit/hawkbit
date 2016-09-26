@@ -63,7 +63,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -218,7 +218,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @Override
     protected String getTableId() {
-        return SPUIComponentIdProvider.TARGET_TABLE_ID;
+        return UIComponentIdProvider.TARGET_TABLE_ID;
     }
 
     @Override
@@ -398,7 +398,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         pinBtn.setStyleName(pinBtnStyle.toString());
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.setId(UIComponentIdProvider.TARGET_PIN_ICON + itemId);
         pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
@@ -552,7 +552,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @Override
     protected String getDropTableId() {
-        return SPUIComponentIdProvider.DIST_TABLE_ID;
+        return UIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override

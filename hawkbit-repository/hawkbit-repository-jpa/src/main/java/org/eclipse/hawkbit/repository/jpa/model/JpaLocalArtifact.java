@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -40,10 +41,12 @@ public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifa
 
     @NotNull
     @Column(name = "gridfs_file_name", length = 40)
+    @Size(max = 40)
     private String gridFsFileName;
 
     @NotNull
     @Column(name = "provided_file_name", length = 256)
+    @Size(max = 256)
     private String filename;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })

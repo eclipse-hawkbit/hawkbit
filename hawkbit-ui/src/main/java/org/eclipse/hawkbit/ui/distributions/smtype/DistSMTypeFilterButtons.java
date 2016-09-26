@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import static org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE;
 import static org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE;
-import static org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
 import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_NAME;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -79,7 +79,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        return SPUIComponentIdProvider.SM_TYPE_FILTER_BTN_ID + name;
+        return UIComponentIdProvider.SM_TYPE_FILTER_BTN_ID + name;
     }
 
     @Override

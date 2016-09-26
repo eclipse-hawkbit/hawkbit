@@ -96,7 +96,7 @@
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
-      <mariadb-java-client.version>1.4.3</mariadb-java-client.version>
+      <mariadb-java-client.version>1.5.2</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>

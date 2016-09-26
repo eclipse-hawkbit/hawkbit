@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
@@ -26,6 +28,8 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
     private static final long serialVersionUID = 1L;
 
     @Column(name = "version", nullable = false, length = 64)
+    @Size(max = 64)
+    @NotNull
     private String version;
 
     /**

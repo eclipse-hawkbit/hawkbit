@@ -10,12 +10,14 @@ package org.eclipse.hawkbit.feign.core.client;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.support.SpringMvcContract;
 
 import feign.MethodMetadata;
+import feign.Param;
 
 /**
  * Own implementation of the {@link SpringMvcContract} which catches the
@@ -38,6 +40,10 @@ public class IgnoreMultipleConsumersProducersSpringMvcContract extends SpringMvc
             // multiple consumers and produces, see
             // https://github.com/spring-cloud/spring-cloud-netflix/issues/808
             LOGGER.trace(e.getMessage(), e);
+
+            // This line from super is mandatory to avoid that access to the
+            // expander causes a nullpointer.
+            data.indexToExpander(new LinkedHashMap<Integer, Param.Expander>());
         }
     }
 }

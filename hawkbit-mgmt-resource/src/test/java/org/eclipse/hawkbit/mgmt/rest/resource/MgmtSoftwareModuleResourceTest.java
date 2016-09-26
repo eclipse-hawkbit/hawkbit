@@ -58,6 +58,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -455,6 +456,19 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(post("/rest/v1/softwaremodules").content("sdfjsdlkjfskdjf".getBytes())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
+
+        final SoftwareModule missingName = entityFactory.generateSoftwareModule(osType, null, "version 1", null, null);
+        mvc.perform(
+                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(missingName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        final SoftwareModule toLongName = entityFactory.generateSoftwareModule(osType,
+                RandomStringUtils.randomAscii(80), "version 1", null, null);
+        mvc.perform(
+                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(modules))

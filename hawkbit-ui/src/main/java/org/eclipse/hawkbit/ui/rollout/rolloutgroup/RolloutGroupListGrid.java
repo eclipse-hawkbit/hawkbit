@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -208,7 +208,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected String getGridId() {
-        return SPUIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID;
+        return UIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID;
     }
 
     @Override
@@ -382,7 +382,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
             final StatusFontIcon statusFontIcon = statusIconMap.get(value);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                    SPUIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+                    UIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
 
         }
 

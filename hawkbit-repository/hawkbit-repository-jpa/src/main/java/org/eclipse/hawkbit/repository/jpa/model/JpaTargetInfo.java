@@ -37,6 +37,8 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
@@ -88,6 +90,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
     private JpaTarget target;
 
     @Column(name = "address", length = 512)
+    @Size(max = 512)
     private String address;
 
     @Column(name = "last_target_query")
@@ -96,8 +99,9 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
     @Column(name = "install_date")
     private Long installationDate;
 
-    @Column(name = "update_status", nullable = false, length = 255)
+    @Column(name = "update_status", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
+    @NotNull
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)

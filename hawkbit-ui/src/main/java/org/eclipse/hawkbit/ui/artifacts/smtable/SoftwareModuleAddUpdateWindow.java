@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -140,20 +140,20 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private void createRequiredComponents() {
 
-        nameTextField = createTextField("textfield.name", SPUIComponentIdProvider.SOFT_MODULE_NAME);
+        nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME);
 
-        versionTextField = createTextField("textfield.version", SPUIComponentIdProvider.SOFT_MODULE_VERSION);
+        versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION);
 
-        vendorTextField = createTextField("textfield.vendor", SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
+        vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
-                .prompt(i18n.get("textfield.description")).id(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
+                .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", null, null, true, null,
                 i18n.get("upload.swmodule.type"));
-        typeComboBox.setId(SPUIComponentIdProvider.SW_MODULE_TYPE);
+        typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);

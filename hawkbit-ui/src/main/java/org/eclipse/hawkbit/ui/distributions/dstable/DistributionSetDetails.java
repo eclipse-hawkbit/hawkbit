@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -275,7 +275,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if (type != null) {
             final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
-            typeLabel.setId(SPUIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
+            typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
@@ -296,7 +296,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponentIdProvider.DS_EDIT_BUTTON;
+        return UIComponentIdProvider.DS_EDIT_BUTTON;
     }
 
     @Override
@@ -382,12 +382,12 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getTabSheetId() {
-        return SPUIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
+        return UIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
     }
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
+        return UIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
 
     @Override

@@ -24,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
@@ -66,24 +67,28 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private RolloutGroupSuccessCondition successCondition = RolloutGroupSuccessCondition.THRESHOLD;
 
     @Column(name = "success_condition_exp", length = 512, nullable = false)
+    @Size(max = 512)
     private String successConditionExp;
 
     @Column(name = "success_action", nullable = false)
     private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
 
     @Column(name = "success_action_exp", length = 512, nullable = false)
+    @Size(max = 512)
     private String successActionExp;
 
     @Column(name = "error_condition")
     private RolloutGroupErrorCondition errorCondition;
 
     @Column(name = "error_condition_exp", length = 512)
+    @Size(max = 512)
     private String errorConditionExp;
 
     @Column(name = "error_action")
     private RolloutGroupErrorAction errorAction;
 
     @Column(name = "error_action_exp", length = 512)
+    @Size(max = 512)
     private String errorActionExp;
 
     @Column(name = "total_targets")

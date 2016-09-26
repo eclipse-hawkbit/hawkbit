@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -45,21 +44,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class AmqpMessageDispatcherService extends BaseAmqpService {
 
-    @Autowired
-    private ArtifactUrlHandler artifactUrlHandler;
-
-    @Autowired
-    private AmqpSenderService amqpSenderService;
+    private final ArtifactUrlHandler artifactUrlHandler;
+    private final AmqpSenderService amqpSenderService;
 
     /**
      * Constructor.
      * 
      * @param rabbitTemplate
      *            the rabbitTemplate
+     * @param amqpSenderService
+     *            to send AMQP message
+     * @param artifactUrlHandler
+     *            for generating download URLs
      */
-    @Autowired
-    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate) {
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
+            final ArtifactUrlHandler artifactUrlHandler) {
         super(rabbitTemplate);
+        this.artifactUrlHandler = artifactUrlHandler;
+        this.amqpSenderService = amqpSenderService;
     }
 
     /**
@@ -176,13 +178,5 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
-    }
-
-    public void setArtifactUrlHandler(final ArtifactUrlHandler artifactUrlHandler) {
-        this.artifactUrlHandler = artifactUrlHandler;
-    }
-
-    public void setAmqpSenderService(final AmqpSenderService amqpSenderService) {
-        this.amqpSenderService = amqpSenderService;
     }
 }

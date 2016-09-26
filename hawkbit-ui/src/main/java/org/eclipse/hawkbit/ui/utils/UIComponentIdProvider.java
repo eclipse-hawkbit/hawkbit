@@ -10,13 +10,8 @@ package org.eclipse.hawkbit.ui.utils;
 
 /**
  * Interface to provide the unchanged constants.
- *
- *
- *
- *
- *
  */
-public final class SPUIComponentIdProvider {
+public final class UIComponentIdProvider {
     /**
      * ID-Target.
      */
@@ -48,12 +43,17 @@ public final class SPUIComponentIdProvider {
     /**
      * ID-Targ.PIN.
      */
-    public static final String TARGET_PIN_ICON = "target.pin.icon";
+    public static final String TARGET_PIN_ICON = "target.pin.icon.";
 
     /**
      * Target search text id.
      */
     public static final String TARGET_TEXT_FIELD = "target.search.textfield";
+
+    /**
+     * ID for target filter search
+     */
+    public static final String TARGET_FILTER_SEARCH_TEXT = "target.filter.search.text.Id";
 
     /**
      * ID for add target filter icon
@@ -108,6 +108,11 @@ public final class SPUIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
+
+    /**
+     * ID for distribution set tag icon
+     */
+    public static final String SHOW_DIST_TAG_ICON = "show.dist.tags.icon";
     /**
      * ID - soft.module.name.
      */
@@ -212,6 +217,11 @@ public final class SPUIComponentIdProvider {
      * Action history table force quit Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
+
+    /**
+     * ID for option group save timeforced
+     */
+    public static final String ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED = "save.action.radio.timeforced";
 
     /**
      * Target filter wrapper id.
@@ -591,9 +601,19 @@ public final class SPUIComponentIdProvider {
     public static final String CUSTOM_TARGET_TAG_TABLE_ID = "custom.target.tag.tableId";
 
     /**
+     * ID for closing custom filter
+     */
+    public static final String CUSTOM_FILTER_CLOSE = "create.custom.filter.close.Id";
+
+    /**
+     * ID for custom filter query text
+     */
+    public static final String CUSTOM_FILTER_QUERY = "custom.query.text.Id";
+
+    /**
      * Target filter table id.
      */
-    public static final String TAEGET_FILTER_TABLE_ID = "target.query.filter.table.Id";
+    public static final String TARGET_FILTER_TABLE_ID = "target.query.filter.table.Id";
 
     /**
      * create or update target filter query - name label id.
@@ -745,6 +765,11 @@ public final class SPUIComponentIdProvider {
     public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
 
     /**
+     * ID for rollout progress bar
+     */
+    public static final String ROLLOUT_PROGRESS_BAR = "rollout.status.progress.bar.id";
+
+    /**
      * Action confirmation popup id.
      */
     public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
@@ -795,6 +820,16 @@ public final class SPUIComponentIdProvider {
     public static final String METADATA_VALUE_ID = "metadata.value.id";
 
     /**
+     * Metadata save id.
+     */
+    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
+
+    /**
+     * Metadata discard id.
+     */
+    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
+
+    /**
      * Metadata add icon id.
      */
     public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
@@ -834,9 +869,18 @@ public final class SPUIComponentIdProvider {
     public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
 
     /**
+     * Table multiselect for selecting DistType
+     */
+    public static final String SELECT_DIST_TYPE = "select-dist-type";
+    /**
+     * ID for download anonymous checkbox
+     */
+    public static final String DOWNLOAD_ANONYMOUS_CHECKBOX = "downloadanonymouscheckbox";
+
+    /**
      * /* Private Constructor.
      */
-    private SPUIComponentIdProvider() {
+    private UIComponentIdProvider() {
 
     }
 }

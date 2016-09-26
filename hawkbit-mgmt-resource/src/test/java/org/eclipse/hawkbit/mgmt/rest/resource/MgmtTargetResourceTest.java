@@ -32,10 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -667,6 +669,48 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .convertException(mvcResult.getResponse().getContentAsString());
         assertThat(exceptionInfo.getExceptionClass()).isEqualTo(MessageNotReadableException.class.getName());
         assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REST_BODY_NOT_READABLE.getKey());
+    }
+
+    @Test
+    @Description("Verfies that a mandatory properties of new targets are validated as not null.")
+    public void createTargetWithMissingMandatoryPropertyBadRequest() throws Exception {
+        final Target test1 = entityFactory.generateTarget("id1", "token");
+        test1.setName(null);
+
+        final MvcResult mvcResult = mvc
+                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
+                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+
+        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+
+        // verify response json exception message
+        final ExceptionInfo exceptionInfo = ResourceUtility
+                .convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getExceptionClass()).isEqualTo(ConstraintViolationException.class.getName());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
+    }
+
+    @Test
+    @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
+    public void createTargetWithInvalidPropertyBadRequest() throws Exception {
+        final Target test1 = entityFactory.generateTarget("id1", "token");
+        test1.setName(RandomStringUtils.randomAscii(80));
+
+        final MvcResult mvcResult = mvc
+                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
+                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+
+        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+
+        // verify response json exception message
+        final ExceptionInfo exceptionInfo = ResourceUtility
+                .convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getExceptionClass()).isEqualTo(ConstraintViolationException.class.getName());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
     }
 
     @Test

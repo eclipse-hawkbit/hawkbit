@@ -33,6 +33,7 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.BasePropertyChangeEvent.PropertyChange;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
@@ -109,6 +110,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
+    @NotNull
     private DistributionSetType type;
 
     @Column(name = "complete")

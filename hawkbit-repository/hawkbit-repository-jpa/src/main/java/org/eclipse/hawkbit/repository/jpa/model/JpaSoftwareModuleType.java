@@ -14,6 +14,8 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
@@ -34,6 +36,8 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     private static final long serialVersionUID = 1L;
 
     @Column(name = "type_key", nullable = false, length = 64)
+    @Size(max = 64)
+    @NotNull
     private String key;
 
     @Column(name = "max_ds_assignments", nullable = false)
@@ -41,6 +45,7 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     private int maxAssignments;
 
     @Column(name = "colour", nullable = true, length = 16)
+    @Size(max = 16)
     private String colour;
 
     @Column(name = "deleted")

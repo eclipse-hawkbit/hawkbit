@@ -28,6 +28,8 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -58,6 +60,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @ManyToOne
     @JoinColumn(name = "module_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @NotNull
     private JpaSoftwareModuleType type;
 
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
@@ -67,6 +70,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean deleted;
 
     @Column(name = "vendor", nullable = true, length = 256)
+    @Size(max = 256)
     private String vendor;
 
     @OneToMany(mappedBy = "softwareModule", cascade = { CascadeType.ALL }, targetEntity = JpaLocalArtifact.class)
