@@ -38,8 +38,11 @@ public class MgmtSystemTenantConfigurationValueRequest {
      * 
      * @param value
      */
-    public void setValue(final Serializable value) {
-        this.value = value;
+    public void setValue(final Object value) {
+        if (!(value instanceof Serializable)) {
+            throw new IllegalArgumentException("The value muste be a instance of " + Serializable.class.getName());
+        }
+        this.value = (Serializable) value;
     }
 
 }
