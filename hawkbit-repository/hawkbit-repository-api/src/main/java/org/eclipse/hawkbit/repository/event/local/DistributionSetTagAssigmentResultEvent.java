@@ -9,12 +9,16 @@
 package org.eclipse.hawkbit.repository.event.local;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
+import org.springframework.data.annotation.Transient;
 
 /**
- * A event for assignment target tag.
+ * An event for assignment target tag.
  */
 public class DistributionSetTagAssigmentResultEvent extends DefaultEvent {
 
+    private static final long serialVersionUID = 1L;
+
+    @Transient
     private final DistributionSetTagAssignmentResult assigmentResult;
 
     /**
