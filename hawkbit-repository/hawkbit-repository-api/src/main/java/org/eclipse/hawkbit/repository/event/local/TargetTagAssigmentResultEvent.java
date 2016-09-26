@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.event.local;
 
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.springframework.data.annotation.Transient;
 
 /**
  * An event for assignment target tag.
@@ -18,8 +17,7 @@ public class TargetTagAssigmentResultEvent extends DefaultEvent {
 
     private static final long serialVersionUID = 1L;
 
-    @Transient
-    private final TargetTagAssignmentResult assigmentResult;
+    private final transient TargetTagAssignmentResult assigmentResult;
 
     /**
      * Constructor.
