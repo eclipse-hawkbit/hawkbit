@@ -12,8 +12,6 @@ package org.eclipse.hawkbit.repository.event.local;
  * Event declaration for the UI to notify the UI that a rollout has been
  * changed.
  * 
- * @author Michael Hirsch
- *
  */
 public class RolloutChangeEvent extends DefaultEvent {
 

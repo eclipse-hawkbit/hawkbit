@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
  */
 public class DistributionSetTagAssigmentResultEvent extends DefaultEvent {
 
+    private static final long serialVersionUID = 1L;
+
     private final DistributionSetTagAssignmentResult assigmentResult;
 
     /**
