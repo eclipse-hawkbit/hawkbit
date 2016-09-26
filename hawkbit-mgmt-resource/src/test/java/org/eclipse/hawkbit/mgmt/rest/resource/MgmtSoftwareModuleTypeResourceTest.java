@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -319,8 +318,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
                 entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
-        final List<SoftwareModuleType> types = new ArrayList<>();
-        types.add(testType);
+        final List<SoftwareModuleType> types = Lists.newArrayList(testType);
 
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremoduletypes/12345678")).andDo(MockMvcResultPrinter.print())
@@ -338,9 +336,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModuleType missingName = new JpaSoftwareModuleType("test123", null, "Desc123", 5);
         mvc.perform(post("/rest/v1/softwaremoduletypes")
-                .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(missingName)))
+                .content(
+                        "[{\"description\":\"Desc123\",\"id\":9223372036854775807,\"key\":\"test123\",\"maxAssignments\":5}]")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
