@@ -52,6 +52,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -110,6 +111,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private Button saveButton;
 
     private Link helpLink;
+
+    private Button searchIcon;
 
     private String oldFilterName;
 
@@ -195,6 +198,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         nameTextField.setWidth(380, Unit.PIXELS);
 
         saveButton = createSaveButton();
+        searchIcon = createSearchIcon();
 
         helpLink = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getTargetfilterView());
 
@@ -292,7 +296,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.setSizeUndefined();
         iconLayout.setSpacing(false);
-        iconLayout.addComponents(helpLink, saveButton);
+        iconLayout.addComponents(helpLink, searchIcon, saveButton);
 
         final HorizontalLayout queryLayout = new HorizontalLayout();
         queryLayout.setSizeUndefined();
@@ -324,10 +328,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         if (validationFailed || (isNameAndQueryEmpty(nameTextField.getValue(), query)
                 || (query.equals(oldFilterQuery) && nameTextField.getValue().equals(oldFilterName)))) {
             saveButton.setEnabled(false);
+            searchIcon.setEnabled(false);
         } else {
             if (hasSavePermission()) {
                 saveButton.setEnabled(true);
             }
+            searchIcon.setEnabled(true);
         }
     }
 
@@ -361,6 +367,22 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         saveButton.addClickListener(this);
         saveButton.setEnabled(false);
         return saveButton;
+    }
+
+    private Button createSearchIcon() {
+        searchIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.FILTER_SEARCH_ICON_ID, "", "", null, false,
+                FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+        searchIcon.addClickListener(event -> onSearchIconClick());
+        searchIcon.setEnabled(false);
+        searchIcon.setData(false);
+        return searchIcon;
+    }
+
+    private void onSearchIconClick() {
+        if (!queryTextField.isValidationError()) {
+            queryTextField.showValidationInProgress();
+            queryTextField.getExecutor().execute(queryTextField.new StatusCircledAsync(UI.getCurrent()));
+        }
     }
 
     @Override
