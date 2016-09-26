@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An base definition class for {@link EntityEvent} for some object.
+ * A base definition class for {@link EntityEvent} for some object.
  *
  * @param <E>
  *            the type of the entity

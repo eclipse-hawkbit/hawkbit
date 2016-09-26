@@ -15,8 +15,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An distributed tenant aware event. It's the base class of the other
- * distributed events. all the necessary information of distributing events to
+ * A distributed tenant aware event. It's the base class of the other
+ * distributed events. All the necessary information of distributing events to
  * other nodes.
  *
  */
@@ -51,7 +51,7 @@ public class TenantAwareDistributedEvent extends RemoteApplicationEvent implemen
      *            the applicationId
      */
     public TenantAwareDistributedEvent(final Object source, final String tenant, final String applicationId) {
-        super(source, applicationId, null);
+        super(source, applicationId, "**");
         this.tenant = tenant;
     }
 
