@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.SessionScope;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
 import org.vaadin.spring.events.annotation.EnableEventBus;
@@ -53,7 +54,9 @@ public class UIAutoConfiguration {
     }
 
     /**
-     * A event provider bean which hold the supported events for the UI.
+     * The session scoped event push strategy. Session scope is necessary, that
+     * every UI has a own strategy. The bean is no proxy, because this bean is
+     * bounded to the vaadin session.
      * 
      * @param applicationContext
      *            the context to add the listener
@@ -62,7 +65,7 @@ public class UIAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @SessionScope
+    @SessionScope(proxyMode = ScopedProxyMode.NO)
     public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy();
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);

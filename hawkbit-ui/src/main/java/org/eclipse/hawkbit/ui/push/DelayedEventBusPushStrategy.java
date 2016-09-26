@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -60,9 +59,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
     private static final int BLOCK_SIZE = 10_000;
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.Event> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
+
+    @Autowired
+    private ScheduledExecutorService executorService;
 
     @Autowired
     private EventBus.SessionEventBus eventBus;
@@ -87,7 +88,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     public void clean() {
         LOG.debug("Cleanup resources");
         jobHandle.cancel(true);
-        executorService.shutdownNow();
         queue.clear();
     }
 
