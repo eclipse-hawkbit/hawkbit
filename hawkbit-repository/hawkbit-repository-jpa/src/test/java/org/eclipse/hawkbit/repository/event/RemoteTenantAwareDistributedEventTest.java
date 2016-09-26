@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
@@ -93,9 +94,14 @@ public class RemoteTenantAwareDistributedEventTest extends AbstractJpaIntegratio
     public void reloadRolloutGroupCreatedEventByRemoteEvent() throws JsonProcessingException {
 
         targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        final DistributionSet ds = distributionSetManagement
+                .createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2", "incomplete",
+                        distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+
         final Rollout rollout = entityFactory.generateRollout();
         rollout.setName("exampleRollout");
         rollout.setTargetFilterQuery("controllerId==*");
+        rollout.setDistributionSet(ds);
 
         final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
                 new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")

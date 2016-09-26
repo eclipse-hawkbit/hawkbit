@@ -173,6 +173,9 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
 
         final JpaAction generateAction = (JpaAction) entityFactory.generateAction();
         generateAction.setActionType(ActionType.FORCED);
+        final Target generateTarget = entityFactory.generateTarget("Test");
+        final Target target = targetManagement.createTarget(generateTarget);
+        generateAction.setTarget(target);
         final Action entity = actionRepository.save(generateAction);
 
         final ActionCreatedEvent createdEvent = new ActionCreatedEvent(entity, "Node");
@@ -201,9 +204,14 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
     public void reloadRolloutByRemoteEvent() throws JsonProcessingException {
 
         targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        final DistributionSet ds = distributionSetManagement
+                .createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2", "incomplete",
+                        distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+
         final Rollout rollout = entityFactory.generateRollout();
         rollout.setName("exampleRollout");
         rollout.setTargetFilterQuery("controllerId==*");
+        rollout.setDistributionSet(ds);
 
         final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
                 new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")
