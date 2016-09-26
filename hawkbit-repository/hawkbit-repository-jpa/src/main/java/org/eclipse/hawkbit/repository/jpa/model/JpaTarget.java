@@ -173,6 +173,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
+    @Override
     public boolean addTag(final TargetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -181,6 +182,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return tags.add(tag);
     }
 
+    @Override
     public boolean removeTag(final TargetTag tag) {
         if (tags == null) {
             return false;
