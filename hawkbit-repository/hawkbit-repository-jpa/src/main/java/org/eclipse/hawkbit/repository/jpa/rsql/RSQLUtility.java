@@ -196,8 +196,8 @@ public final class RSQLUtility {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
-            this.substitutor = (virtualPropertyLookup != null)
-                    ? new StrSubstitutor(new StrLookupAdapter(virtualPropertyLookup), StrSubstitutor.DEFAULT_PREFIX,
+            this.substitutor = (virtualPropertyLookup != null && virtualPropertyLookup instanceof StrLookup)
+                    ? new StrSubstitutor((StrLookup)virtualPropertyLookup, StrSubstitutor.DEFAULT_PREFIX,
                             StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE)
                     : null;
             simpleTypeConverter = new SimpleTypeConverter();
@@ -592,27 +592,4 @@ public final class RSQLUtility {
 
     }
 
-    /**
-     * Adapts the <code>VirtualPropertyLookup</code> to <code>StrLookup</code>.
-     */
-    static final class StrLookupAdapter extends StrLookup<String> {
-
-        private VirtualPropertyLookup virtualPropertyLookup;
-
-        /**
-         * Constructor.
-         *
-         * @param virtualPropertyLookup
-         *            the lookup to adapt.
-         */
-        StrLookupAdapter(VirtualPropertyLookup virtualPropertyLookup) {
-            this.virtualPropertyLookup = virtualPropertyLookup;
-        }
-
-        @Override
-        public String lookup(String key) {
-            return virtualPropertyLookup.lookup(key);
-        }
-
-    }
 }

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.time.Instant;
 
+import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import org.springframework.stereotype.Component;
  * </ul>
  */
 @Component
-public class VirtualPropertyResolver implements VirtualPropertyLookup {
+public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyLookup {
 
     @Autowired
     private TimestampCalculator timestampCalculator;

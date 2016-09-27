@@ -64,7 +64,7 @@ public class VirtualPropertyResolverTest {
             }
         });
 
-        this.substitutor = new StrSubstitutor(new RSQLUtility.StrLookupAdapter(resolverUnderTest),
+        this.substitutor = new StrSubstitutor(resolverUnderTest,
                 StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
      }
