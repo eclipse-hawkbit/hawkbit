@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ public class ArtifactUrlHandlerProperties {
      *
      */
     public static class UrlProtocol {
+
+        private static final int DEFAULT_HTTP_PORT = 8080;
 
         /**
          * Set to true if enabled.
@@ -77,12 +80,12 @@ public class ArtifactUrlHandlerProperties {
         /**
          * Port placeholder that can be used in ref pattern.
          */
-        private Integer port = 8080;
+        private Integer port = DEFAULT_HTTP_PORT;
 
         /**
          * Support for the following hawkBit API.
          */
-        private List<APIType> supports = Lists.newArrayList(APIType.DDI, APIType.DMF);
+        private List<ApiType> supports = Lists.newArrayList(ApiType.DDI, ApiType.DMF);
 
         public boolean isEnabled() {
             return enabled;
@@ -132,12 +135,12 @@ public class ArtifactUrlHandlerProperties {
             this.port = port;
         }
 
-        public List<APIType> getSupports() {
-            return supports;
+        public List<ApiType> getSupports() {
+            return Collections.unmodifiableList(supports);
         }
 
-        public void setSupports(final List<APIType> supports) {
-            this.supports = supports;
+        public void setSupports(final List<ApiType> supports) {
+            this.supports = Collections.unmodifiableList(supports);
         }
 
         public String getProtocol() {

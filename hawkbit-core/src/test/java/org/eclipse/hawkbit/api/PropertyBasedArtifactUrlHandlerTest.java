@@ -69,13 +69,13 @@ public class PropertyBasedArtifactUrlHandlerTest {
     public void urlGenerationWithDefaultConfiguration() {
         properties.getProtocols().put("download-http", new UrlProtocol());
 
-        final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, APIType.DDI);
+        final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI);
         assertEquals(
                 Lists.newArrayList(new ArtifactUrl("http", "download-http", HTTP_LOCALHOST + TENANT + "/controller/v1/"
                         + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
                 ddiUrls);
 
-        final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, APIType.DMF);
+        final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
         assertEquals(ddiUrls, dmfUrls);
     }
 
@@ -87,14 +87,14 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Lists.newArrayList(APIType.DMF));
+        proto.setSupports(Lists.newArrayList(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fw/{tenant}/{controllerId}/sha1/{artifactSHA1}");
         properties.getProtocols().put(TEST_PROTO, proto);
 
-        List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, APIType.DDI);
+        List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI);
 
         assertThat(urls).isEmpty();
-        urls = urlHandlerUnderTest.getUrls(placeholder, APIType.DMF);
+        urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
         assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO, TEST_REL,
                 "coap://127.0.0.1:5683/fw/" + TENANT + "/" + CONTROLLER_ID + "/sha1/" + SHA1HASH)), urls);
@@ -108,14 +108,14 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Lists.newArrayList(APIType.DMF));
+        proto.setSupports(Lists.newArrayList(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
         properties.getProtocols().put("ftp", proto);
 
-        List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, APIType.DDI);
+        List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI);
 
         assertThat(urls).isEmpty();
-        urls = urlHandlerUnderTest.getUrls(placeholder, APIType.DMF);
+        urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
         assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO, TEST_REL,
                 TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE10)),

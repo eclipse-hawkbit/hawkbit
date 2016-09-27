@@ -82,6 +82,20 @@ public class TenantSecurityToken {
         this(tenant, null, controllerId, null, fileResource);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param tenantId
+     *            the tenant for the security token
+     * @param targetId
+     *            target identification by technical ID
+     * @param fileResource
+     *            the file to obtain
+     */
+    public TenantSecurityToken(final Long tenantId, final Long targetId, final FileResource fileResource) {
+        this(null, tenantId, null, targetId, fileResource);
+    }
+
     public void setTenant(final String tenant) {
         this.tenant = tenant;
     }

@@ -29,5 +29,5 @@ public interface ArtifactUrlHandler {
      * 
      * @return an URL for the given artifact parameters in a given protocol
      */
-    List<ArtifactUrl> getUrls(URLPlaceholder placeholder, APIType api);
+    List<ArtifactUrl> getUrls(URLPlaceholder placeholder, ApiType api);
 }

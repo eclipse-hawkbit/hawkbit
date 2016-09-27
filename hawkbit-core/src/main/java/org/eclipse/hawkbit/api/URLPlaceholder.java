@@ -19,6 +19,21 @@ public class URLPlaceholder {
     private final Long targetId;
     private final SoftwareData softwareData;
 
+    /**
+     * Constructor.
+     * 
+     * @param tenant
+     *            of the client
+     * @param tenantId
+     *            of teh tenant
+     * @param controllerId
+     *            of the target
+     * @param targetId
+     *            of the target
+     * @param softwareData
+     *            information about the artifact and software module that can be
+     *            accessed by the URL.
+     */
     public URLPlaceholder(final String tenant, final Long tenantId, final String controllerId, final Long targetId,
             final SoftwareData softwareData) {
         this.tenant = tenant;
@@ -28,12 +43,29 @@ public class URLPlaceholder {
         this.softwareData = softwareData;
     }
 
+    /**
+     * Information about the artifact and software module that can be accessed
+     * by the URL.
+     *
+     */
     public static class SoftwareData {
         private Long softwareModuleId;
         private String filename;
         private Long artifactId;
         private String sha1Hash;
 
+        /**
+         * Constructor.
+         * 
+         * @param softwareModuleId
+         *            of the module the artifact belongs to
+         * @param filename
+         *            of the artifact
+         * @param artifactId
+         *            of the artifact
+         * @param sha1Hash
+         *            of the artifact
+         */
         public SoftwareData(final Long softwareModuleId, final String filename, final Long artifactId,
                 final String sha1Hash) {
             this.softwareModuleId = softwareModuleId;
@@ -93,7 +125,7 @@ public class URLPlaceholder {
             if (obj == null) {
                 return false;
             }
-            if (!(obj instanceof SoftwareData)) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
             final SoftwareData other = (SoftwareData) obj;
@@ -170,7 +202,7 @@ public class URLPlaceholder {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof URLPlaceholder)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final URLPlaceholder other = (URLPlaceholder) obj;

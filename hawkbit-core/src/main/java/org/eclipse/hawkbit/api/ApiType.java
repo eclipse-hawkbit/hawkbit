@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.api;
  * hawkBit API type.
  *
  */
-public enum APIType {
+public enum ApiType {
 
     /**
      * Support for Device Management Federation API.

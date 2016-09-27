@@ -67,7 +67,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     }
 
     @Override
-    public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final APIType api) {
+    public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api) {
 
         return urlHandlerProperties.getProtocols().entrySet().stream()
                 .filter(entry -> entry.getValue().getSupports().contains(api))

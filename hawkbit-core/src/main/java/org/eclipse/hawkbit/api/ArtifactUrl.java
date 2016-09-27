@@ -18,6 +18,16 @@ public class ArtifactUrl {
     private final String rel;
     private final String ref;
 
+    /**
+     * Constructor.
+     * 
+     * @param protocol
+     *            string, e.g. ftp, http, https
+     * @param rel
+     *            hypermedia value
+     * @param ref
+     *            hypermedia value
+     */
     public ArtifactUrl(final String protocol, final String rel, final String ref) {
         this.protocol = protocol;
         this.rel = rel;
@@ -63,7 +73,7 @@ public class ArtifactUrl {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof ArtifactUrl)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final ArtifactUrl other = (ArtifactUrl) obj;
