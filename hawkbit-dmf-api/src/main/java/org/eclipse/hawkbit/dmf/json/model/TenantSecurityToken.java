@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -37,7 +38,7 @@ public class TenantSecurityToken {
     private final Long targetId;
 
     @JsonProperty(required = false)
-    private Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, String> headers;
 
     @JsonProperty(required = false)
     private final FileResource fileResource;
@@ -109,7 +110,11 @@ public class TenantSecurityToken {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        if (headers == null) {
+            return Collections.emptyMap();
+        }
+
+        return Collections.unmodifiableMap(headers);
     }
 
     public FileResource getFileResource() {
@@ -132,12 +137,34 @@ public class TenantSecurityToken {
      * @return the value
      */
     public String getHeader(final String name) {
+        if (headers == null) {
+            return null;
+        }
+
         return headers.get(name);
     }
 
     public void setHeaders(final Map<String, String> headers) {
         this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.headers.putAll(headers);
+    }
+
+    /**
+     * Associates the specified header value with the specified name.
+     * 
+     * @param name
+     *            of the header
+     * @param value
+     *            of the header
+     * 
+     * @return the previous value associated with the <tt>name</tt>, or
+     *         <tt>null</tt> if there was no mapping for <tt>name</tt>.
+     */
+    public String putHeader(final String name, final String value) {
+        if (headers == null) {
+            headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        }
+        return headers.put(name, value);
     }
 
     /**

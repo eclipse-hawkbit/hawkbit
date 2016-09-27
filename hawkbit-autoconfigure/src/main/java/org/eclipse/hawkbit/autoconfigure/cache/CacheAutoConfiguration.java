@@ -82,8 +82,7 @@ public class CacheAutoConfiguration extends CachingConfigurerSupport {
          */
         @Override
         public Collection<Cache> resolveCaches(final CacheOperationInvocationContext<?> context) {
-            return super.resolveCaches(context).stream().map(cache -> new TenantCacheWrapper(cache))
-                    .collect(Collectors.toList());
+            return super.resolveCaches(context).stream().map(TenantCacheWrapper::new).collect(Collectors.toList());
         }
 
         /*

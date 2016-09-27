@@ -227,7 +227,7 @@ public class ArtifactStore implements ArtifactRepository {
      * @return a paged list of artifacts mapped from the given dbFiles
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
-        return dbFiles.stream().map(this::map).collect(Collectors.toList());
+        return dbFiles.stream().map(ArtifactStore::map).collect(Collectors.toList());
     }
 
     /**
@@ -263,7 +263,7 @@ public class ArtifactStore implements ArtifactRepository {
      *            the mongoDB gridFs file.
      * @return a mapped artifact from the given dbFile
      */
-    private GridFsArtifact map(final GridFSFile fsFile) {
+    private static GridFsArtifact map(final GridFSFile fsFile) {
         if (fsFile == null) {
             return null;
         }

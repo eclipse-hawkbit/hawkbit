@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import com.google.common.collect.Lists;
+
 /**
  *
  * A controller which handles the DMF AMQP authentication.
@@ -43,7 +44,7 @@ public class AmqpControllerAuthentication {
 
     private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider = new PreAuthTokenSourceTrustAuthenticationProvider();
 
-    private final List<PreAuthentificationFilter> filterChain = new ArrayList<>();
+    private List<PreAuthentificationFilter> filterChain;
 
     private final ControllerManagement controllerManagement;
 
@@ -91,6 +92,8 @@ public class AmqpControllerAuthentication {
     }
 
     private void addFilter() {
+        filterChain = Lists.newArrayListWithExpectedSize(5);
+
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(gatewaySecurityTokenFilter);

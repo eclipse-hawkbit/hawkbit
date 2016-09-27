@@ -8,7 +8,8 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -30,7 +31,7 @@ public class DownloadAndUpdateRequest {
     private String targetSecurityToken;
 
     @JsonProperty
-    private final List<SoftwareModule> softwareModules = new LinkedList<>();
+    private List<SoftwareModule> softwareModules;
 
     public Long getActionId() {
         return actionId;
@@ -49,7 +50,11 @@ public class DownloadAndUpdateRequest {
     }
 
     public List<SoftwareModule> getSoftwareModules() {
-        return softwareModules;
+        if (softwareModules == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(softwareModules);
     }
 
     /**
@@ -59,6 +64,10 @@ public class DownloadAndUpdateRequest {
      *            the module
      */
     public void addSoftwareModule(final SoftwareModule createSoftwareModule) {
+        if (softwareModules == null) {
+            softwareModules = new ArrayList<>();
+        }
+
         softwareModules.add(createSoftwareModule);
 
     }

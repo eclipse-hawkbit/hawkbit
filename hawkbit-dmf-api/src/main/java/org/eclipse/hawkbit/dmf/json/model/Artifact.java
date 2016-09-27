@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,10 +35,14 @@ public class Artifact {
     private Long size;
 
     @JsonProperty
-    private Map<String, String> urls = new HashMap<>();
+    private Map<String, String> urls;
 
     public Map<String, String> getUrls() {
-        return urls;
+        if (urls == null) {
+            return Collections.emptyMap();
+        }
+
+        return Collections.unmodifiableMap(urls);
     }
 
     public void setUrls(final Map<String, String> urls) {

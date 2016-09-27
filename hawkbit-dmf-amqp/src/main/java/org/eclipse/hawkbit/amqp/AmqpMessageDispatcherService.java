@@ -100,7 +100,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
 
         final String targetSecurityToken = systemSecurityContext
-                .runAsSystem(() -> targetAssignDistributionSetEvent.getTarget().getSecurityToken());
+                .runAsSystem(targetAssignDistributionSetEvent.getTarget()::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {

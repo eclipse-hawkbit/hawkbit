@@ -200,7 +200,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted due to wrong credential");
@@ -218,7 +218,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Authentication authentication = authenticationManager.doAuthenticate(securityToken);
         assertThat(authentication).isNotNull();
     }
@@ -251,7 +251,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -273,7 +273,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -301,7 +301,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -329,7 +329,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
+        securityToken.putHeader(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 

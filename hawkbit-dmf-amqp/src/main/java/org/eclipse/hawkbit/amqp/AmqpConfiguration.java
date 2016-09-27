@@ -55,7 +55,7 @@ import org.springframework.util.ErrorHandler;
 import com.google.common.collect.Maps;
 
 /**
- * Spring configuration for AMQP 0.9 based DMF communication for indirect device
+ * Spring configuration for AMQP based DMF communication for indirect device
  * integration.
  *
  */

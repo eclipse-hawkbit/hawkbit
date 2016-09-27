@@ -50,11 +50,21 @@ public class SoftwareModuleTypeBuilder {
         return this;
     }
 
+    /**
+     * @param description
+     *            of the module
+     * @return the builder itself
+     */
     public SoftwareModuleTypeBuilder description(final String description) {
         this.description = description;
         return this;
     }
 
+    /**
+     * @param maxAssignments
+     *            of a module of that type to the same distribution set
+     * @return the builder itself
+     */
     public SoftwareModuleTypeBuilder maxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
         return this;

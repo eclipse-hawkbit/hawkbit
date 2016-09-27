@@ -171,7 +171,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         final TenantSecurityToken secruityToken = new TenantSecurityToken(tenant, null, controllerId, null,
                 FileResource.createFileResourceBySha1(""));
         final UnmodifiableIterator<String> forEnumeration = Iterators.forEnumeration(request.getHeaderNames());
-        forEnumeration.forEachRemaining(header -> secruityToken.getHeaders().put(header, request.getHeader(header)));
+        forEnumeration.forEachRemaining(header -> secruityToken.putHeader(header, request.getHeader(header)));
         return secruityToken;
     }
 
