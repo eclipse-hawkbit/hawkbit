@@ -158,6 +158,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return Collections.unmodifiableSet(tags);
     }
 
+    @Override
     public boolean addTag(final DistributionSetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -166,6 +167,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return tags.add(tag);
     }
 
+    @Override
     public boolean removeTag(final DistributionSetTag tag) {
         if (tags == null) {
             return false;
