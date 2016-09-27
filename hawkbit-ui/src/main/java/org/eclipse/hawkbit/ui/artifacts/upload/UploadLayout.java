@@ -34,10 +34,10 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.util.SPInfo;
 import org.slf4j.Logger;
@@ -254,6 +254,11 @@ public class UploadLayout extends VerticalLayout {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 // selected software module at the time of file drop is
                 // considered for upload
+
+                if (!artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
+                    return;
+                }
+
                 final SoftwareModule selectedSw = artifactUploadState.getSelectedBaseSoftwareModule().get();
                 // reset the flag
                 hasDirectory = Boolean.FALSE;

@@ -107,10 +107,15 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     @ResponseBody
+    // Exception squid:S3655 - Optional access is checked in
+    // findSoftwareModuleWithExceptionIfNotFound
+    // subroutine
+    @SuppressWarnings("squid:S3655")
     public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
+
         return ResponseEntity.ok(toResponse(module.getLocalArtifact(artifactId).get()));
     }
 

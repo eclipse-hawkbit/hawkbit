@@ -173,9 +173,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateDistributionPermission() && distributionSetManagement
-                .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
-                .getAssignedTargets().isEmpty()) {
+        if (getPermissionChecker().hasUpdateDistributionPermission()
+                && manageDistUIState.getLastSelectedDistribution().isPresent()
+                && distributionSetManagement
+                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
+                        .getAssignedTargets().isEmpty()) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);

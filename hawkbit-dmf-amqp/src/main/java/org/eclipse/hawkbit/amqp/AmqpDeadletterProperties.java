@@ -22,12 +22,13 @@ import com.google.common.collect.Maps;
  */
 @ConfigurationProperties("hawkbit.dmf.rabbitmq.deadLetter")
 public class AmqpDeadletterProperties {
+    private static final int THREE_WEEKS = 21;
 
     /**
      * Message time to live (ttl) for the deadletter queue. Default ttl is 3
      * weeks.
      */
-    private long ttl = Duration.ofDays(21).toMillis();
+    private long ttl = Duration.ofDays(THREE_WEEKS).toMillis();
 
     /**
      * Return the deadletter arguments.

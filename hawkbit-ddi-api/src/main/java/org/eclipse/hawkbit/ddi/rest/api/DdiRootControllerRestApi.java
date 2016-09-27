@@ -37,7 +37,9 @@ public interface DdiRootControllerRestApi {
 
     /**
      * Returns all artifacts of a given software module and target.
-     *
+     * 
+     * @param tenant
+     *            of the request
      * @param targetid
      *            of the target that matches to controller id
      * @param softwareModuleId
@@ -53,6 +55,8 @@ public interface DdiRootControllerRestApi {
     /**
      * Root resource for an individual {@link Target}.
      *
+     * @param tenant
+     *            of the request
      * @param targetid
      *            of the target that matches to controller id
      * @param request
@@ -68,6 +72,8 @@ public interface DdiRootControllerRestApi {
      * Handles GET {@link DdiArtifact} download request. This could be full or
      * partial (as specified by RFC7233 (Range Requests)) download request.
      *
+     * @param tenant
+     *            of the request
      * @param targetid
      *            of the related target
      * @param softwareModuleId
@@ -92,6 +98,8 @@ public interface DdiRootControllerRestApi {
     /**
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
      *
+     * @param tenant
+     *            of the request
      * @param targetid
      *            of the related target
      * @param softwareModuleId
@@ -116,6 +124,8 @@ public interface DdiRootControllerRestApi {
     /**
      * Resource for software module.
      *
+     * @param tenant
+     *            of the request
      * @param targetid
      *            of the target that matches to controller id
      * @param actionId
@@ -139,6 +149,8 @@ public interface DdiRootControllerRestApi {
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.
      *
+     * @param tenant
+     *            of the request
      * @param feedback
      *            to provide
      * @param targetid
@@ -159,6 +171,8 @@ public interface DdiRootControllerRestApi {
     /**
      * This is the feedback channel for the config data action.
      *
+     * @param tenant
+     *            of the request
      * @param configData
      *            as body
      * @param targetid
@@ -176,6 +190,8 @@ public interface DdiRootControllerRestApi {
     /**
      * RequestMethod.GET method for the {@link DdiCancel} action.
      *
+     * @param tenant
+     *            of the request
      * @param targetid
      *            ID of the calling target
      * @param actionId
@@ -195,6 +211,8 @@ public interface DdiRootControllerRestApi {
      * RequestMethod.POST method receiving the {@link DdiActionFeedback} from
      * the target.
      *
+     * @param tenant
+     *            of the request
      * @param feedback
      *            the {@link DdiActionFeedback} from the target.
      * @param targetid

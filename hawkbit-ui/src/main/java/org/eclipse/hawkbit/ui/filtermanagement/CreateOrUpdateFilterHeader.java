@@ -26,9 +26,9 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -136,7 +136,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    private boolean validationFailed = false;
+    private boolean validationFailed;
 
     /**
      * Initialize the Campaign Status History Header.
@@ -509,6 +509,10 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void updateCustomFilter() {
+        if (!filterManagementUIState.getTfQuery().isPresent()) {
+            return;
+        }
+
         final TargetFilterQuery targetFilterQuery = filterManagementUIState.getTfQuery().get();
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
