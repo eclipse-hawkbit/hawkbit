@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
-        final Iterable<Target> createdTargets = this.targetManagement
+        final Collection<Target> createdTargets = this.targetManagement
                 .createTargets(MgmtTargetMapper.fromRequest(entityFactory, targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets), HttpStatus.CREATED);

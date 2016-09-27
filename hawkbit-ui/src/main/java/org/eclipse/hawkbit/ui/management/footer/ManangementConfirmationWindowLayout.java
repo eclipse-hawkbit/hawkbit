@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
@@ -88,7 +88,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<>();
+        final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(3);
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
         }
@@ -150,7 +150,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<>();
+        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
         int successAssignmentCount = 0;
         int duplicateAssignmentCount = 0;

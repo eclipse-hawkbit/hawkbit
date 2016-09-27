@@ -848,7 +848,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        assertThat(ah.getOptLockRevision()).isEqualTo(1L);
+        assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
         final SoftwareModuleMetadata swMetadata1 = new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1);
 
@@ -858,7 +858,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .createSoftwareModuleMetadata(Lists.newArrayList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2L);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         assertThat(softwareModuleMetadata).hasSize(2);
         assertThat(softwareModuleMetadata.get(0)).isNotNull();
@@ -900,7 +900,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         // initial opt lock revision must be 1
-        assertThat(ah.getOptLockRevision()).isEqualTo(1L);
+        assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
         // create an software module meta data entry
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement.createSoftwareModuleMetadata(
@@ -910,7 +910,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // because we are modifying the
         // base software module
         SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2L);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         // modifying the meta data value
         softwareModuleMetadata.get(0).setValue(knownUpdateValue);
@@ -925,7 +925,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // module so opt lock
         // revision must be two
         changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3L);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3);
 
         // verify updated meta data contains the updated value
         assertThat(updated).isNotNull();

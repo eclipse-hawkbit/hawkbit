@@ -13,8 +13,7 @@ import static org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.Sof
 import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
 import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_NAME;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
@@ -59,10 +58,9 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<>();
         final BeanQueryFactory<SoftwareModuleTypeBeanQuery> typeQF = new BeanQueryFactory<>(
                 SoftwareModuleTypeBeanQuery.class);
-        typeQF.setQueryConfiguration(queryConfig);
+        typeQF.setQueryConfiguration(Collections.emptyMap());
         return new LazyQueryContainer(new LazyQueryDefinition(true, 20, VAR_NAME), typeQF);
     }
 

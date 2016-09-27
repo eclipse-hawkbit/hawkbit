@@ -541,28 +541,30 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the assigment of tags to the a single target.")
     public void targetTagAssignment() {
-        Target t1 = testdataFactory.generateTarget("id-1", "blablub");
+        final Target t1 = testdataFactory.generateTarget("id-1", "blablub");
         final int noT2Tags = 4;
         final int noT1Tags = 3;
         final List<TargetTag> t1Tags = tagManagement
                 .createTargetTags(testdataFactory.generateTargetTags(noT1Tags, "tag1"));
-        t1.getTags().addAll(t1Tags);
-        t1 = targetManagement.createTarget(t1);
 
-        Target t2 = testdataFactory.generateTarget("id-2", "blablub");
+        t1Tags.forEach(tag -> ((JpaTarget) t1).addTag(tag));
+
+        targetManagement.createTarget(t1);
+        final Target t2 = testdataFactory.generateTarget("id-2", "blablub");
         final List<TargetTag> t2Tags = tagManagement
                 .createTargetTags(testdataFactory.generateTargetTags(noT2Tags, "tag2"));
-        t2.getTags().addAll(t2Tags);
-        t2 = targetManagement.createTarget(t2);
 
-        t1 = targetManagement.findTargetByControllerID(t1.getControllerId());
-        assertThat(t1.getTags()).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(t1.getTags()).as("Tag size is wrong").hasSize(noT1Tags)
+        t2Tags.forEach(tag -> ((JpaTarget) t2).addTag(tag));
+        targetManagement.createTarget(t2);
+
+        final Target t11 = targetManagement.findTargetByControllerID(t1.getControllerId());
+        assertThat(t11.getTags()).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
+        assertThat(t11.getTags()).as("Tag size is wrong").hasSize(noT1Tags)
                 .doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
 
-        t2 = targetManagement.findTargetByControllerID(t2.getControllerId());
-        assertThat(t2.getTags()).as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(t2.getTags()).as("Tag size is wrong").hasSize(noT2Tags)
+        final Target t21 = targetManagement.findTargetByControllerID(t2.getControllerId());
+        assertThat(t21.getTags()).as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
+        assertThat(t21.getTags()).as("Tag size is wrong").hasSize(noT2Tags)
                 .doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
     }
 

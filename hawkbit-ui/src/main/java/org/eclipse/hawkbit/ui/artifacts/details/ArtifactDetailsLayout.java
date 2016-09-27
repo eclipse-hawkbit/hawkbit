@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.artifacts.details;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +46,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -207,8 +208,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private Container createArtifactLazyQueryContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<>();
-        return getArtifactLazyQueryContainer(queryConfiguration);
+        return getArtifactLazyQueryContainer(Collections.emptyMap());
     }
 
     private LazyQueryContainer getArtifactLazyQueryContainer(final Map<String, Object> queryConfig) {
@@ -429,9 +429,12 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 titleOfArtifactDetails.setContentMode(ContentMode.HTML);
             }
         }
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration;
         if (baseSwModuleId != null) {
+            queryConfiguration = Maps.newHashMapWithExpectedSize(1);
             queryConfiguration.put(SPUIDefinitions.BY_BASE_SOFTWARE_MODULE, baseSwModuleId);
+        } else {
+            queryConfiguration = Collections.emptyMap();
         }
         final LazyQueryContainer artifactContainer = getArtifactLazyQueryContainer(queryConfiguration);
         artifactDetailsTable.setContainerDataSource(artifactContainer);

@@ -29,8 +29,8 @@ public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupCondit
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        final Long totalGroup = rolloutGroup.getTotalTargets();
-        final Long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
+        final long totalGroup = rolloutGroup.getTotalTargets();
+        final long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.FINISHED);
         try {
             final Integer threshold = Integer.valueOf(expression);

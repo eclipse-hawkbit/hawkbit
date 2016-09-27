@@ -8,8 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
@@ -101,9 +100,8 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<>();
         final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<>(DistributionTagBeanQuery.class);
-        tagQF.setQueryConfiguration(queryConfig);
+        tagQF.setQueryConfiguration(Collections.emptyMap());
         return HawkbitCommonUtil.createDSLazyQueryContainer(
                 new BeanQueryFactory<DistributionTagBeanQuery>(DistributionTagBeanQuery.class));
 

@@ -43,11 +43,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA Implementation of {@link EntityFactory}.
  *
  */
+@Validated
 public class JpaEntityFactory implements EntityFactory {
 
     @Override

@@ -11,6 +11,10 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Software package as sub element of a {@link DistributionSet}.
+ *
+ */
 public interface SoftwareModule extends NamedVersionedEntity {
 
     /**
@@ -40,12 +44,12 @@ public interface SoftwareModule extends NamedVersionedEntity {
     Optional<LocalArtifact> getLocalArtifactByFilename(String fileName);
 
     /**
-     * @return the artifacts
+     * @return immutable list of all artifacts
      */
     List<Artifact> getArtifacts();
 
     /**
-     * @return local artifacts only
+     * @return immutable list of local artifacts only
      */
     List<LocalArtifact> getLocalArtifacts();
 
@@ -104,7 +108,8 @@ public interface SoftwareModule extends NamedVersionedEntity {
     List<SoftwareModuleMetadata> getMetadata();
 
     /**
-     * @return the assignedTo
+     * @return immutable list of {@link DistributionSet}s the module is assigned
+     *         to
      */
     List<DistributionSet> getAssignedTo();
 
