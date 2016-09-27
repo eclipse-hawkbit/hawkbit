@@ -21,12 +21,12 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
  */
 public class FilterParams {
 
-    Collection<TargetUpdateStatus> filterByStatus;
-    Boolean overdueState;
-    String filterBySearchText;
-    Boolean selectTargetWithNoTag;
-    String[] filterByTagNames;
-    Long filterByDistributionId;
+    private Collection<TargetUpdateStatus> filterByStatus;
+    private Boolean overdueState;
+    private String filterBySearchText;
+    private Boolean selectTargetWithNoTag;
+    private String[] filterByTagNames;
+    private Long filterByDistributionId;
 
     /**
      * Constructor.
@@ -72,6 +72,7 @@ public class FilterParams {
      * Sets {@link DistributionSet#getId()} to filter the result.
      *
      * @param filterByDistributionId
+     *            the distribution set id
      */
     public void setFilterByDistributionId(Long filterByDistributionId) {
         this.filterByDistributionId = filterByDistributionId;
@@ -91,6 +92,7 @@ public class FilterParams {
      * Sets the collection of target states to filter for.
      *
      * @param filterByStatus
+     *            collection of target update status
      */
     public void setFilterByStatus(Collection<TargetUpdateStatus> filterByStatus) {
         this.filterByStatus = filterByStatus;
@@ -113,6 +115,7 @@ public class FilterParams {
      * overdue filter is activated.
      *
      * @param overdueState
+     *            if the overdue filter should be activates
      */
     public void setOverdueState(Boolean overdueState) {
         this.overdueState = overdueState;
@@ -133,6 +136,7 @@ public class FilterParams {
      * Sets the search text to filter for.
      *
      * @param filterBySearchText
+     *            search text
      */
     public void setFilterBySearchText(String filterBySearchText) {
         this.filterBySearchText = filterBySearchText;
@@ -152,6 +156,7 @@ public class FilterParams {
      * Sets the flag indicating if tagging filter is used.
      *
      * @param selectTargetWithNoTag
+     *            should the tagging filter be used?
      */
     public void setSelectTargetWithNoTag(Boolean selectTargetWithNoTag) {
         this.selectTargetWithNoTag = selectTargetWithNoTag;
@@ -171,6 +176,7 @@ public class FilterParams {
      * Sets the tags that are used to filter for.
      *
      * @param filterByTagNames
+     *            array of tag names
      */
     public void setFilterByTagNames(String[] filterByTagNames) {
         this.filterByTagNames = filterByTagNames;

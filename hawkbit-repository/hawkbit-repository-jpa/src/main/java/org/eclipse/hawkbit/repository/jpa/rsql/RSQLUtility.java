@@ -187,7 +187,6 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
-        private final VirtualPropertyLookup virtualPropertyLookup;
         private final StrSubstitutor substitutor;
 
         private final SimpleTypeConverter simpleTypeConverter;
@@ -197,10 +196,10 @@ public final class RSQLUtility {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
-            this.virtualPropertyLookup = virtualPropertyLookup;
-            this.substitutor = new StrSubstitutor(new StrLookupAdapter(virtualPropertyLookup),
-                    StrSubstitutor.DEFAULT_PREFIX,
-                    StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
+            this.substitutor = (virtualPropertyLookup != null)
+                    ? new StrSubstitutor(new StrLookupAdapter(virtualPropertyLookup), StrSubstitutor.DEFAULT_PREFIX,
+                            StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE)
+                    : null;
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
@@ -222,7 +221,7 @@ public final class RSQLUtility {
             return toSingleList(cb.conjunction());
         }
 
-        private List<Predicate> toSingleList(final Predicate predicate) {
+        private static List<Predicate> toSingleList(final Predicate predicate) {
             return Collections.singletonList(predicate);
         }
 
@@ -419,7 +418,7 @@ public final class RSQLUtility {
         // Exception squid:S2095 - see
         // https://jira.sonarsource.com/browse/SONARJAVA-1478
         @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
-        private Object transformEnumValue(final ComparisonNode node, final String value,
+        private static Object transformEnumValue(final ComparisonNode node, final String value,
                 final Class<? extends Object> javaType) {
             final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
             try {
@@ -447,7 +446,7 @@ public final class RSQLUtility {
 
             final String value;
             // if lookup is available, replace macros ...
-            if (virtualPropertyLookup != null) {
+            if (substitutor != null) {
                 value = substitutor.replace(values.get(0));
             } else {
                 value = values.get(0);
@@ -568,12 +567,12 @@ public final class RSQLUtility {
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        private String escapeValueToSQL(final String transformedValue) {
+        private static String escapeValueToSQL(final String transformedValue) {
             return transformedValue.replace("%", "\\%").replace(LIKE_WILDCARD, '%');
         }
 
         @SuppressWarnings("unchecked")
-        private <Y> Path<Y> pathOfString(final Path<?> path) {
+        private static <Y> Path<Y> pathOfString(final Path<?> path) {
             return (Path<Y>) path;
         }
 

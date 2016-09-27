@@ -8,7 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.*;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_DISTRIBUTION;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TAG;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.FILTER_BY_TEXT;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TAG;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY;
+import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_FILTER_BY_TEXT;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -416,7 +423,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     /**
      * Add listener to pin.
      *
-     * @param pinBtn
+     * @param event
      *            as event
      */
     private void addPinClickListener(final ClickEvent event) {
