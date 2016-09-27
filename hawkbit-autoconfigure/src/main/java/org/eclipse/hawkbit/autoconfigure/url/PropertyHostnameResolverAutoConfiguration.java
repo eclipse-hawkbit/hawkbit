@@ -41,14 +41,11 @@ public class PropertyHostnameResolverAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(value = HostnameResolver.class)
     public HostnameResolver hostnameResolver() {
-        return new HostnameResolver() {
-            @Override
-            public URL resolveHostname() {
-                try {
-                    return new URL(serverProperties.getUrl());
-                } catch (final MalformedURLException e) {
-                    throw Throwables.propagate(e);
-                }
+        return () -> {
+            try {
+                return new URL(serverProperties.getUrl());
+            } catch (final MalformedURLException e) {
+                throw Throwables.propagate(e);
             }
         };
     }
