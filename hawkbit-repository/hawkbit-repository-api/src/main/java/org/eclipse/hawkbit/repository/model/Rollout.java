@@ -38,7 +38,7 @@ public interface Rollout extends NamedEntity {
     void setDistributionSet(DistributionSet distributionSet);
 
     /**
-     * @return list of deployment groups of the rollout.
+     * @return immutable list of deployment groups of the rollout.
      */
     List<RolloutGroup> getRolloutGroups();
 

@@ -159,7 +159,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
             LOG.warn("Softare module with id {} could not be found.", softwareModuleId);
             result = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
+
+            // Exception squid:S3655 - Optional access is checked in checkModule
+            // subroutine
+            @SuppressWarnings("squid:S3655")
             final LocalArtifact artifact = module.getLocalArtifactByFilename(fileName).get();
+
             final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
@@ -204,6 +209,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
+    // Exception squid:S3655 - Optional access is checked in checkModule
+    // subroutine
+    @SuppressWarnings("squid:S3655")
     public ResponseEntity<Void> downloadArtifactMd5(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,

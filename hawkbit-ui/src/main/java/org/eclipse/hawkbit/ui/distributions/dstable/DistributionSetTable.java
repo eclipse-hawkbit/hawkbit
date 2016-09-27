@@ -57,6 +57,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -167,7 +168,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
         manageDistUIState.getManageDistFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
@@ -530,7 +531,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return manageMetadataBtn;
     }
 
-   private void showMetadataDetails(final Long itemId) {
+    private void showMetadataDetails(final Long itemId) {
         final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }

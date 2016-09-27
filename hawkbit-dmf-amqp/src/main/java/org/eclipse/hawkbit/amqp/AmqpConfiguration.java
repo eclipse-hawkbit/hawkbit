@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,6 +51,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
+
+import com.google.common.collect.Maps;
 
 /**
  * Spring configuration for AMQP 0.9 based DMF communication for indirect device
@@ -349,7 +350,7 @@ public class AmqpConfiguration {
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;

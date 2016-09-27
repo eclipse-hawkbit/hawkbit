@@ -31,7 +31,7 @@ public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements T
     private String colour;
 
     protected AbstractJpaTag() {
-        super();
+        // Default constructor needed for JPA entities
     }
 
     /**

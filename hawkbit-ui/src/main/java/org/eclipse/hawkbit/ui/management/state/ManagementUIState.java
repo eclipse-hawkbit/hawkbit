@@ -87,10 +87,9 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
     private boolean customFilterSelected;
 
     private boolean bulkUploadWindowMinimised;
-    
+
     private DistributionSetIdName lastSelectedDistribution;
-    
-    
+
     /**
      * @return the lastSelectedDistribution
      */
@@ -98,11 +97,9 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
         return Optional.ofNullable(lastSelectedDistribution);
     }
 
-    
     public void setLastSelectedDistribution(final DistributionSetIdName value) {
         this.lastSelectedDistribution = value;
     }
-
 
     /**
      * @return the bulkUploadWindowMinimised

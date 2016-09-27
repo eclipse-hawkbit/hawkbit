@@ -12,7 +12,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -73,23 +72,22 @@ public final class DataConversionHelper {
      * Creates all (rest) artifacts for a given software module.
      *
      * @param target
-     *            to convert
+     *            for create URLs for
      * @param module
      *            the software module
      * @param artifactUrlHandler
-     *            for generating download URLs
+     *            for creating download URLs
      * @param systemManagement
-     *            for accessing the tenant ID
+     *            for access to tenant meta data
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
     public static List<DdiArtifact> createArtifacts(final Target target,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
-        final List<DdiArtifact> files = new ArrayList<>();
 
-        module.getLocalArtifacts()
-                .forEach(artifact -> files.add(createArtifact(target, artifactUrlHandler, artifact, systemManagement)));
-        return files;
+        return module.getLocalArtifacts().stream()
+                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement))
+                .collect(Collectors.toList());
     }
 
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,

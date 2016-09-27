@@ -106,7 +106,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(findActionsWithStatusCountByTarget).as("wrong action size").hasSize(1);
         assertThat(findActionsWithStatusCountByTarget.get(0).getActionStatusCount()).as("wrong action status size")
-                .isEqualTo(3L);
+                .isEqualTo(3);
     }
 
     @Test

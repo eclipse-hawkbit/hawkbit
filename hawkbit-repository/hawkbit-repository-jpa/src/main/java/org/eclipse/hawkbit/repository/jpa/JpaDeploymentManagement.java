@@ -592,7 +592,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         multiselect.where(cb.equal(actionRoot.get(JpaAction_.target), target));
         multiselect.orderBy(cb.desc(actionRoot.get(JpaAction_.id)));
         multiselect.groupBy(actionRoot.get(JpaAction_.id));
-        return new ArrayList<>(entityManager.createQuery(multiselect).getResultList());
+        return Collections.unmodifiableList(entityManager.createQuery(multiselect).getResultList());
     }
 
     @Override

@@ -32,7 +32,7 @@ public abstract class AbstractJpaArtifact extends AbstractJpaTenantAwareBaseEnti
     private String md5Hash;
 
     @Column(name = "file_size")
-    private Long size;
+    private long size;
 
     @Override
     public abstract SoftwareModule getSoftwareModule();
@@ -56,11 +56,11 @@ public abstract class AbstractJpaArtifact extends AbstractJpaTenantAwareBaseEnti
     }
 
     @Override
-    public Long getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(final Long size) {
+    public void setSize(final long size) {
         this.size = size;
     }
 }

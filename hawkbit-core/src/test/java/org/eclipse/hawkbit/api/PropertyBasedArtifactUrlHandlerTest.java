@@ -45,7 +45,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private static final String TARGETID_BASE62 = "EZqA";
     private static final String SHA1HASH = "test12345";
     private static final long ARTIFACTID = 1345678L;
-    private static final String ARTIFACTID_BASE10 = "5e4U";
+    private static final String ARTIFACTID_BASE62 = "5e4U";
     private static final String TENANT = "TEST_TENANT";
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
@@ -118,7 +118,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
         assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO, TEST_REL,
-                TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE10)),
+                TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)),
                 urls);
     }
 }

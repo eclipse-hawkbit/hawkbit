@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -123,7 +124,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 .runAsSystem(() -> this.systemManagement.getTenantMetadata().getDefaultDsType().getKey());
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
-        final Iterable<DistributionSet> createdDSets = this.distributionSetManagement
+        final Collection<DistributionSet> createdDSets = this.distributionSetManagement
                 .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement,
                         this.distributionSetManagement, entityFactory));
 

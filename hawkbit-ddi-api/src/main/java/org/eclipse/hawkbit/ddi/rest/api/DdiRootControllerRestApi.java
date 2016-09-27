@@ -48,15 +48,15 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
+    ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
      * Root resource for an individual {@link Target}.
      *
      * @param tenant
-     *            of the client
+     *            of the request
      * @param controllerId
      *            of the target that matches to controller id
      * @param request
@@ -73,7 +73,7 @@ public interface DdiRootControllerRestApi {
      * partial (as specified by RFC7233 (Range Requests)) download request.
      *
      * @param tenant
-     *            of the client
+     *            of the request
      * @param controllerId
      *            of the target
      * @param softwareModuleId
@@ -99,7 +99,7 @@ public interface DdiRootControllerRestApi {
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
      *
      * @param tenant
-     *            of the client
+     *            of the request
      * @param controllerId
      *            of the target
      * @param softwareModuleId
@@ -125,7 +125,7 @@ public interface DdiRootControllerRestApi {
      * Resource for software module.
      *
      * @param tenant
-     *            of the client
+     *            of the request
      * @param controllerId
      *            of the target
      * @param actionId
@@ -191,7 +191,7 @@ public interface DdiRootControllerRestApi {
      * RequestMethod.GET method for the {@link DdiCancel} action.
      *
      * @param tenant
-     *            of the client
+     *            of the request
      * @param controllerId
      *            ID of the calling target
      * @param actionId

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 
+import com.google.common.collect.Lists;
+
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
  * the edge controller, e.g. OS, JVM, AgentHub.
@@ -64,7 +67,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private JpaSoftwareModuleType type;
 
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
-    private final List<DistributionSet> assignedTo = new ArrayList<>();
+    private List<DistributionSet> assignedTo;
 
     @Column(name = "deleted")
     private boolean deleted;
@@ -82,13 +85,13 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
     @JoinColumn(name = "sw_id", insertable = false, updatable = false)
-    private final List<SoftwareModuleMetadata> metadata = new ArrayList<>();
+    private List<SoftwareModuleMetadata> metadata;
 
     /**
      * Default constructor.
      */
     public JpaSoftwareModule() {
-        super();
+        // Default constructor for JPA
     }
 
     /**
@@ -120,6 +123,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     public void addArtifact(final LocalArtifact artifact) {
         if (null == artifacts) {
             artifacts = new ArrayList<>(4);
+            artifacts.add(artifact);
+            return;
         }
 
         if (!artifacts.contains(artifact)) {
@@ -134,7 +139,9 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Override
     public void addArtifact(final ExternalArtifact artifact) {
         if (null == externalArtifacts) {
-            externalArtifacts = new ArrayList<>(4);
+            externalArtifacts = new LinkedList<>();
+            externalArtifacts.add(artifact);
+            return;
         }
 
         if (!externalArtifacts.contains(artifact)) {
@@ -143,28 +150,18 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     }
 
-    /**
-     * @param artifactId
-     *            to look for
-     * @return found {@link Artifact}
-     */
     @Override
     public Optional<LocalArtifact> getLocalArtifact(final Long artifactId) {
-        if (null == artifacts) {
+        if (artifacts == null) {
             return Optional.empty();
         }
 
         return artifacts.stream().filter(artifact -> artifact.getId().equals(artifactId)).findFirst();
     }
 
-    /**
-     * @param fileName
-     *            to look for
-     * @return found {@link Artifact}
-     */
     @Override
     public Optional<LocalArtifact> getLocalArtifactByFilename(final String fileName) {
-        if (null == artifacts) {
+        if (artifacts == null) {
             return Optional.empty();
         }
 
@@ -177,11 +174,18 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      */
     @Override
     public List<Artifact> getArtifacts() {
-        final List<Artifact> result = new ArrayList<>();
-        result.addAll(artifacts);
+        if (artifacts == null && externalArtifacts == null) {
+            return Collections.emptyList();
+        } else if (artifacts == null) {
+            return Collections.unmodifiableList(externalArtifacts);
+        } else if (externalArtifacts == null) {
+            return Collections.unmodifiableList(artifacts);
+        }
+
+        final List<Artifact> result = Lists.newLinkedList(artifacts);
         result.addAll(externalArtifacts);
 
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     /**
@@ -207,7 +211,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      */
     @Override
     public void removeArtifact(final LocalArtifact artifact) {
-        if (null != artifacts) {
+        if (artifacts != null) {
             artifacts.remove(artifact);
         }
     }
@@ -218,7 +222,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      */
     @Override
     public void removeArtifact(final ExternalArtifact artifact) {
-        if (null != externalArtifacts) {
+        if (externalArtifacts != null) {
             externalArtifacts.remove(artifact);
         }
     }
@@ -248,11 +252,12 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.type = (JpaSoftwareModuleType) type;
     }
 
-    /**
-     * @return immutable list of meta data elements.
-     */
     @Override
     public List<SoftwareModuleMetadata> getMetadata() {
+        if (metadata == null) {
+            return Collections.emptyList();
+        }
+
         return Collections.unmodifiableList(metadata);
     }
 
@@ -262,12 +267,13 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
                 + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type=" + getType().getName() + "]";
     }
 
-    /**
-     * @return the assignedTo
-     */
     @Override
     public List<DistributionSet> getAssignedTo() {
-        return assignedTo;
+        if (assignedTo == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(assignedTo);
     }
 
 }
