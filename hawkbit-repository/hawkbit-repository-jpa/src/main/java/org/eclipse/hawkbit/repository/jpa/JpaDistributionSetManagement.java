@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,6 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 /**
@@ -130,26 +130,24 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName);
 
         DistributionSetTagAssignmentResult result;
-        final List<JpaDistributionSet> toBeChangedDSs = new ArrayList<>();
-        for (final JpaDistributionSet set : sets) {
-            if (set.getTags().add(myTag)) {
-                toBeChangedDSs.add(set);
-            }
-        }
+
+        final List<JpaDistributionSet> toBeChangedDSs = sets.stream().filter(set -> set.addTag(myTag))
+                .collect(Collectors.toList());
 
         // un-assignment case
         if (toBeChangedDSs.isEmpty()) {
             for (final JpaDistributionSet set : sets) {
-                if (set.getTags().remove(myTag)) {
+                if (set.removeTag(myTag)) {
                     toBeChangedDSs.add(set);
                 }
             }
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
                     toBeChangedDSs.size(), Collections.emptyList(),
-                    new ArrayList<>(distributionSetRepository.save(toBeChangedDSs)), myTag);
+                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag);
         } else {
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0, new ArrayList<>(distributionSetRepository.save(toBeChangedDSs)), Collections.emptyList(), myTag);
+                    0, Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)),
+                    Collections.emptyList(), myTag);
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
@@ -178,8 +176,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSet(final Long... distributionSetIDs) {
-        final List<Long> toHardDelete = new ArrayList<>();
-
         final List<Long> assigned = distributionSetRepository
                 .findAssignedToTargetDistributionSetsById(distributionSetIDs);
         assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
@@ -190,13 +186,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         // mark the rest as hard delete
-        for (final Long setId : distributionSetIDs) {
-            if (!assigned.contains(setId)) {
-                toHardDelete.add(setId);
-            }
-        }
+        final List<Long> toHardDelete = Arrays.stream(distributionSetIDs).filter(setId -> !assigned.contains(setId))
+                .collect(Collectors.toList());
 
-        // hard delete the rest if exixts
+        // hard delete the rest if exists
         if (!toHardDelete.isEmpty()) {
             // don't give the delete statement an empty list, JPA/Oracle cannot
             // handle the empty list
@@ -243,7 +236,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaDistributionSet> toSave = (Collection) distributionSets;
 
-        return new ArrayList<>(distributionSetRepository.save(toSave));
+        return Collections.unmodifiableList(distributionSetRepository.save(toSave));
     }
 
     @Override
@@ -296,7 +289,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private static Page<DistributionSetType> convertDsTPage(final Page<JpaDistributionSetType> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()));
     }
 
     @Override
@@ -314,7 +307,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static Page<DistributionSet> convertDsPage(final Page<JpaDistributionSet> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     /**
@@ -337,7 +330,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findDistributionSetsByDeletedAndOrCompleted(final Pageable pageReq,
             final Boolean deleted, final Boolean complete) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(2);
 
         if (deleted != null) {
             final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
@@ -359,11 +352,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
                 virtualPropertyLookup);
 
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(2);
         if (deleted != null) {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
         specList.add(spec);
+
         return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
     }
 
@@ -388,7 +382,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final Page<DistributionSet> findDistributionSetsByFilters = findDistributionSetsByFilters(pageable,
                 dsFilterWithNoTargetLinked);
 
-        final List<DistributionSet> resultSet = new LinkedList<>(findDistributionSetsByFilters.getContent());
+        final List<DistributionSet> resultSet = new ArrayList<>(findDistributionSetsByFilters.getContent());
         int orderIndex = 0;
         if (installedDS != null) {
             final boolean remove = resultSet.remove(installedDS);
@@ -419,18 +413,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public List<DistributionSet> findDistributionSetsAll(final Collection<Long> dist) {
-        return new ArrayList<>(distributionSetRepository.findAll(DistributionSetSpecification.byIds(dist)));
+        return Collections
+                .unmodifiableList(distributionSetRepository.findAll(DistributionSetSpecification.byIds(dist)));
     }
 
     @Override
     public Long countDistributionSetsAll() {
-
-        final List<Specification<JpaDistributionSet>> specList = new LinkedList<>();
-
         final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
-        specList.add(spec);
 
-        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
+        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(Lists.newArrayList(spec)));
     }
 
     @Override
@@ -560,7 +551,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId) {
-        return new ArrayList<>(distributionSetMetadataRepository
+        return Collections.unmodifiableList(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
                         distributionSetId)));
@@ -584,7 +575,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static Page<DistributionSetMetadata> convertMdPage(final Page<JpaDistributionSetMetadata> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -609,7 +600,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(7);
 
         Specification<JpaDistributionSet> spec;
 
@@ -710,9 +701,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public List<DistributionSet> assignTag(final Collection<Long> dsIds, final DistributionSetTag tag) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
 
-        allDs.forEach(ds -> ds.getTags().add(tag));
+        allDs.forEach(ds -> ds.addTag(tag));
 
-        final List<DistributionSet> save = new ArrayList<>(distributionSetRepository.save(allDs));
+        final List<DistributionSet> save = Collections.unmodifiableList(distributionSetRepository.save(allDs));
 
         afterCommit.afterCommit(() -> {
 
@@ -732,7 +723,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaDistributionSet> distributionSets = (Collection) tag.getAssignedToDistributionSet();
 
-        return new ArrayList<>(unAssignTag(distributionSets, tag));
+        return Collections.unmodifiableList(unAssignTag(distributionSets, tag));
     }
 
     @Override
@@ -746,7 +737,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private List<JpaDistributionSet> unAssignTag(final Collection<JpaDistributionSet> distributionSets,
             final DistributionSetTag tag) {
-        distributionSets.forEach(ds -> ds.getTags().remove(tag));
+        distributionSets.forEach(ds -> ds.removeTag(tag));
         return distributionSetRepository.save(distributionSets);
     }
 

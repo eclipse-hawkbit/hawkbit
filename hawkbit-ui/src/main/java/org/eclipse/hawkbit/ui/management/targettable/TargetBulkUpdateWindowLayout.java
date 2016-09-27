@@ -9,11 +9,8 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -40,6 +37,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.tokenfield.TokenField;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
@@ -112,12 +110,6 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         buildLayout();
         setImmediate(true);
         setCompositionRoot(mainLayout);
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     protected void onStartOfUpload() {
@@ -242,7 +234,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     private Container createContainer() {
 
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration = Maps.newHashMapWithExpectedSize(2);
 
         final List<String> list = new ArrayList<>();
         queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -65,7 +66,11 @@ public class JpaTargetTag extends AbstractJpaTag implements TargetTag {
 
     @Override
     public List<Target> getAssignedToTargets() {
-        return assignedToTargets;
+        if (assignedToTargets == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(assignedToTargets);
     }
 
     @Override

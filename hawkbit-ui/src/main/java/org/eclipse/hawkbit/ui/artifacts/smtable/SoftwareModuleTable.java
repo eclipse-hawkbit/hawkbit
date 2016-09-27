@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,11 +24,11 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -37,6 +36,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -97,7 +97,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
         artifactUploadState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 

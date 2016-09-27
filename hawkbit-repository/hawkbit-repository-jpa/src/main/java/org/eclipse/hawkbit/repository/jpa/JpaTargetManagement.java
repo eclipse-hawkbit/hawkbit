@@ -132,7 +132,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
-        return new ArrayList<>(targetRepository
+        return Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs)));
     }
 
@@ -201,7 +201,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         toUpdate.forEach(target -> target.setNew(false));
 
-        return new ArrayList<>(targetRepository.save(toUpdate));
+        return Collections.unmodifiableList(targetRepository.save(toUpdate));
     }
 
     @Override
@@ -245,11 +245,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     private static Slice<Target> convertPage(final Slice<JpaTarget> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
     @Override
@@ -291,8 +291,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final String... tagNames) {
+                                     final String searchText, final Long installedOrAssignedDistributionSetId,
+                                     final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
                         selectTargetWithNoTag, tagNames),
@@ -301,7 +301,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private static List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams,
-            final boolean fetch) {
+                                                                         final boolean fetch) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus(), fetch));
@@ -362,7 +362,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
-            alreadyAssignedTargets.forEach(target -> target.getTags().remove(tag));
+            alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
@@ -372,9 +372,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         allTargets.removeAll(alreadyAssignedTargets);
         // some or none are assigned -> assign
-        allTargets.forEach(target -> target.getTags().add(tag));
+        allTargets.forEach(target -> target.addTag(tag));
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                allTargets.size(), 0, new ArrayList<>(targetRepository.save(allTargets)), Collections.emptyList(), tag);
+                allTargets.size(), 0, Collections.unmodifiableList(targetRepository.save(allTargets)),
+                Collections.emptyList(), tag);
 
         afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
 
@@ -390,8 +391,8 @@ public class JpaTargetManagement implements TargetManagement {
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
-        allTargets.forEach(target -> target.getTags().add(tag));
-        final List<Target> save = new ArrayList<>(targetRepository.save(allTargets));
+        allTargets.forEach(target -> target.addTag(tag));
+        final List<Target> save = Collections.unmodifiableList(targetRepository.save(allTargets));
 
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
@@ -403,11 +404,12 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTarget> toUnassign = (Collection) targets;
 
-        toUnassign.forEach(target -> target.getTags().remove(tag));
+        toUnassign.forEach(target -> target.removeTag(tag));
 
-        final List<Target> save = new ArrayList<>(targetRepository.save(toUnassign));
+        final List<Target> save = Collections.unmodifiableList(targetRepository.save(toUnassign));
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
@@ -427,7 +429,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target unAssignTag(final String controllerID, final TargetTag targetTag) {
-        final List<Target> allTargets = new ArrayList<>(targetRepository
+        final List<Target> allTargets = Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
         final List<Target> unAssignTag = unAssignTag(allTargets, targetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
@@ -481,7 +483,7 @@ public class JpaTargetManagement implements TargetManagement {
         final List<JpaTarget> resultList = entityManager.createQuery(query).setFirstResult(pageable.getOffset())
                 .setMaxResults(pageSize + 1).getResultList();
         final boolean hasNext = resultList.size() > pageSize;
-        return new SliceImpl<>(new ArrayList<>(resultList), pageable, hasNext);
+        return new SliceImpl<>(Collections.unmodifiableList(resultList), pageable, hasNext);
     }
 
     private static Predicate[] specificationsToPredicate(final List<Specification<JpaTarget>> specifications,
@@ -564,13 +566,9 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(JpaTarget_.id),
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                virtualPropertyLookup);
-        final List<Specification<JpaTarget>> specList = new ArrayList<>();
-        specList.add(spec);
-
-        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(specList, targetRoot, multiselect,
-                cb);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyLookup);
+        final Predicate[] specificationsForMultiSelect = specificationsToPredicate(Lists.newArrayList(spec), targetRoot,
+                multiselect, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect
@@ -632,18 +630,16 @@ public class JpaTargetManagement implements TargetManagement {
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
-        final List<Target> savedTargets = new ArrayList<>();
-        for (final Target t : targets) {
-            final Target myTarget = createTarget(t, TargetUpdateStatus.UNKNOWN, null, t.getTargetInfo().getAddress());
-            savedTargets.add(myTarget);
-        }
-        return savedTargets;
+
+        return targets.stream()
+                .map(t -> createTarget(t, TargetUpdateStatus.UNKNOWN, null, t.getTargetInfo().getAddress()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Target> findTargetsByTag(final String tagName) {
         final JpaTargetTag tag = targetTagRepository.findByNameEquals(tagName);
-        return new ArrayList<>(targetRepository.findByTag(tag));
+        return Collections.unmodifiableList(targetRepository.findByTag(tag));
     }
 
     @Override

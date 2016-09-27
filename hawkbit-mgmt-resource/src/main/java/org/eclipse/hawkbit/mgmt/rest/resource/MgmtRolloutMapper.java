@@ -11,8 +11,9 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Condition;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction.ErrorAction;
@@ -48,9 +49,11 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
-        final List<MgmtRolloutResponseBody> result = new ArrayList<>(rollouts.size());
-        rollouts.forEach(r -> result.add(toResponseRollout(r)));
-        return result;
+        if (rollouts == null) {
+            return Collections.emptyList();
+        }
+
+        return rollouts.stream().map(MgmtRolloutMapper::toResponseRollout).collect(Collectors.toList());
     }
 
     static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout) {
@@ -103,9 +106,11 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts) {
-        final List<MgmtRolloutGroupResponseBody> result = new ArrayList<>(rollouts.size());
-        rollouts.forEach(r -> result.add(toResponseRolloutGroup(r)));
-        return result;
+        if (rollouts == null) {
+            return Collections.emptyList();
+        }
+
+        return rollouts.stream().map(MgmtRolloutMapper::toResponseRolloutGroup).collect(Collectors.toList());
     }
 
     static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup) {

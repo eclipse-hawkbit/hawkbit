@@ -494,9 +494,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         final SoftwareModuleType testSmType = softwareManagement.createSoftwareModuleType(
                 entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
-        final List<DistributionSetType> types = new ArrayList<>();
-        types.add(testType);
-
         // DST does not exist
         mvc.perform(get("/rest/v1/distributionsettypes/12345678")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -554,9 +551,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSetType missingName = entityFactory.generateDistributionSetType("test123", null, "Desc123");
-        mvc.perform(post("/rest/v1/distributionsettypes")
-                .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(missingName)))
+        // Missing mandatory field name
+        mvc.perform(post("/rest/v1/distributionsettypes").content("[{\"description\":\"Desc123\",\"key\":\"test123\"}]")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 

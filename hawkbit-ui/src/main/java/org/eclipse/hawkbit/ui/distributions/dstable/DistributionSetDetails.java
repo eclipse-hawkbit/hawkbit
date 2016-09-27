@@ -93,7 +93,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private VerticalLayout tagsLayout;
 
-    private final Map<String, StringBuilder> assignedSWModule = new HashMap<>();
+    private Map<String, StringBuilder> assignedSWModule;
 
     /**
      * softwareLayout Initialize the component.
@@ -144,6 +144,10 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         }
 
         if (null != softwareModuleIdNameList) {
+            if (assignedSWModule == null) {
+                assignedSWModule = new HashMap<>();
+            }
+
             for (final SoftwareModuleIdName swIdName : softwareModuleIdNameList) {
                 final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId());
                 if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
@@ -169,9 +173,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     private Button assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateDistributionPermission() && distributionSetManagement
-                .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
-                .getAssignedTargets().isEmpty()) {
+        if (getPermissionChecker().hasUpdateDistributionPermission()
+                && manageDistUIState.getLastSelectedDistribution().isPresent()
+                && distributionSetManagement
+                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
+                        .getAssignedTargets().isEmpty()) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
@@ -186,6 +192,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @SuppressWarnings("unchecked")
     private void updateSoftwareModule(final SoftwareModule module) {
+        if (assignedSWModule == null) {
+            assignedSWModule = new HashMap<>();
+        }
 
         softwareModuleTable.getContainerDataSource().getItemIds();
         if (assignedSWModule.containsKey(module.getType().getName())) {
@@ -363,7 +372,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
                 && getSelectedBaseEntity() != null) {
-            assignedSWModule.clear();
+            if (assignedSWModule != null) {
+                assignedSWModule.clear();
+            }
             setSelectedBaseEntity(
                     distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
             UI.getCurrent().access(() -> populateModule());
@@ -375,7 +386,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if (saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ASSIGNMENT
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
-            assignedSWModule.clear();
+            if (assignedSWModule != null) {
+                assignedSWModule.clear();
+            }
             showUnsavedAssignment();
         }
     }

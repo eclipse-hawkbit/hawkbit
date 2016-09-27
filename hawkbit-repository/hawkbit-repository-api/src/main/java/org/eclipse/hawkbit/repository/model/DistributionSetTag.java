@@ -17,8 +17,8 @@ import java.util.List;
 public interface DistributionSetTag extends Tag {
 
     /**
-     * @return {@link List} of {@link DistributionSet}s this {@link Tag} is
-     *         assigned to.
+     * @return immutable {@link List} of {@link DistributionSet}s this
+     *         {@link Tag} is assigned to.
      */
     List<DistributionSet> getAssignedToDistributionSet();
 

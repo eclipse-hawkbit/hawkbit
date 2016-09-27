@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,11 +144,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     private static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
     @Override
@@ -656,7 +656,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
-        final Long totalGroup = rolloutGroup.getTotalTargets();
+        final int totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);
         if (totalGroup == 0) {

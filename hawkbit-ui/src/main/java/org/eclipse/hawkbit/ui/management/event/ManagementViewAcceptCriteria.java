@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +16,7 @@ import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
+import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
@@ -67,7 +67,7 @@ public class ManagementViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, List<String>> createDropConfigurations() {
-        final Map<String, List<String>> config = new HashMap<>();
+        final Map<String, List<String>> config = Maps.newHashMapWithExpectedSize(6);
 
         // Delete drop area acceptable components
         config.put(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID,
@@ -94,7 +94,7 @@ public class ManagementViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
-        final Map<String, Object> config = new HashMap<>();
+        final Map<String, Object> config = Maps.newHashMapWithExpectedSize(4);
         config.put(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, DragEvent.TARGET_TAG_DRAG);
         config.put(UIComponentIdProvider.TARGET_TABLE_ID, DragEvent.TARGET_DRAG);
         config.put(UIComponentIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);

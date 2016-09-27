@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -115,7 +115,7 @@ public class JpaTagManagement implements TagManagement {
             }
         });
 
-        final List<TargetTag> save = new ArrayList<>(targetTagRepository.save(targetTags));
+        final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository.save(targetTags));
         afterCommit
                 .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
         return save;
@@ -145,7 +145,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public List<TargetTag> findAllTargetTags() {
-        return new ArrayList<>(targetTagRepository.findAll());
+        return Collections.unmodifiableList(targetTagRepository.findAll());
     }
 
     @Override
@@ -156,12 +156,12 @@ public class JpaTagManagement implements TagManagement {
     }
 
     private static Page<TargetTag> convertTPage(final Page<JpaTargetTag> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     private static Page<DistributionSetTag> convertDsPage(final Page<JpaDistributionSetTag> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -217,7 +217,8 @@ public class JpaTagManagement implements TagManagement {
                 throw new EntityAlreadyExistsException();
             }
         }
-        final List<DistributionSetTag> save = new ArrayList<>(distributionSetTagRepository.save(distributionSetTags));
+        final List<DistributionSetTag> save = Collections
+                .unmodifiableList(distributionSetTagRepository.save(distributionSetTags));
         afterCommit.afterCommit(
                 () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
 
@@ -232,7 +233,7 @@ public class JpaTagManagement implements TagManagement {
 
         final List<JpaDistributionSet> changed = new LinkedList<>();
         for (final JpaDistributionSet set : distributionSetRepository.findByTag(tag)) {
-            set.getTags().remove(tag);
+            set.removeTag(tag);
             changed.add(set);
         }
 
@@ -258,7 +259,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public List<DistributionSetTag> findAllDistributionSetTags() {
-        return new ArrayList<>(distributionSetTagRepository.findAll());
+        return Collections.unmodifiableList(distributionSetTagRepository.findAll());
     }
 
     @Override

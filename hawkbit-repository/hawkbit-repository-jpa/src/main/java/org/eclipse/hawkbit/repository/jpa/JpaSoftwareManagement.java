@@ -11,12 +11,15 @@ package org.eclipse.hawkbit.repository.jpa;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -66,6 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -170,7 +174,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaSoftwareModule> jpaCast = (Collection) swModules;
 
-        return new ArrayList<>(softwareModuleRepository.save(jpaCast));
+        return Collections.unmodifiableList(softwareModuleRepository.save(jpaCast));
     }
 
     @Override
@@ -189,22 +193,22 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private static Slice<SoftwareModule> convertSmPage(final Slice<JpaSoftwareModule> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
     private static Page<SoftwareModule> convertSmPage(final Page<JpaSoftwareModule> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     private static Page<SoftwareModuleMetadata> convertSmMdPage(final Page<JpaSoftwareModuleMetadata> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
     public Long countSoftwareModulesByType(final SoftwareModuleType type) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(2);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.equalType((JpaSoftwareModuleType) type);
         specList.add(spec);
@@ -281,7 +285,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     public Slice<SoftwareModule> findSoftwareModulesAll(final Pageable pageable) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(2);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -300,13 +304,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public Long countSoftwareModulesAll() {
-
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
-
         final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
 
-        return countSwModuleByCriteriaAPI(specList);
+        return countSwModuleByCriteriaAPI(Lists.newArrayList(spec));
     }
 
     @Override
@@ -333,20 +333,20 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private static Page<SoftwareModuleType> convertSmTPage(final Page<JpaSoftwareModuleType> findAll,
             final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<SoftwareModule> findSoftwareModulesById(final Collection<Long> ids) {
-        return new ArrayList<>(softwareModuleRepository.findByIdIn(ids));
+        return Collections.unmodifiableList(softwareModuleRepository.findByIdIn(ids));
     }
 
     @Override
     public Slice<SoftwareModule> findSoftwareModuleByFilters(final Pageable pageable, final String searchText,
             final SoftwareModuleType type) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(4);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -444,7 +444,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private static List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText,
             final JpaSoftwareModuleType type) {
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
         if (!Strings.isNullOrEmpty(searchText)) {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
@@ -458,18 +458,15 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     private Predicate[] specificationsToPredicate(final List<Specification<JpaSoftwareModule>> specifications,
             final Root<JpaSoftwareModule> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
             final Predicate... additionalPredicates) {
-        final List<Predicate> predicates = new ArrayList<>();
-        specifications.forEach(spec -> predicates.add(spec.toPredicate(root, query, cb)));
-        for (final Predicate predicate : additionalPredicates) {
-            predicates.add(predicate);
-        }
-        return predicates.toArray(new Predicate[predicates.size()]);
+
+        return Stream.concat(specifications.stream().map(spec -> spec.toPredicate(root, query, cb)),
+                Arrays.stream(additionalPredicates)).toArray(Predicate[]::new);
     }
 
     @Override
     public Long countSoftwareModuleByFilters(final String searchText, final SoftwareModuleType type) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>();
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -579,7 +576,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
             checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(softwareModuleMetadata.getId());
         }
         metadata.forEach(m -> entityManager.merge((JpaSoftwareModule) m.getSoftwareModule()).setLastModifiedAt(-1L));
-        return new ArrayList<>(softwareModuleMetadataRepository.save(metadata));
+        return Collections.unmodifiableList(softwareModuleMetadataRepository.save(metadata));
     }
 
     @Override
@@ -629,8 +626,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
-        return new ArrayList<>(
-                softwareModuleMetadataRepository
+        return Collections
+                .unmodifiableList(softwareModuleMetadataRepository
                         .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query,
                                 cb) -> cb.and(cb.equal(
                                         root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),

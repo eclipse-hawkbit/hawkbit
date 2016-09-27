@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
@@ -39,13 +41,13 @@ final class MgmtDistributionSetTypeMapper {
 
     static List<DistributionSetType> smFromRequest(final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement,
-            final Iterable<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
-        final List<DistributionSetType> mappedList = new ArrayList<>();
-
-        for (final MgmtDistributionSetTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(entityFactory, softwareManagement, smRest));
+            final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
+        if (smTypesRest == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, softwareManagement, smRest))
+                .collect(Collectors.toList());
     }
 
     static DistributionSetType fromRequest(final EntityFactory entityFactory,
@@ -91,19 +93,19 @@ final class MgmtDistributionSetTypeMapper {
     }
 
     static List<MgmtDistributionSetType> toTypesResponse(final List<DistributionSetType> types) {
-        final List<MgmtDistributionSetType> response = new ArrayList<>();
-        for (final DistributionSetType dsType : types) {
-            response.add(toResponse(dsType));
+        if (types == null) {
+            return Collections.emptyList();
         }
-        return response;
+
+        return types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList());
     }
 
     static List<MgmtDistributionSetType> toListResponse(final List<DistributionSetType> types) {
-        final List<MgmtDistributionSetType> response = new ArrayList<>();
-        for (final DistributionSetType dsType : types) {
-            response.add(toResponse(dsType));
+        if (types == null) {
+            return Collections.emptyList();
         }
-        return response;
+
+        return types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList());
     }
 
     static MgmtDistributionSetType toResponse(final DistributionSetType type) {

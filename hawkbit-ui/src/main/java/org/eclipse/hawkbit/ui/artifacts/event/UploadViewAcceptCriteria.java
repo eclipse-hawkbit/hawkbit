@@ -9,13 +9,13 @@
 package org.eclipse.hawkbit.ui.artifacts.event;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
+import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
@@ -54,7 +54,7 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, List<String>> createDropConfigurations() {
-        final Map<String, List<String>> config = new HashMap<>();
+        final Map<String, List<String>> config = Maps.newHashMapWithExpectedSize(1);
         // Delete drop area droppable components
         config.put(UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID, Arrays.asList(
                 UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
@@ -63,7 +63,7 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
-        final Map<String, Object> config = new HashMap<>();
+        final Map<String, Object> config = Maps.newHashMapWithExpectedSize(2);
         config.put(UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, UploadArtifactUIEvent.SOFTWARE_TYPE_DRAG_START);
         config.put(UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UploadArtifactUIEvent.SOFTWARE_DRAG_START);
         return config;
