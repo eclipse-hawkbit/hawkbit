@@ -29,6 +29,7 @@
       <module>hawkbit-example-ddi-feign-client</module>
       <module>hawkbit-example-mgmt-feign-client</module>
       <module>hawkbit-example-mgmt-simulator</module>
+      <module>hawkbit-example-redis</module>
    </modules>
 
    <dependencyManagement>
