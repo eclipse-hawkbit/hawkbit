@@ -594,7 +594,9 @@ public class UploadLayout extends VerticalLayout {
         // delete file system zombies
         artifactUploadState.getFileSelected().forEach(customFile -> {
             final File file = new File(customFile.getFilePath());
-            file.delete();
+            if (!file.delete()) {
+                LOG.warn("Failed to delete file {} in upload dialog", customFile.getFilePath());
+            }
         });
 
         artifactUploadState.getFileSelected().clear();
