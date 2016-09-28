@@ -21,7 +21,7 @@
    <artifactId>hawkbit-examples-parent</artifactId>
    <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
-
+   
    <modules>
       <module>hawkbit-device-simulator</module>
       <module>hawkbit-example-app</module>
@@ -36,15 +36,15 @@
       <dependencies>
          <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-dependencies</artifactId>
-            <version>Brixton.SR5</version>
+            <artifactId>spring-cloud-netflix-dependencies</artifactId>
+            <version>1.2.0.RELEASE</version>
             <type>pom</type>
             <scope>import</scope>
          </dependency>
          <dependency>
-            <groupId>com.netflix.feign</groupId>
+            <groupId>io.github.openfeign</groupId>
             <artifactId>feign-jackson</artifactId>
-            <version>8.16.2</version>
+            <version>9.3.1</version>
          </dependency>
       </dependencies>
    </dependencyManagement>
