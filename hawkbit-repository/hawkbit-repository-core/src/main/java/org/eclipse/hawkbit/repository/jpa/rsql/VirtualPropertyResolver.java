@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for
@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
  * time intervals).<br>
  * Such a virtual property needs to be calculated on Java-side before it may be
  * used in a target filter query that is passed to the database. Therefore a
- * placeholder is used in the RSQL expression that is expanded in the
- * {@link RSQLUtility}.
+ * placeholder is used in the RSQL expression that is expanded when the RSQL is
+ * parsed
  * <p>
  * A virtual property may either be a system value like the current date (aka
  * <em>now_ts</em>) or a value derived from (tenant-specific) system
@@ -41,11 +41,11 @@ import org.springframework.stereotype.Component;
  * configuration.</li>
  * </ul>
  */
-@Component
-public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyLookup {
+public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyReplacer {
 
-    @Autowired
-    private TimestampCalculator timestampCalculator;
+    private final TimestampCalculator timestampCalculator = new TimestampCalculator();
+
+    private StrSubstitutor substitutor;
 
     @Override
     public String lookup(String rhs) {
@@ -57,6 +57,15 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
             resolved = String.valueOf(getTimestampCalculator().calculateOverdueTimestamp());
         }
         return resolved;
+    }
+
+    @Override
+    public String replace(String input) {
+        if (substitutor == null) {
+            substitutor = new StrSubstitutor(this, StrSubstitutor.DEFAULT_PREFIX, StrSubstitutor.DEFAULT_SUFFIX,
+                    StrSubstitutor.DEFAULT_ESCAPE);
+        }
+        return substitutor.replace(input);
     }
 
     TimestampCalculator getTimestampCalculator() {

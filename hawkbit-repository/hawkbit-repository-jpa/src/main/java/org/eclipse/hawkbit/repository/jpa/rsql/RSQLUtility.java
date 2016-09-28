@@ -26,11 +26,11 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
@@ -99,7 +99,7 @@ public final class RSQLUtility {
      * @param fieldNameProvider
      *            the enum class type which implements the
      *            {@link FieldNameProvider}
-     * @param virtualPropertyLookup
+     * @param virtualPropertyReplacer
      *            holds the logic how the known macros have to be resolved; may
      *            be <code>null</code>
      * @return an specification which can be used with JPA
@@ -110,8 +110,8 @@ public final class RSQLUtility {
      *             if the RSQL syntax is wrong
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider, VirtualPropertyLookup virtualPropertyLookup) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyLookup);
+            final Class<A> fieldNameProvider, VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer);
     }
 
     /**
@@ -142,13 +142,13 @@ public final class RSQLUtility {
 
         private final String rsql;
         private final Class<A> enumType;
-        private final VirtualPropertyLookup virtualPropertyLookup;
+        private final VirtualPropertyReplacer virtualPropertyReplacer;
 
         private RSQLSpecification(final String rsql, final Class<A> enumType,
-                VirtualPropertyLookup virtualPropertyLookup) {
+                VirtualPropertyReplacer virtualPropertyReplacer) {
             this.rsql = rsql;
             this.enumType = enumType;
-            this.virtualPropertyLookup = virtualPropertyLookup;
+            this.virtualPropertyReplacer = virtualPropertyReplacer;
         }
 
         @Override
@@ -157,7 +157,7 @@ public final class RSQLUtility {
             final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
-                    virtualPropertyLookup);
+                    virtualPropertyReplacer);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (accept != null && !accept.isEmpty()) {
@@ -187,19 +187,16 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
-        private final StrSubstitutor substitutor;
+        private final VirtualPropertyReplacer virtualPropertyReplacer;
 
         private final SimpleTypeConverter simpleTypeConverter;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-                VirtualPropertyLookup virtualPropertyLookup) {
+                VirtualPropertyReplacer virtualPropertyReplacer) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
-            this.substitutor = (virtualPropertyLookup != null && virtualPropertyLookup instanceof StrLookup)
-                    ? new StrSubstitutor((StrLookup)virtualPropertyLookup, StrSubstitutor.DEFAULT_PREFIX,
-                            StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE)
-                    : null;
+            this.virtualPropertyReplacer = virtualPropertyReplacer;
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
@@ -446,8 +443,8 @@ public final class RSQLUtility {
 
             final String value;
             // if lookup is available, replace macros ...
-            if (substitutor != null) {
-                value = substitutor.replace(values.get(0));
+            if (virtualPropertyReplacer != null) {
+                value = virtualPropertyReplacer.replace(values.get(0));
             } else {
                 value = values.get(0);
             }

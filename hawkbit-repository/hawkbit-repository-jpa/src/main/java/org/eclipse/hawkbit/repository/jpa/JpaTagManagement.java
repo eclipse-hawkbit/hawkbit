@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyLookup;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -76,7 +76,7 @@ public class JpaTagManagement implements TagManagement {
     private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
-    private VirtualPropertyLookup virtualPropertyLookup;
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     public TargetTag findTargetTag(final String name) {
@@ -151,7 +151,7 @@ public class JpaTagManagement implements TagManagement {
     @Override
     public Page<TargetTag> findAllTargetTags(final String rsqlParam, final Pageable pageable) {
 
-        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class, virtualPropertyLookup);
+        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class, virtualPropertyReplacer);
         return convertTPage(targetTagRepository.findAll(spec, pageable), pageable);
     }
 
@@ -285,7 +285,7 @@ public class JpaTagManagement implements TagManagement {
     @Override
     public Page<DistributionSetTag> findAllDistributionSetTags(final String rsqlParam, final Pageable pageable) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
     }

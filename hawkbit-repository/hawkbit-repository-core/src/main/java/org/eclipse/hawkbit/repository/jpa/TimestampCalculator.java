@@ -15,15 +15,13 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.springframework.stereotype.Service;
 
 /**
- * Service that calculates non-persistent timestamps , e.g. the point a time a
+ * Calculates non-persistent timestamps , e.g. the point a time a
  * target is declared as overdue.<br>
  * Therefore tenant specific configuration may be considered.
  *
  */
-@Service
 public class TimestampCalculator {
 
     /**

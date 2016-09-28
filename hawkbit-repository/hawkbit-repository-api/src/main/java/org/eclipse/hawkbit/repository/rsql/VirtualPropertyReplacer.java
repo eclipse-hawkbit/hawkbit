@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.rsql;
+package org.eclipse.hawkbit.repository.rsql;
 
 /**
  * Implementations map a placeholder to the associated value.
@@ -14,15 +14,15 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
  * This is used in context of string replacement.
  */
 @FunctionalInterface
-public interface VirtualPropertyLookup {
+public interface VirtualPropertyReplacer {
 
     /**
-     * Looks up a placeholder to the associated value.
+     * Looks up a placeholders and replaces them
      *
-     * @param placeholder
-     *            the virtual property that should be resolved by a value
-     * @return the value for the placeholder; may be <code>null</code> if no
-     *         value could be found for the given placeholder;
+     * @param input
+     *            the input string in which virtual properties should be
+     *            replaced
+     * @return the result of the replacement
      */
-    String lookup(String placeholder);
+    String replace(String input);
 }

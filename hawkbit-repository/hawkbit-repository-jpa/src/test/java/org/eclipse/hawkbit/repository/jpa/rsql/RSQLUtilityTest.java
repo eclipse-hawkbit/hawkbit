@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -321,7 +322,7 @@ public class RSQLUtilityTest {
                 eq(overduePropPlaceholder));
     }
 
-    public VirtualPropertyLookup setupMacroLookup() {
+    public VirtualPropertyReplacer setupMacroLookup() {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))

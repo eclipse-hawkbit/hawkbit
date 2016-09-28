@@ -43,9 +43,8 @@ public final class FilterQueryValidation {
     /**
      * method for get ExpectedTokens.
      * 
-     * @param input
-     * @param entityManager
-     * @return
+     * @param input RSQL filter
+     * @return Validation result
      */
     public static ValidationResult getExpectedTokens(final String input) {
 

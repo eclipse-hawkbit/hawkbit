@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyLookup;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -116,7 +116,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
-    private VirtualPropertyLookup virtualPropertyLookup;
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Autowired
     @Qualifier("asyncExecutor")
@@ -155,7 +155,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Page<Rollout> findAllWithDetailedStatusByPredicate(final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaRollout> specification = RSQLUtility.parse(rsqlParam, RolloutFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
 
         final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, pageable);
         setRolloutStatusDetails(findAll);

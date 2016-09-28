@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;

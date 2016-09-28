@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyResolver;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -118,6 +120,15 @@ public class TestConfiguration implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
+    }
+
+    /**
+     *
+     * @return returns a VirtualPropertyReplacer
+     */
+    @Bean
+    public VirtualPropertyReplacer virtualPropertyReplacer() {
+        return new VirtualPropertyResolver();
     }
 
 }

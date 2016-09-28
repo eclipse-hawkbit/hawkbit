@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyLookup;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -105,7 +105,7 @@ public class JpaTargetManagement implements TargetManagement {
     private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
-    private VirtualPropertyLookup virtualPropertyLookup;
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     public Target findTargetByControllerID(final String controllerId) {
@@ -158,13 +158,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findTargetsAll(final TargetFilterQuery targetFilterQuery, final Pageable pageable) {
         return findTargetsBySpec(
-                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyLookup),
+                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer),
                 pageable);
     }
 
     @Override
     public Page<Target> findTargetsAll(final String targetFilterQuery, final Pageable pageable) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyLookup),
+        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer),
                 pageable);
     }
 
@@ -233,7 +233,7 @@ public class JpaTargetManagement implements TargetManagement {
             final Pageable pageReq) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -262,7 +262,7 @@ public class JpaTargetManagement implements TargetManagement {
             final Pageable pageable) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -566,7 +566,7 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(JpaTarget_.id),
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyLookup);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer);
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(Lists.newArrayList(spec), targetRoot,
                 multiselect, cb);
 
@@ -645,14 +645,14 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Long countTargetByTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
         return targetRepository.count(specs);
     }
 
     @Override
     public Long countTargetByTargetFilterQuery(final String targetFilterQuery) {
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
-                virtualPropertyLookup);
+                virtualPropertyReplacer);
         return targetRepository.count(specs);
     }
 
