@@ -16,10 +16,10 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
@@ -38,33 +38,43 @@ import org.springframework.context.annotation.Primary;
  */
 @Configuration
 @EnableCaching
-public class CacheAutoConfiguration extends CachingConfigurerSupport {
+public class CacheAutoConfiguration {
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    @Qualifier("directCacheManager")
+    private CacheManager directCacheManager;
 
     /**
      * @return the default cache manager bean if none other cache manager is
      *         existing.
      */
-    @Override
     @Bean
     @ConditionalOnMissingBean
     @Primary
     public TenancyCacheManager cacheManager() {
-        return new TenantAwareCacheManager(directCacheManager(), tenantAware);
+        return new TenantAwareCacheManager(directCacheManager, tenantAware);
     }
 
     /**
-     * @return the direct cache manager to access without tenant aware check,
-     *         cause in sometimes it's necessary to access the cache directly
-     *         without having the current tenant, e.g. initial creation of
-     *         tenant
+     * A configuration for the direct cache manager.
      */
-    @Bean(name = "directCacheManager")
-    @ConditionalOnMissingBean(name = "directCacheManager")
-    public CacheManager directCacheManager() {
-        return new GuavaCacheManager();
+    @Configuration
+    protected static class DirectCacheManagerConfiguration {
+        /**
+         * @return the direct cache manager to access without tenant aware
+         *         check, cause in sometimes it's necessary to access the cache
+         *         directly without having the current tenant, e.g. initial
+         *         creation of tenant
+         */
+        @Bean(name = "directCacheManager")
+        @ConditionalOnMissingBean(name = "directCacheManager")
+        public CacheManager directCacheManager() {
+            return new GuavaCacheManager();
+        }
+
     }
 
     /**
