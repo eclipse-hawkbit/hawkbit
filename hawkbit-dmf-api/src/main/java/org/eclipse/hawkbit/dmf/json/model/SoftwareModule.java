@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,7 +35,7 @@ public class SoftwareModule {
     @JsonProperty
     private String moduleVersion;
     @JsonProperty
-    private List<Artifact> artifacts = new LinkedList<>();
+    private List<Artifact> artifacts;
 
     public String getModuleType() {
         return moduleType;
@@ -54,7 +54,11 @@ public class SoftwareModule {
     }
 
     public List<Artifact> getArtifacts() {
-        return artifacts;
+        if (artifacts == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(artifacts);
     }
 
     public Long getModuleId() {

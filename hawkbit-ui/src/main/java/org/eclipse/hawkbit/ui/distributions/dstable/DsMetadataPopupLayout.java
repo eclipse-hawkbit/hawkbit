@@ -79,7 +79,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {
-        final DistributionSetMetadata dsMetaData = entityFactory.generateDistributionSetMetadata(entity, key, value);
         distributionSetManagement.deleteDistributionSetMetadata(entity, key);
     }
 

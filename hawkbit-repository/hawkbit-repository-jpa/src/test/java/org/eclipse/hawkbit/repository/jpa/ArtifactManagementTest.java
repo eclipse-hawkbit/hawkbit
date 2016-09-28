@@ -279,23 +279,23 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findArtifact(java.lang.Long)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findLocalArtifact(java.lang.Long)}
      * .
      * 
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
     @Test
-    @Description("Loads an artifact based on given ID.")
-    public void findArtifact() throws NoSuchAlgorithmException, IOException {
+    @Description("Loads an local artifact based on given ID.")
+    public void findLocalArtifact() throws NoSuchAlgorithmException, IOException {
         SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
-        final Artifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
+        final LocalArtifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
                 sm.getId(), "file1", false);
 
-        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
+        assertThat(artifactManagement.findLocalArtifact(result.getId())).isEqualTo(result);
     }
 
     /**

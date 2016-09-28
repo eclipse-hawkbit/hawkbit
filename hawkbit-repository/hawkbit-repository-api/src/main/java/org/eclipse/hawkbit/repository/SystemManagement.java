@@ -63,7 +63,8 @@ public interface SystemManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadata();
 
     /**
@@ -92,5 +93,15 @@ public interface SystemManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(@NotNull TenantMetaData metaData);
+
+    /**
+     * Returns {@link TenantMetaData} of given tenant ID.
+     *
+     * @param tenantId
+     *            to retrieve data for
+     * @return {@link TenantMetaData} of given tenant
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    TenantMetaData getTenantMetadata(@NotNull Long tenantId);
 
 }

@@ -75,24 +75,4 @@ public class JpaDistributionSetTag extends AbstractJpaTag implements Distributio
 
         return Collections.unmodifiableList(assignedToDistributionSet);
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof DistributionSetTag)) {
-            return false;
-        }
-
-        return true;
-    }
 }

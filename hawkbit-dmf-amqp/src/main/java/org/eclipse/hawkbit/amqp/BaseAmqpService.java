@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -37,6 +38,14 @@ public class BaseAmqpService {
      */
     public BaseAmqpService(final RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
+    }
+
+    protected static void checkContentTypeJson(final Message message) {
+        final MessageProperties messageProperties = message.getMessageProperties();
+        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
+            return;
+        }
+        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     /**
@@ -98,7 +107,7 @@ public class BaseAmqpService {
         return value.toString();
     }
 
-    protected final void logAndThrowMessageError(final Message message, final String error) {
+    protected static final void logAndThrowMessageError(final Message message, final String error) {
         LOGGER.warn("Warning! \"{}\" reported by message: {}", error, message);
         throw new AmqpRejectAndDontRequeueException(error);
     }

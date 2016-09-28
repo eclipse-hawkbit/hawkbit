@@ -9,8 +9,18 @@
 package org.eclipse.hawkbit.api;
 
 /**
- * Represented the supported protocols for artifact url's.
+ * hawkBit API type.
+ *
  */
-public enum UrlProtocol {
-    COAP, HTTP, HTTPS
+public enum ApiType {
+
+    /**
+     * Support for Device Management Federation API.
+     */
+    DMF,
+
+    /**
+     * Support for Direct Device Integration API.
+     */
+    DDI;
 }

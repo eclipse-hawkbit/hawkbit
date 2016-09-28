@@ -57,7 +57,11 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      * @return the actionIds
      */
     public List<Long> getActions() {
-        return actions;
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actions);
     }
 
     @Override

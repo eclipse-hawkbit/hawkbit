@@ -30,7 +30,6 @@ public class DdiConfig {
      *            configuration of the SP target
      */
     public DdiConfig(final DdiPolling polling) {
-        super();
         this.polling = polling;
     }
 

@@ -8,21 +8,16 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
  * An pre-authenticated processing filter which extracts (if enabled through
@@ -68,11 +63,12 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
 
     @Override
     public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+        final String controllerId = resolveControllerId(secruityToken);
         final String authHeader = secruityToken.getHeader(TenantSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
             LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
-            return new HeaderAuthentication(secruityToken.getControllerId(), authHeader.substring(OFFSET_TARGET_TOKEN));
+            return new HeaderAuthentication(controllerId, authHeader.substring(OFFSET_TARGET_TOKEN));
         }
         LOGGER.debug(
                 "security token filter is enabled but requst does not contain either the necessary path variables {} or the authorization header with scheme {}",
@@ -81,51 +77,36 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
-        final String securityToken = tenantAware.runAsTenant(secruityToken.getTenant(),
-                new GetSecurityTokenTenantRunner(secruityToken.getTenant(), secruityToken.getControllerId()));
-        return new HeaderAuthentication(secruityToken.getControllerId(), securityToken);
+    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken securityToken) {
+        final Target target = systemSecurityContext.runAsSystemAsTenant(() -> {
+            if (securityToken.getTargetId() != null) {
+                return controllerManagement.findByTargetId(securityToken.getTargetId());
+            }
+            return controllerManagement.findByControllerId(securityToken.getControllerId());
+        }, securityToken.getTenant());
+
+        if (target == null) {
+            return null;
+        }
+        final String targetSecurityToken = systemSecurityContext.runAsSystemAsTenant(() -> target.getSecurityToken(),
+                securityToken.getTenant());
+        return new HeaderAuthentication(target.getControllerId(), targetSecurityToken);
+    }
+
+    private String resolveControllerId(final TenantSecurityToken securityToken) {
+        if (securityToken.getControllerId() != null) {
+            return securityToken.getControllerId();
+        }
+        final Optional<Target> foundTarget = Optional.ofNullable(systemSecurityContext.runAsSystemAsTenant(
+                () -> controllerManagement.findByTargetId(securityToken.getTargetId()), securityToken.getTenant()));
+        if (!foundTarget.isPresent()) {
+            return null;
+        }
+        return foundTarget.get().getControllerId();
     }
 
     @Override
     protected TenantConfigurationKey getTenantConfigurationKey() {
         return TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED;
-    }
-
-    private final class GetSecurityTokenTenantRunner implements TenantAware.TenantRunner<String> {
-
-        private final String controllerId;
-        private final String tenant;
-
-        private GetSecurityTokenTenantRunner(final String tenant, final String controllerId) {
-            this.tenant = tenant;
-            this.controllerId = controllerId;
-        }
-
-        @Override
-        public String run() {
-            LOGGER.trace("retrieving security token for controllerId {}", controllerId);
-            final SecurityContext oldContext = SecurityContextHolder.getContext();
-            try {
-                SecurityContextHolder.setContext(getSecurityTokenReadContext());
-                return controllerManagement.getSecurityTokenByControllerId(controllerId);
-            } finally {
-                SecurityContextHolder.setContext(oldContext);
-            }
-        }
-
-        private SecurityContext getSecurityTokenReadContext() {
-            final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
-            securityContextImpl.setAuthentication(getSecurityTokenReadAuthentication());
-            return securityContextImpl;
-        }
-
-        private Authentication getSecurityTokenReadAuthentication() {
-            final AnonymousAuthenticationToken anonymousAuthenticationToken = new AnonymousAuthenticationToken(
-                    "anonymous-read-security-token", "anonymous", com.google.common.collect.Lists
-                            .newArrayList(new SimpleGrantedAuthority(SpPermission.READ_TARGET_SEC_TOKEN)));
-            anonymousAuthenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
-            return anonymousAuthenticationToken;
-        }
     }
 }
