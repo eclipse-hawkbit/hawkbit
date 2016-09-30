@@ -74,8 +74,13 @@ public class ActionUpdateStatus {
     }
 
     public boolean addMessage(final Collection<String> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return false;
+        }
+
         if (this.message == null) {
-            this.message = new ArrayList<>();
+            this.message = new ArrayList<>(messages);
+            return true;
         }
 
         return this.message.addAll(messages);
