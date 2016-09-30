@@ -48,7 +48,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Version
     @Column(name = "optlock_revision")
-    private long optLockRevision;
+    private int optLockRevision;
 
     /**
      * Default constructor needed for JPA entities.
@@ -106,11 +106,11 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     @Override
-    public long getOptLockRevision() {
+    public int getOptLockRevision() {
         return optLockRevision;
     }
 
-    public void setOptLockRevision(final long optLockRevision) {
+    public void setOptLockRevision(final int optLockRevision) {
         this.optLockRevision = optLockRevision;
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         final int prime = 31;
         int result = 1;
         result = prime * result + (id == null ? 0 : id.hashCode());
-        result = prime * result + (int) (optLockRevision ^ optLockRevision >>> 32);
+        result = prime * result + optLockRevision;
         result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
@@ -179,5 +179,4 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         return true;
     }
 
-    
 }

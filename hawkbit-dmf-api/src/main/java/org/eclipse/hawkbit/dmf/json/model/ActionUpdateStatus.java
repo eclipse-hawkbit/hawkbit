@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.dmf.json.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,9 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of action update status.
- * 
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,7 +30,7 @@ public class ActionUpdateStatus {
     @JsonProperty(required = true)
     private ActionStatus actionStatus;
     @JsonProperty
-    private final List<String> message = new ArrayList<>();
+    private List<String> message;
 
     public Long getActionId() {
         return actionId;
@@ -59,7 +57,19 @@ public class ActionUpdateStatus {
     }
 
     public List<String> getMessage() {
-        return message;
+        if (message == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(message);
+    }
+
+    public boolean addMessage(final String message) {
+        if (this.message == null) {
+            this.message = new ArrayList<>();
+        }
+
+        return this.message.add(message);
     }
 
 }

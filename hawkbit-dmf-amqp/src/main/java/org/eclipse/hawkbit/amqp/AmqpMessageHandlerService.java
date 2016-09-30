@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -18,68 +17,45 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.cache.CacheConstants;
-import org.eclipse.hawkbit.cache.DownloadArtifactCache;
-import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.dmf.json.model.Artifact;
-import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  *
- * {@link AmqpMessageHandlerService} handles all incoming AMQP messages for the
- * queue which is configure for the property hawkbit.dmf.rabbitmq.receiverQueue.
+ * {@link AmqpMessageHandlerService} handles all incoming target interaction
+ * AMQP messages (e.g. create target, check for updates etc.) for the queue
+ * which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
  *
  */
 public class AmqpMessageHandlerService extends BaseAmqpService {
@@ -88,40 +64,29 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
-    @Autowired
-    private ControllerManagement controllerManagement;
+    private final ControllerManagement controllerManagement;
 
-    @Autowired
-    private AmqpControllerAuthentication authenticationManager;
-
-    @Autowired
-    private ArtifactManagement artifactManagement;
-
-    @Autowired
-    @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
-    private Cache cache;
-
-    @Autowired
-    private HostnameResolver hostnameResolver;
-
-    @Autowired
-    private EntityFactory entityFactory;
-
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final EntityFactory entityFactory;
 
     /**
      * Constructor.
      * 
-     * @param defaultTemplate
-     *            the configured amqp template.
+     * @param rabbitTemplate
+     *            for converting messages
      * @param amqpMessageDispatcherService
      *            to sending events to DMF client
+     * @param controllerManagement
+     *            for target repo access
+     * @param entityFactory
+     *            to create entities
      */
-    public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate,
-            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
-        super(defaultTemplate);
+    public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+            final AmqpMessageDispatcherService amqpMessageDispatcherService,
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+        super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
+        this.controllerManagement = controllerManagement;
+        this.entityFactory = entityFactory;
     }
 
     /**
@@ -140,28 +105,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
-    }
-
-    /**
-     * Executed on a authentication request.
-     * 
-     * @param message
-     *            the amqp message
-     * @return the rpc message back to supplier.
-     */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
-    public Message onAuthenticationRequest(final Message message) {
-        checkContentTypeJson(message);
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        try {
-            return handleAuthentifiactionMessage(message);
-        } catch (final IllegalArgumentException ex) {
-            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException | TooManyStatusEntriesException e) {
-            throw new AmqpRejectAndDontRequeueException(e);
-        } finally {
-            SecurityContextHolder.setContext(oldContext);
-        }
     }
 
     /**
@@ -204,108 +147,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             SecurityContextHolder.setContext(oldContext);
         }
         return null;
-    }
-
-    private Message handleAuthentifiactionMessage(final Message message) {
-        final DownloadResponse authentificationResponse = new DownloadResponse();
-        final MessageProperties messageProperties = message.getMessageProperties();
-        final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
-        final FileResource fileResource = secruityToken.getFileResource();
-        try {
-            SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
-
-            final LocalArtifact localArtifact = findLocalArtifactByFileResource(fileResource);
-
-            if (localArtifact == null) {
-                LOG.info("target {} requested file resource {} which does not exists to download",
-                        secruityToken.getControllerId(), fileResource);
-                throw new EntityNotFoundException();
-            }
-
-            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact);
-
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadLocalArtifactBinary(localArtifact));
-            if (artifact == null) {
-                throw new EntityNotFoundException();
-            }
-            authentificationResponse.setArtifact(artifact);
-            final String downloadId = UUID.randomUUID().toString();
-            // SHA1 key is set, download by SHA1
-            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1,
-                    localArtifact.getSha1Hash());
-            cache.put(downloadId, downloadCache);
-            authentificationResponse
-                    .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
-                            .path("/api/v1/downloadserver/downloadId/").path(downloadId).build().toUriString());
-            authentificationResponse.setResponseCode(HttpStatus.OK.value());
-        } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
-            LOG.error("Login failed", e);
-            authentificationResponse.setResponseCode(HttpStatus.FORBIDDEN.value());
-            authentificationResponse.setMessage("Login failed");
-        } catch (final URISyntaxException e) {
-            LOG.error("URI build exception", e);
-            authentificationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            authentificationResponse.setMessage("Building download URI failed");
-        } catch (final EntityNotFoundException e) {
-            final String errorMessage = "Artifact for resource " + fileResource + "not found ";
-            LOG.warn(errorMessage, e);
-            authentificationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
-            authentificationResponse.setMessage(errorMessage);
-        }
-
-        return getMessageConverter().toMessage(authentificationResponse, messageProperties);
-    }
-
-    /**
-     * check action for this download purposes, the method will throw an
-     * EntityNotFoundException in case the controller is not allowed to download
-     * this file because it's not assigned to an action and not assigned to this
-     * controller. Otherwise no controllerId is set = anonymous download
-     * 
-     * @param secruityToken
-     *            the security token which holds the target ID to check on
-     * @param localArtifact
-     *            the local artifact to verify if the given target is allowed to
-     *            download this artifact
-     */
-    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
-            final LocalArtifact localArtifact) {
-        final String controllerId = secruityToken.getControllerId();
-        if (controllerId == null) {
-            LOG.info("anonymous download no authentication check for artifact {}", localArtifact);
-            return;
-        }
-        LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
-                controllerId, localArtifact);
-        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
-            LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
-                    localArtifact);
-            throw new EntityNotFoundException();
-        }
-        LOG.info("download security check for target {} and artifact {} granted", controllerId, localArtifact);
-    }
-
-    private LocalArtifact findLocalArtifactByFileResource(final FileResource fileResource) {
-        if (fileResource.getSha1() != null) {
-            return artifactManagement.findFirstLocalArtifactsBySHA1(fileResource.getSha1());
-        } else if (fileResource.getFilename() != null) {
-            return artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream().findFirst()
-                    .orElse(null);
-        } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
-            return artifactManagement
-                    .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
-                            fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
-                    .stream().findFirst().orElse(null);
-        }
-        return null;
-    }
-
-    private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
-        final Artifact artifact = new Artifact();
-        artifact.setSize(dbArtifact.getSize());
-        final DbArtifactHash dbArtifactHash = dbArtifact.getHashes();
-        artifact.setHashes(new ArtifactHash(dbArtifactHash.getSha1(), dbArtifactHash.getMd5()));
-        return artifact;
     }
 
     private static void setSecurityContext(final Authentication authentication) {
@@ -361,10 +202,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DistributionSet distributionSet = action.get().getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
-        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getOptLockRevision(), target.getTenant(), target.getControllerId(), action.get().getId(),
-                softwareModuleList, target.getTargetInfo().getAddress(), targetSecurityToken));
+                target.getOptLockRevision(), target.getTenant(), target, action.get().getId(), softwareModuleList));
 
     }
 
@@ -481,7 +320,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return action;
     }
 
-    private void handleCancelRejected(final Message message, final Action action, final ActionStatus actionStatus) {
+    private static void handleCancelRejected(final Message message, final Action action,
+            final ActionStatus actionStatus) {
         if (action.isCancelingOrCanceled()) {
 
             actionStatus.setStatus(Status.WARNING);
@@ -495,39 +335,4 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private static void checkContentTypeJson(final Message message) {
-        final MessageProperties messageProperties = message.getMessageProperties();
-        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
-            return;
-        }
-        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
-    }
-
-    void setControllerManagement(final ControllerManagement controllerManagement) {
-        this.controllerManagement = controllerManagement;
-    }
-
-    void setHostnameResolver(final HostnameResolver hostnameResolver) {
-        this.hostnameResolver = hostnameResolver;
-    }
-
-    void setAuthenticationManager(final AmqpControllerAuthentication authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-
-    void setArtifactManagement(final ArtifactManagement artifactManagement) {
-        this.artifactManagement = artifactManagement;
-    }
-
-    void setCache(final Cache cache) {
-        this.cache = cache;
-    }
-
-    void setEntityFactory(final EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
-    }
-
-    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
-        this.systemSecurityContext = systemSecurityContext;
-    }
 }

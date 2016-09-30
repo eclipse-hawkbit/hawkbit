@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +15,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import com.google.common.collect.Lists;
+
 /**
  *
  * A controller which handles the DMF AMQP authentication.
@@ -42,9 +44,11 @@ public class AmqpControllerAuthentication {
 
     private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider = new PreAuthTokenSourceTrustAuthenticationProvider();
 
-    private final List<PreAuthentificationFilter> filterChain = new ArrayList<>();
+    private List<PreAuthentificationFilter> filterChain;
 
     private final ControllerManagement controllerManagement;
+
+    private final SystemManagement systemManagement;
 
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
@@ -57,6 +61,7 @@ public class AmqpControllerAuthentication {
     /**
      * Constructor.
      * 
+     * @param systemManagement
      * @param controllerManagement
      * @param tenantConfigurationManagement
      * @param tenantAware
@@ -66,10 +71,12 @@ public class AmqpControllerAuthentication {
      * @param systemSecurityContext
      *            security context
      */
-    public AmqpControllerAuthentication(final ControllerManagement controllerManagement,
+    public AmqpControllerAuthentication(final SystemManagement systemManagement,
+            final ControllerManagement controllerManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
             final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
         this.controllerManagement = controllerManagement;
+        this.systemManagement = systemManagement;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantAware = tenantAware;
         this.ddiSecruityProperties = ddiSecruityProperties;
@@ -85,6 +92,8 @@ public class AmqpControllerAuthentication {
     }
 
     private void addFilter() {
+        filterChain = Lists.newArrayListWithExpectedSize(5);
+
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(gatewaySecurityTokenFilter);
@@ -106,13 +115,15 @@ public class AmqpControllerAuthentication {
     }
 
     /**
-     * Performs authentication with the secruity token.
+     * Performs authentication with the security token.
      *
      * @param secruityToken
      *            the authentication request object
-     * @return the authentfication object
+     * @return the authentication object
      */
     public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
+        resolveTenant(secruityToken);
+
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
         for (final PreAuthentificationFilter filter : filterChain) {
             final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
@@ -123,6 +134,14 @@ public class AmqpControllerAuthentication {
             }
         }
         return preAuthenticatedAuthenticationProvider.authenticate(authentication);
+
+    }
+
+    private void resolveTenant(final TenantSecurityToken securityToken) {
+        if (securityToken.getTenant() == null) {
+            securityToken.setTenant(systemSecurityContext
+                    .runAsSystem(() -> systemManagement.getTenantMetadata(securityToken.getTenantId()).getTenant()));
+        }
 
     }
 

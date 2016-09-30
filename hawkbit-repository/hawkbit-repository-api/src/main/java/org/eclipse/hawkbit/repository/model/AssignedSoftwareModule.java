@@ -60,7 +60,7 @@ public class AssignedSoftwareModule implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (assigned ? 1231 : 1237);
-        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
+        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
         return result;
     }
 
@@ -72,7 +72,7 @@ public class AssignedSoftwareModule implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof AssignedSoftwareModule)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final AssignedSoftwareModule other = (AssignedSoftwareModule) obj;

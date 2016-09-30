@@ -26,7 +26,7 @@ public abstract class AbstractJpaMetaData implements MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "meta_key", length = 128)
+    @Column(name = "meta_key", nullable = false, length = 128)
     @Size(min = 1, max = 128)
     @NotNull
     private String key;
@@ -37,7 +37,6 @@ public abstract class AbstractJpaMetaData implements MetaData {
     private String value;
 
     public AbstractJpaMetaData(final String key, final String value) {
-        super();
         this.key = key;
         this.value = value;
     }

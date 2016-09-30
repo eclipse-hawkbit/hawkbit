@@ -9,11 +9,12 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.google.common.collect.Maps;
 
 /**
  * Bean which holds the necessary properties for configuring the AMQP deadletter
@@ -21,12 +22,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("hawkbit.dmf.rabbitmq.deadLetter")
 public class AmqpDeadletterProperties {
+    private static final int THREE_WEEKS = 21;
 
     /**
      * Message time to live (ttl) for the deadletter queue. Default ttl is 3
      * weeks.
      */
-    private long ttl = Duration.ofDays(21).toMillis();
+    private long ttl = Duration.ofDays(THREE_WEEKS).toMillis();
 
     /**
      * Return the deadletter arguments.
@@ -36,7 +38,7 @@ public class AmqpDeadletterProperties {
      * @return map which holds the properties
      */
     public Map<String, Object> getDeadLetterExchangeArgs(final String exchange) {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
         args.put("x-dead-letter-exchange", exchange);
         return args;
     }
@@ -53,7 +55,7 @@ public class AmqpDeadletterProperties {
     }
 
     private Map<String, Object> getTTLArgs() {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
         args.put("x-message-ttl", getTtl());
         return args;
     }

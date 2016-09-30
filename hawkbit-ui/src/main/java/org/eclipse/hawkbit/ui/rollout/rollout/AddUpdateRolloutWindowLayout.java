@@ -43,10 +43,10 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -610,25 +610,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         @Override
         public void validate(final Object value) {
-            try {
-                if (isNoOfGroupsOrTargetFilterEmpty()) {
-                    uiNotification
-                            .displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
-                } else {
-                    if (value != null) {
-                        final int groupSize = getGroupSize();
-                        new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0,
-                                groupSize).validate(Integer.valueOf(value.toString()));
-                    }
+            if (isNoOfGroupsOrTargetFilterEmpty()) {
+                uiNotification.displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
+            } else {
+                if (value != null) {
+                    final int groupSize = getGroupSize();
+                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
+                            .validate(Integer.valueOf(value.toString()));
                 }
-            }
-            // suppress the need of preserve original exception, will blow
-            // up the
-            // log and not necessary here
-            catch (final InvalidValueException ex) {
-                // we have to throw the exception here, otherwise the UI won't
-                // show the vaadin validation error!
-                throw ex;
             }
         }
 
@@ -648,19 +637,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         @Override
         public void validate(final Object value) {
-            try {
-                if (value != null) {
-                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
-                            .validate(Integer.valueOf(value.toString()));
-                }
-            }
-            // suppress the need of preserve original exception, will blow
-            // up the
-            // log and not necessary here
-            catch (final InvalidValueException ex) {
-                // we have to throw the exception here, otherwise the UI won't
-                // show the vaadin validation error!
-                throw ex;
+            if (value != null) {
+                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
+                        .validate(Integer.valueOf(value.toString()));
             }
         }
     }
@@ -670,19 +649,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         @Override
         public void validate(final Object value) {
-            try {
-                if (value != null) {
-                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
-                            .validate(Integer.valueOf(value.toString()));
-                }
-            }
-            // suppress the need of preserve original exception, will blow
-            // up the
-            // log and not necessary here
-            catch (final InvalidValueException ex) {
-                // we have to throw the exception here, otherwise the UI won't
-                // show the vaadin validation error!
-                throw ex;
+            if (value != null) {
+                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
+                        .validate(Integer.valueOf(value.toString()));
             }
         }
     }

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,14 +83,22 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return {@link List} of assigned entity.
      */
     public List<T> getAssignedEntity() {
-        return assignedEntity;
+        if (assignedEntity == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(assignedEntity);
     }
 
     /**
      * @return {@link List} of unassigned entity.
      */
     public List<T> getUnassignedEntity() {
-        return unassignedEntity;
+        if (unassignedEntity == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(unassignedEntity);
     }
 
 }

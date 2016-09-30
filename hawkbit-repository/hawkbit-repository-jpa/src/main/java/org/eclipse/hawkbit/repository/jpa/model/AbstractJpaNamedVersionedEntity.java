@@ -47,7 +47,7 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
     }
 
     AbstractJpaNamedVersionedEntity() {
-        super();
+        // Default constructor needed for JPA entities
     }
 
     @Override

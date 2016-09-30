@@ -34,6 +34,8 @@ public class RolloutGroupCreatedEvent extends AbstractDistributedEvent {
      *            the revision of the event
      * @param rolloutId
      *            the ID of the rollout the group has been created
+     * @param rolloutGroupId
+     *            identifier of this group
      * @param totalRolloutGroup
      *            the total number of rollout groups for this rollout
      * @param createdRolloutGroup

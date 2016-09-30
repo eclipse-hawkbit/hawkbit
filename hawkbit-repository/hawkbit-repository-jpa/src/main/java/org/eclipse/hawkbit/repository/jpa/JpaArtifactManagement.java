@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -194,7 +193,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findArtifact(final Long id) {
+    public LocalArtifact findLocalArtifact(final Long id) {
         return localArtifactRepository.findOne(id);
     }
 

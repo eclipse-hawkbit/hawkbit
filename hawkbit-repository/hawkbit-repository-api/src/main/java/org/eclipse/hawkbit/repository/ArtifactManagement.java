@@ -208,15 +208,16 @@ public interface ArtifactManagement {
     void deleteLocalArtifact(@NotNull Long id);
 
     /**
-     * Searches for {@link Artifact} with given {@link Identifiable}.
+     * Searches for {@link LocalArtifact} with given {@link Identifiable}.
      *
      * @param id
      *            to search for
-     * @return found {@link Artifact} or <code>null</code> is it could not be
-     *         found.
+     * @return found {@link LocalArtifact} or <code>null</code> is it could not
+     *         be found.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Artifact findArtifact(@NotNull Long id);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
+    LocalArtifact findLocalArtifact(@NotNull Long id);
 
     /**
      * Find by artifact by software module id and filename.

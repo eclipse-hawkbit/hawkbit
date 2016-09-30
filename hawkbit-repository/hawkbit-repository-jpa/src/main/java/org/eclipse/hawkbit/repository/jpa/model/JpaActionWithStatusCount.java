@@ -59,7 +59,7 @@ public class JpaActionWithStatusCount implements ActionWithStatusCount {
     // Exception squid:S00107 - needed this way for JPA to fill the view
     @SuppressWarnings("squid:S00107")
     public JpaActionWithStatusCount(final Long actionId, final ActionType actionType, final boolean active,
-            final long forcedTime, final Status status, final Long actionCreatedAt, final Long actionLastModifiedAt,
+            final Long forcedTime, final Status status, final Long actionCreatedAt, final Long actionLastModifiedAt,
             final Long dsId, final String dsName, final String dsVersion, final Long actionStatusCount,
             final String rolloutName) {
         this.dsId = dsId;
