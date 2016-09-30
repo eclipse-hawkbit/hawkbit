@@ -112,39 +112,38 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     private static List<SuggestToken> getNextTokens(final Exception e) {
         final ParseException parseException = findParseException(e);
-        if (parseException != null) {
-            final List<SuggestToken> listTokens = new ArrayList<>();
-            final ParseExceptionWrapper parseExceptionWrapper = new ParseExceptionWrapper(parseException);
-            final int[][] expectedTokenSequence = parseExceptionWrapper.getExpectedTokenSequence();
-            final TokenWrapper currentToken = parseExceptionWrapper.getCurrentToken();
-            final TokenWrapper nextToken = currentToken.getNext();
-            final int currentTokenKind = currentToken.getKind();
-            final String currentTokenImageName = currentToken.getImage();
-            final int nextTokenBeginColumn = nextToken.getBeginColumn();
-            final int currentTokenEndColumn = currentToken.getEndColumn();
-
-            // token == 5 is the field token, reverse engineering.
-            if (currentTokenKind == 5) {
-                final Optional<List<SuggestToken>> handleFieldTokenSuggestion = handleFieldTokenSuggestion(
-                        currentTokenImageName, nextTokenBeginColumn, currentTokenEndColumn);
-                if (handleFieldTokenSuggestion.isPresent()) {
-                    return handleFieldTokenSuggestion.get();
-                }
-            }
-
-            for (final int[] is : expectedTokenSequence) {
-                for (final int i : is) {
-                    final Collection<String> tokenImage = TokenDescription.getTokenImage(i);
-                    if (tokenImage != null && !tokenImage.isEmpty()) {
-                        tokenImage.forEach(image -> listTokens.add(new SuggestToken(currentTokenEndColumn + 1,
-                                nextTokenBeginColumn + image.length(), null, image)));
-                    }
-                }
-            }
-            return listTokens;
+        if (parseException == null) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        final List<SuggestToken> listTokens = new ArrayList<>();
+        final ParseExceptionWrapper parseExceptionWrapper = new ParseExceptionWrapper(parseException);
+        final int[][] expectedTokenSequence = parseExceptionWrapper.getExpectedTokenSequence();
+        final TokenWrapper currentToken = parseExceptionWrapper.getCurrentToken();
+        final TokenWrapper nextToken = currentToken.getNext();
+        final int currentTokenKind = currentToken.getKind();
+        final String currentTokenImageName = currentToken.getImage();
+        final int nextTokenBeginColumn = nextToken.getBeginColumn();
+        final int currentTokenEndColumn = currentToken.getEndColumn();
 
+        // token == 5 is the field token, reverse engineering.
+        if (currentTokenKind == 5) {
+            final Optional<List<SuggestToken>> handleFieldTokenSuggestion = handleFieldTokenSuggestion(
+                    currentTokenImageName, nextTokenBeginColumn, currentTokenEndColumn);
+            if (handleFieldTokenSuggestion.isPresent()) {
+                return handleFieldTokenSuggestion.get();
+            }
+        }
+
+        for (final int[] is : expectedTokenSequence) {
+            for (final int i : is) {
+                final Collection<String> tokenImage = TokenDescription.getTokenImage(i);
+                if (tokenImage != null && !tokenImage.isEmpty()) {
+                    tokenImage.forEach(image -> listTokens.add(new SuggestToken(currentTokenEndColumn + 1,
+                            nextTokenBeginColumn + image.length(), null, image)));
+                }
+            }
+        }
+        return listTokens;
     }
 
     private static Optional<List<SuggestToken>> handleFieldTokenSuggestion(final String currentTokenImageName,
@@ -193,9 +192,9 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     }
 
     private static ParseException findParseException(final Throwable e) {
-        if (e != null && e instanceof ParseException) {
+        if (e instanceof ParseException) {
             return (ParseException) e;
-        } else if (e != null && e.getCause() != null) {
+        } else if (e.getCause() != null) {
             return findParseException(e.getCause());
         }
         return null;
@@ -203,24 +202,31 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     private static String getCustomMessage(final String message, final List<SuggestToken> expectedTokens) {
         String builder = message;
-        if (message.contains(":")) {
-            builder = message.substring(message.indexOf(':') + 1, message.length());
-            if (builder.indexOf("Was expecting") != -1) {
-                builder = builder.substring(0, builder.lastIndexOf("Was expecting"));
-            }
-            if (null != expectedTokens && !expectedTokens.isEmpty()) {
-                final StringBuilder tokens = new StringBuilder();
-                expectedTokens.stream().forEach(value -> tokens.append(value.getSuggestion() + ","));
-                builder = builder.concat("Was expecting :" + tokens.toString().substring(0, tokens.length() - 1));
-            }
-            builder = builder.replace('\r', ' ');
-            builder = builder.replace('\n', ' ');
-            builder = builder.replaceAll(">", " ");
-            builder = builder.replaceAll("<", " ");
+
+        if (!message.contains(":")) {
+            return builder;
         }
+
+        builder = message.substring(message.indexOf(':') + 1, message.length());
+        if (builder.indexOf("Was expecting") != -1) {
+            builder = builder.substring(0, builder.lastIndexOf("Was expecting"));
+        }
+
+        if (expectedTokens != null && !expectedTokens.isEmpty()) {
+            final StringBuilder tokens = new StringBuilder();
+            expectedTokens.stream().forEach(value -> tokens.append(value.getSuggestion() + ","));
+            builder = builder.concat("Was expecting :" + tokens.toString().substring(0, tokens.length() - 1));
+        }
+        builder = builder.replace('\r', ' ');
+        builder = builder.replace('\n', ' ');
+        builder = builder.replaceAll(">", " ");
+        builder = builder.replaceAll("<", " ");
+
         return builder;
     }
 
+    // Token map with logical and comparator operator that are used for context
+    // sensitive help on search query.
     private static final class TokenDescription {
 
         private static final Multimap<Integer, String> TOKEN_MAP = ArrayListMultimap.create();
@@ -264,18 +270,17 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         }
 
         private static boolean hasSubEntries(final String tokenImageName) {
-            final String tmpTokenName;
+            String tmpTokenName = tokenImageName;
             if (tokenImageName.contains(".")) {
                 final String[] split = tokenImageName.split("\\.");
-                if (split.length > 0) {
-                    tmpTokenName = split[0];
-                } else {
+                if (split.length <= 0) {
                     return false;
                 }
-            } else {
-                tmpTokenName = tokenImageName;
+                tmpTokenName = split[0];
             }
-            return Arrays.stream(TargetFields.values()).filter(field -> field.toString().equalsIgnoreCase(tmpTokenName))
+            final String finalTmpTokenName = tmpTokenName;
+            return Arrays.stream(TargetFields.values())
+                    .filter(field -> field.toString().equalsIgnoreCase(finalTmpTokenName))
                     .map(field -> field.getSubEntityAttributes()).flatMap(subentities -> subentities.stream())
                     .count() > 0;
         }
@@ -296,16 +301,18 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         }
 
         private static boolean containsValue(final String imageName) {
-            if (imageName.contains(".")) {
-                final String[] split = imageName.split("\\.");
-                if (split.length > 1 && FIELD_NAMES.contains(split[0].toLowerCase())) {
-                    return SUB_NAMES.get(split[0].toLowerCase()).stream()
-                            .filter(subname -> new String(split[0] + "." + subname).equalsIgnoreCase(imageName))
-                            .count() > 0;
-                }
+            if (!imageName.contains(".")) {
+                return FIELD_NAMES.stream().filter(value -> value.equalsIgnoreCase(imageName)).count() > 0;
+            }
+            final String[] split = imageName.split("\\.");
+            if (split.length > 1 && FIELD_NAMES.contains(split[0].toLowerCase())) {
+                return SUB_NAMES.get(split[0].toLowerCase()).stream()
+                        .filter(subname -> new String(split[0] + "." + subname).equalsIgnoreCase(imageName))
+                        .count() > 0;
             }
             return FIELD_NAMES.stream().filter(value -> value.equalsIgnoreCase(imageName)).count() > 0;
         }
+
     }
 
 }
