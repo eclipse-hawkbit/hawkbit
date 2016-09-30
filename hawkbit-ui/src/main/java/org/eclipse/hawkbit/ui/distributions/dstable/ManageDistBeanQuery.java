@@ -41,12 +41,12 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     private static final long serialVersionUID = 5176481314404662215L;
     private Sort sort = new Sort(Direction.ASC, "createdAt");
-    private String searchText = null;
+    private String searchText;
     private transient DistributionSetManagement distributionSetManagement;
-    private transient Page<DistributionSet> firstPageDistributionSets = null;
+    private transient Page<DistributionSet> firstPageDistributionSets;
 
-    private DistributionSetType distributionSetType = null;
-    private Boolean dsComplete = null;
+    private DistributionSetType distributionSetType;
+    private Boolean dsComplete;
 
     /**
      *

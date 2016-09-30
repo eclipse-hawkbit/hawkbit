@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -35,7 +36,7 @@ import static org.junit.Assert.*;
  */
 @Features("Component Tests - Repository")
 @Stories("Target Filter Query Management")
-public class TargetFilterQueryManagenmentTest extends AbstractJpaIntegrationTest {
+public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test creation of target filter query.")
@@ -61,6 +62,15 @@ public class TargetFilterQueryManagenmentTest extends AbstractJpaIntegrationTest
                 .findTargetFilterQueryByFilter(new PageRequest(0, 10), "name==" + filterName).getContent();
         assertEquals("Search result should have 1 result", 1, results.size());
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery, results.get(0));
+    }
+
+    @Test(expected = RSQLParameterUnsupportedFieldException.class)
+    @Description("Test searching a target filter query with an invalid filter.")
+    public void searchTargetFilterQueryInvalidField() {
+        // Should throw an exception
+        targetFilterQueryManagement.findTargetFilterQueryByFilter(new PageRequest(0, 10), "unknownField==testValue")
+                .getContent();
+
     }
 
     @Test

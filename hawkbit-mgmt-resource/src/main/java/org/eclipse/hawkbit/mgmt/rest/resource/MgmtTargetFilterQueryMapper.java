@@ -11,8 +11,9 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -33,34 +35,27 @@ public final class MgmtTargetFilterQueryMapper {
     }
 
     /**
-     * Create a response for targets.
+     * Create a response for target filter queries.
      *
      * @param filters
      *            list of targets
      * @return the response
      */
-    public static List<MgmtTargetFilterQuery> toResponse(final Iterable<TargetFilterQuery> filters) {
-        final List<MgmtTargetFilterQuery> mappedList = new ArrayList<>();
-        if (filters != null) {
-            for (final TargetFilterQuery filter : filters) {
-                final MgmtTargetFilterQuery response = toResponse(filter);
-                mappedList.add(response);
-            }
+    public static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters) {
+        if (CollectionUtils.isEmpty(filters)) {
+            return Collections.emptyList();
         }
-        return mappedList;
+        return filters.stream().map(MgmtTargetFilterQueryMapper::toResponse).collect(Collectors.toList());
     }
 
     /**
-     * Create a response for target.
+     * Create a response for target filter query.
      *
      * @param filter
      *            the target
      * @return the response
      */
     public static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter) {
-        if (filter == null) {
-            return null;
-        }
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
@@ -78,7 +73,9 @@ public final class MgmtTargetFilterQueryMapper {
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withRel("self"));
-        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).postAssignedDistributionSet(filter.getId(),null)).withRel("autoAssignDS"));
+        targetRest.add(
+                linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).postAssignedDistributionSet(filter.getId(), null))
+                        .withRel("autoAssignDS"));
 
         return targetRest;
     }

@@ -236,8 +236,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
         DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -247,10 +245,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<TargetFilterQuery> targetFilterQueries;
         if (rsqlParam != null) {
-            targetFilterQueries = this.targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
+            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
                     distributionSet, rsqlParam);
         } else {
-            targetFilterQueries = this.targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
+            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
                     distributionSet);
         }
 

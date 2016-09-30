@@ -78,13 +78,13 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<TargetFilterQuery> findFilterPage = this.filterManagement
+            final Page<TargetFilterQuery> findFilterPage = filterManagement
                     .findTargetFilterQueryByFilter(pageable, rsqlParam);
             countTargetsAll = findFilterPage.getTotalElements();
             findTargetFiltersAll = findFilterPage;
         } else {
-            findTargetFiltersAll = this.filterManagement.findAllTargetFilterQuery(pageable);
-            countTargetsAll = this.filterManagement.countAllTargetFilterQuery();
+            findTargetFiltersAll = filterManagement.findAllTargetFilterQuery(pageable);
+            countTargetsAll = filterManagement.countAllTargetFilterQuery();
         }
 
         final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper
@@ -94,7 +94,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter) {
-        final TargetFilterQuery createdTarget = this.filterManagement
+        final TargetFilterQuery createdTarget = filterManagement
                 .createTargetFilterQuery(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(createdTarget), HttpStatus.CREATED);
@@ -113,7 +113,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             existingFilter.setQuery(targetFilterRest.getQuery());
         }
 
-        final TargetFilterQuery updateFilter = this.filterManagement.updateTargetFilterQuery(existingFilter);
+        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(existingFilter);
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
@@ -121,7 +121,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-        this.filterManagement.deleteTargetFilterQuery(filter.getId());
+        filterManagement.deleteTargetFilterQuery(filter.getId());
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -139,7 +139,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
         filter.setAutoAssignDistributionSet(distributionSet);
 
-        final TargetFilterQuery updateFilter = this.filterManagement.updateTargetFilterQuery(filter);
+        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filter);
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
@@ -149,12 +149,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
         DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
         MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
-        final HttpStatus retStatus;
-        if (distributionSetRest == null) {
-            retStatus = HttpStatus.NO_CONTENT;
-        } else {
-            retStatus = HttpStatus.OK;
-        }
+        final HttpStatus retStatus = distributionSetRest == null ? HttpStatus.NO_CONTENT : HttpStatus.OK;
         return new ResponseEntity<>(distributionSetRest, retStatus);
     }
 
@@ -164,13 +159,13 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
         filter.setAutoAssignDistributionSet(null);
 
-        this.filterManagement.updateTargetFilterQuery(filter);
+        filterManagement.updateTargetFilterQuery(filter);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        final TargetFilterQuery filter = this.filterManagement.findTargetFilterQueryById(filterId);
+        final TargetFilterQuery filter = filterManagement.findTargetFilterQueryById(filterId);
         if (filter == null) {
             throw new EntityNotFoundException("TargetFilterQuery with Id {" + filterId + "} does not exist");
         }

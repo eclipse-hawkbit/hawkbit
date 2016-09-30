@@ -56,7 +56,7 @@ public class TargetFilterQueryDetailsTable extends Table {
      */
     public void populateTableByDistributionSet(final DistributionSet distributionSet) {
         removeAllItems();
-        if (null == distributionSet) {
+        if (distributionSet == null) {
             return;
         }
 

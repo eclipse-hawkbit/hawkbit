@@ -32,9 +32,8 @@ public class MgmtTargetFilterQueryRequestBody {
      * @param name
      *            the name to set
      */
-    public MgmtTargetFilterQueryRequestBody setName(final String name) {
+    public void setName(final String name) {
         this.name = name;
-        return this;
     }
 
     /**
