@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.dmf.json.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,6 +71,19 @@ public class ActionUpdateStatus {
         }
 
         return this.message.add(message);
+    }
+
+    public boolean addMessage(final Collection<String> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return false;
+        }
+
+        if (this.message == null) {
+            this.message = new ArrayList<>(messages);
+            return true;
+        }
+
+        return this.message.addAll(messages);
     }
 
 }
