@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +54,8 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
@@ -157,18 +159,30 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
+    public boolean hasTargetArtifactAssigned(final Long targetId, final LocalArtifact localArtifact) {
+        final Target target = targetRepository.findOne(targetId);
+        if (target == null) {
+            return false;
+        }
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, localArtifact)) > 0;
+    }
+
+    @Override
     public List<Action> findActiveActionByTarget(final Target target) {
         return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 
     @Override
     public Optional<Action> findOldestActiveActionByTarget(final Target target) {
-        return actionRepository.findFirstByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
+        // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
+        // DATAJPA-841 issue.
+        return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
     }
 
     @Override
     public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return new ArrayList<>(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
+        return Collections
+                .unmodifiableList(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
     }
 
     @Override
@@ -452,12 +466,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public String getSecurityTokenByControllerId(final String controllerId) {
-        final Target target = targetRepository.findByControllerId(controllerId);
-        return target != null ? target.getSecurityToken() : null;
-    }
-
-    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
@@ -468,6 +476,16 @@ public class JpaControllerManagement implements ControllerManagement {
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
         cacheWriteNotify.downloadProgress(statusId, requestedBytes, shippedBytesSinceLast, shippedBytesOverall);
+    }
+
+    @Override
+    public Target findByControllerId(final String controllerId) {
+        return targetRepository.findByControllerId(controllerId);
+    }
+
+    @Override
+    public Target findByTargetId(final long targetId) {
+        return targetRepository.findOne(targetId);
     }
 
 }

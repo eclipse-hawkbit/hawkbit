@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.event.local;
 
-import java.net.URI;
 import java.util.Collection;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Event that gets sent when a distribution set gets assigned to a target.
@@ -21,10 +21,8 @@ public class TargetAssignDistributionSetEvent extends DefaultEvent {
 
     private static final long serialVersionUID = 1L;
     private final Collection<SoftwareModule> softwareModules;
-    private final String controllerId;
+    private final Target target;
     private final Long actionId;
-    private final URI targetAdress;
-    private final String targetToken;
 
     /**
      * Creates a new {@link TargetAssignDistributionSetEvent}.
@@ -33,26 +31,19 @@ public class TargetAssignDistributionSetEvent extends DefaultEvent {
      *            the revision of the event
      * @param tenant
      *            the tenant of the event
-     * @param controllerId
-     *            the ID of the controller
+     * @param target
+     *            the assigned {@link Target}
      * @param actionId
      *            the action id of the assignment
      * @param softwareModules
      *            the software modules which have been assigned to the target
-     * @param targetAdress
-     *            the targetAdress of the target
-     * @param targetToken
-     *            the authentication token of the target
      */
-    public TargetAssignDistributionSetEvent(final long revision, final String tenant, final String controllerId,
-            final Long actionId, final Collection<SoftwareModule> softwareModules, final URI targetAdress,
-            final String targetToken) {
+    public TargetAssignDistributionSetEvent(final long revision, final String tenant, final Target target,
+            final Long actionId, final Collection<SoftwareModule> softwareModules) {
         super(revision, tenant);
-        this.controllerId = controllerId;
+        this.target = target;
         this.actionId = actionId;
         this.softwareModules = softwareModules;
-        this.targetAdress = targetAdress;
-        this.targetToken = targetToken;
     }
 
     /**
@@ -63,11 +54,11 @@ public class TargetAssignDistributionSetEvent extends DefaultEvent {
     }
 
     /**
-     * @return the controllerId of the Target which has been assigned to the
-     *         distribution set
+     * @return the {@link Target} which has been assigned to the distribution
+     *         set
      */
-    public String getControllerId() {
-        return controllerId;
+    public Target getTarget() {
+        return target;
     }
 
     /**
@@ -75,13 +66,5 @@ public class TargetAssignDistributionSetEvent extends DefaultEvent {
      */
     public Collection<SoftwareModule> getSoftwareModules() {
         return softwareModules;
-    }
-
-    public URI getTargetAdress() {
-        return targetAdress;
-    }
-
-    public String getTargetToken() {
-        return targetToken;
     }
 }

@@ -686,7 +686,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
-        targAssigned = deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity();
+        targAssigned = Lists
+                .newLinkedList(deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity());
         targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
@@ -756,7 +757,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
             final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<Target>();
+        final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
             final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
             for (final Action action : findByTarget) {

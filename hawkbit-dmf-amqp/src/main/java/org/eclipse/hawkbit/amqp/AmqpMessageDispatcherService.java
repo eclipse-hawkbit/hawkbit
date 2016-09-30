@@ -14,8 +14,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.UrlProtocol;
+import org.eclipse.hawkbit.api.URLPlaceholder;
+import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -23,9 +25,12 @@ import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -46,6 +51,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpSenderService amqpSenderService;
+    private final SystemSecurityContext systemSecurityContext;
+    private final SystemManagement systemManagement;
 
     /**
      * Constructor.
@@ -56,12 +63,19 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            to send AMQP message
      * @param artifactUrlHandler
      *            for generating download URLs
+     * @param systemSecurityContext
+     *            for execution with system permissions
+     * @param systemManagement
+     *            to access to tenant metadata
      */
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
-            final ArtifactUrlHandler artifactUrlHandler) {
+            final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
+            final SystemManagement systemManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
+        this.systemSecurityContext = systemSecurityContext;
+        this.systemManagement = systemManagement;
     }
 
     /**
@@ -73,20 +87,24 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final URI targetAdress = targetAssignDistributionSetEvent.getTargetAdress();
+        final URI targetAdress = targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
             return;
         }
 
-        final String controllerId = targetAssignDistributionSetEvent.getControllerId();
+        final String controllerId = targetAssignDistributionSetEvent.getTarget().getControllerId();
         final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules = targetAssignDistributionSetEvent
                 .getSoftwareModules();
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
         downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
-        downloadAndUpdateRequest.setTargetSecurityToken(targetAssignDistributionSetEvent.getTargetToken());
+
+        final String targetSecurityToken = systemSecurityContext
+                .runAsSystem(targetAssignDistributionSetEvent.getTarget()::getSecurityToken);
+        downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
-            final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(controllerId, softwareModule);
+            final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(
+                    targetAssignDistributionSetEvent.getTarget(), softwareModule);
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 
@@ -132,51 +150,42 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return messageProperties;
     }
 
-    private SoftwareModule convertToAmqpSoftwareModule(final String targetId,
+    private SoftwareModule convertToAmqpSoftwareModule(final Target target,
             final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule) {
         final SoftwareModule amqpSoftwareModule = new SoftwareModule();
         amqpSoftwareModule.setModuleId(softwareModule.getId());
         amqpSoftwareModule.setModuleType(softwareModule.getType().getKey());
         amqpSoftwareModule.setModuleVersion(softwareModule.getVersion());
 
-        final List<Artifact> artifacts = convertArtifacts(targetId, softwareModule.getLocalArtifacts());
+        final List<Artifact> artifacts = convertArtifacts(target, softwareModule.getLocalArtifacts());
         amqpSoftwareModule.setArtifacts(artifacts);
         return amqpSoftwareModule;
     }
 
-    private List<Artifact> convertArtifacts(final String targetId, final List<LocalArtifact> localArtifacts) {
+    private List<Artifact> convertArtifacts(final Target target, final List<LocalArtifact> localArtifacts) {
         if (localArtifacts.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return localArtifacts.stream().map(localArtifact -> convertArtifact(targetId, localArtifact))
+        return localArtifacts.stream().map(localArtifact -> convertArtifact(target, localArtifact))
                 .collect(Collectors.toList());
     }
 
-    private Artifact convertArtifact(final String targetId, final LocalArtifact localArtifact) {
+    private Artifact convertArtifact(final Target target, final LocalArtifact localArtifact) {
         final Artifact artifact = new Artifact();
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.COAP)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.COAP,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.COAP));
-        }
-
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTP));
-        }
-
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
-            artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
-                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTPS));
-        }
+        artifact.setUrls(artifactUrlHandler
+                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
+                        new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
+                                localArtifact.getId(), localArtifact.getSha1Hash())),
+                        ApiType.DMF)
+                .stream().collect(Collectors.toMap(e -> e.getProtocol(), e -> e.getRef())));
 
         artifact.setFilename(localArtifact.getFilename());
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
     }
+
 }

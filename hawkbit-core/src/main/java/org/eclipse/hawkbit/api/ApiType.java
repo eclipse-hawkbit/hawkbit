@@ -6,13 +6,21 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.cache;
+package org.eclipse.hawkbit.api;
 
 /**
- * Cache Constants.
+ * hawkBit API type.
+ *
  */
-public final class CacheConstants {
+public enum ApiType {
 
-    private CacheConstants() {
-    }
+    /**
+     * Support for Device Management Federation API.
+     */
+    DMF,
+
+    /**
+     * Support for Direct Device Integration API.
+     */
+    DDI;
 }

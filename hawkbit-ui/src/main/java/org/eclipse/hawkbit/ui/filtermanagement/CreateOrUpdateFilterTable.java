@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -142,7 +142,7 @@ public class CreateOrUpdateFilterTable extends Table {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
         if (!Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
             queryConfig.put(SPUIDefinitions.FILTER_BY_QUERY, filterManagementUIState.getFilterQueryValue());
         }

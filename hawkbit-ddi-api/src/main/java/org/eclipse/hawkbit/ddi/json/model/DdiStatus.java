@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -57,7 +58,11 @@ public class DdiStatus {
     }
 
     public List<String> getDetails() {
-        return details;
+        if (details == null) {
+            return Collections.emptyList();
+        }        
+        
+        return Collections.unmodifiableList(details);
     }
 
     /**
@@ -98,7 +103,7 @@ public class DdiStatus {
 
         private String name;
 
-        private ExecutionStatus(final String name) {
+        ExecutionStatus(final String name) {
             this.name = name;
         }
 

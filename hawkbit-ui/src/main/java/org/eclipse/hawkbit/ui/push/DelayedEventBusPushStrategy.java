@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -61,6 +62,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final int BLOCK_SIZE = 10_000;
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.Event> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
+    private int uiid = -1;
 
     @Autowired
     private ScheduledExecutorService executorService;
@@ -79,40 +81,21 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void init(final UI vaadinUI) {
-        LOG.debug("Initialize delayed event push strategy");
+        uiid = vaadinUI.getUIId();
+        LOG.info("Initialize delayed event push strategy for UI {}", uiid);
+        if (vaadinUI.getSession() == null) {
+            LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
+        }
+
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
                 2000, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void clean() {
-        LOG.debug("Cleanup resources");
+        LOG.info("Cleanup delayed event push strategy for UI", uiid);
         jobHandle.cancel(true);
         queue.clear();
-    }
-
-    /**
-     * Checks if the tenant within the event is equal with the current tenant in
-     * the context.
-     *
-     * @param userContext
-     *            the security context of the current session
-     * @param event
-     *            the event to dispatch to the UI
-     * @return {@code true} if the event can be dispatched to the UI otherwise
-     *         {@code false}
-     */
-    protected boolean eventSecurityCheck(final SecurityContext userContext,
-            final org.eclipse.hawkbit.repository.event.Event event) {
-        if (userContext == null || userContext.getAuthentication() == null) {
-            return false;
-        }
-        final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
-        if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
-            return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
-                    .equalsIgnoreCase(event.getTenant());
-        }
-        return false;
     }
 
     private final class DispatchRunnable implements Runnable {
@@ -127,39 +110,60 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
         @Override
         public void run() {
-            LOG.debug("UI EventBus aggregator started");
+            LOG.debug("UI EventBus aggregator started for UI {}", vaadinUI.getUIId());
             final long timestamp = System.currentTimeMillis();
-            final List<org.eclipse.hawkbit.repository.event.Event> events = new LinkedList<>();
-            for (int i = 0; i < BLOCK_SIZE; i++) {
-                final org.eclipse.hawkbit.repository.event.Event pollEvent = queue.poll();
-                if (pollEvent == null) {
-                    continue;
-                }
-                events.add(pollEvent);
+
+            final int size = queue.size();
+            if (size <= 0) {
+                LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", vaadinUI.getUIId());
+                return;
             }
+
+            final List<Event> events = new ArrayList<>(size);
+            final int eventsSize = queue.drainTo(events);
 
             if (events.isEmpty()) {
+                LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", vaadinUI.getUIId());
                 return;
             }
-
-            if (vaadinSession == null) {
-                return;
-            }
-
-            LOG.debug("UI EventBus aggregator session: {}", vaadinSession);
 
             final WrappedSession wrappedSession = vaadinSession.getSession();
             if (wrappedSession == null) {
                 return;
             }
 
-            final int eventsSize = events.size();
+            LOG.debug("UI EventBus aggregator dispatches {} events for session {} for UI {}", eventsSize, vaadinSession,
+                    vaadinUI.getUIId());
 
             doDispatch(events, wrappedSession);
 
-            LOG.debug("UI EventBus aggregator done with sending {} events in {} ms", eventsSize,
-                    System.currentTimeMillis() - timestamp);
+            LOG.debug("UI EventBus aggregator done with sending {} events in {} ms for UI {}", eventsSize,
+                    System.currentTimeMillis() - timestamp, vaadinUI.getUIId());
 
+        }
+
+        /**
+         * Checks if the tenant within the event is equal with the current
+         * tenant in the context.
+         *
+         * @param userContext
+         *            the security context of the current session
+         * @param event
+         *            the event to dispatch to the UI
+         * @return {@code true} if the event can be dispatched to the UI
+         *         otherwise {@code false}
+         */
+        private boolean eventSecurityCheck(final SecurityContext userContext,
+                final org.eclipse.hawkbit.repository.event.Event event) {
+            if (userContext == null || userContext.getAuthentication() == null) {
+                return false;
+            }
+            final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
+            if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
+                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
+                        .equalsIgnoreCase(event.getTenant());
+            }
+            return false;
         }
 
         private void doDispatch(final List<org.eclipse.hawkbit.repository.event.Event> events,
@@ -174,26 +178,24 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
                     }
+                    LOG.debug("UI EventBus aggregator of UI {} got lock on session.", vaadinUI.getUIId());
                     fowardSingleEvents(events, userContext);
                     fowardBulkEvents(events, userContext);
-                });
+                    LOG.debug("UI EventBus aggregator of UI {} left lock on session.", vaadinUI.getUIId());
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.error("Wait for Vaadin session for UI {} interrupted!", vaadinUI.getUIId(), e);
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }
         }
 
-        private void fowardBulkEvents(final List<org.eclipse.hawkbit.repository.event.Event> events,
-                final SecurityContext userContext) {
+        private void fowardBulkEvents(final List<Event> events, final SecurityContext userContext) {
             final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
-            publishBulkEvent(events, userContext, filterBulkEvenTypes);
-        }
 
-        private void publishBulkEvent(final List<org.eclipse.hawkbit.repository.event.Event> events,
-                final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
             for (final Class<?> bulkType : filterBulkEvenTypes) {
-                final List<org.eclipse.hawkbit.repository.event.Event> listBulkEvents = events.stream()
-                        .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
-                                && bulkType.isInstance(event))
+                final List<Event> listBulkEvents = events.stream()
+                        .filter(event -> eventSecurityCheck(userContext, event) && bulkType.isInstance(event))
                         .collect(Collectors.toList());
                 if (!listBulkEvents.isEmpty()) {
                     eventBus.publish(vaadinUI, listBulkEvents);
@@ -201,10 +203,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             }
         }
 
-        private void fowardSingleEvents(final List<org.eclipse.hawkbit.repository.event.Event> events,
-                final SecurityContext userContext) {
+        private void fowardSingleEvents(final List<Event> events, final SecurityContext userContext) {
             events.stream()
-                    .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                    .filter(event -> eventSecurityCheck(userContext, event)
                             && eventProvider.getSingleEvents().contains(event.getClass()))
                     .forEach(event -> eventBus.publish(vaadinUI, event));
         }

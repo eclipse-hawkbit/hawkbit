@@ -27,15 +27,15 @@ public interface DistributionSetType extends NamedEntity {
     boolean isDeleted();
 
     /**
-     * @return set of {@link SoftwareModuleType}s that need to be in a
+     * @return immutable set of {@link SoftwareModuleType}s that need to be in a
      *         {@link DistributionSet} of this type to be
      *         {@link DistributionSet#isComplete()}.
      */
     Set<SoftwareModuleType> getMandatoryModuleTypes();
 
     /**
-     * @return set of optional {@link SoftwareModuleType}s that can be in a
-     *         {@link DistributionSet} of this type.
+     * @return immutable set of optional {@link SoftwareModuleType}s that can be
+     *         in a {@link DistributionSet} of this type.
      */
     Set<SoftwareModuleType> getOptionalModuleTypes();
 

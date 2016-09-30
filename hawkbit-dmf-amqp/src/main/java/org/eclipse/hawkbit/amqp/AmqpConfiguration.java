@@ -9,14 +9,18 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.HostnameResolver;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -47,8 +51,10 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
 
+import com.google.common.collect.Maps;
+
 /**
- * Spring configuration for AMQP 0.9 based DMF communication for indirect device
+ * Spring configuration for AMQP based DMF communication for indirect device
  * integration.
  *
  */
@@ -251,17 +257,51 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create amqp handler service bean.
+     * Create AMQP handler service bean.
      * 
+     * @param rabbitTemplate
+     *            for converting messages
      * @param amqpMessageDispatcherService
      *            to sending events to DMF client
+     * @param controllerManagement
+     *            for target repo access
+     * @param entityFactory
+     *            to create entities
      *
      * @return handler service bean
      */
     @Bean
-    public AmqpMessageHandlerService amqpMessageHandlerService(
-            final AmqpMessageDispatcherService amqpMessageDispatcherService) {
-        return new AmqpMessageHandlerService(rabbitTemplate(), amqpMessageDispatcherService);
+    public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+            final AmqpMessageDispatcherService amqpMessageDispatcherService,
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+        return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
+                entityFactory);
+    }
+
+    /**
+     * Create AMQP handler service bean for authentication messages.
+     * 
+     * @param rabbitTemplate
+     *            for converting messages
+     * @param authenticationManager
+     *            for target authentication
+     * @param artifactManagement
+     *            for artifact URI generation
+     * @param downloadIdCache
+     *            for download IDs
+     * @param hostnameResolver
+     *            for resolving the host for downloads
+     * @param controllerManagement
+     *            for target repo access
+     * @return handler service bean
+     */
+    @Bean
+    public AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
+            final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
+            final DownloadIdCache downloadIdCache, final HostnameResolver hostnameResolver,
+            final ControllerManagement controllerManagement) {
+        return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement,
+                downloadIdCache, hostnameResolver, controllerManagement);
     }
 
     /**
@@ -291,22 +331,25 @@ public class AmqpConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
-    public AmqpControllerAuthentication amqpControllerAuthentication(final ControllerManagement controllerManagement,
+    public AmqpControllerAuthentication amqpControllerAuthentication(final SystemManagement systemManagement,
+            final ControllerManagement controllerManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
             final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
-        return new AmqpControllerAuthentication(controllerManagement, tenantConfigurationManagement, tenantAware,
-                ddiSecruityProperties, systemSecurityContext);
+        return new AmqpControllerAuthentication(systemManagement, controllerManagement, tenantConfigurationManagement,
+                tenantAware, ddiSecruityProperties, systemSecurityContext);
     }
 
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
-            final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler) {
-        return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler);
+            final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {
+        return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
+                systemSecurityContext, systemManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;

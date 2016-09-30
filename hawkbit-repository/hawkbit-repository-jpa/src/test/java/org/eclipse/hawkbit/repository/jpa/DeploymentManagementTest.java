@@ -113,7 +113,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(findActionsWithStatusCountByTarget).as("wrong action size").hasSize(1);
         assertThat(findActionsWithStatusCountByTarget.get(0).getActionStatusCount()).as("wrong action status size")
-                .isEqualTo(3L);
+                .isEqualTo(3);
     }
 
     @Test
@@ -936,7 +936,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final Target myt : targets) {
             boolean found = false;
             for (final TargetAssignDistributionSetEvent event : events) {
-                if (event.getControllerId().equals(myt.getControllerId())) {
+                if (event.getTarget().getControllerId().equals(myt.getControllerId())) {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
                     assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();

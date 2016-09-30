@@ -52,7 +52,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     private Set<Long> selectedSoftwareModules = emptySet();
 
-    private Set<String> selectedDeleteDistSetTypes = new HashSet<>();
+    private final Set<String> selectedDeleteDistSetTypes = new HashSet<>();
 
     private Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
 
@@ -199,10 +199,6 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     public Set<String> getSelectedDeleteDistSetTypes() {
         return selectedDeleteDistSetTypes;
-    }
-
-    public void setSelectedDeleteDistSetTypes(final Set<String> selectedDeleteDistSetTypes) {
-        this.selectedDeleteDistSetTypes = selectedDeleteDistSetTypes;
     }
 
     public Set<String> getSelectedDeleteSWModuleTypes() {

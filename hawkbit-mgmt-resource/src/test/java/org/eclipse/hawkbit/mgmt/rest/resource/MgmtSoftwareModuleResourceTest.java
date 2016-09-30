@@ -438,8 +438,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
-        final List<SoftwareModule> modules = new ArrayList<>();
-        modules.add(sm);
+        final List<SoftwareModule> modules = Lists.newArrayList(sm);
 
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
@@ -457,11 +456,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModule missingName = entityFactory.generateSoftwareModule(osType, null, "version 1", null, null);
-        mvc.perform(
-                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(missingName)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/softwaremodules")
+                .content("[{\"description\":\"Desc123\",\"key\":\"test123\", \"type\":\"os\"}]")
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         final SoftwareModule toLongName = entityFactory.generateSoftwareModule(osType,
                 RandomStringUtils.randomAscii(80), "version 1", null, null);

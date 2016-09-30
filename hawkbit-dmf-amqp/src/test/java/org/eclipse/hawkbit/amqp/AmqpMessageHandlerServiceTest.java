@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,8 +80,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class AmqpMessageHandlerServiceTest {
 
     private static final String TENANT = "DEFAULT";
+    private static final Long TENANT_ID = 123L;
+    private static String CONTROLLLER_ID = "123";
+    private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
+    private AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandlerService;
 
     private MessageConverter messageConverter;
 
@@ -113,22 +116,18 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
-    @Mock
-    private SystemSecurityContext systemSecurityContextMock;
-
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock);
-        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
-        amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
-        amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
-        amqpMessageHandlerService.setDownloadIdCache(downloadIdCache);
-        amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
-        amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
-        amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
+                controllerManagementMock, entityFactoryMock);
 
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
+                controllerManagementMock, entityFactoryMock);
+        amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
+                authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
+                controllerManagementMock);
     }
 
     @Test
@@ -279,13 +278,13 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -298,7 +297,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -309,7 +308,7 @@ public class AmqpMessageHandlerServiceTest {
                 .thenThrow(EntityNotFoundException.class);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -322,7 +321,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123",
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID, TARGET_ID,
                 FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -340,7 +339,7 @@ public class AmqpMessageHandlerServiceTest {
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
+        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -364,14 +363,11 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any()))
-                .thenReturn(Optional.of(action));
+        when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
         when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
                 .thenReturn(softwareModuleList);
-
-        when(systemSecurityContextMock.runAsSystem(anyObject())).thenReturn("securityToken");
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -393,10 +389,10 @@ public class AmqpMessageHandlerServiceTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
                 .getValue();
 
-        assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
+        assertThat(targetAssignDistributionSetEvent.getTarget().getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
-        assertThat(targetAssignDistributionSetEvent.getTargetToken()).as("targetoken not filled correctly")
-                .isEqualTo(action.getTarget().getSecurityToken());
+        assertThat(targetAssignDistributionSetEvent.getTarget().getSecurityToken())
+                .as("targetoken not filled correctly").isEqualTo(action.getTarget().getSecurityToken());
         assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
         assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
                 .isEqualTo(softwareModuleList);

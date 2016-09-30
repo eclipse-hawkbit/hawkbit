@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
@@ -25,9 +26,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
  * A mapper which maps repository model to RESTful model representation and
  * back.
  *
- *
- *
- *
  */
 final class MgmtSoftwareModuleTypeMapper {
 
@@ -37,13 +35,12 @@ final class MgmtSoftwareModuleTypeMapper {
     }
 
     static List<SoftwareModuleType> smFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
-        final List<SoftwareModuleType> mappedList = new ArrayList<>();
-
-        for (final MgmtSoftwareModuleTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(entityFactory, smRest));
+            final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
+        if (smTypesRest == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
     static SoftwareModuleType fromRequest(final EntityFactory entityFactory,
@@ -57,20 +54,12 @@ final class MgmtSoftwareModuleTypeMapper {
         return result;
     }
 
-    static List<MgmtSoftwareModuleType> toTypesResponse(final List<SoftwareModuleType> types) {
-        final List<MgmtSoftwareModuleType> response = new ArrayList<>();
-        for (final SoftwareModuleType softwareModule : types) {
-            response.add(toResponse(softwareModule));
+    static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
+        if (types == null) {
+            return Collections.emptyList();
         }
-        return response;
-    }
 
-    static List<MgmtSoftwareModuleType> toListResponse(final Collection<SoftwareModuleType> types) {
-        final List<MgmtSoftwareModuleType> response = new ArrayList<>();
-        for (final SoftwareModuleType softwareModule : types) {
-            response.add(toResponse(softwareModule));
-        }
-        return response;
+        return types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList());
     }
 
     static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {

@@ -220,7 +220,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
         return lastTargetQuery;
     }
 
-    public void setLastTargetQuery(final Long lastTargetQuery) {
+    public void setLastTargetQuery(final long lastTargetQuery) {
         this.lastTargetQuery = lastTargetQuery;
     }
 

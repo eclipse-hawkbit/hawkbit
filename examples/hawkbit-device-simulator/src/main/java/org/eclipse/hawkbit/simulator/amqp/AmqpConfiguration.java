@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.simulator.amqp;
 import static org.eclipse.hawkbit.simulator.amqp.AmqpProperties.CONFIGURATION_PREFIX;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -35,6 +34,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
+
+import com.google.common.collect.Maps;
 
 /**
  * The spring AMQP configuration to use a AMQP for communication with SP update
@@ -200,13 +201,13 @@ public class AmqpConfiguration {
     }
 
     private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
         args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
         return args;
     }
 
     private static Map<String, Object> getTTLMaxArgs() {
-        final Map<String, Object> args = new HashMap<>();
+        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put("x-message-ttl", Duration.ofDays(1).toMillis());
         args.put("x-max-length", 100_000);
         return args;

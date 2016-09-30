@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
@@ -48,6 +49,8 @@ import com.google.common.base.Splitter;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
+    private static final int MESSAGE_ENTRY_LENGTH = 512;
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
@@ -67,14 +70,14 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")), indexes = {
             @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
     @Column(name = "detail_message", length = 512)
-    private final List<String> messages = new ArrayList<>();
+    private List<String> messages;
 
     /**
      * Note: filled only in {@link Status#DOWNLOAD}.
      */
     @Transient
     @CacheField(key = CacheKeys.DOWNLOAD_PROGRESS_PERCENT)
-    private int downloadProgressPercent;
+    private short downloadProgressPercent;
 
     /**
      * Creates a new {@link ActionStatus} object.
@@ -86,7 +89,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      * @param occurredAt
      *            the occurred timestamp
      */
-    public JpaActionStatus(final Action action, final Status status, final Long occurredAt) {
+    public JpaActionStatus(final Action action, final Status status, final long occurredAt) {
         this.action = (JpaAction) action;
         this.status = status;
         this.occurredAt = occurredAt;
@@ -119,7 +122,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     }
 
     @Override
-    public int getDownloadProgressPercent() {
+    public short getDownloadProgressPercent() {
         return downloadProgressPercent;
     }
 
@@ -136,13 +139,20 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @Override
     public final void addMessage(final String message) {
         if (message != null) {
-            Splitter.fixedLength(512).split(message).forEach(messages::add);
+            if (messages == null) {
+                messages = new ArrayList<>((message.length() / MESSAGE_ENTRY_LENGTH) + 1);
+            }
+            Splitter.fixedLength(MESSAGE_ENTRY_LENGTH).split(message).forEach(messages::add);
         }
     }
 
     @Override
     public List<String> getMessages() {
-        return messages;
+        if (messages == null) {
+            messages = Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(messages);
     }
 
     @Override

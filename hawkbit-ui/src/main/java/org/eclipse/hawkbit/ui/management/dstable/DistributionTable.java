@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +42,11 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -56,6 +55,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -240,7 +240,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(4);
         managementUIState.getDistributionTableFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         managementUIState.getDistributionTableFilters().getPinnedTargetId()
@@ -525,6 +525,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void styleDistributionTableOnPinning() {
+        if (!managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()) {
+            return;
+        }
+
         final Target targetObj = targetService.findTargetByControllerIDWithDetails(
                 managementUIState.getDistributionTableFilters().getPinnedTargetId().get());
 

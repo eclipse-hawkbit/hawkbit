@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa.aspects;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +35,8 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
+import com.google.common.collect.Maps;
+
 /**
  * {@link Aspect} catches persistence exceptions and wraps them to custom
  * specific exceptions Additionally it checks and prevents access to certain
@@ -46,14 +47,14 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingAspectHandler.class);
 
-    private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>();
+    private static final Map<String, String> EXCEPTION_MAPPING = Maps.newHashMapWithExpectedSize(4);
 
     /**
      * this is required to enable a certain order of exception and to select the
      * most specific mappable exception according to the type hierarchy of the
      * exception.
      */
-    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>();
+    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
     @Autowired
     private JpaVendorAdapter jpaVendorAdapter;

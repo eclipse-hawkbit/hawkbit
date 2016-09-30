@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -72,7 +73,7 @@ public class PagedList<T> extends ResourceSupport {
     }
 
     public List<T> getContent() {
-        return content;
+        return Collections.unmodifiableList(content);
     }
 
 }

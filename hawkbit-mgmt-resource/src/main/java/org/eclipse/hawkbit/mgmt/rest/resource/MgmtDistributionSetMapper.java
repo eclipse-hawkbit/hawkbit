@@ -12,7 +12,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -34,10 +37,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
- *
- *
- *
  */
 public final class MgmtDistributionSetMapper {
     private MgmtDistributionSetMapper() {
@@ -75,15 +74,13 @@ public final class MgmtDistributionSetMapper {
      *            to use for conversion
      * @return converted list of {@link DistributionSet}s
      */
-    static List<DistributionSet> dsFromRequest(final Iterable<MgmtDistributionSetRequestBodyPost> sets,
+    static List<DistributionSet> dsFromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final EntityFactory entityFactory) {
 
-        final List<DistributionSet> mappedList = new ArrayList<>();
-        for (final MgmtDistributionSetRequestBodyPost dsRest : sets) {
-            mappedList.add(fromRequest(dsRest, softwareManagement, distributionSetManagement, entityFactory));
-        }
-        return mappedList;
+        return sets.stream()
+                .map(dsRest -> fromRequest(dsRest, softwareManagement, distributionSetManagement, entityFactory))
+                .collect(Collectors.toList());
 
     }
 
@@ -139,15 +136,12 @@ public final class MgmtDistributionSetMapper {
      */
     static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
             final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
-        final List<DistributionSetMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final MgmtMetadata metadataRest : metadata) {
-            if (metadataRest.getKey() == null) {
-                throw new IllegalArgumentException("the key of the metadata must be present");
-            }
-            mappedList.add(
-                    entityFactory.generateDistributionSetMetadata(ds, metadataRest.getKey(), metadataRest.getValue()));
+        if (metadata == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return metadata.stream().map(metadataRest -> entityFactory.generateDistributionSetMetadata(ds,
+                metadataRest.getKey(), metadataRest.getValue())).collect(Collectors.toList());
     }
 
     /**
@@ -196,15 +190,12 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    static List<MgmtDistributionSet> toResponseDistributionSets(final Iterable<DistributionSet> sets) {
-        final List<MgmtDistributionSet> response = new ArrayList<>();
-        if (sets != null) {
-
-            for (final DistributionSet set : sets) {
-                response.add(toResponse(set));
-            }
+    static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
+        if (sets == null) {
+            return Collections.emptyList();
         }
-        return response;
+
+        return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
     }
 
     static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
@@ -224,14 +215,10 @@ public final class MgmtDistributionSetMapper {
     }
 
     static List<MgmtDistributionSet> toResponseFromDsList(final List<DistributionSet> sets) {
-        final List<MgmtDistributionSet> mappedList = new ArrayList<>();
-        if (sets != null) {
-            for (final DistributionSet set : sets) {
-                final MgmtDistributionSet response = toResponse(set);
-
-                mappedList.add(response);
-            }
+        if (sets == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
     }
 }

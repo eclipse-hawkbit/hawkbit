@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -78,6 +77,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import com.google.common.collect.Maps;
 /**
  * General configuration for hawkBit's Repository.
  *
@@ -199,7 +199,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = new HashMap<>();
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports

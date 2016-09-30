@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.app;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,6 @@ public class MyUI extends HawkbitUI {
      * @param pushStrategy
      * @param eventBus
      */
-    @Autowired
     public MyUI(final EventPushStrategy pushStrategy, final SessionEventBus eventBus) {
         super(pushStrategy, eventBus);
     }

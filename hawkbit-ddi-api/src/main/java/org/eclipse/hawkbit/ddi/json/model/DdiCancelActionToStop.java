@@ -25,7 +25,6 @@ public class DdiCancelActionToStop {
      *            ID of the action to be stoppedW
      */
     public DdiCancelActionToStop(final String stopId) {
-        super();
         this.stopId = stopId;
     }
 

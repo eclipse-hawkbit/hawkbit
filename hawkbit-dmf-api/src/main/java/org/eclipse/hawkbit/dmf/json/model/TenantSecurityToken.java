@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,15 +28,46 @@ public class TenantSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
-    @JsonProperty
-    private final String tenant;
-    @JsonProperty
+    @JsonProperty(required = false)
+    private String tenant;
+    @JsonProperty(required = false)
+    private final Long tenantId;
+    @JsonProperty(required = false)
     private final String controllerId;
     @JsonProperty(required = false)
-    private Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Long targetId;
+
+    @JsonProperty(required = false)
+    private Map<String, String> headers;
 
     @JsonProperty(required = false)
     private final FileResource fileResource;
+
+    /**
+     * Constructor.
+     * 
+     * @param tenant
+     *            the tenant for the security token
+     * @param tenantId
+     *            alternative tenant identification by technical ID
+     * @param controllerId
+     *            the ID of the controller for the security token
+     * @param targetId
+     *            alternative target identification by technical ID
+     * @param fileResource
+     *            the file to obtain
+     */
+    @JsonCreator
+    public TenantSecurityToken(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("tenantId") final Long tenantId, @JsonProperty("controllerId") final String controllerId,
+            @JsonProperty("targetId") final Long targetId,
+            @JsonProperty("fileResource") final FileResource fileResource) {
+        this.tenant = tenant;
+        this.tenantId = tenantId;
+        this.controllerId = controllerId;
+        this.targetId = targetId;
+        this.fileResource = fileResource;
+    }
 
     /**
      * Constructor.
@@ -47,13 +79,26 @@ public class TenantSecurityToken {
      * @param fileResource
      *            the file to obtain
      */
-    @JsonCreator
-    public TenantSecurityToken(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("controllerId") final String controllerId,
-            @JsonProperty("fileResource") final FileResource fileResource) {
+    public TenantSecurityToken(final String tenant, final String controllerId, final FileResource fileResource) {
+        this(tenant, null, controllerId, null, fileResource);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param tenantId
+     *            the tenant for the security token
+     * @param targetId
+     *            target identification by technical ID
+     * @param fileResource
+     *            the file to obtain
+     */
+    public TenantSecurityToken(final Long tenantId, final Long targetId, final FileResource fileResource) {
+        this(null, tenantId, null, targetId, fileResource);
+    }
+
+    public void setTenant(final String tenant) {
         this.tenant = tenant;
-        this.controllerId = controllerId;
-        this.fileResource = fileResource;
     }
 
     public String getTenant() {
@@ -65,11 +110,23 @@ public class TenantSecurityToken {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        if (headers == null) {
+            return Collections.emptyMap();
+        }
+
+        return Collections.unmodifiableMap(headers);
     }
 
     public FileResource getFileResource() {
         return fileResource;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public Long getTargetId() {
+        return targetId;
     }
 
     /**
@@ -80,12 +137,34 @@ public class TenantSecurityToken {
      * @return the value
      */
     public String getHeader(final String name) {
+        if (headers == null) {
+            return null;
+        }
+
         return headers.get(name);
     }
 
     public void setHeaders(final Map<String, String> headers) {
         this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.headers.putAll(headers);
+    }
+
+    /**
+     * Associates the specified header value with the specified name.
+     * 
+     * @param name
+     *            of the header
+     * @param value
+     *            of the header
+     * 
+     * @return the previous value associated with the <tt>name</tt>, or
+     *         <tt>null</tt> if there was no mapping for <tt>name</tt>.
+     */
+    public String putHeader(final String name, final String value) {
+        if (headers == null) {
+            headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        }
+        return headers.put(name, value);
     }
 
     /**
@@ -98,6 +177,8 @@ public class TenantSecurityToken {
     public static class FileResource {
         @JsonProperty(required = false)
         private String sha1;
+        @JsonProperty(required = false)
+        private Long artifactId;
         @JsonProperty(required = false)
         private String filename;
         @JsonProperty(required = false)
@@ -128,6 +209,14 @@ public class TenantSecurityToken {
             this.softwareModuleFilenameResource = softwareModuleFilenameResource;
         }
 
+        public Long getArtifactId() {
+            return artifactId;
+        }
+
+        public void setArtifactId(final Long artifactId) {
+            this.artifactId = artifactId;
+        }
+
         /**
          * factory method to create a file resource for an SHA1 lookup.
          * 
@@ -138,6 +227,19 @@ public class TenantSecurityToken {
         public static FileResource createFileResourceBySha1(final String sha1) {
             final FileResource resource = new FileResource();
             resource.sha1 = sha1;
+            return resource;
+        }
+
+        /**
+         * factory method to create a file resource for an artifact ID lookup.
+         * 
+         * @param artifactId
+         *            the artifact IF key of the file to obtain
+         * @return the {@link FileResource} with SHA1 key set
+         */
+        public static FileResource createFileResourceByArtifactId(final Long artifactId) {
+            final FileResource resource = new FileResource();
+            resource.artifactId = artifactId;
             return resource;
         }
 
@@ -173,7 +275,7 @@ public class TenantSecurityToken {
 
         @Override
         public String toString() {
-            return "FileResource [sha1=" + sha1 + ", filename=" + filename + "]";
+            return "FileResource [sha1=" + sha1 + ", artifactId=" + artifactId + ", filename=" + filename + "]";
         }
 
         /**
