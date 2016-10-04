@@ -379,10 +379,14 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void onSearchIconClick() {
-        if (!queryTextField.isValidationError()) {
-            queryTextField.showValidationInProgress();
-            queryTextField.getExecutor().execute(queryTextField.new StatusCircledAsync(UI.getCurrent()));
+
+        if (queryTextField.isValidationError()) {
+            return;
         }
+
+        queryTextField.showValidationInProgress();
+        queryTextField.getExecutor().execute(queryTextField.new StatusCircledAsync(UI.getCurrent()));
+
     }
 
     @Override

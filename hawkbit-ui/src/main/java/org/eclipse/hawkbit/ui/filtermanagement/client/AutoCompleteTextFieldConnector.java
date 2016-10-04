@@ -54,14 +54,16 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             @Override
             public void showSuggestions(final SuggestionContextDto suggestContext) {
                 select.clearItems();
-                if (suggestContext != null) {
-                    final List<SuggestTokenDto> suggestions = suggestContext.getSuggestions();
-                    if (suggestions != null && !suggestions.isEmpty()) {
-                        select.addItems(suggestions, textFieldWidget, panel, rpc);
-                        panel.showRelativeTo(textFieldWidget);
-                        select.moveSelectionDown();
-                        return;
-                    }
+                if (suggestContext == null) {
+                    panel.hide();
+                    return;
+                }
+                final List<SuggestTokenDto> suggestions = suggestContext.getSuggestions();
+                if (suggestions != null && !suggestions.isEmpty()) {
+                    select.addItems(suggestions, textFieldWidget, panel, rpc);
+                    panel.showRelativeTo(textFieldWidget);
+                    select.moveSelectionDown();
+                    return;
                 }
                 panel.hide();
             }

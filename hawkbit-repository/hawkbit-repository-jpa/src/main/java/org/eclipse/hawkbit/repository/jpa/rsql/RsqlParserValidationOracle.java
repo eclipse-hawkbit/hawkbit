@@ -92,9 +92,12 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     }
 
     private static Collection<? extends SuggestToken> getLogicalOperatorSuggestion(final String rsqlQuery) {
-        final int currentQueryLength = rsqlQuery.length();
-        // only return and/or suggestion when there is a space at the end
+        if (!rsqlQuery.endsWith(" ")) {
+            return Collections.emptyList();
+        }
         if (rsqlQuery.endsWith(" ")) {
+            final int currentQueryLength = rsqlQuery.length();
+            // only return and/or suggestion when there is a space at the end
             final Collection<String> tokenImages = TokenDescription.getTokenImage(TokenDescription.LOGICAL_OP);
             final List<SuggestToken> logicalOps = new ArrayList<>(tokenImages.size());
             for (final String tokenImage : tokenImages) {
