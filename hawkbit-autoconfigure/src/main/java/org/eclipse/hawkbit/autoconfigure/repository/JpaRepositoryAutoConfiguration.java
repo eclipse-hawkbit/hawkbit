@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.repository;
 
 import org.eclipse.hawkbit.EnableJpaRepository;
+import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -33,7 +34,7 @@ public class JpaRepositoryAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public VirtualPropertyReplacer virtualPropertyReplacer() {
-        return new VirtualPropertyResolver();
+        return new VirtualPropertyResolver(new TimestampCalculator());
     }
 
 }

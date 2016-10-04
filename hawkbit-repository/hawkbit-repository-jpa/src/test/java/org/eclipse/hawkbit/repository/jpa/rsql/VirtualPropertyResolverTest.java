@@ -36,7 +36,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class VirtualPropertyResolverTest {
 
     @Spy
-    VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
+    VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver(new TimestampCalculator());
 
     @Mock
     TenantConfigurationManagement confMgmt;

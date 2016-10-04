@@ -50,7 +50,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RSQLUtilityTest {
 
     @Spy
-    VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
+    VirtualPropertyResolver macroResolver = new VirtualPropertyResolver(new TimestampCalculator());
 
     @Mock
     TenantConfigurationManagement confMgmt;

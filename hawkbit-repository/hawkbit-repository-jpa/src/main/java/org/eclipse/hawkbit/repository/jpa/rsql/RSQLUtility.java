@@ -441,12 +441,10 @@ public final class RSQLUtility {
             // methods.
             final Object transformedValue = transformedValues.get(0);
 
-            final String value;
+            String value = values.get(0);
             // if lookup is available, replace macros ...
             if (virtualPropertyReplacer != null) {
-                value = virtualPropertyReplacer.replace(values.get(0));
-            } else {
-                value = values.get(0);
+                value = virtualPropertyReplacer.replace(value);
             }
 
             final List<Predicate> singleList = new ArrayList<>();

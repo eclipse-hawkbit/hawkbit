@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -128,7 +129,7 @@ public class TestConfiguration implements AsyncConfigurer {
      */
     @Bean
     public VirtualPropertyReplacer virtualPropertyReplacer() {
-        return new VirtualPropertyResolver();
+        return new VirtualPropertyResolver(new TimestampCalculator());
     }
 
 }

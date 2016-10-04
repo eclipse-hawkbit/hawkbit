@@ -43,9 +43,20 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
  */
 public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyReplacer {
 
-    private final TimestampCalculator timestampCalculator = new TimestampCalculator();
+    private final TimestampCalculator timestampCalculator;
 
     private StrSubstitutor substitutor;
+
+    /**
+     * Instantiates a new virtual property resolver with the given timestamp
+     * calculator
+     * 
+     * @param timestampCalculator
+     *            calculates timestamps
+     */
+    public VirtualPropertyResolver(TimestampCalculator timestampCalculator) {
+        this.timestampCalculator = timestampCalculator;
+    }
 
     @Override
     public String lookup(String rhs) {
