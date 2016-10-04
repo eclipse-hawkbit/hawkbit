@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -234,9 +235,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                         try {
                             holder = (EventHolder) eventProvider.getEvents().get(entry.getKey())
                                     .getConstructor(List.class).newInstance(entry.getValue());
-                        } catch (final Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException
+                                | InvocationTargetException e) {
+                            LOG.error("Failed to create EventHolder!", e);
                         }
 
                         return holder;

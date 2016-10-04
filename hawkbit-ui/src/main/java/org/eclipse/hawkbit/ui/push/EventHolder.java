@@ -10,16 +10,19 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.eventbus.event.Event;
+
 /**
  * EventHolder beans contains a list of events that can be process by the UI in
  * batch like fashion.
  *
  */
+@FunctionalInterface
 public interface EventHolder {
 
     /**
      * @return list of contained events
      */
-    List<?> getEvents();
+    List<? extends Event> getEvents();
 
 }

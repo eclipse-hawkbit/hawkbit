@@ -160,7 +160,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         // refresh the details tabs only if selected ds is updated
         if (lastSelectedDsIdName != null) {
             final Optional<DistributionSet> selectedSetUpdated = holder.getEvents().stream()
-                    .map(event -> event.getEntity()).filter(set -> set.equals(lastSelectedDsIdName.getId()))
+                    .map(event -> event.getEntity()).filter(set -> set.getId().equals(lastSelectedDsIdName.getId()))
                     .findFirst();
 
             if (selectedSetUpdated.isPresent()) {

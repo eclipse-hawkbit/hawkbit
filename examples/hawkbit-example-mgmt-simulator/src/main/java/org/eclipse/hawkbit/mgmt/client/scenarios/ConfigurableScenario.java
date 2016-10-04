@@ -68,6 +68,9 @@ public class ConfigurableScenario {
 
     private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
 
+    // Exception - squid:S00107 - this is a simulator that leverages multiple
+    // resouces/feign beans.
+    @SuppressWarnings("squid:S00107")
     public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
             final MgmtSoftwareModuleClientResource softwareModuleResource,
             final MgmtSoftwareModuleClientResource uploadSoftwareModule, final MgmtTargetClientResource targetResource,
@@ -91,9 +94,7 @@ public class ConfigurableScenario {
 
         LOGGER.info("Running Configurable Scenario...");
 
-        // while (1==1) {
         clientConfigurationProperties.getScenarios().forEach(this::createScenario);
-        // }
     }
 
     private void createScenario(final Scenario scenario) {
