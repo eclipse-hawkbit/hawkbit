@@ -16,16 +16,13 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * Scheduler to check target filters for auto assignment of distribution sets
  */
-@Component
 // don't active the auto assign scheduler in test, otherwise it is hard to test
 @Profile("!test")
 @EnableConfigurationProperties(AutoAssignProperties.class)
@@ -33,17 +30,33 @@ public class AutoAssignScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);
 
-    @Autowired
-    private TenantAware tenantAware;
+    private final TenantAware tenantAware;
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemManagement systemManagement;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final SystemSecurityContext systemSecurityContext;
 
-    @Autowired
-    private AutoAssignChecker autoAssignChecker;
+    private final AutoAssignChecker autoAssignChecker;
+
+    /**
+     * Instantiates a new AutoAssignScheduler
+     * 
+     * @param tenantAware
+     *            to run as specific tenant
+     * @param systemManagement
+     *            to find all tenants
+     * @param systemSecurityContext
+     *            to run as system
+     * @param autoAssignChecker
+     *            to run a check as tenant
+     */
+    public AutoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
+            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+        this.tenantAware = tenantAware;
+        this.systemManagement = systemManagement;
+        this.systemSecurityContext = systemSecurityContext;
+        this.autoAssignChecker = autoAssignChecker;
+    }
 
     /**
      * Scheduler method called by the spring-async mechanism. Retrieves all

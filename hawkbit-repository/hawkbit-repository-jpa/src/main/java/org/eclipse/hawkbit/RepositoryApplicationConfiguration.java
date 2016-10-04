@@ -43,6 +43,8 @@ import org.eclipse.hawkbit.repository.jpa.JpaTargetManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
@@ -389,5 +391,47 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     public EntityFactory entityFactory() {
         return new JpaEntityFactory();
+    }
+
+    /**
+     * {@link AutoAssignChecker} bean.
+     *
+     * @param targetFilterQueryManagement
+     *            to get all target filter queries
+     * @param targetManagement
+     *            to get targets
+     * @param deploymentManagement
+     *            to assign distribution sets to targets
+     * @param transactionManager
+     *            to run transactions
+     * @return a new {@link AutoAssignChecker}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AutoAssignChecker autoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement,
+            TargetManagement targetManagement, DeploymentManagement deploymentManagement,
+            PlatformTransactionManager transactionManager) {
+        return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
+                transactionManager);
+    }
+
+    /**
+     * {@link AutoAssignScheduler} bean.
+     *
+     * @param tenantAware
+     *            to run as specific tenant
+     * @param systemManagement
+     *            to find all tenants
+     * @param systemSecurityContext
+     *            to run as system
+     * @param autoAssignChecker
+     *            to run a check as tenant
+     * @return a new {@link AutoAssignChecker}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AutoAssignScheduler autoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
+            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+        return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
 }

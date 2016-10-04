@@ -23,68 +23,79 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.PersistenceException;
 
 /**
- * Checks if targets need a new distribution set (DS) based on the target filter queries and
- * assigns the new DS when necessary.
- * First all target filter queries are listed. For every target filter query (TFQ) the auto assign DS
- * is retrieved.
- * All targets get listed per target filter query, that match the TFQ and that don't have the
- * auto assign DS in their action history.
+ * Checks if targets need a new distribution set (DS) based on the target filter
+ * queries and assigns the new DS when necessary. First all target filter
+ * queries are listed. For every target filter query (TFQ) the auto assign DS is
+ * retrieved. All targets get listed per target filter query, that match the TFQ
+ * and that don't have the auto assign DS in their action history.
  */
-@Component
 public class AutoAssignChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignChecker.class);
 
-    @Autowired
-    private TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
 
-    @Autowired
-    private TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private DeploymentManagement deploymentManagement;
+    private final DeploymentManagement deploymentManagement;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    private TransactionTemplate transactionTemplate;
-
+    private final TransactionTemplate transactionTemplate;
 
     /**
-     * Maximum for target filter queries with auto assign DS
-     * Maximum for targets that are fetched in one turn
+     * Maximum for target filter queries with auto assign DS Maximum for targets
+     * that are fetched in one turn
      */
     private static final int PAGE_SIZE = 1000;
 
     /**
-     * The message which is added to the action status when a distribution set is assigned
-     * to an target. First %s is the name of the target filter.
+     * The message which is added to the action status when a distribution set
+     * is assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
 
     /**
-     * Checks all target filter queries with an auto assign distribution set
-     * and triggers the check and assignment to targets that don't have the design DS yet
+     * Instantiates a new auto assign checker
+     *
+     * @param targetFilterQueryManagement
+     *            to get all target filter queries
+     * @param targetManagement
+     *            to get targets
+     * @param deploymentManagement
+     *            to assign distribution sets to targets
+     * @param transactionManager
+     *            to run transactions
      */
+    public AutoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement, TargetManagement targetManagement,
+            DeploymentManagement deploymentManagement, PlatformTransactionManager transactionManager) {
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetManagement = targetManagement;
+        this.deploymentManagement = deploymentManagement;
+
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("autoAssignDSToTargets");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate = new TransactionTemplate(transactionManager, def);
+    }
+
+    /**
+     * Checks all target filter queries with an auto assign distribution set and
+     * triggers the check and assignment to targets that don't have the design
+     * DS yet
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void check() {
-        if(transactionTemplate == null) {
-            final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            def.setName("autoAssignDSToTargets");
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            transactionTemplate = new TransactionTemplate(transactionManager, def);
-        }
 
         PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
 
@@ -99,9 +110,9 @@ public class AutoAssignChecker {
 
     /**
      * Fetches the distribution set, gets all controllerIds and assigns the DS
-     * to them.
-     * Catches PersistenceException and own exceptions derived from AbstractServerRtException
-     * 
+     * to them. Catches PersistenceException and own exceptions derived from
+     * AbstractServerRtException
+     *
      * @param targetFilterQuery
      *            the target filter query
      */
@@ -124,7 +135,7 @@ public class AutoAssignChecker {
 
     /**
      * Runs one page of target assignments within a dedicated transaction
-     * 
+     *
      * @param targetFilterQuery
      *            the target filter query
      * @param dsId
@@ -144,8 +155,9 @@ public class AutoAssignChecker {
     }
 
     /**
-     * Gets all matching targets with the designated action from the target management
-     * 
+     * Gets all matching targets with the designated action from the target
+     * management
+     *
      * @param targetFilterQuery
      *            the query the targets have to match
      * @param dsId
@@ -155,14 +167,13 @@ public class AutoAssignChecker {
      *            maximum amount of targets to retrieve
      * @return list of targets with action type
      */
-    private List<TargetWithActionType> getTargetsWithActionType(TargetFilterQuery targetFilterQuery, Long dsId, int count) {
+    private List<TargetWithActionType> getTargetsWithActionType(TargetFilterQuery targetFilterQuery, Long dsId,
+            int count) {
         Page<Target> targets = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(new PageRequest(0, count),
                 dsId, targetFilterQuery);
 
-        return targets.getContent().stream()
-                .map(t -> new TargetWithActionType(t.getControllerId(), Action.ActionType.FORCED,
-                        RepositoryModelConstants.NO_FORCE_TIME))
-                .collect(Collectors.toList());
+        return targets.getContent().stream().map(t -> new TargetWithActionType(t.getControllerId(),
+                Action.ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());
     }
 
 }
