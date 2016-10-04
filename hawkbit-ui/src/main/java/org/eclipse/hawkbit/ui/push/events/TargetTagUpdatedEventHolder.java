@@ -8,21 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.push.events;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link TargetTagUpdateEvent}s.
+ *
+ */
 public class TargetTagUpdatedEventHolder implements EventHolder {
+    private final List<TargetTagUpdateEvent> events;
 
     public TargetTagUpdatedEventHolder(final List<TargetTagUpdateEvent> events) {
-        // Events not needed by UI, i.e. a "Ping" is sufficient
+        this.events = events;
     }
 
     @Override
     public List<TargetTagUpdateEvent> getEvents() {
-        return Collections.emptyList();
+        return events;
     }
 
 }

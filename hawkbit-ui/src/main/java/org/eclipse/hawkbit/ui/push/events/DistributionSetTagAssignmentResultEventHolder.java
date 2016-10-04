@@ -13,6 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link DistributionSetTagAssigmentResultEvent}s.
+ *
+ */
 public class DistributionSetTagAssignmentResultEventHolder implements EventHolder {
     private final List<DistributionSetTagAssigmentResultEvent> events;
 

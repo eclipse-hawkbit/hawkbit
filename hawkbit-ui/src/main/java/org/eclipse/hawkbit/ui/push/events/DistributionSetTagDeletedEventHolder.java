@@ -13,6 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link DistributionSetTagDeletedEvent}s.
+ *
+ */
 public class DistributionSetTagDeletedEventHolder implements EventHolder {
     private final List<DistributionSetTagDeletedEvent> events;
 

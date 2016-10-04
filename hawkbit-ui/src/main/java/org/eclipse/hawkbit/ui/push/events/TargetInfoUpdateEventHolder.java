@@ -13,6 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link TargetInfoUpdateEvent}s.
+ *
+ */
 public class TargetInfoUpdateEventHolder implements EventHolder {
     private final List<TargetInfoUpdateEvent> events;
 

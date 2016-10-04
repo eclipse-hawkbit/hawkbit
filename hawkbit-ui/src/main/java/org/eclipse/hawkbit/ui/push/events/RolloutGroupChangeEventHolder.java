@@ -13,6 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link RolloutGroupChangeEvent}s.
+ *
+ */
 public class RolloutGroupChangeEventHolder implements EventHolder {
     private final List<RolloutGroupChangeEvent> events;
 

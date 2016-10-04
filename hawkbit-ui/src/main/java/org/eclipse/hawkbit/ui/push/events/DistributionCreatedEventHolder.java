@@ -13,6 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
 import org.eclipse.hawkbit.ui.push.EventHolder;
 
+/**
+ * EventHolder for {@link DistributionCreatedEvent}s.
+ *
+ */
 public class DistributionCreatedEventHolder implements EventHolder {
     private final List<DistributionCreatedEvent> events;
 
