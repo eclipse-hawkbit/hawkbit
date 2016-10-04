@@ -244,32 +244,34 @@ public interface TargetManagement {
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified assigned distribution set.
-     * and returns not the full target but {@link TargetIdName}.
+     * and that don't have the specified distribution set in their action
+     * history.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
+     * @param distributionSetId
+     *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
      * @return the found {@link TargetIdName}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findAllTargetIdsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
-                                                                   Long distributionSetId,
-                                                                   @NotNull TargetFilterQuery targetFilterQuery);
+    Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
+            @NotNull TargetFilterQuery targetFilterQuery);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified assigned distribution set. and returns
-     * not the full target but {@link TargetIdName}.
+     * and that don't have the specified distribution set in their action
+     * history.
      *
+     * @param distributionSetId
+     *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
      * @return the found {@link TargetIdName}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countTargetByTargetFilterQueryAndNonDS(Long distributionSetId,
-                                                @NotNull TargetFilterQuery targetFilterQuery);
+    Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet} without

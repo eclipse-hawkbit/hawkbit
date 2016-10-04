@@ -73,7 +73,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countTargetByTargetFilterQueryAndNonDS(setA.getId(), targetFilterQuery))
+        assertThat(targetManagement.countTargetsByTargetFilterQueryAndNonDS(setA.getId(), targetFilterQuery))
                 .isEqualTo(90);
 
         // Run the check

@@ -563,8 +563,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findAllTargetIdsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
-            Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+    public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
+                                                                  Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
 
@@ -577,7 +577,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Long countTargetByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+    public Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         specList.add(spec);

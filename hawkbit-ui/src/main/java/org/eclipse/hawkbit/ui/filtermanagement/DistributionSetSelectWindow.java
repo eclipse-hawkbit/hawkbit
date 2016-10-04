@@ -248,7 +248,7 @@ public class DistributionSetSelectWindow
             layout.setMargin(true);
             setContent(layout);
 
-            Long targetsCount = targetManagement.countTargetByTargetFilterQueryAndNonDS(distributionSetId, targetFilterQuery);
+            Long targetsCount = targetManagement.countTargetsByTargetFilterQueryAndNonDS(distributionSetId, targetFilterQuery);
             Label mainTextLabel;
             if(targetsCount == 0) {
                 mainTextLabel = new Label(i18n.get("message.confirm.assign.consequences.none"));

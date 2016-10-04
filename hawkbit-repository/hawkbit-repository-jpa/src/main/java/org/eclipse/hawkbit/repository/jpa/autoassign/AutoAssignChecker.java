@@ -156,7 +156,7 @@ public class AutoAssignChecker {
      * @return list of targets with action type
      */
     private List<TargetWithActionType> getTargetsWithActionType(TargetFilterQuery targetFilterQuery, Long dsId, int count) {
-        Page<Target> targets = targetManagement.findAllTargetIdsByTargetFilterQueryAndNonDS(new PageRequest(0, count),
+        Page<Target> targets = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(new PageRequest(0, count),
                 dsId, targetFilterQuery);
 
         return targets.getContent().stream()

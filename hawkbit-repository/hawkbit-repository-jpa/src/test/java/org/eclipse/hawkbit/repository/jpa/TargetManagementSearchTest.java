@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.junit.Test;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
 import com.google.common.collect.Lists;
@@ -733,7 +732,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         deploymentManagement.assignDistributionSet(assignedSet, assignedTargets);
 
-        List<Target> result = targetManagement.findAllTargetIdsByTargetFilterQueryAndNonDS(pageReq,
+        List<Target> result = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq,
                 assignedSet.getId(), tfq).getContent();
         assertThat(result)
                 .as("count of targets").hasSize(unassignedTargets.size())
