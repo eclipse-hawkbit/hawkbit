@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 // don't active the auto assign scheduler in test, otherwise it is hard to test
 @Profile("!test")
+@EnableConfigurationProperties(AutoAssignProperties.class)
 public class AutoAssignScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);

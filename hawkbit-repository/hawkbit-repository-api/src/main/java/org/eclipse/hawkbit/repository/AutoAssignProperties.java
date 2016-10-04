@@ -9,13 +9,11 @@
 package org.eclipse.hawkbit.repository;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Rollout Management properties.
  *
  */
-@Component
 @ConfigurationProperties("hawkbit.autoassign")
 public class AutoAssignProperties {
     /**

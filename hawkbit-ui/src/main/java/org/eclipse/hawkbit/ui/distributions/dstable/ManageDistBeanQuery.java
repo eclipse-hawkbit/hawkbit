@@ -64,17 +64,17 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
-            if (null != queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE)) {
+            if (queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE) != null) {
                 distributionSetType = (DistributionSetType) queryConfig
                         .get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE);
             }
-            if(null != queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE)) {
+            if(queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE) != null) {
                 dsComplete = (Boolean)queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
             }
         }
 
         if (sortStates.length > 0) {
-            // Initalize sort
+            // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
             for (int distId = 1; distId < sortPropertyIds.length; distId++) {
