@@ -56,6 +56,8 @@ public class ClientConfigurationProperties {
         private String targetAddress = "amqp:/simulator.replyTo";
         private boolean runRollouts = true;
         private int rolloutDeploymentGroups = 4;
+        private boolean createTargetTags = false;
+        private int dsTags = 5;
 
         /**
          * Artifact size. Values can use the suffixed "MB" or "KB" to indicate a
@@ -165,6 +167,22 @@ public class ClientConfigurationProperties {
 
         public void setAppModulesPerDistributionSet(final int appModulesPerDistributionSet) {
             this.appModulesPerDistributionSet = appModulesPerDistributionSet;
+        }
+
+        public boolean isCreateTargetTags() {
+            return createTargetTags;
+        }
+
+        public void setCreateTargetTags(final boolean createTargetTags) {
+            this.createTargetTags = createTargetTags;
+        }
+
+        public int getDsTags() {
+            return dsTags;
+        }
+
+        public void setDsTags(final int dsTags) {
+            this.dsTags = dsTags;
         }
 
     }

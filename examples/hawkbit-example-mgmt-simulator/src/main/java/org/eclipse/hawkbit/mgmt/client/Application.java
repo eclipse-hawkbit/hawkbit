@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.mgmt.client;
 import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
 import org.eclipse.hawkbit.feign.core.client.IgnoreMultipleConsumersProducersSpringMvcContract;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.scenarios.ConfigurableScenario;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.FeignMultipartEncoder;
@@ -78,10 +80,12 @@ public class Application implements CommandLineRunner {
     public ConfigurableScenario configurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
             final MgmtSoftwareModuleClientResource softwareModuleResource,
             final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final MgmtTargetTagClientResource targetTagResource,
+            final MgmtDistributionSetTagClientResource distributionSetTagResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
         return new ConfigurableScenario(distributionSetResource, softwareModuleResource,
-                uploadSoftwareModule(clientConfigurationProperties), targetResource, rolloutResource,
-                clientConfigurationProperties);
+                uploadSoftwareModule(clientConfigurationProperties), targetResource, rolloutResource, targetTagResource,
+                distributionSetTagResource, clientConfigurationProperties);
     }
 
     @Bean

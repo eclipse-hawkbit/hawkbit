@@ -127,7 +127,7 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId
      *            the ID of the target tag to retrieve
      * @param assignedTargetRequestBodies
-     *            list of target ids to be toggled
+     *            list of controller ids to be toggled
      *
      * @return the list of assigned targets and unassigned targets.
      */
@@ -143,7 +143,7 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId
      *            the ID of the target tag to retrieve
      * @param assignedTargetRequestBodies
-     *            list of target ids to be assigned
+     *            list of controller ids to be assigned
      *
      * @return the list of assigned targets.
      */

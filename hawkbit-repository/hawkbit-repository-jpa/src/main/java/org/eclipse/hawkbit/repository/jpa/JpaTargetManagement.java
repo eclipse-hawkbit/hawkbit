@@ -370,9 +370,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> assignTag(final Collection<String> targetIds, final TargetTag tag) {
+    public List<Target> assignTag(final Collection<String> controllerIds, final TargetTag tag) {
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
+                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
         allTargets.forEach(target -> target.addTag(tag));
         final List<Target> save = Collections.unmodifiableList(targetRepository.save(allTargets));

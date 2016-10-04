@@ -123,7 +123,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
-                500, TimeUnit.MILLISECONDS);
+                1_000, TimeUnit.MILLISECONDS);
         systemEventBus.register(this);
     }
 

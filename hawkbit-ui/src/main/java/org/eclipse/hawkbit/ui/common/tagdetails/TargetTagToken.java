@@ -132,7 +132,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getAssigned() > 0) {
+        if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
             return assignmentResult.getAssignedEntity().stream().map(t -> t.getControllerId())
                     .anyMatch(controllerId -> controllerId
                             .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));
@@ -141,7 +141,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getUnassigned() > 0) {
+        if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
             return assignmentResult.getUnassignedEntity().stream().map(t -> t.getControllerId())
                     .anyMatch(controllerId -> controllerId
                             .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));

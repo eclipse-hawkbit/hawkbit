@@ -135,6 +135,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                 targetContainer.removeItem(targetIdName);
             } else {
                 shouldRefreshTargets = true;
+                break;
             }
         }
         if (shouldRefreshTargets) {
@@ -190,8 +191,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onSystemEvents(final TargetCreatedEventHolder holder) {
-        onTargetCreatedEvents();
+    public void onTargetCreatedEvents(final TargetCreatedEventHolder holder) {
+        refreshTargets();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -788,10 +789,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
         return null != managementUIState.getLastSelectedTargetIdName()
                 && managementUIState.getLastSelectedTargetIdName().equals(targetIdName);
-    }
-
-    private void onTargetCreatedEvents() {
-        refreshTargets();
     }
 
     private boolean isFilterEnabled() {
