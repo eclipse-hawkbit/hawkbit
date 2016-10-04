@@ -72,7 +72,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         return urlHandlerProperties.getProtocols().entrySet().stream()
                 .filter(entry -> entry.getValue().getSupports().contains(api))
                 .filter(entry -> entry.getValue().isEnabled())
-                .map(entry -> new ArtifactUrl(entry.getValue().getProtocol(), entry.getValue().getRel(),
+                .map(entry -> new ArtifactUrl(entry.getValue().getProtocol().toUpperCase(), entry.getValue().getRel(),
                         generateUrl(entry.getValue(), placeholder)))
                 .collect(Collectors.toList());
 
