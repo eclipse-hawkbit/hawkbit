@@ -39,15 +39,16 @@ import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererDa
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
+import org.eclipse.hawkbit.ui.push.events.RolloutChangeEventHolder;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -133,7 +134,11 @@ public class RolloutListGrid extends AbstractGrid {
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvent(final RolloutChangeEvent rolloutChangeEvent) {
+    public void onRolloutChangeEvent(final RolloutChangeEventHolder holder) {
+        holder.getEvents().forEach(this::handleEvent);
+    }
+
+    private void handleEvent(final RolloutChangeEvent rolloutChangeEvent) {
         if (!rolloutUIState.isShowRollOuts()) {
             return;
         }

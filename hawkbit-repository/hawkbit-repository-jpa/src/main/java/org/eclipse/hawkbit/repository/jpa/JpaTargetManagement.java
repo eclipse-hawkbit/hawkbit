@@ -347,7 +347,8 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
+            afterCommit.afterCommit(
+                    () -> eventBus.post(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
             return result;
         }
 
@@ -358,7 +359,8 @@ public class JpaTargetManagement implements TargetManagement {
                 allTargets.size(), 0, Collections.unmodifiableList(targetRepository.save(allTargets)),
                 Collections.emptyList(), tag);
 
-        afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
+        afterCommit.afterCommit(
+                () -> eventBus.post(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -378,7 +380,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
-            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
         });
 
         return save;
@@ -394,7 +396,7 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
-            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
         });
         return save;
     }

@@ -28,10 +28,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -54,14 +52,18 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
+import org.eclipse.hawkbit.ui.push.events.TargetCreatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.TargetDeletedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.TargetInfoUpdateEventHolder;
+import org.eclipse.hawkbit.ui.push.events.TargetUpdatedEventHolder;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,28 +124,74 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
-    /**
-     * EventListener method which is called when a list of events is published.
-     * Event types should not be mixed up.
-     *
-     * @param events
-     *            list of events
-     */
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvents(final List<?> events) {
-        final Object firstEvent = events.get(0);
-        if (TargetCreatedEvent.class.isInstance(firstEvent)) {
-            onTargetCreatedEvents();
-        } else if (TargetInfoUpdateEvent.class.isInstance(firstEvent)) {
-            onTargetUpdateEvents(((List<TargetInfoUpdateEvent>) events).stream()
-                    .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
-                    .collect(Collectors.toList()));
-        } else if (TargetDeletedEvent.class.isInstance(firstEvent)) {
-            onTargetDeletedEvent((List<TargetDeletedEvent>) events);
-        } else if (TargetUpdatedEvent.class.isInstance(firstEvent)) {
-            onTargetUpdateEvents(((List<TargetUpdatedEvent>) events).stream()
-                    .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
+    public void onTargetDeletedEvents(final TargetDeletedEventHolder holder) {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shouldRefreshTargets = false;
+        for (final TargetDeletedEvent deletedEvent : holder.getEvents()) {
+            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getTargetId(), null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                targetContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshTargets = true;
+            }
         }
+        if (shouldRefreshTargets) {
+            refreshOnDelete();
+        } else {
+            targetContainer.commit();
+        }
+        reSelectItemsAfterDeletionEvent();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public void onTargetUpdatedEvents(final TargetUpdatedEventHolder holder) {
+        onTargetUpdateEvents(holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity())
+                .collect(Collectors.toList()));
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public void onTargetInfoUpdateEvents(final TargetInfoUpdateEventHolder holder) {
+        onTargetUpdateEvents(
+                holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * EventListener method which is called by the event bus to notify about a
+     * list of {@link TargetInfoUpdateEvent}.
+     *
+     * @param updatedTargets
+     *            list of updated targets
+     */
+    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
+        @SuppressWarnings("unchecked")
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+
+        if (isFilterEnabled()) {
+            LOG.debug("Filter enabled on UI {}. Refresh targets from database.", getUI().getUIId());
+            refreshTargets();
+        } else {
+            updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
+                    .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
+        }
+
+        // workaround until push is available for action
+        // history, re-select
+        // the updated target so the action history gets
+        // refreshed.
+        final Optional<Target> selected = updatedTargets.stream()
+                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
+        if (selected.isPresent()) {
+            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public void onSystemEvents(final TargetCreatedEventHolder holder) {
+        onTargetCreatedEvents();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -297,26 +345,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
         return managementViewAcceptCriteria;
-    }
-
-    private void onTargetDeletedEvent(final List<TargetDeletedEvent> events) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shouldRefreshTargets = false;
-        for (final TargetDeletedEvent deletedEvent : events) {
-            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getTargetId(), null, null);
-            if (visibleItemIds.contains(targetIdName)) {
-                targetContainer.removeItem(targetIdName);
-            } else {
-                shouldRefreshTargets = true;
-            }
-        }
-        if (shouldRefreshTargets) {
-            refreshOnDelete();
-        } else {
-            targetContainer.commit();
-        }
-        reSelectItemsAfterDeletionEvent();
     }
 
     private void reSelectItemsAfterDeletionEvent() {
@@ -760,37 +788,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
         return null != managementUIState.getLastSelectedTargetIdName()
                 && managementUIState.getLastSelectedTargetIdName().equals(targetIdName);
-    }
-
-    /**
-     * EventListener method which is called by the event bus to notify about a
-     * list of {@link TargetInfoUpdateEvent}.
-     *
-     * @param updatedTargets
-     *            list of updated targets
-     */
-    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
-        @SuppressWarnings("unchecked")
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-
-        if (isFilterEnabled()) {
-            LOG.debug("Filter enabled on UI {}. Refresh targets from database.", getUI().getUIId());
-            refreshTargets();
-        } else {
-            updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
-                    .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
-        }
-
-        // workaround until push is available for action
-        // history, re-select
-        // the updated target so the action history gets
-        // refreshed.
-        final Optional<Target> selected = updatedTargets.stream()
-                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
-        if (selected.isPresent()) {
-            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
-        }
     }
 
     private void onTargetCreatedEvents() {
