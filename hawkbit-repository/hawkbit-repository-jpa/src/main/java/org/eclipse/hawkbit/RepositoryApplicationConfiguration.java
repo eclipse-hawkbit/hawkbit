@@ -51,6 +51,8 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
+import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -91,6 +93,12 @@ import com.google.common.eventbus.EventBus;
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Autowired
     private EventBus eventBus;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RsqlValidationOracle rsqlValidationOracle() {
+        return new RsqlParserValidationOracle();
+    }
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
