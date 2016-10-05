@@ -123,14 +123,18 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * certificate.
      *
      * @param principal
+     *            the {@link HeaderAuthentication} from the header
      * @param credentials
+     *            a single {@link HeaderAuthentication} or a Collection of
+     *            HeaderAuthentication
      * @param tokenDetails
+     *            authentication details
      * @return <code>true</code> if authentication succeeded, otherwise
      *         <code>false</code>
      */
     private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
         boolean successAuthentication = false;
-        if (Collection.class.isAssignableFrom(credentials.getClass())) {
+        if (credentials instanceof Collection) {
             final Collection<?> multiValueCredentials = (Collection<?>) credentials;
             if (multiValueCredentials.contains(principal)) {
                 successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.security;
 
-
-//import static org.junit.Assert.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
@@ -105,7 +103,6 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNull();
-        ;
     }
 
     @Test
