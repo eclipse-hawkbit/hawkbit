@@ -226,9 +226,8 @@ public class TargetFilterTable extends Table {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .findTargetFilterQueryByName(targetFilterName);
-        filterManagementUIState.setTfQuery(targetFilterQuery);
         filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
-
+        filterManagementUIState.setTfQuery(targetFilterQuery);
         filterManagementUIState.setEditViewDisplayed(true);
         eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
     }

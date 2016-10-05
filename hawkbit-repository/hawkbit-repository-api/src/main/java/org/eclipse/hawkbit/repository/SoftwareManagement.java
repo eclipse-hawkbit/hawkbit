@@ -155,11 +155,13 @@ public interface SoftwareManagement {
     /**
      * deletes a software module meta data entry.
      *
-     * @param id
-     *            the ID of the software module meta data to delete
+     * @param softwareModule
+     *            where meta data has to be deleted
+     * @param key
+     *            of the metda data element
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotNull String key);
+    void deleteSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotEmpty String key);
 
     /**
      * Deletes {@link SoftwareModule}s which is any if the given ids.
@@ -251,9 +253,10 @@ public interface SoftwareManagement {
     /**
      * finds a single software module meta data by its id.
      *
-     * @param id
-     *            the id of the software module meta data containing the meta
-     *            data key and the ID of the software module
+     * @param softwareModule
+     *            where meta data has to be found
+     * @param key
+     *            of the meta data element
      * @return the found SoftwareModuleMetadata or {@code null} if not exits
      * @throws EntityNotFoundException
      *             in case the meta data does not exists for the given key
@@ -280,8 +283,8 @@ public interface SoftwareManagement {
      *
      * @param softwareModuleId
      *            the software module id to retrieve the meta data from
-     * @param spec
-     *            the specification to filter the result
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
      * @param pageable
      *            the page request to page the result
      * @return a paged result of all meta data entries for a given software
@@ -346,8 +349,8 @@ public interface SoftwareManagement {
     /**
      * Retrieves all {@link SoftwareModule}s with a given specification.
      *
-     * @param spec
-     *            the specification to filter the software modules
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
      * @param pageable
      *            pagination parameter
      * @return the found {@link SoftwareModule}s
@@ -392,7 +395,7 @@ public interface SoftwareManagement {
      *         {@link SoftwareModuleType#getKey()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleType findSoftwareModuleTypeByKey(@NotNull String key);
+    SoftwareModuleType findSoftwareModuleTypeByKey(@NotEmpty String key);
 
     /**
      *
@@ -415,8 +418,8 @@ public interface SoftwareManagement {
     /**
      * Retrieves all {@link SoftwareModuleType}s with a given specification.
      *
-     * @param spec
-     *            the specification to filter the software modules types
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
      * @param pageable
      *            pagination parameter
      * @return the found {@link SoftwareModuleType}s

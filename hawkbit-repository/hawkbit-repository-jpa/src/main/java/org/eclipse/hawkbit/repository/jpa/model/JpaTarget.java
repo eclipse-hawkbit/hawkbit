@@ -162,7 +162,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
             return Collections.emptySet();
         }
 
-        return tags;
+        return Collections.unmodifiableSet(tags);
     }
 
     public List<RolloutTargetGroup> getRolloutTargetGroup() {
@@ -210,7 +210,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     public boolean addAction(final Action action) {
         if (actions == null) {
-            actions = new ArrayList<>(4);
+            actions = new ArrayList<>();
         }
 
         return actions.add(action);

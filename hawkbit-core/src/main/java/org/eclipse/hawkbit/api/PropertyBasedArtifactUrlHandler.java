@@ -9,55 +9,80 @@
 package org.eclipse.hawkbit.api;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 
 import com.google.common.base.Strings;
 import com.google.common.net.UrlEscapers;
 
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
- * based on pattern.
+ * based on patterns configured by {@link ArtifactUrlHandlerProperties}.
+ * 
+ * This mechanism can be used to generate links to arbitrary file hosting
+ * infrastructure. However, the hawkBit update server supports hosting files as
+ * well in the following {@link UrlProtocol#getRef()} patterns:
+ * 
+ * Default:
+ * {protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/
+ * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
+ * 
+ * Default (MD5SUM files):
+ * {protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/
+ * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}.MD5SUM
+ * 
  */
-@Component
-@EnableConfigurationProperties(ArtifactUrlHandlerProperties.class)
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     private static final String PROTOCOL_PLACEHOLDER = "protocol";
-    private static final String TARGET_ID_PLACEHOLDER = "targetId";
+    private static final String CONTROLLER_ID_PLACEHOLDER = "controllerId";
+    private static final String TARGET_ID_BASE10_PLACEHOLDER = "targetId";
+    private static final String TARGET_ID_BASE62_PLACEHOLDER = "targetIdBase62";
     private static final String IP_PLACEHOLDER = "ip";
     private static final String PORT_PLACEHOLDER = "port";
     private static final String HOSTNAME_PLACEHOLDER = "hostname";
     private static final String ARTIFACT_FILENAME_PLACEHOLDER = "artifactFileName";
     private static final String ARTIFACT_SHA1_PLACEHOLDER = "artifactSHA1";
+    private static final String ARTIFACT_ID_BASE10_PLACEHOLDER = "artifactId";
+    private static final String ARTIFACT_ID_BASE62_PLACEHOLDER = "artifactIdBase62";
     private static final String TENANT_PLACEHOLDER = "tenant";
-    private static final String SOFTWARE_MODULE_ID_PLACDEHOLDER = "softwareModuleId";
+    private static final String TENANT_ID_BASE10_PLACEHOLDER = "tenantId";
+    private static final String TENANT_ID_BASE62_PLACEHOLDER = "tenantIdBase62";
+    private static final String SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER = "softwareModuleId";
+    private static final String SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER = "softwareModuleIdBase62";
 
-    @Autowired
-    private ArtifactUrlHandlerProperties urlHandlerProperties;
+    private final ArtifactUrlHandlerProperties urlHandlerProperties;
 
-    @Autowired
-    private TenantAware tenantAware;
+    /**
+     * @param urlHandlerProperties
+     *            for URL generation configuration
+     */
+    public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
+        this.urlHandlerProperties = urlHandlerProperties;
+    }
 
     @Override
-    public String getUrl(final String targetId, final Long softwareModuleId, final String filename,
-            final String sha1Hash, final UrlProtocol protocol) {
+    public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api) {
 
-        final String protocolString = protocol.name().toLowerCase();
-        final ProtocolProperties properties = urlHandlerProperties.getProperties(protocolString);
-        if (properties == null || properties.getPattern() == null) {
-            return null;
-        }
+        return urlHandlerProperties.getProtocols().entrySet().stream()
+                .filter(entry -> entry.getValue().getSupports().contains(api))
+                .filter(entry -> entry.getValue().isEnabled())
+                .map(entry -> new ArtifactUrl(entry.getValue().getProtocol().toUpperCase(), entry.getValue().getRel(),
+                        generateUrl(entry.getValue(), placeholder)))
+                .collect(Collectors.toList());
 
-        String urlPattern = properties.getPattern();
-        final Set<Entry<String, String>> entrySet = getReplaceMap(targetId, softwareModuleId,
-                UrlEscapers.urlFragmentEscaper().escape(filename), sha1Hash, protocolString, properties).entrySet();
+    }
+
+    private static String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder) {
+        final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder).entrySet();
+
+        String urlPattern = protocol.getRef();
+
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
@@ -69,30 +94,29 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         return urlPattern;
     }
 
-    private Map<String, String> getReplaceMap(final String targetId, final Long softwareModuleId, final String filename,
-            final String sha1Hash, final String protocol, final ProtocolProperties properties) {
+    private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder) {
         final Map<String, String> replaceMap = new HashMap<>();
-        replaceMap.put(IP_PLACEHOLDER, properties.getIp());
-        replaceMap.put(HOSTNAME_PLACEHOLDER, properties.getHostname());
-        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER, filename);
-        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, sha1Hash);
-        replaceMap.put(PROTOCOL_PLACEHOLDER, protocol);
-        replaceMap.put(PORT_PLACEHOLDER, properties.getPort());
-        replaceMap.put(TENANT_PLACEHOLDER, tenantAware.getCurrentTenant());
-        replaceMap.put(TARGET_ID_PLACEHOLDER, targetId);
-        replaceMap.put(SOFTWARE_MODULE_ID_PLACDEHOLDER, String.valueOf(softwareModuleId));
+        replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
+        replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
+        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
+                UrlEscapers.urlFragmentEscaper().escape(placeholder.getSoftwareData().getFilename()));
+        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
+        replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
+        replaceMap.put(PORT_PLACEHOLDER, protocol.getPort() == null ? null : String.valueOf(protocol.getPort()));
+        replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
+        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
+        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
+        replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
+        replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
+        replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
+        replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
+                Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER,
+                String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER,
+                Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
         return replaceMap;
-    }
-
-    @Override
-    public boolean protocolSupported(final UrlProtocol protocol) {
-        final String protocolString = protocol.name().toLowerCase();
-        final ProtocolProperties properties = urlHandlerProperties.getProperties(protocolString);
-        if (properties == null || properties.getPattern() == null) {
-            return false;
-        }
-
-        return properties.isEnabled();
     }
 
 }

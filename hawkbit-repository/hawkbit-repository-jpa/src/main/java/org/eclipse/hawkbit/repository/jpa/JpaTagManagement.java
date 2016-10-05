@@ -129,7 +129,7 @@ public class JpaTagManagement implements TagManagement {
 
         final List<JpaTarget> changed = new LinkedList<>();
         for (final JpaTarget target : targetRepository.findByTag(tag)) {
-            target.getTags().remove(tag);
+            target.removeTag(tag);
             changed.add(target);
         }
 

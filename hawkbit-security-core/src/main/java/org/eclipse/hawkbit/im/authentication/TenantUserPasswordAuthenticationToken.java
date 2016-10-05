@@ -68,4 +68,35 @@ public class TenantUserPasswordAuthenticationToken extends UsernamePasswordAuthe
     public Object getTenant() {
         return tenant;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TenantUserPasswordAuthenticationToken other = (TenantUserPasswordAuthenticationToken) obj;
+        if (tenant == null) {
+            if (other.tenant != null) {
+                return false;
+            }
+        } else if (!tenant.equals(other.tenant)) {
+            return false;
+        }
+        return true;
+    }
+
 }

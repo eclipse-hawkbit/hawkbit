@@ -71,7 +71,7 @@ public class DdiResult {
 
         private String name;
 
-        private FinalResult(final String name) {
+        FinalResult(final String name) {
             this.name = name;
         }
 

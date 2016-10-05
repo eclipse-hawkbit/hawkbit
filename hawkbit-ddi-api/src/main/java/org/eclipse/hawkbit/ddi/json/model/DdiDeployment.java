@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -41,7 +42,6 @@ public class DdiDeployment {
      *            to handle.
      */
     public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks) {
-        super();
         this.download = download;
         this.update = update;
         this.chunks = chunks;
@@ -56,7 +56,11 @@ public class DdiDeployment {
     }
 
     public List<DdiChunk> getChunks() {
-        return chunks;
+        if (chunks == null) {
+            return Collections.emptyList();
+        }
+        
+        return Collections.unmodifiableList(chunks);
     }
 
     /**
@@ -81,7 +85,7 @@ public class DdiDeployment {
 
         private String name;
 
-        private HandlingType(final String name) {
+        HandlingType(final String name) {
             this.name = name;
         }
 

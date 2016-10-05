@@ -11,6 +11,8 @@ package org.eclipse.hawkbit;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
+import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -52,7 +54,8 @@ import com.mongodb.MongoClientOptions;
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
-@EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class })
+@EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
+        ArtifactUrlHandlerProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
@@ -64,6 +67,12 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     public TestdataFactory testdataFactory() {
         return new TestdataFactory();
+    }
+
+    @Bean
+    public PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
+            final ArtifactUrlHandlerProperties urlHandlerProperties) {
+        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
     }
 
     @Bean

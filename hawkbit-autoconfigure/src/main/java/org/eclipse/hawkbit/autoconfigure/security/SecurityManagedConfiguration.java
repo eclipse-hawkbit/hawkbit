@@ -148,7 +148,7 @@ public class SecurityManagedConfiguration {
         private DdiSecurityProperties ddiSecurityConfiguration;
 
         @Autowired
-        private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+        private SecurityProperties springSecurityProperties;
 
         @Autowired
         private SystemSecurityContext systemSecurityContext;
@@ -478,7 +478,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
     public void onAuthenticationSuccess(final Authentication authentication) throws Exception {
 
         if (authentication.getClass().equals(TenantUserPasswordAuthenticationToken.class)) {
-            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(),
+            systemSecurityContext.runAsSystemAsTenant(systemManagement::getTenantMetadata,
                     ((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
         } else if (authentication.getClass().equals(UsernamePasswordAuthenticationToken.class)) {
             // TODO: vaadin4spring-ext-security does not give us the
@@ -489,7 +489,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
             // vaadin4spring 0.0.7 because it
             // has been fixed.
             final String defaultTenant = "DEFAULT";
-            systemSecurityContext.runAsSystemAsTenant(() -> systemManagement.getTenantMetadata(), defaultTenant);
+            systemSecurityContext.runAsSystemAsTenant(systemManagement::getTenantMetadata, defaultTenant);
         }
 
         super.onAuthenticationSuccess(authentication);
@@ -526,7 +526,7 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     private void lazyCreateTenantMetadata() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            systemSecurityContext.runAsSystem(() -> systemManagement.getTenantMetadata());
+            systemSecurityContext.runAsSystem(systemManagement::getTenantMetadata);
         }
     }
 

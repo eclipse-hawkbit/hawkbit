@@ -356,14 +356,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void assignDistributionSetEvent(final JpaTarget target, final Long actionId,
             final List<JpaSoftwareModule> modules) {
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
-        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
+
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
             eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
-            eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                    target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
-                    targetSecurityToken));
+            eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(), target,
+                    actionId, softwareModules));
         });
     }
 

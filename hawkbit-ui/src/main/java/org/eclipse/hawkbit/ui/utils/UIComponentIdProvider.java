@@ -880,6 +880,10 @@ public final class UIComponentIdProvider {
      * ID for download anonymous checkbox
      */
     public static final String DOWNLOAD_ANONYMOUS_CHECKBOX = "downloadanonymouscheckbox";
+    /**
+     * Id of custom filter query search Icon.
+     */
+    public static final String FILTER_SEARCH_ICON_ID = "filter.search.icon";
 
     /**
      * /* Private Constructor.

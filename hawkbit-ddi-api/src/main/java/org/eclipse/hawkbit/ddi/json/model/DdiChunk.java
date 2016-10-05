@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -65,7 +66,11 @@ public class DdiChunk {
     }
 
     public List<DdiArtifact> getArtifacts() {
-        return artifacts;
+        if (artifacts == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(artifacts);
     }
 
 }
