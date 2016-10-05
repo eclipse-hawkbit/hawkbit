@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 public interface EventEntityManager {
 
     /**
-     * Find a entity by given id.
+     * Find an entity by given id.
      * 
      * @param tenant
      *            the tenant
@@ -31,7 +31,7 @@ public interface EventEntityManager {
     <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id, Class<E> entityType);
 
     /**
-     * Finds all entities by given ids.
+     * Finds all entities by given id's.
      * 
      * @param tenant
      *            the tenant

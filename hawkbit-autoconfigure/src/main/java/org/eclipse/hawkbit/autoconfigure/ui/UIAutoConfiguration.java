@@ -54,8 +54,8 @@ public class UIAutoConfiguration {
     }
 
     /**
-     * The ui scoped event push strategy. Session scope is necessary, that every
-     * UI has a own strategy.
+     * The UI scoped event push strategy. Session scope is necessary, that every
+     * UI has an own strategy.
      * 
      * @param applicationContext
      *            the context to add the listener
