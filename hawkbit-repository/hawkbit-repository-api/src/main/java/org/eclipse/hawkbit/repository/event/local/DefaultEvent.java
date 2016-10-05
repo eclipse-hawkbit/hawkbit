@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Abstract event definition class which holds the necessary revsion and tenant
+ * Abstract event definition class which holds the necessary revision and tenant
  * information which every event needs.
  * 
  * @see TenantAwareDistributedEvent for events which should be distributed to
