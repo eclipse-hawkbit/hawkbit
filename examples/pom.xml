@@ -21,6 +21,11 @@
    <artifactId>hawkbit-examples-parent</artifactId>
    <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
+   
+   <properties>
+      <!-- Do not deploy examples, we do not want to release them. -->
+      <maven.deploy.skip>true</maven.deploy.skip>
+   </properties>
 
    <modules>
       <module>hawkbit-device-simulator</module>
