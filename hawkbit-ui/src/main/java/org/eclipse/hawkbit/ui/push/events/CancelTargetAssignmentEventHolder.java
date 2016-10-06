@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.push.events;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.ui.push.EventHolder;
 
 /**
  * EventHolder for {@link CancelTargetAssignmentEvent}s.
  *
  */
-public class CancelTargetAssignmentEventHolder implements EventHolder {
+public class CancelTargetAssignmentEventHolder implements EventHolder<CancelTargetAssignmentEvent> {
     private final List<CancelTargetAssignmentEvent> events;
 
     public CancelTargetAssignmentEventHolder(final List<CancelTargetAssignmentEvent> events) {

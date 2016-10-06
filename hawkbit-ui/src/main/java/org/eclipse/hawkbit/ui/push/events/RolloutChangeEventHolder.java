@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.push.events;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.EventHolder;
 
 /**
  * EventHolder for {@link RolloutChangeEvent}s.
  *
  */
-public class RolloutChangeEventHolder implements EventHolder {
+public class RolloutChangeEventHolder implements EventHolder<RolloutChangeEvent> {
     private final List<RolloutChangeEvent> events;
 
     public RolloutChangeEventHolder(final List<RolloutChangeEvent> events) {

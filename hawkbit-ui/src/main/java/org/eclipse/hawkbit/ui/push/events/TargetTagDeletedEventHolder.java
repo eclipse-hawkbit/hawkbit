@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.push.events;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.ui.push.EventHolder;
 
 /**
  * EventHolder for {@link TargetTagDeletedEvent}s.
  *
  */
-public class TargetTagDeletedEventHolder implements EventHolder {
+public class TargetTagDeletedEventHolder implements EventHolder<TargetTagDeletedEvent> {
     private final List<TargetTagDeletedEvent> events;
 
     public TargetTagDeletedEventHolder(final List<TargetTagDeletedEvent> events) {

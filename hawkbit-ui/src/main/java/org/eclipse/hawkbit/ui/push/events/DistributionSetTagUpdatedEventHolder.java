@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.push.events;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.ui.push.EventHolder;
 
 /**
  * EventHolder for {@link DistributionSetTagUpdateEvent}s.
  *
  */
-public class DistributionSetTagUpdatedEventHolder implements EventHolder {
+public class DistributionSetTagUpdatedEventHolder implements EventHolder<DistributionSetTagUpdateEvent> {
     private final List<DistributionSetTagUpdateEvent> events;
 
     public DistributionSetTagUpdatedEventHolder(final List<DistributionSetTagUpdateEvent> events) {

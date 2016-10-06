@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.push;
+package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
@@ -18,11 +18,11 @@ import org.eclipse.hawkbit.eventbus.event.Event;
  *
  */
 @FunctionalInterface
-public interface EventHolder {
+public interface EventHolder<T extends Event> {
 
     /**
      * @return list of contained events
      */
-    List<? extends Event> getEvents();
+    List<T> getEvents();
 
 }

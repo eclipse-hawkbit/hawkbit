@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.ui.push.events;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.ui.push.EventHolder;
 
 /**
  * EventHolder for {@link TargetTagCreatedEvent}s.
  *
  */
-public class TargetTagCreatedEventHolder implements EventHolder {
+public class TargetTagCreatedEventHolder implements EventHolder<TargetTagCreatedEvent> {
     private final List<TargetTagCreatedEvent> events;
 
     public TargetTagCreatedEventHolder(final List<TargetTagCreatedEvent> events) {

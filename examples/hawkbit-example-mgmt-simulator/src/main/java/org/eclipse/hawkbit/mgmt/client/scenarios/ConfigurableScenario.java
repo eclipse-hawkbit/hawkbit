@@ -262,30 +262,28 @@ public class ConfigurableScenario {
 
     private void createTargets(final Scenario scenario) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
+        IntStream.range(0, scenario.getTargets() / PAGE_SIZE).parallel().forEach(i -> createTargetPage(scenario, i));
+        LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
+    }
 
-        IntStream.range(0, scenario.getTargets() / PAGE_SIZE).parallel().forEach(i -> {
-            final List<MgmtTarget> targets = targetResource.createTargets(
-                    new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
-                            .buildAsList(i * PAGE_SIZE, (i + 1) * PAGE_SIZE > scenario.getTargets()
-                                    ? (scenario.getTargets() - (i * PAGE_SIZE)) : PAGE_SIZE))
-                    .getBody();
+    private void createTargetPage(final Scenario scenario, final int page) {
+        final List<MgmtTarget> targets = targetResource.createTargets(
+                new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
+                        .buildAsList(page * PAGE_SIZE, (page + 1) * PAGE_SIZE > scenario.getTargets()
+                                ? (scenario.getTargets() - (page * PAGE_SIZE)) : PAGE_SIZE))
+                .getBody();
 
-            if (scenario.getTargetTags() > 0) {
-                targetTagResource
-                        .createTargetTags(new TagBuilder().name("Page " + i)
-                                .description("Target tag for target page " + i).buildAsList(scenario.getTargetTags()))
-                        .getBody().forEach(tag -> {
-                            targetTagResource.assignTargets(tag.getTagId(),
+        if (scenario.getTargetTags() > 0) {
+            targetTagResource
+                    .createTargetTags(new TagBuilder().name("Page " + page)
+                            .description("Target tag for target page " + page).buildAsList(scenario.getTargetTags()))
+                    .getBody().forEach(
+                            tag -> targetTagResource.assignTargets(tag.getTagId(),
                                     targets.stream()
                                             .map(target -> new MgmtAssignedTargetRequestBody()
                                                     .setControllerId(target.getControllerId()))
-                                            .collect(Collectors.toList()));
-                        });
-            }
-
-        });
-
-        LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
+                                            .collect(Collectors.toList())));
+        }
     }
 
     private static int parseSize(final String s) {

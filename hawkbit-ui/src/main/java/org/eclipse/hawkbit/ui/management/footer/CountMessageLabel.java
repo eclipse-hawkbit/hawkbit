@@ -129,7 +129,7 @@ public class CountMessageLabel extends Label {
 
     private void displayTargetCountStatus() {
         final TargetTableFilters targFilParams = managementUIState.getTargetTableFilters();
-        final StringBuilder message = getTotalTargetMessage(targFilParams);
+        final StringBuilder message = getTotalTargetMessage();
         final String filteredTargets = i18n.get("label.filter.targets");
 
         if (targFilParams.hasFilter()) {
@@ -176,7 +176,7 @@ public class CountMessageLabel extends Label {
         setCaption(message.toString());
     }
 
-    private StringBuilder getTotalTargetMessage(final TargetTableFilters targFilParams) {
+    private StringBuilder getTotalTargetMessage() {
         if (managementUIState.getTargetsTruncated() != null) {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
