@@ -21,7 +21,7 @@
    <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN" />
    <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
 
-   <Root level="ERROR">
+   <Root level="INFO">
       <appender-ref ref="CONSOLE" />
    </Root>
 
