@@ -88,13 +88,13 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
 
         final TargetTagCreatedBulkEvent bulkEvent = new TargetTagCreatedBulkEvent(targetTag.getTenant(),
                 targetTag.getClass(), targetTags, "Node");
-        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(targetTags));
+        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(targetTags.toArray()));
 
         final Message<?> message = createMessage(bulkEvent);
 
         final TargetTagCreatedBulkEvent remoteEvent = (TargetTagCreatedBulkEvent) abstractMessageConverter
                 .fromMessage(message, TargetTagCreatedBulkEvent.class);
-        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(targetTags));
+        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(targetTags.toArray()));
     }
 
     @Test
@@ -106,13 +106,13 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetTagCreatedBulkEvent createdBulkEvent = new DistributionSetTagCreatedBulkEvent(
                 dsTag.getTenant(), dsTag.getClass(), dsTags, "Node");
-        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags));
+        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags.toArray()));
 
         final Message<?> message = createMessage(createdBulkEvent);
 
         final DistributionSetTagCreatedBulkEvent remoteEvent = (DistributionSetTagCreatedBulkEvent) abstractMessageConverter
                 .fromMessage(message, DistributionSetTagCreatedBulkEvent.class);
-        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(dsTags));
+        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(dsTags.toArray()));
 
     }
 
