@@ -33,6 +33,11 @@ $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
 ```
+Build hawkBit examples. The examples are not included in the maven-reactor build.
+```
+$ cd hawkbit/examples
+$ mvn clean install
+```
 #### Start hawkBit example app
 [Example Application](examples/hawkbit-example-app)
 ```
