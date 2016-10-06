@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
@@ -52,6 +53,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
+import org.eclipse.hawkbit.ui.push.events.CancelTargetAssignmentEventHolder;
 import org.eclipse.hawkbit.ui.push.events.TargetCreatedEventHolder;
 import org.eclipse.hawkbit.ui.push.events.TargetDeletedEventHolder;
 import org.eclipse.hawkbit.ui.push.events.TargetInfoUpdateEventHolder;
@@ -75,6 +77,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -147,13 +150,27 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onTargetUpdatedEvents(final TargetUpdatedEventHolder holder) {
+    void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventHolder holder) {
+        // workaround until push is available for action
+        // history, re-select
+        // the updated target so the action history gets
+        // refreshed.
+        final Optional<Target> selected = holder.getEvents().stream().map(event -> event.getTarget())
+                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
+        if (selected.isPresent()) {
+            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetUpdatedEvents(final TargetUpdatedEventHolder holder) {
         onTargetUpdateEvents(holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity())
                 .collect(Collectors.toList()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onTargetInfoUpdateEvents(final TargetInfoUpdateEventHolder holder) {
+    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventHolder holder) {
         onTargetUpdateEvents(
                 holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
                         .collect(Collectors.toList()));
@@ -349,10 +366,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private void reSelectItemsAfterDeletionEvent() {
-        Set<Object> values = new HashSet<>();
+        Set<Object> values;
         if (isMultiSelect()) {
             values = new HashSet<>((Set<?>) getValue());
         } else {
+            values = Sets.newHashSetWithExpectedSize(1);
             values.add(getValue());
         }
         unSelectAll();
@@ -865,7 +883,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
             size = targetManagement.countTargetByTargetFilterQuery(
                     managementUIState.getTargetTableFilters().getTargetFilterQuery().get());
-        } else if (!anyFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
+        } else if (noFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
             size = totalTargetsCount;
         } else {
             size = targetManagement.countTargetByFilters(status, searchText, distributionId, noTagClicked, targetTags);
@@ -878,9 +896,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                 && !Strings.isNullOrEmpty(managementUIState.getTargetTableFilters().getSearchText().get());
     }
 
-    private static Boolean anyFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
+    private static boolean noFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
             final Boolean noTagClicked, final String[] targetTags, final String searchText) {
-        return status == null && distributionId == null && Strings.isNullOrEmpty(searchText)
+        return CollectionUtils.isEmpty(status) && distributionId == null && Strings.isNullOrEmpty(searchText)
                 && !isTagSelected(targetTags, noTagClicked);
     }
 

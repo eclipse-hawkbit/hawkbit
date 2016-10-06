@@ -201,19 +201,11 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargets(final Long... targetIDs) {
-        // we need to select the target IDs first to check the if the targetIDs
-        // belonging to the
-        // tenant! Delete statement are not automatically enhanced with the
-        // @FilterDef of the
-        // hibernate session.
-        final List<Long> targetsForCurrentTenant = targetRepository.findAll(Lists.newArrayList(targetIDs)).stream()
-                .map(Target::getId).collect(Collectors.toList());
-        if (!targetsForCurrentTenant.isEmpty()) {
-            targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
-            targetRepository.deleteByIdIn(targetsForCurrentTenant);
-        }
-        targetsForCurrentTenant
-                .forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
+        final Collection<Long> targets = Lists.newArrayList(targetIDs);
+
+        targetRepository.deleteByIdIn(targets);
+
+        targets.forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
     }
 
     @Override

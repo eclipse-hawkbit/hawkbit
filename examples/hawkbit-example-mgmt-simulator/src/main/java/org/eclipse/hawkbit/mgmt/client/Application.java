@@ -29,7 +29,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.feign.support.ResponseEntityDecoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
@@ -45,7 +44,6 @@ import feign.slf4j.Slf4jLogger;
 @SpringBootApplication
 @EnableFeignClients("org.eclipse.hawkbit.mgmt.client.resource")
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
-@Configuration
 @AutoConfigureAfter(FeignClientConfiguration.class)
 @Import(FeignClientConfiguration.class)
 public class Application implements CommandLineRunner {
@@ -93,8 +91,8 @@ public class Application implements CommandLineRunner {
         return new CreateStartedRolloutExample();
     }
 
-    @Bean
-    public MgmtSoftwareModuleClientResource uploadSoftwareModule(final ClientConfigurationProperties configuration) {
+    private static MgmtSoftwareModuleClientResource uploadSoftwareModule(
+            final ClientConfigurationProperties configuration) {
         final ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new Jackson2HalModule());

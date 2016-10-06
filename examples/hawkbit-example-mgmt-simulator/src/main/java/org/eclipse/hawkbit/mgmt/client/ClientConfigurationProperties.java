@@ -55,8 +55,17 @@ public class ClientConfigurationProperties {
         private int artifactsPerSM = 1;
         private String targetAddress = "amqp:/simulator.replyTo";
         private boolean runRollouts = true;
+        private short rolloutSuccessThreshold = 80;
         private int rolloutDeploymentGroups = 4;
-        private boolean createTargetTags = false;
+
+        /**
+         * Targets tags per page (500 targets).
+         */
+        private int targetTags;
+
+        /**
+         * Distribution Set tags per set
+         */
         private int dsTags = 5;
 
         /**
@@ -169,12 +178,12 @@ public class ClientConfigurationProperties {
             this.appModulesPerDistributionSet = appModulesPerDistributionSet;
         }
 
-        public boolean isCreateTargetTags() {
-            return createTargetTags;
+        public void setTargetTags(final int targetTags) {
+            this.targetTags = targetTags;
         }
 
-        public void setCreateTargetTags(final boolean createTargetTags) {
-            this.createTargetTags = createTargetTags;
+        public int getTargetTags() {
+            return targetTags;
         }
 
         public int getDsTags() {
@@ -183,6 +192,14 @@ public class ClientConfigurationProperties {
 
         public void setDsTags(final int dsTags) {
             this.dsTags = dsTags;
+        }
+
+        public short getRolloutSuccessThreshold() {
+            return rolloutSuccessThreshold;
+        }
+
+        public void setRolloutSuccessThreshold(final short rolloutSuccessThreshold) {
+            this.rolloutSuccessThreshold = rolloutSuccessThreshold;
         }
 
     }

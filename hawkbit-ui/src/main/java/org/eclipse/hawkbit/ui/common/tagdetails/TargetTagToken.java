@@ -9,11 +9,9 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -25,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
@@ -106,16 +103,6 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         for (final TargetTag tag : tagManagement.findAllTargetTags()) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagUpdateEvent(final List<TargetTagUpdateEvent> events) {
-        events.stream().map(event -> event.getEntity()).forEach(entity -> {
-            final Item item = container.getItem(entity.getId());
-            if (item != null) {
-                updateItem(entity.getName(), entity.getColour(), item);
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

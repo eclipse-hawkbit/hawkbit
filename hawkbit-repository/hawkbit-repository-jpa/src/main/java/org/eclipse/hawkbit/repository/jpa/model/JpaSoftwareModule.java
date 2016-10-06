@@ -76,9 +76,11 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Size(max = 256)
     private String vendor;
 
+    @CascadeOnDelete
     @OneToMany(mappedBy = "softwareModule", cascade = { CascadeType.ALL }, targetEntity = JpaLocalArtifact.class)
     private List<LocalArtifact> artifacts;
 
+    @CascadeOnDelete
     @OneToMany(mappedBy = "softwareModule", cascade = { CascadeType.ALL }, targetEntity = JpaExternalArtifact.class)
     private List<ExternalArtifact> externalArtifacts;
 

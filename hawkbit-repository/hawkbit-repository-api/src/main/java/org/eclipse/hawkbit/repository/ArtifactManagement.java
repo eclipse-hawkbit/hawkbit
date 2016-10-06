@@ -187,13 +187,16 @@ public interface ArtifactManagement {
     void deleteExternalArtifact(@NotNull Long id);
 
     /**
-     * Deletes a local artifact.
+     * Garbage collects local artifact binary file if only referenced by given
+     * {@link LocalArtifact} metadata object.
      *
-     * @param existing
+     * @param onlyByThisReferenced
      *            the related local artifact
+     * 
+     * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteLocalArtifact(@NotNull LocalArtifact existing);
+    boolean clearLocalArtifactBinary(@NotNull LocalArtifact onlyByThisReferenced);
 
     /**
      * Deletes {@link Artifact} based on given id.

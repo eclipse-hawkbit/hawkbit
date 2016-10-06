@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties;
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties.Scenario;
@@ -128,7 +129,8 @@ public class ConfigurableScenario {
         PagedList<MgmtSoftwareModule> modules;
         do {
             modules = softwareModuleResource.getSoftwareModules(0, PAGE_SIZE, null, null).getBody();
-            modules.getContent().forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
+            modules.getContent().parallelStream()
+                    .forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
         } while (modules.getTotal() > PAGE_SIZE);
     }
 
@@ -136,7 +138,8 @@ public class ConfigurableScenario {
         PagedList<MgmtDistributionSet> distributionSets;
         do {
             distributionSets = distributionSetResource.getDistributionSets(0, PAGE_SIZE, null, null).getBody();
-            distributionSets.getContent().forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
+            distributionSets.getContent().parallelStream()
+                    .forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
         } while (distributionSets.getTotal() > PAGE_SIZE);
 
         deleteDistributionSetTags();
@@ -146,7 +149,8 @@ public class ConfigurableScenario {
         PagedList<MgmtTag> dsTags;
         do {
             dsTags = distributionSetTagResource.getDistributionSetTags(0, PAGE_SIZE, null, null).getBody();
-            dsTags.getContent().forEach(ds -> distributionSetTagResource.deleteDistributionSetTag(ds.getTagId()));
+            dsTags.getContent().parallelStream()
+                    .forEach(ds -> distributionSetTagResource.deleteDistributionSetTag(ds.getTagId()));
         } while (dsTags.getTotal() > PAGE_SIZE);
     }
 
@@ -154,7 +158,8 @@ public class ConfigurableScenario {
         PagedList<MgmtTarget> targets;
         do {
             targets = targetResource.getTargets(0, PAGE_SIZE, null, null).getBody();
-            targets.getContent().forEach(target -> targetResource.deleteTarget(target.getControllerId()));
+            targets.getContent().parallelStream()
+                    .forEach(target -> targetResource.deleteTarget(target.getControllerId()));
         } while (targets.getTotal() > PAGE_SIZE);
 
         deleteTargetTags();
@@ -164,7 +169,8 @@ public class ConfigurableScenario {
         PagedList<MgmtTag> targetTags;
         do {
             targetTags = targetTagResource.getTargetTags(0, PAGE_SIZE, null, null).getBody();
-            targetTags.getContent().forEach(target -> targetTagResource.deleteTargetTag(target.getTagId()));
+            targetTags.getContent().parallelStream()
+                    .forEach(target -> targetTagResource.deleteTargetTag(target.getTagId()));
         } while (targetTags.getTotal() > PAGE_SIZE);
     }
 
@@ -177,10 +183,10 @@ public class ConfigurableScenario {
     private void runRollout(final MgmtDistributionSet set, final Scenario scenario) {
         LOGGER.info("Run rollout for set {}", set.getDsId());
         // create a Rollout
-        final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource
-                .create(new RolloutBuilder().name("Rollout" + set.getName() + set.getVersion())
-                        .groupSize(scenario.getRolloutDeploymentGroups()).targetFilterQuery("name==*")
-                        .distributionSetId(set.getDsId()).successThreshold("80").errorThreshold("5").build())
+        final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource.create(new RolloutBuilder()
+                .name("Rollout" + set.getName() + set.getVersion()).groupSize(scenario.getRolloutDeploymentGroups())
+                .targetFilterQuery("name==*").distributionSetId(set.getDsId())
+                .successThreshold(String.valueOf(scenario.getRolloutSuccessThreshold())).errorThreshold("5").build())
                 .getBody();
 
         // start the created Rollout
@@ -243,8 +249,10 @@ public class ConfigurableScenario {
                 .getBody());
 
         for (int iArtifact = 0; iArtifact < scenario.getArtifactsPerSM(); iArtifact++) {
+            final int count = iArtifact;
             modules.forEach(module -> {
-                final ArtifactFile file = new ArtifactFile("dummyfile.dummy", null, "multipart/form-data", artifact);
+                final ArtifactFile file = new ArtifactFile("dummyfile.dummy" + count, null, "multipart/form-data",
+                        artifact);
                 uploadSoftwareModule.uploadArtifact(module.getModuleId(), file, null, null, null);
             });
         }
@@ -255,28 +263,27 @@ public class ConfigurableScenario {
     private void createTargets(final Scenario scenario) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
 
-        for (int i = 0; i < (scenario.getTargets() / PAGE_SIZE); i++) {
-
+        IntStream.range(0, scenario.getTargets() / PAGE_SIZE).parallel().forEach(i -> {
             final List<MgmtTarget> targets = targetResource.createTargets(
                     new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
                             .buildAsList(i * PAGE_SIZE, (i + 1) * PAGE_SIZE > scenario.getTargets()
                                     ? (scenario.getTargets() - (i * PAGE_SIZE)) : PAGE_SIZE))
                     .getBody();
 
-            if (scenario.isCreateTargetTags()) {
-                final Long tagid = targetTagResource.createTargetTags(
-                        new TagBuilder().name("Page " + i).description("Target tag for target page " + i).build())
-                        .getBody().get(0).getTagId();
-
+            if (scenario.getTargetTags() > 0) {
                 targetTagResource
-                        .assignTargets(tagid,
-                                targets.stream()
-                                        .map(target -> new MgmtAssignedTargetRequestBody()
-                                                .setControllerId(target.getControllerId()))
-                                        .collect(Collectors.toList()));
+                        .createTargetTags(new TagBuilder().name("Page " + i)
+                                .description("Target tag for target page " + i).buildAsList(scenario.getTargetTags()))
+                        .getBody().forEach(tag -> {
+                            targetTagResource.assignTargets(tag.getTagId(),
+                                    targets.stream()
+                                            .map(target -> new MgmtAssignedTargetRequestBody()
+                                                    .setControllerId(target.getControllerId()))
+                                            .collect(Collectors.toList()));
+                        });
             }
 
-        }
+        });
 
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
     }

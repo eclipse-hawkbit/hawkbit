@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -56,15 +55,4 @@ public interface TargetInfoRepository {
      */
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     <S extends JpaTargetInfo> S save(S entity);
-
-    /**
-     * Deletes info entries by ID.
-     *
-     * @param targetIDs
-     *            to delete
-     */
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    void deleteByTargetIdIn(final Collection<Long> targetIDs);
 }

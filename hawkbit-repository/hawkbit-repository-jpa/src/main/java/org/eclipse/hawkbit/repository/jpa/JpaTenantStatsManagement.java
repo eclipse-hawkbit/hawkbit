@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -46,15 +44,8 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
         final TenantUsage result = new TenantUsage(tenant);
 
         result.setTargets(targetRepository.count());
-
-        final Long artifacts = artifactRepository.countBySoftwareModuleDeleted(false);
-        result.setArtifacts(artifacts);
-
-        final Optional<Long> artifactsSize = artifactRepository.getSumOfUndeletedArtifactSize();
-        if (artifactsSize.isPresent()) {
-            result.setOverallArtifactVolumeInBytes(artifactsSize.get());
-        }
-
+        result.setArtifacts(artifactRepository.countBySoftwareModuleDeleted(false));
+        artifactRepository.getSumOfUndeletedArtifactSize().map(result::setOverallArtifactVolumeInBytes);
         result.setActions(actionRepository.count());
 
         return result;

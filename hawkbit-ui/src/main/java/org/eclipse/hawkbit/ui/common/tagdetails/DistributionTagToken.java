@@ -126,7 +126,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventHolder holder) {
         holder.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
-                .forEach(deletedTagId -> removeTagFromCombo(deletedTagId));
+                .forEach(this::removeTagFromCombo);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -153,7 +153,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     protected boolean isAssign(final DistributionSetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getAssigned() > 0) {
+        if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedDsIdName() != null) {
             final List<Long> assignedDsNames = assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
@@ -164,7 +164,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     protected boolean isUnassign(final DistributionSetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getUnassigned() > 0) {
+        if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedDsIdName() != null) {
             final List<Long> assignedDsNames = assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {

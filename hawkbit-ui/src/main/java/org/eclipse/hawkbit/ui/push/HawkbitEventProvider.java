@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.push;
 import java.util.Map;
 
 import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
+import org.eclipse.hawkbit.ui.push.events.CancelTargetAssignmentEventHolder;
 import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventHolder;
 import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventHolder;
 import org.eclipse.hawkbit.ui.push.events.DistributionSetTagAssignmentResultEventHolder;
@@ -53,7 +55,7 @@ import com.google.gwt.thirdparty.guava.common.collect.Maps;
  */
 public class HawkbitEventProvider implements UIEventProvider {
 
-    private static final Map<Class<? extends Event>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(17);
+    private static final Map<Class<? extends Event>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(18);
 
     static {
 
@@ -71,6 +73,7 @@ public class HawkbitEventProvider implements UIEventProvider {
         EVENTS.put(TargetInfoUpdateEvent.class, TargetInfoUpdateEventHolder.class);
         EVENTS.put(TargetDeletedEvent.class, TargetDeletedEventHolder.class);
         EVENTS.put(TargetUpdatedEvent.class, TargetUpdatedEventHolder.class);
+        EVENTS.put(CancelTargetAssignmentEvent.class, CancelTargetAssignmentEventHolder.class);
 
         EVENTS.put(DistributionSetUpdateEvent.class, DistributionSetUpdatedEventHolder.class);
         EVENTS.put(DistributionDeletedEvent.class, DistributionDeletedEventHolder.class);

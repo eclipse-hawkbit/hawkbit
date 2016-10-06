@@ -28,11 +28,11 @@ import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -83,6 +83,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -338,17 +339,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionForTarget;
     }
 
-    /**
-     * Sends the {@link TargetAssignDistributionSetEvent} for a specific target
-     * to the {@link EventBus}.
-     *
-     * @param target
-     *            the Target which has been assigned to a distribution set
-     * @param actionId
-     *            the action id of the assignment
-     * @param softwareModules
-     *            the software modules which have been assigned
-     */
     private void assignDistributionSetEvent(final JpaTarget target, final Long actionId,
             final List<JpaSoftwareModule> modules) {
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -442,8 +432,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventBus.post(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
-                target.getTenant(), target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
+        afterCommit.afterCommit(() -> eventBus.post(
+                new CancelTargetAssignmentEvent(target.getOptLockRevision(), target.getTenant(), target, actionId)));
     }
 
     @Override
@@ -502,7 +492,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public Action startScheduledAction(final Action action) {
 
         final JpaAction mergedAction = (JpaAction) entityManager.merge(action);
@@ -603,7 +593,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return convertAcPage(actions, pageable);
     }
 
-    private Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
+    private static Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
         final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target), target));
