@@ -11,13 +11,18 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+
+import com.google.common.collect.Lists;
 
 /**
  * A {@link TenantAware} implemenation which retrieves the ID of the tenant from
@@ -32,9 +37,9 @@ public class SecurityContextTenantAware implements TenantAware {
     public String getCurrentTenant() {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
-            final Object authDetails = context.getAuthentication().getDetails();
-            if (authDetails instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) authDetails).getTenant();
+            final Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserPrincipal) {
+                return ((UserPrincipal) principal).getTenant();
             }
         }
         return null;
@@ -66,12 +71,17 @@ public class SecurityContextTenantAware implements TenantAware {
     private static final class AuthenticationDelegate implements Authentication {
         private static final long serialVersionUID = 1L;
 
+        private static final String SYSTEM_USER = "system";
+        private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Lists
+                .newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
         private final Authentication delegate;
-        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+
+        private final UserPrincipal systemPrincipal;
 
         private AuthenticationDelegate(final Authentication delegate, final String tenant) {
             this.delegate = delegate;
-            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
+            this.systemPrincipal = new UserPrincipal(SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER,
+                    tenant, SYSTEM_AUTHORITIES);
         }
 
         @Override
@@ -111,12 +121,12 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public Object getDetails() {
-            return tenantAwareAuthenticationDetails;
+            return (delegate != null) ? delegate.getDetails() : null;
         }
 
         @Override
         public Object getPrincipal() {
-            return (delegate != null) ? delegate.getPrincipal() : null;
+            return systemPrincipal;
         }
 
         @Override

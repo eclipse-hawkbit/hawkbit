@@ -8,13 +8,12 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
 
 /**
  * A software provisioning user principal definition stored in the
@@ -24,14 +23,13 @@ import org.springframework.security.core.userdetails.UserDetails;
  *
  *
  */
-public class UserPrincipal implements UserDetails, Serializable {
+public class UserPrincipal extends User {
 
     /**
     * 
     */
     private static final long serialVersionUID = 1L;
 
-    private final String username;
     private final String firstname;
     private final String lastname;
     private final String loginname;
@@ -51,19 +49,16 @@ public class UserPrincipal implements UserDetails, Serializable {
      */
     public UserPrincipal(final String username, final String firstname, final String lastname, final String loginname,
             final String tenant) {
-        this.username = username;
+        this(username, "***", lastname, firstname, loginname, tenant, Collections.emptyList());
+    }
+
+    public UserPrincipal(final String username, final String password, final String firstname, final String lastname,
+            final String loginname, final String tenant, final Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, authorities);
         this.firstname = firstname;
         this.lastname = lastname;
         this.loginname = loginname;
         this.tenant = tenant;
-    }
-
-    /**
-     * @return the username
-     */
-    @Override
-    public String getUsername() {
-        return username;
     }
 
     /**
@@ -94,68 +89,21 @@ public class UserPrincipal implements UserDetails, Serializable {
         return tenant;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#getAuthorities(
-     * )
-     */
-    @Override
-    public Collection<SimpleGrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#getPassword()
-     */
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isAccountNonExpired()
-     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isAccountNonLocked()
-     */
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isCredentialsNonExpired()
-     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#isEnabled()
-     */
     @Override
     public boolean isEnabled() {
         return true;

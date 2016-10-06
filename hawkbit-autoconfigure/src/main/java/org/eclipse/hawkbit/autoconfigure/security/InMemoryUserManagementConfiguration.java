@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -52,7 +53,7 @@ public class InMemoryUserManagementConfiguration extends GlobalAuthenticationCon
     @Bean
     @ConditionalOnMissingBean
     public UserDetailsService userDetailsService() {
-        final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager(new ArrayList<>());
+        final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserPrincipalDetailsManager();
         inMemoryUserDetailsManager.setAuthenticationManager(null);
         inMemoryUserDetailsManager.createUser(new User(securityProperties.getUser().getName(),
                 securityProperties.getUser().getPassword(), PermissionUtils.createAllAuthorityList()));
@@ -77,6 +78,21 @@ public class InMemoryUserManagementConfiguration extends GlobalAuthenticationCon
                     authentication.getCredentials(), user.getAuthorities());
             result.setDetails(new TenantAwareAuthenticationDetails("DEFAULT", false));
             return result;
+        }
+    }
+
+    private static final class InMemoryUserPrincipalDetailsManager extends InMemoryUserDetailsManager {
+
+        private InMemoryUserPrincipalDetailsManager() {
+            super(new ArrayList<>());
+        }
+
+        @Override
+        public UserDetails loadUserByUsername(final String username) {
+            final UserDetails loadUserByUsername = super.loadUserByUsername(username);
+            return new UserPrincipal(loadUserByUsername.getUsername(), loadUserByUsername.getPassword(),
+                    loadUserByUsername.getUsername(), loadUserByUsername.getUsername(),
+                    loadUserByUsername.getUsername(), "DEFAULT", loadUserByUsername.getAuthorities());
         }
     }
 }
