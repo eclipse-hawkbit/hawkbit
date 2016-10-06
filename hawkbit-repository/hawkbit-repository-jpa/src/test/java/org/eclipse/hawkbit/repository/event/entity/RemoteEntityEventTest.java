@@ -140,7 +140,6 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
                 .fromMessage(message, DistributionSetTagUpdateEvent.class);
         assertThat(underTestUpdateEvent.getEntity()).isEqualTo(entity);
 
-        // DistributionSetTagDeletedEvent
         final DistributionSetTagDeletedEvent deleteEvent = new DistributionSetTagDeletedEvent(entity, "Node");
         assertThat(deleteEvent.getEntity()).isSameAs(entity);
         message = createMessage(deleteEvent);

@@ -122,9 +122,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
         final long current = System.currentTimeMillis();
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -156,8 +154,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(content()
-                            .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                    .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                     .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
             return null;
         });
@@ -242,8 +239,6 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
-
-        // {"config":{"polling":{}},"_links":{"configData":{"href":"http://localhost/default/controller/v1/4711/configData"}}}
 
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());

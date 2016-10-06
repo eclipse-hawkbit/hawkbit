@@ -56,7 +56,7 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
         this.abstractMessageConverter = autoConfiguration.busJsonConverter();
         ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan",
-                new String[] { "org.eclipse.hawkbit.repository.even.remote",
+                new String[] { "org.eclipse.hawkbit.repository.event.remote",
                         ClassUtils.getPackageName(RemoteApplicationEvent.class) });
         ((InitializingBean) abstractMessageConverter).afterPropertiesSet();
 
@@ -88,13 +88,13 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
 
         final TargetTagCreatedBulkEvent bulkEvent = new TargetTagCreatedBulkEvent(targetTag.getTenant(),
                 targetTag.getClass(), targetTags, "Node");
-        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(targetTags.toArray()));
+        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(targetTags));
 
         final Message<?> message = createMessage(bulkEvent);
 
         final TargetTagCreatedBulkEvent remoteEvent = (TargetTagCreatedBulkEvent) abstractMessageConverter
                 .fromMessage(message, TargetTagCreatedBulkEvent.class);
-        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(targetTags.toArray()));
+        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(targetTags));
     }
 
     @Test
@@ -106,13 +106,13 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetTagCreatedBulkEvent createdBulkEvent = new DistributionSetTagCreatedBulkEvent(
                 dsTag.getTenant(), dsTag.getClass(), dsTags, "Node");
-        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags.toArray()));
+        assertThat(createdBulkEvent.getEntities(), Matchers.containsInAnyOrder(dsTags));
 
         final Message<?> message = createMessage(createdBulkEvent);
 
         final DistributionSetTagCreatedBulkEvent remoteEvent = (DistributionSetTagCreatedBulkEvent) abstractMessageConverter
                 .fromMessage(message, DistributionSetTagCreatedBulkEvent.class);
-        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(dsTags.toArray()));
+        assertThat(remoteEvent.getEntities(), Matchers.containsInAnyOrder(dsTags));
 
     }
 

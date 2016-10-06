@@ -60,8 +60,4 @@ public class TenantAwareDistributedEvent extends RemoteApplicationEvent implemen
         return tenant;
     }
 
-    public void setTenant(final String tenant) {
-        this.tenant = tenant;
-    }
-
 }

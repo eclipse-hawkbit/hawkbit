@@ -74,11 +74,14 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
     @Override
     @JsonIgnore
     public TargetInfo getEntity() {
-        if (targetInfo == null) {
-            final Target target = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
-                    getEntityId(), entityClass);
-            targetInfo = target == null ? null : target.getTargetInfo();
+
+        if (targetInfo != null) {
+            return targetInfo;
         }
+
+        final Target target = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
+                getEntityId(), entityClass);
+        targetInfo = target == null ? null : target.getTargetInfo();
         return targetInfo;
     }
 

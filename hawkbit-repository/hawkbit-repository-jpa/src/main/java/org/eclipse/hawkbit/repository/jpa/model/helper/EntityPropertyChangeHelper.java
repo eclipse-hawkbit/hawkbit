@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,8 +30,8 @@ public final class EntityPropertyChangeHelper {
     /**
      * To get the map of entity property change set
      * 
-     * @param clazz
      * @param event
+     *            the event
      * @return the map of the changeSet
      */
     public static Map<String, PropertyChange> getChangeSet(final DescriptorEvent event) {
@@ -40,7 +39,6 @@ public final class EntityPropertyChangeHelper {
         return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)
                 .collect(Collectors.toMap(record -> record.getAttribute(),
-                        record -> new PropertyChange((Serializable) record.getOldValue(),
-                                (Serializable) record.getNewValue())));
+                        record -> new PropertyChange(record.getOldValue(), record.getNewValue())));
     }
 }

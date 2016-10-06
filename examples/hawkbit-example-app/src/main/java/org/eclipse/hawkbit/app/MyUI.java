@@ -8,11 +8,8 @@
  */
 package org.eclipse.hawkbit.app;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
 
 import com.vaadin.annotations.Push;
@@ -37,8 +34,12 @@ public class MyUI extends HawkbitUI {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Constructor
+     * 
      * @param pushStrategy
+     *            the push strategy
      * @param eventBus
+     *            the event bus
      */
     public MyUI(final EventPushStrategy pushStrategy, final SessionEventBus eventBus) {
         super(pushStrategy, eventBus);

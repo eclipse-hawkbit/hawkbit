@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -30,7 +29,7 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
 
     private static final long serialVersionUID = -3671601415138242311L;
 
-    private Map<String, PropertyChange> changeSetValues = new HashMap<>();
+    private final Map<String, PropertyChange> changeSetValues;
 
     /**
      * Constructor for json serialization.

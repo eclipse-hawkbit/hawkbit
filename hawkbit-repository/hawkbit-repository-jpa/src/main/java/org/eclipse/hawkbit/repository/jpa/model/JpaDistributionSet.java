@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
@@ -344,7 +345,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+        publishEventWithEventPublisher(
                 new DistributionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
@@ -352,14 +353,14 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
         final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(descriptorEvent);
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+        publishEventWithEventPublisher(
                 new DistributionSetUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
         if (changeSet.containsKey(DELETED_PROPERTY)) {
             final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
             if (newDeleted) {
-                EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionDeletedEvent(
-                        getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
+                publishEventWithEventPublisher(new DistributionDeletedEvent(getTenant(), getId(),
+                        EventPublisherHolder.getInstance().getApplicationId()));
             }
         }
 
@@ -367,8 +368,12 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionDeletedEvent(getTenant(),
-                getId(), EventPublisherHolder.getInstance().getApplicationId()));
+        publishEventWithEventPublisher(new DistributionDeletedEvent(getTenant(), getId(),
+                EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    private void publishEventWithEventPublisher(final ApplicationEvent event) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
     }
 
 }

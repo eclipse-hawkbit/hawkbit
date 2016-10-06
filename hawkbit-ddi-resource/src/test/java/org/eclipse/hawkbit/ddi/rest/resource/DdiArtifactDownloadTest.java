@@ -569,7 +569,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public static class DownloadTestConfiguration {
 
         @Bean
-        public Listener bancelEventHandlerStubBean() {
+        public Listener cancelEventHandlerStubBean() {
             return new Listener();
         }
 

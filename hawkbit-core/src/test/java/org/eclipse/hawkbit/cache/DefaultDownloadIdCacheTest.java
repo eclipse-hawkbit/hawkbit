@@ -49,6 +49,8 @@ public class DefaultDownloadIdCacheTest {
 
     private DefaultDownloadIdCache underTest;
 
+    private final String knownKey = "12345";
+
     @Before
     public void before() {
         underTest = new DefaultDownloadIdCache(cacheManagerMock);
@@ -59,7 +61,6 @@ public class DefaultDownloadIdCacheTest {
     @Test
     @Description("Verifies that putting key and value is delegated to the CacheManager implementation")
     public void putKeyAndValueIsDelegatedToCacheManager() {
-        final String knownKey = "12345";
         final DownloadArtifactCache value = new DownloadArtifactCache(DownloadType.BY_SHA1, knownKey);
 
         underTest.put(knownKey, value);
@@ -73,7 +74,6 @@ public class DefaultDownloadIdCacheTest {
     @Test
     @Description("Verifies that evicting a key is delegated to the CacheManager implementation")
     public void evictKeyIsDelegatedToCacheManager() {
-        final String knownKey = "12345";
 
         underTest.evict(knownKey);
 
@@ -98,7 +98,6 @@ public class DefaultDownloadIdCacheTest {
     @Test
     @Description("Verifies that retrieving a null value for a specific key is delegated to the CacheManager implementation")
     public void getValueReturnsNullIfNoKeyIsAssociated() {
-        final String knownKey = "12345";
 
         when(cacheMock.get(knownKey)).thenReturn(new SimpleValueWrapper(null));
 
@@ -112,8 +111,6 @@ public class DefaultDownloadIdCacheTest {
     public void tenancyCacheManagerIsUsingDirectCache() {
 
         underTest = new DefaultDownloadIdCache(tenancyCacheManagerMock);
-
-        final String knownKey = "12345";
         final DownloadArtifactCache value = new DownloadArtifactCache(DownloadType.BY_SHA1, knownKey);
 
         underTest.put(knownKey, value);
