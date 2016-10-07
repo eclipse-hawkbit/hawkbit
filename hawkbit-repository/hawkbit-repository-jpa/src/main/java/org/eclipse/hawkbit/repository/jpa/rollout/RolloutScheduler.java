@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,10 +57,7 @@ public class RolloutScheduler {
      * tenant the {@link RolloutManagement#checkRunningRollouts(long)} in the
      * {@link SystemSecurityContext}.
      */
-    // @Scheduled(initialDelayString =
-    // RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER,
-    // fixedDelayString =
-    // RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
+    @Scheduled(initialDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void rolloutScheduler() {
         LOGGER.debug("rollout schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
