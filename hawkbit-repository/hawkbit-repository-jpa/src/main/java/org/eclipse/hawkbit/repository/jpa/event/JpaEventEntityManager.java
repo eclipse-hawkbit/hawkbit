@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity_;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class JpaEventEntityManager implements EventEntityManager {
 
     private final TenantAware tenantAware;
 
-    @Autowired
     private final EntityManager entityManager;
 
     /**
@@ -53,7 +51,15 @@ public class JpaEventEntityManager implements EventEntityManager {
     @Override
     public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id,
             final Class<E> entityType) {
-        return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
+        return tenantAware.runAsTenant(tenant, () -> {
+            final E entity = entityManager.find(entityType, id);
+            // The entityManager needs to refresh the entity so the new entity
+            // value is available on other nodes. It is necessary to read the
+            // entity from the database again to ensure there are no stale data
+            // in the cache.
+            entityManager.refresh(entity);
+            return entity;
+        });
     }
 
     @SuppressWarnings("unchecked")
