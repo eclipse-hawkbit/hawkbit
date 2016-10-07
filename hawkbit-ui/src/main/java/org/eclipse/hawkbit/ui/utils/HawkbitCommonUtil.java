@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.utils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -435,8 +435,7 @@ public final class HawkbitCommonUtil {
      */
     public static LazyQueryContainer createLazyQueryContainer(
             final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<>();
-        queryFactory.setQueryConfiguration(queryConfig);
+        queryFactory.setQueryConfiguration(Collections.emptyMap());
         return new LazyQueryContainer(new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
     }
 
@@ -448,8 +447,7 @@ public final class HawkbitCommonUtil {
      */
     public static LazyQueryContainer createDSLazyQueryContainer(
             final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<>();
-        queryFactory.setQueryConfiguration(queryConfig);
+        queryFactory.setQueryConfiguration(Collections.emptyMap());
         return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "tagIdName"), queryFactory);
     }
 

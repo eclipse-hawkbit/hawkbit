@@ -32,12 +32,12 @@ public interface Target extends NamedEntity {
     String getControllerId();
 
     /**
-     * @return assigned {@link TargetTag}s.
+     * @return immutable set of assigned {@link TargetTag}s.
      */
     Set<TargetTag> getTags();
 
     /**
-     * @return {@link Action} history of the {@link Target}.
+     * @return immutable {@link Action} history of the {@link Target}.
      */
     List<Action> getActions();
 
@@ -63,5 +63,20 @@ public interface Target extends NamedEntity {
      *            new securityToken
      */
     void setSecurityToken(String token);
+
+    /**
+     * @param tag
+     *            to add
+     * @return <code>true</code> if tag could be added sucessfully (i.e. was not
+     *         already in the list).
+     */
+    public boolean addTag(TargetTag tag);
+
+    /**
+     * @param tag
+     *            to remove
+     * @return <code>true</code> if tag was in the list and removed
+     */
+    public boolean removeTag(TargetTag tag);
 
 }

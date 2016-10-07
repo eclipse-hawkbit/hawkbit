@@ -90,7 +90,7 @@ public enum TenantConfigurationKey {
      * @param validator
      *            Validator which validates, that property is of correct format
      */
-    private TenantConfigurationKey(final String key, final String defaultKeyName, final Class<?> dataType,
+    TenantConfigurationKey(final String key, final String defaultKeyName, final Class<?> dataType,
             final String defaultValue, final Class<? extends TenantConfigurationValidator> validator) {
         this.keyName = key;
         this.dataType = dataType;

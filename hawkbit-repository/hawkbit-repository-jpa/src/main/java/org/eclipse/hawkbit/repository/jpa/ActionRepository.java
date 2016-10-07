@@ -30,6 +30,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -103,7 +104,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Optional<Action> findFirstByTargetAndActiveOrderByIdAsc(final JpaTarget target, boolean active);
+    Optional<Action> findFirstByTargetAndActive(final Sort sort, final JpaTarget target, boolean active);
 
     /**
      * Retrieves latest {@link UpdateAction} for given target and

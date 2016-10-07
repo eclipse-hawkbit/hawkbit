@@ -303,4 +303,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                         Constants.DST_DEFAULT_OS_WITH_APPS_NAME, "Default type with Firmware/OS and optional app(s).")
                                 .addMandatoryModuleType(os).addOptionalModuleType(app));
     }
+
+    @Override
+    public TenantMetaData getTenantMetadata(final Long tenantId) {
+        return tenantMetaDataRepository.findOne(tenantId);
+    }
 }

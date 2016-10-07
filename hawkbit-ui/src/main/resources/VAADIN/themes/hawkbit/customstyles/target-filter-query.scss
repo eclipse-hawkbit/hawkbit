@@ -8,6 +8,39 @@
  */
 @mixin target-filter-query {
 
+.gwt-MenuBar-autocomplete {
+      cursor: default;  
+   }
+   
+   .gwt-MenuBar-autocomplete .gwt-MenuItem{
+      border-radius: 3px !important;
+      cursor: pointer !important;
+	  font-weight: 400 !important;
+	  line-height: 27px !important;
+	  padding: 0 20px 0 10px !important;
+	  position: relative !important;
+      white-space: nowrap !important;
+    }
+    
+.gwt-MenuBar-autocomplete .gwt-MenuItem-selected {
+    background-color: $hawkbit-primary-color;
+    background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%) !important;
+    color: #ecf2f8 !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05) !important;
+}
+.suggestion-popup{
+	backface-visibility: hidden;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.09);
+    box-sizing: border-box;
+    color: #474747;
+    padding: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+
 .caption-header-layout{
 	padding-left:10px;
 }
@@ -23,15 +56,17 @@
 .target-filter-textfield, .target-filter-textfield:focus{
 	border:none !important;
 	box-shadow: none !important;
-	height:26px !important;
+	height: 26px !important;
 }
 
 .error-icon{
+    margin-left: 5px;
 	color:$success-icon-color !important;
 	padding-left:2px !important;
 }
 
 .success-icon{
+    margin-left: 5px;
 	color:$error-icon-color !important;
 	padding-left:2px !important;
 }
@@ -42,10 +77,12 @@
 }
 
 .target-filter-spinner{
-    @include valo-spinner(
-       $size: $v-font-size--small,
-       $color: $bosch-color-light-blue
-     );
+   margin-top: 5px;
+   margin-left: 5px;
+   @include valo-spinner(
+     $size:16px,
+     $speed:500ms
+   );
 }
 
 .hide-status-label {

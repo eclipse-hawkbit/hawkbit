@@ -26,9 +26,24 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 public interface DistributionSet extends NamedVersionedEntity {
 
     /**
-     * @return {@link Set} of assigned {@link DistributionSetTag}s.
+     * @return immutable {@link Set} of assigned {@link DistributionSetTag}s.
      */
     Set<DistributionSetTag> getTags();
+
+    /**
+     * @param tag
+     *            to add
+     * @return <code>true</code> if tag could be added sucessfully (i.e. was not
+     *         already in the list).
+     */
+    boolean addTag(final DistributionSetTag tag);
+
+    /**
+     * @param tag
+     *            to remove
+     * @return <code>true</code> if tag was in the list and removed
+     */
+    boolean removeTag(final DistributionSetTag tag);
 
     /**
      * @return <code>true</code> if the set is deleted and only kept for history

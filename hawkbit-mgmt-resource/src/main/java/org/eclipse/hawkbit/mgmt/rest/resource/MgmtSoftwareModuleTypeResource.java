@@ -72,7 +72,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
         }
 
         final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper
-                .toListResponse(findModuleTypessAll.getContent());
+                .toTypesResponse(findModuleTypessAll.getContent());
         return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
     }
 

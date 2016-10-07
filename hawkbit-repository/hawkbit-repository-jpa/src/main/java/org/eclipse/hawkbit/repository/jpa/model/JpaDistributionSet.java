@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -83,13 +82,13 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @JoinTable(name = "sp_ds_module", joinColumns = {
             @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
                     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
-    private final Set<SoftwareModule> modules = new HashSet<>();
+    private Set<SoftwareModule> modules;
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
             @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
                     @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
-    private Set<DistributionSetTag> tags = new HashSet<>();
+    private Set<DistributionSetTag> tags;
 
     @Column(name = "deleted")
     private boolean deleted;
@@ -110,7 +109,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @OneToMany(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class, cascade = {
             CascadeType.REMOVE })
     @JoinColumn(name = "ds_id", insertable = false, updatable = false)
-    private final List<DistributionSetMetadata> metadata = new ArrayList<>();
+    private List<DistributionSetMetadata> metadata;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
@@ -124,7 +123,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
      * Default constructor.
      */
     public JpaDistributionSet() {
-        super();
+        // Default constructor for JPA
     }
 
     /**
@@ -156,7 +155,29 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public Set<DistributionSetTag> getTags() {
-        return tags;
+        if (tags == null) {
+            return Collections.emptySet();
+        }
+
+        return Collections.unmodifiableSet(tags);
+    }
+
+    @Override
+    public boolean addTag(final DistributionSetTag tag) {
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+
+        return tags.add(tag);
+    }
+
+    @Override
+    public boolean removeTag(final DistributionSetTag tag) {
+        if (tags == null) {
+            return false;
+        }
+
+        return tags.remove(tag);
     }
 
     @Override
@@ -166,11 +187,19 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public List<DistributionSetMetadata> getMetadata() {
+        if (metadata == null) {
+            return Collections.emptyList();
+        }
+
         return Collections.unmodifiableList(metadata);
     }
 
     public List<Action> getActions() {
-        return actions;
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actions);
     }
 
     @Override
@@ -190,14 +219,13 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return this;
     }
 
-    public DistributionSet setTags(final Set<DistributionSetTag> tags) {
-        this.tags = tags;
-        return this;
-    }
-
     @Override
     public List<Target> getAssignedTargets() {
-        return assignedToTargets;
+        if (assignedToTargets == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(assignedToTargets);
     }
 
     @Override
@@ -207,7 +235,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public List<TargetInfo> getInstalledTargets() {
-        return installedAtTargets;
+        if (installedAtTargets == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(installedAtTargets);
     }
 
     @Override
@@ -218,21 +250,20 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public Set<SoftwareModule> getModules() {
+        if (modules == null) {
+            return Collections.emptySet();
+        }
+
         return Collections.unmodifiableSet(modules);
     }
 
     @Override
     public boolean addModule(final SoftwareModule softwareModule) {
-
-        // we cannot allow that modules are added without a type defined
-        if (type == null) {
-            throw new DistributionSetTypeUndefinedException();
+        if (modules == null) {
+            modules = new HashSet<>();
         }
 
-        // check if it is allowed to such a module to this DS type
-        if (!type.containsModuleType(softwareModule.getType())) {
-            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
-        }
+        checkTypeCompatability(softwareModule);
 
         final Optional<SoftwareModule> found = modules.stream()
                 .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
@@ -258,8 +289,24 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return false;
     }
 
+    private void checkTypeCompatability(final SoftwareModule softwareModule) {
+        // we cannot allow that modules are added without a type defined
+        if (type == null) {
+            throw new DistributionSetTypeUndefinedException();
+        }
+
+        // check if it is allowed to such a module to this DS type
+        if (!type.containsModuleType(softwareModule.getType())) {
+            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
+        }
+    }
+
     @Override
     public boolean removeModule(final SoftwareModule softwareModule) {
+        if (modules == null) {
+            return false;
+        }
+
         final Optional<SoftwareModule> found = modules.stream()
                 .filter(module -> module.getId().equals(softwareModule.getId())).findFirst();
 
@@ -275,6 +322,10 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
+        if (modules == null) {
+            return null;
+        }
+
         final Optional<SoftwareModule> result = modules.stream().filter(module -> module.getType().equals(type))
                 .findFirst();
 

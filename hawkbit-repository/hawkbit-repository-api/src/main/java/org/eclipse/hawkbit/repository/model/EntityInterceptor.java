@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.repository.model;
 /**
  * Interface for the entity interceptor lifecycle.
  */
+// Exception squid:EmptyStatementUsageCheck - don't want to force users to
+// impelemnt all methods
+@SuppressWarnings("squid:EmptyStatementUsageCheck")
 public interface EntityInterceptor {
 
     /**

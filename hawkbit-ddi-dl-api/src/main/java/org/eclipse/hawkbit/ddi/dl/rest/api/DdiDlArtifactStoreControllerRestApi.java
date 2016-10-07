@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,7 +27,9 @@ public interface DdiDlArtifactStoreControllerRestApi {
     /**
      * Handles GET download request. This could be full or partial download
      * request.
-     *
+     * 
+     * @param tenant
+     *            name of the client
      * @param fileName
      *            to search for
      * @param targetid
@@ -40,12 +42,14 @@ public interface DdiDlArtifactStoreControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
             + "/{fileName}")
     @ResponseBody
-    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
+    ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid);
 
     /**
      * Handles GET MD5 checksum file download request.
      *
+     * @param tenant
+     *            name of the client
      * @param fileName
      *            to search for
      *
@@ -54,7 +58,7 @@ public interface DdiDlArtifactStoreControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}"
             + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
+    ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName);
 
 }

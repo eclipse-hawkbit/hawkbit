@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -58,7 +58,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
     @JoinColumn(name = "rolloutGroup_Id", insertable = false, updatable = false)
-    private final List<RolloutTargetGroup> rolloutTargetGroup = new ArrayList<>();
+    private List<RolloutTargetGroup> rolloutTargetGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private JpaRolloutGroup parent;
@@ -92,7 +92,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private String errorActionExp;
 
     @Column(name = "total_targets")
-    private long totalTargets;
+    private int totalTargets;
 
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -118,7 +118,11 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     }
 
     public List<RolloutTargetGroup> getRolloutTargetGroup() {
-        return rolloutTargetGroup;
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
     @Override
@@ -201,11 +205,11 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     }
 
     @Override
-    public long getTotalTargets() {
+    public int getTotalTargets() {
         return totalTargets;
     }
 
-    public void setTotalTargets(final long totalTargets) {
+    public void setTotalTargets(final int totalTargets) {
         this.totalTargets = totalTargets;
     }
 
@@ -223,7 +227,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Override
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+            totalTargetCountStatus = new TotalTargetCountStatus(new Long(totalTargets));
         }
         return totalTargetCountStatus;
     }

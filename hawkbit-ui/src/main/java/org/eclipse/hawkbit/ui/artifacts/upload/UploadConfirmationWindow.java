@@ -32,11 +32,11 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -572,6 +572,9 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     }
 
+    // Exception squid:S3655 - Optional access is checked in
+    // checkIfArtifactDetailsDispalyed subroutine
+    @SuppressWarnings("squid:S3655")
     private void processArtifactUpload() {
         final List<String> itemIds = (List<String>) uploadDetailsTable.getItemIds();
         if (preUploadValidation(itemIds)) {
@@ -593,6 +596,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                 }
                 refreshArtifactDetailsLayout = checkIfArtifactDetailsDispalyed(bSoftwareModule.getId());
             }
+
             if (refreshArtifactDetailsLayout) {
                 uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSoftwareModule().get());
             }

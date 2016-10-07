@@ -44,6 +44,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
@@ -136,7 +137,7 @@ public class TargetFilterTable extends Table {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<>();
+        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(1);
         filterManagementUIState.getCustomFilterSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         return queryConfig;
@@ -266,9 +267,8 @@ public class TargetFilterTable extends Table {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .findTargetFilterQueryByName(targetFilterName);
-        filterManagementUIState.setTfQuery(targetFilterQuery);
         filterManagementUIState.setFilterQueryValue(targetFilterQuery.getQuery());
-
+        filterManagementUIState.setTfQuery(targetFilterQuery);
         filterManagementUIState.setEditViewDisplayed(true);
         eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW);
     }

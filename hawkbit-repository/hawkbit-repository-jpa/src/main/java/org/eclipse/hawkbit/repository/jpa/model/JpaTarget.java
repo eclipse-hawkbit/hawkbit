@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,13 +86,13 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
             @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {
                     @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag")) })
-    private Set<TargetTag> tags = new HashSet<>();
+    private Set<TargetTag> tags;
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {
             CascadeType.REMOVE }, targetEntity = JpaAction.class)
     @JoinColumn(name = "target", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
-    private final List<Action> actions = new ArrayList<>();
+    private List<Action> actions;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
     @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
@@ -114,7 +115,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
     @JoinColumn(name = "target_Id", insertable = false, updatable = false)
-    private final List<RolloutTargetGroup> rolloutTargetGroup = new ArrayList<>();
+    private List<RolloutTargetGroup> rolloutTargetGroup;
 
     /**
      * Constructor.
@@ -141,12 +142,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         targetInfo = new JpaTargetInfo(this);
     }
 
-    /**
-     * empty constructor for JPA.
-     */
     JpaTarget() {
-        controllerId = null;
-        securityToken = null;
+        // empty constructor for JPA.
     }
 
     @Override
@@ -161,7 +158,37 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public Set<TargetTag> getTags() {
-        return tags;
+        if (tags == null) {
+            return Collections.emptySet();
+        }
+
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public List<RolloutTargetGroup> getRolloutTargetGroup() {
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(rolloutTargetGroup);
+    }
+
+    @Override
+    public boolean addTag(final TargetTag tag) {
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+
+        return tags.add(tag);
+    }
+
+    @Override
+    public boolean removeTag(final TargetTag tag) {
+        if (tags == null) {
+            return false;
+        }
+
+        return tags.remove(tag);
     }
 
     public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
@@ -172,13 +199,21 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         this.controllerId = controllerId;
     }
 
-    public void setTags(final Set<TargetTag> tags) {
-        this.tags = tags;
-    }
-
     @Override
     public List<Action> getActions() {
-        return actions;
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actions);
+    }
+
+    public boolean addAction(final Action action) {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+
+        return actions.add(action);
     }
 
     @Override

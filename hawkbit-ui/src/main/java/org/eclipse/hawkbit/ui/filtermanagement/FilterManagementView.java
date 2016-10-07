@@ -94,8 +94,7 @@ public class FilterManagementView extends VerticalLayout implements View {
     void onEvent(final CustomFilterUIEvent custFilterUIEvent) {
         if (custFilterUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
             viewTargetFilterDetailLayout();
-        } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
-                || custFilterUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
+        } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
             this.getUI().access(() -> viewCreateTargetFilterLayout());
         } else if (custFilterUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
                 || custFilterUIEvent == CustomFilterUIEvent.SHOW_FILTER_MANAGEMENT) {

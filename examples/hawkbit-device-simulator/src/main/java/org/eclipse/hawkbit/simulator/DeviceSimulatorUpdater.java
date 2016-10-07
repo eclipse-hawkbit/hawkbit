@@ -34,7 +34,6 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
-import org.eclipse.hawkbit.dmf.json.model.Artifact.UrlProtocol;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
@@ -206,12 +205,12 @@ public class DeviceSimulatorUpdater {
         private static void handleArtifacts(final String targetToken, final List<UpdateStatus> status,
                 final Artifact artifact) {
 
-            if (artifact.getUrls().containsKey(UrlProtocol.HTTPS)) {
-                status.add(downloadUrl(artifact.getUrls().get(UrlProtocol.HTTPS), targetToken,
-                        artifact.getHashes().getSha1(), artifact.getSize()));
-            } else if (artifact.getUrls().containsKey(UrlProtocol.HTTP)) {
-                status.add(downloadUrl(artifact.getUrls().get(UrlProtocol.HTTP), targetToken,
-                        artifact.getHashes().getSha1(), artifact.getSize()));
+            if (artifact.getUrls().containsKey("HTTPS")) {
+                status.add(downloadUrl(artifact.getUrls().get("HTTPS"), targetToken, artifact.getHashes().getSha1(),
+                        artifact.getSize()));
+            } else if (artifact.getUrls().containsKey("HTTP")) {
+                status.add(downloadUrl(artifact.getUrls().get("HTTP"), targetToken, artifact.getHashes().getSha1(),
+                        artifact.getSize()));
             }
         }
 

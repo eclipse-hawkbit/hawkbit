@@ -12,15 +12,16 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.UrlProtocol;
+import org.eclipse.hawkbit.api.URLPlaceholder;
+import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfig;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -46,11 +48,11 @@ public final class DataConversionHelper {
 
     }
 
-    static List<DdiChunk> createChunks(final String targetid, final Action uAction,
-            final ArtifactUrlHandler artifactUrlHandler) {
+    static List<DdiChunk> createChunks(final Target target, final Action uAction,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(), createArtifacts(targetid, module, artifactUrlHandler)))
+                        module.getName(), createArtifacts(target, module, artifactUrlHandler, systemManagement)))
                 .collect(Collectors.toList());
 
     }
@@ -69,43 +71,42 @@ public final class DataConversionHelper {
     /**
      * Creates all (rest) artifacts for a given software module.
      *
-     * @param targetid
-     *            of the target
+     * @param target
+     *            for create URLs for
      * @param module
      *            the software module
+     * @param artifactUrlHandler
+     *            for creating download URLs
+     * @param systemManagement
+     *            for access to tenant meta data
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
-    public static List<DdiArtifact> createArtifacts(final String targetid,
+    public static List<DdiArtifact> createArtifacts(final Target target,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
-            final ArtifactUrlHandler artifactUrlHandler) {
-        final List<DdiArtifact> files = new ArrayList<>();
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
 
-        module.getLocalArtifacts()
-                .forEach(artifact -> files.add(createArtifact(targetid, artifactUrlHandler, artifact)));
-        return files;
+        return module.getLocalArtifacts().stream()
+                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement))
+                .collect(Collectors.toList());
     }
 
-    private static DdiArtifact createArtifact(final String targetid, final ArtifactUrlHandler artifactUrlHandler,
-            final LocalArtifact artifact) {
+    private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
+            final LocalArtifact artifact, final SystemManagement systemManagement) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
         file.setFilename(artifact.getFilename());
         file.setSize(artifact.getSize());
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
-            final String linkHttp = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
-                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTP);
-            file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
-        }
+        artifactUrlHandler
+                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
+                        new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
+                                artifact.getSha1Hash())),
+                        ApiType.DDI)
+                .forEach(entry -> file.add(new Link(entry.getRef()).withRel(entry.getRel())));
 
-        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
-            final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
-                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
-            file.add(new Link(linkHttps).withRel("download"));
-            file.add(new Link(linkHttps + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
-        }
         return file;
+
     }
 
     static DdiControllerBase fromTarget(final Target target, final Optional<Action> action,
@@ -133,8 +134,8 @@ public final class DataConversionHelper {
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
-            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                    .putConfigData(tenantAware.getCurrentTenant(), null, target.getControllerId()))
+            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
+                    tenantAware.getCurrentTenant(), target.getControllerId()))
                             .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;

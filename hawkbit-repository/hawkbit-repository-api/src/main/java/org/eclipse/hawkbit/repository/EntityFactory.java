@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -64,7 +66,7 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt);
+    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt);
 
     /**
      * Generates an {@link ActionStatus} object without persisting it.
@@ -81,7 +83,7 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(Action action, final Status status, Long occurredAt,
+    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt,
             final Collection<String> messages);
 
     /**
@@ -99,7 +101,8 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt, final String message);
+    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt,
+            final String message);
 
     /**
      * Generates an empty {@link DistributionSet} without persisting it.
@@ -124,8 +127,8 @@ public interface EntityFactory {
      * 
      * @return {@link DistributionSet} object
      */
-    DistributionSet generateDistributionSet(String name, String version, String description, DistributionSetType type,
-            Collection<SoftwareModule> moduleList);
+    DistributionSet generateDistributionSet(@NotNull String name, @NotNull String version, String description,
+            @NotNull DistributionSetType type, Collection<SoftwareModule> moduleList);
 
     /**
      * Generates an empty {@link DistributionSetMetadata} element without
@@ -148,7 +151,8 @@ public interface EntityFactory {
      * 
      * @return {@link DistributionSetMetadata} object
      */
-    DistributionSetMetadata generateDistributionSetMetadata(DistributionSet distributionSet, String key, String value);
+    DistributionSetMetadata generateDistributionSetMetadata(@NotNull DistributionSet distributionSet,
+            @NotNull String key, String value);
 
     /**
      * Generates an empty {@link DistributionSetTag} without persisting it.
@@ -164,7 +168,7 @@ public interface EntityFactory {
      *            of the tag
      * @return {@link DistributionSetTag} object
      */
-    DistributionSetTag generateDistributionSetTag(String name);
+    DistributionSetTag generateDistributionSetTag(@NotNull String name);
 
     /**
      * Generates a {@link DistributionSetTag} without persisting it.
@@ -177,7 +181,7 @@ public interface EntityFactory {
      *            of the tag
      * @return {@link DistributionSetTag} object
      */
-    DistributionSetTag generateDistributionSetTag(String name, String description, String colour);
+    DistributionSetTag generateDistributionSetTag(@NotNull String name, String description, String colour);
 
     /**
      * Generates an empty {@link DistributionSetType} without persisting it.
@@ -198,7 +202,7 @@ public interface EntityFactory {
      * 
      * @return {@link DistributionSetType} object
      */
-    DistributionSetType generateDistributionSetType(String key, String name, String description);
+    DistributionSetType generateDistributionSetType(@NotNull String key, @NotNull String name, String description);
 
     /**
      * Generates an empty {@link Rollout} without persisting it.
@@ -237,8 +241,8 @@ public interface EntityFactory {
      * 
      * @return {@link SoftwareModule} object
      */
-    SoftwareModule generateSoftwareModule(SoftwareModuleType type, String name, String version, String description,
-            String vendor);
+    SoftwareModule generateSoftwareModule(@NotNull SoftwareModuleType type, @NotNull String name,
+            @NotNull String version, String description, String vendor);
 
     /**
      * Generates an empty {@link SoftwareModuleMetadata} pair without persisting
@@ -260,7 +264,8 @@ public interface EntityFactory {
      * 
      * @return {@link SoftwareModuleMetadata} object
      */
-    SoftwareModuleMetadata generateSoftwareModuleMetadata(SoftwareModule softwareModule, String key, String value);
+    SoftwareModuleMetadata generateSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotNull String key,
+            String value);
 
     /**
      * Generates an empty {@link SoftwareModuleType} without persisting it.
@@ -283,7 +288,8 @@ public interface EntityFactory {
      * 
      * @return {@link SoftwareModuleType} object
      */
-    SoftwareModuleType generateSoftwareModuleType(String key, String name, String description, int maxAssignments);
+    SoftwareModuleType generateSoftwareModuleType(@NotNull String key, @NotNull String name, String description,
+            int maxAssignments);
 
     /**
      * Generates an empty {@link Target} without persisting it.
@@ -307,7 +313,7 @@ public interface EntityFactory {
      * 
      * @return {@link Target} object
      */
-    Target generateTarget(@NotEmpty String controllerID, @NotEmpty String securityToken);
+    Target generateTarget(@NotEmpty String controllerID, String securityToken);
 
     /**
      * Generates an empty {@link TargetFilterQuery} without persisting it.
@@ -354,7 +360,7 @@ public interface EntityFactory {
      *            of the tag
      * @return {@link TargetTag} object
      */
-    TargetTag generateTargetTag(String name);
+    TargetTag generateTargetTag(@NotNull String name);
 
     /**
      * Generates a {@link TargetTag} without persisting it.
@@ -367,7 +373,7 @@ public interface EntityFactory {
      *            of the tag
      * @return {@link TargetTag} object
      */
-    TargetTag generateTargetTag(String name, String description, String colour);
+    TargetTag generateTargetTag(@NotNull String name, String description, String colour);
 
     /**
      * Generates an empty {@link LocalArtifact} without persisting it.

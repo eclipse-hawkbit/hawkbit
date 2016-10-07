@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.utils;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -19,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
+import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
 
 /**
@@ -32,7 +32,7 @@ import com.vaadin.server.WebBrowser;
 public final class SPDateTimeUtil {
 
     private static final String DURATION_FORMAT = "y','M','d','H','m','s";
-    private static final Map<Integer, CalendarI18N> DURATION_I18N = new HashMap<>();
+    private static final Map<Integer, CalendarI18N> DURATION_I18N = Maps.newHashMapWithExpectedSize(6);
 
     static {
         DURATION_I18N.put(0, CalendarI18N.YEAR);

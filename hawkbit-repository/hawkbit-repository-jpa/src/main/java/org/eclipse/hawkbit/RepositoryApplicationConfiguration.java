@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -54,6 +53,8 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
+import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -75,6 +76,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 
 /**
@@ -93,6 +95,12 @@ import com.google.common.eventbus.EventBus;
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Autowired
     private EventBus eventBus;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RsqlValidationOracle rsqlValidationOracle() {
+        return new RsqlParserValidationOracle();
+    }
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
@@ -199,7 +207,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = new HashMap<>();
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports

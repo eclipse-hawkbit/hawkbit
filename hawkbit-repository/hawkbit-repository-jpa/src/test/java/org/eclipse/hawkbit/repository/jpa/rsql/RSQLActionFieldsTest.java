@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +31,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("RSQL filter actions")
 public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
-    private Target target;
+    private JpaTarget target;
     private JpaAction action;
 
     @Before
@@ -42,7 +41,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         targetManagement.createTarget(target);
         action = new JpaAction();
         action.setActionType(ActionType.SOFT);
-        target.getActions().add(action);
+        target.addAction(action);
         action.setTarget(target);
         actionRepository.save(action);
         for (int i = 0; i < 10; i++) {
@@ -51,7 +50,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             newAction.setActive(i % 2 == 0);
             newAction.setTarget(target);
             actionRepository.save(newAction);
-            target.getActions().add(newAction);
+            target.addAction(newAction);
         }
 
     }

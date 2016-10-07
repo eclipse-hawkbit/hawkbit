@@ -8,8 +8,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -22,14 +21,31 @@
    <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
 
-   <modules>
-      <module>hawkbit-device-simulator</module>
-      <module>hawkbit-example-app</module>
-      <module>hawkbit-example-core-feign-client</module>
-      <module>hawkbit-example-ddi-feign-client</module>
-      <module>hawkbit-example-mgmt-feign-client</module>
-      <module>hawkbit-example-mgmt-simulator</module>
-   </modules>
+   <profiles>
+      <profile>
+         <id>noExampleApp</id>
+         <modules>
+            <module>hawkbit-example-core-feign-client</module>
+            <module>hawkbit-example-ddi-feign-client</module>
+            <module>hawkbit-example-mgmt-feign-client</module>
+            <module>hawkbit-example-mgmt-simulator</module>
+         </modules>
+      </profile>
+      <profile>
+         <id>default</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+         <modules>
+            <module>hawkbit-device-simulator</module>
+            <module>hawkbit-example-app</module>
+            <module>hawkbit-example-core-feign-client</module>
+            <module>hawkbit-example-ddi-feign-client</module>
+            <module>hawkbit-example-mgmt-feign-client</module>
+            <module>hawkbit-example-mgmt-simulator</module>
+         </modules>
+      </profile>
+   </profiles>
 
    <dependencyManagement>
       <dependencies>

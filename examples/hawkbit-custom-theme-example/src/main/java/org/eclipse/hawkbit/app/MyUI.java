@@ -8,6 +8,8 @@ package org.eclipse.hawkbit.app;
  * http://www.eclipse.org/legal/epl-v10.html
  */
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
@@ -38,8 +40,8 @@ public class MyUI extends HawkbitUI {
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    public MyUI(final EventBus systemEventBus, final org.vaadin.spring.events.EventBus.SessionEventBus eventBus,
-            final UIEventProvider provider) {
-        super(new DelayedEventBusPushStrategy(eventBus, systemEventBus, provider));
+    public MyUI(final ScheduledExecutorService executorService, final EventBus systemEventBus,
+            final org.vaadin.spring.events.EventBus.SessionEventBus eventBus, final UIEventProvider provider) {
+        super(new DelayedEventBusPushStrategy(executorService, eventBus, systemEventBus, provider));
     }
 }

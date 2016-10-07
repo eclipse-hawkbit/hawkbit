@@ -205,8 +205,10 @@ public interface DistributionSetManagement {
     /**
      * deletes a distribution set meta data entry.
      *
-     * @param id
-     *            the ID of the distribution set meta data to delete
+     * @param distributionSet
+     *            where meta data has to be deleted
+     * @param key
+     *            of the meta data element
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void deleteDistributionSetMetadata(@NotNull final DistributionSet distributionSet, @NotNull final String key);
@@ -429,7 +431,7 @@ public interface DistributionSetManagement {
      */
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeByKey(@NotNull String key);
+    DistributionSetType findDistributionSetTypeByKey(@NotEmpty String key);
 
     /**
      * @param name
@@ -469,15 +471,16 @@ public interface DistributionSetManagement {
     /**
      * finds a single distribution set meta data by its id.
      *
-     * @param id
-     *            the id of the distribution set meta data containing the meta
-     *            data key and the ID of the distribution set
+     * @param distributionSet
+     *            where meta data has to rind
+     * @param key
+     *            of the meta data element
      * @return the found DistributionSetMetadata or {@code null} if not exits
      * @throws EntityNotFoundException
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetMetadata findOne(@NotNull DistributionSet distributionSet, @NotNull String key);
+    DistributionSetMetadata findOne(@NotNull DistributionSet distributionSet, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in

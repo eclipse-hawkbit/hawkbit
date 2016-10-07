@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.footer;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -90,7 +90,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<>();
+        final Map<String, ConfirmationTab> tabs = Maps.newHashMapWithExpectedSize(5);
         /* Create tab for SW Modules delete */
         if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
@@ -112,7 +112,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         }
 
         /* Create tab for Assign Software Module */
-
         if (!manageDistUIState.getAssignedList().isEmpty()) {
             tabs.put(i18n.get("caption.assign.dist.accordion.tab"), createAssignSWModuleConfirmationTab());
         }

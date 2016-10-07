@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -134,7 +135,11 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public List<ActionStatus> getActionStatus() {
-        return actionStatus;
+        if (actionStatus == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actionStatus);
     }
 
     @Override

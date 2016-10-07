@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -65,60 +67,46 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     static List<SoftwareModuleMetadata> fromRequestSwMetadata(final EntityFactory entityFactory,
-            final SoftwareModule sw, final List<MgmtMetadata> metadata) {
-        final List<SoftwareModuleMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final MgmtMetadata metadataRest : metadata) {
-            if (metadataRest.getKey() == null) {
-                throw new IllegalArgumentException("the key of the metadata must be present");
-            }
-            mappedList.add(
-                    entityFactory.generateSoftwareModuleMetadata(sw, metadataRest.getKey(), metadataRest.getValue()));
+            final SoftwareModule sw, final Collection<MgmtMetadata> metadata) {
+        if (metadata == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return metadata.stream().map(metadataRest -> entityFactory.generateSoftwareModuleMetadata(sw,
+                metadataRest.getKey(), metadataRest.getValue())).collect(Collectors.toList());
     }
 
     static List<SoftwareModule> smFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtSoftwareModuleRequestBodyPost> smsRest, final SoftwareManagement softwareManagement) {
-        final List<SoftwareModule> mappedList = new ArrayList<>();
-        for (final MgmtSoftwareModuleRequestBodyPost smRest : smsRest) {
-            mappedList.add(fromRequest(entityFactory, smRest, softwareManagement));
+            final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest, final SoftwareManagement softwareManagement) {
+        if (smsRest == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest, softwareManagement))
+                .collect(Collectors.toList());
     }
 
     /**
      * Create response for sw modules.
      * 
-     * @param baseSoftareModules
+     * @param softwareModules
      *            the modules
      * @return the response
      */
-    public static List<MgmtSoftwareModule> toResponse(final List<SoftwareModule> baseSoftareModules) {
-        final List<MgmtSoftwareModule> mappedList = new ArrayList<>();
-        if (baseSoftareModules != null) {
-            for (final SoftwareModule target : baseSoftareModules) {
-                final MgmtSoftwareModule response = toResponse(target);
-
-                mappedList.add(response);
-            }
+    public static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
+        if (softwareModules == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
     }
 
-    static List<MgmtSoftwareModule> toResponseSoftwareModules(final Iterable<SoftwareModule> softwareModules) {
-        final List<MgmtSoftwareModule> response = new ArrayList<>();
-        for (final SoftwareModule softwareModule : softwareModules) {
-            response.add(toResponse(softwareModule));
+    static List<MgmtMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
+        if (metadata == null) {
+            return Collections.emptyList();
         }
-        return response;
-    }
 
-    static List<MgmtMetadata> toResponseSwMetadata(final List<SoftwareModuleMetadata> metadata) {
-        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final SoftwareModuleMetadata distributionSetMetadata : metadata) {
-            mappedList.add(toResponseSwMetadata(distributionSetMetadata));
-        }
-        return mappedList;
+        return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).collect(Collectors.toList());
     }
 
     static MgmtMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
@@ -194,15 +182,11 @@ public final class MgmtSoftwareModuleMapper {
         return artifactRest;
     }
 
-    static List<MgmtArtifact> artifactsToResponse(final List<Artifact> artifacts) {
-        final List<MgmtArtifact> mappedList = new ArrayList<>();
-
-        if (artifacts != null) {
-            for (final Artifact artifact : artifacts) {
-                final MgmtArtifact response = toResponse(artifact);
-                mappedList.add(response);
-            }
+    static List<MgmtArtifact> artifactsToResponse(final Collection<Artifact> artifacts) {
+        if (artifacts == null) {
+            return Collections.emptyList();
         }
-        return mappedList;
+
+        return artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
     }
 }
