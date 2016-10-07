@@ -59,10 +59,12 @@ public class CacheAutoConfiguration {
     }
 
     /**
-     * A configuration for the direct cache manager.
+     * A separate configuration of the direct cache manager for the
+     * {@link TenantAwareCacheManager} that it can get overridden by another
+     * configuration.
      */
     @Configuration
-    protected static class DirectCacheManagerConfiguration {
+    static class DirectCacheManagerConfiguration {
         /**
          * @return the direct cache manager to access without tenant aware
          *         check, cause in sometimes it's necessary to access the cache

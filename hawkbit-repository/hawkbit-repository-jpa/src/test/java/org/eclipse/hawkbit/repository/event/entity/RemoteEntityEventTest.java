@@ -75,9 +75,9 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
     public void setup() throws Exception {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
         this.abstractMessageConverter = autoConfiguration.busJsonConverter();
-        ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan",
-                new String[] { "org.eclipse.hawkbit.repository.even.remote",
-                        ClassUtils.getPackageName(RemoteApplicationEvent.class) });
+        final String[] allRemoteEventsFromPackage = new String[] { "org.eclipse.hawkbit.repository.event.remote",
+                ClassUtils.getPackageName(RemoteApplicationEvent.class) };
+        ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan", allRemoteEventsFromPackage);
         ((InitializingBean) abstractMessageConverter).afterPropertiesSet();
 
     }
@@ -247,8 +247,7 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
         final Map<String, MimeType> headers = Maps.newLinkedHashMap();
         headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
         final String json = new ObjectMapper().writeValueAsString(event);
-        final Message<String> message = MessageBuilder.withPayload(json).copyHeaders(headers).build();
-        return message;
+        return MessageBuilder.withPayload(json).copyHeaders(headers).build();
     }
 
 }

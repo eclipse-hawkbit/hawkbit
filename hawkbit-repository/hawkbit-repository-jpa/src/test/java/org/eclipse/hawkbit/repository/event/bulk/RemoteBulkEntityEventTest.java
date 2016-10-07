@@ -55,9 +55,9 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
     public void setup() throws Exception {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
         this.abstractMessageConverter = autoConfiguration.busJsonConverter();
-        ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan",
-                new String[] { "org.eclipse.hawkbit.repository.event.remote",
-                        ClassUtils.getPackageName(RemoteApplicationEvent.class) });
+        final String[] allRemoteEventsFromPackage = new String[] { "org.eclipse.hawkbit.repository.event.remote",
+                ClassUtils.getPackageName(RemoteApplicationEvent.class) };
+        ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan", allRemoteEventsFromPackage);
         ((InitializingBean) abstractMessageConverter).afterPropertiesSet();
 
     }
