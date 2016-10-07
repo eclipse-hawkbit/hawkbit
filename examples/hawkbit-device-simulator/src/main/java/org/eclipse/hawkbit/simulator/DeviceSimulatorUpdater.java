@@ -205,11 +205,11 @@ public class DeviceSimulatorUpdater {
         private static void handleArtifacts(final String targetToken, final List<UpdateStatus> status,
                 final Artifact artifact) {
 
-            if (artifact.getUrls().containsKey("https")) {
-                status.add(downloadUrl(artifact.getUrls().get("https"), targetToken, artifact.getHashes().getSha1(),
+            if (artifact.getUrls().containsKey("HTTPS")) {
+                status.add(downloadUrl(artifact.getUrls().get("HTTPS"), targetToken, artifact.getHashes().getSha1(),
                         artifact.getSize()));
-            } else if (artifact.getUrls().containsKey("http")) {
-                status.add(downloadUrl(artifact.getUrls().get("http"), targetToken, artifact.getHashes().getSha1(),
+            } else if (artifact.getUrls().containsKey("HTTP")) {
+                status.add(downloadUrl(artifact.getUrls().get("HTTP"), targetToken, artifact.getHashes().getSha1(),
                         artifact.getSize()));
             }
         }

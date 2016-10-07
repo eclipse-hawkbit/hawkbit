@@ -70,8 +70,8 @@ public class PropertyBasedArtifactUrlHandlerTest {
         properties.getProtocols().put("download-http", new UrlProtocol());
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI);
-        assertEquals(
-                Lists.newArrayList(new ArtifactUrl("http", "download-http", HTTP_LOCALHOST + TENANT + "/controller/v1/"
+        assertEquals(Lists.newArrayList(
+                new ArtifactUrl("http".toUpperCase(), "download-http", HTTP_LOCALHOST + TENANT + "/controller/v1/"
                         + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
                 ddiUrls);
 
@@ -96,7 +96,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).isEmpty();
         urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
-        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO, TEST_REL,
+        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
                 "coap://127.0.0.1:5683/fw/" + TENANT + "/" + CONTROLLER_ID + "/sha1/" + SHA1HASH)), urls);
     }
 
@@ -117,7 +117,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).isEmpty();
         urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
 
-        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO, TEST_REL,
+        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
                 TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)),
                 urls);
     }

@@ -145,13 +145,13 @@
       <commons-lang3.version>3.4</commons-lang3.version>
       <commons-collections4.version>4.1</commons-collections4.version>
       <json.version>20141113</json.version>
-      <rsql-parser.version>2.0.0</rsql-parser.version>
+      <rsql-parser.version>2.1.0</rsql-parser.version>
       <spring-cloud-bus.version>1.2.0.RELEASE</spring-cloud-bus.version>
       
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
-      <release.scm.connection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.connection>
+      <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
       <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
       <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
       <!-- Release - END -->
