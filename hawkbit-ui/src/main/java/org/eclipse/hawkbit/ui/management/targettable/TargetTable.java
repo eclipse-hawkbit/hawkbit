@@ -128,7 +128,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onTargetDeletedEvents(final TargetDeletedEventHolder holder) {
+    void onTargetDeletedEvents(final TargetDeletedEventHolder holder) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshTargets = false;
@@ -145,6 +145,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             refreshOnDelete();
         } else {
             targetContainer.commit();
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
         }
         reSelectItemsAfterDeletionEvent();
     }
@@ -208,7 +209,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onTargetCreatedEvents(final TargetCreatedEventHolder holder) {
+    void onTargetCreatedEvents(final TargetCreatedEventHolder holder) {
         refreshTargets();
     }
 
