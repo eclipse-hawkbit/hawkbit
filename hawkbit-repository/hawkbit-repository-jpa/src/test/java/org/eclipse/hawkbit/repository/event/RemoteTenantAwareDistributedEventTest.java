@@ -76,7 +76,8 @@ public class RemoteTenantAwareDistributedEventTest extends AbstractJpaIntegratio
                 TargetInfoUpdateEvent.class);
 
         final TargetInfo jpaTargetInfo = remoteEvent.getEntity();
-        assertThat(jpaTargetInfo).isEqualTo(targetInfo);
+        assertThat(jpaTargetInfo.getTarget().getControllerId()).isEqualTo(targetInfo.getTarget().getControllerId());
+        assertThat(jpaTargetInfo.getUpdateStatus()).isEqualTo(targetInfo.getUpdateStatus());
     }
 
     @Test
