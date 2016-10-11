@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigment
  * EventHolder for {@link DistributionSetTagAssigmentResultEvent}s.
  *
  */
-public class DistributionSetTagAssignmentResultEventHolder
-        implements EventHolder<DistributionSetTagAssigmentResultEvent> {
+public class DistributionSetTagAssignmentResultEventContainer
+        implements EventContainer<DistributionSetTagAssigmentResultEvent> {
     private final List<DistributionSetTagAssigmentResultEvent> events;
 
-    public DistributionSetTagAssignmentResultEventHolder(final List<DistributionSetTagAssigmentResultEvent> events) {
+    public DistributionSetTagAssignmentResultEventContainer(final List<DistributionSetTagAssigmentResultEvent> events) {
         this.events = events;
     }
 

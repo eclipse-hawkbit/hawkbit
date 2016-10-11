@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
 
 /**
- * EventHolder for {@link DistributionSetTagCreatedEvent}s.
+ * EventHolder for {@link DistributionSetUpdateEvent}s.
  *
  */
-public class DistributionSetTagCreatedEventHolder implements EventHolder<DistributionSetTagCreatedEvent> {
-    private final List<DistributionSetTagCreatedEvent> events;
+public class DistributionSetUpdatedEventContainer implements EventContainer<DistributionSetUpdateEvent> {
+    private final List<DistributionSetUpdateEvent> events;
 
-    public DistributionSetTagCreatedEventHolder(final List<DistributionSetTagCreatedEvent> events) {
+    public DistributionSetUpdatedEventContainer(final List<DistributionSetUpdateEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<DistributionSetTagCreatedEvent> getEvents() {
+    public List<DistributionSetUpdateEvent> getEvents() {
         return events;
     }
 

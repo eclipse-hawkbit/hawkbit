@@ -17,9 +17,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +48,21 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventHolder holder) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer holder) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventHolder holder) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer holder) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventHolder holder) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer holder) {
         populateTagNameCombo();
     }
 

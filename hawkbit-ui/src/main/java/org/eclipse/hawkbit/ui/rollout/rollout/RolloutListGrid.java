@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererDa
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
-import org.eclipse.hawkbit.ui.push.events.RolloutChangeEventHolder;
+import org.eclipse.hawkbit.ui.push.events.RolloutChangeEventContainer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -134,7 +134,7 @@ public class RolloutListGrid extends AbstractGrid {
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onRolloutChangeEvent(final RolloutChangeEventHolder holder) {
+    public void onRolloutChangeEvent(final RolloutChangeEventContainer holder) {
         holder.getEvents().forEach(this::handleEvent);
     }
 

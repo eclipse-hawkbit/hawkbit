@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
 
 /**
- * EventHolder for {@link RolloutGroupChangeEvent}s.
+ * EventHolder for {@link DistributionSetTagDeletedEvent}s.
  *
  */
-public class RolloutGroupChangeEventHolder implements EventHolder<RolloutGroupChangeEvent> {
-    private final List<RolloutGroupChangeEvent> events;
+public class DistributionSetTagDeletedEventContainer implements EventContainer<DistributionSetTagDeletedEvent> {
+    private final List<DistributionSetTagDeletedEvent> events;
 
-    public RolloutGroupChangeEventHolder(final List<RolloutGroupChangeEvent> events) {
+    public DistributionSetTagDeletedEventContainer(final List<DistributionSetTagDeletedEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<RolloutGroupChangeEvent> getEvents() {
+    public List<DistributionSetTagDeletedEvent> getEvents() {
         return events;
     }
 

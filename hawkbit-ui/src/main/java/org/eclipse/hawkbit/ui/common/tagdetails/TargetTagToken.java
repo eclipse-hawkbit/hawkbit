@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.push.events.TargetTagAssigmentResultEventHolder;
+import org.eclipse.hawkbit.ui.push.events.TargetTagAssigmentResultEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -106,7 +106,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEventHolder holder) {
+    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEventContainer holder) {
         holder.getEvents().stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
             final TargetTag targetTag = assignmentResult.getTargetTag();
             if (isAssign(assignmentResult)) {

@@ -41,9 +41,9 @@ import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -116,14 +116,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionCreatedEvents(final DistributionCreatedEventHolder holder) {
+    void onDistributionCreatedEvents(final DistributionCreatedEventContainer holder) {
         if (holder.getEvents().stream().anyMatch(event -> event.getEntity().isComplete())) {
             refreshDistributions();
         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionDeleteEvents(final DistributionDeletedEventHolder holder) {
+    void onDistributionDeleteEvents(final DistributionDeletedEventContainer holder) {
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
@@ -146,7 +146,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventHolder holder) {
+    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer holder) {
 
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
 

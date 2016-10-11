@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -66,21 +66,21 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventHolder holder) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer holder) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventHolder holder) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer holder) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventHolder holder) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer holder) {
         refreshTagTable();
     }
 

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
 import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.ui.push.events.EventHolder;
+import org.eclipse.hawkbit.ui.push.events.EventContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
@@ -211,7 +211,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             try {
                 SecurityContextHolder.setContext(userContext);
 
-                final List<EventHolder<Event>> groupedEvents = groupEvents(events, userContext, eventProvider);
+                final List<EventContainer<Event>> groupedEvents = groupEvents(events, userContext, eventProvider);
                 vaadinUI.access(() -> {
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
@@ -228,14 +228,14 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         }
 
         @SuppressWarnings("unchecked")
-        private List<EventHolder<Event>> groupEvents(final List<Event> events, final SecurityContext userContext,
+        private List<EventContainer<Event>> groupEvents(final List<Event> events, final SecurityContext userContext,
                 final UIEventProvider eventProvider) {
 
             return events.stream().filter(event -> DelayedEventBusPushStrategy.eventSecurityCheck(userContext, event))
                     .collect(Collectors.groupingBy(Event::getClass)).entrySet().stream().map(entry -> {
-                        EventHolder<Event> holder = null;
+                        EventContainer<Event> holder = null;
                         try {
-                            holder = (EventHolder<Event>) eventProvider.getEvents().get(entry.getKey())
+                            holder = (EventContainer<Event>) eventProvider.getEvents().get(entry.getKey())
                                     .getConstructor(List.class).newInstance(entry.getValue());
                         } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException
                                 | InvocationTargetException e) {

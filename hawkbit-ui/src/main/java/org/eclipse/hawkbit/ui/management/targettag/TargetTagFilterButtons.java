@@ -25,9 +25,9 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
-import org.eclipse.hawkbit.ui.push.events.TargetTagCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetTagUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -286,21 +286,21 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEvent(final TargetTagUpdatedEventHolder events) {
+    void onEvent(final TargetTagUpdatedEventContainer events) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagCreated(final TargetTagCreatedEventHolder holder) {
+    void onEventTargetTagCreated(final TargetTagCreatedEventContainer holder) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetDeletedEvent(final TargetTagDeletedEventHolder holder) {
+    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer holder) {
         refreshContainer();
     }
 

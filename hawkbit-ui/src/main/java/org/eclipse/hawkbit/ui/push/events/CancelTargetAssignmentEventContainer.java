@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 
 /**
- * EventHolder for {@link TargetTagAssigmentResultEvent}s.
+ * EventHolder for {@link CancelTargetAssignmentEvent}s.
  *
  */
-public class TargetTagAssigmentResultEventHolder implements EventHolder<TargetTagAssigmentResultEvent> {
-    private final List<TargetTagAssigmentResultEvent> events;
+public class CancelTargetAssignmentEventContainer implements EventContainer<CancelTargetAssignmentEvent> {
+    private final List<CancelTargetAssignmentEvent> events;
 
-    public TargetTagAssigmentResultEventHolder(final List<TargetTagAssigmentResultEvent> events) {
+    public CancelTargetAssignmentEventContainer(final List<CancelTargetAssignmentEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<TargetTagAssigmentResultEvent> getEvents() {
+    public List<CancelTargetAssignmentEvent> getEvents() {
         return events;
     }
 

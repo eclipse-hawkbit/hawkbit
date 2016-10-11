@@ -19,9 +19,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -117,20 +117,20 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventHolder holder) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer holder) {
         holder.getEvents().stream().map(event -> event.getEntity())
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventHolder holder) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer holder) {
         holder.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
                 .forEach(this::removeTagFromCombo);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventHolder holder) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer holder) {
         holder.getEvents().stream().map(event -> event.getEntity()).forEach(entity -> {
             final Item item = container.getItem(entity.getId());
             if (item != null) {

@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 
 /**
- * EventHolder for {@link TargetCreatedEvent}s.
+ * EventHolder for {@link TargetInfoUpdateEvent}s.
  *
  */
-public class TargetCreatedEventHolder implements EventHolder<TargetCreatedEvent> {
-    private final List<TargetCreatedEvent> events;
+public class TargetInfoUpdateEventContainer implements EventContainer<TargetInfoUpdateEvent> {
+    private final List<TargetInfoUpdateEvent> events;
 
-    public TargetCreatedEventHolder(final List<TargetCreatedEvent> events) {
+    public TargetInfoUpdateEventContainer(final List<TargetInfoUpdateEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<TargetCreatedEvent> getEvents() {
+    public List<TargetInfoUpdateEvent> getEvents() {
         return events;
     }
 

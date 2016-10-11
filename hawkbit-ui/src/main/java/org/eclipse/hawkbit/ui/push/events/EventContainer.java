@@ -15,10 +15,13 @@ import org.eclipse.hawkbit.eventbus.event.Event;
 /**
  * EventHolder beans contains a list of events that can be process by the UI in
  * batch like fashion.
+ * 
+ * @param <T>
+ *            event type
  *
  */
 @FunctionalInterface
-public interface EventHolder<T extends Event> {
+public interface EventContainer<T extends Event> {
 
     /**
      * @return list of contained events

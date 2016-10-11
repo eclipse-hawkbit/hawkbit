@@ -42,9 +42,9 @@ import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -127,7 +127,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventHolder holder) {
+    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer holder) {
 
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
 
@@ -165,12 +165,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionCreatedEvents(final DistributionCreatedEventHolder holder) {
+    void onDistributionCreatedEvents(final DistributionCreatedEventContainer holder) {
         refreshDistributions();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionDeletedEvents(final DistributionDeletedEventHolder holder) {
+    void onDistributionDeletedEvents(final DistributionDeletedEventContainer holder) {
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;

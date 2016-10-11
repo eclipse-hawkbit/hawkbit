@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push.events;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 
 /**
- * EventHolder for {@link DistributionCreatedEvent}s.
+ * EventHolder for {@link RolloutChangeEvent}s.
  *
  */
-public class DistributionCreatedEventHolder implements EventHolder<DistributionCreatedEvent> {
-    private final List<DistributionCreatedEvent> events;
+public class RolloutChangeEventContainer implements EventContainer<RolloutChangeEvent> {
+    private final List<RolloutChangeEvent> events;
 
-    public DistributionCreatedEventHolder(final List<DistributionCreatedEvent> events) {
+    public RolloutChangeEventContainer(final List<RolloutChangeEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<DistributionCreatedEvent> getEvents() {
+    public List<RolloutChangeEvent> getEvents() {
         return events;
     }
 

@@ -53,11 +53,11 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
-import org.eclipse.hawkbit.ui.push.events.CancelTargetAssignmentEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetCreatedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetDeletedEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetInfoUpdateEventHolder;
-import org.eclipse.hawkbit.ui.push.events.TargetUpdatedEventHolder;
+import org.eclipse.hawkbit.ui.push.events.CancelTargetAssignmentEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetInfoUpdateEventContainer;
+import org.eclipse.hawkbit.ui.push.events.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -128,7 +128,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetDeletedEvents(final TargetDeletedEventHolder holder) {
+    void onTargetDeletedEvents(final TargetDeletedEventContainer holder) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshTargets = false;
@@ -151,7 +151,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventHolder holder) {
+    void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer holder) {
         // workaround until push is available for action
         // history, re-select
         // the updated target so the action history gets
@@ -165,13 +165,13 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetUpdatedEvents(final TargetUpdatedEventHolder holder) {
+    void onTargetUpdatedEvents(final TargetUpdatedEventContainer holder) {
         onTargetUpdateEvents(holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity())
                 .collect(Collectors.toList()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventHolder holder) {
+    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventContainer holder) {
         onTargetUpdateEvents(
                 holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
                         .collect(Collectors.toList()));
@@ -209,7 +209,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetCreatedEvents(final TargetCreatedEventHolder holder) {
+    void onTargetCreatedEvents(final TargetCreatedEventContainer holder) {
         refreshTargets();
     }
 
