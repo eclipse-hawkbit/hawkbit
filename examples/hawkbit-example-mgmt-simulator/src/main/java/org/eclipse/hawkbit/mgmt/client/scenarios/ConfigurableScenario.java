@@ -207,21 +207,20 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
-        final byte[] artifact = generateArtifact(scenario);
 
         final List<MgmtDistributionSet> sets = distributionSetResource
                 .createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName()).type("os_app")
                         .version("1.0.").buildAsList(scenario.getDistributionSets()))
                 .getBody();
 
-        sets.forEach(dsSet -> {
-            final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
+        assignSoftwareModulesTo(scenario, sets);
 
-            final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
-            modules.forEach(module -> assign.id(module.getModuleId()));
-            distributionSetResource.assignSoftwareModules(dsSet.getDsId(), assign.build());
-        });
+        tagDistributionSets(scenario, sets);
 
+        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
+    }
+
+    private void tagDistributionSets(final Scenario scenario, final List<MgmtDistributionSet> sets) {
         for (int i = 0; i < scenario.getDsTags(); i++) {
             final MgmtTag tag = distributionSetTagResource
                     .createDistributionSetTags(
@@ -233,8 +232,17 @@ public class ConfigurableScenario {
                             set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
                             .collect(Collectors.toList()));
         }
+    }
 
-        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
+    private void assignSoftwareModulesTo(final Scenario scenario, final List<MgmtDistributionSet> sets) {
+        final byte[] artifact = generateArtifact(scenario);
+        sets.forEach(dsSet -> {
+            final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
+
+            final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
+            modules.forEach(module -> assign.id(module.getModuleId()));
+            distributionSetResource.assignSoftwareModules(dsSet.getDsId(), assign.build());
+        });
     }
 
     private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
@@ -267,12 +275,22 @@ public class ConfigurableScenario {
     }
 
     private void createTargetPage(final Scenario scenario, final int page) {
-        final List<MgmtTarget> targets = targetResource.createTargets(
-                new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
-                        .buildAsList(page * PAGE_SIZE, (page + 1) * PAGE_SIZE > scenario.getTargets()
-                                ? (scenario.getTargets() - (page * PAGE_SIZE)) : PAGE_SIZE))
-                .getBody();
+        final List<MgmtTarget> targets = createTargets(scenario, page);
 
+        tagTargets(scenario, page, targets);
+    }
+
+    private List<MgmtTarget> createTargets(final Scenario scenario, final int page) {
+        return targetResource
+                .createTargets(
+                        new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
+                                .buildAsList(calculateOffset(page),
+                                        (page + 1) * PAGE_SIZE > scenario.getTargets()
+                                                ? (scenario.getTargets() - calculateOffset(page)) : PAGE_SIZE))
+                .getBody();
+    }
+
+    private void tagTargets(final Scenario scenario, final int page, final List<MgmtTarget> targets) {
         if (scenario.getTargetTags() > 0) {
             targetTagResource
                     .createTargetTags(new TagBuilder().name("Page " + page)
@@ -284,6 +302,10 @@ public class ConfigurableScenario {
                                                     .setControllerId(target.getControllerId()))
                                             .collect(Collectors.toList())));
         }
+    }
+
+    private static int calculateOffset(final int page) {
+        return page * PAGE_SIZE;
     }
 
     private static int parseSize(final String s) {

@@ -59,7 +59,7 @@ public class ClientConfigurationProperties {
         private int rolloutDeploymentGroups = 4;
 
         /**
-         * Targets tags per page (500 targets).
+         * Targets tags per page.
          */
         private int targetTags;
 

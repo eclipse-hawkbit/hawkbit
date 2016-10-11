@@ -23,7 +23,7 @@ public class TargetTagCreatedEvent extends AbstractBaseEntityEvent<TargetTag> {
      * Constructor.
      * 
      * @param tag
-     *            the tag which is updated
+     *            the tag which has been created
      */
     public TargetTagCreatedEvent(final TargetTag tag) {
         super(tag);
