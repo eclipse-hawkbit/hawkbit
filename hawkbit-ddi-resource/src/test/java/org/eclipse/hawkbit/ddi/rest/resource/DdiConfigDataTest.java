@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -42,6 +41,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Config Data Resource")
 public class DdiConfigDataTest extends AbstractRestIntegrationTest {
+
+    /**
+     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
+     * Spring version 4.3.2
+     */
+    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
@@ -77,7 +82,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                        .contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.configData.href").doesNotExist());
     }

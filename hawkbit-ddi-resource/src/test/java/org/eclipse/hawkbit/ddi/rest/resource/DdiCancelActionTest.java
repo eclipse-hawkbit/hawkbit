@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
@@ -32,6 +31,7 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -44,6 +44,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Cancel Action Resource")
 public class DdiCancelActionTest extends AbstractRestIntegrationTest {
+
+    /**
+     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
+     * Spring version 4.3.2
+     */
+    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     @Test
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")
@@ -118,8 +124,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -151,8 +156,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
@@ -395,8 +399,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()

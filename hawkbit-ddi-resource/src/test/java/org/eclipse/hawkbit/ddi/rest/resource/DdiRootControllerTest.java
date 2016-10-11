@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import static org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
@@ -42,6 +41,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -54,6 +54,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
 public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoDB {
+
+    /**
+     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
+     * Spring version 4.3.2
+     */
+    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
@@ -165,8 +171,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(org.eclipse.hawkbit.ddi.rest.resource.util.MediaType.APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00"))).andReturn().getResponse()
                 .getHeader("ETag");
 
