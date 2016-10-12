@@ -96,6 +96,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private DistributionSetMetadataRepository distributionSetMetadataRepository;
 
     @Autowired
+    private TargetFilterQueryRepository targetFilterQueryRepository;
+
+    @Autowired
     private ActionRepository actionRepository;
 
     @Autowired
@@ -180,7 +183,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // soft delete assigned
         if (!assigned.isEmpty()) {
-            distributionSetRepository.deleteDistributionSet(assigned.toArray(new Long[assigned.size()]));
+            Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
+            distributionSetRepository.deleteDistributionSet(dsIds);
+            targetFilterQueryRepository.unsetAutoAssignDistributionSet(dsIds);
         }
 
         // mark the rest as hard delete

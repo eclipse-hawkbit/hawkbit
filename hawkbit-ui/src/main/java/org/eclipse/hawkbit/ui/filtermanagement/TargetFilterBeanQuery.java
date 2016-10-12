@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.ProxyTargetFilter;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -85,7 +87,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             targetFilterQuery = getTargetFilterQueryManagement().findAllTargetFilterQuery(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            targetFilterQuery = getTargetFilterQueryManagement().findTargetFilterQueryByFilters(
+            targetFilterQuery = getTargetFilterQueryManagement().findTargetFilterQueryByName(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     searchText);
         }
@@ -98,6 +100,11 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
             proxyTarFilter.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(tarFilterQuery));
             proxyTarFilter.setQuery(tarFilterQuery.getQuery());
+
+            final DistributionSet distributionSet = tarFilterQuery.getAutoAssignDistributionSet();
+            if (distributionSet != null) {
+                proxyTarFilter.setAutoAssignDistributionSet(new ProxyDistribution(distributionSet));
+            }
             proxyTargetFilter.add(proxyTarFilter);
         }
         return proxyTargetFilter;
@@ -117,7 +124,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
                     .findAllTargetFilterQuery(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findTargetFilterQueryByFilters(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+                    .findTargetFilterQueryByName(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

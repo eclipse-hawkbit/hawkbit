@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 
 /**
  * Proxy for {@link DistributionSet}.
@@ -38,6 +41,33 @@ public class ProxyDistribution {
     private String name;
     private String version;
     private String description;
+
+    /**
+     * Creates an empty proxy distribution set
+     */
+    public ProxyDistribution() {
+        // Default constructor
+    }
+
+    /**
+     * Creates a new proxy distribution set by using the values from a distribution set
+     * @param distributionSet the source distribution set
+     */
+    public ProxyDistribution(DistributionSet distributionSet) {
+        setName(distributionSet.getName());
+        setDescription(distributionSet.getDescription());
+        setDistId(distributionSet.getId());
+        setId(distributionSet.getId());
+        setVersion(distributionSet.getVersion());
+        setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
+        setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
+        setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
+        setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
+        setNameVersion(
+                HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
+        setIsComplete(distributionSet.isComplete());
+    }
+
 
     /**
      * @return the nameVersion

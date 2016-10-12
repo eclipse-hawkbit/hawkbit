@@ -114,6 +114,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private void addNewFilter() {
+        filterManagementUIState.setTfQuery(null);
         filterManagementUIState.setFilterQueryValue(null);
         filterManagementUIState.setCreateFilterBtnClicked(true);
         eventBus.publish(this, CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK);

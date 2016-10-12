@@ -26,6 +26,7 @@ public class ProxyTargetFilter {
     private String createdBy;
     private String lastModifiedBy;
     private String query;
+    private ProxyDistribution autoAssignDistributionSet;
 
     public String getCreatedDate() {
         return createdDate;
@@ -90,4 +91,11 @@ public class ProxyTargetFilter {
         this.createdBy = createdBy;
     }
 
+    public ProxyDistribution getAutoAssignDistributionSet() {
+        return autoAssignDistributionSet;
+    }
+
+    public void setAutoAssignDistributionSet(ProxyDistribution autoAssignDistributionSet) {
+        this.autoAssignDistributionSet = autoAssignDistributionSet;
+    }
 }

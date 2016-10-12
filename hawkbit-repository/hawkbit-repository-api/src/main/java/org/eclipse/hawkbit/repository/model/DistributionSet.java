@@ -89,6 +89,11 @@ public interface DistributionSet extends NamedVersionedEntity {
     List<Target> getAssignedTargets();
 
     /**
+     * @return the auto assign target filters
+     */
+    List<TargetFilterQuery> getAutoAssignFilters();
+
+    /**
      * @return the installedTargets
      */
     List<TargetInfo> getInstalledTargets();

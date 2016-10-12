@@ -176,13 +176,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
+        return assignDistributionSet(dsID, targets, null);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
+    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
+                                                                 final Collection<TargetWithActionType> targets,
+                                                                 final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(
                     String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
         }
 
-        return assignDistributionSetToTargets(set, targets, null, null);
+        return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
     }
 
     @Override
@@ -197,21 +207,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
         }
 
-        return assignDistributionSetToTargets(set, targets, (JpaRollout) rollout, (JpaRolloutGroup) rolloutGroup);
+        return assignDistributionSetToTargets(set, targets, (JpaRollout) rollout, (JpaRolloutGroup) rolloutGroup, null);
     }
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
      *
-     * @param dsID
+     * @param set
      *            the ID of the distribution set to assign
-     * @param targets
+     * @param targetsWithActionType
      *            a list of all targets and their action type
      * @param rollout
      *            the rollout for this assignment
      * @param rolloutGroup
      *            the rollout group for this assignment
+     * @param actionMessage
+     *            an optional message to be written into the action status
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -220,7 +232,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final JpaDistributionSet set,
             final Collection<TargetWithActionType> targetsWithActionType, final JpaRollout rollout,
-            final JpaRolloutGroup rolloutGroup) {
+            final JpaRolloutGroup rolloutGroup, final String actionMessage) {
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException(
@@ -293,6 +305,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             actionStatus.setAction(action);
             actionStatus.setOccurredAt(action.getCreatedAt());
             actionStatus.setStatus(Status.RUNNING);
+            if(actionMessage != null) {
+                actionStatus.addMessage(actionMessage);
+            }
             actionStatusRepository.save(actionStatus);
         });
 
@@ -353,11 +368,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     /**
-     * Removes {@link UpdateAction}s that are no longer necessary and sends
+     * Removes {@link Action}s that are no longer necessary and sends
      * cancellations to the controller.
      *
-     * @param myTarget
-     *            to override {@link UpdateAction}s
+     * @param targetsIds
+     *            to override {@link Action}s
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
@@ -392,7 +407,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return assignDistributionSetToTargets(set, tIDs.stream()
                 .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null,
-                null);
+                null, null);
     }
 
     @Override

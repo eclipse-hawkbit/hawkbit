@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -173,6 +174,37 @@ public interface MgmtDistributionSetRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/installedTargets", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam);
+
+    /**
+     * Handles the GET request to retrieve target filter queries that have the
+     * given distribution set as auto assign DS.
+     *
+     * @param distributionSetId
+     *            the ID of the distribution set to retrieve the assigned
+     *            targets
+     * @param pagingOffsetParam
+     *            the offset of list of targets for pagination, might not be
+     *            present in the rest request then default value will be applied
+     * @param pagingLimitParam
+     *            the limit of the paged request, might not be present in the
+     *            rest request then default value will be applied
+     * @param sortParam
+     *            the sorting parameter in the request URL, syntax
+     *            {@code field:direction, field:direction}
+     * @param rsqlParam
+     *            the search name parameter in the request URL, syntax
+     *            {@code q=myFilter}
+     * @return status OK if get request is successful with the paged list of
+     *         targets
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/autoAssignTargetFilters", produces = {
+            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+    ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,

@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
+import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -91,6 +92,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private DistributionSetMetadatadetailslayout dsMetadataTable;
 
+    private TargetFilterQueryDetailsTable tfqDetailsTable;
+
     private VerticalLayout tagsLayout;
 
     private Map<String, StringBuilder> assignedSWModule;
@@ -103,9 +106,14 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
                 manageDistUIState);
+
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
         dsMetadataTable.init(getI18n(), getPermissionChecker(), distributionSetManagement, dsMetadataPopupLayout,
                 entityFactory);
+
+        tfqDetailsTable = new TargetFilterQueryDetailsTable();
+        tfqDetailsTable.init(getI18n());
+
         super.init();
     }
 
@@ -120,6 +128,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         populateModule();
         populateTags();
         populateMetadataDetails();
+        populateTargetFilterQueries();
     }
 
     private void populateModule() {
@@ -277,6 +286,10 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
     }
 
+    protected void populateTargetFilterQueries() {
+        tfqDetailsTable.populateTableByDistributionSet(getSelectedBaseEntity());
+    }
+
     private void updateDistributionSetDetailsLayout(final String type, final Boolean isMigrationRequired) {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
@@ -332,6 +345,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(tfqDetailsTable, getI18n().get("caption.auto.assignment.ds"), null);
     }
 
     @Override

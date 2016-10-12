@@ -38,6 +38,10 @@ local.properties
 .settings/
 .loadpath
 
+# IDEA
+*.iml
+.idea
+
 # External tool builders
 .externalToolBuilders/
 

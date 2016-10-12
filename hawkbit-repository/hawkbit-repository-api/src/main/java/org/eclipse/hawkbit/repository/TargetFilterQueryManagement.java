@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,17 +72,77 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findAllTargetFilterQuery(@NotNull Pageable pageable);
 
     /**
+     * Counts all target filter queries
+     * @return the number of all target filter queries
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countAllTargetFilterQuery();
+
+    /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
      *
      *
      * @param pageable
      *            pagination parameter
      * @param name
-     *            target filter query name
+     *            name filter
      * @return the page with the found {@link TargetFilterQuery}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findTargetFilterQueryByFilters(@NotNull Pageable pageable, String name);
+    Page<TargetFilterQuery> findTargetFilterQueryByName(@NotNull Pageable pageable, String name);
+
+    /**
+     * Retrieves all target filter query which {@link TargetFilterQuery}.
+     *
+     *
+     * @param pageable
+     *            pagination parameter
+     * @param rsqlFilter
+     *            RSQL filter string
+     * @return the page with the found {@link TargetFilterQuery}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter);
+
+    /**
+     * Retrieves all target filter query which {@link TargetFilterQuery}.
+     *
+     *
+     * @param pageable
+     *            pagination parameter
+     * @param distributionSet
+     *            the auto assign distribution set
+     * @return the page with the found {@link TargetFilterQuery}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
+            DistributionSet distributionSet);
+
+    /**
+     * Retrieves all target filter query which {@link TargetFilterQuery}.
+     *
+     *
+     * @param pageable
+     *            pagination parameter
+     * @param distributionSet
+     *            the auto assign distribution set
+     * @param rsqlParam
+     *            RSQL filter
+     * @return the page with the found {@link TargetFilterQuery}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
+            DistributionSet distributionSet, String rsqlParam);
+
+    /**
+     * Retrieves all target filter query with auto assign DS which {@link TargetFilterQuery}.
+     *
+     *
+     * @return the page with the found {@link TargetFilterQuery}
+     * @param pageable
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull Pageable pageable);
 
     /**
      * Find target filter query by id.
