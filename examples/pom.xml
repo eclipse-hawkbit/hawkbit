@@ -31,6 +31,11 @@
       <module>hawkbit-example-mgmt-simulator</module>
    </modules>
 
+   <properties>
+      <docker.host>unix:///var/run/docker.sock</docker.host>
+      <docker.registry.user>hawkbit</docker.registry.user>
+   </properties>
+
    <dependencyManagement>
       <dependencies>
          <dependency>
@@ -47,5 +52,18 @@
          </dependency>
       </dependencies>
    </dependencyManagement>
+
+   <build>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>io.fabric8</groupId>
+               <artifactId>docker-maven-plugin</artifactId>
+               <version>0.16.6</version>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+   </build>
+
 
 </project>

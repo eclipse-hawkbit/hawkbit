@@ -229,7 +229,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addCancelActionStatus(final ActionStatus actionStatus) {
         final JpaAction action = (JpaAction) actionStatus.getAction();
 
