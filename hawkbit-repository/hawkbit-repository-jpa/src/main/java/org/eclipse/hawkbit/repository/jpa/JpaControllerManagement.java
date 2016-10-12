@@ -18,7 +18,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -269,26 +268,26 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
-        final JpaAction action = (JpaAction) actionStatus.getAction();
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Action addUpdateActionStatus(final ActionStatus actionStatus) {
+        final Long action = actionStatus.getAction().getId();
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
         // action status feedback channel order from the device cannot be
         // guaranteed. However, if an action is closed we do not accept further
         // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action)) {
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, actionStatus.getAction().isActive())) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getId(), action.getId());
-            return action;
+                    actionStatus.getStatus(), action);
+            return actionStatus.getAction();
         }
         return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
-            final JpaAction action) {
-        return !action.isActive() && (repositoryProperties.isRejectActionStatusForClosedAction()
+            final boolean actionActive) {
+        return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
                 || (Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus())));
     }
 
@@ -299,13 +298,14 @@ public class JpaControllerManagement implements ControllerManagement {
      * @param action
      * @return
      */
-    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        LOG.debug("addUpdateActionStatus for action {}", action.getId());
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long action) {
+        LOG.debug("addUpdateActionStatus for action {}", action);
 
-        final JpaAction mergedAction = entityManager.merge(action);
+        // TODO kaizimmerm: open bug
+        final JpaAction mergedAction = actionRepository.findById(action);
         JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
         // check for a potential DOS attack
-        checkForToManyStatusEntries(action);
+        checkForToManyStatusEntries(mergedAction);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
@@ -325,7 +325,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
+        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, mergedTarget.getId());
 
         return actionRepository.save(mergedAction);
     }
@@ -366,6 +366,8 @@ public class JpaControllerManagement implements ControllerManagement {
         if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
                 .equals(targetInfo.getInstalledDistributionSet().getId())) {
             targetInfo.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+        } else {
+            System.out.println("BÄM!");
         }
 
         targetInfoRepository.save(targetInfo);

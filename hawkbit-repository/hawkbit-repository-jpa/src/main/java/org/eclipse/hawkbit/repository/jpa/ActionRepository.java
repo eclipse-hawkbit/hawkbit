@@ -37,6 +37,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,7 +147,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions according to the searched target
      */
     @Query("Select a from JpaAction a where a.target = :target order by a.id")
-    List<Action> findByTarget(@Param("target") final JpaTarget target);
+    List<Action> findByTarget(@Param("target") JpaTarget target);
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag
@@ -347,8 +348,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
-    List<Action> findByRolloutAndRolloutGroupParentAndStatus(JpaRollout rollout, JpaRolloutGroup rolloutGroupParent,
-            Status actionStatus);
+    List<Identifiable<Long>> findByRolloutAndRolloutGroupParentAndStatus(JpaRollout rollout,
+            JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.

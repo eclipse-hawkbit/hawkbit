@@ -270,7 +270,7 @@ public interface DeploymentManagement {
      *         rollout group in a specific status
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
+    List<Long> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
             @NotNull RolloutGroup rolloutGroupParent, @NotNull Action.Status actionStatus);
 
     /**
@@ -478,8 +478,6 @@ public interface DeploymentManagement {
      * Updates a {@link Action} and forces the {@link Action} if it's not
      * already forced.
      *
-     * @param targetId
-     *            the ID of the target
      * @param actionId
      *            the ID of the action
      * @return the updated or the found {@link Action}
@@ -491,12 +489,12 @@ public interface DeploymentManagement {
      * Starting an action which is scheduled, e.g. in case of roll out a
      * scheduled action must be started now.
      *
-     * @param action
-     *            the action to start now.
+     * @param actionId
+     *            the the ID of the action to start now.
      * @return the action which has been started
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action startScheduledAction(@NotNull Action action);
+    Action startScheduledAction(@NotNull Long actionId);
 
     /**
      * All {@link ActionStatus} entries in the repository.
