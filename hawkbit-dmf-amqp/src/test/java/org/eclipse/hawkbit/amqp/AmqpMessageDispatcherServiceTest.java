@@ -202,7 +202,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                1L, TENANT, testTarget, 1L);
+                testTarget, 1L);
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(

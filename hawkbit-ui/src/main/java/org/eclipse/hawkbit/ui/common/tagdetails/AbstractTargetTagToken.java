@@ -35,14 +35,14 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
     protected transient TagManagement tagManagement;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEventTargetTagCreated(final TargetTagCreatedEventContainer holder) {
-        holder.getEvents().stream().map(event -> event.getEntity())
+    void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
+        container.getEvents().stream().map(event -> event.getEntity())
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer holder) {
-        holder.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
+    void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
+        container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
                 .forEach(this::removeTagFromCombo);
     }
 

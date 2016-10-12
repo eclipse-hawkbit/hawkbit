@@ -96,7 +96,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer holder) {
+    public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer eventContainer) {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
         }

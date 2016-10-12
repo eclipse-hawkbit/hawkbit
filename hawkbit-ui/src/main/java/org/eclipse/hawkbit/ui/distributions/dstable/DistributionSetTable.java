@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -127,34 +126,25 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer holder) {
+    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
 
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
 
-        handleSelectedAndUpdatedDs(holder.getEvents());
+        handleSelectedAndUpdatedDs(eventContainer.getEvents());
 
-        updateVisableTableEntries(holder.getEvents(), visibleItemIds);
+        updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
     }
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
-        final Optional<DistributionSetIdName> lastSelectedDsIdName = manageDistUIState.getLastSelectedDistribution();
-        // refresh the details tabs only if selected ds is updated
-        if (lastSelectedDsIdName.isPresent()) {
-            final Optional<DistributionSet> selectedSetUpdated = events.stream().map(event -> event.getEntity())
-                    .filter(set -> set.getId().equals(lastSelectedDsIdName.get().getId())).findFirst();
-
-            if (selectedSetUpdated.isPresent()) {
-                // update table row+details layout
-                eventBus.publish(this,
-                        new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated.get()));
-            }
-        }
-    }
-
-    private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdateEvent> events,
-            final List<DistributionSetIdName> visibleItemIds) {
-        return events.stream().map(event -> event.getEntity())
-                .allMatch(set -> set.isComplete() && !visibleItemIds.contains(DistributionSetIdName.generate(set)));
+        manageDistUIState.getLastSelectedDistribution().ifPresent(lastSelectedDsIdName -> {
+            events.stream().map(event -> event.getEntity())
+                    .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
+                    .ifPresent(selectedSetUpdated -> {
+                        // update table row+details layout
+                        eventBus.publish(this,
+                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated));
+                    });
+        });
     }
 
     private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
@@ -165,16 +155,16 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionCreatedEvents(final DistributionCreatedEventContainer holder) {
+    void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
         refreshDistributions();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionDeletedEvents(final DistributionDeletedEventContainer holder) {
+    void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
-        for (final DistributionDeletedEvent deletedEvent : holder.getEvents()) {
+        for (final DistributionDeletedEvent deletedEvent : eventContainer.getEvents()) {
             final Long distributionSetId = deletedEvent.getDistributionSetId();
             final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
             if (visibleItemIds.contains(targetIdName)) {

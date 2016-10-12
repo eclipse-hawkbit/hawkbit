@@ -286,21 +286,21 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEvent(final TargetTagUpdatedEventContainer events) {
+    void onEvent(final TargetTagUpdatedEventContainer eventContainer) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagCreated(final TargetTagCreatedEventContainer holder) {
+    void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer holder) {
+    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
         refreshContainer();
     }
 

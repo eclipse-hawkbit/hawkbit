@@ -142,7 +142,7 @@ public interface RolloutGroupManagement {
             @NotNull Pageable pageable);
 
     /**
-     * Get count of targets in different status in rollout group.
+     * Get {@link RolloutGroup} by Id.
      *
      * @param rolloutGroupId
      *            rollout group id

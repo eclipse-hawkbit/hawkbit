@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.eventbus.event;
 
-import org.eclipse.hawkbit.eventbus.event.DefaultEvent;
+import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  *
  *
  */
-public class CancelTargetAssignmentEvent extends DefaultEvent {
+public class CancelTargetAssignmentEvent implements Event {
 
     private final Target target;
     private final Long actionId;
@@ -26,18 +26,12 @@ public class CancelTargetAssignmentEvent extends DefaultEvent {
     /**
      * Creates a new {@link CancelTargetAssignmentEvent}.
      *
-     * @param revision
-     *            the revision for this event
-     * @param tenant
-     *            the tenant for this event
      * @param target
      *            entity
      * @param actionId
      *            the action id of the assignment
      */
-    public CancelTargetAssignmentEvent(final long revision, final String tenant, final Target target,
-            final Long actionId) {
-        super(revision, tenant);
+    public CancelTargetAssignmentEvent(final Target target, final Long actionId) {
         this.target = target;
         this.actionId = actionId;
     }
@@ -54,6 +48,16 @@ public class CancelTargetAssignmentEvent extends DefaultEvent {
      */
     public Target getTarget() {
         return target;
+    }
+
+    @Override
+    public long getRevision() {
+        return -1;
+    }
+
+    @Override
+    public String getTenant() {
+        return target.getTenant();
     }
 
 }

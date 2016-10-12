@@ -158,11 +158,12 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         final TagData tagData = tagDetails.putIfAbsent(tagId, new TagData(tagId, tagName, tagColor));
         if (tagData == null) {
             final Item item = container.addItem(tagId);
-
-            if (item != null) {
-                item.getItemProperty(ID_PROPERTY).setValue(tagId);
-                updateItem(tagName, tagColor, item);
+            if (item == null) {
+                return;
             }
+
+            item.getItemProperty(ID_PROPERTY).setValue(tagId);
+            updateItem(tagName, tagColor, item);
         }
     }
 

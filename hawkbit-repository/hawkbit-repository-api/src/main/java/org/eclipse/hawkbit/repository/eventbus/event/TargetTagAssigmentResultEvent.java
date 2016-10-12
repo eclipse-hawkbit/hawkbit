@@ -38,7 +38,7 @@ public class TargetTagAssigmentResultEvent implements Event {
 
     @Override
     public long getRevision() {
-        return 0;
+        return -1;
     }
 
     @Override

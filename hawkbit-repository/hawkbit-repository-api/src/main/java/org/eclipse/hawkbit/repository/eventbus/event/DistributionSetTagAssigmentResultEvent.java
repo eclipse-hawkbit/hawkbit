@@ -39,7 +39,7 @@ public class DistributionSetTagAssigmentResultEvent implements Event {
 
     @Override
     public long getRevision() {
-        return 0;
+        return -1;
     }
 
     @Override

@@ -22,9 +22,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -128,11 +128,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetDeletedEvents(final TargetDeletedEventContainer holder) {
+    void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshTargets = false;
-        for (final TargetDeletedEvent deletedEvent : holder.getEvents()) {
+        for (final TargetDeletedEvent deletedEvent : eventContainer.getEvents()) {
             final TargetIdName targetIdName = new TargetIdName(deletedEvent.getTargetId(), null, null);
             if (visibleItemIds.contains(targetIdName)) {
                 targetContainer.removeItem(targetIdName);
@@ -151,30 +151,25 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer holder) {
+    void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer eventContainer) {
         // workaround until push is available for action
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        final Optional<Target> selected = holder.getEvents().stream().map(event -> event.getTarget())
-                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
-        if (selected.isPresent()) {
-            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
-        }
+        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getTarget()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetUpdatedEvents(final TargetUpdatedEventContainer holder) {
-        onTargetUpdateEvents(holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity())
+    void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
+        onTargetUpdateEvents(eventContainer.getEvents().stream()
+                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventContainer eventContainer) {
+        onTargetUpdateEvents(eventContainer.getEvents().stream()
+                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
                 .collect(Collectors.toList()));
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventContainer holder) {
-        onTargetUpdateEvents(
-                holder.getEvents().stream().map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
-                        .collect(Collectors.toList()));
     }
 
     /**
@@ -189,7 +184,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
 
         if (isFilterEnabled()) {
-            LOG.debug("Filter enabled on UI {}. Refresh targets from database.", getUI().getUIId());
             refreshTargets();
         } else {
             updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
@@ -200,12 +194,13 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        final Optional<Target> selected = updatedTargets.stream()
-                .filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny();
-        if (selected.isPresent()) {
-            LOG.debug("Selected element has changed on UI {}. Reselect to update action history.", getUI().getUIId());
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selected.get()));
-        }
+        reselectTargetIfSelectedInStream(updatedTargets.stream());
+    }
+
+    private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
+        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(target -> {
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target));
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

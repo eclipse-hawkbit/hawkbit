@@ -48,21 +48,21 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer holder) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer holder) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer holder) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 

@@ -134,8 +134,8 @@ public class RolloutListGrid extends AbstractGrid {
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onRolloutChangeEvent(final RolloutChangeEventContainer holder) {
-        holder.getEvents().forEach(this::handleEvent);
+    public void onRolloutChangeEvent(final RolloutChangeEventContainer eventContainer) {
+        eventContainer.getEvents().forEach(this::handleEvent);
     }
 
     private void handleEvent(final RolloutChangeEvent rolloutChangeEvent) {

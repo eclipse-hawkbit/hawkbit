@@ -193,8 +193,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         if (action.get().isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(new CancelTargetAssignmentEvent(
-                    target.getOptLockRevision(), target.getTenant(), target, action.get().getId()));
+            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
+                    new CancelTargetAssignmentEvent(target, action.get().getId()));
             return;
         }
 
@@ -327,6 +327,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
             // cancel action rejected, write warning status message and fall
             // back to running action status
+
+            // TODO kaizimmerm: open bug
 
         } else {
             logAndThrowMessageError(message,

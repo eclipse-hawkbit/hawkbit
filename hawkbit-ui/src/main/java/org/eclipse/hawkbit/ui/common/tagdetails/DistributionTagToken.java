@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.push.events.DistributionSetTagAssignmentResultEventContainer;
 import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
@@ -117,21 +117,21 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer holder) {
-        holder.getEvents().stream().map(event -> event.getEntity())
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
+        eventContainer.getEvents().stream().map(event -> event.getEntity())
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer holder) {
-        holder.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
+        eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
                 .forEach(this::removeTagFromCombo);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer holder) {
-        holder.getEvents().stream().map(event -> event.getEntity()).forEach(entity -> {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
+        eventContainer.getEvents().stream().map(event -> event.getEntity()).forEach(entity -> {
             final Item item = container.getItem(entity.getId());
             if (item != null) {
                 updateItem(entity.getName(), entity.getColour(), item);
@@ -140,9 +140,8 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagAssigmentResultEvent(final List<DistributionSetTagAssigmentResultEvent> events) {
-
-        events.stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
+    void onTargetTagAssigmentResultEvent(final DistributionSetTagAssignmentResultEventContainer eventContainer) {
+        eventContainer.getEvents().stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
             final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
             if (isAssign(assignmentResult)) {
                 addNewToken(tag.getId());
