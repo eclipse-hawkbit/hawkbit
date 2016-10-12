@@ -327,9 +327,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
             // cancel action rejected, write warning status message and fall
             // back to running action status
-
-            // TODO kaizimmerm: open bug
-
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());

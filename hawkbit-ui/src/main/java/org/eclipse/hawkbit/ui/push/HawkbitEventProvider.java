@@ -48,7 +48,7 @@ import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.TargetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.TargetUpdatedEventContainer;
 
-import com.google.gwt.thirdparty.guava.common.collect.Maps;
+import com.google.common.collect.Maps;
 
 /**
  * The default hawkbit event provider.
@@ -67,7 +67,8 @@ public class HawkbitEventProvider implements UIEventProvider {
         EVENTS.put(DistributionSetTagCreatedEvent.class, DistributionSetTagCreatedEventContainer.class);
         EVENTS.put(DistributionSetTagDeletedEvent.class, DistributionSetTagDeletedEventContainer.class);
         EVENTS.put(DistributionSetTagUpdateEvent.class, DistributionSetTagUpdatedEventContainer.class);
-        EVENTS.put(DistributionSetTagAssigmentResultEvent.class, DistributionSetTagAssignmentResultEventContainer.class);
+        EVENTS.put(DistributionSetTagAssigmentResultEvent.class,
+                DistributionSetTagAssignmentResultEventContainer.class);
 
         EVENTS.put(TargetCreatedEvent.class, TargetCreatedEventContainer.class);
         EVENTS.put(TargetInfoUpdateEvent.class, TargetInfoUpdateEventContainer.class);
