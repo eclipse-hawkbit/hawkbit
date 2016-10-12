@@ -90,7 +90,7 @@ public class SimulationController {
         for (int i = 0; i < amount; i++) {
             final String deviceId = name + i;
             repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
-                    gatewayToken));
+                    gatewayToken, true));
         }
 
         return ResponseEntity.ok("Updated " + amount + " " + protocol + " connected targets!");

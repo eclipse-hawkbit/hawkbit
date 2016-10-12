@@ -33,22 +33,6 @@ public class SimulatedDeviceFactory {
     private SpSenderService spSenderService;
 
     /**
-     * Creating a simulated devices.
-     * 
-     * @param id
-     *            the ID of the simulated device
-     * @param tenant
-     *            the tenant of the simulated device
-     * @param protocol
-     *            the protocol of the device
-     * @return the created simulated device
-     */
-    public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant,
-            final Protocol protocol) {
-        return createSimulatedDevice(id, tenant, protocol, 1800, null, null);
-    }
-
-    /**
      * Creating a simulated device.
      * 
      * @param id
@@ -66,14 +50,21 @@ public class SimulatedDeviceFactory {
      * @param gatewayToken
      *            the gatewayToken to be used to authenticate
      *            {@link DDISimulatedDevice}s at the endpoint
+     * @param pollImmediatly
+     *            <code>true</code> if an immediate message should be send to
+     *            update server
      * @return the created simulated device
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol,
-            final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
+            final int pollDelaySec, final URL baseEndpoint, final String gatewayToken, final boolean pollImmediatly) {
         switch (protocol) {
         case DMF_AMQP:
-            spSenderService.createOrUpdateThing(tenant, id);
-            return new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
+            final AbstractSimulatedDevice device = new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
+            device.setNextPollCounterSec(pollDelaySec);
+            if (pollImmediatly) {
+                spSenderService.createOrUpdateThing(tenant, id);
+            }
+            return device;
         case DDI_HTTP:
             final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())
                     .requestInterceptor(new GatewayTokenInterceptor(gatewayToken)).logLevel(Logger.Level.BASIC)

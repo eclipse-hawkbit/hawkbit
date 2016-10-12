@@ -50,7 +50,7 @@ public class SimulatorStartup implements ApplicationListener<ContextRefreshedEve
                     if (amqpProperties.isEnabled()) {
                         repository.add(deviceFactory.createSimulatedDevice(deviceId, autostart.getTenant(),
                                 autostart.getApi(), autostart.getPollDelay(), new URL(autostart.getEndpoint()),
-                                autostart.getGatewayToken()));
+                                autostart.getGatewayToken(), true));
                     }
 
                 } catch (final MalformedURLException e) {
