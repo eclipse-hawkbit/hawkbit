@@ -579,9 +579,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
-        final List<Specification<JpaTarget>> specList = new ArrayList<>();
+        final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
         specList.add(spec);
-
         specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
 
         return countByCriteriaAPI(specList);

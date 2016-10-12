@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -154,7 +153,7 @@ public class TargetFilterTable extends Table {
     }
 
     private List<TableColumn> getVisbleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = new ArrayList<>(7);
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2F));
@@ -287,14 +286,11 @@ public class TargetFilterTable extends Table {
     }
 
     private void setColumnProperties() {
-        final List<TableColumn> columnList = getVisbleColumns();
-        final List<Object> swColumnIds = new ArrayList<>();
-        for (final TableColumn column : columnList) {
+        setVisibleColumns(getVisbleColumns().stream().map(column -> {
             setColumnHeader(column.getColumnPropertyId(), column.getColumnHeader());
             setColumnExpandRatio(column.getColumnPropertyId(), column.getExpandRatio());
-            swColumnIds.add(column.getColumnPropertyId());
-        }
-        setVisibleColumns(swColumnIds.toArray());
+            return column.getColumnPropertyId();
+        }).toArray());
     }
 
 }

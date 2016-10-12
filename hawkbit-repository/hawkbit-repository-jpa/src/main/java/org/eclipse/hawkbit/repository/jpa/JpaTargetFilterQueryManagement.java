@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -83,18 +84,18 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Page<TargetFilterQuery> findTargetFilterQueryByName(final Pageable pageable, final String name) {
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!Strings.isNullOrEmpty(name)) {
-            specList.add(TargetFilterQuerySpecification.likeName(name));
+            specList = Collections.singletonList(TargetFilterQuerySpecification.likeName(name));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
 
     @Override
     public Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter) {
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!Strings.isNullOrEmpty(rsqlFilter)) {
-            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
+            specList = Collections.singletonList(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -108,7 +109,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
             DistributionSet distributionSet, String rsqlFilter) {
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         if (distributionSet != null) {
             specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         }
@@ -120,8 +121,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull Pageable pageable) {
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
-        specList.add(TargetFilterQuerySpecification.withAutoAssignDS());
+        final List<Specification<JpaTargetFilterQuery>> specList = Collections
+                .singletonList(TargetFilterQuerySpecification.withAutoAssignDS());
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
 

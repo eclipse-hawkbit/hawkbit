@@ -118,7 +118,7 @@ public class DistributionSetSelectTable extends Table {
     }
 
     private List<TableColumn> getVisbleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = new ArrayList<>(2);
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.6F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.4F));
         return columnList;
@@ -126,14 +126,11 @@ public class DistributionSetSelectTable extends Table {
     }
 
     private void setColumnProperties() {
-        final List<TableColumn> columnList = getVisbleColumns();
-        final List<Object> swColumnIds = new ArrayList<>();
-        for (final TableColumn column : columnList) {
+        setVisibleColumns(getVisbleColumns().stream().map(column -> {
             setColumnHeader(column.getColumnPropertyId(), column.getColumnHeader());
             setColumnExpandRatio(column.getColumnPropertyId(), column.getExpandRatio());
-            swColumnIds.add(column.getColumnPropertyId());
-        }
-        setVisibleColumns(swColumnIds.toArray());
+            return column.getColumnPropertyId();
+        }).toArray());
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
