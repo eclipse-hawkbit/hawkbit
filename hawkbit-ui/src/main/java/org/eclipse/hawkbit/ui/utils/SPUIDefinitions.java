@@ -482,6 +482,11 @@ public final class SPUIDefinitions {
     public static final String FILTER_BY_INVALID_QUERY = "FilterByInvalidFilterQueryText";
 
     /**
+     * Filter by distribution set complete.
+     */
+    public static final String FILTER_BY_DS_COMPLETE = "FilterByDistributionSetComplete";
+
+    /**
      * Sort order of column - created at in target table.
      */
     public static final Direction TARGET_TABLE_CREATE_AT_SORT_ORDER = Direction.ASC;

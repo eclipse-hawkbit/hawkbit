@@ -57,6 +57,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private TargetRepository targetRepository;
 
     @Autowired
+    private TargetFilterQueryRepository targetFilterQueryRepository;
+
+    @Autowired
     private ActionRepository actionRepository;
 
     @Autowired
@@ -221,6 +224,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
             targetRepository.deleteByTenantIgnoreCase(tenant);
+            targetFilterQueryRepository.deleteByTenantIgnoreCase(tenant);
             actionRepository.deleteByTenantIgnoreCase(tenant);
             rolloutGroupRepository.deleteByTenantIgnoreCase(tenant);
             rolloutRepository.deleteByTenantIgnoreCase(tenant);

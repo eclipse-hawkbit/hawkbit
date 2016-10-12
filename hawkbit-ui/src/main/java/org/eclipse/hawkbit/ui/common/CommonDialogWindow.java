@@ -263,9 +263,9 @@ public class CommonDialogWindow extends Window {
 
             if (field instanceof Table) {
                 ((Table) field).addItemSetChangeListener(new ChangeListener(field));
-            } else {
-                field.addValueChangeListener(new ChangeListener(field));
             }
+            field.addValueChangeListener(new ChangeListener(field));
+
         }
     }
 

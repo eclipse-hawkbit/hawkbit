@@ -323,6 +323,30 @@ public interface EntityFactory {
     TargetFilterQuery generateTargetFilterQuery();
 
     /**
+     * Generates an {@link TargetFilterQuery} without persisting it.
+     *
+     * @param name
+     *            name for the filter
+     * @param query
+     *            query of the filter
+     * @return {@link TargetFilterQuery} object
+     */
+    TargetFilterQuery generateTargetFilterQuery(String name, String query);
+
+    /**
+     * Generates an {@link TargetFilterQuery} without persisting it.
+     *
+     * @param name
+     *            name for the filter
+     * @param query
+     *            query of the filter
+     * @param autoAssignDS
+     *            auto assign distribution set
+     * @return {@link TargetFilterQuery} object
+     */
+    TargetFilterQuery generateTargetFilterQuery(String name, String query, DistributionSet autoAssignDS);
+
+    /**
      * Generates an empty {@link TargetTag} without persisting it.
      * 
      * @return {@link TargetTag} object

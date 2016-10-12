@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.rest.util.SortUtility;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -57,6 +58,14 @@ public final class PagingUtility {
             return new Sort(Direction.ASC, TargetFields.NAME.getFieldName());
         }
         return new Sort(SortUtility.parse(TargetFields.class, sortParam));
+    }
+
+    static Sort sanitizeTargetFilterQuerySortParam(final String sortParam) {
+        if (sortParam == null) {
+            // default
+            return new Sort(Direction.ASC, TargetFilterQueryFields.NAME.getFieldName());
+        }
+        return new Sort(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
     }
 
     static Sort sanitizeSoftwareModuleSortParam(final String sortParam) {

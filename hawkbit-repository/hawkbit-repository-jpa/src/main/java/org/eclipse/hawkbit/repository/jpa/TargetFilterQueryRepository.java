@@ -13,6 +13,8 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,5 +44,16 @@ public interface TargetFilterQueryRepository
     @Modifying
     @Transactional
     <S extends JpaTargetFilterQuery> S save(S entity);
+
+    /**
+     * Sets the auto assign distribution sets to null which match the ds ids.
+     *
+     * @param dsIds
+     *            distribution set ids to be set to null
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL where d.autoAssignDistributionSet in :ids")
+    void unsetAutoAssignDistributionSet(@Param("ids") Long... dsIds);
 
 }
