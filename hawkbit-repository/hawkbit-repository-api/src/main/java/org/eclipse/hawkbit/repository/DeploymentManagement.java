@@ -106,6 +106,27 @@ public interface DeploymentManagement {
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
+     * their IDs with a specific {@link ActionType} and an action message.
+     *
+     * @param dsID
+     *            the ID of the distribution set to assign
+     * @param targets
+     *            a list of all targets and their action type
+     * @param actionMessage
+     *            an optional message for the action status
+     * @return the assignment result
+     *
+     * @throw IncompleteDistributionSetException if mandatory
+     *        {@link SoftwareModuleType} are not assigned as define by the
+     *        {@link DistributionSetType}.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
+                                                          @NotEmpty Collection<TargetWithActionType> targets,
+                                                          String actionMessage);
+
+    /**
+     * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
      *
      * @param dsID
@@ -364,9 +385,6 @@ public interface DeploymentManagement {
      *            pagination parameter
      * @param action
      *            to be filtered on
-     * @param withMessages
-     *            to <code>true</code> if {@link ActionStatus#getMessages()}
-     *            need to be fetched.
      * @return the corresponding {@link Page} of {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -463,8 +481,6 @@ public interface DeploymentManagement {
      *
      * @param action
      *            to be canceled
-     * @param target
-     *            for which the action needs cancellation
      *
      * @return generated {@link Action} or <code>null</code> if not active on
      *         {@link Target}.

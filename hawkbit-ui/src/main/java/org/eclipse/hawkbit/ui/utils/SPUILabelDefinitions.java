@@ -204,6 +204,10 @@ public final class SPUILabelDefinitions {
      */
     public static final String ASSIGNED_DISTRIBUTION_ID = "assignedDistributionSet.id";
     /**
+     * AUTO ASSIGN DISTRIBUTION SET ID
+     */
+    public static final String AUTO_ASSIGN_DISTRIBUTION_SET = "autoAssignDistributionSet";
+    /**
      * ASSIGNED DISTRIBUTION Name & Version.
      */
     public static final String ASSIGNED_DISTRIBUTION_NAME_VER = "assignedDistNameVersion";

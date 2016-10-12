@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery_;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -36,5 +37,29 @@ public final class TargetFilterQuerySpecification {
             final String searchTextToLower = searchText.toLowerCase();
             return cb.like(cb.lower(targetFilterQueryRoot.get(JpaTargetFilterQuery_.name)), searchTextToLower);
         };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
+     * on is {@link JpaTargetFilterQuery#getName()}.
+     *
+     * @param distributionSet
+     *            of the filter
+     * @return the {@link JpaTargetFilterQuery} {@link Specification}
+     */
+    public static Specification<JpaTargetFilterQuery> byAutoAssignDS(final DistributionSet distributionSet) {
+        return (targetFilterQueryRoot, query, cb) -> cb
+                .equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet), distributionSet);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
+     * on is {@link JpaTargetFilterQuery#getName()}.
+     *
+     * @return the {@link JpaTargetFilterQuery} {@link Specification}
+     */
+    public static Specification<JpaTargetFilterQuery> withAutoAssignDS() {
+        return (targetFilterQueryRoot, query, cb) -> cb
+                .isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet));
     }
 }
