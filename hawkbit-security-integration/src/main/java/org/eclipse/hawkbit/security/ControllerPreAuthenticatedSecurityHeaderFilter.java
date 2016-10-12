@@ -77,7 +77,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public Object getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
         // retrieve the common name header and the authority name header from
         // the http request and combine them together
         final String commonNameValue = secruityToken.getHeader(caCommonNameHeader);

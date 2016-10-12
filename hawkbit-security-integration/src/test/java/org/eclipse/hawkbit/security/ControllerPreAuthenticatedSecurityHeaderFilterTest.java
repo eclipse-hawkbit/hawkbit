@@ -46,10 +46,13 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
 
     private static final String CA_COMMON_NAME = "ca-cn";
+    private static final String CA_COMMON_NAME_VALUE = "box1";
 
     private static final String X_SSL_ISSUER_HASH_1 = "X-Ssl-Issuer-Hash-1";
 
     private static final String SINGLE_HASH = "hash1";
+    private static final String SECOND_HASH = "hash2";
+    private static final String UNKNOWN_HASH = "unknown";
 
     private static final String MULTI_HASH = "hash1;hash2;hash3";
 
@@ -69,9 +72,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with a single known hash")
     public void testIssuerHashBasedAuthenticationWithSingleKnownHash() {
-        // prepare security token
-        final TenantSecurityToken securityToken = prepareSecurityToken();
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, SINGLE_HASH);
+        final TenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -82,9 +83,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with multiple known hashes")
     public void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
-        // prepare security token
-        final TenantSecurityToken securityToken = prepareSecurityToken();
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, SINGLE_HASH);
+        final TenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -95,9 +94,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with unknown hash")
     public void testIssuerHashBasedAuthenticationWithUnknownHash() {
-        // prepare security token
-        final TenantSecurityToken securityToken = prepareSecurityToken();
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "unknown");
+        final TenantSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
@@ -108,39 +105,37 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests different values for issuer hash header and inspects the credentials")
     public void useDifferentValuesForIssuerHashHeader() {
+        final TenantSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
+        final TenantSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
 
-        // prepare security token
-        TenantSecurityToken securityToken = prepareSecurityToken();
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash1");
+        final HeaderAuthentication expected1 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SINGLE_HASH);
+        final HeaderAuthentication expected2 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SECOND_HASH);
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
 
-        HeaderAuthentication expected = new HeaderAuthentication("box1", "hash1");
-        Collection<HeaderAuthentication> credentials = (Collection<HeaderAuthentication>) underTest
-                .getPreAuthenticatedCredentials(securityToken);
-        assertThat(credentials.contains(expected)).isTrue();
+        final Collection<HeaderAuthentication> credentials1 = (Collection<HeaderAuthentication>) underTest
+                .getPreAuthenticatedCredentials(securityToken1);
+        final Collection<HeaderAuthentication> credentials2 = (Collection<HeaderAuthentication>) underTest
+                .getPreAuthenticatedCredentials(securityToken2);
 
-        Object principal = underTest.getPreAuthenticatedPrincipal(securityToken);
-        assertEquals("hash1 expected in principal!", expected, principal);
+        Object principal1 = underTest.getPreAuthenticatedPrincipal(securityToken1);
+        Object principal2 = underTest.getPreAuthenticatedPrincipal(securityToken2);
 
-        securityToken = prepareSecurityToken();
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, "hash2");
-        expected = new HeaderAuthentication("box1", "hash2");
-        credentials = (Collection<HeaderAuthentication>) underTest.getPreAuthenticatedCredentials(securityToken);
-        assertThat(credentials.contains(expected)).isTrue();
+        assertThat(credentials1.contains(expected1)).isTrue();
+        assertThat(credentials2.contains(expected2)).isTrue();
 
-        principal = underTest.getPreAuthenticatedPrincipal(securityToken);
-        assertEquals("hash2 expected in principal!", expected, principal);
+        assertEquals("hash1 expected in principal!", expected1, principal1);
+        assertEquals("hash2 expected in principal!", expected2, principal2);
 
     }
 
-    private static TenantSecurityToken prepareSecurityToken() {
-        final TenantSecurityToken securityToken = new TenantSecurityToken("DEFAULT", "box1",
+    private static TenantSecurityToken prepareSecurityToken(String issuerHashHeaderValue) {
+        final TenantSecurityToken securityToken = new TenantSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE,
                 FileResource.createFileResourceBySha1("12345"));
-        securityToken.getHeaders().put(CA_COMMON_NAME, "box1");
-
+        securityToken.getHeaders().put(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
+        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, issuerHashHeaderValue);
         return securityToken;
     }
 

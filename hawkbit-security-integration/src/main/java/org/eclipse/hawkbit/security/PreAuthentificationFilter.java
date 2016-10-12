@@ -36,7 +36,7 @@ public interface PreAuthentificationFilter {
      *            the secruityToken
      * @return the extracted tenant and controller id
      */
-    Object getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
+    HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
 
     /**
      * Extract the principal credentials from the current secruityToken.

@@ -46,12 +46,6 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         return tenantAware.runAsTenant(secruityToken.getTenant(), configurationKeyTenantRunner);
     }
 
-    @Override
-    public abstract Object getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
-
-    @Override
-    public abstract Object getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
-
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {
         @Override
         public Boolean run() {
