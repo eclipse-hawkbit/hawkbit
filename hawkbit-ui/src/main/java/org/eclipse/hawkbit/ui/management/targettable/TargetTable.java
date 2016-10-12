@@ -198,9 +198,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
-        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(target -> {
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target));
-        });
+        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
+                target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

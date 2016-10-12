@@ -50,12 +50,14 @@ public class SimulatedDeviceFactory {
      * @param gatewayToken
      *            the gatewayToken to be used to authenticate
      *            {@link DDISimulatedDevice}s at the endpoint
-     * @param pollImmediatly
-     *            <code>true</code> if an immediate message should be send to
-     *            update server
      * @return the created simulated device
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol,
+            final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
+        return createSimulatedDevice(id, tenant, protocol, pollDelaySec, baseEndpoint, gatewayToken, false);
+    }
+
+    private AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol,
             final int pollDelaySec, final URL baseEndpoint, final String gatewayToken, final boolean pollImmediatly) {
         switch (protocol) {
         case DMF_AMQP:
@@ -73,5 +75,31 @@ public class SimulatedDeviceFactory {
         default:
             throw new IllegalArgumentException("Protocol " + protocol + " unknown");
         }
+    }
+
+    /**
+     * Creating a simulated device and send an immediate DMF poll to update
+     * server.
+     * 
+     * @param id
+     *            the ID of the simulated device
+     * @param tenant
+     *            the tenant of the simulated device
+     * @param protocol
+     *            the protocol which should be used be the simulated device
+     * @param pollDelaySec
+     *            the poll delay time in seconds which should be used for
+     *            {@link DDISimulatedDevice}s and {@link DMFSimulatedDevice}
+     * @param baseEndpoint
+     *            the http base endpoint which should be used for
+     *            {@link DDISimulatedDevice}s
+     * @param gatewayToken
+     *            the gatewayToken to be used to authenticate
+     *            {@link DDISimulatedDevice}s at the endpoint
+     * @return the created simulated device
+     */
+    public AbstractSimulatedDevice createSimulatedDeviceWithImmediatePoll(final String id, final String tenant,
+            final Protocol protocol, final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
+        return createSimulatedDevice(id, tenant, protocol, pollDelaySec, baseEndpoint, gatewayToken, true);
     }
 }

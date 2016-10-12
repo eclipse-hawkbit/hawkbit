@@ -101,7 +101,7 @@ public class DeviceSimulatorUpdater {
         // plug and play - non existing device will be auto created
         if (device == null) {
             device = repository
-                    .add(deviceFactory.createSimulatedDevice(id, tenant, Protocol.DMF_AMQP, 1800, null, null, false));
+                    .add(deviceFactory.createSimulatedDevice(id, tenant, Protocol.DMF_AMQP, 1800, null, null));
         }
 
         device.setProgress(0.0);
