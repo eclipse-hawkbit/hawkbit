@@ -6,25 +6,25 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.push.events;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 
 /**
- * EventHolder for {@link TargetUpdatedEvent}s.
+ * EventHolder for {@link RolloutChangeEvent}s.
  *
  */
-public class TargetUpdatedEventContainer implements EventContainer<TargetUpdatedEvent> {
-    private final List<TargetUpdatedEvent> events;
+public class RolloutChangeEventContainer implements EventContainer<RolloutChangeEvent> {
+    private final List<RolloutChangeEvent> events;
 
-    public TargetUpdatedEventContainer(final List<TargetUpdatedEvent> events) {
+    RolloutChangeEventContainer(final List<RolloutChangeEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<TargetUpdatedEvent> getEvents() {
+    public List<RolloutChangeEvent> getEvents() {
         return events;
     }
 

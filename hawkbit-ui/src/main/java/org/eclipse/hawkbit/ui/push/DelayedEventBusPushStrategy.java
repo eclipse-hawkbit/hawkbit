@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
 import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.ui.push.events.EventContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.push.events;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
 public class TargetTagCreatedEventContainer implements EventContainer<TargetTagCreatedEvent> {
     private final List<TargetTagCreatedEvent> events;
 
-    public TargetTagCreatedEventContainer(final List<TargetTagCreatedEvent> events) {
+    TargetTagCreatedEventContainer(final List<TargetTagCreatedEvent> events) {
         this.events = events;
     }
 

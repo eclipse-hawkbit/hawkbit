@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.push.events;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
 public class TargetTagDeletedEventContainer implements EventContainer<TargetTagDeletedEvent> {
     private final List<TargetTagDeletedEvent> events;
 
-    public TargetTagDeletedEventContainer(final List<TargetTagDeletedEvent> events) {
+    TargetTagDeletedEventContainer(final List<TargetTagDeletedEvent> events) {
         this.events = events;
     }
 

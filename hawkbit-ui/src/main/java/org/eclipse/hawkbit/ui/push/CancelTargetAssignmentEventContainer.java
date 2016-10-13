@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.push.events;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent
 public class CancelTargetAssignmentEventContainer implements EventContainer<CancelTargetAssignmentEvent> {
     private final List<CancelTargetAssignmentEvent> events;
 
-    public CancelTargetAssignmentEventContainer(final List<CancelTargetAssignmentEvent> events) {
+    CancelTargetAssignmentEventContainer(final List<CancelTargetAssignmentEvent> events) {
         this.events = events;
     }
 
