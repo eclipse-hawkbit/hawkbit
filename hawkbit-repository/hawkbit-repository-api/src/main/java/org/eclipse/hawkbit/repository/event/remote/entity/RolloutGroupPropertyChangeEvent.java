@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the remote event of {@link RolloutGroup} proeprty changes.
  */
-public class RolloutGroupPropertyChangeEvent extends BasePropertyChangeEvent<RolloutGroup> {
+public class RolloutGroupPropertyChangeEvent extends RemotePropertyChangeEvent<RolloutGroup> {
 
     private static final long serialVersionUID = 4026477044419472686L;
 

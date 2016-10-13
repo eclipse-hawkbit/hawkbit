@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
- * Event to represent software add, update or delete.
+ * TenantAwareEvent to represent software add, update or delete.
  *
  */
 public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {

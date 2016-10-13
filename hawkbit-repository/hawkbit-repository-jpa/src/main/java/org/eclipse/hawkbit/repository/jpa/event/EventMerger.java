@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
@@ -54,7 +54,7 @@ public class EventMerger {
         final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
         while (rolloutIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutIterator.next();
-            applicationEventPublisher.publishEvent(new RolloutChangeEvent(1, eventKey.tenant, eventKey.rolloutId));
+            applicationEventPublisher.publishEvent(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
             rolloutIterator.remove();
         }
 
@@ -62,7 +62,7 @@ public class EventMerger {
         while (rolloutGroupIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutGroupIterator.next();
             applicationEventPublisher.publishEvent(
-                    new RolloutGroupChangeEvent(1, eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
+                    new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
             rolloutGroupIterator.remove();
         }
     }
@@ -74,8 +74,8 @@ public class EventMerger {
      * @param event
      *            the event on the event bus
      */
-    @EventListener(classes = Event.class)
-    public void onEvent(final Event event) {
+    @EventListener(classes = TenantAwareEvent.class)
+    public void onEvent(final TenantAwareEvent event) {
         Long rolloutId = null;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
@@ -88,7 +88,7 @@ public class EventMerger {
             rolloutId = ((RolloutPropertyChangeEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
             rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
-            rolloutGroupId = ((RolloutGroupCreatedEvent) event).getRolloutGroupId();
+            rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupPropertyChangeEvent) {
             final RolloutGroup rolloutGroup = ((RolloutGroupPropertyChangeEvent) event).getEntity();
             rolloutId = rolloutGroup.getRollout().getId();

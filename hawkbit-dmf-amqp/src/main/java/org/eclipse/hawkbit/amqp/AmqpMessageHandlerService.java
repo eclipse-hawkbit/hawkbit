@@ -177,7 +177,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
-            logAndThrowMessageError(message, "No ReplyTo was set for the createThing Event.");
+            logAndThrowMessageError(message, "No ReplyTo was set for the createThing TenantAwareEvent.");
         }
 
         final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
@@ -194,8 +194,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         if (action.get().isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target.getOptLockRevision(), target.getTenant(),
+            amqpMessageDispatcherService
+                    .targetCancelAssignmentToDistributionSet(new CancelTargetAssignmentEvent(target.getTenant(),
                             target.getControllerId(), action.get().getId(), target.getTargetInfo().getAddress()));
             return;
         }
@@ -204,7 +204,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getOptLockRevision(), target.getTenant(), target, action.get().getId(), softwareModuleList));
+                target.getTenant(), target, action.get().getId(), softwareModuleList));
 
     }
 

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.BasePropertyChangeEvent.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemotePropertyChangeEvent.PropertyChange;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.internal.sessions.ObjectChangeSet;
 import org.eclipse.persistence.queries.UpdateObjectQuery;

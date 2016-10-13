@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * * A bulk event which contains one or many new ds tag after creating.
  */
-public class DistributionSetTagCreatedBulkEvent extends BaseEntityBulkEvent<DistributionSetTag> {
+public class DistributionSetTagCreatedBulkEvent extends RemoteEntityBulkEvent<DistributionSetTag> {
 
     private static final long serialVersionUID = 1L;
 

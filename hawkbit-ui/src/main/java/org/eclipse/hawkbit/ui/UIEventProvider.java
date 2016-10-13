@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 
 /**
  * The UI event provider hold all supported repository events which will
@@ -29,7 +29,7 @@ public interface UIEventProvider {
      * 
      * @return list of provided event types. Should not be null
      */
-    default Set<Class<? extends Event>> getSingleEvents() {
+    default Set<Class<? extends TenantAwareEvent>> getSingleEvents() {
         return Collections.emptySet();
     }
 
@@ -40,7 +40,7 @@ public interface UIEventProvider {
      * 
      * @return list of provided bulk event types. Should not be null
      */
-    default Set<Class<? extends Event>> getBulkEvents() {
+    default Set<Class<? extends TenantAwareEvent>> getBulkEvents() {
         return Collections.emptySet();
     }
 
@@ -53,8 +53,8 @@ public interface UIEventProvider {
      * @return list of provided bulk event types which are filtered. Should not
      *         be null
      */
-    default Set<Class<?>> getFilteredBulkEventsType(final List<Event> allEvents) {
-        return allEvents.stream().map(Event::getClass).filter(getBulkEvents()::contains).collect(Collectors.toSet());
+    default Set<Class<?>> getFilteredBulkEventsType(final List<TenantAwareEvent> allEvents) {
+        return allEvents.stream().map(TenantAwareEvent::getClass).filter(getBulkEvents()::contains).collect(Collectors.toSet());
     }
 
 }

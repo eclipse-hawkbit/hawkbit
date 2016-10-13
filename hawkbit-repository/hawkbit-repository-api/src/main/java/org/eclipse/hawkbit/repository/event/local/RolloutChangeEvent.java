@@ -9,25 +9,25 @@
 package org.eclipse.hawkbit.repository.event.local;
 
 /**
- * Event declaration for the UI to notify the UI that a rollout has been
- * changed.
+ * TenantAwareEvent declaration for the UI to notify the UI that a rollout has
+ * been changed.
  * 
  */
-public class RolloutChangeEvent extends DefaultEvent {
+public class RolloutChangeEvent extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
     private final Long rolloutId;
 
     /**
-     * @param revision
-     *            the revision of the event
+     * Constructor.
+     * 
      * @param tenant
      *            the tenant of the event
      * @param rolloutId
      *            the ID of the rollout which has been changed
      */
-    public RolloutChangeEvent(final long revision, final String tenant, final Long rolloutId) {
-        super(revision, tenant);
+    public RolloutChangeEvent(final String tenant, final Long rolloutId) {
+        super(tenant);
         this.rolloutId = rolloutId;
     }
 

@@ -70,7 +70,7 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
         final TargetTag targetTag = targetTags.get(0);
 
         final TargetTagCreatedBulkEvent bulkEvent = new TargetTagCreatedBulkEvent(targetTag, "Node");
-        assertThat(bulkEvent.getEntity(), Matchers.containsInAnyOrder(new TargetTag[] { targetTag }));
+        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(new TargetTag[] { targetTag }));
 
         final Message<?> message = createMessage(bulkEvent);
 
@@ -124,7 +124,7 @@ public class RemoteBulkEntityEventTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag dsTag = dsTags.get(0);
 
         final DistributionSetTagCreatedBulkEvent bulkEvent = new DistributionSetTagCreatedBulkEvent(dsTag, "Node");
-        assertThat(bulkEvent.getEntity(), Matchers.containsInAnyOrder(new DistributionSetTag[] { dsTag }));
+        assertThat(bulkEvent.getEntities(), Matchers.containsInAnyOrder(new DistributionSetTag[] { dsTag }));
 
         final Message<?> message = createMessage(bulkEvent);
 

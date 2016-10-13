@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the remote event of {@link Rollout} of property changes.
  */
-public class RolloutPropertyChangeEvent extends BasePropertyChangeEvent<Rollout> {
+public class RolloutPropertyChangeEvent extends RemotePropertyChangeEvent<Rollout> {
     private static final long serialVersionUID = 1056221355466373514L;
 
     /**

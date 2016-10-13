@@ -124,7 +124,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     /**
      * EventListener method which is called when a list of events is published.
-     * Event types should not be mixed up.
+     * TenantAwareEvent types should not be mixed up.
      *
      * @param events
      *            list of events

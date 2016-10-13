@@ -14,7 +14,7 @@ package org.eclipse.hawkbit.repository.event;
  *
  */
 @FunctionalInterface
-public interface Event {
+public interface TenantAwareEvent {
 
     /**
      * @return the tenant of the event.

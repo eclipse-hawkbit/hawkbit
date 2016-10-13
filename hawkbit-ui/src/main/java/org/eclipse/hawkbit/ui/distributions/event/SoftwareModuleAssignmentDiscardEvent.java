@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.event;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 
 /**
- * Event fired on discard of software module assignment.
+ * TenantAwareEvent fired on discard of software module assignment.
  * 
  *
  *

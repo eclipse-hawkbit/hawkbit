@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the remote event of creating a new {@link Action}.
  */
-public class ActionCreatedEvent extends TenantAwareBaseEntityEvent<Action> {
+public class ActionCreatedEvent extends RemoteEntityEvent<Action> {
     private static final long serialVersionUID = 181780358321768629L;
 
     /**

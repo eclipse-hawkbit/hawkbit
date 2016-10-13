@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * Defines the remote event of deleting a {@link Target}.
  */
-public class TargetDeletedEvent extends BaseEntityIdEvent {
+public class TargetDeletedEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
 

@@ -361,8 +361,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
             eventPublisher.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), applicationContext.getId()));
-            eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(target.getOptLockRevision(),
-                    target.getTenant(), target, actionId, softwareModules));
+            eventPublisher.publishEvent(
+                    new TargetAssignDistributionSetEvent(target.getTenant(), target, actionId, softwareModules));
         });
     }
 
@@ -446,9 +446,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target.getOptLockRevision(),
-                        target.getTenant(), target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target.getTenant(),
+                target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
     }
 
     @Override

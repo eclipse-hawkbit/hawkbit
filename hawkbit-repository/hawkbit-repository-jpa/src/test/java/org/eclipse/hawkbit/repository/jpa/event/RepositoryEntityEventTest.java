@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
@@ -146,16 +146,16 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     private static class MyEventListener {
 
-        private final BlockingQueue<Event> queue = new LinkedBlockingQueue<>();
+        private final BlockingQueue<TenantAwareEvent> queue = new LinkedBlockingQueue<>();
 
-        @EventListener(classes = Event.class)
-        public void onEvent(final Event event) {
+        @EventListener(classes = TenantAwareEvent.class)
+        public void onEvent(final TenantAwareEvent event) {
             queue.offer(event);
         }
 
         public <T> T waitForEvent(final Class<T> eventType, final long timeout, final TimeUnit timeUnit)
                 throws InterruptedException {
-            Event event = null;
+            TenantAwareEvent event = null;
             while ((event = queue.poll(timeout, timeUnit)) != null) {
                 if (event.getClass().isAssignableFrom(eventType)) {
                     return (T) event;

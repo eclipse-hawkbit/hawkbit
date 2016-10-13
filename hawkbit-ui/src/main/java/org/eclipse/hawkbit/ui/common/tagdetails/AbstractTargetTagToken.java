@@ -32,7 +32,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
-        for (final TargetTag tag : event.getEntity()) {
+        for (final TargetTag tag : event.getEntities()) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
     }

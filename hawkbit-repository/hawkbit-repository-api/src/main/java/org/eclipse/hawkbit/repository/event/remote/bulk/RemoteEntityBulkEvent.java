@@ -14,10 +14,8 @@ import static java.util.Collections.unmodifiableList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.event.EntityEvent;
-import org.eclipse.hawkbit.repository.event.EntityIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
-import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.util.CollectionUtils;
 
@@ -31,8 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <E>
  *            the entity
  */
-public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends TenantAwareDistributedEvent
-        implements EntityEvent, EntityIdEvent<List<Long>> {
+public class RemoteEntityBulkEvent<E extends TenantAwareBaseEntity> extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,7 +55,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      *            the origin application id
      */
     @JsonCreator
-    protected BaseEntityBulkEvent(@JsonProperty("tenant") final String tenant,
+    protected RemoteEntityBulkEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entitiyIds") final List<Long> entitiyIds,
             @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
@@ -79,7 +76,7 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      * @param applicationId
      *            the origin application id
      */
-    protected BaseEntityBulkEvent(final String tenant, final Class<? extends E> entityClass, final List<E> entities,
+    protected RemoteEntityBulkEvent(final String tenant, final Class<? extends E> entityClass, final List<E> entities,
             final String applicationId) {
         this(tenant, entities.stream().map(entity -> entity.getId()).collect(Collectors.toList()), entityClass,
                 applicationId);
@@ -95,13 +92,12 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
      *            the origin application id
      */
     @SuppressWarnings("unchecked")
-    protected BaseEntityBulkEvent(final E entitiy, final String applicationId) {
+    protected RemoteEntityBulkEvent(final E entitiy, final String applicationId) {
         this(entitiy.getTenant(), (Class<? extends E>) entitiy.getClass(), asList(entitiy), applicationId);
     }
 
-    @Override
     @JsonIgnore
-    public List<E> getEntity() {
+    public List<E> getEntities() {
         if (CollectionUtils.isEmpty(entities)) {
             entities = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntities(getTenant(),
                     entitiyIds, entityClass);
@@ -109,19 +105,4 @@ public class BaseEntityBulkEvent<E extends TenantAwareBaseEntity> extends Tenant
         return unmodifiableList(entities);
     }
 
-    @JsonIgnore
-    public List<E> getEntities() {
-        return getEntity();
-    }
-
-    @Override
-    public List<Long> getEntityId() {
-        return entitiyIds;
-    }
-
-    @Override
-    @JsonIgnore
-    public <T> T getEntity(final Class<T> entityClass) {
-        throw new UnsupportedOperationException("Need to be implmented");
-    }
 }

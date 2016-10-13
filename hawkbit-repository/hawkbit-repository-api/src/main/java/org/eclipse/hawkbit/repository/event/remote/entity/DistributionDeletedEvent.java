@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the remote event for deletion of {@link DistributionSet}.
  */
-public class DistributionDeletedEvent extends BaseEntityIdEvent {
+public class DistributionDeletedEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
 

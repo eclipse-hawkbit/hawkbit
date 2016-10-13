@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * A bulk event which contains one or many new target tags after creating.
  */
-public class TargetTagCreatedBulkEvent extends BaseEntityBulkEvent<TargetTag> {
+public class TargetTagCreatedBulkEvent extends RemoteEntityBulkEvent<TargetTag> {
 
     private static final long serialVersionUID = 1L;
 

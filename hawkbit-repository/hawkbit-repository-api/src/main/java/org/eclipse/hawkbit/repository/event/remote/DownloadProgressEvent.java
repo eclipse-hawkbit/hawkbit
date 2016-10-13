@@ -12,11 +12,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Event that contains an updated download progress for a given ActionStatus
+ * TenantAwareEvent that contains an updated download progress for a given ActionStatus
  * that was written for a download request.
  *
  */
-public class DownloadProgressEvent extends TenantAwareDistributedEvent {
+public class DownloadProgressEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 

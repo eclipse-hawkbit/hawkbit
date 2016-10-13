@@ -34,7 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.BasePropertyChangeEvent.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemotePropertyChangeEvent.PropertyChange;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;

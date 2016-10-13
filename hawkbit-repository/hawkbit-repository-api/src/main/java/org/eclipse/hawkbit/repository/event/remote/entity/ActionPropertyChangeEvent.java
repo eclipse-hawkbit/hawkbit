@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines the the remote event of {@link Action} property changes.
  */
-public class ActionPropertyChangeEvent extends BasePropertyChangeEvent<Action> {
+public class ActionPropertyChangeEvent extends RemotePropertyChangeEvent<Action> {
     private static final long serialVersionUID = 181780358321768629L;
 
     /**

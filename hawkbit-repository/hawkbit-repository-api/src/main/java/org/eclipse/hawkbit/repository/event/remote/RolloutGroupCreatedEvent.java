@@ -8,23 +8,22 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteIdEvent;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Event definition which is been published in case a rollout group has been
- * created for a specific rollout.
+ * TenantAwareEvent definition which is been published in case a rollout group
+ * has been created for a specific rollout.
  *
  */
-public class RolloutGroupCreatedEvent extends TenantAwareDistributedEvent {
+public class RolloutGroupCreatedEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
 
     @JsonProperty(required = true)
     private final Long rolloutId;
-
-    @JsonProperty(required = true)
-    private final Long rolloutGroupId;
 
     /**
      * Creating a new rollout group created event for a specific rollout.
@@ -40,20 +39,14 @@ public class RolloutGroupCreatedEvent extends TenantAwareDistributedEvent {
      */
     @JsonCreator
     public RolloutGroupCreatedEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("rolloutId") final Long rolloutId, @JsonProperty("rolloutGroupId") final Long rolloutGroupId,
+            @JsonProperty("rolloutId") final Long rolloutId, @JsonProperty("entityId") final Long rolloutGroupId,
             @JsonProperty("originService") final String applicationId) {
-        super(rolloutId, tenant, applicationId);
+        super(rolloutGroupId, tenant, applicationId);
         this.rolloutId = rolloutId;
-        this.rolloutGroupId = rolloutGroupId;
-
     }
 
     public Long getRolloutId() {
         return rolloutId;
-    }
-
-    public Long getRolloutGroupId() {
-        return rolloutGroupId;
     }
 
 }

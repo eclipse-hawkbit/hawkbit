@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
@@ -33,8 +33,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
  */
 public class HawkbitEventProvider implements UIEventProvider {
 
-    private static final Set<Class<? extends Event>> SINGLE_EVENTS = new HashSet<>(9);
-    private static final Set<Class<? extends Event>> BULK_EVENTS = new HashSet<>(5);
+    private static final Set<Class<? extends TenantAwareEvent>> SINGLE_EVENTS = new HashSet<>(9);
+    private static final Set<Class<? extends TenantAwareEvent>> BULK_EVENTS = new HashSet<>(5);
 
     static {
         SINGLE_EVENTS.add(TargetTagCreatedBulkEvent.class);
@@ -56,12 +56,12 @@ public class HawkbitEventProvider implements UIEventProvider {
     }
 
     @Override
-    public Set<Class<? extends Event>> getSingleEvents() {
+    public Set<Class<? extends TenantAwareEvent>> getSingleEvents() {
         return SINGLE_EVENTS;
     }
 
     @Override
-    public Set<Class<? extends Event>> getBulkEvents() {
+    public Set<Class<? extends TenantAwareEvent>> getBulkEvents() {
         return BULK_EVENTS;
     }
 

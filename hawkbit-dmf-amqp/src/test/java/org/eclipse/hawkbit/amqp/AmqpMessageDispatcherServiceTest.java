@@ -113,7 +113,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, TENANT, testTarget, 1L, new ArrayList<SoftwareModule>());
+                TENANT, testTarget, 1L, new ArrayList<SoftwareModule>());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -128,7 +128,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, TENANT, testTarget, 1L, dsA.getModules());
+                TENANT, testTarget, 1L, dsA.getModules());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -168,7 +168,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, TENANT, testTarget, 1L, dsA.getModules());
+                TENANT, testTarget, 1L, dsA.getModules());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -202,7 +202,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                1L, TENANT, CONTROLLER_ID, 1L, AMQP_URI);
+                TENANT, CONTROLLER_ID, 1L, AMQP_URI);
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress());

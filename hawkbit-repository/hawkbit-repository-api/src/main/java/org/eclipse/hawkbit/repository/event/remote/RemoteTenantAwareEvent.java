@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * other nodes.
  *
  */
-public class TenantAwareDistributedEvent extends RemoteApplicationEvent implements Event {
+public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
     @JsonProperty(required = true)
@@ -35,7 +35,7 @@ public class TenantAwareDistributedEvent extends RemoteApplicationEvent implemen
      *            the applicationId
      */
     @JsonCreator
-    protected TenantAwareDistributedEvent(@JsonProperty("tenant") final String tenant,
+    protected RemoteTenantAwareEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("originService") final String applicationId) {
         this(new Object(), tenant, applicationId);
     }
@@ -50,7 +50,7 @@ public class TenantAwareDistributedEvent extends RemoteApplicationEvent implemen
      * @param applicationId
      *            the applicationId
      */
-    public TenantAwareDistributedEvent(final Object source, final String tenant, final String applicationId) {
+    public RemoteTenantAwareEvent(final Object source, final String tenant, final String applicationId) {
         super(source, applicationId, "**");
         this.tenant = tenant;
     }

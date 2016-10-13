@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.BasePropertyChangeEvent.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemotePropertyChangeEvent.PropertyChange;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TenantAwareBaseEntityEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -243,7 +243,7 @@ public class RemoteEntityEventTest extends AbstractJpaIntegrationTest {
         assertThat(underTestRolloutGroupPropertyChangeEvent.getChangeSetValues()).isNotNull();
     }
 
-    private Message<String> createMessage(final TenantAwareBaseEntityEvent<?> event) throws JsonProcessingException {
+    private Message<String> createMessage(final RemoteEntityEvent<?> event) throws JsonProcessingException {
         final Map<String, MimeType> headers = Maps.newLinkedHashMap();
         headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
         final String json = new ObjectMapper().writeValueAsString(event);

@@ -8,18 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.EntityIdEvent;
-import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An base definition class for {@link EntityIdEvent} for some object which has
- * an id.
+ * An base definition class for an event which contains an id.
  *
  */
-public class BaseEntityIdEvent extends TenantAwareDistributedEvent implements EntityIdEvent<Long> {
+public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,21 +27,20 @@ public class BaseEntityIdEvent extends TenantAwareDistributedEvent implements En
     /**
      * Constructor for json serialization.
      * 
-     * @param entitySource
-     *            the entity source within the json entity information
+     * @param entityId
+     *            the entity Id
      * @param tenant
      *            the tenant
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected BaseEntityIdEvent(@JsonProperty("entityId") final Long entityId,
-            @JsonProperty("tenant") final String tenant, @JsonProperty("originService") final String applicationId) {
+    protected RemoteIdEvent(@JsonProperty("entityId") final Long entityId, @JsonProperty("tenant") final String tenant,
+            @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
         this.entityId = entityId;
     }
 
-    @Override
     public Long getEntityId() {
         return entityId;
     }

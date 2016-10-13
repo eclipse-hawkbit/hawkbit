@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.repository.event.local;
 import java.net.URI;
 
 /**
- * Event that gets sent when the assignment of a distribution set to a target
- * gets canceled.
+ * TenantAwareEvent that gets sent when the assignment of a distribution set to
+ * a target gets canceled.
  *
  *
  *
  */
-public class CancelTargetAssignmentEvent extends DefaultEvent {
+public class CancelTargetAssignmentEvent extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
     private final String controllerId;
@@ -27,8 +27,6 @@ public class CancelTargetAssignmentEvent extends DefaultEvent {
     /**
      * Creates a new {@link CancelTargetAssignmentEvent}.
      *
-     * @param revision
-     *            the revision for this event
      * @param tenant
      *            the tenant for this event
      * @param controllerId
@@ -38,9 +36,9 @@ public class CancelTargetAssignmentEvent extends DefaultEvent {
      * @param targetAdress
      *            the targetAdress of the target
      */
-    public CancelTargetAssignmentEvent(final long revision, final String tenant, final String controllerId,
-            final Long actionId, final URI targetAdress) {
-        super(revision, tenant);
+    public CancelTargetAssignmentEvent(final String tenant, final String controllerId, final Long actionId,
+            final URI targetAdress) {
+        super(tenant);
         this.controllerId = controllerId;
         this.actionId = actionId;
         this.targetAdress = targetAdress;

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.table;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
- * Event to represent add, update or delete.
+ * TenantAwareEvent to represent add, update or delete.
  *
  */
 public class BaseUIEntityEvent<T extends BaseEntity> {

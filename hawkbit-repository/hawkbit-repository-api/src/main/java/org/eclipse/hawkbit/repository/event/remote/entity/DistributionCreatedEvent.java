@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Defines the the remote of creating a new {@link DistributionSet}.
  *
  */
-public class DistributionCreatedEvent extends TenantAwareBaseEntityEvent<DistributionSet> {
+public class DistributionCreatedEvent extends RemoteEntityEvent<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
 

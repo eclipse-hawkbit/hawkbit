@@ -20,12 +20,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Base remote property change event.
+ * Remote property change event which contains changed properties.
  *
  * @param <E>
  *            the entity
  */
-public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends TenantAwareBaseEntityEvent<E> {
+public class RemotePropertyChangeEvent<E extends TenantAwareBaseEntity> extends RemoteEntityEvent<E> {
 
     private static final long serialVersionUID = -3671601415138242311L;
 
@@ -46,7 +46,7 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
      *            the origin application id
      */
     @JsonCreator
-    protected BasePropertyChangeEvent(@JsonProperty("tenant") final String tenant,
+    protected RemotePropertyChangeEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
@@ -65,7 +65,7 @@ public class BasePropertyChangeEvent<E extends TenantAwareBaseEntity> extends Te
      * @param applicationId
      *            the origin application id
      */
-    public BasePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
+    public RemotePropertyChangeEvent(final E entity, final Map<String, PropertyChange> changeSetValues,
             final String applicationId) {
         super(entity, applicationId);
         this.changeSetValues = changeSetValues;

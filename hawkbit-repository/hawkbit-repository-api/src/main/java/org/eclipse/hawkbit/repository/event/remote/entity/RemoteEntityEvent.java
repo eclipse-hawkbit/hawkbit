@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.EntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
@@ -17,13 +16,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * A base definition class for {@link EntityEvent} for some object.
+ * A base definition class for an remote event which contains a tenant aware
+ * base entity.
  *
  * @param <E>
  *            the type of the entity
  */
-public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends BaseEntityIdEvent
-        implements EntityEvent {
+public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,7 +45,7 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
      *            the origin application id
      */
     @JsonCreator
-    protected TenantAwareBaseEntityEvent(@JsonProperty("tenant") final String tenant,
+    protected RemoteEntityEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends E> entityClass,
             @JsonProperty("originService") final String applicationId) {
@@ -63,12 +62,11 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
      *            the origin application id
      */
     @SuppressWarnings("unchecked")
-    protected TenantAwareBaseEntityEvent(final E baseEntity, final String applicationId) {
+    protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
         this(baseEntity.getTenant(), baseEntity.getId(), (Class<? extends E>) baseEntity.getClass(), applicationId);
         this.entity = baseEntity;
     }
 
-    @Override
     @JsonIgnore
     public E getEntity() {
         if (entity == null) {
@@ -76,12 +74,6 @@ public class TenantAwareBaseEntityEvent<E extends TenantAwareBaseEntity> extends
                     getEntityId(), entityClass);
         }
         return entity;
-    }
-
-    @Override
-    @JsonIgnore
-    public <T> T getEntity(final Class<T> entityClass) {
-        return entityClass.cast(entity);
     }
 
 }

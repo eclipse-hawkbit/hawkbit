@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 /**
  * An event for assignment target tag.
  */
-public class DistributionSetTagAssigmentResultEvent extends DefaultEvent {
+public class DistributionSetTagAssigmentResultEvent extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +26,7 @@ public class DistributionSetTagAssigmentResultEvent extends DefaultEvent {
      *            the assignment result-
      */
     public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult) {
-        super(-1, null);
+        super(null);
         this.assigmentResult = assigmentResult;
     }
 

@@ -56,7 +56,7 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
             return true;
         } else {
             // Display action not allowed notification for invalid drop
-            /* mouse event will be Event.ONMOUSEUP on drop */
+            /* mouse event will be TenantAwareEvent.ONMOUSEUP on drop */
             // From com.google.gwt.user.client.Event
             if (typeVal == 8) {
                 invalidDrop();
@@ -82,7 +82,7 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
 
     private void showHideDropAreaHighlights(final int typeVal, final Component compsource,
             final DragAndDropEvent dragEvent) {
-        /* mouse event will be Event.ONMOUSEUP on drop */
+        /* mouse event will be TenantAwareEvent.ONMOUSEUP on drop */
         // From com.google.gwt.user.client.Event
         if (typeVal == 8) {
             hideDropHints();

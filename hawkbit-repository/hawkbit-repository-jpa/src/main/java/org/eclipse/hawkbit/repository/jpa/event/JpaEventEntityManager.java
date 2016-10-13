@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A Event entity manager, which loads a entity for remote events.
+ * A TenantAwareEvent entity manager, which loads a entity for remote events.
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class JpaEventEntityManager implements EventEntityManager {

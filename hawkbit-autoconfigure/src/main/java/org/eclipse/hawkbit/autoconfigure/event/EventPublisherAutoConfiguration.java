@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.autoconfigure.event;
 
 import java.util.concurrent.Executor;
 
-import org.eclipse.hawkbit.repository.event.remote.TenantAwareDistributedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,11 +79,11 @@ public class EventPublisherAutoConfiguration {
 
         @Override
         public void multicastEvent(final ApplicationEvent event, final ResolvableType eventType) {
-            if (serviceMatcher == null || !(event instanceof TenantAwareDistributedEvent)) {
+            if (serviceMatcher == null || !(event instanceof RemoteTenantAwareEvent)) {
                 super.multicastEvent(event, eventType);
                 return;
             }
-            final TenantAwareDistributedEvent remoteEvent = (TenantAwareDistributedEvent) event;
+            final RemoteTenantAwareEvent remoteEvent = (RemoteTenantAwareEvent) event;
 
             if (serviceMatcher.isFromSelf(remoteEvent)) {
                 super.multicastEvent(event, eventType);

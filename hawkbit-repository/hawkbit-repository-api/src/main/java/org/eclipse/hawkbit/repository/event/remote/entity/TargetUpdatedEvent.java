@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Defines the remote event of updating a {@link Target}.
  *
  */
-public class TargetUpdatedEvent extends TenantAwareBaseEntityEvent<Target> {
+public class TargetUpdatedEvent extends RemoteEntityEvent<Target> {
 
     private static final long serialVersionUID = 5665118668865832477L;
 

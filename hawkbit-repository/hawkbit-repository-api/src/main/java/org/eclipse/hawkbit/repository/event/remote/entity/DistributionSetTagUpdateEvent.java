@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Defines the remote event for update a {@link DistributionSetTag}.
  *
  */
-public class DistributionSetTagUpdateEvent extends TenantAwareBaseEntityEvent<DistributionSetTag> {
+public class DistributionSetTagUpdateEvent extends RemoteEntityEvent<DistributionSetTag> {
 
     private static final long serialVersionUID = 1L;
 

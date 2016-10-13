@@ -8,8 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.EntityEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.BaseEntityIdEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 
@@ -18,9 +17,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Event for update the targets info.
+ * TenantAwareEvent for update the targets info.
  */
-public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEvent {
+public class TargetInfoUpdateEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,13 +64,6 @@ public class TargetInfoUpdateEvent extends BaseEntityIdEvent implements EntityEv
         this.targetInfo = targetInfo;
     }
 
-    @Override
-    @JsonIgnore
-    public <E> E getEntity(final Class<E> entityClass) {
-        return entityClass.cast(targetInfo);
-    }
-
-    @Override
     @JsonIgnore
     public TargetInfo getEntity() {
 

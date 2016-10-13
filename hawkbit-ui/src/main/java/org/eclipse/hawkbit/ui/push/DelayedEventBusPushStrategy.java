@@ -20,8 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.repository.event.EntityEvent;
-import org.eclipse.hawkbit.repository.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
     private static final int BLOCK_SIZE = 10_000;
-    private final BlockingDeque<org.eclipse.hawkbit.repository.event.Event> queue = new LinkedBlockingDeque<>(
+    private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
     private int uiid = -1;
 
@@ -74,7 +73,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
 
-    private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.Event event) {
+    private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getSingleEvents().contains(event.getClass())
                 || eventProvider.getBulkEvents().contains(event.getClass());
     }
@@ -119,7 +118,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                 return;
             }
 
-            final List<Event> events = new ArrayList<>(size);
+            final List<TenantAwareEvent> events = new ArrayList<>(size);
             final int eventsSize = queue.drainTo(events);
 
             if (events.isEmpty()) {
@@ -154,7 +153,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
          *         otherwise {@code false}
          */
         private boolean eventSecurityCheck(final SecurityContext userContext,
-                final org.eclipse.hawkbit.repository.event.Event event) {
+                final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
             if (userContext == null || userContext.getAuthentication() == null) {
                 return false;
             }
@@ -166,7 +165,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             return false;
         }
 
-        private void doDispatch(final List<org.eclipse.hawkbit.repository.event.Event> events,
+        private void doDispatch(final List<org.eclipse.hawkbit.repository.event.TenantAwareEvent> events,
                 final WrappedSession wrappedSession) {
             final SecurityContext userContext = (SecurityContext) wrappedSession
                     .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
@@ -190,11 +189,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             }
         }
 
-        private void fowardBulkEvents(final List<Event> events, final SecurityContext userContext) {
+        private void fowardBulkEvents(final List<TenantAwareEvent> events, final SecurityContext userContext) {
             final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
 
             for (final Class<?> bulkType : filterBulkEvenTypes) {
-                final List<Event> listBulkEvents = events.stream()
+                final List<TenantAwareEvent> listBulkEvents = events.stream()
                         .filter(event -> eventSecurityCheck(userContext, event) && bulkType.isInstance(event))
                         .collect(Collectors.toList());
                 if (!listBulkEvents.isEmpty()) {
@@ -203,7 +202,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             }
         }
 
-        private void fowardSingleEvents(final List<Event> events, final SecurityContext userContext) {
+        private void fowardSingleEvents(final List<TenantAwareEvent> events, final SecurityContext userContext) {
             events.stream()
                     .filter(event -> eventSecurityCheck(userContext, event)
                             && eventProvider.getSingleEvents().contains(event.getClass()))
@@ -213,8 +212,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     /**
      * An application event publisher subscriber which subscribes
-     * {@link EntityEvent} from the repository to dispatch these events to the
-     * UI {@link SessionEventBus} .
+     * {@link TenantAwareEvent} from the repository to dispatch these events to
+     * the UI {@link SessionEventBus} .
      * 
      * @param applicationEvent
      *            the entity event which has been published from the repository
@@ -222,11 +221,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     @Override
     @Async
     public void onApplicationEvent(final ApplicationEvent applicationEvent) {
-        if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.Event)) {
+        if (!(applicationEvent instanceof org.eclipse.hawkbit.repository.event.TenantAwareEvent)) {
             return;
         }
 
-        final org.eclipse.hawkbit.repository.event.Event event = (Event) applicationEvent;
+        final org.eclipse.hawkbit.repository.event.TenantAwareEvent event = (TenantAwareEvent) applicationEvent;
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
