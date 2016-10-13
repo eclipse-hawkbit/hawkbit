@@ -50,13 +50,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RSQLUtilityTest {
 
     @Spy
-    VirtualPropertyResolver macroResolver = new VirtualPropertyResolver(new TimestampCalculator());
+    private VirtualPropertyResolver macroResolver = new VirtualPropertyResolver(new TimestampCalculator());
 
     @Mock
-    TenantConfigurationManagement confMgmt;
+    private TenantConfigurationManagement confMgmt;
 
     @Mock
-    TimestampCalculator timestampCalculator;
+    private TimestampCalculator timestampCalculator;
 
     @Mock
     private Root<Object> baseSoftwareModuleRootMock;
@@ -287,11 +287,11 @@ public class RSQLUtilityTest {
                 .thenReturn(mock(Predicate.class));
 
         // test
-        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
+        RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
-        verify(macroResolver, times(1)).lookup(overdueProp);
+        // verification
+        verify(macroResolver).lookup(overdueProp);
         // the macro is already replaced when passed to #lessThanOrEqualTo -> the method is never invoked with the
         // placeholder:
         verify(criteriaBuilderMock, never()).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),

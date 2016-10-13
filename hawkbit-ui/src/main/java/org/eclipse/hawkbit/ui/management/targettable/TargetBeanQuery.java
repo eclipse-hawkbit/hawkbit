@@ -173,10 +173,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     }
 
     private Boolean isOverdueFilterEnabled() {
-        if (Boolean.TRUE.equals(overdueState)) {
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
+        return Boolean.TRUE.equals(overdueState);
     }
 
     @Override

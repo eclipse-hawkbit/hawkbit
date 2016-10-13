@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,14 +37,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class VirtualPropertyResolverTest {
 
     @Spy
-    VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver(new TimestampCalculator());
+    private VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver(new TimestampCalculator());
 
     @Mock
-    TenantConfigurationManagement confMgmt;
+    private TenantConfigurationManagement confMgmt;
 
-    StrSubstitutor substitutor;
+    private StrSubstitutor substitutor;
 
-    Long nowTestTime;
+    private Long nowTestTime;
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:05:00").build();
@@ -65,7 +66,7 @@ public class VirtualPropertyResolverTest {
             }
         });
 
-        this.substitutor = new StrSubstitutor(resolverUnderTest,
+        substitutor = new StrSubstitutor(resolverUnderTest,
                 StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
      }
@@ -77,7 +78,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse("NOW_TS has to be resolved!", resolvedPlaceholders.contains(placeholder));
+        assertThat("NOW_TS has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse("OVERDUE_TS has to be resolved!", resolvedPlaceholders.contains(placeholder));
+        assertThat("OVERDUE_TS has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertFalse("overdue_ts has to be resolved!", resolvedPlaceholders.contains(placeholder));
+        assertThat("overdue_ts has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
@@ -107,7 +108,7 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + placeholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertTrue("unknown should not be resolved!", resolvedPlaceholders.contains(placeholder));
+        assertThat("unknown should not be resolved!", resolvedPlaceholders, containsString(placeholder));
     }
 
     @Test
@@ -118,6 +119,6 @@ public class VirtualPropertyResolverTest {
         String testString = "lhs=lt=" + escaptedPlaceholder;
 
         String resolvedPlaceholders = substitutor.replace(testString);
-        assertTrue("Escaped OVERDUE_TS should not be resolved!", resolvedPlaceholders.contains(placeholder));
+        assertThat("Escaped OVERDUE_TS should not be resolved!", resolvedPlaceholders, containsString(placeholder));
     }
 }

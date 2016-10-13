@@ -27,6 +27,7 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -68,7 +69,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
@@ -315,15 +315,19 @@ public class JpaTargetManagement implements TargetManagement {
                     TargetSpecifications
                             .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
-        if (!Strings.isNullOrEmpty(filterParams.getFilterBySearchText())) {
+        if (StringUtils.isNotEmpty(filterParams.getFilterBySearchText())) {
             specList.add(TargetSpecifications.likeNameOrDescriptionOrIp(filterParams.getFilterBySearchText()));
         }
-        if (filterParams.getSelectTargetWithNoTag() != null && (filterParams.getSelectTargetWithNoTag()
-                || (filterParams.getFilterByTagNames() != null && filterParams.getFilterByTagNames().length > 0))) {
+        if (isHasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
                     filterParams.getSelectTargetWithNoTag()));
         }
         return specList;
+    }
+
+    private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
+        return filterParams.getSelectTargetWithNoTag() != null && (filterParams.getSelectTargetWithNoTag()
+                || (filterParams.getFilterByTagNames() != null && filterParams.getFilterByTagNames().length > 0));
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
