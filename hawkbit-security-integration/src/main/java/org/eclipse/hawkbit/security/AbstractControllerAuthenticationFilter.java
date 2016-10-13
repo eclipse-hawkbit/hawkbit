@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An abstraction for all controller based security. Check if the tenant
  * configuration is enabled.
- * 
+ *
  *
  *
  */
@@ -45,12 +45,6 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     public boolean isEnable(final TenantSecurityToken secruityToken) {
         return tenantAware.runAsTenant(secruityToken.getTenant(), configurationKeyTenantRunner);
     }
-
-    @Override
-    public abstract HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
-
-    @Override
-    public abstract HeaderAuthentication getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
 
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {
         @Override
