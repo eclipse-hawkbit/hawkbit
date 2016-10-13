@@ -134,8 +134,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private static TenantSecurityToken prepareSecurityToken(String issuerHashHeaderValue) {
         final TenantSecurityToken securityToken = new TenantSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE,
                 FileResource.createFileResourceBySha1("12345"));
-        securityToken.getHeaders().put(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
-        securityToken.getHeaders().put(X_SSL_ISSUER_HASH_1, issuerHashHeaderValue);
+        securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
+        securityToken.putHeader(X_SSL_ISSUER_HASH_1, issuerHashHeaderValue);
         return securityToken;
     }
 
