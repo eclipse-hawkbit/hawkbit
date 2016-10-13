@@ -30,11 +30,8 @@ import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -295,6 +292,84 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/installedTargets"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.content[0].controllerId", equalTo(knownTargetId)));
+    }
+
+    @Test
+    @Description("Ensures that target filters with auto assign DS are returned as persisted in the repository.")
+    public void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+        // prepare distribution set
+        final String knownFilterName = "a";
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+
+        targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.generateTargetFilterQuery(knownFilterName, "x==y", createdDs));
+        // create some dummy target filter queries
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
+                + "/autoAssignTargetFilters")).andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].name", equalTo(knownFilterName)));
+    }
+
+    @Test
+    @Description("Ensures that an error is returned when the query is invalid.")
+    public void getAutoAssignTargetFiltersOfDSWithInvalidFilter() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final String invalidQuery = "unknownField=le=42";
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
+                + "/autoAssignTargetFilters").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, invalidQuery))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Ensures that target filters with auto assign DS are returned according to the query.")
+    public void getMultipleAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+        final String filterNamePrefix = "filter-";
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final String query = "name==" + filterNamePrefix + "*";
+
+        // create target filter queries that should be found
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.generateTargetFilterQuery(filterNamePrefix + "1", "x==y", createdDs));
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.generateTargetFilterQuery(filterNamePrefix + "2", "x==z", createdDs));
+        // create some dummy target filter queries
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
+                + "/autoAssignTargetFilters").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(2)))
+                .andExpect(jsonPath("$.content[0].name", equalTo(filterNamePrefix + "1")))
+                .andExpect(jsonPath("$.content[1].name", equalTo(filterNamePrefix + "2")));
+    }
+
+    @Test
+    @Description("Ensures that no target filters are returned according to the non matching query.")
+    public void getEmptyAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+        final String filterNamePrefix = "filter-";
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final String query = "name==doesNotExist";
+
+        // create target filter queries that should be found
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.generateTargetFilterQuery(filterNamePrefix + "1", "x==y", createdDs));
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.generateTargetFilterQuery(filterNamePrefix + "2", "x==z", createdDs));
+        // create some dummy target filter queries
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
+        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
+                + "/autoAssignTargetFilters").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(0)));
     }
 
     @Test

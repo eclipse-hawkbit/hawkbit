@@ -24,15 +24,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.Test;
 import org.springframework.data.domain.Slice;
 
@@ -832,6 +825,26 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByAssignedDistributionSet(assignedSet.getId(), pageReq))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
                 .as("and that means the following expected amount").hasSize(10);
+
+    }
+
+    @Test
+    @Description("Verifies that targets without given assigned DS are returned from repository.")
+    public void findTargetWithoutAssignedDistributionSet() {
+        final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.generateTargetFilterQuery("tfq", "name==*"));
+        List<Target> unassignedTargets = targetManagement
+                .createTargets(testdataFactory.generateTargets(12, "unassigned"));
+        List<Target> assignedTargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
+
+        deploymentManagement.assignDistributionSet(assignedSet, assignedTargets);
+
+        List<Target> result = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq,
+                assignedSet.getId(), tfq).getContent();
+        assertThat(result)
+                .as("count of targets").hasSize(unassignedTargets.size())
+                .as("contains all targets").containsAll(unassignedTargets);
 
     }
 

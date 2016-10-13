@@ -105,6 +105,11 @@ public final class MgmtRestConstants {
             + "/distributionsettags";
 
     /**
+     * The target URL mapping rest resource.
+     */
+    public static final String TARGET_FILTER_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetfilters";
+
+    /**
      * The tag URL mapping rest resource.
      */
     public static final String DISTRIBUTIONSET_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";

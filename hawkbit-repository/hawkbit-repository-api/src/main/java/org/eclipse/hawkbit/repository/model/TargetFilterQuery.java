@@ -56,4 +56,16 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      */
     void setQuery(String query);
 
+    /**
+     * @return the auto assign {@link DistributionSet} if given.
+     */
+    DistributionSet getAutoAssignDistributionSet();
+
+    /**
+     * @param distributionSet
+     *                      the {@link DistributionSet} that should be assigned to a
+     *                      target when this filter matches.
+     */
+    void setAutoAssignDistributionSet(DistributionSet distributionSet);
+
 }

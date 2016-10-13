@@ -14,12 +14,15 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -232,6 +235,24 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> cb.equal(
                 targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                 distributionSetId);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that don't have the given
+     * distribution set in their action history
+     *
+     * @param distributionSetId
+     *            the ID of the distribution set which must not be assigned
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNotDistributionSetInActions(final Long distributionSetId) {
+        return (targetRoot, query, cb) -> {
+            final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id),
+                    distributionSetId));
+
+            return cb.isNull(actionsJoin.get(JpaAction_.id));
+        };
     }
 
     /**

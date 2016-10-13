@@ -26,6 +26,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
@@ -570,7 +571,8 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(JpaTarget_.id),
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(Lists.newArrayList(spec), targetRoot,
                 multiselect, cb);
 
@@ -582,6 +584,33 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Object[]> resultList = getTargetIdNameResultSet(pageRequest, cb, targetRoot, multiselect);
         return resultList.parallelStream().map(o -> new TargetIdName((long) o[0], o[1].toString(), o[2].toString()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
+            @NotNull TargetFilterQuery targetFilterQuery) {
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
+
+        return findTargetsBySpec(
+                (root, cq,
+                        cb) -> cb.and(spec.toPredicate(root, cq, cb), TargetSpecifications
+                                .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
+                pageRequest);
+
+    }
+
+    @Override
+    public Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId,
+            @NotNull TargetFilterQuery targetFilterQuery) {
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
+        final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
+        specList.add(spec);
+        specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
+
+        return countByCriteriaAPI(specList);
     }
 
     @PreDestroy

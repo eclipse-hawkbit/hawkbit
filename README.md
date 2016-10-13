@@ -5,7 +5,7 @@
 [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit) 
-[![SonarQuality](https://sonar.eu-gb.mybluemix.net/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.eu-gb.mybluemix.net)
+[![SonarQuality](https://sonar.eu-gb.mybluemix.net/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.eu-gb.mybluemix.net)[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
 # Documentation
 
