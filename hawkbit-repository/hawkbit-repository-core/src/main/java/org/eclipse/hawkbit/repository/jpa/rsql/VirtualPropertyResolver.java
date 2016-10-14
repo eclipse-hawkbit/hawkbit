@@ -8,12 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for
@@ -43,20 +48,7 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
  */
 public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyReplacer {
 
-    private final TimestampCalculator timestampCalculator;
-
     private StrSubstitutor substitutor;
-
-    /**
-     * Instantiates a new virtual property resolver with the given timestamp
-     * calculator
-     * 
-     * @param timestampCalculator
-     *            calculates timestamps
-     */
-    public VirtualPropertyResolver(TimestampCalculator timestampCalculator) {
-        this.timestampCalculator = timestampCalculator;
-    }
 
     @Override
     public String lookup(String rhs) {
@@ -65,7 +57,7 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
         if ("now_ts".equalsIgnoreCase(rhs)) {
             resolved = String.valueOf(Instant.now().toEpochMilli());
         } else if ("overdue_ts".equalsIgnoreCase(rhs)) {
-            resolved = String.valueOf(getTimestampCalculator().calculateOverdueTimestamp());
+            resolved = String.valueOf(TimestampCalculator.calculateOverdueTimestamp());
         }
         return resolved;
     }
@@ -79,7 +71,4 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
         return substitutor.replace(input);
     }
 
-    TimestampCalculator getTimestampCalculator() {
-        return timestampCalculator;
-    }
 }

@@ -12,6 +12,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -25,19 +27,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Unit Tests - Repository")
 @Stories("Placeholder resolution for virtual properties")
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TimestampCalculator.class)
 public class VirtualPropertyResolverTest {
 
     @Spy
-    private VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver(new TimestampCalculator());
+    private VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
 
     @Mock
     private TenantConfigurationManagement confMgmt;
@@ -59,12 +63,8 @@ public class VirtualPropertyResolverTest {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
             .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
 
-        when(resolverUnderTest.getTimestampCalculator()).thenReturn(new TimestampCalculator() {
-            @Override
-            protected TenantConfigurationManagement getTenantConfigurationManagement() {
-                return confMgmt;
-            }
-        });
+        mockStatic(TimestampCalculator.class);
+        when(TimestampCalculator.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
         substitutor = new StrSubstitutor(resolverUnderTest,
                 StrSubstitutor.DEFAULT_PREFIX,

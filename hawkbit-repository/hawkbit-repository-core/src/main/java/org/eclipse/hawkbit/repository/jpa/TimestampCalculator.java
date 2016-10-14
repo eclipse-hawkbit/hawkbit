@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
  * Therefore tenant specific configuration may be considered.
  *
  */
-public class TimestampCalculator {
+public final class TimestampCalculator {
 
     /**
      * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the
@@ -36,20 +36,20 @@ public class TimestampCalculator {
      * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long
      *         value
      */
-    public long calculateOverdueTimestamp() {
+    public static long calculateOverdueTimestamp() {
         return Instant.now().toEpochMilli() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()
                 - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
     }
 
-    private Duration getDurationForKey(TenantConfigurationKey key) {
+    private static Duration getDurationForKey(TenantConfigurationKey key) {
         return DurationHelper.formattedStringToDuration(getRawStringForKey(key));
     }
 
-    private String getRawStringForKey(TenantConfigurationKey key) {
+    private static String getRawStringForKey(TenantConfigurationKey key) {
         return getTenantConfigurationManagement().getConfigurationValue(key, String.class).getValue();
     }
 
-    protected TenantConfigurationManagement getTenantConfigurationManagement() {
+    public static TenantConfigurationManagement getTenantConfigurationManagement() {
         return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement();
     }
 }

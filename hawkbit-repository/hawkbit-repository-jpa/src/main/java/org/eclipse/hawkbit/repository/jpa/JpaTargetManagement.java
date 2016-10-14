@@ -309,7 +309,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
         if (filterParams.getOverdueState() != null) {
             specList.add(
-                    TargetSpecifications.isOverdue(new TimestampCalculator().calculateOverdueTimestamp()));
+                    TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
         if (filterParams.getFilterByDistributionId() != null) {
             specList.add(

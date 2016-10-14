@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,27 +37,26 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
 @Features("Component Tests - Repository")
 @Stories("RSQL search utility")
+@PrepareForTest(TimestampCalculator.class)
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
 public class RSQLUtilityTest {
 
     @Spy
-    private VirtualPropertyResolver macroResolver = new VirtualPropertyResolver(new TimestampCalculator());
+    private VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
 
     @Mock
     private TenantConfigurationManagement confMgmt;
-
-    @Mock
-    private TimestampCalculator timestampCalculator;
 
     @Mock
     private Root<Object> baseSoftwareModuleRootMock;
@@ -315,10 +315,10 @@ public class RSQLUtilityTest {
         Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
-        // verfication
-        verify(macroResolver, times(1)).lookup(overdueProp);
+        // verification
+        verify(macroResolver).lookup(overdueProp);
         // the macro is unknown and hence never replaced -> #lessThanOrEqualTo is invoked with the placeholder:
-        verify(criteriaBuilderMock, times(1)).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
+        verify(criteriaBuilderMock).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq(overduePropPlaceholder));
     }
 
@@ -328,12 +328,8 @@ public class RSQLUtilityTest {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
 
-        when(macroResolver.getTimestampCalculator()).thenReturn(new TimestampCalculator() {
-            @Override
-            protected TenantConfigurationManagement getTenantConfigurationManagement() {
-                return confMgmt;
-            }
-        });
+        mockStatic(TimestampCalculator.class);
+        when(TimestampCalculator.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
         return macroResolver;
     }
