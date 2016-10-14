@@ -24,6 +24,9 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
  */
 public final class TimestampCalculator {
 
+    private TimestampCalculator() {
+    }
+
     /**
      * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the
      * current timestamp and the intervals for polling and poll-overdue:
