@@ -44,6 +44,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
@@ -68,7 +69,7 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 @WebAppConfiguration
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringApplicationConfiguration(classes = { TestConfiguration.class })
+@SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
