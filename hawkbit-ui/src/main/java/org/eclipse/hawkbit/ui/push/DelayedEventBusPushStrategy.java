@@ -234,7 +234,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                         EventContainer<Event> holder = null;
                         try {
                             holder = (EventContainer<Event>) eventProvider.getEvents().get(entry.getKey())
-                                    .getConstructor(List.class).newInstance(entry.getValue());
+                                    .getDeclaredConstructor(List.class).newInstance(entry.getValue());
                         } catch (final ReflectiveOperationException e) {
                             LOG.error("Failed to create EventHolder!", e);
                         }
