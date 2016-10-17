@@ -8,13 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.cache;
 
-import java.math.RoundingMode;
-
-import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -23,8 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import com.google.common.math.DoubleMath;
-
 /**
  * An service which combines the functionality for functional use cases to write
  * into the cache an notify the writing to the cache to the event bus.
@@ -32,55 +25,17 @@ import com.google.common.math.DoubleMath;
 @Service
 public class CacheWriteNotify {
 
-    private static final int DOWNLOAD_PROGRESS_MAX = 100;
-
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private TenantAware tenantAware;
-
-    /**
-     * Writes the download progress into the cache
-     * {@link CacheKeys#DOWNLOAD_PROGRESS_PERCENT} and notifies the
-     * eventPublisher with a {@link DownloadProgressEvent}.
-     *
-     * @param statusId
-     *            the ID of the {@link ActionStatus}
-     * @param requestedBytes
-     *            requested bytes of the request
-     * @param shippedBytesSinceLast
-     *            since last event
-     * @param shippedBytesOverall
-     *            for the download request
-     */
-    public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
-            final Long shippedBytesOverall) {
-
-        final Cache cache = cacheManager.getCache(JpaActionStatus.class.getName());
-        final String cacheKey = CacheKeys.entitySpecificCacheKey(String.valueOf(statusId),
-                CacheKeys.DOWNLOAD_PROGRESS_PERCENT);
-
-        final int progressPercent = DoubleMath.roundToInt(shippedBytesOverall * 100.0 / requestedBytes,
-                RoundingMode.DOWN);
-
-        if (progressPercent < DOWNLOAD_PROGRESS_MAX) {
-            cache.put(cacheKey, progressPercent);
-        } else {
-            // in case we reached progress 100 delete the cache value again
-            // because otherwise he will keep there forever
-            cache.evict(cacheKey);
-        }
-
-        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
-                applicationContext.getId()));
-    }
 
     /**
      * Writes the {@link CacheKeys#ROLLOUT_GROUP_CREATED} and
@@ -118,35 +73,4 @@ public class CacheWriteNotify {
                 rolloutGroupId, applicationContext.getId()));
     }
 
-    /**
-     * @param cacheManager
-     *            the cacheManager to set
-     */
-    void setCacheManager(final CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
-    }
-
-    /**
-     * @param applicationContext
-     *            the applicationContext to set
-     */
-    public void setApplicationContext(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
-    /**
-     * @param eventPublisher
-     *            the eventPublisher to set
-     */
-    public void setEventPublisher(final ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    /**
-     * @param tenantAware
-     *            the tenantAware to set
-     */
-    void setTenantAware(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
 }

@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.report.model.SeriesTime;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -143,7 +142,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable(value = "distributionUsageAssigned")
     public List<InnerOuterDataReportSeries<String>> distributionUsageAssigned(final int topXEntries) {
 
         // top X entries distribution usage
@@ -169,7 +167,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable(value = "distributionUsageInstalled")
     public List<InnerOuterDataReportSeries<String>> distributionUsageInstalled(final int topXEntries) {
         // top X entries distribution usage
         final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
@@ -194,7 +191,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("targetsCreatedOverPeriod")
     public <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType,
             final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
@@ -245,7 +241,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("feedbackReceivedOverTime")
     public <T extends Serializable> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType,
             final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager

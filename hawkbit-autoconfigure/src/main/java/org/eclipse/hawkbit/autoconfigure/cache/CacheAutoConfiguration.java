@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
+import static com.google.common.cache.CacheBuilder.newBuilder;
+
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -18,6 +20,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -27,6 +30,8 @@ import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+
+import com.google.common.cache.CacheBuilder;
 
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific
@@ -64,7 +69,12 @@ public class CacheAutoConfiguration {
      * configuration.
      */
     @Configuration
+    @EnableConfigurationProperties(CacheProperties.class)
     static class DirectCacheManagerConfiguration {
+
+        @Autowired
+        private CacheProperties cacheProperties;
+
         /**
          * @return the direct cache manager to access without tenant aware
          *         check, cause in sometimes it's necessary to access the cache
@@ -74,7 +84,15 @@ public class CacheAutoConfiguration {
         @Bean(name = "directCacheManager")
         @ConditionalOnMissingBean(name = "directCacheManager")
         public CacheManager directCacheManager() {
-            return new GuavaCacheManager();
+            final GuavaCacheManager cacheManager = new GuavaCacheManager();
+
+            if (cacheProperties.getTtl() > 0) {
+                final CacheBuilder<Object, Object> cacheBuilder = newBuilder()
+                        .expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit());
+                cacheManager.setCacheBuilder(cacheBuilder);
+            }
+
+            return cacheManager;
         }
 
     }

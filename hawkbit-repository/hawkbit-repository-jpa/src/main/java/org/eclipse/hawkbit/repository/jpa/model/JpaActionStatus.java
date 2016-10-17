@@ -25,11 +25,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -73,13 +70,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     private List<String> messages;
 
     /**
-     * Note: filled only in {@link Status#DOWNLOAD}.
-     */
-    @Transient
-    @CacheField(key = CacheKeys.DOWNLOAD_PROGRESS_PERCENT)
-    private short downloadProgressPercent;
-
-    /**
      * Creates a new {@link ActionStatus} object.
      *
      * @param action
@@ -119,11 +109,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      */
     public JpaActionStatus() {
         // JPA default constructor.
-    }
-
-    @Override
-    public short getDownloadProgressPercent() {
-        return downloadProgressPercent;
     }
 
     @Override
