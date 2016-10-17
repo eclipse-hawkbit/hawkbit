@@ -22,7 +22,7 @@ public interface PreAuthentificationFilter {
 
     /**
      * Check if the filter is enabled.
-     * 
+     *
      * @param secruityToken
      *            the secruity info
      * @return <true> is enabled <false> diabled
@@ -31,7 +31,7 @@ public interface PreAuthentificationFilter {
 
     /**
      * Extract the principal information from the current secruityToken.
-     * 
+     *
      * @param secruityToken
      *            the secruityToken
      * @return the extracted tenant and controller id
@@ -40,17 +40,17 @@ public interface PreAuthentificationFilter {
 
     /**
      * Extract the principal credentials from the current secruityToken.
-     * 
+     *
      * @param secruityToken
      *            the secruityToken
      * @return the extracted tenant and controller id
      */
-    HeaderAuthentication getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
+    Object getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
 
     /**
      * Allows to add additional authorities to the successful authenticated
      * token.
-     * 
+     *
      * @return the authorities granted to the principal, or an empty collection
      *         if the token has not been authenticated. Never null.
      * @see Authentication#getAuthorities()

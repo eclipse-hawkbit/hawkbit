@@ -130,12 +130,10 @@ public class CountMessageLabel extends Label {
     private void displayTargetCountStatus() {
         final TargetTableFilters targFilParams = managementUIState.getTargetTableFilters();
         final StringBuilder message = getTotalTargetMessage();
-        final String filteredTargets = i18n.get("label.filter.targets");
 
         if (targFilParams.hasFilter()) {
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
-            message.append(filteredTargets);
-            message.append(HawkbitCommonUtil.SP_STRING_SPACE);
+            message.append(i18n.get("label.filter.targets"));
             if (managementUIState.getTargetsTruncated() != null) {
                 message.append(targetTable.size() + managementUIState.getTargetsTruncated());
             } else {

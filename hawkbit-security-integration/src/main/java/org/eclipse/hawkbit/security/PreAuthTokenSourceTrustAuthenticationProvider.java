@@ -27,17 +27,17 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * An spring authentication provider which supports authentication tokens of
  * type {@link PreAuthenticatedAuthenticationToken} created by the
  * {@link ControllerPreAuthenticatedSecurityHeaderFilter}.
- * 
+ *
  * Additionally to the authentication token providing the principal and the
  * credentials which must be match, this authentication provider can also check
  * the remote IP address of the request.
- * 
+ *
  * E.g. The request path is /controller/v1/{controllerId} then the controllerId
  * in the path is the principal. The credentials are the extracted information
  * from e.g. a certificate provided by an reverse proxy. Due this request is
  * only allowed from a specific source address this authentication manager can
  * also check the remote IP address of the request.
- * 
+ *
  *
  *
  */
@@ -58,7 +58,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * Creates a new PreAuthTokenSourceTrustAuthenticationProvider with given
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
-     * 
+     *
      * @param authorizedSourceIps
      *            a list of IP addresses.
      */
@@ -70,7 +70,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * Creates a new PreAuthTokenSourceTrustAuthenticationProvider with given
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
-     * 
+     *
      * @param authorizedSourceIps
      *            a list of IP addresses.
      */
@@ -87,7 +87,6 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             return null;
         }
 
-        boolean successAuthentication = false;
         final PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) authentication;
         final Object credentials = token.getCredentials();
         final Object principal = token.getPrincipal();
@@ -97,14 +96,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             throw new BadCredentialsException("The provided principal and credentials are not match");
         }
 
-        // check if principal equals credentials because we want to check if
-        // e.g. controllerId
-        // containing in the URL equals the controllerId in the special header
-        // set by the reverse
-        // proxy which extracted the CN from the certificate
-        if (principal.equals(credentials)) {
-            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
-        }
+        boolean successAuthentication = calculateAuthenticationSuccess(principal, credentials, tokenDetails);
 
         if (successAuthentication) {
             final Collection<GrantedAuthority> controllerAuthorities = new ArrayList<>();
@@ -117,6 +109,41 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         }
 
         throw new BadCredentialsException("The provided principal and credentials are not match");
+    }
+
+    /**
+     *
+     * The credentials may either be of type HeaderAuthentication or of type
+     * Collection<HeaderAuthentication> depending on the authentication mode in
+     * use (the latter is used in case of trusted reverse-proxy). It is checked
+     * whether principal equals credentials (respectively if credentials
+     * contains principal in case of collection) because we want to check if
+     * e.g. controllerId containing in the URL equals the controllerId in the
+     * special header set by the reverse-proxy which extracted the CN from the
+     * certificate.
+     *
+     * @param principal
+     *            the {@link HeaderAuthentication} from the header
+     * @param credentials
+     *            a single {@link HeaderAuthentication} or a Collection of
+     *            HeaderAuthentication
+     * @param tokenDetails
+     *            authentication details
+     * @return <code>true</code> if authentication succeeded, otherwise
+     *         <code>false</code>
+     */
+    private boolean calculateAuthenticationSuccess(Object principal, Object credentials, Object tokenDetails) {
+        boolean successAuthentication = false;
+        if (credentials instanceof Collection) {
+            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
+            if (multiValueCredentials.contains(principal)) {
+                successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+            }
+        } else if (principal.equals(credentials)) {
+            successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
+        }
+
+        return successAuthentication;
     }
 
     private boolean checkSourceIPAddressIfNeccessary(final Object tokenDetails) {

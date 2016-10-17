@@ -179,7 +179,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      * @param updatedTargets
      *            list of updated targets
      */
-    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
+     private void onTargetUpdateEvents(final List<Target> updatedTargets) {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
 
@@ -188,6 +189,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         } else {
             updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
+            targetContainer.commit();
         }
 
         // workaround until push is available for action
@@ -198,9 +200,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
-        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(target -> {
-            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target));
-        });
+        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
+                target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

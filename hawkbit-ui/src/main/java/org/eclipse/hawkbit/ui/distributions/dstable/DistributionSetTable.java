@@ -136,15 +136,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
-        manageDistUIState.getLastSelectedDistribution().ifPresent(lastSelectedDsIdName -> {
-            events.stream().map(event -> event.getEntity())
-                    .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
-                    .ifPresent(selectedSetUpdated -> {
-                        // update table row+details layout
-                        eventBus.publish(this,
-                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated));
-                    });
-        });
+        manageDistUIState.getLastSelectedDistribution()
+                .ifPresent(lastSelectedDsIdName -> events.stream().map(event -> event.getEntity())
+                        .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
+                        .ifPresent(selectedSetUpdated -> eventBus.publish(this,
+                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated))));
     }
 
     private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,

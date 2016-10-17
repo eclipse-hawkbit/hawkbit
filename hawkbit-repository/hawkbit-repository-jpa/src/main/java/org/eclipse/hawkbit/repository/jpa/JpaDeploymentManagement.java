@@ -495,7 +495,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+<<<<<<< HEAD
     public Action startScheduledAction(final Long actionId) {
+=======
+    public Action startScheduledAction(final Action action) {
+>>>>>>> refs/heads/master
 
         final JpaAction action = actionRepository.findById(actionId);
 

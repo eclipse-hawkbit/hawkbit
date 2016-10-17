@@ -13,8 +13,13 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+<<<<<<< HEAD
 import org.eclipse.hawkbit.ui.push.events.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventContainer;
+=======
+import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
+>>>>>>> refs/heads/master
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;

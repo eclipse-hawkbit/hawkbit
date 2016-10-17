@@ -202,11 +202,16 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargets(final Long... targetIDs) {
-        final Collection<Long> targets = Lists.newArrayList(targetIDs);
+        deleteTargets(Lists.newArrayList(targetIDs));
+    }
 
-        targetRepository.deleteByIdIn(targets);
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public void deleteTargets(final Collection<Long> targetIDs) {
+        targetRepository.deleteByIdIn(targetIDs);
 
-        targets.forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
+        targetIDs.forEach(targetId -> eventBus.post(new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId)));
     }
 
     @Override
@@ -557,8 +562,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest,
-                                                                  Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+    public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull final Pageable pageRequest,
+            final Long distributionSetId, @NotNull final TargetFilterQuery targetFilterQuery) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
 
@@ -571,7 +576,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery) {
+    public Long countTargetsByTargetFilterQueryAndNonDS(final Long distributionSetId,
+            @NotNull final TargetFilterQuery targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
         specList.add(spec);

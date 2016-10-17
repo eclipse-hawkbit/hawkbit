@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -234,8 +235,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                     .collect(Collectors.groupingBy(Event::getClass)).entrySet().stream().map(entry -> {
                         EventContainer<Event> holder = null;
                         try {
-                            holder = (EventContainer<Event>) eventProvider.getEvents().get(entry.getKey())
-                                    .getConstructor(List.class).newInstance(entry.getValue());
+                            final Constructor<Event> declaredConstructor = (Constructor<Event>) eventProvider
+                                    .getEvents().get(entry.getKey()).getDeclaredConstructor(List.class);
+                            declaredConstructor.setAccessible(true);
+
+                            holder = (EventContainer<Event>) declaredConstructor.newInstance(entry.getValue());
                         } catch (final ReflectiveOperationException e) {
                             LOG.error("Failed to create EventHolder!", e);
                         }

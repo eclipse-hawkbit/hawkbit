@@ -29,24 +29,6 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetUpdatedEvent;
-import org.eclipse.hawkbit.ui.push.events.CancelTargetAssignmentEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagAssignmentResultEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.RolloutChangeEventContainer;
-import org.eclipse.hawkbit.ui.push.events.RolloutGroupChangeEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetInfoUpdateEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetTagAssigmentResultEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetTagUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.TargetUpdatedEventContainer;
 
 import com.google.common.collect.Maps;
 

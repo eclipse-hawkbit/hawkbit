@@ -17,9 +17,15 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+<<<<<<< HEAD
 import org.eclipse.hawkbit.ui.push.events.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.events.TargetTagUpdatedEventContainer;
+=======
+import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
+>>>>>>> refs/heads/master
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
