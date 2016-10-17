@@ -41,15 +41,9 @@ import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-<<<<<<< HEAD
-import org.eclipse.hawkbit.ui.push.events.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetUpdatedEventContainer;
-=======
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
->>>>>>> refs/heads/master
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;

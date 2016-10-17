@@ -39,11 +39,7 @@ import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererDa
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
-<<<<<<< HEAD
-import org.eclipse.hawkbit.ui.push.events.RolloutChangeEventContainer;
-=======
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
->>>>>>> refs/heads/master
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;

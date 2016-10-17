@@ -17,15 +17,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
-<<<<<<< HEAD
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.events.DistributionSetTagUpdatedEventContainer;
-=======
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
->>>>>>> refs/heads/master
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
