@@ -179,7 +179,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      * @param updatedTargets
      *            list of updated targets
      */
-     private void onTargetUpdateEvents(final List<Target> updatedTargets) {
+    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
