@@ -56,7 +56,7 @@ public class SimulatedDeviceFactory {
      * @return the created simulated device
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol,
-            final int pollDelaySec, final URL baseEndpoint, final String gatewayToken, final boolean pollImmediatly) {
+            final int pollDelaySec, final URL baseEndpoint, final String gatewayToken) {
         return createSimulatedDevice(id, tenant, protocol, pollDelaySec, baseEndpoint, gatewayToken, false);
     }
 
