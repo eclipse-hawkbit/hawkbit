@@ -123,8 +123,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
         }
 
-        jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
-                1_000, TimeUnit.MILLISECONDS);
+        jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
+                10_000, 1_000, TimeUnit.MILLISECONDS);
         systemEventBus.register(this);
     }
 
