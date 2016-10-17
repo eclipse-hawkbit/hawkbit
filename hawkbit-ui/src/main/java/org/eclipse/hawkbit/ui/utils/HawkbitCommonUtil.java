@@ -45,6 +45,7 @@ import com.vaadin.ui.UI;
  * Common util class.
  */
 public final class HawkbitCommonUtil {
+    public static final String SP_STRING_PIPE = " | ";
     /**
      * Define spaced string.
      */

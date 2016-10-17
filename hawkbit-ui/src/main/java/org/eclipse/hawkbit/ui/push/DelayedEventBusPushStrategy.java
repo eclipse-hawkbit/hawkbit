@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
 import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
@@ -113,8 +112,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     }
 
     private boolean isEventProvided(final Event event) {
-        return eventProvider.getSingleEvents().contains(event.getClass())
-                || eventProvider.getBulkEvents().contains(event.getClass());
+        return eventProvider.getEvents().containsKey(event.getClass());
     }
 
     @Override
@@ -125,8 +123,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
         }
 
-        jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 500,
-                2000, TimeUnit.MILLISECONDS);
+        jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
+                10_000, 1_000, TimeUnit.MILLISECONDS);
         systemEventBus.register(this);
     }
 
@@ -212,13 +210,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             try {
                 SecurityContextHolder.setContext(userContext);
 
+                final List<EventContainer<Event>> groupedEvents = groupEvents(events, userContext, eventProvider);
                 vaadinUI.access(() -> {
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
                     }
                     LOG.debug("UI EventBus aggregator of UI {} got lock on session.", vaadinUI.getUIId());
-                    fowardSingleEvents(events, userContext);
-                    fowardBulkEvents(events, userContext);
+                    groupedEvents.forEach(holder -> eventBus.publish(vaadinUI, holder));
                     LOG.debug("UI EventBus aggregator of UI {} left lock on session.", vaadinUI.getUIId());
                 }).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -228,25 +226,25 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             }
         }
 
-        private void fowardBulkEvents(final List<Event> events, final SecurityContext userContext) {
-            final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
+        @SuppressWarnings("unchecked")
+        private List<EventContainer<Event>> groupEvents(final List<Event> events, final SecurityContext userContext,
+                final UIEventProvider eventProvider) {
 
-            for (final Class<?> bulkType : filterBulkEvenTypes) {
-                final List<Event> listBulkEvents = events.stream()
-                        .filter(event -> DelayedEventBusPushStrategy.eventSecurityCheck(userContext, event)
-                                && bulkType.isInstance(event))
-                        .collect(Collectors.toList());
-                if (!listBulkEvents.isEmpty()) {
-                    eventBus.publish(vaadinUI, listBulkEvents);
-                }
-            }
-        }
+            return events.stream().filter(event -> eventSecurityCheck(userContext, event))
+                    .collect(Collectors.groupingBy(Event::getClass)).entrySet().stream().map(entry -> {
+                        EventContainer<Event> holder = null;
+                        try {
+                            final Constructor<Event> declaredConstructor = (Constructor<Event>) eventProvider
+                                    .getEvents().get(entry.getKey()).getDeclaredConstructor(List.class);
+                            declaredConstructor.setAccessible(true);
 
-        private void fowardSingleEvents(final List<Event> events, final SecurityContext userContext) {
-            events.stream()
-                    .filter(event -> DelayedEventBusPushStrategy.eventSecurityCheck(userContext, event)
-                            && eventProvider.getSingleEvents().contains(event.getClass()))
-                    .forEach(event -> eventBus.publish(vaadinUI, event));
+                            holder = (EventContainer<Event>) declaredConstructor.newInstance(entry.getValue());
+                        } catch (final ReflectiveOperationException e) {
+                            LOG.error("Failed to create EventHolder!", e);
+                        }
+
+                        return holder;
+                    }).collect(Collectors.toList());
         }
     }
 

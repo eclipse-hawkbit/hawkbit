@@ -61,7 +61,9 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
                 rolloutGroup, Action.Status.SCHEDULED);
         logger.debug("{} Next actions to start for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
                 rolloutGroup);
-        rolloutGroupActions.forEach(action -> deploymentManagement.startScheduledAction(action));
+        rolloutGroupActions.forEach(deploymentManagement::startScheduledAction);
+        logger.debug("{} actions started for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
+                rolloutGroup);
         if (!rolloutGroupActions.isEmpty()) {
             // get all next scheduled groups based on the found actions and set
             // them in state running

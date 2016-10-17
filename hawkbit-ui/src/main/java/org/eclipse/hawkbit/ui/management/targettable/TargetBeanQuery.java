@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -50,14 +51,14 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private static final long serialVersionUID = -5645680058303167558L;
 
     private Sort sort = new Sort(TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
-    private transient Collection<TargetUpdateStatus> status = null;
-    private String[] targetTags = null;
-    private Long distributionId = null;
-    private String searchText = null;
-    private Boolean noTagClicked = Boolean.FALSE;
+    private transient Collection<TargetUpdateStatus> status;
+    private String[] targetTags;
+    private Long distributionId;
+    private String searchText;
+    private Boolean noTagClicked;
     private transient TargetManagement targetManagement;
     private transient I18N i18N;
-    private Long pinnedDistId = null;
+    private Long pinnedDistId;
     private TargetFilterQuery targetFilterQuery;
     private ManagementUIState managementUIState;
 
@@ -176,7 +177,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     }
 
     private Boolean anyFilterSelected() {
-        if (status == null && distributionId == null && Strings.isNullOrEmpty(searchText) && !isTagSelected()) {
+        if (CollectionUtils.isEmpty(status) && distributionId == null && Strings.isNullOrEmpty(searchText)
+                && !isTagSelected()) {
             return false;
         }
         return true;

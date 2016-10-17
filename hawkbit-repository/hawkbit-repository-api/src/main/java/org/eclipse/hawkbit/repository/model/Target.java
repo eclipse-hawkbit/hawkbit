@@ -70,13 +70,13 @@ public interface Target extends NamedEntity {
      * @return <code>true</code> if tag could be added sucessfully (i.e. was not
      *         already in the list).
      */
-    public boolean addTag(TargetTag tag);
+    boolean addTag(TargetTag tag);
 
     /**
      * @param tag
      *            to remove
      * @return <code>true</code> if tag was in the list and removed
      */
-    public boolean removeTag(TargetTag tag);
+    boolean removeTag(TargetTag tag);
 
 }

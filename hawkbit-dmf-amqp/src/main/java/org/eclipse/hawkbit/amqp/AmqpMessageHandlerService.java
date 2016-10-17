@@ -21,12 +21,12 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
-import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
@@ -194,8 +194,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (action.get().isCancelingOrCanceled()) {
             amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target.getOptLockRevision(), target.getTenant(),
-                            target.getControllerId(), action.get().getId(), target.getTargetInfo().getAddress()));
+                    new CancelTargetAssignmentEvent(target, action.get().getId()));
             return;
         }
 
@@ -328,7 +327,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
             // cancel action rejected, write warning status message and fall
             // back to running action status
-
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());

@@ -8,27 +8,43 @@
  */
 package org.eclipse.hawkbit.repository.eventbus.event;
 
+import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 
 /**
  * A event for assignment target tag.
  */
-public class DistributionSetTagAssigmentResultEvent {
+public class DistributionSetTagAssigmentResultEvent implements Event {
 
     private final DistributionSetTagAssignmentResult assigmentResult;
+    private final String tenant;
 
     /**
      * Constructor.
      * 
      * @param assigmentResult
-     *            the assignment result-
+     *            the assignment result
+     * @param tenant
+     *            current
      */
-    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult) {
+    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult,
+            final String tenant) {
         this.assigmentResult = assigmentResult;
+        this.tenant = tenant;
     }
 
     public DistributionSetTagAssignmentResult getAssigmentResult() {
         return assigmentResult;
+    }
+
+    @Override
+    public long getRevision() {
+        return -1;
+    }
+
+    @Override
+    public String getTenant() {
+        return tenant;
     }
 
 }

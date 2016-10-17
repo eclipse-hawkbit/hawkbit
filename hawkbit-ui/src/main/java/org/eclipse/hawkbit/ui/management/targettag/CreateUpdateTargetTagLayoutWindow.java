@@ -13,13 +13,13 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -43,21 +43,21 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
+    void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
+    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
+    void onEventTargetTagUpdateEvent(final TargetTagUpdatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 

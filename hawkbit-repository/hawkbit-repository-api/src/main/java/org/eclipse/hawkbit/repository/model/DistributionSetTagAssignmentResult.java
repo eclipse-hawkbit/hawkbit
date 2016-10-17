@@ -10,13 +10,16 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.eventbus.event.Event;
+
 /**
  * Result object for {@link DistributionSetTag} assignments.
  *
  */
-public class DistributionSetTagAssignmentResult extends AssignmentResult<DistributionSet> {
+public class DistributionSetTagAssignmentResult extends AssignmentResult<DistributionSet> implements Event {
 
     private final DistributionSetTag distributionSetTag;
+    private final String tenant;
 
     /**
      * Constructor.
@@ -36,14 +39,24 @@ public class DistributionSetTagAssignmentResult extends AssignmentResult<Distrib
      */
     public DistributionSetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<DistributionSet> assignedDs, final List<DistributionSet> unassignedDs,
-            final DistributionSetTag distributionSetTag) {
-        super(assigned, alreadyAssigned,unassigned, assignedDs, unassignedDs);
+            final DistributionSetTag distributionSetTag, final String tenant) {
+        super(assigned, alreadyAssigned, unassigned, assignedDs, unassignedDs);
         this.distributionSetTag = distributionSetTag;
+        this.tenant = tenant;
     }
 
     public DistributionSetTag getDistributionSetTag() {
         return distributionSetTag;
     }
 
+    @Override
+    public long getRevision() {
+        return 0;
+    }
+
+    @Override
+    public String getTenant() {
+        return tenant;
+    }
 
 }

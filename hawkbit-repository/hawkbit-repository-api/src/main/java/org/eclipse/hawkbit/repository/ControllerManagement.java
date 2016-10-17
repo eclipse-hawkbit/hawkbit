@@ -255,7 +255,8 @@ public interface ControllerManagement {
 
     /**
      * Refreshes the time of the last time the controller has been connected to
-     * the server.
+     * the server. Switches {@link TargetUpdateStatus#UNKNOWN} to
+     * {@link TargetUpdateStatus#REGISTERED} if necessary.
      *
      * @param controllerId
      *            of the target to to update

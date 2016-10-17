@@ -105,7 +105,7 @@
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
-      <spring-amqp.version>1.6.1.RELEASE</spring-amqp.version>
+      <spring-amqp.version>1.6.2.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
       <!-- Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
@@ -114,9 +114,9 @@
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.0.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.6.5</vaadin.version>
+      <vaadin.version>7.6.8</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-      <vaadin.addon.vaadin-lazyquerycontainer.version>7.4.0.1</vaadin.addon.vaadin-lazyquerycontainer.version>
+      <vaadin.addon.vaadin-lazyquerycontainer.version>7.6.1.3</vaadin.addon.vaadin-lazyquerycontainer.version>
       <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
       <vaadin.addon.tokenfield.version>7.0.1</vaadin.addon.tokenfield.version>
       <vaadin.addon.dbar-addon.version>1.2.0</vaadin.addon.dbar-addon.version>
@@ -136,7 +136,7 @@
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
-      <mariadb-java-client.version>1.5.2</mariadb-java-client.version>
+      <mariadb-java-client.version>1.5.3</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>

@@ -142,15 +142,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             }
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
                     toBeChangedDSs.size(), Collections.emptyList(),
-                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag);
+                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag,
+                    tenantAware.getCurrentTenant());
         } else {
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
                     0, Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)),
-                    Collections.emptyList(), myTag);
+                    Collections.emptyList(), myTag, tenantAware.getCurrentTenant());
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
+        afterCommit.afterCommit(() -> eventBus
+                .post(new DistributionSetTagAssigmentResultEvent(resultAssignment, tenantAware.getCurrentTenant())));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -708,8 +710,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         afterCommit.afterCommit(() -> {
 
             final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
-                    save, Collections.emptyList(), tag);
-            eventBus.post(new DistributionSetTagAssigmentResultEvent(result));
+                    save, Collections.emptyList(), tag, tenantAware.getCurrentTenant());
+            eventBus.post(new DistributionSetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant()));
         });
 
         return save;

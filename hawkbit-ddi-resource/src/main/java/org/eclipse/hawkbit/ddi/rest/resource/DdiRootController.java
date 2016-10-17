@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -130,14 +129,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-
-        if (target.getTargetInfo().getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
-            LOG.debug("target with {} extsisted but was in status UNKNOWN -> REGISTERED)", controllerId);
-            controllerManagement.updateTargetStatus(target.getTargetInfo(), TargetUpdateStatus.REGISTERED,
-                    System.currentTimeMillis(), IpUtil.getClientIpFromRequest(
-                            requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        }
-
         return new ResponseEntity<>(
                 DataConversionHelper.fromTarget(target, controllerManagement.findOldestActiveActionByTarget(target),
                         controllerManagement.getPollingTime(), tenantAware),
