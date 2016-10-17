@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.cache;
 
 /**
- * Cache Object for download a Artifact.
+ * Cache Object for downloading an artifact.
  */
 public class DownloadArtifactCache {
 

@@ -90,7 +90,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
     }
 
     /**
-     * Executed on a authentication request.
+     * Executed on an authentication request.
      * 
      * @param message
      *            the amqp message

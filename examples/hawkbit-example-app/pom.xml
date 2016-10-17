@@ -97,12 +97,6 @@
          <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <!-- Add dependency to use Redis -->
-      <!--  <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-example-redis</artifactId>
-         <version>${project.version}</version>
-      </dependency>   -->
       <!-- Spring -->
       <dependency>
          <groupId>org.springframework.boot</groupId>
