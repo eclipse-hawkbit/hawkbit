@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.app;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
-import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
+import org.eclipse.hawkbit.ui.push.UIEventProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.eventbus.EventBus;

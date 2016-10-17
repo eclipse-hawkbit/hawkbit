@@ -23,10 +23,13 @@ public class DistributionSetTagAssigmentResultEvent extends LocalTenantAwareEven
      * Constructor.
      * 
      * @param assigmentResult
-     *            the assignment result-
+     *            the assignment result
+     * @param tenant
+     *            current
      */
-    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult) {
-        super(null);
+    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult,
+            final String tenant) {
+        super(tenant);
         this.assigmentResult = assigmentResult;
     }
 

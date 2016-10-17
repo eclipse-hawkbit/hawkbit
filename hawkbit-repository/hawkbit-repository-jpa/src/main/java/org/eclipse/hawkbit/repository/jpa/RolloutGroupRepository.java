@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Isolation;
@@ -106,6 +107,20 @@ public interface RolloutGroupRepository
      * @return The child {@link RolloutGroup}s in a specific status
      */
     List<JpaRolloutGroup> findByParentAndStatus(JpaRolloutGroup rolloutGroup, RolloutGroupStatus status);
+
+    /**
+     * Updates all {@link RolloutGroup#getStatus()} of children for given
+     * parent.
+     * 
+     * @param parent
+     *            the parent rolloutgroup
+     * @param status
+     *            the status of the rolloutgroups
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Query("UPDATE JpaRolloutGroup g SET g.status = :status WHERE g.parent = :parent")
+    void setStatusForCildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout and status not

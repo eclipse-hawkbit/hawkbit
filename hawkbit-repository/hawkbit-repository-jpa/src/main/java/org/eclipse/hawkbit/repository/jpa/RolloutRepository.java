@@ -62,7 +62,10 @@ public interface RolloutRepository
     List<JpaRollout> findByLastCheckAndStatus(long lastCheck, RolloutStatus status);
 
     /**
-     * Retrieves all {@link Rollout} for a specific {@code name}
+     * Retrieves all {@link Rollout} for a specific {@code name}.
+     * 
+     * @param pageable
+     *            for paging information
      * 
      * @param name
      *            the rollout name

@@ -16,25 +16,23 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
+import org.eclipse.hawkbit.ui.push.RolloutGroupChangeEventContainer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -43,7 +41,6 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -68,9 +65,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
     private transient RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
-    private transient RolloutManagement rolloutManagement;
-
-    @Autowired
     private transient RolloutUIState rolloutUIState;
 
     @Autowired
@@ -91,33 +85,17 @@ public class RolloutGroupListGrid extends AbstractGrid {
      * Handles the RolloutGroupChangeEvent to refresh the item in the grid.
      *
      *
-     * @param rolloutGroupChangeEvent
+     * @param eventContainer
      *            the event which contains the rollout group which has been
      *            change
      */
-    @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvent(final RolloutGroupChangeEvent rolloutGroupChangeEvent) {
+    public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer eventContainer) {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
         }
-        final RolloutGroup rolloutGroup = rolloutGroupManagement
-                .findRolloutGroupWithDetailedStatus(rolloutGroupChangeEvent.getRolloutGroupId());
-        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
-        final Item item = rolloutContainer.getItem(rolloutGroup.getId());
-        if (item == null) {
-            return;
-        }
-        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
-        item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
-                .setValue(rolloutGroup.getTotalTargetCountStatus());
-        item.getItemProperty(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE)
-                .setValue(calculateFinishedPercentage(rolloutGroup));
-    }
 
-    private String calculateFinishedPercentage(final RolloutGroup rolloutGroup) {
-        return HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup,
-                rolloutManagement.getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup));
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
     @Override

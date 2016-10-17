@@ -37,13 +37,12 @@ public class DistributionSetTagAssignmentResult extends AssignmentResult<Distrib
     public DistributionSetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<DistributionSet> assignedDs, final List<DistributionSet> unassignedDs,
             final DistributionSetTag distributionSetTag) {
-        super(assigned, alreadyAssigned,unassigned, assignedDs, unassignedDs);
+        super(assigned, alreadyAssigned, unassigned, assignedDs, unassignedDs);
         this.distributionSetTag = distributionSetTag;
     }
 
     public DistributionSetTag getDistributionSetTag() {
         return distributionSetTag;
     }
-
 
 }

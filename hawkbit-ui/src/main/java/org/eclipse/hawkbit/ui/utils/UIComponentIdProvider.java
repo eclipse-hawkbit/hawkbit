@@ -882,6 +882,26 @@ public final class UIComponentIdProvider {
     public static final String FILTER_SEARCH_ICON_ID = "filter.search.icon";
 
     /**
+     * Distribution set select table id
+     */
+    public static final String DIST_SET_SELECT_TABLE_ID = "distribution.set.select.table";
+
+    /**
+     * Distribution set select window id
+     */
+    public static final String DIST_SET_SELECT_WINDOW_ID = "distribution.set.select.window";
+
+    /**
+     * Distribution set select consequences window id
+     */
+    public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
+
+    /**
+     * Distribution set select enable checkbox id
+     */
+    public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
+
+    /**
      * /* Private Constructor.
      */
     private UIComponentIdProvider() {

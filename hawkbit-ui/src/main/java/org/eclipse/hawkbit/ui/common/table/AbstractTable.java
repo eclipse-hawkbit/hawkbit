@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -112,7 +113,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         if (values == null) {
             values = Collections.emptySet();
         }
-        return values;
+        return values.stream().filter(item -> item != null).collect(Collectors.toSet());
     }
 
     private void onValueChange() {

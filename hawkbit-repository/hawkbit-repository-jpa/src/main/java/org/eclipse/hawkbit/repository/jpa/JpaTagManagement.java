@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -18,10 +17,10 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.event.remote.bulk.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -34,7 +33,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
@@ -74,9 +72,6 @@ public class JpaTagManagement implements TagManagement {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private TenantAware tenantAware;
-
-    @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
     @Override
@@ -98,7 +93,7 @@ public class JpaTagManagement implements TagManagement {
         final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
 
         afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetTagCreatedBulkEvent(save, applicationContext.getId())));
+                () -> eventPublisher.publishEvent(new TargetTagCreatedEvent(save, applicationContext.getId())));
 
         return save;
     }
@@ -117,9 +112,8 @@ public class JpaTagManagement implements TagManagement {
         });
 
         final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository.save(targetTags));
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(),
-                        JpaTargetTag.class, save, applicationContext.getId())));
+        afterCommit.afterCommit(() -> save.forEach(
+                tag -> eventPublisher.publishEvent(new TargetTagCreatedEvent(tag, applicationContext.getId()))));
         return save;
     }
 
@@ -204,7 +198,7 @@ public class JpaTagManagement implements TagManagement {
         final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
 
         afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new DistributionSetTagCreatedBulkEvent(save, applicationContext.getId())));
+                .publishEvent(new DistributionSetTagCreatedEvent(save, applicationContext.getId())));
         return save;
     }
 
@@ -223,9 +217,8 @@ public class JpaTagManagement implements TagManagement {
         }
         final List<DistributionSetTag> save = Collections
                 .unmodifiableList(distributionSetTagRepository.save(distributionSetTags));
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(),
-                        JpaDistributionSetTag.class, save, applicationContext.getId())));
+        afterCommit.afterCommit(() -> save.forEach(tag -> eventPublisher
+                .publishEvent(new DistributionSetTagCreatedEvent(tag, applicationContext.getId()))));
 
         return save;
     }

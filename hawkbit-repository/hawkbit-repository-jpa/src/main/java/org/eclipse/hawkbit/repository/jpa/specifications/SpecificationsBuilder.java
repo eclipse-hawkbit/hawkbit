@@ -28,7 +28,7 @@ public final class SpecificationsBuilder {
      * where clause.
      *
      * @param specList
-     *            all specification wich will combine
+     *            all specification which will combine
      * @return <null> if the given specification list is empty
      */
     public static <T> Specifications<T> combineWithAnd(final List<Specification<T>> specList) {
@@ -36,8 +36,7 @@ public final class SpecificationsBuilder {
             return null;
         }
         Specifications<T> specs = Specifications.where(specList.get(0));
-        specList.remove(0);
-        for (final Specification<T> specification : specList) {
+        for (final Specification<T> specification : specList.subList(1, specList.size())) {
             specs = specs.and(specification);
         }
         return specs;

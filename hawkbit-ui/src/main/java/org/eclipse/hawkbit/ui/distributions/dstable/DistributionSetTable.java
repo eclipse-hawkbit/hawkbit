@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -42,12 +41,15 @@ import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
+import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,30 +126,56 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvents(final DistributionSetUpdateEvent event) {
-        final DistributionSet ds = event.getEntity();
-        final DistributionSetIdName lastSelectedDsIdName = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get() : null;
+    void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
+
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
 
-        // refresh the details tabs only if selected ds is updated
-        if (lastSelectedDsIdName != null && lastSelectedDsIdName.getId().equals(ds.getId())) {
-            // update table row+details layout
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, ds));
-        } else if (visibleItemIds.stream().filter(e -> e.getId().equals(ds.getId())).findFirst().isPresent()) {
-            // update the name/version details visible in table
-            UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
-        }
+        handleSelectedAndUpdatedDs(eventContainer.getEvents());
+
+        updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
+    }
+
+    private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
+        manageDistUIState.getLastSelectedDistribution()
+                .ifPresent(lastSelectedDsIdName -> events.stream().map(event -> event.getEntity())
+                        .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
+                        .ifPresent(selectedSetUpdated -> eventBus.publish(this,
+                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated))));
+    }
+
+    private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
+            final List<DistributionSetIdName> visibleItemIds) {
+        events.stream().filter(event -> event.getEntity().isComplete())
+                .filter(event -> visibleItemIds.contains(DistributionSetIdName.generate(event.getEntity())))
+                .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvents(final List<?> events) {
-        final Object firstEvent = events.get(0);
-        if (DistributionCreatedEvent.class.isInstance(firstEvent)) {
-            refreshDistributions();
-        } else if (DistributionDeletedEvent.class.isInstance(firstEvent)) {
-            onDistributionDeleteEvent((List<DistributionDeletedEvent>) events);
+    void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
+        refreshDistributions();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
+        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shouldRefreshDs = false;
+        for (final DistributionDeletedEvent deletedEvent : eventContainer.getEvents()) {
+            final Long distributionSetId = deletedEvent.getEntityId();
+            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                dsContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshDs = true;
+            }
         }
+
+        if (shouldRefreshDs) {
+            refreshOnDelete();
+        } else {
+            dsContainer.commit();
+        }
+        reSelectItemsAfterDeletionEvent();
     }
 
     @Override
@@ -454,7 +482,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.DELETED_DISTRIBUTIONS || event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -469,7 +497,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -564,28 +592,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final Item item = getContainerDataSource()
                 .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
         updateEntity(editedDs, item);
-    }
-
-    private void onDistributionDeleteEvent(final List<DistributionDeletedEvent> events) {
-        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shouldRefreshDs = false;
-        for (final DistributionDeletedEvent deletedEvent : events) {
-            final Long distributionSetId = deletedEvent.getEntityId();
-            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
-            if (visibleItemIds.contains(targetIdName)) {
-                dsContainer.removeItem(targetIdName);
-            } else {
-                shouldRefreshDs = true;
-            }
-        }
-
-        if (shouldRefreshDs) {
-            refreshOnDelete();
-        } else {
-            dsContainer.commit();
-        }
-        reSelectItemsAfterDeletionEvent();
     }
 
     private void refreshOnDelete() {

@@ -97,6 +97,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private DistributionSetMetadataRepository distributionSetMetadataRepository;
 
     @Autowired
+    private TargetFilterQueryRepository targetFilterQueryRepository;
+
+    @Autowired
     private ActionRepository actionRepository;
 
     @Autowired
@@ -151,9 +154,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
-        afterCommit
-                .afterCommit(() -> eventPublisher.publishEvent(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
-
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new DistributionSetTagAssigmentResultEvent(resultAssignment, tenantAware.getCurrentTenant())));
         // no reason to persist the tag
         entityManager.detach(myTag);
         return result;
@@ -183,7 +185,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // soft delete assigned
         if (!assigned.isEmpty()) {
-            distributionSetRepository.deleteDistributionSet(assigned.toArray(new Long[assigned.size()]));
+            final Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
+            distributionSetRepository.deleteDistributionSet(dsIds);
+            targetFilterQueryRepository.unsetAutoAssignDistributionSet(dsIds);
         }
 
         // mark the rest as hard delete
@@ -709,7 +713,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
             final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
                     save, Collections.emptyList(), tag);
-            eventPublisher.publishEvent(new DistributionSetTagAssigmentResultEvent(result));
+            eventPublisher
+                    .publishEvent(new DistributionSetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant()));
         });
 
         return save;

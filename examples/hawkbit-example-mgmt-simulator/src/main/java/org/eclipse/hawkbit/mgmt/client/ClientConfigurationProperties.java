@@ -55,7 +55,18 @@ public class ClientConfigurationProperties {
         private int artifactsPerSM = 1;
         private String targetAddress = "amqp:/simulator.replyTo";
         private boolean runRollouts = true;
+        private short rolloutSuccessThreshold = 80;
         private int rolloutDeploymentGroups = 4;
+
+        /**
+         * Targets tags per page.
+         */
+        private int targetTags;
+
+        /**
+         * Distribution Set tags per set
+         */
+        private int dsTags = 5;
 
         /**
          * Artifact size. Values can use the suffixed "MB" or "KB" to indicate a
@@ -165,6 +176,30 @@ public class ClientConfigurationProperties {
 
         public void setAppModulesPerDistributionSet(final int appModulesPerDistributionSet) {
             this.appModulesPerDistributionSet = appModulesPerDistributionSet;
+        }
+
+        public void setTargetTags(final int targetTags) {
+            this.targetTags = targetTags;
+        }
+
+        public int getTargetTags() {
+            return targetTags;
+        }
+
+        public int getDsTags() {
+            return dsTags;
+        }
+
+        public void setDsTags(final int dsTags) {
+            this.dsTags = dsTags;
+        }
+
+        public short getRolloutSuccessThreshold() {
+            return rolloutSuccessThreshold;
+        }
+
+        public void setRolloutSuccessThreshold(final short rolloutSuccessThreshold) {
+            this.rolloutSuccessThreshold = rolloutSuccessThreshold;
         }
 
     }

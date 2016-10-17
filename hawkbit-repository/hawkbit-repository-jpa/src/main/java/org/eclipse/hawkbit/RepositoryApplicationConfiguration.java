@@ -46,6 +46,8 @@ import org.eclipse.hawkbit.repository.jpa.JpaTargetManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
@@ -207,15 +209,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(5);
+        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(4);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports
         properties.put("eclipselink.jdbc.allow-native-sql-queries", "true");
         // flyway
         properties.put("eclipselink.ddl-generation", "none");
-
-        properties.put("eclipselink.persistence-context.flush-mode", "auto");
+        // Embeed into hawkBit logging
         properties.put("eclipselink.logging.logger", "JavaLogger");
 
         return properties;
@@ -423,6 +424,48 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     public EventEntityManager eventEntityManager(final TenantAware aware, final EntityManager entityManager) {
         return new JpaEventEntityManager(aware, entityManager);
+    }
+    
+       /**
+     * {@link AutoAssignChecker} bean.
+     *
+     * @param targetFilterQueryManagement
+     *            to get all target filter queries
+     * @param targetManagement
+     *            to get targets
+     * @param deploymentManagement
+     *            to assign distribution sets to targets
+     * @param transactionManager
+     *            to run transactions
+     * @return a new {@link AutoAssignChecker}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AutoAssignChecker autoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement,
+            TargetManagement targetManagement, DeploymentManagement deploymentManagement,
+            PlatformTransactionManager transactionManager) {
+        return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
+                transactionManager);
+    }
+
+    /**
+     * {@link AutoAssignScheduler} bean.
+     *
+     * @param tenantAware
+     *            to run as specific tenant
+     * @param systemManagement
+     *            to find all tenants
+     * @param systemSecurityContext
+     *            to run as system
+     * @param autoAssignChecker
+     *            to run a check as tenant
+     * @return a new {@link AutoAssignChecker}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AutoAssignScheduler autoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
+            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+        return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
 
 }

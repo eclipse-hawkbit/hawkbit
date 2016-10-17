@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.event.local;
 
-import java.net.URI;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
- * TenantAwareEvent that gets sent when the assignment of a distribution set to
- * a target gets canceled.
+ * Event that gets sent when the assignment of a distribution set to a target
+ * gets canceled.
  *
  *
  *
@@ -20,28 +20,21 @@ import java.net.URI;
 public class CancelTargetAssignmentEvent extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
-    private final String controllerId;
+    private final Target target;
     private final Long actionId;
-    private final URI targetAdress;
 
     /**
      * Creates a new {@link CancelTargetAssignmentEvent}.
      *
-     * @param tenant
-     *            the tenant for this event
-     * @param controllerId
-     *            the ID of the controller
+     * @param target
+     *            entity
      * @param actionId
      *            the action id of the assignment
-     * @param targetAdress
-     *            the targetAdress of the target
      */
-    public CancelTargetAssignmentEvent(final String tenant, final String controllerId, final Long actionId,
-            final URI targetAdress) {
-        super(tenant);
-        this.controllerId = controllerId;
+    public CancelTargetAssignmentEvent(final Target target, final Long actionId) {
+        super(target.getTenant());
+        this.target = target;
         this.actionId = actionId;
-        this.targetAdress = targetAdress;
     }
 
     /**
@@ -52,29 +45,10 @@ public class CancelTargetAssignmentEvent extends LocalTenantAwareEvent {
     }
 
     /**
-     * @return the controllerId of the Target which has been assigned to the
-     *         distribution set
+     * @return target where the action got canceled
      */
-    public String getControllerId() {
-        return controllerId;
+    public Target getTarget() {
+        return target;
     }
 
-    /**
-     *
-     * @return the targetr adress.
-     */
-    public URI getTargetAdress() {
-        return targetAdress;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "TargetAssignDistributionSetEvent [targetAdress=" + targetAdress + ", controllerId=" + controllerId
-                + ", actionId=" + actionId + "]";
-    }
 }

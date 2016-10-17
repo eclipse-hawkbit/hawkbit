@@ -124,12 +124,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     public void targetCancelAssignmentToDistributionSet(
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
-        final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();
+        final String controllerId = cancelTargetAssignmentDistributionSetEvent.getTarget().getControllerId();
         final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
         final Message message = getMessageConverter().toMessage(actionId, createConnectorMessageProperties(
                 cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId, EventTopic.CANCEL_DOWNLOAD));
 
-        amqpSenderService.sendMessage(message, cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
+        amqpSenderService.sendMessage(message,
+                cancelTargetAssignmentDistributionSetEvent.getTarget().getTargetInfo().getAddress());
 
     }
 

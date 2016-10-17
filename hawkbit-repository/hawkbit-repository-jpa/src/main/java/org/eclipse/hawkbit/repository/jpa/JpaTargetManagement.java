@@ -26,6 +26,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -204,18 +205,11 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargets(final Long... targetIDs) {
-        // we need to select the target IDs first to check the if the targetIDs
-        // belonging to the
-        // tenant! Delete statement are not automatically enhanced with the
-        // @FilterDef of the
-        // hibernate session.
-        final List<Long> targetsForCurrentTenant = targetRepository.findAll(Lists.newArrayList(targetIDs)).stream()
-                .map(Target::getId).collect(Collectors.toList());
-        if (!targetsForCurrentTenant.isEmpty()) {
-            targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
-            targetRepository.deleteByIdIn(targetsForCurrentTenant);
-        }
-        targetsForCurrentTenant.forEach(targetId -> eventPublisher.publishEvent(
+        final Collection<Long> targets = Lists.newArrayList(targetIDs);
+
+        targetRepository.deleteByIdIn(targets);
+
+        targets.forEach(targetId -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId, applicationContext.getId())));
     }
 
@@ -350,7 +344,8 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(result)));
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
             return result;
         }
 
@@ -361,7 +356,8 @@ public class JpaTargetManagement implements TargetManagement {
                 allTargets.size(), 0, Collections.unmodifiableList(targetRepository.save(allTargets)),
                 Collections.emptyList(), tag);
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(result)));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -371,9 +367,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> assignTag(final Collection<String> targetIds, final TargetTag tag) {
+    public List<Target> assignTag(final Collection<String> controllerIds, final TargetTag tag) {
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
+                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
         allTargets.forEach(target -> target.addTag(tag));
         final List<Target> save = Collections.unmodifiableList(targetRepository.save(allTargets));
@@ -381,7 +377,8 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
-            eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventPublisher
+                    .publishEvent(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
         });
 
         return save;
@@ -397,7 +394,8 @@ public class JpaTargetManagement implements TargetManagement {
         afterCommit.afterCommit(() -> {
             final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
-            eventPublisher.publishEvent(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventPublisher
+                    .publishEvent(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
         });
         return save;
     }
@@ -562,6 +560,31 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Object[]> resultList = getTargetIdNameResultSet(pageRequest, cb, targetRoot, multiselect);
         return resultList.parallelStream().map(o -> new TargetIdName((long) o[0], o[1].toString(), o[2].toString()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull final Pageable pageRequest,
+            final Long distributionSetId, @NotNull final TargetFilterQuery targetFilterQuery) {
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+
+        return findTargetsBySpec(
+                (root, cq,
+                        cb) -> cb.and(spec.toPredicate(root, cq, cb), TargetSpecifications
+                                .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
+                pageRequest);
+
+    }
+
+    @Override
+    public Long countTargetsByTargetFilterQueryAndNonDS(final Long distributionSetId,
+            @NotNull final TargetFilterQuery targetFilterQuery) {
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
+        specList.add(spec);
+        specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
+
+        return countByCriteriaAPI(specList);
     }
 
     @Override

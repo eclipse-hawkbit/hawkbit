@@ -50,6 +50,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
+    private static final String ID_PROPERTY = "id";
+    private static final String NAME_PROPERTY = "name";
     private static final String COLOR_PROPERTY = "color";
 
     private static final long serialVersionUID = 6599386705285184783L;
@@ -120,7 +122,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tokenField.setImmediate(true);
         tokenField.addStyleName(ValoTheme.COMBOBOX_TINY);
         tokenField.setSizeFull();
-        tokenField.setTokenCaptionPropertyId("name");
+        tokenField.setTokenCaptionPropertyId(NAME_PROPERTY);
     }
 
     protected void repopulateToken() {
@@ -130,8 +132,8 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     private Container createContainer() {
         container = new IndexedContainer();
-        container.addContainerProperty("name", String.class, "");
-        container.addContainerProperty("id", Long.class, "");
+        container.addContainerProperty(NAME_PROPERTY, String.class, "");
+        container.addContainerProperty(ID_PROPERTY, Long.class, "");
         container.addContainerProperty(COLOR_PROPERTY, String.class, "");
         return container;
     }
@@ -142,7 +144,13 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     private void removeTagAssignedFromCombo(final Long tagId) {
-        tokensAdded.put(tagId, new TagData(tagId, getTagName(tagId), getColor(tagId)));
+        // might not yet exist or not anymore due to unprocessed events
+        final Item item = tokenField.getContainerDataSource().getItem(tagId);
+        if (item == null) {
+            return;
+        }
+
+        tokensAdded.put(tagId, new TagData(tagId, getTagName(item), getColor(item)));
         container.removeItem(tagId);
     }
 
@@ -150,13 +158,17 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         final TagData tagData = tagDetails.putIfAbsent(tagId, new TagData(tagId, tagName, tagColor));
         if (tagData == null) {
             final Item item = container.addItem(tagId);
-            item.getItemProperty("id").setValue(tagId);
+            if (item == null) {
+                return;
+            }
+
+            item.getItemProperty(ID_PROPERTY).setValue(tagId);
             updateItem(tagName, tagColor, item);
         }
     }
 
     protected void updateItem(final String tagName, final String tagColor, final Item item) {
-        item.getItemProperty("name").setValue(tagName);
+        item.getItemProperty(NAME_PROPERTY).setValue(tagName);
         item.getItemProperty(COLOR_PROPERTY).setValue(tagColor);
     }
 
@@ -202,7 +214,12 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         }
 
         private void updateTokenStyle(final Object tokenId, final Button button) {
-            final String color = getColor(tokenId);
+            final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+            if (item == null) {
+                return;
+            }
+
+            final String color = getColor(item);
             button.setCaption("<span style=\"color:" + color + " !important;\">" + FontAwesome.CIRCLE.getHtml()
                     + "</span>" + " " + getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
             button.setCaptionAsHtml(true);
@@ -215,20 +232,19 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
         private void tokenClick(final Object tokenId) {
             final Item item = tokenField.getContainerDataSource().addItem(tokenId);
-            item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
+            item.getItemProperty(NAME_PROPERTY).setValue(tagDetails.get(tokenId).getName());
             item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
             unassignTag(tagDetails.get(tokenId).getName());
         }
 
         private Property getItemNameProperty(final Object tokenId) {
             final Item item = tokenField.getContainerDataSource().getItem(tokenId);
-            return item.getItemProperty("name");
+            return item.getItemProperty(NAME_PROPERTY);
         }
 
     }
 
-    private String getColor(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+    private static String getColor(final Item item) {
         if (item.getItemProperty(COLOR_PROPERTY).getValue() != null) {
             return (String) item.getItemProperty(COLOR_PROPERTY).getValue();
         } else {
@@ -236,9 +252,8 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         }
     }
 
-    private String getTagName(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
-        return (String) item.getItemProperty("name").getValue();
+    private static String getTagName(final Item item) {
+        return (String) item.getItemProperty(NAME_PROPERTY).getValue();
     }
 
     protected void removePreviouslyAddedTokens() {

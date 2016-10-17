@@ -23,10 +23,12 @@ public class TargetTagAssigmentResultEvent extends LocalTenantAwareEvent {
      * Constructor.
      * 
      * @param assigmentResult
-     *            the assignment result-
+     *            the assignment result
+     * @param tenant
+     *            current
      */
-    public TargetTagAssigmentResultEvent(final TargetTagAssignmentResult assigmentResult) {
-        super(null);
+    public TargetTagAssigmentResultEvent(final TargetTagAssignmentResult assigmentResult, final String tenant) {
+        super(tenant);
         this.assigmentResult = assigmentResult;
     }
 

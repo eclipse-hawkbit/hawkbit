@@ -6,13 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.AssignmentResult;
-import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.springframework.util.CollectionUtils;
 
 /**

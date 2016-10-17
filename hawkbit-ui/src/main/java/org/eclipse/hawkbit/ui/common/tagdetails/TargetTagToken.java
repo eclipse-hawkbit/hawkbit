@@ -9,24 +9,20 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.local.TargetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
+import org.eclipse.hawkbit.ui.push.TargetTagAssigmentResultEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
@@ -110,44 +106,32 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
-        final TargetTag entity = event.getEntity();
-        final Item item = container.getItem(entity.getId());
-        if (item != null) {
-            updateItem(entity.getName(), entity.getColour(), item);
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEvent event) {
-        final TargetTagAssignmentResult assignmentResult = event.getAssigmentResult();
-        final TargetTag targetTag = assignmentResult.getTargetTag();
-        if (isAssign(assignmentResult)) {
-            addNewToken(targetTag.getId());
-        } else if (isUnassign(assignmentResult)) {
-            removeTokenItem(targetTag.getId(), targetTag.getName());
-        }
+    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEventContainer holder) {
+        holder.getEvents().stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
+            final TargetTag targetTag = assignmentResult.getTargetTag();
+            if (isAssign(assignmentResult)) {
+                addNewToken(targetTag.getId());
+            } else if (isUnassign(assignmentResult)) {
+                removeTokenItem(targetTag.getId(), targetTag.getName());
+            }
+        });
 
     }
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getAssigned() > 0) {
-            final List<String> assignedTargetNames = assignmentResult.getAssignedEntity().stream()
-                    .map(t -> t.getControllerId()).collect(Collectors.toList());
-            if (assignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                return true;
-            }
+        if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
+            return assignmentResult.getAssignedEntity().stream().map(t -> t.getControllerId())
+                    .anyMatch(controllerId -> controllerId
+                            .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));
         }
         return false;
     }
 
     protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getUnassigned() > 0) {
-            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedEntity().stream()
-                    .map(t -> t.getControllerId()).collect(Collectors.toList());
-            if (unassignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                return true;
-            }
+        if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
+            return assignmentResult.getUnassignedEntity().stream().map(t -> t.getControllerId())
+                    .anyMatch(controllerId -> controllerId
+                            .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));
         }
         return false;
     }

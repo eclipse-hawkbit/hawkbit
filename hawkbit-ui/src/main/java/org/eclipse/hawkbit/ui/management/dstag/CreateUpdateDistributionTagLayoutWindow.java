@@ -13,13 +13,13 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.event.remote.bulk.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +48,21 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 

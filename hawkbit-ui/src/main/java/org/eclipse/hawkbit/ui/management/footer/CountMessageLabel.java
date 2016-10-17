@@ -14,9 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
@@ -26,15 +24,15 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
+import com.google.common.base.Optional;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -131,17 +129,19 @@ public class CountMessageLabel extends Label {
 
     private void displayTargetCountStatus() {
         final TargetTableFilters targFilParams = managementUIState.getTargetTableFilters();
-        final StringBuilder message = getTotalTargetMessage(targFilParams);
+        final StringBuilder message = getTotalTargetMessage();
         final String filteredTargets = i18n.get("label.filter.targets");
 
         if (targFilParams.hasFilter()) {
+            message.append(HawkbitCommonUtil.SP_STRING_PIPE);
             message.append(filteredTargets);
+            message.append(HawkbitCommonUtil.SP_STRING_SPACE);
             if (managementUIState.getTargetsTruncated() != null) {
                 message.append(targetTable.size() + managementUIState.getTargetsTruncated());
             } else {
                 message.append(targetTable.size());
             }
-            message.append(HawkbitCommonUtil.SP_STRING_SPACE);
+            message.append(HawkbitCommonUtil.SP_STRING_PIPE);
             final String status = i18n.get("label.filter.status");
             final String tags = i18n.get("label.filter.tags");
             final String text = i18n.get("label.filter.text");
@@ -152,13 +152,12 @@ public class CountMessageLabel extends Label {
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
             filterMesgBuf
                     .append(getTagsMsg(targFilParams.isNoTagSelected(), targFilParams.getClickedTargetTags(), tags));
-            filterMesgBuf.append(getSerachMsg(
-                    targFilParams.getSearchText().isPresent() ? targFilParams.getSearchText().get() : null, text));
-            filterMesgBuf.append(getDistMsg(
-                    targFilParams.getDistributionSet().isPresent() ? targFilParams.getDistributionSet().get() : null,
-                    dists));
-            filterMesgBuf.append(getCustomFilterMsg(targFilParams.getTargetFilterQuery().isPresent()
-                    ? targFilParams.getTargetFilterQuery().get() : null, custom));
+            filterMesgBuf.append(
+                    targFilParams.getSearchText().map(search -> text).orElse(HawkbitCommonUtil.SP_STRING_SPACE));
+            filterMesgBuf.append(
+                    targFilParams.getDistributionSet().map(set -> dists).orElse(HawkbitCommonUtil.SP_STRING_SPACE));
+            filterMesgBuf.append(targFilParams.getTargetFilterQuery().map(query -> custom)
+                    .orElse(HawkbitCommonUtil.SP_STRING_SPACE));
             final String filterMesageChk = filterMesgBuf.toString().trim();
             String filterMesage = filterMesageChk;
             if (filterMesage.endsWith(",")) {
@@ -166,17 +165,23 @@ public class CountMessageLabel extends Label {
             }
             message.append(filterMesage);
         }
+
+        if ((targetTable.size() + Optional.fromNullable(managementUIState.getTargetsTruncated())
+                .or(0L)) > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            message.append(HawkbitCommonUtil.SP_STRING_PIPE);
+            message.append(i18n.get("label.filter.shown"));
+            message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
+        }
+
         setCaption(message.toString());
     }
 
-    private StringBuilder getTotalTargetMessage(final TargetTableFilters targFilParams) {
-        long totalTargetTableEnteries = targetTable.size();
+    private StringBuilder getTotalTargetMessage() {
         if (managementUIState.getTargetsTruncated() != null) {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
             setDescription(i18n.get("label.target.filter.truncated", managementUIState.getTargetsTruncated(),
                     SPUIDefinitions.MAX_TABLE_ENTRIES));
-            totalTargetTableEnteries += managementUIState.getTargetsTruncated();
         } else {
             setIcon(null);
             setDescription(null);
@@ -184,20 +189,7 @@ public class CountMessageLabel extends Label {
 
         final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
         message.append(managementUIState.getTargetsCountAll());
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        if (totalTargetTableEnteries > SPUIDefinitions.MAX_TABLE_ENTRIES) {
-            message.append(i18n.get("label.filter.shown"));
-            message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
-        } else {
-            if (!targFilParams.hasFilter()) {
-                message.append(i18n.get("label.filter.shown"));
-                message.append(targetTable.size());
-            }
 
-            message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        }
-
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
         return message;
     }
 
@@ -241,38 +233,5 @@ public class CountMessageLabel extends Label {
     private static String getTagsMsg(final Boolean noTargetTagSelected, final List<String> tags, final String param) {
         return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue())
                 ? HawkbitCommonUtil.SP_STRING_SPACE : param;
-    }
-
-    /**
-     * Get Search Text Message.
-     *
-     * @param searchTxt
-     *            as search text
-     * @return String as msg.
-     */
-    private static String getSerachMsg(final String searchTxt, final String param) {
-        return Strings.isNullOrEmpty(searchTxt) ? HawkbitCommonUtil.SP_STRING_SPACE : param;
-    }
-
-    /**
-     * Get Dist set Message.
-     *
-     * @param distId
-     *            as serach
-     * @return String as msg.
-     */
-    private static String getDistMsg(final DistributionSetIdName distributionSetIdName, final String param) {
-        return distributionSetIdName != null ? param : HawkbitCommonUtil.SP_STRING_SPACE;
-    }
-
-    /**
-     * Get the custom target filter message.
-     *
-     * @param targetFilterQuery
-     * @param param
-     * @return
-     */
-    private static String getCustomFilterMsg(final TargetFilterQuery targetFilterQuery, final String param) {
-        return targetFilterQuery != null ? param : HawkbitCommonUtil.SP_STRING_SPACE;
     }
 }

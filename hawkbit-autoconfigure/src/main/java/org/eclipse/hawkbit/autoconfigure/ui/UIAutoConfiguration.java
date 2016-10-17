@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.autoconfigure.ui;
 
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
-import org.eclipse.hawkbit.ui.HawkbitEventProvider;
-import org.eclipse.hawkbit.ui.UIEventProvider;
+import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
+import org.eclipse.hawkbit.ui.push.UIEventProvider;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

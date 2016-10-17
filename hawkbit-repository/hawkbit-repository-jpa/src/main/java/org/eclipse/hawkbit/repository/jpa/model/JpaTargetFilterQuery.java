@@ -9,13 +9,19 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
@@ -42,6 +48,10 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @NotNull
     private String query;
 
+    @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
+    @JoinColumn(name = "auto_assign_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_filter_auto_assign_ds"))
+    private JpaDistributionSet autoAssignDistributionSet;
+
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
     }
@@ -57,6 +67,22 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     public JpaTargetFilterQuery(final String name, final String query) {
         this.name = name;
         this.query = query;
+    }
+
+    /**
+     * Construct a Target filter query with auto assign distribution set
+     * 
+     * @param name
+     *            of the {@link TargetFilterQuery}.
+     * @param query
+     *            of the {@link TargetFilterQuery}.
+     * @param autoAssignDistributionSet
+     *            of the {@link TargetFilterQuery}.
+     */
+    public JpaTargetFilterQuery(String name, String query, JpaDistributionSet autoAssignDistributionSet) {
+        this.name = name;
+        this.query = query;
+        this.autoAssignDistributionSet = autoAssignDistributionSet;
     }
 
     @Override
@@ -77,5 +103,15 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @Override
     public void setQuery(final String query) {
         this.query = query;
+    }
+
+    @Override
+    public DistributionSet getAutoAssignDistributionSet() {
+        return autoAssignDistributionSet;
+    }
+
+    @Override
+    public void setAutoAssignDistributionSet(DistributionSet distributionSet) {
+        autoAssignDistributionSet = (JpaDistributionSet)distributionSet;
     }
 }

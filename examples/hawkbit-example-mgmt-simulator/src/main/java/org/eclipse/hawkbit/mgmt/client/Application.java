@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.mgmt.client;
 import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
 import org.eclipse.hawkbit.feign.core.client.IgnoreMultipleConsumersProducersSpringMvcContract;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.scenarios.ConfigurableScenario;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.FeignMultipartEncoder;
@@ -27,7 +29,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.feign.support.ResponseEntityDecoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
@@ -43,7 +44,6 @@ import feign.slf4j.Slf4jLogger;
 @SpringBootApplication
 @EnableFeignClients("org.eclipse.hawkbit.mgmt.client.resource")
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
-@Configuration
 @AutoConfigureAfter(FeignClientConfiguration.class)
 @Import(FeignClientConfiguration.class)
 public class Application implements CommandLineRunner {
@@ -78,10 +78,12 @@ public class Application implements CommandLineRunner {
     public ConfigurableScenario configurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
             final MgmtSoftwareModuleClientResource softwareModuleResource,
             final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final MgmtTargetTagClientResource targetTagResource,
+            final MgmtDistributionSetTagClientResource distributionSetTagResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
         return new ConfigurableScenario(distributionSetResource, softwareModuleResource,
-                uploadSoftwareModule(clientConfigurationProperties), targetResource, rolloutResource,
-                clientConfigurationProperties);
+                uploadSoftwareModule(clientConfigurationProperties), targetResource, rolloutResource, targetTagResource,
+                distributionSetTagResource, clientConfigurationProperties);
     }
 
     @Bean
@@ -89,8 +91,8 @@ public class Application implements CommandLineRunner {
         return new CreateStartedRolloutExample();
     }
 
-    @Bean
-    public MgmtSoftwareModuleClientResource uploadSoftwareModule(final ClientConfigurationProperties configuration) {
+    private static MgmtSoftwareModuleClientResource uploadSoftwareModule(
+            final ClientConfigurationProperties configuration) {
         final ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new Jackson2HalModule());

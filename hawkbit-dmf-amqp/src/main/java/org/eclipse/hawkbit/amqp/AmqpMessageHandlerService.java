@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.handler.annotation.Header;
@@ -194,9 +193,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         if (action.get().isCancelingOrCanceled()) {
-            amqpMessageDispatcherService
-                    .targetCancelAssignmentToDistributionSet(new CancelTargetAssignmentEvent(target.getTenant(),
-                            target.getControllerId(), action.get().getId(), target.getTargetInfo().getAddress()));
+            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
+                    new CancelTargetAssignmentEvent(target, action.get().getId()));
             return;
         }
 
@@ -329,19 +327,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
             // cancel action rejected, write warning status message and fall
             // back to running action status
-
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
         }
     }
-
-    protected static void checkContentTypeJson(final Message message) {
-        final MessageProperties messageProperties = message.getMessageProperties();
-        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
-            return;
-        }
-        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
-    }
-
 }

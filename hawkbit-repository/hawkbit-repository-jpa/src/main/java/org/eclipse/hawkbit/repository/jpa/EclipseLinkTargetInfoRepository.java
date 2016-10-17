@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -58,17 +57,6 @@ public class EclipseLinkTargetInfoRepository implements TargetInfoRepository {
         } else {
             return entityManager.merge(entity);
         }
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    public void deleteByTargetIdIn(final Collection<Long> targetIDs) {
-        final javax.persistence.Query query = entityManager
-                .createQuery("DELETE FROM JpaTargetInfo ti where ti.targetId IN :target");
-        query.setParameter("target", targetIDs);
-
     }
 
 }

@@ -30,7 +30,6 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
@@ -61,6 +60,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -69,7 +69,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +84,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -135,9 +135,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
-
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Modifying
@@ -179,13 +176,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
+        return assignDistributionSet(dsID, targets, null);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
+    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
+            final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(
                     String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
         }
 
-        return assignDistributionSetToTargets(set, targets, null, null);
+        return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
     }
 
     @Override
@@ -200,21 +206,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
         }
 
-        return assignDistributionSetToTargets(set, targets, (JpaRollout) rollout, (JpaRolloutGroup) rolloutGroup);
+        return assignDistributionSetToTargets(set, targets, (JpaRollout) rollout, (JpaRolloutGroup) rolloutGroup, null);
     }
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
      *
-     * @param dsID
+     * @param set
      *            the ID of the distribution set to assign
-     * @param targets
+     * @param targetsWithActionType
      *            a list of all targets and their action type
      * @param rollout
      *            the rollout for this assignment
      * @param rolloutGroup
      *            the rollout group for this assignment
+     * @param actionMessage
+     *            an optional message to be written into the action status
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -223,7 +231,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final JpaDistributionSet set,
             final Collection<TargetWithActionType> targetsWithActionType, final JpaRollout rollout,
-            final JpaRolloutGroup rolloutGroup) {
+            final JpaRolloutGroup rolloutGroup, final String actionMessage) {
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException(
@@ -296,6 +304,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             actionStatus.setAction(action);
             actionStatus.setOccurredAt(action.getCreatedAt());
             actionStatus.setStatus(Status.RUNNING);
+            if (actionMessage != null) {
+                actionStatus.addMessage(actionMessage);
+            }
             actionStatusRepository.save(actionStatus);
         });
 
@@ -342,17 +353,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionForTarget;
     }
 
-    /**
-     * Sends the {@link TargetAssignDistributionSetEvent} for a specific target
-     * to the eventPublisher.
-     *
-     * @param target
-     *            the Target which has been assigned to a distribution set
-     * @param actionId
-     *            the action id of the assignment
-     * @param softwareModules
-     *            the software modules which have been assigned
-     */
     private void assignDistributionSetEvent(final JpaTarget target, final Long actionId,
             final List<JpaSoftwareModule> modules) {
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -367,11 +367,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     /**
-     * Removes {@link UpdateAction}s that are no longer necessary and sends
+     * Removes {@link Action}s that are no longer necessary and sends
      * cancellations to the controller.
      *
-     * @param myTarget
-     *            to override {@link UpdateAction}s
+     * @param targetsIds
+     *            to override {@link Action}s
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
@@ -405,7 +405,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
 
         return assignDistributionSetToTargets(set, tIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null,
+                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
                 null);
     }
 
@@ -446,8 +446,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target.getTenant(),
-                target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId)));
     }
 
     @Override
@@ -506,7 +505,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public Action startScheduledAction(final Action action) {
 
         final JpaAction mergedAction = (JpaAction) entityManager.merge(action);
@@ -607,7 +606,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return convertAcPage(actions, pageable);
     }
 
-    private Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
+    private static Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
         final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target), target));
