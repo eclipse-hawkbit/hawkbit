@@ -53,8 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
-import org.springframework.context.event.SimpleApplicationEventMulticaster;
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -1015,18 +1013,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      *
      */
     public static class DeploymentTestConfiguration {
-
-        /**
-         * Sync EventBus for testing. So we don't need to wait every time till a
-         * event is incoming (normally asyncron). Without a syncron eventbus
-         * every test have to check (with a timeout) is the event arrived.
-         *
-         * @return eventbus bean
-         */
-        @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-        public SimpleApplicationEventMulticaster applicationEventMulticaster() {
-            return new SimpleApplicationEventMulticaster();
-        }
 
         /**
          * 
