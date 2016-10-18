@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -49,7 +51,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -60,6 +61,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.jayway.awaitility.Awaitility;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -461,7 +463,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         } catch (final IncompleteDistributionSetException ex) {
         }
 
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(1, TimeUnit.SECONDS);
+        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(5, TimeUnit.SECONDS);
         assertThat(events).as("events should be empty").isEmpty();
 
         incomplete.addModule(os);
@@ -472,7 +474,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
 
-        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(10, TimeUnit.SECONDS));
+        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(15, TimeUnit.SECONDS));
     }
 
     @Test
@@ -1052,23 +1054,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         private int expectedNumberOfEvents;
 
         /**
-         * Sync EventBus for testing. So we don't need to wait every time till a
-         * event is incoming (normally asyncron). Without a syncron eventbus
-         * every test have to check (with a timeout) is the event arrived.
-         *
-         * @return eventbus bean
-         */
-        @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-        public SimpleApplicationEventMulticaster applicationEventMulticaster() {
-            return new SimpleApplicationEventMulticaster();
-        }
-
-        @Bean
-        public ServiceMatcher serviceMatcher() {
-            return new ServiceMatcher();
-        }
-
-        /**
          * @param expectedNumberOfEvents
          *            the expectedNumberOfEvents to set
          */
@@ -1089,13 +1074,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
-            latch.await(timeout, unit);
-            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<>(events);
-            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
+            Awaitility.await().atMost(timeout, unit).until(eventSize(events), equalTo(expectedNumberOfEvents));
+            return new LinkedList<>(events);
 
-            return handledEvents;
         }
+    }
+
+    private static Callable<Integer> eventSize(final List<TargetAssignDistributionSetEvent> events) {
+        return new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return events.size();
+            }
+        };
     }
 
     private static class CancelEventHandlerStub {
