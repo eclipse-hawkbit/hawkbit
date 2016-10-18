@@ -468,6 +468,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
+
+        // give some chance to receive events asynchronously
+        Thread.sleep(1000);
         assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(10, TimeUnit.SECONDS));
     }
 
