@@ -205,11 +205,16 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargets(final Long... targetIDs) {
-        final Collection<Long> targets = Lists.newArrayList(targetIDs);
+        deleteTargets(Lists.newArrayList(targetIDs));
+    }
 
-        targetRepository.deleteByIdIn(targets);
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public void deleteTargets(final Collection<Long> targetIDs) {
+        targetRepository.deleteByIdIn(targetIDs);
 
-        targets.forEach(targetId -> eventPublisher.publishEvent(
+        targetIDs.forEach(targetId -> eventPublisher.publishEvent(
                 new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId, applicationContext.getId())));
     }
 
