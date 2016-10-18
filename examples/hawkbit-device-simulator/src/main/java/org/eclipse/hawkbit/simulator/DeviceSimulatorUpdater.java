@@ -177,8 +177,8 @@ public class DeviceSimulatorUpdater {
 
             LOGGER.info("Simulate downloads for {}", device.getId());
 
-            modules.forEach(module -> module.getArtifacts()
-                    .forEach(artifact -> handleArtifacts(targetToken, status, artifact)));
+            modules.forEach(
+                    module -> module.getArtifacts().forEach(artifact -> handleArtifact(targetToken, status, artifact)));
 
             final UpdateStatus result = new UpdateStatus(ResponseStatus.SUCCESSFUL);
             result.getStatusMessages().add("Simulation complete!");
@@ -202,7 +202,7 @@ public class DeviceSimulatorUpdater {
             return ResponseStatus.ERROR.equals(status.getResponseStatus());
         }
 
-        private static void handleArtifacts(final String targetToken, final List<UpdateStatus> status,
+        private static void handleArtifact(final String targetToken, final List<UpdateStatus> status,
                 final Artifact artifact) {
 
             if (artifact.getUrls().containsKey("HTTPS")) {

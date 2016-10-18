@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -21,11 +18,14 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -66,21 +66,21 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         refreshTagTable();
     }
 

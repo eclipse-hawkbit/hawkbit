@@ -28,7 +28,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.VaadinSessionScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -41,7 +41,7 @@ import com.vaadin.ui.VerticalLayout;
  *
  */
 @SpringComponent
-@VaadinSessionScope
+@ViewScope
 public class FilterByStatusLayout extends VerticalLayout implements Button.ClickListener {
     private static final long serialVersionUID = -6930348859189929850L;
 

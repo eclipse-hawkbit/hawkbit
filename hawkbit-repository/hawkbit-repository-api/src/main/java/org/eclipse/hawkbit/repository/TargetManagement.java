@@ -193,6 +193,15 @@ public interface TargetManagement {
     void deleteTargets(@NotEmpty Long... targetIDs);
 
     /**
+     * Deletes all targets with the given IDs.
+     *
+     * @param targetIDs
+     *            the technical IDs of the targets to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
+    void deleteTargets(@NotEmpty Collection<Long> targetIDs);
+
+    /**
      * finds all {@link Target#getControllerId()} which are currently in the
      * database.
      *

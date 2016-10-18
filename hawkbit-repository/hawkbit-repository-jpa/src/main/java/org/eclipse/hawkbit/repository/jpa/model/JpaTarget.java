@@ -82,6 +82,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @Transient
     private boolean entityNew;
 
+    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
             @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {

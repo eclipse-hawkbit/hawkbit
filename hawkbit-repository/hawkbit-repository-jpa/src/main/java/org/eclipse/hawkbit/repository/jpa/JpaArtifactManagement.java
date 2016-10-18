@@ -150,28 +150,22 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteLocalArtifact(final LocalArtifact existing) {
-        if (existing == null) {
-            return;
-        }
+    public boolean clearLocalArtifactBinary(final LocalArtifact existing) {
 
-        boolean artifactIsOnlyUsedByOneSoftwareModule = true;
         for (final LocalArtifact lArtifact : localArtifactRepository
                 .findByGridFsFileName(((JpaLocalArtifact) existing).getGridFsFileName())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
                     && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
-                artifactIsOnlyUsedByOneSoftwareModule = false;
-                break;
+                return false;
             }
         }
 
-        if (artifactIsOnlyUsedByOneSoftwareModule) {
-            try {
-                LOG.debug("deleting artifact from repository {}", ((JpaLocalArtifact) existing).getGridFsFileName());
-                artifactRepository.deleteBySha1(((JpaLocalArtifact) existing).getGridFsFileName());
-            } catch (final ArtifactStoreException e) {
-                throw new ArtifactDeleteFailedException(e);
-            }
+        try {
+            LOG.debug("deleting artifact from repository {}", ((JpaLocalArtifact) existing).getGridFsFileName());
+            artifactRepository.deleteBySha1(((JpaLocalArtifact) existing).getGridFsFileName());
+            return true;
+        } catch (final ArtifactStoreException e) {
+            throw new ArtifactDeleteFailedException(e);
         }
     }
 
@@ -185,7 +179,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             return;
         }
 
-        deleteLocalArtifact(existing);
+        clearLocalArtifactBinary(existing);
 
         existing.getSoftwareModule().removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());

@@ -247,7 +247,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
         for (final LocalArtifact localArtifact : swModule.getLocalArtifacts()) {
-            artifactManagement.deleteLocalArtifact(localArtifact);
+            artifactManagement.clearLocalArtifactBinary(localArtifact);
         }
     }
 

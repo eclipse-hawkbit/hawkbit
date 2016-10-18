@@ -11,23 +11,31 @@ package org.eclipse.hawkbit.mgmt.client.scenarios;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties;
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties.Scenario;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetTagClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.RolloutBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.mgmt.client.resource.builder.TagBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.TargetBuilder;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.ArtifactFile;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedDistributionSetRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurableScenario {
 
-    private static final int PAGE_SIZE = 100;
+    private static final int PAGE_SIZE = 500;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurableScenario.class);
 
@@ -51,22 +59,32 @@ public class ConfigurableScenario {
 
     private final MgmtTargetClientResource targetResource;
 
+    private final MgmtTargetTagClientResource targetTagResource;
+
+    private final MgmtDistributionSetTagClientResource distributionSetTagResource;
+
     private final MgmtRolloutClientResource rolloutResource;
 
     private final ClientConfigurationProperties clientConfigurationProperties;
 
     private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
 
+    // Exception - squid:S00107 - this is a simulator that leverages multiple
+    // resouces/feign beans.
+    @SuppressWarnings("squid:S00107")
     public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
             final MgmtSoftwareModuleClientResource softwareModuleResource,
             final MgmtSoftwareModuleClientResource uploadSoftwareModule, final MgmtTargetClientResource targetResource,
-            final MgmtRolloutClientResource rolloutResource,
+            final MgmtRolloutClientResource rolloutResource, final MgmtTargetTagClientResource targetTagResource,
+            final MgmtDistributionSetTagClientResource distributionSetTagResource,
             final ClientConfigurationProperties clientConfigurationProperties) {
+        this.targetTagResource = targetTagResource;
         this.distributionSetResource = distributionSetResource;
         this.softwareModuleResource = softwareModuleResource;
         this.uploadSoftwareModule = uploadSoftwareModule;
         this.targetResource = targetResource;
         this.rolloutResource = rolloutResource;
+        this.distributionSetTagResource = distributionSetTagResource;
         this.clientConfigurationProperties = clientConfigurationProperties;
     }
 
@@ -111,7 +129,8 @@ public class ConfigurableScenario {
         PagedList<MgmtSoftwareModule> modules;
         do {
             modules = softwareModuleResource.getSoftwareModules(0, PAGE_SIZE, null, null).getBody();
-            modules.getContent().forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
+            modules.getContent().parallelStream()
+                    .forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
         } while (modules.getTotal() > PAGE_SIZE);
     }
 
@@ -119,16 +138,40 @@ public class ConfigurableScenario {
         PagedList<MgmtDistributionSet> distributionSets;
         do {
             distributionSets = distributionSetResource.getDistributionSets(0, PAGE_SIZE, null, null).getBody();
-            distributionSets.getContent().forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
+            distributionSets.getContent().parallelStream()
+                    .forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
         } while (distributionSets.getTotal() > PAGE_SIZE);
+
+        deleteDistributionSetTags();
+    }
+
+    private void deleteDistributionSetTags() {
+        PagedList<MgmtTag> dsTags;
+        do {
+            dsTags = distributionSetTagResource.getDistributionSetTags(0, PAGE_SIZE, null, null).getBody();
+            dsTags.getContent().parallelStream()
+                    .forEach(ds -> distributionSetTagResource.deleteDistributionSetTag(ds.getTagId()));
+        } while (dsTags.getTotal() > PAGE_SIZE);
     }
 
     private void deleteTargets() {
         PagedList<MgmtTarget> targets;
         do {
             targets = targetResource.getTargets(0, PAGE_SIZE, null, null).getBody();
-            targets.getContent().forEach(target -> targetResource.deleteTarget(target.getControllerId()));
+            targets.getContent().parallelStream()
+                    .forEach(target -> targetResource.deleteTarget(target.getControllerId()));
         } while (targets.getTotal() > PAGE_SIZE);
+
+        deleteTargetTags();
+    }
+
+    private void deleteTargetTags() {
+        PagedList<MgmtTag> targetTags;
+        do {
+            targetTags = targetTagResource.getTargetTags(0, PAGE_SIZE, null, null).getBody();
+            targetTags.getContent().parallelStream()
+                    .forEach(target -> targetTagResource.deleteTargetTag(target.getTagId()));
+        } while (targetTags.getTotal() > PAGE_SIZE);
     }
 
     private void runRollouts(final Scenario scenario) {
@@ -140,10 +183,10 @@ public class ConfigurableScenario {
     private void runRollout(final MgmtDistributionSet set, final Scenario scenario) {
         LOGGER.info("Run rollout for set {}", set.getDsId());
         // create a Rollout
-        final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource
-                .create(new RolloutBuilder().name("Rollout" + set.getName() + set.getVersion())
-                        .groupSize(scenario.getRolloutDeploymentGroups()).targetFilterQuery("name==*")
-                        .distributionSetId(set.getDsId()).successThreshold("80").errorThreshold("5").build())
+        final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource.create(new RolloutBuilder()
+                .name("Rollout" + set.getName() + set.getVersion()).groupSize(scenario.getRolloutDeploymentGroups())
+                .targetFilterQuery("name==*").distributionSetId(set.getDsId())
+                .successThreshold(String.valueOf(scenario.getRolloutSuccessThreshold())).errorThreshold("5").build())
                 .getBody();
 
         // start the created Rollout
@@ -164,19 +207,42 @@ public class ConfigurableScenario {
 
     private void createDistributionSets(final Scenario scenario) {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
-        final byte[] artifact = generateArtifact(scenario);
 
-        distributionSetResource.createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName())
-                .type("os_app").version("1.0.").buildAsList(scenario.getDistributionSets())).getBody()
-                .forEach(dsSet -> {
-                    final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
+        final List<MgmtDistributionSet> sets = distributionSetResource
+                .createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName()).type("os_app")
+                        .version("1.0.").buildAsList(scenario.getDistributionSets()))
+                .getBody();
 
-                    final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
-                    modules.forEach(module -> assign.id(module.getModuleId()));
-                    distributionSetResource.assignSoftwareModules(dsSet.getDsId(), assign.build());
-                });
+        assignSoftwareModulesTo(scenario, sets);
+
+        tagDistributionSets(scenario, sets);
 
         LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
+    }
+
+    private void tagDistributionSets(final Scenario scenario, final List<MgmtDistributionSet> sets) {
+        for (int i = 0; i < scenario.getDsTags(); i++) {
+            final MgmtTag tag = distributionSetTagResource
+                    .createDistributionSetTags(
+                            new TagBuilder().name("DS Tag" + i).description("DS tag for DS " + i).build())
+                    .getBody().get(0);
+
+            distributionSetTagResource.assignDistributionSets(tag.getTagId(),
+                    sets.stream().map(
+                            set -> new MgmtAssignedDistributionSetRequestBody().setDistributionSetId(set.getDsId()))
+                            .collect(Collectors.toList()));
+        }
+    }
+
+    private void assignSoftwareModulesTo(final Scenario scenario, final List<MgmtDistributionSet> sets) {
+        final byte[] artifact = generateArtifact(scenario);
+        sets.forEach(dsSet -> {
+            final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
+
+            final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
+            modules.forEach(module -> assign.id(module.getModuleId()));
+            distributionSetResource.assignSoftwareModules(dsSet.getDsId(), assign.build());
+        });
     }
 
     private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
@@ -191,8 +257,10 @@ public class ConfigurableScenario {
                 .getBody());
 
         for (int iArtifact = 0; iArtifact < scenario.getArtifactsPerSM(); iArtifact++) {
+            final int count = iArtifact;
             modules.forEach(module -> {
-                final ArtifactFile file = new ArtifactFile("dummyfile.dummy", null, "multipart/form-data", artifact);
+                final ArtifactFile file = new ArtifactFile("dummyfile.dummy" + count, null, "multipart/form-data",
+                        artifact);
                 uploadSoftwareModule.uploadArtifact(module.getModuleId(), file, null, null, null);
             });
         }
@@ -202,15 +270,42 @@ public class ConfigurableScenario {
 
     private void createTargets(final Scenario scenario) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
-
-        for (int i = 0; i < (scenario.getTargets() / PAGE_SIZE); i++) {
-            targetResource.createTargets(
-                    new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
-                            .buildAsList(i * PAGE_SIZE, (i + 1) * PAGE_SIZE > scenario.getTargets()
-                                    ? (scenario.getTargets() - (i * PAGE_SIZE)) : PAGE_SIZE));
-        }
-
+        IntStream.range(0, scenario.getTargets() / PAGE_SIZE).parallel().forEach(i -> createTargetPage(scenario, i));
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
+    }
+
+    private void createTargetPage(final Scenario scenario, final int page) {
+        final List<MgmtTarget> targets = createTargets(scenario, page);
+
+        tagTargets(scenario, page, targets);
+    }
+
+    private List<MgmtTarget> createTargets(final Scenario scenario, final int page) {
+        return targetResource
+                .createTargets(
+                        new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
+                                .buildAsList(calculateOffset(page),
+                                        (page + 1) * PAGE_SIZE > scenario.getTargets()
+                                                ? (scenario.getTargets() - calculateOffset(page)) : PAGE_SIZE))
+                .getBody();
+    }
+
+    private void tagTargets(final Scenario scenario, final int page, final List<MgmtTarget> targets) {
+        if (scenario.getTargetTags() > 0) {
+            targetTagResource
+                    .createTargetTags(new TagBuilder().name("Page " + page)
+                            .description("Target tag for target page " + page).buildAsList(scenario.getTargetTags()))
+                    .getBody().forEach(
+                            tag -> targetTagResource.assignTargets(tag.getTagId(),
+                                    targets.stream()
+                                            .map(target -> new MgmtAssignedTargetRequestBody()
+                                                    .setControllerId(target.getControllerId()))
+                                            .collect(Collectors.toList())));
+        }
+    }
+
+    private static int calculateOffset(final int page) {
+        return page * PAGE_SIZE;
     }
 
     private static int parseSize(final String s) {

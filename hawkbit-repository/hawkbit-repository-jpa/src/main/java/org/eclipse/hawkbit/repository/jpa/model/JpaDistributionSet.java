@@ -78,12 +78,14 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
 
+    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
             @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
                     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
+    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
             @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
@@ -276,9 +278,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                 .filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey())).count();
 
         if (allready >= softwareModule.getType().getMaxAssignments()) {
-            final Optional<SoftwareModule> sameKey = modules.stream()
-                    .filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey())).findFirst();
-            modules.remove(sameKey.get());
+            modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
+                    .findFirst().map(modules::remove);
         }
 
         if (modules.add(softwareModule)) {
@@ -326,14 +327,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
             return null;
         }
 
-        final Optional<SoftwareModule> result = modules.stream().filter(module -> module.getType().equals(type))
-                .findFirst();
-
-        if (result.isPresent()) {
-            return result.get();
-        }
-
-        return null;
+        return modules.stream().filter(module -> module.getType().equals(type)).findFirst().orElse(null);
     }
 
     @Override

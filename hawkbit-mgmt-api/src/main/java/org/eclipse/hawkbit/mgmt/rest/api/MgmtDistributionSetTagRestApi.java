@@ -129,7 +129,7 @@ public interface MgmtDistributionSetTagRestApi {
      * Handles the POST request to toggle the assignment of distribution sets by
      * the given tag id.
      *
-     * @param distributionsetTagIds
+     * @param distributionsetTagId
      *            the ID of the distribution set tag to retrieve
      * @param assignedDSRequestBodies
      *            list of distribution set ids to be toggled

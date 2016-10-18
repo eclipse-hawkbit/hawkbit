@@ -17,10 +17,10 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -96,8 +96,7 @@ public class JpaTagManagement implements TagManagement {
 
         final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
 
-        afterCommit
-                .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+        afterCommit.afterCommit(() -> eventBus.post(new TargetTagCreatedEvent(save)));
 
         return save;
     }
@@ -116,8 +115,7 @@ public class JpaTagManagement implements TagManagement {
         });
 
         final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository.save(targetTags));
-        afterCommit
-                .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+        afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new TargetTagCreatedEvent(tag))));
         return save;
     }
 
@@ -199,8 +197,7 @@ public class JpaTagManagement implements TagManagement {
 
         final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
 
-        afterCommit.afterCommit(
-                () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedEvent(save)));
         return save;
     }
 
@@ -219,8 +216,7 @@ public class JpaTagManagement implements TagManagement {
         }
         final List<DistributionSetTag> save = Collections
                 .unmodifiableList(distributionSetTagRepository.save(distributionSetTags));
-        afterCommit.afterCommit(
-                () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+        afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new DistributionSetTagCreatedEvent(tag))));
 
         return save;
     }

@@ -48,6 +48,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -934,13 +935,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        final List<Target> toAssign = new ArrayList<Target>();
-        toAssign.add(savedTarget);
-        final List<Target> toAssign2 = new ArrayList<Target>();
-        toAssign2.add(savedTarget2);
+        final List<Target> toAssign = Lists.newArrayList(savedTarget);
+        final List<Target> toAssign2 = Lists.newArrayList(savedTarget2);
 
-        assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.UNKNOWN);
         savedTarget = deploymentManagement.assignDistributionSet(savedSet, toAssign).getAssignedEntity().iterator()
                 .next();
         deploymentManagement.assignDistributionSet(savedSet2, toAssign2);

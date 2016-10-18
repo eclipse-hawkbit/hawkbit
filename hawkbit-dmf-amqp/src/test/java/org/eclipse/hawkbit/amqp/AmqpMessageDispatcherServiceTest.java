@@ -29,8 +29,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
-import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -202,10 +202,11 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                1L, TENANT, CONTROLLER_ID, 1L, AMQP_URI);
+                testTarget, 1L);
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
+        final Message sendMessage = createArgumentCapture(
+                cancelTargetAssignmentDistributionSetEvent.getTarget().getTargetInfo().getAddress());
         assertCancelMessage(sendMessage);
 
     }

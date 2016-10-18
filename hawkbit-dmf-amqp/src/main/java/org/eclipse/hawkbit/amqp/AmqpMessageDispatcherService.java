@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
-import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -125,12 +125,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @Subscribe
     public void targetCancelAssignmentToDistributionSet(
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
-        final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();
+        final String controllerId = cancelTargetAssignmentDistributionSetEvent.getTarget().getControllerId();
         final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
         final Message message = getMessageConverter().toMessage(actionId, createConnectorMessageProperties(
                 cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId, EventTopic.CANCEL_DOWNLOAD));
 
-        amqpSenderService.sendMessage(message, cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
+        amqpSenderService.sendMessage(message,
+                cancelTargetAssignmentDistributionSetEvent.getTarget().getTargetInfo().getAddress());
 
     }
 

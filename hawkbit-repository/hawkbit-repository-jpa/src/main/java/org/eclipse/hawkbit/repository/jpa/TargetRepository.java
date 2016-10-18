@@ -68,6 +68,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
+    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     void deleteByIdIn(final Collection<Long> targetIDs);
 
     /**
