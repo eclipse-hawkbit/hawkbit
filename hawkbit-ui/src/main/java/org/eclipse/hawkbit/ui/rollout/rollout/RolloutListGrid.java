@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -40,6 +39,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;

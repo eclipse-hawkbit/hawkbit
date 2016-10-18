@@ -13,8 +13,6 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.local.DistributionSetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.local.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
@@ -29,6 +27,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 
 import com.google.common.collect.Maps;
 

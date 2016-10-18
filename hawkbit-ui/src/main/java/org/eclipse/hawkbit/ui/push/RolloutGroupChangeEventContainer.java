@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 
 /**
  * EventHolder for {@link RolloutGroupChangeEvent}s.

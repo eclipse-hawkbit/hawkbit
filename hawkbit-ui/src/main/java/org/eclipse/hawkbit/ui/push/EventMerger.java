@@ -6,15 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.event;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
@@ -22,6 +20,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupPropertyCh
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
