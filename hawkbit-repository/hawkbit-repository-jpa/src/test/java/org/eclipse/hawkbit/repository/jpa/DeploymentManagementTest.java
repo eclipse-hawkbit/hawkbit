@@ -49,8 +49,11 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -469,8 +472,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
 
-        // give some chance to receive events asynchronously
-        Thread.sleep(1000);
         assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(10, TimeUnit.SECONDS));
     }
 
@@ -1014,6 +1015,18 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public static class DeploymentTestConfiguration {
 
         /**
+         * Sync EventBus for testing. So we don't need to wait every time till a
+         * event is incoming (normally asyncron). Without a syncron eventbus
+         * every test have to check (with a timeout) is the event arrived.
+         *
+         * @return eventbus bean
+         */
+        @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+        public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+            return new SimpleApplicationEventMulticaster();
+        }
+
+        /**
          * 
          * @return the EventHandlerStub bean.
          */
@@ -1037,6 +1050,23 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
         private CountDownLatch latch;
         private int expectedNumberOfEvents;
+
+        /**
+         * Sync EventBus for testing. So we don't need to wait every time till a
+         * event is incoming (normally asyncron). Without a syncron eventbus
+         * every test have to check (with a timeout) is the event arrived.
+         *
+         * @return eventbus bean
+         */
+        @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+        public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+            return new SimpleApplicationEventMulticaster();
+        }
+
+        @Bean
+        public ServiceMatcher serviceMatcher() {
+            return new ServiceMatcher();
+        }
 
         /**
          * @param expectedNumberOfEvents
