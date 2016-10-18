@@ -17,6 +17,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -78,7 +79,9 @@ public class WithSpringAuthorityRule implements TestRule {
                     authorities = annotation.authorities();
                 }
                 final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                        annotation.principal(), annotation.credentials(), authorities);
+                        new UserPrincipal(annotation.principal(), annotation.principal(), annotation.principal(),
+                                annotation.principal(), annotation.tenantId()),
+                        annotation.credentials(), authorities);
                 testingAuthenticationToken
                         .setDetails(new TenantAwareAuthenticationDetails(annotation.tenantId(), false));
                 return testingAuthenticationToken;
