@@ -234,6 +234,11 @@ public class JpaControllerManagement implements ControllerManagement {
         if (address != null) {
             mtargetInfo.setAddress(address.toString());
         }
+
+        if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
+            mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+        }
+
         return targetInfoRepository.save(mtargetInfo);
     }
 

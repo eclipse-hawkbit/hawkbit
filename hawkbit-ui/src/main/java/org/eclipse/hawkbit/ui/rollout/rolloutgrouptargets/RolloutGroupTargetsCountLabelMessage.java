@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -103,15 +103,13 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
 
         final StringBuilder message = new StringBuilder(i18n.get("label.target.filter.count"));
         message.append(rolloutUIState.getRolloutGroupTargetsTotalCount());
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
+
         if (totalTargetTableEnteries > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            message.append(HawkbitCommonUtil.SP_STRING_PIPE);
             message.append(i18n.get("label.filter.shown"));
             message.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
-        } else {
-            message.append(i18n.get("label.filter.shown"));
-            message.append(rolloutGroupTargetsListGrid.getContainerDataSource().size());
         }
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
+
         setCaption(message.toString());
     }
 }

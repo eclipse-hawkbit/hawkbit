@@ -219,7 +219,6 @@ public class JpaTagManagement implements TagManagement {
                 .unmodifiableList(distributionSetTagRepository.save(distributionSetTags));
         afterCommit.afterCommit(() -> save.forEach(tag -> eventPublisher
                 .publishEvent(new DistributionSetTagCreatedEvent(tag, applicationContext.getId()))));
-
         return save;
     }
 

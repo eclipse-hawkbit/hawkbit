@@ -8,14 +8,18 @@
  */
 package org.eclipse.hawkbit.repository.event.local;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.AssignmentResult;
 
 /**
- * An event for assignment ds tag.
+ ** An event for assignment assignment results.
+ *
+ * @param <E>
+ *            type of the assignment result
  */
-public class DistributionSetTagAssigmentResultEvent extends AssignmentResultEvent<DistributionSetTagAssignmentResult> {
+public class AssignmentResultEvent<E extends AssignmentResult<?>> extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
+    private final transient E assigmentResult;
 
     /**
      * Constructor.
@@ -25,9 +29,12 @@ public class DistributionSetTagAssigmentResultEvent extends AssignmentResultEven
      * @param tenant
      *            current
      */
-    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult,
-            final String tenant) {
-        super(assigmentResult, tenant);
+    public AssignmentResultEvent(final E assigmentResult, final String tenant) {
+        super(tenant);
+        this.assigmentResult = assigmentResult;
     }
 
+    public E getAssigmentResult() {
+        return assigmentResult;
+    }
 }

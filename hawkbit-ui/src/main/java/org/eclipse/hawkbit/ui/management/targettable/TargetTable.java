@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -172,13 +173,14 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     /**
-     * EventListener method which is called when a list of events is published.
-     * TenantAwareEvent types should not be mixed up.
+     * EventListener method which is called by the event bus to notify about a
+     * list of {@link TargetInfoUpdateEvent}.
      *
      * @param updatedTargets
      *            list of updated targets
      */
     private void onTargetUpdateEvents(final List<Target> updatedTargets) {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
 
@@ -187,6 +189,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         } else {
             updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
+            targetContainer.commit();
         }
 
         // workaround until push is available for action

@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -100,13 +100,11 @@ public class TargetFilterCountMessageLabel extends Label {
                 setDescription(null);
             }
             targetMessage.append(totalTargets);
-            targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
-            targetMessage.append(i18n.get("label.filter.shown"));
+
             if (totalTargets > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+                targetMessage.append(HawkbitCommonUtil.SP_STRING_PIPE);
+                targetMessage.append(i18n.get("label.filter.shown"));
                 targetMessage.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
-            } else {
-                targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
-                targetMessage.append(totalTargets);
             }
 
             setCaption(targetMessage.toString());

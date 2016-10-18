@@ -427,7 +427,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("registered")))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
                 // idB
                 .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")]._links.self.href",
@@ -436,7 +436,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].description", contains(idB)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].controllerId", contains(idB)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].updateStatus", contains("registered")))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
                 // idC
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")]._links.self.href",
@@ -445,7 +445,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("registered")))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()));
     }
 
@@ -471,7 +471,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("unknown")));
+                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("registered")));
     }
 
     @Test
@@ -500,7 +500,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("registered")))
                 // idB
                 .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")]._links.self.href",
                         contains(linksHrefPrefix + idD)))
@@ -508,7 +508,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].description", contains(idD)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].controllerId", contains(idD)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].updateStatus", contains("unknown")))
+                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].updateStatus", contains("registered")))
                 // idC
                 .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")]._links.self.href",
                         contains(linksHrefPrefix + idE)))
@@ -516,7 +516,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].description", contains(idE)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].controllerId", contains(idE)))
                 .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].updateStatus", contains("unknown")));
+                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].updateStatus", contains("registered")));
     }
 
     @Test

@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -19,8 +23,6 @@ import org.slf4j.LoggerFactory;
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
  * {@link TenantSecurityToken}.
- *
- *
  *
  */
 public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractControllerAuthenticationFilter {
@@ -77,8 +79,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     @Override
     public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
         // retrieve the common name header and the authority name header from
-        // the http request and
-        // combine them together
+        // the http request and combine them together
         final String commonNameValue = secruityToken.getHeader(caCommonNameHeader);
         final String knownSslIssuerConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
@@ -97,18 +98,20 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+    public Object getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
         final String authorityNameConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
         String controllerId = secruityToken.getControllerId();
         // in case of legacy download artifact, the controller ID is not in the
-        // URL path, so then
-        // we just use the common name header
+        // URL path, so then we just use the common name header
         if (controllerId == null || "anonymous".equals(controllerId)) {
             controllerId = secruityToken.getHeader(caCommonNameHeader);
         }
 
-        return new HeaderAuthentication(controllerId, authorityNameConfigurationValue);
+        List<String> knownHashes = splitMultiHashBySemicolon(authorityNameConfigurationValue);
+
+        final String cntlId = controllerId;
+        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(cntlId, hashItem)).collect(Collectors.toSet());
     }
 
     /**
@@ -117,12 +120,15 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * It's ok if we find the the hash in any the trusted CA chain to accept
      * this request for this tenant.
      */
-    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHash) {
+    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHashes) {
+        // there may be several knownIssuerHashes configured for the tenant
+        List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
+
         // iterate over the headers until we get a null header.
         int iHeader = 1;
         String foundHash;
         while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
-            if (foundHash.equals(knownIssuerHash)) {
+            if (knownHashes.contains(foundHash)) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
@@ -147,5 +153,9 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
             return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(
                     TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue());
         }
+    }
+
+    private static List<String> splitMultiHashBySemicolon(String knownIssuerHashes) {
+        return Arrays.asList(knownIssuerHashes.split(";"));
     }
 }
