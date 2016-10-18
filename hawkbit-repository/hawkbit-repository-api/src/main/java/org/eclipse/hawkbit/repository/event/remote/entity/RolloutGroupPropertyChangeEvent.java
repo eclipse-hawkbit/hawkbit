@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event of {@link RolloutGroup} proeprty changes.
+ * Defines the remote event of {@link RolloutGroup} property changes.
  */
 public class RolloutGroupPropertyChangeEvent extends RemotePropertyChangeEvent<RolloutGroup> {
 

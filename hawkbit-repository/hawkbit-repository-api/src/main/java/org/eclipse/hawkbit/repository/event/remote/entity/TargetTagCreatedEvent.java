@@ -14,8 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the {@link RemoteEntityEvent} for creation of a new {@link TargetTag}
- * .
+ * Defines the remote event for the creation of a new {@link TargetTag}.
  *
  */
 public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> {

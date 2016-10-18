@@ -951,12 +951,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     *
+     * 
      *
      */
-    private class DeploymentResult
-
-    {
+    private class DeploymentResult {
         final List<Long> deployedTargetIDs = new ArrayList<Long>();
         final List<Long> undeployedTargetIDs = new ArrayList<Long>();
         final List<Long> distributionSetIDs = new ArrayList<Long>();
@@ -981,57 +979,52 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         }
 
-        /**
-         * @return the distributionSetIDs
-         */
         public List<Long> getDistributionSetIDs() {
             return distributionSetIDs;
         }
 
-        /**
-         * @return
-         */
         public List<Long> getDeployedTargetIDs() {
             return deployedTargetIDs;
         }
 
-        /**
-         * @return
-         */
         public List<Target> getUndeployedTargets() {
             return undeployedTargets;
         }
 
-        /**
-         * @return
-         */
         public List<DistributionSet> getDistributionSets() {
             return distributionSets;
         }
 
-        /**
-         * @return
-         */
         public List<Target> getDeployedTargets() {
             return deployedTargets;
         }
 
-        /**
-         * @return the undeployedTargetIDs
-         */
         public List<Long> getUndeployedTargetIDs() {
             return undeployedTargetIDs;
         }
 
     }
 
+    /**
+     * 
+     * Test configuration for EventHandlerStub and CancelEventHandlerStub.
+     *
+     */
     public static class DeploymentTestConfiguration {
 
+        /**
+         * 
+         * @return the EventHandlerStub bean.
+         */
         @Bean
         public EventHandlerStub eventHandlerStubBean() {
             return new EventHandlerStub();
         }
 
+        /**
+         * 
+         * @return the CancelEventHandlerStub bean.
+         */
         @Bean
         public CancelEventHandlerStub bancelEventHandlerStubBean() {
             return new CancelEventHandlerStub();
