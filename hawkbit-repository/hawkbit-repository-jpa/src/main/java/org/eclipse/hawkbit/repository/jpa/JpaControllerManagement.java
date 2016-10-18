@@ -306,7 +306,6 @@ public class JpaControllerManagement implements ControllerManagement {
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long action) {
         LOG.debug("addUpdateActionStatus for action {}", action);
 
-        // TODO kaizimmerm: open bug
         final JpaAction mergedAction = actionRepository.findById(action);
         JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
         // check for a potential DOS attack
@@ -371,8 +370,6 @@ public class JpaControllerManagement implements ControllerManagement {
         if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
                 .equals(targetInfo.getInstalledDistributionSet().getId())) {
             targetInfo.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-        } else {
-            System.out.println("BÄM!");
         }
 
         targetInfoRepository.save(targetInfo);
