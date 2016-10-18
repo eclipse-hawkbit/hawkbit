@@ -9,11 +9,13 @@
 package org.eclipse.hawkbit.ui.common;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -153,6 +155,20 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
         return trimAndFormatDetail(userPrincipal.getTenant(), 8);
+    }
+
+    /**
+     * @return logged in users {@link Email} address
+     */
+    public static Optional<String> getCurrentUserEmail() {
+        final UserDetails userDetails = getCurrentUser();
+        if (!(userDetails instanceof UserPrincipal)) {
+            return Optional.empty();
+        }
+
+        final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+
+        return Optional.ofNullable(userPrincipal.getEmail());
     }
 
     private static UserDetails getCurrentUser() {

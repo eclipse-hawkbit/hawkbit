@@ -28,9 +28,12 @@ import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -184,11 +187,20 @@ public final class DashboardMenu extends CustomComponent {
         return links;
     }
 
+    private static Resource getImage() {
+        return UserDetailsFormatter.getCurrentUserEmail().map(email -> {
+            return (Resource) new ExternalResource("https://www.gravatar.com/avatar/"
+                    + DigestUtils.md5DigestAsHex(email.getBytes()) + ".jpg?s=56&r=g&d=mm");
+        }).orElse(new ThemeResource("images/profile-pic-57px.jpg"));
+
+    }
+
     private Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
-        final MenuItem settingsItem = settings.addItem("", new ThemeResource("images/profile-pic-57px.jpg"), null);
+
+        final MenuItem settingsItem = settings.addItem("", getImage(), null);
 
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
         final String formattedUsername = UserDetailsFormatter.formatCurrentUsername();
