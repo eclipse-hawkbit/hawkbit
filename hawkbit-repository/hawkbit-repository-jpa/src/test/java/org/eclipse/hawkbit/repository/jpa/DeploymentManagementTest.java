@@ -458,13 +458,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         } catch (final IncompleteDistributionSetException ex) {
         }
 
+        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(1, TimeUnit.SECONDS);
+        assertThat(events).as("events should be empty").isEmpty();
+
         incomplete.addModule(os);
         final DistributionSet nowComplete = distributionSetManagement.updateDistributionSet(incomplete);
-
-        // give some chance to receive events asynchronously
-        Thread.sleep(1000);
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(1, TimeUnit.MILLISECONDS);
-        assertThat(events).as("events should be empty").isEmpty();
 
         eventHandlerStub.setExpectedNumberOfEvents(10);
 
