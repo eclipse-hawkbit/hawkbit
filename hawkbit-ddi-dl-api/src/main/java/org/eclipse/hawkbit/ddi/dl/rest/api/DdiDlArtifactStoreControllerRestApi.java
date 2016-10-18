@@ -32,8 +32,8 @@ public interface DdiDlArtifactStoreControllerRestApi {
      *            name of the client
      * @param fileName
      *            to search for
-     * @param targetid
-     *            of authenticated target
+     * @param principal
+     *            the authentication principal stored in the security context
      *
      * @return response of the servlet which in case of success is status code
      *         {@link HttpStatus#OK} or in case of partial download
@@ -43,7 +43,7 @@ public interface DdiDlArtifactStoreControllerRestApi {
             + "/{fileName}")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
-            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid);
+            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final Object principal);
 
     /**
      * Handles GET MD5 checksum file download request.

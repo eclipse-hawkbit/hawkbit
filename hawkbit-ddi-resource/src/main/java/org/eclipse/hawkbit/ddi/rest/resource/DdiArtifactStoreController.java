@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
+import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -70,7 +71,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
 
     @Override
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
-            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid) {
+            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final Object principal) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
@@ -92,9 +93,11 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
 
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous
-            if (targetid != null && !"anonymous".equals(targetid)) {
+            if (principal instanceof UserPrincipal && ((UserPrincipal) principal).getUsername() != null
+                    && !"anonymous".equals(((UserPrincipal) principal).getUsername())) {
                 final ActionStatus actionStatus = checkAndReportDownloadByTarget(
-                        requestResponseContextHolder.getHttpServletRequest(), targetid, artifact);
+                        requestResponseContextHolder.getHttpServletRequest(), ((UserPrincipal) principal).getUsername(),
+                        artifact);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
