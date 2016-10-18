@@ -50,9 +50,6 @@ public class SimulatedDeviceFactory {
      * @param gatewayToken
      *            the gatewayToken to be used to authenticate
      *            {@link DDISimulatedDevice}s at the endpoint
-     * @param pollImmediatly
-     *            <code>true</code> if an immediate message should be send to
-     *            update server
      * @return the created simulated device
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol,
