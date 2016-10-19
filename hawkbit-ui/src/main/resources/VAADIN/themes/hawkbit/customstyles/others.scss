@@ -178,7 +178,7 @@
   }
 
   .statusIconLightBlue {
-    color: $bosch-color-light-blue;
+    color: $signal-light-blue-color;
   }
 
   .v-button-statusIconLightBlue:after {
@@ -219,7 +219,7 @@
 	  pointer-events: auto !important;
    } 
   	.blueSpinner{
-	  @include valo-spinner($size: $v-font-size--small,$color: $bosch-color-light-blue);
+	  @include valo-spinner($size: $v-font-size--small,$color: $signal-light-blue-color);
 	  pointer-events: auto !important;
    } 
 

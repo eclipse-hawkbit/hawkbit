@@ -190,6 +190,10 @@ public final class UIComponentIdProvider {
      */
     public static final String REGISTERED_STATUS_ICON = "registered.status.icon";
     /**
+     * OVERDUE_STATUS_ICON ID.
+     */
+    public static final String OVERDUE_STATUS_ICON = "overdue.status.icon";
+    /**
      * DROP filter icon id.
      */
     public static final String TARGET_DROP_FILTER_ICON = "target.drop.filter.icon";
