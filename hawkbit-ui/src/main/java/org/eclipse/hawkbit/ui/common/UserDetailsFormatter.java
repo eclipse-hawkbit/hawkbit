@@ -158,7 +158,7 @@ public final class UserDetailsFormatter {
     }
 
     /**
-     * @return logged in users {@link Email} address
+     * @return logged in users Email address
      */
     public static Optional<String> getCurrentUserEmail() {
         final UserDetails userDetails = getCurrentUser();
