@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.RemoteIdEvent;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

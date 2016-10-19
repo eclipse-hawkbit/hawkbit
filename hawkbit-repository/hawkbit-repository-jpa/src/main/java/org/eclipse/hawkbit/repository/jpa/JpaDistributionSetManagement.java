@@ -27,8 +27,7 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.event.local.DistributionSetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -153,9 +152,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     Collections.emptyList(), myTag);
         }
 
-        final DistributionSetTagAssignmentResult resultAssignment = result;
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new DistributionSetTagAssigmentResultEvent(resultAssignment, tenantAware.getCurrentTenant())));
         // no reason to persist the tag
         entityManager.detach(myTag);
         return result;
@@ -707,17 +703,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         allDs.forEach(ds -> ds.addTag(tag));
 
-        final List<DistributionSet> save = Collections.unmodifiableList(distributionSetRepository.save(allDs));
-
-        afterCommit.afterCommit(() -> {
-
-            final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
-                    save, Collections.emptyList(), tag);
-            eventPublisher
-                    .publishEvent(new DistributionSetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant()));
-        });
-
-        return save;
+        return Collections.unmodifiableList(distributionSetRepository.save(allDs));
     }
 
     @Override

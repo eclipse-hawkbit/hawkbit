@@ -8,19 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import java.util.Map;
-
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event of {@link RolloutGroup} property changes.
+ * Defines the remote event of updated a {@link RolloutGroup}.
  */
-public class RolloutGroupPropertyChangeEvent extends RemotePropertyChangeEvent<RolloutGroup> {
+public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
 
-    private static final long serialVersionUID = 4026477044419472686L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for json serialization.
@@ -29,35 +27,29 @@ public class RolloutGroupPropertyChangeEvent extends RemotePropertyChangeEvent<R
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
-     * @param changeSetValues
-     *            the changeSetValues
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected RolloutGroupPropertyChangeEvent(@JsonProperty("tenant") final String tenant,
+    protected RolloutGroupUpdatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends RolloutGroup> entityClass,
-            @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClass, changeSetValues, applicationId);
+        super(tenant, entityId, entityClass, applicationId);
     }
 
     /**
-     * Constructor.
+     * Constructor
      * 
-     * @param entity
-     *            the entity
-     * @param changeSetValues
-     *            the changeSetValues
+     * @param rolloutGroup
+     *            the updated rolloutGroup
      * @param applicationId
      *            the origin application id
      */
-    public RolloutGroupPropertyChangeEvent(final RolloutGroup entity, final Map<String, PropertyChange> changeSetValues,
-            final String applicationId) {
-        super(entity, changeSetValues, applicationId);
+    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final String applicationId) {
+        super(rolloutGroup, applicationId);
     }
 
 }

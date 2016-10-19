@@ -6,17 +6,21 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.local;
+package org.eclipse.hawkbit.ui.push.event;
+
+import org.eclipse.hawkbit.repository.event.local.LocalTenantAwareEvent;
 
 /**
  * TenantAwareEvent declaration for the UI to notify the UI that a rollout has
  * been changed.
  * 
+ *
  */
-public class RolloutChangeEvent extends LocalTenantAwareEvent {
+public class RolloutGroupChangeEvent extends LocalTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
     private final Long rolloutId;
+    private final Long rolloutGroupId;
 
     /**
      * Constructor.
@@ -25,13 +29,20 @@ public class RolloutChangeEvent extends LocalTenantAwareEvent {
      *            the tenant of the event
      * @param rolloutId
      *            the ID of the rollout which has been changed
+     * @param rolloutGroupId
+     *            the ID of the rollout group which has been changed
      */
-    public RolloutChangeEvent(final String tenant, final Long rolloutId) {
+    public RolloutGroupChangeEvent(final String tenant, final Long rolloutId, final Long rolloutGroupId) {
         super(tenant);
         this.rolloutId = rolloutId;
+        this.rolloutGroupId = rolloutGroupId;
     }
 
     public Long getRolloutId() {
         return rolloutId;
+    }
+
+    public Long getRolloutGroupId() {
+        return rolloutGroupId;
     }
 }

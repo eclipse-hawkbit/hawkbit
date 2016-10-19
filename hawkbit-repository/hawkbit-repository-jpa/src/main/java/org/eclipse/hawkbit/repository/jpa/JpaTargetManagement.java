@@ -30,8 +30,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.local.TargetTagAssigmentResultEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -349,8 +348,6 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            afterCommit.afterCommit(() -> eventPublisher
-                    .publishEvent(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
             return result;
         }
 
@@ -360,9 +357,6 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
                 allTargets.size(), 0, Collections.unmodifiableList(targetRepository.save(allTargets)),
                 Collections.emptyList(), tag);
-
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -377,16 +371,7 @@ public class JpaTargetManagement implements TargetManagement {
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
         allTargets.forEach(target -> target.addTag(tag));
-        final List<Target> save = Collections.unmodifiableList(targetRepository.save(allTargets));
-
-        afterCommit.afterCommit(() -> {
-            final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
-                    Collections.emptyList(), tag);
-            eventPublisher
-                    .publishEvent(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
-        });
-
-        return save;
+        return Collections.unmodifiableList(targetRepository.save(allTargets));
     }
 
     private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
@@ -395,14 +380,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         toUnassign.forEach(target -> target.removeTag(tag));
 
-        final List<Target> save = Collections.unmodifiableList(targetRepository.save(toUnassign));
-        afterCommit.afterCommit(() -> {
-            final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
-                    Collections.emptyList(), save, tag);
-            eventPublisher
-                    .publishEvent(new TargetTagAssigmentResultEvent(assigmentResult, tenantAware.getCurrentTenant()));
-        });
-        return save;
+        return Collections.unmodifiableList(targetRepository.save(toUnassign));
     }
 
     @Override

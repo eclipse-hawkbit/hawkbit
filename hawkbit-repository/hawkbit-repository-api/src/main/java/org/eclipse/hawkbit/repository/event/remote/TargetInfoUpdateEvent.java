@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 

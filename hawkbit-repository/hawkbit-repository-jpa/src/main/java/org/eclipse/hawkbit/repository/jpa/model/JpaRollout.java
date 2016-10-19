@@ -28,10 +28,9 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -215,8 +214,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
     }
 

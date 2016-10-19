@@ -17,11 +17,11 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
@@ -73,6 +74,9 @@ public class JpaTagManagement implements TagManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Override
     public TargetTag findTargetTag(final String name) {
@@ -135,8 +139,8 @@ public class JpaTagManagement implements TagManagement {
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
 
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new TargetTagDeletedEvent(tenantAware.getCurrentTenant(), tag.getId(), applicationContext.getId())));
 
     }
 
@@ -239,8 +243,9 @@ public class JpaTagManagement implements TagManagement {
 
         distributionSetTagRepository.deleteByName(tagName);
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new DistributionSetTagDeletedEvent(tag, EventPublisherHolder.getInstance().getApplicationId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new DistributionSetTagDeletedEvent(tenantAware.getCurrentTenant(),
+                        tag.getId(), applicationContext.getId())));
     }
 
     @Override

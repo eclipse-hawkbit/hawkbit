@@ -6,22 +6,22 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.event;
+package org.eclipse.hawkbit.ui.push;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
-import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -81,16 +81,16 @@ public class EventMerger {
         if (event instanceof ActionCreatedEvent) {
             rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
             rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
-        } else if (event instanceof ActionPropertyChangeEvent) {
-            rolloutId = getRolloutId(((ActionPropertyChangeEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionPropertyChangeEvent) event).getEntity().getRolloutGroup());
-        } else if (event instanceof RolloutPropertyChangeEvent) {
-            rolloutId = ((RolloutPropertyChangeEvent) event).getEntityId();
+        } else if (event instanceof ActionUpdatedEvent) {
+            rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
+            rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
+        } else if (event instanceof RolloutUpdatedEvent) {
+            rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
             rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
             rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
-        } else if (event instanceof RolloutGroupPropertyChangeEvent) {
-            final RolloutGroup rolloutGroup = ((RolloutGroupPropertyChangeEvent) event).getEntity();
+        } else if (event instanceof RolloutGroupUpdatedEvent) {
+            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
             rolloutId = rolloutGroup.getRollout().getId();
             rolloutGroupId = rolloutGroup.getId();
         }

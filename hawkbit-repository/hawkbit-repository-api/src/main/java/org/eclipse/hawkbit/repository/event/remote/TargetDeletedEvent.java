@@ -6,43 +6,35 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.remote.entity;
+package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
+import org.eclipse.hawkbit.repository.model.Target;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An base definition class for an event which contains an id.
  *
+ * Defines the remote event of deleting a {@link Target}.
  */
-public class RemoteIdEvent extends RemoteTenantAwareEvent {
+public class TargetDeletedEvent extends RemoteIdEvent {
 
     private static final long serialVersionUID = 1L;
-
-    @JsonProperty(required = true)
-    private final Long entityId;
 
     /**
      * Constructor for json serialization.
      * 
-     * @param entityId
-     *            the entity Id
      * @param tenant
      *            the tenant
+     * @param entityId
+     *            the entity id
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected RemoteIdEvent(@JsonProperty("entityId") final Long entityId, @JsonProperty("tenant") final String tenant,
-            @JsonProperty("originService") final String applicationId) {
+    public TargetDeletedEvent(@JsonProperty("tenant") final String tenant,
+            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
         super(entityId, tenant, applicationId);
-        this.entityId = entityId;
-    }
-
-    public Long getEntityId() {
-        return entityId;
     }
 
 }
