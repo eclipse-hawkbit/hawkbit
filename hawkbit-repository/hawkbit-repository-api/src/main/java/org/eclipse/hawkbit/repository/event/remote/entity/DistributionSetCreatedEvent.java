@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Defines the the remote of creating a new {@link DistributionSet}.
  *
  */
-public class DistributionCreatedEvent extends RemoteEntityEvent<DistributionSet> {
+public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class DistributionCreatedEvent extends RemoteEntityEvent<DistributionSet>
      *            the origin application id
      */
     @JsonCreator
-    protected DistributionCreatedEvent(@JsonProperty("tenant") final String tenant,
+    protected DistributionSetCreatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends DistributionSet> entityClass,
             @JsonProperty("originService") final String applicationId) {
@@ -49,7 +49,7 @@ public class DistributionCreatedEvent extends RemoteEntityEvent<DistributionSet>
      * @param applicationId
      *            the origin application id
      */
-    public DistributionCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
+    public DistributionSetCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
         super(distributionSet, applicationId);
     }
 

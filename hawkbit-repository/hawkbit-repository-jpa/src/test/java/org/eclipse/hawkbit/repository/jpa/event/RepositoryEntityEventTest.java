@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -111,7 +111,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 
-        final DistributionCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionCreatedEvent.class, 1,
+        final DistributionSetCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionSetCreatedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(dsCreatedEvent).isNotNull();
         assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(createDistributionSet.getId());

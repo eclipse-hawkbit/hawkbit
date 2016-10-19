@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
@@ -55,7 +55,7 @@ public class HawkbitEventProvider implements UIEventProvider {
 
         EVENTS.put(DistributionSetUpdateEvent.class, DistributionSetUpdatedEventContainer.class);
         EVENTS.put(DistributionDeletedEvent.class, DistributionDeletedEventContainer.class);
-        EVENTS.put(DistributionCreatedEvent.class, DistributionCreatedEventContainer.class);
+        EVENTS.put(DistributionSetCreatedEvent.class, DistributionCreatedEventContainer.class);
 
         EVENTS.put(RolloutGroupChangeEvent.class, RolloutGroupChangeEventContainer.class);
         EVENTS.put(RolloutChangeEvent.class, RolloutChangeEventContainer.class);

@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 
 /**
- * EventHolder for {@link DistributionCreatedEvent}s.
+ * EventHolder for {@link DistributionSetCreatedEvent}s.
  *
  */
-public class DistributionCreatedEventContainer implements EventContainer<DistributionCreatedEvent> {
-    private final List<DistributionCreatedEvent> events;
+public class DistributionCreatedEventContainer implements EventContainer<DistributionSetCreatedEvent> {
+    private final List<DistributionSetCreatedEvent> events;
 
-    DistributionCreatedEventContainer(final List<DistributionCreatedEvent> events) {
+    DistributionCreatedEventContainer(final List<DistributionSetCreatedEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<DistributionCreatedEvent> getEvents() {
+    public List<DistributionSetCreatedEvent> getEvents() {
         return events;
     }
 

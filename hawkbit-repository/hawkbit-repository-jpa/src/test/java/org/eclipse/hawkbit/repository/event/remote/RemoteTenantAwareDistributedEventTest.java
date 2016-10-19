@@ -12,15 +12,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.junit.Before;
@@ -90,35 +82,6 @@ public class RemoteTenantAwareDistributedEventTest extends AbstractJpaIntegratio
         final DownloadProgressEvent remoteEvent = (DownloadProgressEvent) abstractMessageConverter.fromMessage(message,
                 DownloadProgressEvent.class);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
-    }
-
-    @Test
-    @Description("Verifies that the rollout reloading by remote events works")
-    public void reloadRolloutGroupCreatedEventByRemoteEvent() throws JsonProcessingException {
-
-        targetManagement.createTarget(entityFactory.generateTarget("12345"));
-        final DistributionSet ds = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2", "incomplete",
-                        distributionSetManagement.findDistributionSetTypeByKey("os"), null));
-
-        final Rollout rollout = entityFactory.generateRollout();
-        rollout.setName("exampleRollout");
-        rollout.setTargetFilterQuery("controllerId==*");
-        rollout.setDistributionSet(ds);
-
-        final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
-                new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")
-                        .build());
-        final Rollout findRollout = rolloutManagement.findRolloutById(entity.getId());
-
-        final RolloutGroupCreatedEvent createdEvent = new RolloutGroupCreatedEvent(findRollout.getTenant(),
-                findRollout.getId(), findRollout.getRolloutGroups().get(0).getId(), "Node");
-
-        final Message<?> message = createMessage(createdEvent);
-
-        final RolloutGroupCreatedEvent remoteEvent = (RolloutGroupCreatedEvent) abstractMessageConverter
-                .fromMessage(message, RolloutGroupCreatedEvent.class);
-        assertThat(createdEvent).isEqualTo(remoteEvent);
     }
 
     private Message<String> createMessage(final Object event) throws JsonProcessingException {

@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.cache;
 
-import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -44,14 +45,14 @@ public class CacheWriteNotify {
      *
      * @param rolloutId
      *            the ID of the rollout the group has been created
-     * @param rolloutGroupId
-     *            the ID of the rollout group which has been created
+     * @param rolloutGroup
+     *            rollout group which has been created
      * @param totalRolloutGroup
      *            the total number of rollout groups for this rollout
      * @param createdRolloutGroup
      *            the number of already created groups of the rollout
      */
-    public void rolloutGroupCreated(final Long rolloutId, final Long rolloutGroupId, final int totalRolloutGroup,
+    public void rolloutGroupCreated(final Long rolloutId, final RolloutGroup rolloutGroup, final int totalRolloutGroup,
             final int createdRolloutGroup) {
 
         final Cache cache = cacheManager.getCache(JpaRollout.class.getName());
@@ -69,8 +70,7 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupCreated);
         }
 
-        eventPublisher.publishEvent(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), rolloutId,
-                rolloutGroupId, applicationContext.getId()));
+        eventPublisher.publishEvent(new RolloutGroupCreatedEvent(rolloutGroup, applicationContext.getId()));
     }
 
 }

@@ -35,7 +35,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -350,7 +350,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         publishEventWithEventPublisher(
-                new DistributionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                new DistributionSetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

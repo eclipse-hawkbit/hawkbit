@@ -13,9 +13,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
