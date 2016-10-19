@@ -303,22 +303,22 @@ public class JpaControllerManagement implements ControllerManagement {
      * @param action
      * @return
      */
-    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long action) {
-        LOG.debug("addUpdateActionStatus for action {}", action);
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long actionId) {
+        LOG.debug("addUpdateActionStatus for action {}", actionId);
 
-        final JpaAction mergedAction = actionRepository.findById(action);
-        JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
+        final JpaAction action = actionRepository.findById(actionId);
+        JpaTarget target = (JpaTarget) action.getTarget();
         // check for a potential DOS attack
-        checkForToManyStatusEntries(mergedAction);
+        checkForToManyStatusEntries(action);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            mergedTarget = DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.ERROR, false,
-                    targetInfoRepository, entityManager);
-            handleErrorOnAction(mergedAction, mergedTarget);
+            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false, targetInfoRepository,
+                    entityManager);
+            handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(mergedTarget, mergedAction);
+            handleFinishedAndStoreInTargetStatus(target, action);
             break;
         case CANCELED:
         case WARNING:
@@ -329,9 +329,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, mergedTarget.getId());
+        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
 
-        return actionRepository.save(mergedAction);
+        return actionRepository.save(action);
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
