@@ -8,17 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import java.util.Map;
-
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event of {@link Rollout} of property changes.
+ * Defines the remote event of updated a {@link Rollout}.
  */
-public class RolloutPropertyChangeEvent extends RemotePropertyChangeEvent<Rollout> {
+public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> {
     private static final long serialVersionUID = 1056221355466373514L;
 
     /**
@@ -28,35 +26,29 @@ public class RolloutPropertyChangeEvent extends RemotePropertyChangeEvent<Rollou
      *            the tenant
      * @param entityId
      *            the entity id
-     * @param entityClassName
+     * @param entityClass
      *            the entity entityClassName
-     * @param changeSetValues
-     *            the changeSetValues
      * @param applicationId
      *            the origin application id
      */
     @JsonCreator
-    protected RolloutPropertyChangeEvent(@JsonProperty("tenant") final String tenant,
+    protected RolloutUpdatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
             @JsonProperty("entityClass") final Class<? extends Rollout> entityClass,
-            @JsonProperty("changeSetValues") final Map<String, PropertyChange> changeSetValues,
             @JsonProperty("originService") final String applicationId) {
-        super(tenant, entityId, entityClass, changeSetValues, applicationId);
+        super(tenant, entityId, entityClass, applicationId);
     }
 
     /**
-     * Constructor.
+     * Constructor
      * 
-     * @param entity
-     *            the entity
-     * @param changeSetValues
-     *            the changeSetValues
+     * @param rollout
+     *            the updated rollout
      * @param applicationId
      *            the origin application id
      */
-    public RolloutPropertyChangeEvent(final Rollout entity, final Map<String, PropertyChange> changeSetValues,
-            final String applicationId) {
-        super(entity, changeSetValues, applicationId);
+    public RolloutUpdatedEvent(final Rollout rollout, final String applicationId) {
+        super(rollout, applicationId);
     }
 
 }

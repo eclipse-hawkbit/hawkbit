@@ -13,7 +13,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- * Loads a entity e.g. if a remote event is received.
+ * Loads an entity e.g. if a remote event is received.
  */
 public interface EventEntityManager {
 

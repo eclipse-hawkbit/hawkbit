@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the the remote for update a {@link DistributionSet}.
+ * Defines the remote event for updating a {@link DistributionSet}.
  *
  */
 public class DistributionSetUpdateEvent extends RemoteEntityEvent<DistributionSet> {

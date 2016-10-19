@@ -8,18 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import java.util.Map;
-
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event of updated a{@link RolloutGroup}.
+ * Defines the remote event of updated a {@link RolloutGroup}.
  */
 public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for json serialization.
@@ -34,9 +33,9 @@ public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
      *            the origin application id
      */
     @JsonCreator
-    protected ActionUpdatedEvent(@JsonProperty("tenant") final String tenant,
+    protected RolloutGroupUpdatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends Action> entityClass,
+            @JsonProperty("entityClass") final Class<? extends RolloutGroup> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
     }
@@ -44,13 +43,13 @@ public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
     /**
      * Constructor
      * 
-     * @param action
-     *            the updated action
+     * @param rolloutGroup
+     *            the updated rolloutGroup
      * @param applicationId
      *            the origin application id
      */
-    public ActionUpdatedEvent(final Action action, final String applicationId) {
-        super(action, applicationId);
+    public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final String applicationId) {
+        super(rolloutGroup, applicationId);
     }
 
 }

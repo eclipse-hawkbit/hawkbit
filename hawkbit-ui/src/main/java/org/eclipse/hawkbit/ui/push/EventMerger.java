@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
@@ -84,13 +84,13 @@ public class EventMerger {
         } else if (event instanceof ActionUpdatedEvent) {
             rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
             rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
-        } else if (event instanceof RolloutPropertyChangeEvent) {
-            rolloutId = ((RolloutPropertyChangeEvent) event).getEntityId();
+        } else if (event instanceof RolloutUpdatedEvent) {
+            rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
             rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
             rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
-        } else if (event instanceof RolloutGroupPropertyChangeEvent) {
-            final RolloutGroup rolloutGroup = ((RolloutGroupPropertyChangeEvent) event).getEntity();
+        } else if (event instanceof RolloutGroupUpdatedEvent) {
+            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
             rolloutId = rolloutGroup.getRollout().getId();
             rolloutGroupId = rolloutGroup.getId();
         }

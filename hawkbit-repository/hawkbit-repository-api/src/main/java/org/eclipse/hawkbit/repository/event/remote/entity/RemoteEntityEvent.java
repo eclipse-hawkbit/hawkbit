@@ -17,8 +17,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * A base definition class for an remote event which contains a tenant aware
- * base entity.
+ * A base definition class for remote events which contain a tenant aware base
+ * entity.
  *
  * @param <E>
  *            the type of the entity
