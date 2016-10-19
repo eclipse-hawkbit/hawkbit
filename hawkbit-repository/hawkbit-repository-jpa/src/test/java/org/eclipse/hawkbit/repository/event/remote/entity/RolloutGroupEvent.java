@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.util.UUID;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -41,20 +43,21 @@ public class RolloutGroupEvent extends AbstractRemoteEntityEventTest<RolloutGrou
 
     @Override
     protected RolloutGroup createEntity() {
-        targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        targetManagement.createTarget(entityFactory.generateTarget(UUID.randomUUID().toString()));
         final DistributionSet ds = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2", "incomplete",
-                        distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+                .createDistributionSet(entityFactory.generateDistributionSet(UUID.randomUUID().toString(), "2",
+                        "incomplete", distributionSetManagement.findDistributionSetTypeByKey("os"), null));
 
         final Rollout rollout = entityFactory.generateRollout();
-        rollout.setName("exampleRollout");
+        rollout.setName(UUID.randomUUID().toString());
         rollout.setTargetFilterQuery("controllerId==*");
         rollout.setDistributionSet(ds);
 
         final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
                 new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")
                         .build());
-        return entity.getRolloutGroups().get(0);
+
+        return rolloutManagement.findRolloutById(entity.getId()).getRolloutGroups().get(0);
     }
 
 }

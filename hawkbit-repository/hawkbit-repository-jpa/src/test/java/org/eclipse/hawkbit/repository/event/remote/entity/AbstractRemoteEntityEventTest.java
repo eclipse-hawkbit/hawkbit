@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -60,9 +61,19 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
 
         final BaseEntity baseEntity = createEntity();
 
-        RemoteEntityEvent<?> event;
+        Constructor<?> constructor = null;
+        for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
+            if (constructors.getParameterCount() == 2) {
+                constructor = constructors;
+            }
+        }
+
+        if (constructor == null) {
+            throw new IllegalArgumentException("No suitable constructor foundes");
+        }
+
         try {
-            event = eventType.getDeclaredConstructor(Object.class, String.class).newInstance(baseEntity, "Node");
+            final RemoteEntityEvent<?> event = (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
             assertThat(event.getEntity()).isSameAs(baseEntity);
 
             final Message<?> message = createMessage(event);
@@ -70,7 +81,7 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
                     .fromMessage(message, eventType);
             assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException | JsonProcessingException e) {
+                | SecurityException | JsonProcessingException e) {
             fail("Exception should not happen " + e.getMessage());
         }
     }

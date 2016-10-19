@@ -43,8 +43,6 @@ public class CacheWriteNotify {
      * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
      * eventPublisher with a {@link RolloutGroupCreatedEvent}.
      *
-     * @param rolloutId
-     *            the ID of the rollout the group has been created
      * @param rolloutGroup
      *            rollout group which has been created
      * @param totalRolloutGroup
@@ -52,8 +50,10 @@ public class CacheWriteNotify {
      * @param createdRolloutGroup
      *            the number of already created groups of the rollout
      */
-    public void rolloutGroupCreated(final Long rolloutId, final RolloutGroup rolloutGroup, final int totalRolloutGroup,
+    public void rolloutGroupCreated(final RolloutGroup rolloutGroup, final int totalRolloutGroup,
             final int createdRolloutGroup) {
+
+        final Long rolloutId = rolloutGroup.getRollout().getId();
 
         final Cache cache = cacheManager.getCache(JpaRollout.class.getName());
         final String cacheKeyGroupTotal = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
