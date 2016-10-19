@@ -42,7 +42,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
-        container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getId()))
+        container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
                 .forEach(this::removeTagFromCombo);
     }
 

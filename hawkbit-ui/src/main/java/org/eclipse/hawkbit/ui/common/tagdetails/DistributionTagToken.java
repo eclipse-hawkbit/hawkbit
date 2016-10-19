@@ -125,7 +125,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getId()))
+        eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
                 .forEach(this::removeTagFromCombo);
     }
 
