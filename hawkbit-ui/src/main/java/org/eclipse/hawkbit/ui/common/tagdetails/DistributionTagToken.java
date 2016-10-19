@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagAssignmentResultEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
@@ -75,6 +74,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     private DistributionSetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final DistributionSetTagAssignmentResult result = distributionSetManagement
                 .toggleTagAssignment(Sets.newHashSet(selectedEntity.getId()), tagNameSelected);
+        processTargetTagAssigmentResult(result);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
@@ -139,16 +139,13 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagAssigmentResultEvent(final DistributionSetTagAssignmentResultEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
-            final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
-            if (isAssign(assignmentResult)) {
-                addNewToken(tag.getId());
-            } else if (isUnassign(assignmentResult)) {
-                removeTokenItem(tag.getId(), tag.getName());
-            }
-        });
+    private void processTargetTagAssigmentResult(final DistributionSetTagAssignmentResult assignmentResult) {
+        final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
+        if (isAssign(assignmentResult)) {
+            addNewToken(tag.getId());
+        } else if (isUnassign(assignmentResult)) {
+            removeTokenItem(tag.getId(), tag.getName());
+        }
     }
 
     protected boolean isAssign(final DistributionSetTagAssignmentResult assignmentResult) {

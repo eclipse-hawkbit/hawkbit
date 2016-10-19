@@ -12,10 +12,8 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.local.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.event.local.RolloutGroupChangeEvent;
-import org.eclipse.hawkbit.repository.event.local.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
@@ -37,20 +35,17 @@ import com.google.common.collect.Maps;
  */
 public class HawkbitEventProvider implements UIEventProvider {
 
-    private static final Map<Class<? extends TenantAwareEvent>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(18);
+    private static final Map<Class<? extends TenantAwareEvent>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(16);
 
     static {
 
         EVENTS.put(TargetTagDeletedEvent.class, TargetTagDeletedEventContainer.class);
         EVENTS.put(TargetTagCreatedEvent.class, TargetTagCreatedEventContainer.class);
         EVENTS.put(TargetTagUpdateEvent.class, TargetTagUpdatedEventContainer.class);
-        EVENTS.put(TargetTagAssigmentResultEvent.class, TargetTagAssigmentResultEventContainer.class);
 
         EVENTS.put(DistributionSetTagCreatedEvent.class, DistributionSetTagCreatedEventContainer.class);
         EVENTS.put(DistributionSetTagDeletedEvent.class, DistributionSetTagDeletedEventContainer.class);
         EVENTS.put(DistributionSetTagUpdateEvent.class, DistributionSetTagUpdatedEventContainer.class);
-        EVENTS.put(DistributionSetTagAssigmentResultEvent.class,
-                DistributionSetTagAssignmentResultEventContainer.class);
 
         EVENTS.put(TargetCreatedEvent.class, TargetCreatedEventContainer.class);
         EVENTS.put(TargetInfoUpdateEvent.class, TargetInfoUpdateEventContainer.class);

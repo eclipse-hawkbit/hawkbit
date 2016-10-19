@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.event.local;
 
 import org.eclipse.hawkbit.repository.model.Target;
 
+// Use lazy target loading mechanism
+
 /**
  * Event that gets sent when the assignment of a distribution set to a target
  * gets canceled.
