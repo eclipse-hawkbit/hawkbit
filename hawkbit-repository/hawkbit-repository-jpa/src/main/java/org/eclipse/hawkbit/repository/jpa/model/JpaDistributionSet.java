@@ -35,8 +35,8 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RemotePropertyChangeEvent.PropertyChange;
+import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;

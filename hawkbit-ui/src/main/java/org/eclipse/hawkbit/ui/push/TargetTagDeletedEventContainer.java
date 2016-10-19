@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 
 /**
  * EventHolder for {@link TargetTagDeletedEvent}s.

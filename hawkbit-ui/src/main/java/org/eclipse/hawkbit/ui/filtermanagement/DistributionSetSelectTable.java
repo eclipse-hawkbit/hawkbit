@@ -16,8 +16,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionDeletedEvent;
 import org.eclipse.hawkbit.ui.distributions.dstable.ManageDistBeanQuery;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;

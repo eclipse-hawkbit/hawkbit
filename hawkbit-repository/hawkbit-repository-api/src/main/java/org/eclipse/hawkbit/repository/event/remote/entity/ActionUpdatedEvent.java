@@ -8,18 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.Action;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event of update a {@link TargetTag}.
- *
+ * Defines the remote event of updated a {@link Action}.
  */
-public class TargetTagDeletedEvent extends RemoteEntityEvent<TargetTag> {
-
-    private static final long serialVersionUID = 1L;
+public class ActionUpdatedEvent extends RemoteEntityEvent<Action> {
+    private static final long serialVersionUID = 181780358321768629L;
 
     /**
      * Constructor for json serialization.
@@ -34,22 +32,23 @@ public class TargetTagDeletedEvent extends RemoteEntityEvent<TargetTag> {
      *            the origin application id
      */
     @JsonCreator
-    protected TargetTagDeletedEvent(@JsonProperty("tenant") final String tenant,
+    protected ActionUpdatedEvent(@JsonProperty("tenant") final String tenant,
             @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends TargetTag> entityClass,
+            @JsonProperty("entityClass") final Class<? extends Action> entityClass,
             @JsonProperty("originService") final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
     }
 
     /**
-     * Constructor.
+     * Constructor
      * 
-     * @param tag
-     *            the tag which is deleted
+     * @param action
+     *            the updated action
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagDeletedEvent(final TargetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public ActionUpdatedEvent(final Action action, final String applicationId) {
+        super(action, applicationId);
     }
+
 }

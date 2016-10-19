@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
