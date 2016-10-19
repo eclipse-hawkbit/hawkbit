@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +31,9 @@ import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -83,9 +80,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetTable.class);
 
-    private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
-            Arrays.asList(DragEvent.SOFTWAREMODULE_DRAG));
-
     @Autowired
     private SpPermissionChecker permissionChecker;
 
@@ -99,7 +93,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private transient SoftwareManagement softwareManagement;
 
     @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -114,15 +108,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void init() {
         super.init();
         addTableStyleGenerator();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DragEvent event) {
-        if (event == DragEvent.HIDE_DROP_HINT) {
-            UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        } else if (DISPLAY_DROP_HINT_EVENTS.contains(event)) {
-            UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -256,7 +241,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
-        return distributionsViewAcceptCriteria;
+        return distributionsViewClientCriterion;
     }
 
     @Override
@@ -378,7 +363,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
 
         eventBus.publish(this, DistributionsUIEvent.UPDATE_COUNT);
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
     }
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {

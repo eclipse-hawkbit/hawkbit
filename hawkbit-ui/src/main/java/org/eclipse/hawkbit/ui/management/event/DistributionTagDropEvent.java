@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -66,7 +67,7 @@ public class DistributionTagDropEvent implements DropHandler {
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private ManagementViewClientCriterion managementViewClientCriterion;
 
     @Override
     public void drop(final DragAndDropEvent event) {
@@ -153,12 +154,12 @@ public class DistributionTagDropEvent implements DropHandler {
 
     /**
      * Criteria.
-     * 
+     *
      * @return AcceptCriterion as accept
      */
     @Override
     public AcceptCriterion getAcceptCriterion() {
-        return managementViewAcceptCriteria;
+        return managementViewClientCriterion;
 
     }
 }

@@ -13,10 +13,10 @@ import java.util.EnumSet;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Software module type filter buttons.
- * 
+ *
  */
 @SpringComponent
 @ViewScope
@@ -45,7 +45,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     private ArtifactUploadState artifactUploadState;
 
     @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private UploadViewClientCriterion uploadViewClientCriterion;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleTypeEvent event) {
@@ -92,7 +92,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return uploadViewAcceptCriteria;
+                return uploadViewClientCriterion;
             }
 
             @Override

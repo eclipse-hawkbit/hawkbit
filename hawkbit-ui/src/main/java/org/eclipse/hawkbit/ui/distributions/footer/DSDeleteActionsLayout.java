@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.footer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -21,9 +18,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -54,10 +50,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = 3494052985006132714L;
 
-    private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
-            Arrays.asList(DragEvent.DISTRIBUTION_TYPE_DRAG, DragEvent.DISTRIBUTION_DRAG, DragEvent.SOFTWAREMODULE_DRAG,
-                    DragEvent.SOFTWAREMODULE_TYPE_DRAG));
-
     @Autowired
     private transient SystemManagement systemManagement;
 
@@ -68,16 +60,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private DistributionsConfirmationWindowLayout distConfirmationWindowLayout;
 
     @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DragEvent event) {
-        if (event == DragEvent.HIDE_DROP_HINT) {
-            hideDropHints();
-        } else if (DISPLAY_DROP_HINT_EVENTS.contains(event)) {
-            showDropHints();
-        }
-    }
+    private DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
@@ -120,7 +103,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected AcceptCriterion getDeleteLayoutAcceptCriteria() {
-        return distributionsViewAcceptCriteria;
+        return distributionsViewClientCriterion;
     }
 
     @Override
@@ -141,8 +124,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             processDeleteSWType(sourceComponent.getId());
 
         }
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        hideDropHints();
 
     }
 

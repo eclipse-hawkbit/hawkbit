@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
 import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
@@ -32,7 +31,6 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -154,7 +152,6 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -231,15 +228,6 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             mainLayout.addComponent(deleteAndActionsLayout, 1, 1);
             mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
         }
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     private void maximizeTargetTable() {

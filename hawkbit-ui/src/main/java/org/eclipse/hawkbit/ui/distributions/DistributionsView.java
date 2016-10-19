@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
@@ -30,7 +29,6 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -40,7 +38,6 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -129,7 +126,6 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -146,15 +142,6 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         mainLayout.setColumnExpandRatio(1, 0.5f);
         mainLayout.setColumnExpandRatio(2, 0.5f);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

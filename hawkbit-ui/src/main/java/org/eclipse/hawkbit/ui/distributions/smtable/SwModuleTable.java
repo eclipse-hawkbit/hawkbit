@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -73,7 +73,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private transient SoftwareManagement softwareManagement;
 
     @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
@@ -253,7 +253,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected AcceptCriterion getDropAcceptCriterion() {
-        return distributionsViewAcceptCriteria;
+        return distributionsViewClientCriterion;
     }
 
     @Override

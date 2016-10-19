@@ -36,7 +36,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target filter tabsheet with 'simple' and 'complex' filter options.
- * 
+ *
  *
  *
  */
@@ -102,7 +102,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     }
 
     /**
-     * 
+     *
      */
     private void switchToTabSelectedOnLoad() {
         if (managementUIState.isCustomFilterSelected()) {
@@ -130,7 +130,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         }
         targetTagTableLayout.addComponent(filterByButtons);
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
-        targetTagTableLayout.addStyleName("target-tag-drop-hint");
+        targetTagTableLayout.setId(UIComponentIdProvider.TARGET_TAG_DROP_AREA_ID);
         targetTagTableLayout.setExpandRatio(filterByButtons, 1.0F);
         simpleFilterTab.setCaption(i18n.get("caption.filter.simple"));
         simpleFilterTab.addComponent(targetTagTableLayout);
@@ -149,7 +149,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.ui.TabSheet.SelectedTabChangeListener#selectedTabChange(com
      * .vaadin.ui.TabSheet.SelectedTabChangeEvent)

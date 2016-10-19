@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.ui.artifacts.footer;
 import java.util.Set;
 
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private UploadViewConfirmationWindowLayout uploadViewConfirmationWindowLayout;
 
     @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private UploadViewClientCriterion uploadViewClientCriterion;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadArtifactUIEvent event) {
@@ -66,10 +65,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
                 updateSWActionCount();
             });
         }
-        if (event == UploadArtifactUIEvent.SOFTWARE_DRAG_START
-                || event == UploadArtifactUIEvent.SOFTWARE_TYPE_DRAG_START) {
-            showDropHints();
-        }
     }
 
     private boolean isSoftwareEvent(final UploadArtifactUIEvent event) {
@@ -82,14 +77,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         return event == UploadArtifactUIEvent.DISCARD_ALL_DELETE_SOFTWARE_TYPE
                 || event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE
                 || event == UploadArtifactUIEvent.DISCARD_DELETE_SOFTWARE_TYPE;
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DragEvent event) {
-        if (event == DragEvent.HIDE_DROP_HINT) {
-            UI.getCurrent().access(() -> hideDropHints());
-        }
-
     }
 
     @Override
@@ -119,7 +106,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected AcceptCriterion getDeleteLayoutAcceptCriteria() {
-        return uploadViewAcceptCriteria;
+        return uploadViewClientCriterion;
     }
 
     @Override
@@ -145,7 +132,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
             }
 
         }
-        hideDropHints();
     }
 
     private void deleteSWModuleType(final String swModuleTypeName) {

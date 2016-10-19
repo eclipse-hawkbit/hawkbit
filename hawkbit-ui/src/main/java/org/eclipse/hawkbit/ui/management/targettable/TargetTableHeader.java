@@ -15,12 +15,11 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
@@ -65,7 +64,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     private ManagementUIState managementUIState;
 
     @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private ManagementViewClientCriterion managementViewClientCriterion;
 
     @Autowired
     private TargetAddUpdateWindowLayout targetAddUpdateWindow;
@@ -150,17 +149,6 @@ public class TargetTableHeader extends AbstractTableHeader {
         }
         if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
             closeFilterByDistribution();
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DragEvent dragEvent) {
-        if (dragEvent == DragEvent.DISTRIBUTION_DRAG) {
-            if (!isComplexFilterViewDisplayed) {
-                UI.getCurrent().access(() -> addStyleName("show-table-header-drop-hint"));
-            }
-        } else {
-            UI.getCurrent().access(() -> removeStyleName("show-table-header-drop-hint"));
         }
     }
 
@@ -278,7 +266,6 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
         targetAddUpdateWindow.resetComponents();
         final Window addTargetWindow = targetAddUpdateWindow.getWindow();
         addTargetWindow.setCaption(i18n.get("caption.add.new.target"));
@@ -312,7 +299,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     protected DropHandler getDropFilterHandler() {
         return new DropHandler() {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1L;
 
@@ -323,7 +310,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return managementViewAcceptCriteria;
+                return managementViewClientCriterion;
             }
 
         };
@@ -403,7 +390,6 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private void closeFilterByDistribution() {
 
-        eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
         /* Remove filter by distribution information. */
         getFilterDroppedInfo().removeAllComponents();
         getFilterDroppedInfo().setSizeUndefined();

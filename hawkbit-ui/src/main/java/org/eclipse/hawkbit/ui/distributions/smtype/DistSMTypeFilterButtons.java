@@ -18,7 +18,7 @@ import java.util.Collections;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -49,7 +49,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     private ManageDistUIState manageDistUIState;
 
     @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     @Override
     protected String getButtonsTableId() {
@@ -88,7 +88,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return distributionsViewAcceptCriteria;
+                return distributionsViewClientCriterion;
             }
 
             @Override

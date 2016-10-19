@@ -20,9 +20,8 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
@@ -45,7 +44,6 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.Page;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
@@ -61,13 +59,13 @@ import com.vaadin.ui.UI;
 public class TargetTagFilterButtons extends AbstractFilterButtons {
     private static final String NO_TAG = "NO TAG";
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5049554600376508073L;
 
     @Autowired
     private ManagementUIState managementUIState;
 
     @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private ManagementViewClientCriterion managementViewClientCriterion;
 
     @Autowired
     private I18N i18n;
@@ -88,7 +86,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     /**
      * Initialize component.
-     * 
+     *
      * @param filterButtonClickBehaviour
      *            the clickable behaviour.
      */
@@ -97,21 +95,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
         addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DragEvent dragEvent) {
-        /*
-         * this has some flickering issue for addStyleName(
-         * "show-filter-drop-hint" ); Hence, doing with Javascripts
-         */
-        if (dragEvent == DragEvent.TARGET_DRAG) {
-            UI.getCurrent().access(
-                    () -> Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.dispTargetTagsDropHintScript()));
-        } else {
-            UI.getCurrent().access(
-                    () -> Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.hideTargetTagsDropHintScript()));
-        }
     }
 
     @Override
@@ -150,7 +133,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return managementViewAcceptCriteria;
+                return managementViewClientCriterion;
             }
 
             @Override

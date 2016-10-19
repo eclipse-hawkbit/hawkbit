@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -30,7 +29,6 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -42,7 +40,6 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -142,7 +139,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -236,17 +232,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.removeComponent(uplaodButtonsLayout);
 
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     private void checkNoDataAvaialble() {

@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -64,7 +64,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     private transient SoftwareManagement softwareManagement;
 
     @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private UploadViewClientCriterion uploadViewClientCriterion;
 
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
@@ -215,7 +215,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected AcceptCriterion getDropAcceptCriterion() {
-        return uploadViewAcceptCriteria;
+        return uploadViewClientCriterion;
     }
 
     @Override
