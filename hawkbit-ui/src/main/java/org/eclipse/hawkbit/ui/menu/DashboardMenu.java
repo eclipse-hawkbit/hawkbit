@@ -186,9 +186,8 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static Resource getImage() {
-        return UserDetailsFormatter.getCurrentUserEmail().map(email -> {
-            return (Resource) new GravatarResource(email);
-        }).orElse(new ThemeResource("images/profile-pic-57px.jpg"));
+        return UserDetailsFormatter.getCurrentUserEmail().map(email -> (Resource) new GravatarResource(email))
+                .orElse(new ThemeResource("images/profile-pic-57px.jpg"));
 
     }
 
