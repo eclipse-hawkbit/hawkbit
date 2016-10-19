@@ -53,6 +53,9 @@ public class EventPublisherAutoConfiguration {
     }
 
     /**
+     * Bean for creating a singleton instance of the
+     * {@link EventPublisherHolder}
+     * 
      * @return the singleton instance of the {@link EventPublisherHolder}
      */
     @Bean
@@ -77,6 +80,10 @@ public class EventPublisherAutoConfiguration {
             this.tenantAware = tenantAware;
         }
 
+        /**
+         * Was overridden that not every event has to run within a own
+         * tenantAware.
+         */
         @Override
         public void multicastEvent(final ApplicationEvent event, final ResolvableType eventType) {
             if (serviceMatcher == null || !(event instanceof RemoteTenantAwareEvent)) {

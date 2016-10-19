@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -57,6 +59,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.jayway.awaitility.Awaitility;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -438,7 +441,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
-        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -452,25 +454,27 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet incomplete = distributionSetManagement.createDistributionSet(
                 new JpaDistributionSet("incomplete", "v1", "", standardDsType, Lists.newArrayList(ah, jvm)));
 
+        Thread.sleep(2000);
+        eventHandlerStub.setExpectedNumberOfEvents(0);
+
         try {
             deploymentManagement.assignDistributionSet(incomplete, targets);
             fail("expected IncompleteDistributionSetException");
         } catch (final IncompleteDistributionSetException ex) {
         }
 
+        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(5, TimeUnit.SECONDS);
+        assertThat(events).as("events should be empty").isEmpty();
+
         incomplete.addModule(os);
         final DistributionSet nowComplete = distributionSetManagement.updateDistributionSet(incomplete);
-
-        // give some chance to receive events asynchronously
-        Thread.sleep(1000);
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(1, TimeUnit.MILLISECONDS);
-        assertThat(events).as("events should be empty").isEmpty();
 
         eventHandlerStub.setExpectedNumberOfEvents(10);
 
         assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
                 .as("assign ds doesn't work").isEqualTo(10);
-        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(10, TimeUnit.SECONDS));
+
+        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(15, TimeUnit.SECONDS));
     }
 
     @Test
@@ -951,12 +955,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     *
+     * 
      *
      */
-    private class DeploymentResult
-
-    {
+    private class DeploymentResult {
         final List<Long> deployedTargetIDs = new ArrayList<Long>();
         final List<Long> undeployedTargetIDs = new ArrayList<Long>();
         final List<Long> distributionSetIDs = new ArrayList<Long>();
@@ -981,57 +983,52 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         }
 
-        /**
-         * @return the distributionSetIDs
-         */
         public List<Long> getDistributionSetIDs() {
             return distributionSetIDs;
         }
 
-        /**
-         * @return
-         */
         public List<Long> getDeployedTargetIDs() {
             return deployedTargetIDs;
         }
 
-        /**
-         * @return
-         */
         public List<Target> getUndeployedTargets() {
             return undeployedTargets;
         }
 
-        /**
-         * @return
-         */
         public List<DistributionSet> getDistributionSets() {
             return distributionSets;
         }
 
-        /**
-         * @return
-         */
         public List<Target> getDeployedTargets() {
             return deployedTargets;
         }
 
-        /**
-         * @return the undeployedTargetIDs
-         */
         public List<Long> getUndeployedTargetIDs() {
             return undeployedTargetIDs;
         }
 
     }
 
+    /**
+     * 
+     * Test configuration for EventHandlerStub and CancelEventHandlerStub.
+     *
+     */
     public static class DeploymentTestConfiguration {
 
+        /**
+         * 
+         * @return the EventHandlerStub bean.
+         */
         @Bean
         public EventHandlerStub eventHandlerStubBean() {
             return new EventHandlerStub();
         }
 
+        /**
+         * 
+         * @return the CancelEventHandlerStub bean.
+         */
         @Bean
         public CancelEventHandlerStub bancelEventHandlerStubBean() {
             return new CancelEventHandlerStub();
@@ -1065,13 +1062,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
-            latch.await(timeout, unit);
-            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<>(events);
-            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
+            Awaitility.await().atMost(timeout, unit).until(eventSize(events), equalTo(expectedNumberOfEvents));
+            return new LinkedList<>(events);
 
-            return handledEvents;
         }
+    }
+
+    private static Callable<Integer> eventSize(final List<TargetAssignDistributionSetEvent> events) {
+        return new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return events.size();
+            }
+        };
     }
 
     private static class CancelEventHandlerStub {

@@ -28,9 +28,13 @@ public class DownloadIdCacheAutoConfiguration {
     private CacheManager cacheManager;
 
     /**
-     * Bean for the download id cache.
+     * Bean for the downloadId cache that returns the DefaultDownloadIdCache.
+     * The DefaultDownloadIdCache cannot be used within a cluster because the
+     * downloadId cache is not shared among notes. This means, a downloadId
+     * which is stored on note A for downloading an artifact can only be used
+     * for downloading the artifact form node A.
      * 
-     * @return the cache
+     * @return the DefaultDownloadIdCache
      */
     @Bean
     @ConditionalOnMissingBean

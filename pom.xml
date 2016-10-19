@@ -147,6 +147,7 @@
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <spring-cloud-bus.version>1.2.0.RELEASE</spring-cloud-bus.version>
+      <com.jayway.awaitility.version>1.7.0</com.jayway.awaitility.version>
       
       <!-- Misc libraries versions - END -->
 
@@ -701,6 +702,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.jayway.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${com.jayway.awaitility.version}</version>
          </dependency>
       </dependencies>
    </dependencyManagement>

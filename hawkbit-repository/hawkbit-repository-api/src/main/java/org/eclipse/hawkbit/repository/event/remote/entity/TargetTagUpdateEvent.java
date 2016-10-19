@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Defines the remote event for update a {@link TargetTag}.
+ * Defines the remote event for updating a {@link TargetTag}.
  *
  */
 public class TargetTagUpdateEvent extends RemoteEntityEvent<TargetTag> {
