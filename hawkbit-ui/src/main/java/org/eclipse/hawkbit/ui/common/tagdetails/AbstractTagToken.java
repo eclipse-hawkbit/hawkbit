@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -260,13 +259,10 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tokensAdded.keySet().forEach(previouslyAddedToken -> tokenField.removeToken(previouslyAddedToken));
     }
 
-    protected Long getTagIdByTagName(final String tagName) {
-        final Optional<Map.Entry<Long, TagData>> mapEntry = tagDetails.entrySet().stream()
-                .filter(entry -> entry.getValue().getName().equals(tagName)).findFirst();
-        if (mapEntry.isPresent()) {
-            return mapEntry.get().getKey();
-        }
-        return null;
+    protected Long getTagIdByTagName(final Long tagId) {
+        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findFirst()
+                .map(entry -> entry.getKey()).orElse(null);
+
     }
 
     protected void removeTokenItem(final Long tokenId, final String name) {
