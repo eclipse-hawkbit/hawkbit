@@ -28,9 +28,7 @@ import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.DigestUtils;
 
-import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
@@ -189,8 +187,7 @@ public final class DashboardMenu extends CustomComponent {
 
     private static Resource getImage() {
         return UserDetailsFormatter.getCurrentUserEmail().map(email -> {
-            return (Resource) new ExternalResource("https://www.gravatar.com/avatar/"
-                    + DigestUtils.md5DigestAsHex(email.getBytes()) + ".jpg?s=56&r=g&d=mm");
+            return (Resource) new GravatarResource(email);
         }).orElse(new ThemeResource("images/profile-pic-57px.jpg"));
 
     }
