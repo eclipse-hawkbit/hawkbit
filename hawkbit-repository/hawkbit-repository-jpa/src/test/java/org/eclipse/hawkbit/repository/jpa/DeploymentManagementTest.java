@@ -441,7 +441,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
-        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -454,6 +453,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet incomplete = distributionSetManagement.createDistributionSet(
                 new JpaDistributionSet("incomplete", "v1", "", standardDsType, Lists.newArrayList(ah, jvm)));
+
+        Thread.sleep(2000);
+        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         try {
             deploymentManagement.assignDistributionSet(incomplete, targets);
