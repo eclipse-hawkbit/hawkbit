@@ -48,9 +48,13 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -73,6 +77,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 @SpringApplicationConfiguration(classes = { DeploymentTestConfiguration.class })
+@EnableBinding(Processor.class)
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
@@ -80,6 +85,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private CancelEventHandlerStub cancelEventHandlerStub;
+
+    @Autowired
+    private MessageCollector messageCollector;
+
+    @Autowired
+    private Processor processor;
 
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
@@ -441,6 +452,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
+        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -453,9 +465,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet incomplete = distributionSetManagement.createDistributionSet(
                 new JpaDistributionSet("incomplete", "v1", "", standardDsType, Lists.newArrayList(ah, jvm)));
-
-        Thread.sleep(2000);
-        eventHandlerStub.setExpectedNumberOfEvents(0);
 
         try {
             deploymentManagement.assignDistributionSet(incomplete, targets);
@@ -1105,6 +1114,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;
         }
+    }
+
+    @After
+    public void cleanUpEvents() {
+        messageCollector.forChannel(processor.output()).clear();
     }
 
 }
