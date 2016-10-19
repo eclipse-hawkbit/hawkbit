@@ -31,8 +31,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -193,8 +192,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new ActionPropertyChangeEvent(this,
-                EntityPropertyChangeHelper.getChangeSet(descriptorEvent), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

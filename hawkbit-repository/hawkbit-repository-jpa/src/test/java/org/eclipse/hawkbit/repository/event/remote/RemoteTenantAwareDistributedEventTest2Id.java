@@ -47,7 +47,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Distributet Events Tests")
-public class RemoteTenantAwareDistributedEventTest extends AbstractJpaIntegrationTest {
+public class RemoteTenantAwareDistributedEventTest2Id extends AbstractJpaIntegrationTest {
 
     private AbstractMessageConverter abstractMessageConverter;
 
