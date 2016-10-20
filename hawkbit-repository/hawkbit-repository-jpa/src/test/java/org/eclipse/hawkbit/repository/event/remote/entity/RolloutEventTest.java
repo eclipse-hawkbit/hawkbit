@@ -24,7 +24,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Test RolloutUpdatedEvent")
-public class RolloutEvent extends AbstractRemoteEntityEventTest<Rollout> {
+public class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
 
     @Test
     @Description("Verifies that the rollout entity reloading by remote updated event works")

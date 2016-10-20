@@ -29,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent")
-public class RolloutGroupEvent extends AbstractRemoteEntityEventTest<RolloutGroup> {
+public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> {
 
     @Test
     @Description("Verifies that the rollout group entity reloading by remote created event works")

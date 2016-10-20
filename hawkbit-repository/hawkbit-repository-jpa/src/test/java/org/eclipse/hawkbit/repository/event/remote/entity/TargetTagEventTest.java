@@ -20,7 +20,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Test TargetTagCreatedEvent and TargetTagUpdateEvent")
-public class TargetTagEvent extends AbstractRemoteEntityEventTest<TargetTag> {
+public class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
 
     @Test
     @Description("Verifies that the target tag entity reloading by remote created event works")
