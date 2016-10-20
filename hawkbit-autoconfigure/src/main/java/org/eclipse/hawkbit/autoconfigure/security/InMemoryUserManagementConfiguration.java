@@ -92,7 +92,7 @@ public class InMemoryUserManagementConfiguration extends GlobalAuthenticationCon
             final UserDetails loadUserByUsername = super.loadUserByUsername(username);
             return new UserPrincipal(loadUserByUsername.getUsername(), loadUserByUsername.getPassword(),
                     loadUserByUsername.getUsername(), loadUserByUsername.getUsername(),
-                    loadUserByUsername.getUsername(), "DEFAULT", loadUserByUsername.getAuthorities());
+                    loadUserByUsername.getUsername(), null, "DEFAULT", loadUserByUsername.getAuthorities());
         }
     }
 }

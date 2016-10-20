@@ -80,7 +80,7 @@ public class WithSpringAuthorityRule implements TestRule {
                 }
                 final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
                         new UserPrincipal(annotation.principal(), annotation.principal(), annotation.principal(),
-                                annotation.principal(), annotation.tenantId()),
+                                annotation.principal(), null, annotation.tenantId()),
                         annotation.credentials(), authorities);
                 testingAuthenticationToken
                         .setDetails(new TenantAwareAuthenticationDetails(annotation.tenantId(), false));

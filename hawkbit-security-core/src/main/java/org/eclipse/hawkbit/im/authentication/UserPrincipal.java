@@ -45,13 +45,15 @@ public class UserPrincipal extends User {
      *            address of the user
      */
     public UserPrincipal(final String username, final String firstname, final String lastname, final String loginname,
-            final String tenant, final String email) {
-        this(username, "***", lastname, firstname, loginname, tenant, email, Collections.emptyList());
+            final String email, final String tenant) {
+        this(username, "***", lastname, firstname, loginname, email, tenant, Collections.emptyList());
     }
 
     /**
      * @param username
      *            the user name of the user
+     * @param password
+     *            the password of the user
      * @param firstname
      *            the first name of the user
      * @param lastname
@@ -65,8 +67,11 @@ public class UserPrincipal extends User {
      * @param authorities
      *            the authorities which the user has
      */
+    // too many parameters, builder pattern wouldn't work easy due the super
+    // constructor.
+    @SuppressWarnings("squid:S00107")
     public UserPrincipal(final String username, final String password, final String firstname, final String lastname,
-            final String loginname, final String tenant, final String email,
+            final String loginname, final String email, final String tenant,
             final Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.firstname = firstname;

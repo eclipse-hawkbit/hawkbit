@@ -64,8 +64,9 @@ public class UserPrincipalInfoTokenServices extends UserInfoTokenServices
         final String username = String.valueOf(map.get("user_name"));
         final String firstname = String.valueOf(map.get("given_name"));
         final String lastname = String.valueOf(map.get("family_name"));
+        final String email = String.valueOf(map.get("email"));
         final String zoneId = String.valueOf(getAccessTokenMap().get("zid"));
-        return new UserPrincipal(username, firstname, lastname, username, zoneId);
+        return new UserPrincipal(username, firstname, lastname, username, email, zoneId);
     }
 
     @Override
