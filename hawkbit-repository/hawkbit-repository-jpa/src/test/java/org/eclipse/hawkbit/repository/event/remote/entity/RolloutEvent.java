@@ -28,7 +28,7 @@ public class RolloutEvent extends AbstractRemoteEntityEventTest<Rollout> {
 
     @Test
     @Description("Verifies that the rollout entity reloading by remote updated event works")
-    public void testDistributionSetUpdateEvent() {
+    public void testRolloutUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutUpdatedEvent.class);
     }
 

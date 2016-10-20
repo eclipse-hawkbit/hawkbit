@@ -45,6 +45,8 @@ import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -267,15 +269,18 @@ public class AmqpConfiguration {
      *            for target repo access
      * @param entityFactory
      *            to create entities
+     * @param applicationContext
+     *            the applicationContext
      *
      * @return handler service bean
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final ApplicationContext applicationContext) {
         return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory);
+                entityFactory, applicationContext);
     }
 
     /**
@@ -329,6 +334,17 @@ public class AmqpConfiguration {
         return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
+    /**
+     * create bean.
+     * 
+     * @param systemManagement
+     * @param controllerManagement
+     * @param tenantConfigurationManagement
+     * @param tenantAware
+     * @param ddiSecruityProperties
+     * @param systemSecurityContext
+     * @return the bean
+     */
     @Bean
     @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
     public AmqpControllerAuthentication amqpControllerAuthentication(final SystemManagement systemManagement,
@@ -339,13 +355,25 @@ public class AmqpConfiguration {
                 tenantAware, ddiSecruityProperties, systemSecurityContext);
     }
 
+    /**
+     * create bean
+     * 
+     * @param rabbitTemplate
+     * @param amqpSenderService
+     * @param artifactUrlHandler
+     * @param systemSecurityContext
+     * @param systemManagement
+     * @param serviceMatcher
+     * @return the bean
+     */
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final ServiceMatcher serviceMatcher) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement);
+                systemSecurityContext, systemManagement, serviceMatcher);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

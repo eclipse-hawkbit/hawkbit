@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -129,7 +129,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         distributionSetManagement.deleteDistributionSet(createDistributionSet);
 
-        final DistributionDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionDeletedEvent.class, 1,
+        final DistributionSetDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionSetDeletedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(dsDeletedEvent).isNotNull();
         assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());

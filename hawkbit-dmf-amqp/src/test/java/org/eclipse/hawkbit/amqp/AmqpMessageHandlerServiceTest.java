@@ -41,11 +41,12 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -68,6 +69,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -116,15 +118,18 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private ApplicationContext applicationContext;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
+                controllerManagementMock, entityFactoryMock, applicationContext);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
+                controllerManagementMock, entityFactoryMock, applicationContext);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
                 controllerManagementMock);
@@ -365,10 +370,6 @@ public class AmqpMessageHandlerServiceTest {
         // for the test the same action can be used
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 
-        final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
-        when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
-                .thenReturn(softwareModuleList);
-
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.FINISHED, 23L);
@@ -393,9 +394,7 @@ public class AmqpMessageHandlerServiceTest {
                 .isEqualTo("target1");
         assertThat(targetAssignDistributionSetEvent.getTarget().getSecurityToken())
                 .as("targetoken not filled correctly").isEqualTo(action.getTarget().getSecurityToken());
-        assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
-        assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
-                .isEqualTo(softwareModuleList);
+        assertThat(targetAssignDistributionSetEvent.getEntityId()).as("event has wrong action id").isEqualTo(22L);
 
     }
 
@@ -430,6 +429,7 @@ public class AmqpMessageHandlerServiceTest {
         final List<SoftwareModule> softwareModuleList = new ArrayList<>();
         final JpaSoftwareModule softwareModule = new JpaSoftwareModule();
         softwareModule.setId(777L);
+        softwareModule.setType(new JpaSoftwareModuleType());
         softwareModuleList.add(softwareModule);
         return softwareModuleList;
     }

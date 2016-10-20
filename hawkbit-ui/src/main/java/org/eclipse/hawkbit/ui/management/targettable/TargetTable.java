@@ -156,7 +156,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getTarget()));
+        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

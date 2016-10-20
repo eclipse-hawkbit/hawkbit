@@ -31,9 +31,9 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -64,7 +63,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -107,9 +105,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Autowired
     private DistributionSetRepository distributoinSetRepository;
-
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -320,21 +315,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
-        final List<JpaSoftwareModule> softwareModules = softwareModuleRepository.findByAssignedTo(set);
-
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions);
 
         return result;
     }
 
     private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions, final List<JpaSoftwareModule> softwareModules) {
+            final Map<String, JpaAction> targetIdsToActions) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
-                .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
-                        softwareModules));
+                .forEach(t -> assignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
@@ -353,16 +345,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionForTarget;
     }
 
-    private void assignDistributionSetEvent(final JpaTarget target, final Long actionId,
-            final List<JpaSoftwareModule> modules) {
-        ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
+    private void assignDistributionSetEvent(final Action action) {
+        ((JpaTargetInfo) action.getTarget().getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<SoftwareModule> softwareModules = (Collection) modules;
         afterCommit.afterCommit(() -> {
-            eventPublisher.publishEvent(new TargetInfoUpdateEvent(target.getTargetInfo(), applicationContext.getId()));
             eventPublisher.publishEvent(
-                    new TargetAssignDistributionSetEvent(target.getTenant(), target, actionId, softwareModules));
+                    new TargetInfoUpdateEvent(action.getTarget().getTargetInfo(), applicationContext.getId()));
+            eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId()));
         });
     }
 
@@ -446,7 +435,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId)));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
 
     @Override
@@ -546,11 +536,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // in case we canceled an action before for this target, then don't fire
         // assignment event
         if (!overrideObsoleteUpdateActions.contains(savedAction.getId())) {
-            final List<JpaSoftwareModule> softwareModules = softwareModuleRepository
-                    .findByAssignedTo((JpaDistributionSet) action.getDistributionSet());
-            // send distribution set assignment event
-
-            assignDistributionSetEvent((JpaTarget) mergedAction.getTarget(), mergedAction.getId(), softwareModules);
+            assignDistributionSetEvent(mergedAction);
         }
         return savedAction;
     }

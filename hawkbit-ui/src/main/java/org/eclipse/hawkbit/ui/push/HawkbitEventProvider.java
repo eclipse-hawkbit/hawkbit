@@ -11,12 +11,12 @@ package org.eclipse.hawkbit.ui.push;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
@@ -54,7 +54,7 @@ public class HawkbitEventProvider implements UIEventProvider {
         EVENTS.put(CancelTargetAssignmentEvent.class, CancelTargetAssignmentEventContainer.class);
 
         EVENTS.put(DistributionSetUpdateEvent.class, DistributionSetUpdatedEventContainer.class);
-        EVENTS.put(DistributionDeletedEvent.class, DistributionDeletedEventContainer.class);
+        EVENTS.put(DistributionSetDeletedEvent.class, DistributionDeletedEventContainer.class);
         EVENTS.put(DistributionSetCreatedEvent.class, DistributionCreatedEventContainer.class);
 
         EVENTS.put(RolloutGroupChangeEvent.class, RolloutGroupChangeEventContainer.class);

@@ -44,6 +44,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -162,6 +163,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected MongodExecutable mongodExecutable;
+
+    @Autowired
+    protected ServiceMatcher serviceMatcher;
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();

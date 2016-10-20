@@ -15,18 +15,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.junit.Before;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
-import org.springframework.cloud.bus.jackson.BusJacksonAutoConfiguration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -42,24 +35,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Entity Events")
-public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extends AbstractJpaIntegrationTest {
+public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extends AbstractRemoteEventTest {
 
-    private AbstractMessageConverter abstractMessageConverter;
+    protected RemoteEntityEvent<?> assertAndCreateRemoteEvent(final Class<? extends RemoteEntityEvent<?>> eventType) {
 
-    @Before
-    public void setup() throws Exception {
-        final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
-        this.abstractMessageConverter = autoConfiguration.busJsonConverter();
-        final String[] allRemoteEventsFromPackage = new String[] { "org.eclipse.hawkbit.repository.event.remote",
-                ClassUtils.getPackageName(RemoteApplicationEvent.class) };
-        ReflectionTestUtils.setField(abstractMessageConverter, "packagesToScan", allRemoteEventsFromPackage);
-        ((InitializingBean) abstractMessageConverter).afterPropertiesSet();
-
-    }
-
-    protected void assertAndCreateRemoteEvent(final Class<? extends RemoteEntityEvent<?>> eventType) {
-
-        final BaseEntity baseEntity = createEntity();
+        final E baseEntity = createEntity();
 
         Constructor<?> constructor = null;
         for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
@@ -74,16 +54,24 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
 
         try {
             final RemoteEntityEvent<?> event = (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
-            assertThat(event.getEntity()).isSameAs(baseEntity);
-
-            final Message<?> message = createMessage(event);
-            final RemoteEntityEvent<?> underTestCreatedEvent = (RemoteEntityEvent<?>) abstractMessageConverter
-                    .fromMessage(message, eventType);
-            assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+            assertEntity(baseEntity, event);
+            return event;
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | SecurityException | JsonProcessingException e) {
             fail("Exception should not happen " + e.getMessage());
         }
+        return null;
+    }
+
+    protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event)
+            throws JsonProcessingException {
+        assertThat(event.getEntity()).isSameAs(baseEntity);
+
+        final Message<?> message = createMessage(event);
+        final RemoteEntityEvent<?> underTestCreatedEvent = (RemoteEntityEvent<?>) getAbstractMessageConverter()
+                .fromMessage(message, event.getClass());
+        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        return underTestCreatedEvent;
     }
 
     private Message<String> createMessage(final RemoteEntityEvent<?> event) throws JsonProcessingException {

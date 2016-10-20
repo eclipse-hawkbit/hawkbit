@@ -34,7 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
@@ -360,14 +360,14 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                 new DistributionSetUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
         if (isSoftDeleted(descriptorEvent)) {
-            publishEventWithEventPublisher(new DistributionDeletedEvent(getTenant(), getId(),
+            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(),
                     EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        publishEventWithEventPublisher(new DistributionDeletedEvent(getTenant(), getId(),
+        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(),
                 EventPublisherHolder.getInstance().getApplicationId()));
     }
 

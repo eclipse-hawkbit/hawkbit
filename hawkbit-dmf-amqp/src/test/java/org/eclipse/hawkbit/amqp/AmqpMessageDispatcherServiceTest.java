@@ -12,11 +12,13 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +32,9 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -50,6 +53,7 @@ import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.collect.Lists;
 
@@ -86,6 +90,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     public void before() throws Exception {
         super.before();
         testTarget = entityFactory.generateTarget(CONTROLLER_ID, TEST_TOKEN);
+        ReflectionUtils.findMethod(testTarget.getClass(), "setId", Long.class).invoke(testTarget, 1L);
+
         testTarget.getTargetInfo().setAddress(AMQP_URI.toString());
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
@@ -105,15 +111,17 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, serviceMatcher);
 
     }
 
     @Test
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
+        final Action action = createAction();
+
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                TENANT, testTarget, 1L, new ArrayList<SoftwareModule>());
+                action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -123,12 +131,26 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
 
+    private Action createAction() {
+        final Action action = entityFactory.generateAction();
+        try {
+            ReflectionUtils.findMethod(action.getClass(), "setId", Long.class).invoke(action, 1L);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            fail("Entity has no id method????");
+        }
+        action.setTarget(testTarget);
+        return action;
+    }
+
     @Test
     @Description("Verfies that download and install event with 3 software moduls and no artifacts works")
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Action action = createAction();
+        action.setDistributionSet(dsA);
+
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                TENANT, testTarget, 1L, dsA.getModules());
+                action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -165,10 +187,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             receivedList.add(new DbArtifact());
         }
 
+        final Action action = createAction();
+        action.setDistributionSet(dsA);
+
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                TENANT, testTarget, 1L, dsA.getModules());
+                action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
@@ -202,11 +227,11 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                testTarget, 1L);
+                testTarget, 1L, serviceMatcher.getServiceId());
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getTarget().getTargetInfo().getAddress());
+                cancelTargetAssignmentDistributionSetEvent.getEntity().getTargetInfo().getAddress());
         assertCancelMessage(sendMessage);
 
     }

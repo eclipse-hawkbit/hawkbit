@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.ui.push;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,6 +23,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +80,9 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     @Autowired
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
+
+    private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
+    private static final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());
@@ -227,6 +239,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         }
 
         final org.eclipse.hawkbit.repository.event.TenantAwareEvent event = (TenantAwareEvent) applicationEvent;
+
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
@@ -237,6 +250,117 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
             return;
         }
+    }
+
+    private void onEvent(final TenantAwareEvent event) {
+        Long rolloutId = null;
+        Long rolloutGroupId = null;
+        if (event instanceof ActionCreatedEvent) {
+            rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
+            rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
+        } else if (event instanceof ActionUpdatedEvent) {
+            rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
+            rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
+        } else if (event instanceof RolloutUpdatedEvent) {
+            rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
+        } else if (event instanceof RolloutGroupCreatedEvent) {
+            rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
+            rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
+        } else if (event instanceof RolloutGroupUpdatedEvent) {
+            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
+            rolloutId = rolloutGroup.getRollout().getId();
+            rolloutGroupId = rolloutGroup.getId();
+        }
+
+        if (rolloutId != null) {
+            rolloutEvents.add(new RolloutEventKey(rolloutId, event.getTenant()));
+            if (rolloutGroupId != null) {
+                rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
+            }
+        }
+    }
+
+    private static Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
+        if (rolloutGroup != null) {
+            return rolloutGroup.getId();
+        }
+        return null;
+    }
+
+    private static Long getRolloutId(final Rollout rollout) {
+        if (rollout != null) {
+            return rollout.getId();
+        }
+        return null;
+    }
+
+    /**
+     * The rollout key in the concurrent set to be hold.
+     * 
+     *
+     */
+    private static final class RolloutEventKey {
+        private final Long rolloutId;
+        private final String tenant;
+        private final Long rolloutGroupId;
+
+        private RolloutEventKey(final Long rolloutId, final Long rolloutGroupId, final String tenant) {
+            this.rolloutGroupId = rolloutGroupId;
+            this.rolloutId = rolloutId;
+            this.tenant = tenant;
+        }
+
+        private RolloutEventKey(final Long rolloutId, final String tenant) {
+            this(rolloutId, null, tenant);
+        }
+
+        @Override
+        public int hashCode() {// NOSONAR - as this is generated
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
+            result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
+            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {// NOSONAR - as this is
+                                                 // generated
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final RolloutEventKey other = (RolloutEventKey) obj;
+            if (rolloutGroupId == null) {
+                if (other.rolloutGroupId != null) {
+                    return false;
+                }
+            } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
+                return false;
+            }
+            if (rolloutId == null) {
+                if (other.rolloutId != null) {
+                    return false;
+                }
+            } else if (!rolloutId.equals(other.rolloutId)) {
+                return false;
+            }
+            if (tenant == null) {
+                if (other.tenant != null) {
+                    return false;
+                }
+            } else if (!tenant.equals(other.tenant)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

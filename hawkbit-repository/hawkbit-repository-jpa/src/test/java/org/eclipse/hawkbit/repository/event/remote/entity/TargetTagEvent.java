@@ -24,13 +24,13 @@ public class TargetTagEvent extends AbstractRemoteEntityEventTest<TargetTag> {
 
     @Test
     @Description("Verifies that the target tag entity reloading by remote created event works")
-    public void testDistributionCreatedEvent() {
+    public void testTargetTagCreatedEvent() {
         assertAndCreateRemoteEvent(TargetTagCreatedEvent.class);
     }
 
     @Test
     @Description("Verifies that the target tag entity reloading by remote updated event works")
-    public void testDistributionSetUpdateEvent() {
+    public void testTargetTagUpdateEventt() {
         assertAndCreateRemoteEvent(TargetTagUpdateEvent.class);
     }
 

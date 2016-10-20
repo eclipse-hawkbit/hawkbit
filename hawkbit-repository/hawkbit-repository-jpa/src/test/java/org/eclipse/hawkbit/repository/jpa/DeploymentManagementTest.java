@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
-import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.DeploymentManagementTest.DeploymentTestConfiguration;
@@ -953,7 +953,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
                     assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();
-                    assertThat(event.getActionId()).as("Action id in database and event do not match")
+                    assertThat(event.getEntityId()).as("Action id in database and event do not match")
                             .isEqualTo(activeActionsByTarget.get(0).getId());
                     assertThat(event.getSoftwareModules()).as("softwaremodule size is not correct")
                             .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
@@ -1078,12 +1078,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private static Callable<Integer> eventSize(final List<TargetAssignDistributionSetEvent> events) {
-        return new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return events.size();
-            }
-        };
+        return () -> events.size();
     }
 
     private static class CancelEventHandlerStub {

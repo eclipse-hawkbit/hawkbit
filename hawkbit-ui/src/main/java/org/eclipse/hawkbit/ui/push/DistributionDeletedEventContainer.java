@@ -10,21 +10,21 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 
 /**
- * EventHolder for {@link DistributionDeletedEvent}s.
+ * EventHolder for {@link DistributionSetDeletedEvent}s.
  *
  */
-public class DistributionDeletedEventContainer implements EventContainer<DistributionDeletedEvent> {
-    private final List<DistributionDeletedEvent> events;
+public class DistributionDeletedEventContainer implements EventContainer<DistributionSetDeletedEvent> {
+    private final List<DistributionSetDeletedEvent> events;
 
-    DistributionDeletedEventContainer(final List<DistributionDeletedEvent> events) {
+    DistributionDeletedEventContainer(final List<DistributionSetDeletedEvent> events) {
         this.events = events;
     }
 
     @Override
-    public List<DistributionDeletedEvent> getEvents() {
+    public List<DistributionSetDeletedEvent> getEvents() {
         return events;
     }
 

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.amqp;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,15 +25,13 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.event.local.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.local.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -43,6 +40,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -68,6 +66,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final EntityFactory entityFactory;
 
+    private final ApplicationContext applicationContext;
+
     /**
      * Constructor.
      * 
@@ -82,11 +82,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final ApplicationContext applicationContext) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -194,15 +196,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (action.get().isCancelingOrCanceled()) {
             amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target, action.get().getId()));
+                    new CancelTargetAssignmentEvent(target, action.get().getId(), applicationContext.getId()));
             return;
         }
 
-        final DistributionSet distributionSet = action.get().getDistributionSet();
-        final List<SoftwareModule> softwareModuleList = controllerManagement
-                .findSoftwareModulesByDistributionSet(distributionSet);
-        amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getTenant(), target, action.get().getId(), softwareModuleList));
+        amqpMessageDispatcherService.targetAssignDistributionSet(
+                new TargetAssignDistributionSetEvent(action.get(), applicationContext.getId()));
 
     }
 

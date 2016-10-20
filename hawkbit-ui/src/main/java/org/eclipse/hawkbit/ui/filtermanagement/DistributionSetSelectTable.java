@@ -16,7 +16,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.ui.distributions.dstable.ManageDistBeanQuery;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -87,7 +87,7 @@ public class DistributionSetSelectTable extends Table {
     void onEvents(final List<?> events) {
         final Object firstEvent = events.get(0);
         if (DistributionSetCreatedEvent.class.isInstance(firstEvent)
-                || DistributionDeletedEvent.class.isInstance(firstEvent)) {
+                || DistributionSetDeletedEvent.class.isInstance(firstEvent)) {
             refreshDistributions();
         }
     }

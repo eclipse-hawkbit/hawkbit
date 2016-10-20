@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -31,13 +33,15 @@ public class RolloutGroupEvent extends AbstractRemoteEntityEventTest<RolloutGrou
 
     @Test
     @Description("Verifies that the rollout group entity reloading by remote created event works")
-    public void testDistributionCreatedEvent() {
-        assertAndCreateRemoteEvent(RolloutGroupCreatedEvent.class);
+    public void testRolloutGroupCreatedEvent() {
+        final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(
+                RolloutGroupCreatedEvent.class);
+        assertThat(createdEvent.getRolloutId()).isNotNull();
     }
 
     @Test
     @Description("Verifies that the rollout group entity reloading by remote updated event works")
-    public void testDistributionSetUpdateEvent() {
+    public void testRolloutGroupUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutGroupUpdatedEvent.class);
     }
 

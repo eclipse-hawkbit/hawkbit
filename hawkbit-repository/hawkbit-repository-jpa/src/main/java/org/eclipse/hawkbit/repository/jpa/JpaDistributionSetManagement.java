@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.event.remote.DistributionDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -198,7 +198,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         Arrays.stream(distributionSetIDs).forEach(dsId -> eventPublisher.publishEvent(
-                new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
+                new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
     }
 
     @Override

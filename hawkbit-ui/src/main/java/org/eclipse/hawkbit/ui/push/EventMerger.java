@@ -8,24 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,150 +22,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventMerger {
 
-    private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
-    private static final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
+    // @Autowired
+    // private ApplicationEventPublisher applicationEventPublisher;
 
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    /**
-     * Checks if there are events to publish in the fixed interval.
-     */
-    @Scheduled(initialDelay = 10000, fixedDelay = 2000)
-    public void rolloutEventScheduler() {
-        final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
-        while (rolloutIterator.hasNext()) {
-            final RolloutEventKey eventKey = rolloutIterator.next();
-            applicationEventPublisher.publishEvent(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
-            rolloutIterator.remove();
-        }
-
-        final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
-        while (rolloutGroupIterator.hasNext()) {
-            final RolloutEventKey eventKey = rolloutGroupIterator.next();
-            applicationEventPublisher.publishEvent(
-                    new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
-            rolloutGroupIterator.remove();
-        }
-    }
-
-    /**
-     * Called by the event bus to retrieve all necessary events to collect and
-     * merge.
-     * 
-     * @param event
-     *            the event on the event bus
-     */
-    @EventListener(classes = TenantAwareEvent.class)
-    public void onEvent(final TenantAwareEvent event) {
-        Long rolloutId = null;
-        Long rolloutGroupId = null;
-        if (event instanceof ActionCreatedEvent) {
-            rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
-        } else if (event instanceof ActionUpdatedEvent) {
-            rolloutId = getRolloutId(((ActionUpdatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionUpdatedEvent) event).getEntity().getRolloutGroup());
-        } else if (event instanceof RolloutUpdatedEvent) {
-            rolloutId = ((RolloutUpdatedEvent) event).getEntityId();
-        } else if (event instanceof RolloutGroupCreatedEvent) {
-            rolloutId = ((RolloutGroupCreatedEvent) event).getRolloutId();
-            rolloutGroupId = ((RolloutGroupCreatedEvent) event).getEntityId();
-        } else if (event instanceof RolloutGroupUpdatedEvent) {
-            final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
-            rolloutId = rolloutGroup.getRollout().getId();
-            rolloutGroupId = rolloutGroup.getId();
-        }
-
-        if (rolloutId != null) {
-            rolloutEvents.add(new RolloutEventKey(rolloutId, event.getTenant()));
-            if (rolloutGroupId != null) {
-                rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
-            }
-        }
-    }
-
-    private static Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
-        if (rolloutGroup != null) {
-            return rolloutGroup.getId();
-        }
-        return null;
-    }
-
-    private static Long getRolloutId(final Rollout rollout) {
-        if (rollout != null) {
-            return rollout.getId();
-        }
-        return null;
-    }
-
-    /**
-     * The rollout key in the concurrent set to be hold.
-     * 
-     * @author Michael Hirsch
-     *
-     */
-    private static final class RolloutEventKey {
-        private final Long rolloutId;
-        private final String tenant;
-        private final Long rolloutGroupId;
-
-        private RolloutEventKey(final Long rolloutId, final Long rolloutGroupId, final String tenant) {
-            this.rolloutGroupId = rolloutGroupId;
-            this.rolloutId = rolloutId;
-            this.tenant = tenant;
-        }
-
-        private RolloutEventKey(final Long rolloutId, final String tenant) {
-            this(rolloutId, null, tenant);
-        }
-
-        @Override
-        public int hashCode() {// NOSONAR - as this is generated
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
-            result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
-            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {// NOSONAR - as this is
-                                                 // generated
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final RolloutEventKey other = (RolloutEventKey) obj;
-            if (rolloutGroupId == null) {
-                if (other.rolloutGroupId != null) {
-                    return false;
-                }
-            } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
-                return false;
-            }
-            if (rolloutId == null) {
-                if (other.rolloutId != null) {
-                    return false;
-                }
-            } else if (!rolloutId.equals(other.rolloutId)) {
-                return false;
-            }
-            if (tenant == null) {
-                if (other.tenant != null) {
-                    return false;
-                }
-            } else if (!tenant.equals(other.tenant)) {
-                return false;
-            }
-            return true;
-        }
-
-    }
+    // /**
+    // * Checks if there are events to publish in the fixed interval.
+    // */
+    // @Scheduled(initialDelay = 10000, fixedDelay = 2000)
+    // public void rolloutEventScheduler() {
+    // final Iterator<RolloutEventKey> rolloutIterator =
+    // rolloutEvents.iterator();
+    // while (rolloutIterator.hasNext()) {
+    // final RolloutEventKey eventKey = rolloutIterator.next();
+    // applicationEventPublisher.publishEvent(new
+    // RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
+    // rolloutIterator.remove();
+    // }
+    //
+    // final Iterator<RolloutEventKey> rolloutGroupIterator =
+    // rolloutGroupEvents.iterator();
+    // while (rolloutGroupIterator.hasNext()) {
+    // final RolloutEventKey eventKey = rolloutGroupIterator.next();
+    // applicationEventPublisher.publishEvent(
+    // new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId,
+    // eventKey.rolloutGroupId));
+    // rolloutGroupIterator.remove();
+    // }
+    // }
 }
