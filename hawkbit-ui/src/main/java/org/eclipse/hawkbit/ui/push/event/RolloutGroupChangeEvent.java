@@ -16,7 +16,6 @@ package org.eclipse.hawkbit.ui.push.event;
  */
 public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
 
-    private static final long serialVersionUID = 1L;
     private final Long rolloutId;
     private final Long rolloutGroupId;
 
