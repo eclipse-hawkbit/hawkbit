@@ -275,19 +275,20 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addUpdateActionStatus(final ActionStatus actionStatus) {
-        final Long action = actionStatus.getAction().getId();
+        final Action action = actionStatus.getAction();
+        final Long actionId = action.getId();
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
         // action status feedback channel order from the device cannot be
         // guaranteed. However, if an action is closed we do not accept further
         // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, actionStatus.getAction().isActive())) {
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getStatus(), action);
-            return actionStatus.getAction();
+                    actionStatus.getStatus(), actionId);
+            return action;
         }
-        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
+        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, actionId);
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
