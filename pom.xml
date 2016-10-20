@@ -134,7 +134,7 @@
       <org.easytesting.version>2.0M10</org.easytesting.version>
       <allure.version>1.4.22</allure.version>
       <eclipselink.version>2.6.4</eclipselink.version>
-      <org.powermock.version>1.5.4</org.powermock.version>
+      <org.powermock.version>1.6.5</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.5.3</mariadb-java-client.version>
@@ -674,6 +674,18 @@
             <groupId>pl.pragmatists</groupId>
             <artifactId>JUnitParams</artifactId>
             <version>${pl.pragmatists.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${org.powermock.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${org.powermock.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
