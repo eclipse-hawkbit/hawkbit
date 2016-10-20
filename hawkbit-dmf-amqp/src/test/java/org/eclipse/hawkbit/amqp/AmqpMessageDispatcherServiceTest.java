@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -160,8 +159,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final SoftwareModule module = dsA.getModules().iterator().next();
         final List<DbArtifact> receivedList = new ArrayList<>();
-        for (final Artifact artifact : testdataFactory.createLocalArtifacts(module.getId())) {
-            module.addArtifact((LocalArtifact) artifact);
+        for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
+            module.addArtifact(artifact);
             receivedList.add(new DbArtifact());
         }
 
@@ -186,8 +185,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
             module.getArtifacts().forEach(dbArtifact -> {
                 final Optional<org.eclipse.hawkbit.dmf.json.model.Artifact> found = softwareModule.getArtifacts()
-                        .stream().filter(dmfartifact -> dmfartifact.getFilename()
-                                .equals(((LocalArtifact) dbArtifact).getFilename()))
+                        .stream().filter(dmfartifact -> dmfartifact.getFilename().equals(dbArtifact.getFilename()))
                         .findFirst();
 
                 assertTrue("The artifact should exist in message", found.isPresent());

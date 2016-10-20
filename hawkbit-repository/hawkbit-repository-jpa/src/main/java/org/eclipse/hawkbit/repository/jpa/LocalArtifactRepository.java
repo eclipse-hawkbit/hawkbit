@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -20,11 +20,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link LocalArtifact} repository.
+ * {@link Artifact} repository.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface LocalArtifactRepository extends BaseEntityRepository<JpaLocalArtifact, Long> {
+public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifact, Long> {
 
     /**
      * Counts artifacts size where the related software module is not
@@ -32,7 +32,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaLocalAr
      *
      * @return sum of artifacts size in bytes
      */
-    @Query("SELECT SUM(la.size) FROM JpaLocalArtifact la WHERE la.softwareModule.deleted = 0")
+    @Query("SELECT SUM(la.size) FROM JpaArtifact la WHERE la.softwareModule.deleted = 0")
     Optional<Long> getSumOfUndeletedArtifactSize();
 
     /**
@@ -46,32 +46,31 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaLocalAr
     Long countBySoftwareModuleDeleted(boolean deleted);
 
     /**
-     * Searches for a {@link LocalArtifact} based on given gridFsFileName.
+     * Searches for a {@link Artifact} based on given gridFsFileName.
      *
      * @param gridFsFileName
      *            to search
-     * @return list of {@link LocalArtifact}s.
+     * @return list of {@link Artifact}s.
      */
-    List<LocalArtifact> findByGridFsFileName(String gridFsFileName);
+    List<Artifact> findByGridFsFileName(String gridFsFileName);
 
     /**
-     * Searches for a {@link LocalArtifact} based on given gridFsFileName.
+     * Searches for a {@link Artifact} based on given gridFsFileName.
      *
      * @param gridFsFileName
      *            to search
-     * @return {@link LocalArtifact} the first in the result list
+     * @return {@link Artifact} the first in the result list
      */
-    JpaLocalArtifact findFirstByGridFsFileName(String gridFsFileName);
+    JpaArtifact findFirstByGridFsFileName(String gridFsFileName);
 
     /**
-     * Searches for a {@link LocalArtifact} based user provided filename at
-     * upload.
+     * Searches for a {@link Artifact} based user provided filename at upload.
      *
      * @param filename
      *            to search
-     * @return list of {@link LocalArtifact}.
+     * @return list of {@link Artifact}.
      */
-    List<LocalArtifact> findByFilename(String filename);
+    List<Artifact> findByFilename(String filename);
 
     /**
      * Searches for local artifact for a base software module.
@@ -81,20 +80,20 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaLocalAr
      * @param swId
      *            software module id
      *
-     * @return Page<LocalArtifact>
+     * @return Page<Artifact>
      */
-    Page<LocalArtifact> findBySoftwareModuleId(Pageable pageReq, final Long swId);
+    Page<Artifact> findBySoftwareModuleId(Pageable pageReq, final Long swId);
 
     /**
-     * Searches for a {@link LocalArtifact} based user provided filename at
-     * upload and selected software module id.
+     * Searches for a {@link Artifact} based user provided filename at upload
+     * and selected software module id.
      *
      * @param filename
      *            to search
      * @param softwareModuleId
      *            selected software module id
-     * @return list of {@link LocalArtifact}.
+     * @return list of {@link Artifact}.
      */
-    List<LocalArtifact> findByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
+    List<Artifact> findByFilenameAndSoftwareModuleId(final String filename, final Long softwareModuleId);
 
 }

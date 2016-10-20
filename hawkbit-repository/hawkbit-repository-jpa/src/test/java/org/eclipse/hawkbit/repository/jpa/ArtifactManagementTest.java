@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -22,13 +21,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifact;
-import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -57,7 +52,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#createLocalArtifact(java.io.InputStream)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#createArtifact(java.io.InputStream)}
      * .
      * 
      * @throws IOException
@@ -65,7 +60,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
      */
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
-    public void createLocalArtifact() throws NoSuchAlgorithmException, IOException {
+    public void createArtifact() throws NoSuchAlgorithmException, IOException {
         // checkbaseline
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -84,27 +79,26 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact result = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
-        final Artifact result11 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
+        final Artifact result11 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
                 "file11", false);
-        final Artifact result12 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+        final Artifact result12 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
                 "file12", false);
-        final Artifact result2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm2.getId(),
+        final Artifact result2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm2.getId(),
                 "file2", false);
 
-        assertThat(result).isInstanceOf(LocalArtifact.class);
+        assertThat(result).isInstanceOf(Artifact.class);
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
         assertThat(result2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
-        assertThat(((JpaLocalArtifact) result).getFilename()).isEqualTo("file1");
-        assertThat(((JpaLocalArtifact) result).getGridFsFileName()).isNotNull();
+        assertThat(((JpaArtifact) result).getFilename()).isEqualTo("file1");
+        assertThat(((JpaArtifact) result).getGridFsFileName()).isNotNull();
         assertThat(result).isNotEqualTo(result2);
-        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
-                .isEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
 
-        assertThat(artifactManagement.findLocalArtifactByFilename("file1").get(0).getSha1Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
-        assertThat(artifactManagement.findLocalArtifactByFilename("file1").get(0).getMd5Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getMd5Hash())
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         assertThat(artifactRepository.findAll()).hasSize(4);
@@ -122,7 +116,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
         assertThat(artifactRepository.findAll()).hasSize(1);
 
         softwareModuleRepository.deleteAll();
@@ -131,63 +125,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#createExternalArtifact(org.eclipse.hawkbit.repository.model.ExternalArtifactProvider, java.lang.String)}
-     * .
-     */
-    @Test
-    @Description("Tests the creation of an external artifact metadata element.")
-    public void createExternalArtifact() {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
-
-        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
-                "version 2", null, null);
-        sm2 = softwareModuleRepository.save(sm2);
-
-        final ExternalArtifactProvider provider = artifactManagement.createExternalArtifactProvider("provider X", null,
-                "https://fhghdfjgh", "/{version}/");
-
-        JpaExternalArtifact result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider, null,
-                sm.getId());
-
-        assertNotNull("The result of an external artifact should not be null", result);
-        assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
-        assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
-        assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/{version}/");
-        assertThat(result.getExternalArtifactProvider()).isEqualTo(provider);
-
-        result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider, "/test", sm2.getId());
-        assertNotNull("The newly created external artifact should not be null", result);
-        assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(2);
-        assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/test");
-        assertThat(result.getExternalArtifactProvider()).isEqualTo(provider);
-    }
-
-    @Test
-    @Description("Tests deletio of an external artifact metadata element.")
-    public void deleteExternalArtifact() {
-        assertThat(artifactRepository.findAll()).isEmpty();
-
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
-
-        final JpaExternalArtifactProvider provider = (JpaExternalArtifactProvider) artifactManagement
-                .createExternalArtifactProvider("provider X", null, "https://fhghdfjgh", "/{version}/");
-
-        final JpaExternalArtifact result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider,
-                null, sm.getId());
-        assertNotNull("The newly created external artifact should not be null", result);
-        assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
-
-        artifactManagement.deleteExternalArtifact(result.getId());
-        assertThat(externalArtifactRepository.findAll()).isEmpty();
-    }
-
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#deleteLocalArtifact(java.lang.Long)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#deleteArtifact(java.lang.Long)}
      * .
      * 
      * @throws IOException
@@ -195,7 +133,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
      */
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
-    public void deleteLocalArtifact() throws NoSuchAlgorithmException, IOException {
+    public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
         JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
@@ -206,34 +144,35 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         assertThat(artifactRepository.findAll()).isEmpty();
 
-        final Artifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
-                sm.getId(), "file1", false);
-        final Artifact result2 = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
+                "file1", false);
+        final Artifact result2 = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
                 sm2.getId(), "file2", false);
 
         assertThat(artifactRepository.findAll()).hasSize(2);
 
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
-                .isNotEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
+        assertThat(((JpaArtifact) result).getGridFsFileName())
+                .isNotEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
                         .isNotNull();
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
-                        .isNotNull();
-
-        artifactManagement.deleteLocalArtifact(result.getId());
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName())))).isNull();
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
                         .isNotNull();
 
-        artifactManagement.deleteLocalArtifact(result2.getId());
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
+        artifactManagement.deleteArtifact(result.getId());
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
+                        .isNull();
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
+                        .isNotNull();
+
+        artifactManagement.deleteArtifact(result2.getId());
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
                         .isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -253,33 +192,33 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact result = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
-        final Artifact result2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm2.getId(),
+        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
+        final Artifact result2 = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm2.getId(),
                 "file2", false);
 
         assertThat(artifactRepository.findAll()).hasSize(2);
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
-                .isEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
 
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
                         .isNotNull();
-        artifactManagement.deleteLocalArtifact(result.getId());
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
+        artifactManagement.deleteArtifact(result.getId());
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
                         .isNotNull();
 
-        artifactManagement.deleteLocalArtifact(result2.getId());
-        assertThat(operations.findOne(new Query()
-                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName())))).isNull();
+        artifactManagement.deleteArtifact(result2.getId());
+        assertThat(operations.findOne(
+                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
+                        .isNull();
     }
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findLocalArtifact(java.lang.Long)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findArtifact(java.lang.Long)}
      * .
      * 
      * @throws IOException
@@ -287,20 +226,20 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
      */
     @Test
     @Description("Loads an local artifact based on given ID.")
-    public void findLocalArtifact() throws NoSuchAlgorithmException, IOException {
+    public void findArtifact() throws NoSuchAlgorithmException, IOException {
         SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
-        final LocalArtifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
-                sm.getId(), "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
+                "file1", false);
 
-        assertThat(artifactManagement.findLocalArtifact(result.getId())).isEqualTo(result);
+        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
     }
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#loadLocalArtifactBinary(java.lang.Long)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#loadArtifactBinary(java.lang.Long)}
      * .
      * 
      * @throws IOException
@@ -308,26 +247,26 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
      */
     @Test
     @Description("Loads an artifact binary based on given ID.")
-    public void loadStreamOfLocalArtifact() throws NoSuchAlgorithmException, IOException {
+    public void loadStreamOfArtifact() throws NoSuchAlgorithmException, IOException {
         SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final LocalArtifact result = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
-                sm.getId(), "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
+                false);
 
         assertTrue("The stored binary matches the given binary", IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement.loadLocalArtifactBinary(result).getFileInputStream()));
+                artifactManagement.loadArtifactBinary(result).getFileInputStream()));
     }
 
     @Test
     @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
-    public void loadLocalArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
+    public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         try {
-            artifactManagement.loadLocalArtifactBinary(new JpaLocalArtifact());
+            artifactManagement.loadArtifactBinary(new JpaArtifact());
             fail("Should not have worked with missing permission.");
         } catch (final InsufficientPermissionException e) {
 
@@ -336,19 +275,19 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
     @Test
     @Description("Searches an artifact through the relations of a software module.")
-    public void findLocalArtifactBySoftwareModule() {
+    public void findArtifactBySoftwareModule() {
         SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         SoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareManagement.createSoftwareModule(sm2);
 
-        assertThat(artifactManagement.findLocalArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
+        assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
 
-        final Artifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
-                sm.getId(), "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
+                "file1", false);
 
-        assertThat(artifactManagement.findLocalArtifactBySoftwareModule(pageReq, sm.getId())).hasSize(1);
+        assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).hasSize(1);
     }
 
     @Test
@@ -359,8 +298,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
 
-        artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
-        artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
+        artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
+        artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).hasSize(1);
 

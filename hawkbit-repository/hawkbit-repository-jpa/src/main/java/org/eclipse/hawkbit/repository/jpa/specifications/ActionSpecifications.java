@@ -14,14 +14,14 @@ import javax.persistence.criteria.SetJoin;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -50,14 +50,14 @@ public final class ActionSpecifications {
      * @return a specification to use with spring JPA
      */
     public static Specification<JpaAction> hasTargetAssignedArtifact(final Target target,
-            final LocalArtifact localArtifact) {
+            final Artifact localArtifact) {
         return (actionRoot, query, criteriaBuilder) -> {
             final Join<JpaAction, JpaDistributionSet> dsJoin = actionRoot.join(JpaAction_.distributionSet);
             final SetJoin<JpaDistributionSet, JpaSoftwareModule> modulesJoin = dsJoin.join(JpaDistributionSet_.modules);
-            final ListJoin<JpaSoftwareModule, JpaLocalArtifact> artifactsJoin = modulesJoin
+            final ListJoin<JpaSoftwareModule, JpaArtifact> artifactsJoin = modulesJoin
                     .join(JpaSoftwareModule_.artifacts);
             return criteriaBuilder.and(
-                    criteriaBuilder.equal(artifactsJoin.get(JpaLocalArtifact_.filename), localArtifact.getFilename()),
+                    criteriaBuilder.equal(artifactsJoin.get(JpaArtifact_.filename), localArtifact.getFilename()),
                     criteriaBuilder.equal(actionRoot.get(JpaAction_.target), target));
         };
     }

@@ -32,8 +32,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -87,7 +87,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
-        testdataFactory.createLocalArtifacts(softwareModuleId);
+        testdataFactory.createArtifacts(softwareModuleId);
 
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
@@ -107,9 +107,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1", false);
-        final LocalArtifact artifactSignature = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1.signature", false);
 
         final Target savedTarget = targetManagement.createTarget(target);
@@ -270,9 +270,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1", false);
-        final LocalArtifact artifactSignature = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1.signature", false);
 
         final Target savedTarget = targetManagement.createTarget(target);
@@ -394,9 +394,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1", false);
-        final LocalArtifact artifactSignature = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "test1.signature", false);
 
         final Target savedTarget = targetManagement.createTarget(target);

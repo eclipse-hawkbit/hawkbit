@@ -80,8 +80,8 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
                     .findSoftwareModulesAll(new OffsetBasedPageRequest(startIndex, count, sort));
 
         } else {
-            swModuleBeans = getSoftwareManagementService()
-                    .findSoftwareModuleByFilters(new OffsetBasedPageRequest(startIndex, count, sort), searchText, type);
+            swModuleBeans = getSoftwareManagementService().findSoftwareModuleByFilters(
+                    new OffsetBasedPageRequest(startIndex, count, sort), searchText, type.getId());
         }
 
         for (final SoftwareModule swModule : swModuleBeans) {
@@ -113,7 +113,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
         if (type == null && Strings.isNullOrEmpty(searchText)) {
             size = getSoftwareManagementService().countSoftwareModulesAll();
         } else {
-            size = getSoftwareManagementService().countSoftwareModuleByFilters(searchText, type);
+            size = getSoftwareManagementService().countSoftwareModuleByFilters(searchText, type.getId());
         }
 
         if (size > Integer.MAX_VALUE) {

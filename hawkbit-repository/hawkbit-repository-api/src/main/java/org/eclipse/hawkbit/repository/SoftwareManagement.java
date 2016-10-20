@@ -42,12 +42,12 @@ public interface SoftwareManagement {
      *
      * @param searchText
      *            to search for in name and version
-     * @param type
-     *            to filter the result
+     * @param typeId
+     *            to filter the result by type
      * @return number of found {@link SoftwareModule}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countSoftwareModuleByFilters(String searchText, SoftwareModuleType type);
+    Long countSoftwareModuleByFilters(String searchText, Long typeId);
 
     /**
      * Count all {@link SoftwareModule}s in the repository that are not marked
@@ -57,16 +57,6 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countSoftwareModulesAll();
-
-    /**
-     * Counts {@link SoftwareModule}s with given {@link SoftwareModuleType}.
-     *
-     * @param type
-     *            to count
-     * @return number of found {@link SoftwareModule}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countSoftwareModulesByType(@NotNull SoftwareModuleType type);
 
     /**
      * @return number of {@link SoftwareModuleType}s in the repository.
@@ -146,31 +136,31 @@ public interface SoftwareManagement {
     /**
      * Deletes the given {@link SoftwareModule} {@link Entity}.
      *
-     * @param bsm
+     * @param moduleId
      *            is the {@link SoftwareModule} to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteSoftwareModule(@NotNull SoftwareModule bsm);
+    void deleteSoftwareModule(@NotNull Long moduleId);
 
     /**
      * deletes a software module meta data entry.
      *
-     * @param softwareModule
+     * @param moduleId
      *            where meta data has to be deleted
      * @param key
      *            of the metda data element
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotEmpty String key);
+    void deleteSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);
 
     /**
      * Deletes {@link SoftwareModule}s which is any if the given ids.
      *
-     * @param ids
+     * @param moduleIds
      *            of the Software Modules to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteSoftwareModules(@NotNull Collection<Long> ids);
+    void deleteSoftwareModules(@NotNull Collection<Long> moduleIds);
 
     /**
      * Deletes or marks as delete in case the type is in use.
@@ -193,20 +183,6 @@ public interface SoftwareManagement {
     Page<SoftwareModule> findSoftwareModuleByAssignedTo(@NotNull Pageable pageable, @NotNull DistributionSet set);
 
     /**
-     * @param pageable
-     *            the page request to page the result set
-     * @param set
-     *            to search for
-     * @param type
-     *            to filter
-     * @return all {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findSoftwareModuleByAssignedToAndType(@NotNull Pageable pageable, @NotNull DistributionSet set,
-            @NotNull SoftwareModuleType type);
-
-    /**
      * Filter {@link SoftwareModule}s with given
      * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
      * and {@link SoftwareModule#getType()} that are not marked as deleted.
@@ -215,13 +191,12 @@ public interface SoftwareManagement {
      *            page parameter
      * @param searchText
      *            to be filtered as "like" on {@link SoftwareModule#getName()}
-     * @param type
+     * @param typeId
      *            to be filtered as "like" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull Pageable pageable, String searchText,
-            SoftwareModuleType type);
+    Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull Pageable pageable, String searchText, Long typeId);
 
     /**
      * Finds {@link SoftwareModule} by given id.
@@ -253,7 +228,7 @@ public interface SoftwareManagement {
     /**
      * finds a single software module meta data by its id.
      *
-     * @param softwareModule
+     * @param moduleId
      *            where meta data has to be found
      * @param key
      *            of the meta data element
@@ -262,7 +237,7 @@ public interface SoftwareManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotEmpty String key);
+    SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);
 
     /**
      * finds all meta data by the given software module id.
@@ -316,14 +291,13 @@ public interface SoftwareManagement {
      *            the ID of distribution set to be ordered on top
      * @param searchText
      *            filtered as "like" on {@link SoftwareModule#getName()}
-     * @param type
+     * @param typeId
      *            filtered as "equal" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<AssignedSoftwareModule> findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            @NotNull Pageable pageable, @NotNull Long orderByDistributionId, String searchText,
-            SoftwareModuleType type);
+            @NotNull Pageable pageable, @NotNull Long orderByDistributionId, String searchText, Long typeId);
 
     /**
      * Retrieves all software modules. Deleted ones are filtered.
@@ -370,12 +344,12 @@ public interface SoftwareManagement {
      *
      * @param pageable
      *            page parameters
-     * @param type
+     * @param typeId
      *            to be filtered on
      * @return the found {@link SoftwareModule}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<SoftwareModule> findSoftwareModulesByType(@NotNull Pageable pageable, @NotNull SoftwareModuleType type);
+    Slice<SoftwareModule> findSoftwareModulesByType(@NotNull Pageable pageable, @NotNull Long typeId);
 
     /**
      *

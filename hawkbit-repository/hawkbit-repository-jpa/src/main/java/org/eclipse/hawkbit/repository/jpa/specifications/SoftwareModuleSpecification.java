@@ -13,6 +13,7 @@ import javax.persistence.criteria.Predicate;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,7 +40,7 @@ public final class SoftwareModuleSpecification {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaSoftwareModule_.id), moduleId);
             targetRoot.fetch(JpaSoftwareModule_.type);
-            targetRoot.fetch(JpaSoftwareModule_.metadata,JoinType.LEFT);
+            targetRoot.fetch(JpaSoftwareModule_.metadata, JoinType.LEFT);
             query.distinct(true);
             return predicate;
         };
@@ -77,9 +78,9 @@ public final class SoftwareModuleSpecification {
      *            to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<JpaSoftwareModule> equalType(final JpaSoftwareModuleType type) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<JpaSoftwareModuleType> get(JpaSoftwareModule_.type),
-                type);
+    public static Specification<JpaSoftwareModule> equalType(final Long type) {
+        return (targetRoot, query, cb) -> cb.equal(
+                targetRoot.<JpaSoftwareModuleType> get(JpaSoftwareModule_.type).get(JpaSoftwareModuleType_.id), type);
     }
 
 }

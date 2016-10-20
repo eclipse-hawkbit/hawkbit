@@ -41,8 +41,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -150,7 +150,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final String controllerId, final LocalArtifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final String controllerId, final Artifact localArtifact) {
         final Target target = targetRepository.findByControllerId(controllerId);
         if (target == null) {
             return false;
@@ -159,7 +159,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final LocalArtifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final Long targetId, final Artifact localArtifact) {
         final Target target = targetRepository.findOne(targetId);
         if (target == null) {
             return false;

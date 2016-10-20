@@ -14,11 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -30,11 +30,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -135,12 +135,13 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public TargetFilterQuery generateTargetFilterQuery(String name, String query) {
+    public TargetFilterQuery generateTargetFilterQuery(final String name, final String query) {
         return new JpaTargetFilterQuery(name, query);
     }
 
     @Override
-    public TargetFilterQuery generateTargetFilterQuery(String name, String query, DistributionSet autoAssignDS) {
+    public TargetFilterQuery generateTargetFilterQuery(final String name, final String query,
+            final DistributionSet autoAssignDS) {
         return new JpaTargetFilterQuery(name, query, (JpaDistributionSet) autoAssignDS);
     }
 
@@ -220,8 +221,8 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public LocalArtifact generateLocalArtifact() {
-        return new JpaLocalArtifact();
+    public Artifact generateArtifact() {
+        return new JpaArtifact();
     }
 
 }
