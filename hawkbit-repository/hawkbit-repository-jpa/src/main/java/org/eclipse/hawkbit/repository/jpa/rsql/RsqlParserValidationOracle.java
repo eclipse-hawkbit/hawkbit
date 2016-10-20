@@ -122,6 +122,9 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         final ParseExceptionWrapper parseExceptionWrapper = new ParseExceptionWrapper(parseException);
         final int[][] expectedTokenSequence = parseExceptionWrapper.getExpectedTokenSequence();
         final TokenWrapper currentToken = parseExceptionWrapper.getCurrentToken();
+        if (currentToken == null) {
+            return Collections.emptyList();
+        }
         final TokenWrapper nextToken = currentToken.getNext();
         final int currentTokenKind = currentToken.getKind();
         final String currentTokenImageName = currentToken.getImage();
@@ -138,15 +141,20 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         }
 
         for (final int[] is : expectedTokenSequence) {
-            for (final int i : is) {
-                final Collection<String> tokenImage = TokenDescription.getTokenImage(i);
-                if (tokenImage != null && !tokenImage.isEmpty()) {
-                    tokenImage.forEach(image -> listTokens.add(new SuggestToken(currentTokenEndColumn + 1,
-                            nextTokenBeginColumn + image.length(), null, image)));
-                }
-            }
+            addSuggestionOnTokenImage(listTokens, nextTokenBeginColumn, currentTokenEndColumn, is);
         }
         return listTokens;
+    }
+
+    private static void addSuggestionOnTokenImage(final List<SuggestToken> listTokens, final int nextTokenBeginColumn,
+            final int currentTokenEndColumn, final int[] is) {
+        for (final int i : is) {
+            final Collection<String> tokenImage = TokenDescription.getTokenImage(i);
+            if (tokenImage != null && !tokenImage.isEmpty()) {
+                tokenImage.forEach(image -> listTokens.add(new SuggestToken(currentTokenEndColumn + 1,
+                        nextTokenBeginColumn + image.length(), null, image)));
+            }
+        }
     }
 
     private static Optional<List<SuggestToken>> handleFieldTokenSuggestion(final String currentTokenImageName,
