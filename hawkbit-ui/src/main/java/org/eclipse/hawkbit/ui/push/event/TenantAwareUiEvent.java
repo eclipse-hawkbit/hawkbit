@@ -6,22 +6,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.local;
+package org.eclipse.hawkbit.ui.push.event;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
-import org.springframework.context.ApplicationEvent;
 
 /**
- * Abstract event definition class which holds the necessary revision and tenant
- * information which every event needs.
+ * UI event definition class which holds the necessary tenant information which
+ * every UI event needs.
  * 
- * @see RemoteTenantAwareEvent for events which should be distributed to other
- *      cluster nodes
  */
-public class LocalTenantAwareEvent extends ApplicationEvent implements TenantAwareEvent {
+public class TenantAwareUiEvent implements TenantAwareEvent {
 
-    private static final long serialVersionUID = 1L;
     private final String tenant;
 
     /**
@@ -30,8 +25,7 @@ public class LocalTenantAwareEvent extends ApplicationEvent implements TenantAwa
      * @param tenant
      *            the tenant of the event
      */
-    protected LocalTenantAwareEvent(final String tenant) {
-        super("LOCAL_EVENT");
+    protected TenantAwareUiEvent(final String tenant) {
         this.tenant = tenant;
     }
 

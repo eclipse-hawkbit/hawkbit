@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.push.event;
 
-import org.eclipse.hawkbit.repository.event.local.LocalTenantAwareEvent;
-
 /**
  * TenantAwareEvent declaration for the UI to notify the UI that a rollout has
  * been changed.
  * 
  *
  */
-public class RolloutGroupChangeEvent extends LocalTenantAwareEvent {
+public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
 
     private static final long serialVersionUID = 1L;
     private final Long rolloutId;

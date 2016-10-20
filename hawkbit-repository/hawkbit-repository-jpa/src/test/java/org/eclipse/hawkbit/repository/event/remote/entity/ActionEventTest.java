@@ -8,16 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -41,22 +36,6 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
     public void testActionUpdatedEvent() {
         assertAndCreateRemoteEvent(ActionUpdatedEvent.class);
 
-    }
-
-    @Test
-    @Description("Verifies that target assignment event works")
-    public void testTargetAssignDistributionSetEvent() throws JsonProcessingException {
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final Action action = createEntity();
-        action.setDistributionSet(dsA);
-
-        final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(action,
-                serviceMatcher.getServiceId());
-        final TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) assertEntity(action,
-                assignmentEvent);
-
-        assertThat(underTest.getTarget()).isNotNull();
-        assertThat(underTest.getSoftwareModules()).isNotEmpty();
     }
 
     @Override

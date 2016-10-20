@@ -25,8 +25,8 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -189,19 +189,20 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> action = controllerManagement.findOldestActiveActionByTarget(target);
-        if (!action.isPresent()) {
+        final Optional<Action> actionOptional = controllerManagement.findOldestActiveActionByTarget(target);
+        if (!actionOptional.isPresent()) {
             return;
         }
 
-        if (action.get().isCancelingOrCanceled()) {
+        final Action action = actionOptional.get();
+        if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target, action.get().getId(), applicationContext.getId()));
+                    new CancelTargetAssignmentEvent(target, action.getId(), applicationContext.getId()));
             return;
         }
 
-        amqpMessageDispatcherService.targetAssignDistributionSet(
-                new TargetAssignDistributionSetEvent(action.get(), applicationContext.getId()));
+        amqpMessageDispatcherService
+                .targetAssignDistributionSet(new TargetAssignDistributionSetEvent(action, applicationContext.getId()));
 
     }
 

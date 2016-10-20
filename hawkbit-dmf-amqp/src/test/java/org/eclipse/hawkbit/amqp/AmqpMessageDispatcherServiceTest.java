@@ -32,8 +32,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -111,7 +111,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, controllerManagament,
+                serviceMatcher);
 
     }
 
@@ -123,12 +124,19 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
+
+        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
+    }
+
+    private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+        final Target target = targetManagement
+                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId());
+        final Message sendMessage = createArgumentCapture(target.getTargetInfo().getAddress());
+        return sendMessage;
     }
 
     private Action createAction() {
@@ -152,8 +160,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
+        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("Expecting a size of 3 software modules in the reuqest", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
@@ -195,8 +202,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());
+        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());

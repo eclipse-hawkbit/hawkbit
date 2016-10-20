@@ -10,6 +10,11 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 
@@ -33,6 +38,35 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final DownloadProgressEvent remoteEvent = (DownloadProgressEvent) getAbstractMessageConverter()
                 .fromMessage(message, DownloadProgressEvent.class);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
+    }
+
+    @Test
+    @Description("Verifies that target assignment event works")
+    public void testTargetAssignDistributionSetEvent() throws JsonProcessingException {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final JpaAction generateAction = (JpaAction) entityFactory.generateAction();
+        generateAction.setActionType(ActionType.FORCED);
+        final Target generateTarget = entityFactory.generateTarget("Test");
+        final Target target = targetManagement.createTarget(generateTarget);
+        generateAction.setTarget(target);
+        generateAction.setDistributionSet(dsA);
+        final Action action = actionRepository.save(generateAction);
+
+        final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(action,
+                serviceMatcher.getServiceId());
+
+        final Message<?> message = createMessage(assignmentEvent);
+
+        final TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) getAbstractMessageConverter()
+                .fromMessage(message, TargetAssignDistributionSetEvent.class);
+
+        assertThat(underTest.getActionId()).isNotNull();
+        assertThat(underTest.getControllerId()).isNotNull();
+        assertThat(underTest.getDistributionSetId()).isNotNull();
+
+        assertThat(underTest.getActionId()).isEqualTo(action.getId());
+        assertThat(underTest.getControllerId()).isEqualTo(action.getTarget().getControllerId());
+        assertThat(underTest.getDistributionSetId()).isEqualTo(action.getDistributionSet().getId());
     }
 
 }

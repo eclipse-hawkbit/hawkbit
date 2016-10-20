@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -189,9 +188,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return Collections
-                .unmodifiableList(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
+    public List<SoftwareModule> findSoftwareModulesByDistributionSetId(final Long distributionSetId) {
+        return Collections.unmodifiableList(softwareModuleRepository.findByAssignedToId(distributionSetId));
     }
 
     @Override

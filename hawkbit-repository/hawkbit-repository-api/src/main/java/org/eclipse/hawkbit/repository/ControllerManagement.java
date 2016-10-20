@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-
 /**
  * Service layer for all operations of the DDI API (with access permissions only
  * for the controller).
@@ -151,14 +150,14 @@ public interface ControllerManagement {
      * Retrieves all {@link SoftwareModule}s which are assigned to the given
      * {@link DistributionSet}.
      *
-     * @param distributionSet
-     *            the distribution set which should be assigned to the returned
-     *            {@link SoftwareModule}s
+     * @param distributionSetId
+     *            the distributionSetId set which should be assigned to the
+     *            returned {@link SoftwareModule}s
      * @return a list of {@link SoftwareModule}s assigned to given
      *         {@code distributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<SoftwareModule> findSoftwareModulesByDistributionSet(@NotNull DistributionSet distributionSet);
+    List<SoftwareModule> findSoftwareModulesByDistributionSetId(@NotNull Long distributionSetId);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given

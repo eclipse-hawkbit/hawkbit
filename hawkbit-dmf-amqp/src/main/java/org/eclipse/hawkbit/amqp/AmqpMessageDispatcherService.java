@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,9 +24,11 @@ import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -54,6 +55,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final AmqpSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
+    private final TargetManagement targetManagement;
+    private final ControllerManagement controllerManagement;
     private final ServiceMatcher serviceMatcher;
 
     /**
@@ -67,17 +70,24 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            for generating download URLs
      * @param systemSecurityContext
      *            for execution with system permissions
-     * @param systemManagement
-     *            to access to tenant metadata
+     * @param controllerManagement
+     *            to access software modules
+     * @param targetManagement
+     *            to access targets
+     * @param serviceMatcher
+     *            the serviceMatcher
      */
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
             final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
-            final SystemManagement systemManagement, final ServiceMatcher serviceMatcher) {
+            final SystemManagement systemManagement, final TargetManagement targetManagement,
+            final ControllerManagement controllerManagement, final ServiceMatcher serviceMatcher) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
         this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
+        this.controllerManagement = controllerManagement;
+        this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
     }
 
@@ -94,24 +104,23 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final URI targetAdress = targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress();
+        final Target target = targetManagement.findTargetByControllerID(targetAssignDistributionSetEvent.getId());
+        final URI targetAdress = target.getTargetInfo().getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
             return;
         }
 
-        final String controllerId = targetAssignDistributionSetEvent.getTarget().getControllerId();
-        final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules = targetAssignDistributionSetEvent
-                .getSoftwareModules();
+        final String controllerId = target.getControllerId();
+        final List<org.eclipse.hawkbit.repository.model.SoftwareModule> modules = controllerManagement
+                .findSoftwareModulesByDistributionSetId(targetAssignDistributionSetEvent.getDistributionSetId());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
-        downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getEntityId());
+        downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
 
-        final String targetSecurityToken = systemSecurityContext
-                .runAsSystem(targetAssignDistributionSetEvent.getTarget()::getSecurityToken);
+        final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
-            final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(
-                    targetAssignDistributionSetEvent.getTarget(), softwareModule);
+            final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, softwareModule);
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 

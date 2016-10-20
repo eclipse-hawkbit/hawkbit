@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -30,6 +33,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +127,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             LOG.debug("UI EventBus aggregator started for UI {}", vaadinUI.getUIId());
             final long timestamp = System.currentTimeMillis();
 
-            final int size = queue.size();
+            final Optional<RolloutChangeEvent> rolloutChangeEvent = getRolloutChangeEvent();
+            final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent = getRolloutGroupChangeEvent();
+
+            final int size = calculateQueueSize(rolloutChangeEvent, rolloutGroupChangeEvent);
             if (size <= 0) {
                 LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", vaadinUI.getUIId());
                 return;
@@ -144,11 +152,51 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             LOG.debug("UI EventBus aggregator dispatches {} events for session {} for UI {}", eventsSize, vaadinSession,
                     vaadinUI.getUIId());
 
+            addRolloutChangeEvents(rolloutChangeEvent, rolloutGroupChangeEvent, events);
+
             doDispatch(events, wrappedSession);
 
             LOG.debug("UI EventBus aggregator done with sending {} events in {} ms for UI {}", eventsSize,
                     System.currentTimeMillis() - timestamp, vaadinUI.getUIId());
 
+        }
+
+        private void addRolloutChangeEvents(final Optional<RolloutChangeEvent> rolloutChangeEvent,
+                final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent, final List<TenantAwareEvent> events) {
+            rolloutChangeEvent.ifPresent(events::add);
+            rolloutGroupChangeEvent.ifPresent(events::add);
+
+        }
+
+        private Optional<RolloutChangeEvent> getRolloutChangeEvent() {
+            final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
+            if (rolloutIterator.hasNext()) {
+                final RolloutEventKey eventKey = rolloutIterator.next();
+                rolloutEvents.clear();
+                return Optional.of(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
+            }
+            return Optional.empty();
+        }
+
+        private Optional<RolloutGroupChangeEvent> getRolloutGroupChangeEvent() {
+            final Iterator<RolloutEventKey> rolloutIterator = rolloutGroupEvents.iterator();
+            if (rolloutIterator.hasNext()) {
+                final RolloutEventKey eventKey = rolloutIterator.next();
+                rolloutGroupEvents.clear();
+                return Optional
+                        .of(new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
+            }
+            return Optional.empty();
+        }
+
+        private int calculateQueueSize(final Optional<RolloutChangeEvent> rolloutChangeEvent,
+                final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent) {
+            final AtomicInteger size = new AtomicInteger(queue.size());
+
+            rolloutChangeEvent.ifPresent(event -> size.incrementAndGet());
+            rolloutGroupChangeEvent.ifPresent(event -> size.incrementAndGet());
+
+            return size.get();
         }
 
         /**
@@ -185,6 +233,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
                 final List<EventContainer<TenantAwareEvent>> groupedEvents = groupEvents(events, userContext,
                         eventProvider);
+
                 vaadinUI.access(() -> {
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
@@ -240,6 +289,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
         final org.eclipse.hawkbit.repository.event.TenantAwareEvent event = (TenantAwareEvent) applicationEvent;
 
+        collectRolloutEvent(event);
         // to dispatch too many events which are not interested on the UI
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
@@ -252,7 +302,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         }
     }
 
-    private void onEvent(final TenantAwareEvent event) {
+    private static void collectRolloutEvent(final TenantAwareEvent event) {
         Long rolloutId = null;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {

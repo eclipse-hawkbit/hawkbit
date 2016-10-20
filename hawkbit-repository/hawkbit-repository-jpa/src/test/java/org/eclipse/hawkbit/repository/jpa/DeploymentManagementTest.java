@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.DeploymentManagementTest.DeploymentTestConfiguration;
@@ -949,13 +949,20 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final Target myt : targets) {
             boolean found = false;
             for (final TargetAssignDistributionSetEvent event : events) {
-                if (event.getTarget().getControllerId().equals(myt.getControllerId())) {
+                if (event.getControllerId().equals(myt.getControllerId())) {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
                     assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();
-                    assertThat(event.getEntityId()).as("Action id in database and event do not match")
+                    assertThat(event.getActionId()).as("Action id in database and event do not match")
                             .isEqualTo(activeActionsByTarget.get(0).getId());
-                    assertThat(event.getSoftwareModules()).as("softwaremodule size is not correct")
+
+                    final List<SoftwareModule> modules = controllerManagament
+                            .findSoftwareModulesByDistributionSetId(event.getDistributionSetId());
+                    assertThat(distributionSetManagement.findDistributionSetById(event.getDistributionSetId())
+                            .getModules()).as("softwaremodule size is not correct")
+                                    .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
+
+                    assertThat(modules).as("softwaremodule size is not correct")
                             .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
                 }
             }

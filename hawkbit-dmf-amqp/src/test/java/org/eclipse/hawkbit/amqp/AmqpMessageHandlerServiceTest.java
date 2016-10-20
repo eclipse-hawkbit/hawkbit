@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -390,11 +390,11 @@ public class AmqpMessageHandlerServiceTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
                 .getValue();
 
-        assertThat(targetAssignDistributionSetEvent.getTarget().getControllerId()).as("event has wrong controller id")
+        assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
-        assertThat(targetAssignDistributionSetEvent.getTarget().getSecurityToken())
-                .as("targetoken not filled correctly").isEqualTo(action.getTarget().getSecurityToken());
-        assertThat(targetAssignDistributionSetEvent.getEntityId()).as("event has wrong action id").isEqualTo(22L);
+        assertThat(targetAssignDistributionSetEvent.getDistributionSetId())
+                .isEqualTo(action.getDistributionSet().getId());
+        assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
 
     }
 
