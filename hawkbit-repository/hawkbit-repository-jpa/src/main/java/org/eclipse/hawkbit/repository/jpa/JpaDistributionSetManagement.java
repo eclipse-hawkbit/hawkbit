@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -109,6 +110,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
@@ -286,7 +290,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSetType> findDistributionSetTypesAll(final String rsqlParam, final Pageable pageable) {
         final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam,
-                DistributionSetTypeFields.class);
+                DistributionSetTypeFields.class, virtualPropertyReplacer);
 
         return convertDsTPage(distributionSetTypeRepository.findAll(spec, pageable));
     }
@@ -352,7 +356,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findDistributionSetsAll(final String rsqlParam, final Pageable pageReq,
             final Boolean deleted) {
 
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+                virtualPropertyReplacer);
 
         final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(2);
         if (deleted != null) {
@@ -528,7 +533,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     /**
      * Method to get the latest distribution set based on ds ID after the
      * metadata changes for that distribution set.
-     * 
+     *
      * @param distributionSet
      *            Distribution set
      */
@@ -564,7 +569,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
-                DistributionSetMetadataFields.class);
+                DistributionSetMetadataFields.class, virtualPropertyReplacer);
 
         return convertMdPage(
                 distributionSetMetadataRepository

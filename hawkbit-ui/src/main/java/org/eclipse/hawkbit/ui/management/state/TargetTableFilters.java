@@ -31,6 +31,8 @@ public class TargetTableFilters implements Serializable {
 
     private final List<String> clickedTargetTags = new ArrayList<>();
     private final List<TargetUpdateStatus> clickedStatusTargetTags = new ArrayList<>();
+    private boolean isOverdueFilterEnabled = Boolean.FALSE;
+
     private String searchText;
     private DistributionSetIdName distributionSet;
     private Long pinnedDistId;
@@ -130,7 +132,8 @@ public class TargetTableFilters implements Serializable {
      *         {@code false}
      */
     public boolean hasFilter() {
-        return isFilteredByTextOrDs() || hasTagsSelected() || isFilteredByStatusOrCustomFilter();
+        return isFilteredByTextOrDs() || hasTagsSelected() || isFilteredByStatusOrCustomFilter()
+                || isOverdueFilterEnabled();
     }
 
     private boolean hasTagsSelected() {
@@ -158,6 +161,14 @@ public class TargetTableFilters implements Serializable {
      */
     public void setTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
+    }
+
+    public boolean isOverdueFilterEnabled() {
+        return isOverdueFilterEnabled;
+    }
+
+    public void setOverdueFilterEnabled(boolean isOverdueFilterEnabled) {
+        this.isOverdueFilterEnabled = isOverdueFilterEnabled;
     }
 
 }

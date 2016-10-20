@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
@@ -105,6 +106,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Autowired
     private ArtifactManagement artifactManagement;
+
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     @Modifying
@@ -312,7 +316,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public Page<SoftwareModule> findSoftwareModulesByPredicate(final String rsqlParam, final Pageable pageable) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class);
+        final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class,
+                virtualPropertyReplacer);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }
@@ -320,7 +325,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final String rsqlParam, final Pageable pageable) {
 
-        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class);
+        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
+                virtualPropertyReplacer);
 
         return convertSmTPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
     }
@@ -606,7 +612,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
             final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.parse(rsqlParam,
-                SoftwareModuleMetadataFields.class);
+                SoftwareModuleMetadataFields.class, virtualPropertyReplacer);
         return convertSmMdPage(
                 softwareModuleMetadataRepository
                         .findAll(

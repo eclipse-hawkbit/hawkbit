@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +28,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -68,7 +70,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
@@ -103,6 +104,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     public Target findTargetByControllerID(final String controllerId) {
@@ -154,12 +158,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsAll(final TargetFilterQuery targetFilterQuery, final Pageable pageable) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
+        return findTargetsBySpec(
+                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer),
+                pageable);
     }
 
     @Override
     public Page<Target> findTargetsAll(final String targetFilterQuery, final Pageable pageable) {
-        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
+        return findTargetsBySpec(RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer),
+                pageable);
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
@@ -223,7 +230,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID, final String rsqlParam,
             final Pageable pageReq) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -251,7 +259,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId, final String rsqlParam,
             final Pageable pageable) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -269,40 +278,54 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetByFilters(final Pageable pageable, final Collection<TargetUpdateStatus> status,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean overdueState, final String searchText, final Long installedOrAssignedDistributionSetId,
             final Boolean selectTargetWithNoTag, final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, searchText,
-                installedOrAssignedDistributionSetId, selectTargetWithNoTag, true, tagNames);
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(
+                new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
+                        selectTargetWithNoTag, tagNames),
+                true);
         return findByCriteriaAPI(pageable, specList);
     }
 
     @Override
-    public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final String searchText,
-            final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
-            final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(status, searchText,
-                installedOrAssignedDistributionSetId, selectTargetWithNoTag, true, tagNames);
+    public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
+                                     final String searchText, final Long installedOrAssignedDistributionSetId,
+                                     final Boolean selectTargetWithNoTag, final String... tagNames) {
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(
+                new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
+                        selectTargetWithNoTag, tagNames),
+                true);
         return countByCriteriaAPI(specList);
     }
 
-    private static List<Specification<JpaTarget>> buildSpecificationList(final Collection<TargetUpdateStatus> status,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final boolean fetch, final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = new LinkedList<>();
-        if (status != null && !status.isEmpty()) {
-            specList.add(TargetSpecifications.hasTargetUpdateStatus(status, fetch));
+    private static List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams,
+                                                                         final boolean fetch) {
+        final List<Specification<JpaTarget>> specList = new ArrayList<>();
+        if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
+            specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus(), fetch));
         }
-        if (installedOrAssignedDistributionSetId != null) {
+        if (filterParams.getOverdueState() != null) {
             specList.add(
-                    TargetSpecifications.hasInstalledOrAssignedDistributionSet(installedOrAssignedDistributionSetId));
+                    TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
-        if (!Strings.isNullOrEmpty(searchText)) {
-            specList.add(TargetSpecifications.likeNameOrDescriptionOrIp(searchText));
+        if (filterParams.getFilterByDistributionId() != null) {
+            specList.add(
+                    TargetSpecifications
+                            .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
-        if (selectTargetWithNoTag != null && (selectTargetWithNoTag || (tagNames != null && tagNames.length > 0))) {
-            specList.add(TargetSpecifications.hasTags(tagNames, selectTargetWithNoTag));
+        if (StringUtils.isNotEmpty(filterParams.getFilterBySearchText())) {
+            specList.add(TargetSpecifications.likeNameOrDescriptionOrIp(filterParams.getFilterBySearchText()));
+        }
+        if (isHasTagsFilterActive(filterParams)) {
+            specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
+                    filterParams.getSelectTargetWithNoTag()));
         }
         return specList;
+    }
+
+    private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
+        return filterParams.getSelectTargetWithNoTag() != null && (filterParams.getSelectTargetWithNoTag()
+                || (filterParams.getFilterByTagNames() != null && filterParams.getFilterByTagNames().length > 0));
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
@@ -418,9 +441,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findTargetsAllOrderByLinkedDistributionSet(final Pageable pageable,
-            final Long orderByDistributionId, final Long filterByDistributionId,
-            final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
-            final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
+            final Long orderByDistributionId, final FilterParams filterParams) {
+
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaTarget> query = cb.createQuery(JpaTarget.class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
@@ -443,8 +465,7 @@ public class JpaTargetManagement implements TargetManagement {
         // build the specifications and then to predicates necessary by the
         // given filters
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterByStatus, filterBySearchText, filterByDistributionId,
-                        selectTargetWithNoTag, true, filterByTagNames),
+                buildSpecificationList(filterParams, true),
                 targetRoot, query, cb);
 
         // if we have some predicates then add it to the where clause of the
@@ -500,7 +521,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<TargetIdName> findAllTargetIdsByFilters(final Pageable pageRequest,
-            final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
+            final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
+            final String filterBySearchText,
             final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
             final String... filterByTagNames) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -517,8 +539,9 @@ public class JpaTargetManagement implements TargetManagement {
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterByStatus, filterBySearchText, installedOrAssignedDistributionSetId,
-                        selectTargetWithNoTag, false, filterByTagNames),
+                buildSpecificationList(new FilterParams(installedOrAssignedDistributionSetId, filterByStatus,
+                        overdueState, filterBySearchText,
+                        selectTargetWithNoTag, filterByTagNames), false),
                 targetRoot, multiselect, cb);
 
         // if we have some predicates then add it to the where clause of the
@@ -547,7 +570,8 @@ public class JpaTargetManagement implements TargetManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(JpaTarget_.id),
                 targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name), targetRoot.get(sortProperty));
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(Lists.newArrayList(spec), targetRoot,
                 multiselect, cb);
 
@@ -565,7 +589,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull final Pageable pageRequest,
             final Long distributionSetId, @NotNull final TargetFilterQuery targetFilterQuery) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
 
         return findTargetsBySpec(
                 (root, cq,
@@ -578,7 +603,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Long countTargetsByTargetFilterQueryAndNonDS(final Long distributionSetId,
             @NotNull final TargetFilterQuery targetFilterQuery) {
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+        		virtualPropertyReplacer);
         final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
         specList.add(spec);
         specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
@@ -650,13 +676,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countTargetByTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer);
         return targetRepository.count(specs);
     }
 
     @Override
     public Long countTargetByTargetFilterQuery(final String targetFilterQuery) {
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
+        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+                virtualPropertyReplacer);
         return targetRepository.count(specs);
     }
 

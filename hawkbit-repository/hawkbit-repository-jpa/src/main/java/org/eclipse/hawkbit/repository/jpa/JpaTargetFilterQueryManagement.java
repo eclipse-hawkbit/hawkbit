@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -48,6 +49,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Autowired
     private TargetFilterQueryRepository targetFilterQueryRepository;
+
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     @Modifying
@@ -95,7 +99,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!Strings.isNullOrEmpty(rsqlFilter)) {
-            specList = Collections.singletonList(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
+            specList = Collections.singletonList(
+                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -114,7 +119,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         }
         if (!Strings.isNullOrEmpty(rsqlFilter)) {
-            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class));
+            specList.add(RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -156,7 +161,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
-        RSQLUtility.parse(query, TargetFields.class);
+        RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer);
         return true;
     }
 
