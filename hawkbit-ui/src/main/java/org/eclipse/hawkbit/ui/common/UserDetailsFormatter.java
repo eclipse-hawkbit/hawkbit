@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
@@ -153,6 +154,20 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
         return trimAndFormatDetail(userPrincipal.getTenant(), 8);
+    }
+
+    /**
+     * @return logged in users Email address
+     */
+    public static Optional<String> getCurrentUserEmail() {
+        final UserDetails userDetails = getCurrentUser();
+        if (!(userDetails instanceof UserPrincipal)) {
+            return Optional.empty();
+        }
+
+        final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+
+        return Optional.ofNullable(userPrincipal.getEmail());
     }
 
     private static UserDetails getCurrentUser() {
