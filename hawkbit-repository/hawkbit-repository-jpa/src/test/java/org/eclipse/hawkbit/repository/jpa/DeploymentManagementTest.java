@@ -935,9 +935,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private void assertTargetAssignDistributionSetEvents(final List<Target> targets, final DistributionSet ds,
             final List<TargetAssignDistributionSetEvent> events) {
         assertThat(events).isNotEmpty();
+        System.out.println("event size" + events.size());
         for (final Target myt : targets) {
             boolean found = false;
             for (final TargetAssignDistributionSetEvent event : events) {
+                System.out.println(event.getControllerId());
+
                 if (event.getControllerId().equals(myt.getControllerId())) {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
