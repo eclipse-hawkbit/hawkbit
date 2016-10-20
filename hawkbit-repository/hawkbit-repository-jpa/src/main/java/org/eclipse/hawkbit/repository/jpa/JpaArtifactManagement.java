@@ -135,7 +135,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         clearArtifactBinary(existing);
 
-        existing.getSoftwareModule().removeArtifact(existing);
+        ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
         localArtifactRepository.delete(id);
     }

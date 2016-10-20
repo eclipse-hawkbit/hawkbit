@@ -118,7 +118,7 @@ public interface SoftwareManagement {
      *
      * @param types
      *            to create
-     * @return created {@link Entity}
+     * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleType> types);
@@ -128,13 +128,13 @@ public interface SoftwareManagement {
      *
      * @param type
      *            to create
-     * @return created {@link Entity}
+     * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleType type);
 
     /**
-     * Deletes the given {@link SoftwareModule} {@link Entity}.
+     * Deletes the given {@link SoftwareModule} Entity.
      *
      * @param moduleId
      *            is the {@link SoftwareModule} to be deleted
@@ -256,7 +256,7 @@ public interface SoftwareManagement {
     /**
      * finds all meta data by the given software module id.
      *
-     * @param softwareModuleId
+     * @param moduleId
      *            the software module id to retrieve the meta data from
      * @param rsqlParam
      *            filter definition in RSQL syntax
@@ -272,7 +272,7 @@ public interface SoftwareManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long softwareModuleId,
+    Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId,
             @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
@@ -408,19 +408,6 @@ public interface SoftwareManagement {
     Page<SoftwareModuleType> findSoftwareModuleTypesAll(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
-     * Retrieves software module including details (
-     * {@link SoftwareModule#getArtifacts()}).
-     *
-     * @param id
-     *            parameter
-     * @param isDeleted
-     *            parameter
-     * @return the found {@link SoftwareModule}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModule findSoftwareModuleWithDetails(@NotNull Long id);
-
-    /**
      * Updates existing {@link SoftwareModule}. Update-able values are
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
@@ -428,7 +415,7 @@ public interface SoftwareManagement {
      * @param sm
      *            to update
      *
-     * @return the saved {@link Entity}.
+     * @return the saved Entity.
      *
      * @throws NullPointerException
      *             of {@link SoftwareModule#getId()} is <code>null</code>
@@ -456,7 +443,7 @@ public interface SoftwareManagement {
      *
      * @param sm
      *            to update
-     * @return updated {@link Entity}
+     * @return updated Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
@@ -476,6 +463,6 @@ public interface SoftwareManagement {
      * @return result of all meta data entries for a given software module id.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(Long softwareModuleId);
+    List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long moduleId);
 
 }

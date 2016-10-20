@@ -71,7 +71,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Override
     protected List<SoftwareModuleMetadata> getMetadataList() {
-        return getSelectedEntity().getMetadata();
+        return softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(getSelectedEntity().getId());
     }
 
     /**

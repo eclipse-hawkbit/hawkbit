@@ -71,7 +71,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private String vendor;
 
     @CascadeOnDelete
-    @OneToMany(mappedBy = "softwareModule", cascade = { CascadeType.ALL }, targetEntity = JpaArtifact.class)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
+            CascadeType.ALL }, targetEntity = JpaArtifact.class)
     private List<Artifact> artifacts;
 
     @CascadeOnDelete
@@ -107,10 +108,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.type = (JpaSoftwareModuleType) type;
     }
 
-    /**
-     * @param artifact
-     *            is added to the assigned {@link Artifact}s.
-     */
     @Override
     public void addArtifact(final Artifact artifact) {
         if (null == artifacts) {
@@ -145,7 +142,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      * @param artifact
      *            is removed from the assigned {@link LocalArtifact}s.
      */
-    @Override
     public void removeArtifact(final Artifact artifact) {
         if (artifacts != null) {
             artifacts.remove(artifact);
@@ -167,7 +163,13 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         return deleted;
     }
 
-    @Override
+    /**
+     * Marks or un-marks this software module as deleted.
+     * 
+     * @param deleted
+     *            {@code true} if the software module should be marked as
+     *            deleted otherwise {@code false}
+     */
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
@@ -177,7 +179,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.type = (JpaSoftwareModuleType) type;
     }
 
-    @Override
     public List<SoftwareModuleMetadata> getMetadata() {
         if (metadata == null) {
             return Collections.emptyList();

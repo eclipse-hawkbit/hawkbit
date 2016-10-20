@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -112,7 +113,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, TENANT, testTarget, 1L, new ArrayList<SoftwareModule>());
+                1L, TENANT, testTarget, 1L, Collections.emptyList());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
                 targetAssignDistributionSetEvent.getTarget().getTargetInfo().getAddress());

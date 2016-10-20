@@ -139,7 +139,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
                 .andExpect(jsonPath("$.providedFilename", equalTo("origFilename"))).andReturn();
@@ -147,7 +147,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
-        final Long artId = softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0).getId();
+        final Long artId = softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Link contains no self url")
@@ -167,8 +167,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         // binary
         assertTrue("Wrong artifact content",
                 IOUtils.contentEquals(new ByteArrayInputStream(random),
-                        artifactManagement.loadArtifactBinary(
-                                softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                        artifactManagement
+                                .loadArtifactBinary(
+                                        softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
                                 .getFileInputStream()));
 
         // hashes
@@ -179,7 +180,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
-        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0).getFilename())
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
@@ -213,7 +214,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
                 .andExpect(jsonPath("$.providedFilename", equalTo("orig"))).andExpect(status().isCreated());
 
@@ -342,7 +343,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
-                .andExpect(jsonPath("$.type", equalTo("local"))).andExpect(jsonPath("$.size", equalTo(random.length)))
+                .andExpect(jsonPath("$.size", equalTo(random.length)))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
@@ -370,7 +371,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[0].id", equalTo(artifact.getId().intValue())))
-                .andExpect(jsonPath("$.[0].type", equalTo("local")))
                 .andExpect(jsonPath("$.[0].size", equalTo(random.length)))
                 .andExpect(jsonPath("$.[0].hashes.md5", equalTo(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
@@ -382,7 +382,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getId())))
                 .andExpect(jsonPath("$.[1].id", equalTo(artifact2.getId().intValue())))
-                .andExpect(jsonPath("$.[1].type", equalTo("local")))
                 .andExpect(jsonPath("$.[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
                 .andExpect(jsonPath("$.[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
                 .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
@@ -908,7 +907,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         // check repo before delete
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
 
-        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()).hasSize(2);
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts()).hasSize(2);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
 
         // delete
@@ -919,7 +918,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("After the sm should be marked as deleted")
                 .hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
-        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts())
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
 
     }

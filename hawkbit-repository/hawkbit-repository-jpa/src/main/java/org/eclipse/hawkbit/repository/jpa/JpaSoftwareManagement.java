@@ -207,9 +207,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public SoftwareModule findSoftwareModuleById(final Long id) {
-        final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.byId(id);
-
-        return softwareModuleRepository.findOne(spec);
+        return softwareModuleRepository.findOne(id);
     }
 
     @Override
@@ -295,16 +293,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
 
         return countSwModuleByCriteriaAPI(Lists.newArrayList(spec));
-    }
-
-    @Override
-    public SoftwareModule findSoftwareModuleWithDetails(final Long id) {
-        final SoftwareModule result = findSoftwareModuleById(id);
-        if (result != null) {
-            result.getArtifacts().size();
-        }
-
-        return result;
     }
 
     @Override

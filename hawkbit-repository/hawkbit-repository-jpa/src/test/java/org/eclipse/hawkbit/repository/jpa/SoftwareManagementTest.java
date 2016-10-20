@@ -478,7 +478,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleWithDetails(moduleX.getId());
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP3]: Create SoftwareModuleY and add the same ArtifactX
@@ -486,7 +486,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleWithDetails(moduleY.getId());
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // verify: that only one entry was created in mongoDB
@@ -530,14 +530,14 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleWithDetails(moduleX.getId());
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleWithDetails(moduleY.getId());
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // verify: that only one entry was created in mongoDB
@@ -591,7 +591,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
-        softwareModule = softwareManagement.findSoftwareModuleWithDetails(softwareModule.getId());
+        softwareModule = softwareManagement.findSoftwareModuleById(softwareModule.getId());
         assertThat(softwareModuleRepository.findAll()).hasSize((int) countSoftwareModule + 1);
 
         final List<Artifact> artifacts = softwareModule.getArtifacts();
@@ -935,13 +935,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata())
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
                 .as("Contains the created metadata element")
                 .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareManagement.deleteSoftwareModuleMetadata(ah.getId(), knownKey1);
-        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata()).as("Metadata elemenets are")
-                .isEmpty();
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
+                .as("Metadata elemenets are").isEmpty();
     }
 
     @Test

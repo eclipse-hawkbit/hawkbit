@@ -16,13 +16,12 @@ import java.util.Optional;
  *
  */
 public interface SoftwareModule extends NamedVersionedEntity {
-
     /**
      * @param artifact
      *            is added to the assigned {@link Artifact}s.
      */
     void addArtifact(Artifact artifact);
-
+    
     /**
      * @param artifactId
      *            to look for
@@ -67,12 +66,6 @@ public interface SoftwareModule extends NamedVersionedEntity {
     void setVendor(String vendor);
 
     /**
-     * @param artifact
-     *            is removed from the assigned {@link Artifact}s.
-     */
-    void removeArtifact(Artifact artifact);
-
-    /**
      * @return the type of the software module
      */
     SoftwareModuleType getType();
@@ -84,24 +77,10 @@ public interface SoftwareModule extends NamedVersionedEntity {
     boolean isDeleted();
 
     /**
-     * Marks or un-marks this software module as deleted.
-     * 
-     * @param deleted
-     *            {@code true} if the software module should be marked as
-     *            deleted otherwise {@code false}
-     */
-    void setDeleted(boolean deleted);
-
-    /**
      * @param type
      *            the module type for this software module
      */
     void setType(SoftwareModuleType type);
-
-    /**
-     * @return immutable list of meta data elements.
-     */
-    List<SoftwareModuleMetadata> getMetadata();
 
     /**
      * @return immutable list of {@link DistributionSet}s the module is assigned
