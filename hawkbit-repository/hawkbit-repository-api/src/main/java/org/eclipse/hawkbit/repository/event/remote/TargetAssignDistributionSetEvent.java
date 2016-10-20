@@ -65,7 +65,6 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
      * @param applicationId
      *            the application id.
      */
-    @JsonCreator
     public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
         this(action.getTenant(), action.getId(), action.getDistributionSet().getId(),
                 action.getTarget().getControllerId(), applicationId);
