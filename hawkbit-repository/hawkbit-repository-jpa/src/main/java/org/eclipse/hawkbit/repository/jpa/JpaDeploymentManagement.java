@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -135,6 +136,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
+
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -612,8 +616,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return convertAcPage(actions, pageable);
     }
 
-    private static Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class);
+    private Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
+        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class, virtualPropertyReplacer);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target), target));
     }

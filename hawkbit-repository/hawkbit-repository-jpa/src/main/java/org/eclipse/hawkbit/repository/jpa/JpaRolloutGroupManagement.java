@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -70,6 +71,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private VirtualPropertyReplacer virtualPropertyReplacer;
+
     @Override
     public RolloutGroup findRolloutGroupById(final Long rolloutGroupId) {
         return rolloutGroupRepository.findOne(rolloutGroupId);
@@ -92,7 +96,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     public Page<RolloutGroup> findRolloutGroupsAll(final Rollout rollout, final String rsqlParam,
             final Pageable pageable) {
 
-        final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class);
+        final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class,
+                virtualPropertyReplacer);
 
         return convertPage(
                 rolloutGroupRepository
@@ -145,7 +150,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup, final String rsqlParam,
             final Pageable pageable) {
 
-        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
+        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer);
 
         return convertTPage(targetRepository.findAll((root, query, criteriaBuilder) -> {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = root.join(JpaTarget_.rolloutTargetGroup);

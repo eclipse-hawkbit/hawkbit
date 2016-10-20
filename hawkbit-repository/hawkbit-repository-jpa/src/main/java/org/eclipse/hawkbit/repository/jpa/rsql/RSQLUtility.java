@@ -25,10 +25,12 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
@@ -47,9 +49,8 @@ import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
- * A utility class which is able to parse RSQL strings into an spring data
- * {@link Specification} which then can be enhanced sql queries to filter
- * entities. RSQL parser library: https://github.com/jirutka/rsql-parser
+ * A utility class which is able to parse RSQL strings into an spring data {@link Specification} which then can be
+ * enhanced sql queries to filter entities. RSQL parser library: https://github.com/jirutka/rsql-parser
  *
  * <ul>
  * <li>Equal to : ==</li>
@@ -59,16 +60,24 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <li>Greater than operator : =gt= or ></li>
  * <li>Greater than or equal to : =ge= or >=</li>
  * </ul>
+ * <p>
  * Examples of RSQL expressions in both FIQL-like and alternative notation:
  * <ul>
  * <li>version==2.0.0</li>
  * <li>name==targetId1;description==plugAndPlay</li>
  * <li>name==targetId1 and description==plugAndPlay</li>
- * <li>name==targetId1;description==plugAndPlay</li>
- * <li>name==targetId1 and description==plugAndPlay</li>
  * <li>name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN</li>
  * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
  * </ul>
+ * <p>
+ * There is also a mechanism that allows to refer to known macros that can resolved by an optional {@link StrLookup}
+ * (cp. {@link VirtualPropertyResolver}).<br>
+ * An example that queries for all overdue targets using the ${OVERDUE_TS} placeholder introduced by
+ * {@link VirtualPropertyResolver} looks like this:<br>
+ * <em>lastControllerRequestAt=le=${OVERDUE_TS}</em><br>
+ * It is possible to escape a macro expression by using a second '$': $${OVERDUE_TS} would prevent the ${OVERDUE_TS}
+ * token from being expanded.
+ *
  */
 public final class RSQLUtility {
 
@@ -90,6 +99,9 @@ public final class RSQLUtility {
      * @param fieldNameProvider
      *            the enum class type which implements the
      *            {@link FieldNameProvider}
+     * @param virtualPropertyReplacer
+     *            holds the logic how the known macros have to be resolved; may
+     *            be <code>null</code>
      * @return an specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
@@ -98,8 +110,8 @@ public final class RSQLUtility {
      *             if the RSQL syntax is wrong
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider);
+            final Class<A> fieldNameProvider, VirtualPropertyReplacer virtualPropertyReplacer) {
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer);
     }
 
     /**
@@ -130,10 +142,13 @@ public final class RSQLUtility {
 
         private final String rsql;
         private final Class<A> enumType;
+        private final VirtualPropertyReplacer virtualPropertyReplacer;
 
-        private RSQLSpecification(final String rsql, final Class<A> enumType) {
+        private RSQLSpecification(final String rsql, final Class<A> enumType,
+                VirtualPropertyReplacer virtualPropertyReplacer) {
             this.rsql = rsql;
             this.enumType = enumType;
+            this.virtualPropertyReplacer = virtualPropertyReplacer;
         }
 
         @Override
@@ -141,7 +156,8 @@ public final class RSQLUtility {
 
             final Node rootNode = parseRsql(rsql);
 
-            final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType);
+            final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
+                    virtualPropertyReplacer);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (accept != null && !accept.isEmpty()) {
@@ -171,13 +187,16 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
+        private final VirtualPropertyReplacer virtualPropertyReplacer;
 
         private final SimpleTypeConverter simpleTypeConverter;
 
-        private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType) {
+        private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
+                VirtualPropertyReplacer virtualPropertyReplacer) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
+            this.virtualPropertyReplacer = virtualPropertyReplacer;
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
@@ -199,7 +218,7 @@ public final class RSQLUtility {
             return toSingleList(cb.conjunction());
         }
 
-        private List<Predicate> toSingleList(final Predicate predicate) {
+        private static List<Predicate> toSingleList(final Predicate predicate) {
             return Collections.singletonList(predicate);
         }
 
@@ -348,13 +367,10 @@ public final class RSQLUtility {
         private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
                 final Path<Object> fieldPath) {
             // in case the value of an rsql query e.g. type==application is an
-            // enum we need to
-            // handle it separately because JPA needs the correct java-type to
-            // build an
-            // expression. So String and numeric values JPA can do it by it's
-            // own but not for
-            // classes like enums. So we need to transform the given value
-            // string into the enum
+            // enum we need to handle it separately because JPA needs the
+            // correct java-type to build an expression. So String and numeric
+            // values JPA can do it by it's own but not for classes like enums.
+            // So we need to transform the given value string into the enum
             // class.
             final Class<? extends Object> javaType = fieldPath.getJavaType();
             if (javaType != null && javaType.isEnum()) {
@@ -399,15 +415,14 @@ public final class RSQLUtility {
         // Exception squid:S2095 - see
         // https://jira.sonarsource.com/browse/SONARJAVA-1478
         @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
-        private Object transformEnumValue(final ComparisonNode node, final String value,
+        private static Object transformEnumValue(final ComparisonNode node, final String value,
                 final Class<? extends Object> javaType) {
             final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
             try {
                 return Enum.valueOf(tmpEnumType, value.toUpperCase());
             } catch (final IllegalArgumentException e) {
                 // we could not transform the given string value into the enum
-                // type, so ignore
-                // it and return null and do not filter
+                // type, so ignore it and return null and do not filter
                 LOGGER.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
                         javaType);
                 LOGGER.debug("value cannot be transformed to an enum", e);
@@ -422,10 +437,16 @@ public final class RSQLUtility {
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<String> values, final List<Object> transformedValues, final A enumField) {
             // only 'equal' and 'notEqual' can handle transformed value like
-            // enums. The JPA API
-            // cannot handle object types for greaterThan etc methods.
+            // enums. The JPA API cannot handle object types for greaterThan etc
+            // methods.
             final Object transformedValue = transformedValues.get(0);
-            final String value = values.get(0);
+
+            String value = values.get(0);
+            // if lookup is available, replace macros ...
+            if (virtualPropertyReplacer != null) {
+                value = virtualPropertyReplacer.replace(value);
+            }
+
             final List<Predicate> singleList = new ArrayList<>();
 
             final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);
@@ -541,12 +562,12 @@ public final class RSQLUtility {
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        private String escapeValueToSQL(final String transformedValue) {
+        private static String escapeValueToSQL(final String transformedValue) {
             return transformedValue.replace("%", "\\%").replace(LIKE_WILDCARD, '%');
         }
 
         @SuppressWarnings("unchecked")
-        private <Y> Path<Y> pathOfString(final Path<?> path) {
+        private static <Y> Path<Y> pathOfString(final Path<?> path) {
             return (Path<Y>) path;
         }
 
@@ -565,4 +586,5 @@ public final class RSQLUtility {
         }
 
     }
+
 }

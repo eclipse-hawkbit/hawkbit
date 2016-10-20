@@ -54,16 +54,20 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
     @Autowired
     private ManagementUIState managementUIState;
 
+    private static final String OVERDUE_CAPTION = "overdue";
+
     private Button unknown;
     private Button inSync;
     private Button pending;
     private Button error;
     private Button registered;
+    private Button overdue;
     private Boolean unknownBtnClicked = false;
     private Boolean errorBtnClicked = false;
     private Boolean pendingBtnClicked = false;
     private Boolean inSyncBtnClicked = false;
     private Boolean registeredBtnClicked = false;
+    private Boolean overdueBtnClicked = false;
     private Button buttonClicked;
     private static final String BTN_CLICKED = "btnClicked";
 
@@ -103,7 +107,17 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         buttonLayout.addComponent(registered);
         buttonLayout.setComponentAlignment(registered, Alignment.MIDDLE_CENTER);
         addComponent(buttonLayout);
-        setComponentAlignment(buttonLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(buttonLayout, Alignment.MIDDLE_LEFT);
+
+        final HorizontalLayout overdueLayout = new HorizontalLayout();
+        final Label overdueLabel = new LabelBuilder().name(i18n.get("label.filter.by.overdue")).buildLabel();
+        overdueLayout.setStyleName("overdue-button-layout");
+        overdueLayout.addComponent(overdue);
+        overdueLayout.setComponentAlignment(overdue, Alignment.MIDDLE_LEFT);
+        overdueLayout.addComponent(overdueLabel);
+        overdueLayout.setComponentAlignment(overdueLabel, Alignment.MIDDLE_LEFT);
+        addComponent(overdueLayout);
+        setComponentAlignment(overdueLayout, Alignment.MIDDLE_LEFT);
 
     }
 
@@ -129,6 +143,10 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
                 }
             }
         }
+        if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
+            overdue.addStyleName(BTN_CLICKED);
+            overdueBtnClicked = Boolean.TRUE;
+        }
     }
 
     /**
@@ -150,18 +168,23 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         registered = SPUIComponentProvider.getButton(UIComponentIdProvider.REGISTERED_STATUS_ICON,
                 TargetUpdateStatus.REGISTERED.toString(), i18n.get("tooltip.status.registered"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
+        overdue = SPUIComponentProvider.getButton(UIComponentIdProvider.OVERDUE_STATUS_ICON,
+                OVERDUE_CAPTION, i18n.get("tooltip.status.overdue"),
+                SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
         applyStatusBtnStyle();
         unknown.setData("filterStatusOne");
         inSync.setData("filterStatusTwo");
         pending.setData("filterStatusThree");
         error.setData("filterStatusFour");
         registered.setData("filterStatusFive");
+        overdue.setData("filterStatusSix");
 
         unknown.addClickListener(this);
         inSync.addClickListener(this);
         pending.addClickListener(this);
         error.addClickListener(this);
         registered.addClickListener(this);
+        overdue.addClickListener(this);
     }
 
     /**
@@ -173,6 +196,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         pending.addStyleName("pendingBtn");
         error.addStyleName("errorBtn");
         registered.addStyleName("registeredBtn");
+        overdue.addStyleName("overdueBtn");
     }
 
     @Override
@@ -188,6 +212,8 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
             processErrorFilterStatus();
         } else if (event.getButton().getCaption().equalsIgnoreCase(TargetUpdateStatus.REGISTERED.toString())) {
             processRegisteredFilterStatus();
+        } else if (event.getButton().getCaption().equalsIgnoreCase(OVERDUE_CAPTION)) {
+            processOverdueFilterStatus();
         }
     }
 
@@ -232,8 +258,25 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
     }
 
     /**
+     * Process - OVERDUE.
+     */
+    private void processOverdueFilterStatus() {
+        overdueBtnClicked = !overdueBtnClicked;
+        managementUIState.getTargetTableFilters().setOverdueFilterEnabled(overdueBtnClicked);
+
+        if (overdueBtnClicked) {
+            buttonClicked.addStyleName(BTN_CLICKED);
+            eventBus.publish(this, TargetFilterEvent.FILTER_BY_STATUS);
+        } else {
+            buttonClicked.removeStyleName(BTN_CLICKED);
+            eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_STATUS);
+        }
+
+    }
+
+    /**
      * Process - COMMON PROCESS.
-     * 
+     *
      * @param status
      *            as enum
      * @param buttonReset
@@ -268,11 +311,12 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         inSync.removeStyleName(BTN_CLICKED);
         error.removeStyleName(BTN_CLICKED);
         pending.removeStyleName(BTN_CLICKED);
+        overdue.removeStyleName(BTN_CLICKED);
     }
 
     /**
      * Check if any status button in clicked.
-     * 
+     *
      * @return
      */
     private boolean isStatusFilterApplied() {
