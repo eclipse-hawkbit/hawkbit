@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -18,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -48,13 +46,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.messaging.Processor;
-import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -63,7 +57,6 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.jayway.awaitility.Awaitility;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -77,7 +70,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
 @SpringApplicationConfiguration(classes = { DeploymentTestConfiguration.class })
-@EnableBinding(Processor.class)
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
@@ -85,12 +77,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private CancelEventHandlerStub cancelEventHandlerStub;
-
-    @Autowired
-    private MessageCollector messageCollector;
-
-    @Autowired
-    private Processor processor;
 
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
@@ -472,6 +458,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         } catch (final IncompleteDistributionSetException ex) {
         }
 
+        // give some chance to receive events asynchronously
+        Thread.sleep(1L);
         final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(5, TimeUnit.SECONDS);
         assertThat(events).as("events should be empty").isEmpty();
 
@@ -1078,14 +1066,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
-            Awaitility.await().atMost(timeout, unit).until(eventSize(events), equalTo(expectedNumberOfEvents));
+            latch.await(timeout, unit);
+            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<>(events);
+            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
+                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return new LinkedList<>(events);
 
         }
-    }
-
-    private static Callable<Integer> eventSize(final List<TargetAssignDistributionSetEvent> events) {
-        return () -> events.size();
     }
 
     private static class CancelEventHandlerStub {
@@ -1116,11 +1103,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;
         }
-    }
-
-    @After
-    public void cleanUpEvents() {
-        messageCollector.forChannel(processor.output()).clear();
     }
 
 }
