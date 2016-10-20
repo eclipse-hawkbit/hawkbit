@@ -115,8 +115,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, controllerManagament,
-                serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement,
+                controllerManagament);
+        amqpMessageDispatcherService.setServiceMatcher(serviceMatcher);
 
     }
 

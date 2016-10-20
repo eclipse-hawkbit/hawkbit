@@ -76,6 +76,9 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
 
+    @Autowired(required = false)
+    private ServiceMatcher serviceMatcher;
+
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
     @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
@@ -365,7 +368,6 @@ public class AmqpConfiguration {
      * @param systemManagement
      * @param targetManagement
      * @param controllerManagement
-     * @param serviceMatcher
      * @return the bean
      */
     @Bean
@@ -373,10 +375,12 @@ public class AmqpConfiguration {
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ControllerManagement controllerManagement,
-            final ServiceMatcher serviceMatcher) {
-        return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, targetManagement, controllerManagement, serviceMatcher);
+            final TargetManagement targetManagement, final ControllerManagement controllerManagement) {
+        final AmqpMessageDispatcherService amqpMessageDispatcherService = new AmqpMessageDispatcherService(
+                rabbitTemplate, amqpSenderService, artifactUrlHandler, systemSecurityContext, systemManagement,
+                targetManagement, controllerManagement);
+        amqpMessageDispatcherService.setServiceMatcher(serviceMatcher);
+        return amqpMessageDispatcherService;
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

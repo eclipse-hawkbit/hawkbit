@@ -57,7 +57,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
     private final ControllerManagement controllerManagement;
-    private final ServiceMatcher serviceMatcher;
+    private ServiceMatcher serviceMatcher;
 
     /**
      * Constructor.
@@ -70,17 +70,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            for generating download URLs
      * @param systemSecurityContext
      *            for execution with system permissions
+     * @param systemManagement
+     *            the systemManagement
      * @param controllerManagement
      *            to access software modules
      * @param targetManagement
      *            to access targets
-     * @param serviceMatcher
-     *            the serviceMatcher
      */
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
             final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement, final TargetManagement targetManagement,
-            final ControllerManagement controllerManagement, final ServiceMatcher serviceMatcher) {
+            final ControllerManagement controllerManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -88,7 +88,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemManagement = systemManagement;
         this.controllerManagement = controllerManagement;
         this.targetManagement = targetManagement;
-        this.serviceMatcher = serviceMatcher;
     }
 
     /**
@@ -100,7 +99,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        if (!serviceMatcher.isFromSelf(targetAssignDistributionSetEvent)) {
+        if (serviceMatcher == null || !serviceMatcher.isFromSelf(targetAssignDistributionSetEvent)) {
             return;
         }
 
@@ -213,6 +212,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
+    }
+
+    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
+        this.serviceMatcher = serviceMatcher;
     }
 
 }
