@@ -934,6 +934,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertTargetAssignDistributionSetEvents(final List<Target> targets, final DistributionSet ds,
             final List<TargetAssignDistributionSetEvent> events) {
+        assertThat(events).isNotEmpty();
         for (final Target myt : targets) {
             boolean found = false;
             for (final TargetAssignDistributionSetEvent event : events) {
@@ -1067,10 +1068,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
-            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<>(events);
+            final List<TargetAssignDistributionSetEvent> handledEvents = Collections
+                    .unmodifiableList(new LinkedList<>(events));
             assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
-            return new LinkedList<>(events);
+            return handledEvents;
 
         }
     }
