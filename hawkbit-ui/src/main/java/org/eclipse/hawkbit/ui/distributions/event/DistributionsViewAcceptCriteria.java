@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;

@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import static org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE;
 import static org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
 import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_NAME;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
 
 import java.util.Collections;
 
@@ -21,8 +21,8 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;

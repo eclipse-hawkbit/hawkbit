@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteri
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;

@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.3.7.RELEASE</version>
+      <version>1.3.8.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -100,13 +100,14 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>1.3.7.RELEASE</spring.boot.version>
+      <spring.boot.version>1.3.8.RELEASE</spring.boot.version>
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <spring-amqp.version>1.6.2.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
+      <spring-data-releasetrain.version>Hopper-SR4</spring-data-releasetrain.version>
       <!-- Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->
@@ -132,7 +133,7 @@
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
       <allure.version>1.4.22</allure.version>
-      <eclipselink.version>2.6.2</eclipselink.version>
+      <eclipselink.version>2.6.4</eclipselink.version>
       <org.powermock.version>1.6.5</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>

@@ -8,6 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -17,18 +27,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.Test;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
-
-import java.util.Iterator;
-import java.util.List;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 /**
  * Test class for {@link TargetFilterQueryManagement}.
