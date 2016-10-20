@@ -104,7 +104,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Target target = targetManagement.findTargetByControllerID(targetAssignDistributionSetEvent.getId());
+        final Target target = targetManagement
+                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId());
+
+        if (target == null) {
+            return;
+        }
+
         final URI targetAdress = target.getTargetInfo().getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
             return;

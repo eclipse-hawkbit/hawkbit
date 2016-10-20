@@ -21,8 +21,6 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
@@ -45,14 +43,12 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -425,15 +421,6 @@ public class AmqpMessageHandlerServiceTest {
         return messageProperties;
     }
 
-    private List<SoftwareModule> createSoftwareModuleList() {
-        final List<SoftwareModule> softwareModuleList = new ArrayList<>();
-        final JpaSoftwareModule softwareModule = new JpaSoftwareModule();
-        softwareModule.setId(777L);
-        softwareModule.setType(new JpaSoftwareModuleType());
-        softwareModuleList.add(softwareModule);
-        return softwareModuleList;
-    }
-
     private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
         initalizeSecurityTokenGenerator();
@@ -442,6 +429,10 @@ public class AmqpMessageHandlerServiceTest {
         final JpaAction actionMock = mock(JpaAction.class);
         final JpaTarget targetMock = mock(JpaTarget.class);
         final TargetInfo targetInfoMock = mock(TargetInfo.class);
+        final DistributionSet distributionSetMock = mock(DistributionSet.class);
+
+        when(distributionSetMock.getId()).thenReturn(1L);
+        when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
         when(actionMock.getId()).thenReturn(targetId);
         when(actionMock.getStatus()).thenReturn(status);
         when(actionMock.getTenant()).thenReturn("DEFAULT");

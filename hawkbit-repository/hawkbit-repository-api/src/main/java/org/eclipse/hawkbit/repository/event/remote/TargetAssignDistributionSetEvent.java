@@ -28,7 +28,7 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
     @JsonProperty(required = true)
     private final Long distributionSetId;
 
-    @JsonProperty
+    @JsonProperty(required = true)
     private final String controllerId;
 
     /**
