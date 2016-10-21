@@ -55,7 +55,6 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
         return version;
     }
 
-    @Override
     public void setVersion(final String version) {
         this.version = version;
     }

@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -395,8 +396,8 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetByFilters(@NotNull Pageable pageable, Collection<TargetUpdateStatus> status,
-            Boolean overdueState, String searchText, Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
-            String... tagNames);
+            Boolean overdueState, String searchText, Long installedOrAssignedDistributionSetId,
+            Boolean selectTargetWithNoTag, String... tagNames);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}without
@@ -607,23 +608,25 @@ public interface TargetManagement {
     /**
      * updates the {@link Target}.
      *
-     * @param target
+     * @param controllerId
      *            to be updated
+     * 
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
+     * @param address
+     *            to update or <code>null</code>
+     * @param securityToken
+     *            to update or <code>null</code>
      * @return the updated {@link Target}
+     * 
+     * @throws EntityNotFoundException
+     *             if given target does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Target updateTarget(@NotNull Target target);
-
-    /**
-     * updates multiple {@link Target}s.
-     *
-     * @param targets
-     *            to be updated
-     * @return the updated {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    List<Target> updateTargets(@NotNull Collection<Target> targets);
+    Target updateTarget(@NotEmpty String controllerId, String name, String description, String address,
+            String securityToken);
 
 }

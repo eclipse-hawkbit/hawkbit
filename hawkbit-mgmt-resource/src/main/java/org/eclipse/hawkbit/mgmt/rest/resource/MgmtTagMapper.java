@@ -121,18 +121,4 @@ final class MgmtTagMapper {
         response.setTagId(tag.getId());
         response.setColour(tag.getColour());
     }
-
-    static void updateTag(final MgmtTagRequestBodyPut response, final Tag tag) {
-        if (response.getDescription() != null) {
-            tag.setDescription(response.getDescription());
-        }
-
-        if (response.getColour() != null) {
-            tag.setColour(response.getColour());
-        }
-
-        if (response.getName() != null) {
-            tag.setName(response.getName());
-        }
-    }
 }

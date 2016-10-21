@@ -66,12 +66,10 @@ public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseE
         return name;
     }
 
-    @Override
     public void setDescription(final String description) {
         this.description = description;
     }
 
-    @Override
     public void setName(final String name) {
         this.name = name;
     }

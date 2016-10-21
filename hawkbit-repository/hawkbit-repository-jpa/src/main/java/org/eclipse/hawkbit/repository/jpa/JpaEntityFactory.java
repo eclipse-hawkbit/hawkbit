@@ -58,11 +58,6 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public DistributionSet generateDistributionSet() {
-        return new JpaDistributionSet();
-    }
-
-    @Override
     public DistributionSetMetadata generateDistributionSetMetadata() {
         return new JpaDistributionSetMetadata();
     }
@@ -86,16 +81,33 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public Target generateTarget(final String controllerId) {
-        return new JpaTarget(controllerId);
+    public Target generateTarget(final String controllerId, final String name, final String description,
+            final String securityToken) {
+        JpaTarget target;
+
+        if (StringUtils.isEmpty(securityToken)) {
+            target = new JpaTarget(controllerId);
+        } else {
+            target = new JpaTarget(controllerId, securityToken);
+        }
+
+        if (!StringUtils.isEmpty(name)) {
+            target.setName(name);
+        }
+
+        target.setDescription(description);
+
+        return target;
     }
 
     @Override
-    public Target generateTarget(final String controllerId, final String securityToken) {
-        if (StringUtils.isEmpty(securityToken)) {
-            return new JpaTarget(controllerId);
-        }
-        return new JpaTarget(controllerId, securityToken);
+    public Target generateTarget(final String controllerID) {
+        return generateTarget(controllerID, null, null, null);
+    }
+
+    @Override
+    public Target generateTarget(final String controllerID, final String description) {
+        return generateTarget(controllerID, null, description, null);
     }
 
     @Override
@@ -148,11 +160,6 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public SoftwareModuleType generateSoftwareModuleType() {
         return new JpaSoftwareModuleType();
-    }
-
-    @Override
-    public SoftwareModule generateSoftwareModule() {
-        return new JpaSoftwareModule();
     }
 
     @Override

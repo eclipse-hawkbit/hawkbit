@@ -230,10 +230,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
         if (null != typeNameValue && null != typeKeyValue) {
             SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
-                    typeDescValue, assignNumber);
-            newSWType.setColour(colorPicked);
-            newSWType.setDescription(typeDescValue);
-            newSWType.setColour(colorPicked);
+                    typeDescValue, colorPicked, assignNumber);
             newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
             eventBus.publish(this,
@@ -248,10 +245,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != typeNameValue) {
-            existingType.setName(typeNameValue);
-            existingType.setDescription(typeDescValue);
-            existingType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-            swTypeManagementService.updateSoftwareModuleType(existingType);
+            swTypeManagementService.updateSoftwareModuleType(existingType.getId(), typeNameValue, typeDescValue,
+                    ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));

@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -259,7 +258,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return Collections.unmodifiableSet(modules);
     }
 
-    @Override
     public boolean addModule(final SoftwareModule softwareModule) {
         if (modules == null) {
             modules = new HashSet<>();
@@ -302,7 +300,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
     }
 
-    @Override
     public boolean removeModule(final SoftwareModule softwareModule) {
         if (modules == null) {
             return false;
@@ -319,15 +316,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         return false;
 
-    }
-
-    @Override
-    public SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
-        if (modules == null) {
-            return null;
-        }
-
-        return modules.stream().filter(module -> module.getType().equals(type)).findFirst().orElse(null);
     }
 
     @Override

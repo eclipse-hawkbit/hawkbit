@@ -97,32 +97,30 @@ public final class MgmtDistributionSetMapper {
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final EntityFactory entityFactory) {
 
-        final DistributionSet result = entityFactory.generateDistributionSet();
-        result.setDescription(dsRest.getDescription());
-        result.setName(dsRest.getName());
-        result.setType(findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement));
-
-        result.setRequiredMigrationStep(dsRest.isRequiredMigrationStep());
-        result.setVersion(dsRest.getVersion());
+        final List<SoftwareModule> modules = new ArrayList<>(dsRest.getModules().size());
 
         if (dsRest.getOs() != null) {
-            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getOs().getId(), softwareManagement));
+            modules.add(findSoftwareModuleWithExceptionIfNotFound(dsRest.getOs().getId(), softwareManagement));
         }
 
         if (dsRest.getApplication() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(), softwareManagement));
+            modules.add(findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(), softwareManagement));
         }
 
         if (dsRest.getRuntime() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
+            modules.add(findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
         }
 
         if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(module -> result
-                    .addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
+            dsRest.getModules().forEach(module -> modules
+                    .add(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
         }
+
+        final DistributionSet result = entityFactory.generateDistributionSet(dsRest.getName(), dsRest.getVersion(),
+                dsRest.getDescription(),
+                findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement), modules);
+
+        result.setRequiredMigrationStep(dsRest.isRequiredMigrationStep());
 
         return result;
     }

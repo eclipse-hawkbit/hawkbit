@@ -296,11 +296,8 @@ public class TestdataFactory {
      */
     public DistributionSet createDistributionSetWithNoSoftwareModules(final String name, final String version) {
 
-        final DistributionSet dis = entityFactory.generateDistributionSet();
-        dis.setName(name);
-        dis.setVersion(version);
-        dis.setDescription(DEFAULT_DESCRIPTION);
-        dis.setType(findOrCreateDefaultTestDsType());
+        final DistributionSet dis = entityFactory.generateDistributionSet(name, version, DEFAULT_DESCRIPTION,
+                findOrCreateDefaultTestDsType(), null);
         return distributionSetManagement.createDistributionSet(dis);
     }
 
@@ -362,13 +359,10 @@ public class TestdataFactory {
      */
     public DistributionSet createUpdatedDistributionSet() {
         DistributionSet set = createDistributionSet("");
-        set.setVersion(DEFAULT_VERSION);
-        set = distributionSetManagement.updateDistributionSet(set);
+        set = distributionSetManagement.updateDistributionSet(set.getId(), null, null, DEFAULT_VERSION);
 
-        set.getModules().forEach(module -> {
-            module.setDescription("Updated " + DEFAULT_DESCRIPTION);
-            softwareManagement.updateSoftwareModule(module);
-        });
+        set.getModules().forEach(module -> softwareManagement.updateSoftwareModule(module.getId(),
+                "Updated " + DEFAULT_DESCRIPTION, null));
 
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
@@ -499,10 +493,7 @@ public class TestdataFactory {
      */
     public DistributionSet generateDistributionSet(final String name, final String version,
             final DistributionSetType type, final Collection<SoftwareModule> modules) {
-        final DistributionSet distributionSet = entityFactory.generateDistributionSet(name, version, null, type,
-                modules);
-        distributionSet.setDescription(LOREM.words(10));
-        return distributionSet;
+        return entityFactory.generateDistributionSet(name, version, LOREM.words(10), type, modules);
     }
 
     /**
@@ -514,10 +505,8 @@ public class TestdataFactory {
      * @return the generated {@link DistributionSet}
      */
     public DistributionSet generateDistributionSet(final String name) {
-        final DistributionSet distributionSet = entityFactory.generateDistributionSet(name, DEFAULT_VERSION, null,
+        return entityFactory.generateDistributionSet(name, DEFAULT_VERSION, LOREM.words(10),
                 findOrCreateDefaultTestDsType(), null);
-        distributionSet.setDescription(LOREM.words(10));
-        return distributionSet;
     }
 
     /**
@@ -563,9 +552,7 @@ public class TestdataFactory {
      * @return the generated {@link Target}
      */
     private Target generateTarget(final String ctrlID, final String description, final TargetTag[] tags) {
-        final Target target = entityFactory.generateTarget(ctrlID);
-        target.setName("Prov.Target ".concat(ctrlID));
-        target.setDescription(description);
+        final Target target = entityFactory.generateTarget(ctrlID, "Prov.Target ".concat(ctrlID), description, null);
         if (tags != null && tags.length > 0) {
             for (final TargetTag t : tags) {
                 target.getTags().add(t);

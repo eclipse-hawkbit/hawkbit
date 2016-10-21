@@ -60,26 +60,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Test
-    @Description("Try to update non updatable fields results in repository doing nothing.")
-    public void updateTypeNonUpdateableFieldsFails() {
-        final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
-
-        created.setName("a new name");
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entitity to be equal to created version")
-                .isEqualTo(created.getOptLockRevision());
-    }
-
-    @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepositoryForType() {
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), null, null,
+                null);
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity to be equal to created version")
@@ -92,10 +79,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
-        created.setDescription("changed");
-        created.setColour("changed");
-
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), null, "changed",
+                "changed");
 
         assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
                 .isEqualTo(created.getOptLockRevision() + 1);
@@ -104,26 +89,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     @Test
-    @Description("Try to update non updatable fields results in repository doing nothing.")
-    public void updateNonUpdateableFieldsFails() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-
-        ah.setName("a new name");
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entitity to be equal to created version")
-                .isEqualTo(ah.getOptLockRevision());
-    }
-
-    @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepository() {
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah.getId(), null, null);
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity to be equal to created version")
@@ -136,9 +107,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
 
-        ah.setDescription("changed");
-        ah.setVendor("changed");
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah.getId(), "changed", "changed");
 
         assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
                 .isEqualTo(ah.getOptLockRevision() + 1);
@@ -200,22 +169,6 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         } catch (final EntityAlreadyExistsException e) {
 
         }
-    }
-
-    @Test
-    @Description("Calling update for changing fields to null results in change in the repository.")
-    public void eraseSoftareModuleFields() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
-
-        ah.setDescription(null);
-        ah.setVendor(null);
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
-
-        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
-                .isEqualTo(ah.getOptLockRevision() + 1);
-        assertThat(updated.getDescription()).as("Updated description is").isNull();
-        assertThat(updated.getVendor()).as("Updated vendor is").isNull();
     }
 
     @Test
@@ -398,7 +351,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        distributionSetManagement.assignSoftwareModules(disSet, Sets.newHashSet(assignedModule));
+        distributionSetManagement.assignSoftwareModules(disSet.getId(), Sets.newHashSet(assignedModule.getId()));
 
         // [STEP3]: Delete the assigned SoftwareModule
         softwareManagement.deleteSoftwareModule(assignedModule.getId());
@@ -434,7 +387,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        distributionSetManagement.assignSoftwareModules(disSet, Sets.newHashSet(assignedModule));
+        distributionSetManagement.assignSoftwareModules(disSet.getId(), Sets.newHashSet(assignedModule.getId()));
 
         // [STEP3]: Assign DistributionSet to a Device
         deploymentManagement.assignDistributionSet(disSet, Lists.newArrayList(target));
@@ -544,11 +497,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(operations.find(new Query())).hasSize(1);
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
-        distributionSetManagement.assignSoftwareModules(disSetX, Sets.newHashSet(moduleX));
+        distributionSetManagement.assignSoftwareModules(disSetX.getId(), Sets.newHashSet(moduleX.getId()));
         deploymentManagement.assignDistributionSet(disSetX, Lists.newArrayList(target));
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
-        distributionSetManagement.assignSoftwareModules(disSetY, Sets.newHashSet(moduleY));
+        distributionSetManagement.assignSoftwareModules(disSetY.getId(), Sets.newHashSet(moduleY.getId()));
         deploymentManagement.assignDistributionSet(disSetY, Lists.newArrayList(target));
 
         // [STEP5]: Delete SoftwareModuleX

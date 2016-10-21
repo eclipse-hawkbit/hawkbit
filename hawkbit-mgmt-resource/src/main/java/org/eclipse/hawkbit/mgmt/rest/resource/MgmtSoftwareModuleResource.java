@@ -182,18 +182,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
 
-        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-
-        // only description and vendor can be modified
-        if (restSoftwareModule.getDescription() != null) {
-            module.setDescription(restSoftwareModule.getDescription());
-        }
-        if (restSoftwareModule.getVendor() != null) {
-            module.setVendor(restSoftwareModule.getVendor());
-        }
-
-        final SoftwareModule updateSoftwareModule = softwareManagement.updateSoftwareModule(module);
-        return ResponseEntity.ok(toResponse(updateSoftwareModule));
+        return ResponseEntity.ok(toResponse(softwareManagement.updateSoftwareModule(softwareModuleId,
+                restSoftwareModule.getDescription(), restSoftwareModule.getVendor())));
     }
 
     @Override

@@ -412,22 +412,28 @@ public interface SoftwareManagement {
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
      *
-     * @param sm
+     * @param moduleId
      *            to update
+     * @param description
+     *            to update or <code>null</code>
+     * @param vendor
+     *            to update or <code>null</code>
+     * 
+     * @throws EntityNotFoundException
+     *             if given module does not exist
      *
      * @return the saved Entity.
-     *
-     * @throws NullPointerException
-     *             of {@link SoftwareModule#getId()} is <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModule updateSoftwareModule(@NotNull SoftwareModule sm);
+    SoftwareModule updateSoftwareModule(@NotNull Long moduleId, String description, String vendor);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
      *
      * @param metadata
      *            the meta data entry to be updated
+     * 
+     * 
      * @return the updated meta data entry
      * @throws EntityNotFoundException
      *             in case the meta data entry does not exists and cannot be
@@ -437,16 +443,25 @@ public interface SoftwareManagement {
     SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull SoftwareModuleMetadata metadata);
 
     /**
-     * Updates existing {@link SoftwareModuleType}. Update-able value is
-     * {@link SoftwareModuleType#getDescription()} and
-     * {@link SoftwareModuleType#getColour()}.
+     * Updates existing {@link SoftwareModuleType}.
      *
-     * @param sm
+     * @param smTypeid
      *            to update
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
+     * @param colour
+     *            to update or <code>null</code>
+     * 
      * @return updated Entity
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link SoftwareModuleType} does not exists and
+     *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
+    SoftwareModuleType updateSoftwareModuleType(@NotNull Long smTypeid, String name, String description, String colour);
 
     /**
      * Finds all meta data by the given software module id.

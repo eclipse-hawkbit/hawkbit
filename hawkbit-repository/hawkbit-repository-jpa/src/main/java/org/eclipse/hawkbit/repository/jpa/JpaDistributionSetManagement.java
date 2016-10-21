@@ -8,15 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -30,7 +26,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -41,8 +36,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -54,7 +50,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -114,6 +110,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
+    @Autowired
+    private SoftwareModuleRepository softwareModuleRepository;
+
+    @Autowired
+    private SoftwareModuleTypeRepository softwareModuleTypeRepository;
+
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
         return distributionSetRepository.findOne(DistributionSetSpecification.byId(distid));
@@ -170,11 +172,51 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet updateDistributionSet(final DistributionSet ds) {
-        checkNotNull(ds.getId());
-        final DistributionSet persisted = findDistributionSetByIdWithDetails(ds.getId());
-        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, persisted.getModules());
-        return distributionSetRepository.save((JpaDistributionSet) ds);
+    public DistributionSet updateDistributionSet(final Long setId, final String name, final String description,
+            final String version) {
+
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+
+        if (name != null) {
+            set.setName(name);
+        }
+
+        if (description != null) {
+            set.setDescription(description);
+        }
+
+        if (version != null) {
+            set.setVersion(version);
+        }
+
+        return distributionSetRepository.save(set);
+    }
+
+    private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final Long setId) {
+        final JpaDistributionSetType set = (JpaDistributionSetType) findDistributionSetTypeById(setId);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Distribution set type cannot be updated as it does not exixt" + setId);
+        }
+        return set;
+    }
+
+    private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
+        final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetByIdWithDetails(setId);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId);
+        }
+        return set;
+    }
+
+    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long moduleId) {
+        final JpaSoftwareModule module = softwareModuleRepository.findOne(moduleId);
+
+        if (module == null) {
+            throw new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + moduleId);
+        }
+        return module;
     }
 
     @Override
@@ -187,7 +229,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // soft delete assigned
         if (!assigned.isEmpty()) {
-            Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
+            final Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
             distributionSetRepository.deleteDistributionSet(dsIds);
             targetFilterQueryRepository.unsetAutoAssignDistributionSet(dsIds);
         }
@@ -249,48 +291,122 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet assignSoftwareModules(final DistributionSet ds, final Set<SoftwareModule> softwareModules) {
-        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, softwareModules);
-        for (final SoftwareModule softwareModule : softwareModules) {
-            ds.addModule(softwareModule);
+    public DistributionSet assignSoftwareModules(final Long setId, final Collection<Long> moduleIds) {
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findByIdIn(moduleIds);
+
+        if (modules.size() < moduleIds.size()) {
+            throw new EntityNotFoundException("Not all given software modules where found.");
         }
-        return distributionSetRepository.save((JpaDistributionSet) ds);
+
+        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
+
+        modules.forEach(set::addModule);
+
+        return distributionSetRepository.save(set);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet unassignSoftwareModule(final DistributionSet ds, final SoftwareModule softwareModule) {
-        final Set<SoftwareModule> softwareModules = new HashSet<>();
-        softwareModules.add(softwareModule);
-        ds.removeModule(softwareModule);
-        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, softwareModules);
-        return distributionSetRepository.save((JpaDistributionSet) ds);
+    public DistributionSet unassignSoftwareModule(final Long setId, final Long moduleId) {
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
+
+        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
+
+        set.removeModule(module);
+
+        return distributionSetRepository.save(set);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetType updateDistributionSetType(final DistributionSetType dsType) {
-        checkNotNull(dsType.getId());
+    public DistributionSetType updateDistributionSetType(final Long dsTypeId, final String description,
+            final String colour) {
 
-        final JpaDistributionSetType persisted = distributionSetTypeRepository.findOne(dsType.getId());
+        final JpaDistributionSetType persisted = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
 
-        // throw exception if user tries to update a DS type that is already in
-        // use
-        if (!persisted.areModuleEntriesIdentical(dsType) && distributionSetRepository.countByType(persisted) > 0) {
-            throw new EntityReadOnlyException(
-                    String.format("distribution set type %s set is already assigned to targets and cannot be changed",
-                            dsType.getName()));
+        if (description != null) {
+            persisted.setDescription(description);
         }
 
-        return distributionSetTypeRepository.save((JpaDistributionSetType) dsType);
+        if (colour != null) {
+            persisted.setColour(colour);
+        }
+
+        return distributionSetTypeRepository.save(persisted);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public DistributionSetType assignMandatorySoftwareModuleTypes(final Long dsTypeId,
+            final Collection<Long> softwareModulesTypeIds) {
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+
+        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
+                .findByIdIn(softwareModulesTypeIds);
+
+        if (modules.size() < softwareModulesTypeIds.size()) {
+            throw new EntityNotFoundException("Not all given software module types where found.");
+        }
+
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+
+        modules.forEach(type::addMandatoryModuleType);
+
+        return distributionSetTypeRepository.save(type);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public DistributionSetType assignOptionalSoftwareModuleTypes(final Long dsTypeId,
+            final Collection<Long> softwareModulesTypeIds) {
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+
+        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
+                .findByIdIn(softwareModulesTypeIds);
+
+        if (modules.size() < softwareModulesTypeIds.size()) {
+            throw new EntityNotFoundException("Not all given software module types where found.");
+        }
+
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+
+        modules.forEach(type::addOptionalModuleType);
+
+        return distributionSetTypeRepository.save(type);
+    }
+
+    private void checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(final JpaDistributionSetType type) {
+        if (distributionSetRepository.countByType(type) > 0) {
+            throw new EntityReadOnlyException(String.format(
+                    "distribution set type %s is already assigned to distribution sets and cannot be changed",
+                    type.getName()));
+        }
+
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+
+        type.removeModuleType(softwareModuleTypeId);
+
+        return distributionSetTypeRepository.save(type);
     }
 
     @Override
     public Page<DistributionSetType> findDistributionSetTypesAll(final String rsqlParam, final Pageable pageable) {
-        final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam,
-                DistributionSetTypeFields.class, virtualPropertyReplacer);
+        final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
+                virtualPropertyReplacer);
 
         return convertDsTPage(distributionSetTypeRepository.findAll(spec, pageable));
     }
@@ -647,11 +763,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetSoftwareModulesIsAllowedToModify(final JpaDistributionSet distributionSet,
-            final Set<SoftwareModule> softwareModules) {
-        if (!new HashSet<SoftwareModule>(distributionSet.getModules()).equals(softwareModules)
-                && actionRepository.countByDistributionSet(distributionSet) > 0) {
-            throw new EntityLockedException(
+    private void checkDistributionSetSoftwareModulesIsAllowedToModify(final JpaDistributionSet distributionSet) {
+        if (actionRepository.countByDistributionSet(distributionSet) > 0) {
+            throw new EntityReadOnlyException(
                     String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
                             distributionSet.getName(), distributionSet.getVersion()));
         }

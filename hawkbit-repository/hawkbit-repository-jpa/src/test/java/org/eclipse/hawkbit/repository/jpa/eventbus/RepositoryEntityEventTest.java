@@ -68,8 +68,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the target update event is published when a target has been updated")
     public void targetUpdateEventIsPublished() throws InterruptedException {
         final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
-        createdTarget.setName("updateName");
-        targetManagement.updateTarget(createdTarget);
+        targetManagement.updateTarget(createdTarget.getControllerId(), "updateName", null, null, null);
 
         final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class, 1,
                 TimeUnit.SECONDS);
@@ -106,9 +105,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the distribution set created event is published when a distribution set has been created")
     public void distributionSetCreatedEventIsPublished() throws InterruptedException {
-        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet();
-        generateDistributionSet.setName("dsEventTest");
-        generateDistributionSet.setVersion("1");
+        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
+                null, null);
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 
@@ -122,9 +120,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the distribution set deleted event is published when a distribution set has been deleted")
     public void distributionSetDeletedEventIsPublished() throws InterruptedException {
 
-        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet();
-        generateDistributionSet.setName("dsEventTest");
-        generateDistributionSet.setVersion("1");
+        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
+                null, null);
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 

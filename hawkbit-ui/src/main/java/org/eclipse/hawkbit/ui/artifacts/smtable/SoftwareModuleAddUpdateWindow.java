@@ -24,10 +24,10 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -248,10 +248,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private void updateSwModule() {
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String newVendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-        SoftwareModule newSWModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
-        newSWModule.setVendor(newVendor);
-        newSWModule.setDescription(newDesc);
-        newSWModule = softwareManagement.updateSoftwareModule(newSWModule);
+        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(baseSwModuleId, newDesc, newVendor);
         if (newSWModule != null) {
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
                     new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));

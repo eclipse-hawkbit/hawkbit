@@ -21,7 +21,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
      *            is added to the assigned {@link Artifact}s.
      */
     void addArtifact(Artifact artifact);
-    
+
     /**
      * @param artifactId
      *            to look for
@@ -60,12 +60,6 @@ public interface SoftwareModule extends NamedVersionedEntity {
     String getVendor();
 
     /**
-     * @param vendor
-     *            the vendor of this software module to set
-     */
-    void setVendor(String vendor);
-
-    /**
      * @return the type of the software module
      */
     SoftwareModuleType getType();
@@ -75,12 +69,6 @@ public interface SoftwareModule extends NamedVersionedEntity {
      *         otherwise {@code false}
      */
     boolean isDeleted();
-
-    /**
-     * @param type
-     *            the module type for this software module
-     */
-    void setType(SoftwareModuleType type);
 
     /**
      * @return immutable list of {@link DistributionSet}s the module is assigned

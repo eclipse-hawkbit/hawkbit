@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -113,42 +111,53 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModule updateSoftwareModule(final SoftwareModule sm) {
-        checkNotNull(sm.getId());
+    public SoftwareModule updateSoftwareModule(final Long moduleId, final String description, final String vendor) {
+        final JpaSoftwareModule module = softwareModuleRepository.findOne(moduleId);
 
-        final JpaSoftwareModule module = softwareModuleRepository.findOne(sm.getId());
-
-        boolean updated = false;
-        if (null == sm.getDescription() || !sm.getDescription().equals(module.getDescription())) {
-            module.setDescription(sm.getDescription());
-            updated = true;
-        }
-        if (null == sm.getVendor() || !sm.getVendor().equals(module.getVendor())) {
-            module.setVendor(sm.getVendor());
-            updated = true;
+        if (module == null) {
+            throw new EntityNotFoundException("Software module cannot be updated as it does not exixt" + moduleId);
         }
 
-        return updated ? softwareModuleRepository.save(module) : module;
+        if (description != null) {
+            module.setDescription(description);
+        }
+        if (vendor != null) {
+            module.setVendor(vendor);
+        }
+
+        return softwareModuleRepository.save(module);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleType sm) {
-        checkNotNull(sm.getId());
+    public SoftwareModuleType updateSoftwareModuleType(final Long smTypeid, final String name, final String description,
+            final String colour) {
 
-        final JpaSoftwareModuleType type = softwareModuleTypeRepository.findOne(sm.getId());
+        final JpaSoftwareModuleType type = findSoftwareModuleTypeAndThrowExceptionIfNotFound(smTypeid);
 
-        boolean updated = false;
-        if (sm.getDescription() == null || !sm.getDescription().equals(type.getDescription())) {
-            type.setDescription(sm.getDescription());
-            updated = true;
+        if (name != null) {
+            type.setName(name);
         }
-        if (sm.getColour() != null && !sm.getColour().equals(type.getColour())) {
-            type.setColour(sm.getColour());
-            updated = true;
+
+        if (description != null) {
+            type.setDescription(description);
         }
-        return updated ? softwareModuleTypeRepository.save(type) : type;
+
+        if (colour != null) {
+            type.setColour(colour);
+        }
+
+        return softwareModuleTypeRepository.save(type);
+    }
+
+    private JpaSoftwareModuleType findSoftwareModuleTypeAndThrowExceptionIfNotFound(final Long smTypeid) {
+        final JpaSoftwareModuleType set = softwareModuleTypeRepository.findOne(smTypeid);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Software module type cannot be updated as it does not exixt" + smTypeid);
+        }
+        return set;
     }
 
     @Override

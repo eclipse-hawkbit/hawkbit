@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -226,23 +227,43 @@ public interface TagManagement {
     /**
      * Updates an existing {@link DistributionSetTag}.
      *
-     * @param distributionSetTag
+     * @param distributionSetTagId
      *            to be updated
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
+     * @param colour
+     *            to update or <code>null</code>
+     * 
      * @return the updated {@link DistributionSet}
-     * @throws NullPointerException
-     *             of {@link DistributionSetTag#getName()} is <code>null</code>
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetTag} does not exists and
+     *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetTag updateDistributionSetTag(@NotNull DistributionSetTag distributionSetTag);
+    DistributionSetTag updateDistributionSetTag(@NotNull Long distributionSetTagId, String name, String description,
+            String colour);
 
     /**
      * updates the {@link TargetTag}.
      *
-     * @param targetTag
+     * @param targetTagId
      *            the {@link TargetTag} with updated values
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
+     * @param colour
+     *            to update or <code>null</code>
      * @return the updated {@link TargetTag}
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetTag} does not exists and
+     *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTag updateTargetTag(@NotNull TargetTag targetTag);
+    TargetTag updateTargetTag(@NotNull Long targetTagId, String name, String description, String colour);
 
 }

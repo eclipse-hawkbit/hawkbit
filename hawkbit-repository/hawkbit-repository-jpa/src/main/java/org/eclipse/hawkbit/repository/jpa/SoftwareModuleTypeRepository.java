@@ -8,11 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,4 +62,16 @@ public interface SoftwareModuleTypeRepository
      *         {@link SoftwareModuleType#getName()}
      */
     JpaSoftwareModuleType findByName(String name);
+
+    /**
+     * retrieves all software module types with a given
+     * {@link SoftwareModuleType#getId()}.
+     *
+     * @param ids
+     *            to search for
+     * @return {@link List} of found {@link SoftwareModule}s
+     */
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("SELECT sm FROM JpaSoftwareModuleType sm WHERE sm.id IN ?1")
+    List<JpaSoftwareModuleType> findByIdIn(Iterable<Long> ids);
 }

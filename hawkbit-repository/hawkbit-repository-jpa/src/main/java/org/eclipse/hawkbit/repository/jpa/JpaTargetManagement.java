@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -44,7 +46,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -53,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -67,7 +69,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -159,8 +160,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findTargetsAll(final TargetFilterQuery targetFilterQuery, final Pageable pageable) {
         return findTargetsBySpec(
-                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer),
-                pageable);
+                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer), pageable);
     }
 
     @Override
@@ -184,25 +184,29 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Target updateTarget(final Target target) {
-        Assert.notNull(target.getId());
+    public Target updateTarget(final String controllerID, final String name, final String description,
+            final String address, final String securityToken) {
+        final JpaTarget target = Optional.ofNullable(targetRepository.findByControllerId(controllerID))
+                .orElseThrow(() -> new EntityNotFoundException("Target with ID " + controllerID + " not found."));
 
-        final JpaTarget toUpdate = (JpaTarget) target;
-        toUpdate.setNew(false);
-        return targetRepository.save(toUpdate);
-    }
+        target.setNew(false);
 
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> updateTargets(final Collection<Target> targets) {
+        if (name != null) {
+            target.setName(name);
+        }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTarget> toUpdate = (Collection) targets;
+        if (description != null) {
+            target.setDescription(description);
+        }
 
-        toUpdate.forEach(target -> target.setNew(false));
+        if (address != null) {
+            target.getTargetInfo().setAddress(address);
+        }
+        if (securityToken != null) {
+            target.setSecurityToken(securityToken);
+        }
 
-        return Collections.unmodifiableList(targetRepository.save(toUpdate));
+        return targetRepository.save(target);
     }
 
     @Override
@@ -230,8 +234,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID, final String rsqlParam,
             final Pageable pageReq) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
-                virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -259,8 +262,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId, final String rsqlParam,
             final Pageable pageable) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class,
-                virtualPropertyReplacer);
+        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer);
 
         return convertPage(
                 targetRepository
@@ -289,8 +291,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-                                     final String searchText, final Long installedOrAssignedDistributionSetId,
-                                     final Boolean selectTargetWithNoTag, final String... tagNames) {
+            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(
                 new FilterParams(installedOrAssignedDistributionSetId, status, overdueState, searchText,
                         selectTargetWithNoTag, tagNames),
@@ -299,19 +301,17 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private static List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams,
-                                                                         final boolean fetch) {
+            final boolean fetch) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
         if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus(), fetch));
         }
         if (filterParams.getOverdueState() != null) {
-            specList.add(
-                    TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
+            specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
         if (filterParams.getFilterByDistributionId() != null) {
-            specList.add(
-                    TargetSpecifications
-                            .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
+            specList.add(TargetSpecifications
+                    .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
         if (StringUtils.isNotEmpty(filterParams.getFilterBySearchText())) {
             specList.add(TargetSpecifications.likeNameOrDescriptionOrIp(filterParams.getFilterBySearchText()));
@@ -465,8 +465,7 @@ public class JpaTargetManagement implements TargetManagement {
         // build the specifications and then to predicates necessary by the
         // given filters
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
-                buildSpecificationList(filterParams, true),
-                targetRoot, query, cb);
+                buildSpecificationList(filterParams, true), targetRoot, query, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect
@@ -522,9 +521,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public List<TargetIdName> findAllTargetIdsByFilters(final Pageable pageRequest,
             final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
-            final String filterBySearchText,
-            final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
-            final String... filterByTagNames) {
+            final String filterBySearchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
@@ -540,8 +538,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
                 buildSpecificationList(new FilterParams(installedOrAssignedDistributionSetId, filterByStatus,
-                        overdueState, filterBySearchText,
-                        selectTargetWithNoTag, filterByTagNames), false),
+                        overdueState, filterBySearchText, selectTargetWithNoTag, filterByTagNames), false),
                 targetRoot, multiselect, cb);
 
         // if we have some predicates then add it to the where clause of the
@@ -604,7 +601,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Long countTargetsByTargetFilterQueryAndNonDS(final Long distributionSetId,
             @NotNull final TargetFilterQuery targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-        		virtualPropertyReplacer);
+                virtualPropertyReplacer);
         final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
         specList.add(spec);
         specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));

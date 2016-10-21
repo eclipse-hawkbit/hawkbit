@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -105,31 +106,15 @@ public interface DistributionSet extends NamedVersionedEntity {
     Set<SoftwareModule> getModules();
 
     /**
-     * @param softwareModule
-     * @return <code>true</code> if the module was added and <code>false</code>
-     *         if it already existed in the set
-     *
-     */
-    boolean addModule(SoftwareModule softwareModule);
-
-    /**
-     * Removed given {@link SoftwareModule} from this DS instance.
-     *
-     * @param softwareModule
-     *            to remove
-     * @return <code>true</code> if element was found and removed
-     */
-    boolean removeModule(SoftwareModule softwareModule);
-
-    /**
      * Searches through modules for the given type.
      *
      * @param type
      *            to search for
-     * @return SoftwareModule of given type or <code>null</code> if not in the
-     *         list.
+     * @return SoftwareModule of given type.
      */
-    SoftwareModule findFirstModuleByType(SoftwareModuleType type);
+    default Optional<SoftwareModule> findFirstModuleByType(final SoftwareModuleType type) {
+        return getModules().stream().filter(module -> module.getType().equals(type)).findFirst();
+    }
 
     /**
      * @return type of the {@link DistributionSet}.

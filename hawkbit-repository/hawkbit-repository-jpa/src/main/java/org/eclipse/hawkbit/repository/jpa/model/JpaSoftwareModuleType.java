@@ -128,7 +128,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }

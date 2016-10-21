@@ -51,10 +51,4 @@ public interface SoftwareModuleType extends NamedEntity {
      */
     String getColour();
 
-    /**
-     * @param colour
-     *            code to by used in management UI views.
-     */
-    void setColour(final String colour);
-
 }

@@ -54,7 +54,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -70,6 +69,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -188,8 +188,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
-                                                                 final Collection<TargetWithActionType> targets,
-                                                                 final String actionMessage) {
+            final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(
@@ -309,7 +308,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             actionStatus.setAction(action);
             actionStatus.setOccurredAt(action.getCreatedAt());
             actionStatus.setStatus(Status.RUNNING);
-            if(actionMessage != null) {
+            if (actionMessage != null) {
                 actionStatus.addMessage(actionMessage);
             }
             actionStatusRepository.save(actionStatus);
@@ -410,8 +409,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
 
         return assignDistributionSetToTargets(set, tIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null,
-                null, null);
+                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
+                null);
     }
 
     @Override
@@ -476,7 +475,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         actionStatusRepository.save(new JpaActionStatus(mergedAction, Status.CANCELED, System.currentTimeMillis(),
                 "A force quit has been performed."));
 
-        DeploymentHelper.successCancellation(mergedAction, actionRepository, targetManagement, targetInfoRepository,
+        DeploymentHelper.successCancellation(mergedAction, actionRepository, targetRepository, targetInfoRepository,
                 entityManager);
 
         return actionRepository.save(mergedAction);

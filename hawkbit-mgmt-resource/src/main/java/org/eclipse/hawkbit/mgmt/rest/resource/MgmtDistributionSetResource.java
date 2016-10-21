@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
@@ -152,21 +150,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
-        final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        if (toUpdate.getDescription() != null) {
-            set.setDescription(toUpdate.getDescription());
-        }
-
-        if (toUpdate.getName() != null) {
-            set.setName(toUpdate.getName());
-        }
-
-        if (toUpdate.getVersion() != null) {
-            set.setVersion(toUpdate.getVersion());
-        }
         return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponse(this.distributionSetManagement.updateDistributionSet(set)),
+                MgmtDistributionSetMapper.toResponse(this.distributionSetManagement.updateDistributionSet(
+                        distributionSetId, toUpdate.getName(), toUpdate.getDescription(), toUpdate.getVersion())),
                 HttpStatus.OK);
     }
 
@@ -232,12 +219,12 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
-            @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam) {
-        DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+        final DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -357,21 +344,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        final Set<SoftwareModule> softwareModuleToBeAssigned = new HashSet<>();
-        for (final MgmtSoftwareModuleAssigment sm : softwareModuleIDs) {
-            final SoftwareModule softwareModule = this.softwareManagement.findSoftwareModuleById(sm.getId());
-            if (softwareModule != null) {
-                softwareModuleToBeAssigned.add(softwareModule);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }
-        // Add Softwaremodules to DisSet only if all of them were found
-        this.distributionSetManagement.assignSoftwareModules(ds, softwareModuleToBeAssigned);
+        this.distributionSetManagement.assignSoftwareModules(distributionSetId,
+                softwareModuleIDs.stream().map(module -> module.getId()).collect(Collectors.toList()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -381,9 +356,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         // check if distribution set and software module exist otherwise throw
         // exception immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
         final SoftwareModule sm = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId);
-        this.distributionSetManagement.unassignSoftwareModule(ds, sm);
+        this.distributionSetManagement.unassignSoftwareModule(distributionSetId, sm);
         return ResponseEntity.ok().build();
     }
 

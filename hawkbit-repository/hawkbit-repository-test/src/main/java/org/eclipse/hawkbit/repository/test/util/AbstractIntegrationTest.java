@@ -179,18 +179,18 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType.setDescription(description);
-        osType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(osType));
+        osType = securityRule.runAsPrivileged(
+                () -> softwareManagement.updateSoftwareModuleType(osType.getId(), null, description, null));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType.setDescription(description);
-        appType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(appType));
+        appType = securityRule.runAsPrivileged(
+                () -> softwareManagement.updateSoftwareModuleType(appType.getId(), null, description, null));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType.setDescription(description);
-        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(runtimeType));
+        runtimeType = securityRule.runAsPrivileged(
+                () -> softwareManagement.updateSoftwareModuleType(runtimeType.getId(), null, description, null));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }

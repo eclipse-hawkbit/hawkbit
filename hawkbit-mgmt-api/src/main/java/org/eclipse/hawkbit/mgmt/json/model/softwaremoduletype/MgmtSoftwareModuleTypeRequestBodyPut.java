@@ -19,21 +19,24 @@ public class MgmtSoftwareModuleTypeRequestBodyPut {
     @JsonProperty
     private String description;
 
-    /**
-     * @return the description
-     */
+    @JsonProperty
+    private String colour;
+
     public String getDescription() {
         return description;
     }
 
-    /**
-     * @param description
-     *            the description to set
-     *
-     * @return updated body
-     */
     public MgmtSoftwareModuleTypeRequestBodyPut setDescription(final String description) {
         this.description = description;
+        return this;
+    }
+
+    public String getColour() {
+        return colour;
+    }
+
+    public MgmtSoftwareModuleTypeRequestBodyPut setColour(final String colour) {
+        this.colour = colour;
         return this;
     }
 

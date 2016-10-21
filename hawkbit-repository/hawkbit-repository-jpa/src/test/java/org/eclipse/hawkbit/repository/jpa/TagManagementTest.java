@@ -299,10 +299,9 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // change data
         final TargetTag savedAssigned = tags.iterator().next();
-        savedAssigned.setName("test123");
 
         // persist
-        tagManagement.updateTargetTag(savedAssigned);
+        tagManagement.updateTargetTag(savedAssigned.getId(), "test123", null, null);
 
         // check data
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
@@ -374,10 +373,9 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         tagManagement.createTargetTag(new JpaTargetTag("A"));
         final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("B"));
-        tag.setName("A");
 
         try {
-            tagManagement.updateTargetTag(tag);
+            tagManagement.updateTargetTag(tag.getId(), "A", null, null);
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -401,10 +399,9 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
         tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
         final DistributionSetTag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
-        tag.setName("A");
 
         try {
-            tagManagement.updateDistributionSetTag(tag);
+            tagManagement.updateDistributionSetTag(tag.getId(), "A", null, null);
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -420,10 +417,9 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // change data
         final DistributionSetTag savedAssigned = tags.iterator().next();
-        savedAssigned.setName("test123");
 
         // persist
-        tagManagement.updateDistributionSetTag(savedAssigned);
+        tagManagement.updateDistributionSetTag(savedAssigned.getId(), "test123", null, null);
 
         // check data
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of ds tags").hasSize(tags.size());

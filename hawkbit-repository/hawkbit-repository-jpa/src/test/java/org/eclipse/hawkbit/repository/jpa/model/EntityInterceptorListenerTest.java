@@ -96,9 +96,8 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     private void executeUpdateAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         Target updateTarget = addListenerAndCreateTarget(entityInterceptor,
                 entityFactory.generateTarget("targetToBeCreated"));
-        updateTarget.setDescription("New");
 
-        updateTarget = targetManagement.updateTarget(updateTarget);
+        updateTarget = targetManagement.updateTarget(updateTarget.getControllerId(), null, "New", null, null);
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);

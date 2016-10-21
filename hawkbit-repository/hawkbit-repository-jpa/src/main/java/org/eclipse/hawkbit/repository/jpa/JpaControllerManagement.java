@@ -268,7 +268,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // the canceled action itself.
         actionStatus.addMessage(
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
-        DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, targetInfoRepository,
                 entityManager);
     }
 
@@ -339,7 +339,9 @@ public class JpaControllerManagement implements ControllerManagement {
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
-        targetManagement.updateTarget(mergedTarget);
+
+        mergedTarget.setNew(false);
+        targetRepository.save(mergedTarget);
     }
 
     private void checkForToManyStatusEntries(final JpaAction action) {

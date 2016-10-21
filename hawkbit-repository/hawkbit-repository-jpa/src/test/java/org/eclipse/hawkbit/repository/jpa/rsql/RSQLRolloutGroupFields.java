@@ -83,7 +83,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = new JpaRollout();
+        final JpaRollout rollout = new JpaRollout();
         rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
         rollout.setName(name);
         rollout.setTargetFilterQuery(targetFilterQuery);

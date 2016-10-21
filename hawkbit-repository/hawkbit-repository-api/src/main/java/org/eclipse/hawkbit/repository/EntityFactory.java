@@ -105,13 +105,6 @@ public interface EntityFactory {
             final String message);
 
     /**
-     * Generates an empty {@link DistributionSet} without persisting it.
-     * 
-     * @return {@link DistributionSet} object
-     */
-    DistributionSet generateDistributionSet();
-
-    /**
      * Generates an {@link DistributionSet} without persisting it.
      * 
      * @param name
@@ -128,7 +121,7 @@ public interface EntityFactory {
      * @return {@link DistributionSet} object
      */
     DistributionSet generateDistributionSet(@NotNull String name, @NotNull String version, String description,
-            @NotNull DistributionSetType type, Collection<SoftwareModule> moduleList);
+            DistributionSetType type, Collection<SoftwareModule> moduleList);
 
     /**
      * Generates an empty {@link DistributionSetMetadata} element without
@@ -219,13 +212,6 @@ public interface EntityFactory {
     RolloutGroup generateRolloutGroup();
 
     /**
-     * Generates an empty {@link SoftwareModule} without persisting it.
-     * 
-     * @return {@link SoftwareModule} object
-     */
-    SoftwareModule generateSoftwareModule();
-
-    /**
      * Generates a {@link SoftwareModule} without persisting it.
      *
      * @param type
@@ -268,13 +254,6 @@ public interface EntityFactory {
             String value);
 
     /**
-     * Generates an empty {@link SoftwareModuleType} without persisting it.
-     * 
-     * @return {@link SoftwareModuleType} object
-     */
-    SoftwareModuleType generateSoftwareModuleType();
-
-    /**
      * Generates a {@link SoftwareModuleType} without persisting it.
      * 
      * @param key
@@ -283,17 +262,20 @@ public interface EntityFactory {
      *            {@link SoftwareModuleType#getName()}
      * @param description
      *            {@link SoftwareModuleType#getDescription()}
+     * @param colour
+     *            {@link SoftwareModuleType#getColour()}
      * @param maxAssignments
      *            {@link SoftwareModuleType#getMaxAssignments()}
      * 
      * @return {@link SoftwareModuleType} object
      */
     SoftwareModuleType generateSoftwareModuleType(@NotNull String key, @NotNull String name, String description,
-            int maxAssignments);
+            String colour, int maxAssignments);
 
     /**
      * Generates an empty {@link Target} without persisting it.
-     * {@link Target#getSecurityToken()} is generated.
+     * {@link Target#getSecurityToken()} is generated. {@link Target#getName()}
+     * is equal to {@link Target#getControllerId()}.
      * 
      * @param controllerID
      *            of the {@link Target}
@@ -307,13 +289,32 @@ public interface EntityFactory {
      * 
      * @param controllerID
      *            of the {@link Target}
+     * @param name
+     *            of the {@link Target} (optional, i.e. {@link Target#getName()}
+     *            is equal to {@link Target#getControllerId()}.)
+     * @param description
+     *            of the {@link Target} (optional)
      * @param securityToken
      *            of the {@link Target} for authentication if enabled on tenant.
      *            Generates one if empty or <code>null</code>.
      * 
      * @return {@link Target} object
      */
-    Target generateTarget(@NotEmpty String controllerID, String securityToken);
+    Target generateTarget(@NotEmpty String controllerID, String name, String description, String securityToken);
+
+    /**
+     * Generates an empty {@link Target} without persisting it.
+     * {@link Target#getSecurityToken()} is generated. {@link Target#getName()}
+     * is equal to {@link Target#getControllerId()}.
+     * 
+     * @param controllerID
+     *            of the {@link Target}
+     * @param description
+     *            of the {@link Target}
+     * 
+     * @return {@link Target} object
+     */
+    Target generateTarget(@NotEmpty String controllerID, String description);
 
     /**
      * Generates an empty {@link TargetFilterQuery} without persisting it.

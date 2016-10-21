@@ -357,7 +357,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
                 checkMandatoryAndAddMandatoryModuleType(newDistType, isMandatory, swModuleType);
             }
-            newDistType.setDescription(typeDescValue);
             newDistType.setColour(colorPicked);
             newDistType = distributionSetManagement.createDistributionSetType(newDistType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));

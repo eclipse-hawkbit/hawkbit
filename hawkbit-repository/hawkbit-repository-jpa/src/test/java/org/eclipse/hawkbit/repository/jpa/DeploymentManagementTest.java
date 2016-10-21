@@ -53,6 +53,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -454,8 +455,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         } catch (final IncompleteDistributionSetException ex) {
         }
 
-        incomplete.addModule(os);
-        final DistributionSet nowComplete = distributionSetManagement.updateDistributionSet(incomplete);
+        final DistributionSet nowComplete = distributionSetManagement.assignSoftwareModules(incomplete.getId(),
+                Sets.newHashSet(os.getId()));
 
         // give some chance to receive events asynchronously
         Thread.sleep(300);

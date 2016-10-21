@@ -38,15 +38,13 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     public void seuptBeforeTest() {
 
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
-        ds.setDescription("DS");
-        ds = distributionSetManagement.updateDistributionSet(ds);
+        ds = distributionSetManagement.updateDistributionSet(ds.getId(), null, "DS", null);
         distributionSetManagement
                 .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds, "metaValue"));
 
         DistributionSet ds2 = testdataFactory.createDistributionSets("NewDS", 3).get(0);
 
-        ds2.setDescription("DS%");
-        ds2 = distributionSetManagement.updateDistributionSet(ds2);
+        ds2 = distributionSetManagement.updateDistributionSet(ds2.getId(), null, "DS%", null);
         distributionSetManagement
                 .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds2, "value"));
 

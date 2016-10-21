@@ -60,8 +60,8 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         assertThat(type).as("persited entity is not equal to regular object")
                 .isNotEqualTo(new JpaSoftwareModuleType("test", "test", "test", 1));
 
-        type.setDescription("another");
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type.getId(), null, "another",
+                null);
         assertThat(type).as("Changed entity is not equal to the previous version").isNotEqualTo(updated);
     }
 
@@ -79,25 +79,6 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         assertThat(type).as("managed entity is equal to regular object with same content").isEqualTo(mock);
         assertThat(type.hashCode()).as("managed entity has same hash code as regular object with same content")
                 .isEqualTo(mock.hashCode());
-    }
-
-    @Test
-    @Description("Verfies that updated entities do not have the same hashcode.")
-    public void updatedEntitiesHaveDifferentHashcodes() {
-        final SoftwareModuleType type = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test", "test", "test", 1));
-        assertThat(type.hashCode()).as("persited entity does not have same hashcode as regular object")
-                .isNotEqualTo(new JpaSoftwareModuleType("test", "test", "test", 1).hashCode());
-
-        final int beforeChange = type.hashCode();
-        type.setDescription("another");
-        assertThat(type.hashCode())
-                .as("Changed entity has no different hashcode than the previous version until updated in repository")
-                .isEqualTo(beforeChange);
-
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type);
-        assertThat(type.hashCode()).as("Updated entity has different hashcode than the previous version")
-                .isNotEqualTo(updated.hashCode());
     }
 
 }

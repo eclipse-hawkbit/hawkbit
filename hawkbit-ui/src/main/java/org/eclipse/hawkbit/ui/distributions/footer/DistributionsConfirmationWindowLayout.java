@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
@@ -28,10 +26,10 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -576,18 +574,12 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void saveAllAssignments(final ConfirmationTab tab) {
         manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
-
-            final DistributionSet ds = dsManagement.findDistributionSetByIdWithDetails(distIdName.getId());
-
             final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
                     .collect(Collectors.toList());
-
-            final List<SoftwareModule> softwareModules = softwareManagement.findSoftwareModulesById(softIds);
-
-            softwareModules.forEach(ds::addModule);
-            dsManagement.updateDistributionSet(ds);
+            dsManagement.assignSoftwareModules(distIdName.getId(), softIds);
 
         });
+
         int count = 0;
         for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
                 .getAssignedList().entrySet()) {

@@ -118,22 +118,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
-        final Target existingTarget = findTargetWithExceptionIfNotFound(controllerId);
-        LOG.debug("updating target {}", existingTarget.getId());
-        if (targetRest.getDescription() != null) {
-            existingTarget.setDescription(targetRest.getDescription());
-        }
-        if (targetRest.getName() != null) {
-            existingTarget.setName(targetRest.getName());
-        }
-        if (targetRest.getAddress() != null) {
-            existingTarget.getTargetInfo().setAddress(targetRest.getAddress());
-        }
-        if (targetRest.getSecurityToken() != null) {
-            existingTarget.setSecurityToken(targetRest.getSecurityToken());
-        }
 
-        final Target updateTarget = this.targetManagement.updateTarget(existingTarget);
+        final Target updateTarget = this.targetManagement.updateTarget(controllerId, targetRest.getName(),
+                targetRest.getDescription(), targetRest.getAddress(), targetRest.getSecurityToken());
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }

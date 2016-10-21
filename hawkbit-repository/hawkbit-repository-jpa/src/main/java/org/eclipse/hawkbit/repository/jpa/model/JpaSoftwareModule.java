@@ -148,7 +148,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         }
     }
 
-    @Override
     public void setVendor(final String vendor) {
         this.vendor = vendor;
     }
@@ -174,9 +173,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.deleted = deleted;
     }
 
-    @Override
-    public void setType(final SoftwareModuleType type) {
-        this.type = (JpaSoftwareModuleType) type;
+    public void setType(final JpaSoftwareModuleType type) {
+        this.type = type;
     }
 
     public List<SoftwareModuleMetadata> getMetadata() {

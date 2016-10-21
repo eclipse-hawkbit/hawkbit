@@ -335,9 +335,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertNotNull("The lastModifiedAt attribut of the target should no be null", savedTarget.getLastModifiedAt());
         assertThat(target).as("Target compared with saved target").isEqualTo(savedTarget);
 
-        savedTarget.setDescription("changed description");
         Thread.sleep(1);
-        savedTarget = targetManagement.updateTarget(savedTarget);
+        savedTarget = targetManagement.updateTarget(savedTarget.getControllerId(), null, "changed description", null,
+                null);
         assertNotNull("The lastModifiedAt attribute of the target should not be null", savedTarget.getLastModifiedAt());
         assertThat(createdAt).as("CreatedAt compared with saved modifiedAt")
                 .isNotEqualTo(savedTarget.getLastModifiedAt());
@@ -377,8 +377,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // change the objects and save to again to trigger a change on
         // lastModifiedAt
-        firstSaved.forEach(t -> t.setName(t.getName().concat("\tchanged")));
-        firstSaved = targetManagement.updateTargets(firstSaved);
+        firstSaved = firstSaved.stream().map(t -> targetManagement.updateTarget(t.getControllerId(),
+                t.getName().concat("\tchanged"), null, null, null)).collect(Collectors.toList());
 
         // verify that all entries are found
         _founds: for (final Target foundTarget : allFound) {

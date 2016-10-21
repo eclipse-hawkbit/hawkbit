@@ -876,20 +876,20 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        Rollout myRollout = new JpaRollout();
+        JpaRollout myRollout = new JpaRollout();
         myRollout.setName(rolloutName);
         myRollout.setDescription("This is a test description for the rollout");
         myRollout.setTargetFilterQuery("controllerId==" + targetPrefixName + "-*");
         myRollout.setDistributionSet(distributionSet);
 
-        myRollout = rolloutManagement.createRolloutAsync(myRollout, amountGroups, conditions);
+        myRollout = (JpaRollout) rolloutManagement.createRolloutAsync(myRollout, amountGroups, conditions);
 
         SuccessConditionRolloutStatus conditionRolloutTargetCount = new SuccessConditionRolloutStatus(
                 RolloutStatus.READY);
         assertThat(MultipleInvokeHelper.doWithTimeout(new RolloutStatusCallable(myRollout.getId()),
                 conditionRolloutTargetCount, 15000, 500)).as("Rollout status").isNotNull();
 
-        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        myRollout = (JpaRollout) rolloutManagement.findRolloutById(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
         rolloutManagement.startRolloutAsync(myRollout);
 
@@ -897,7 +897,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(MultipleInvokeHelper.doWithTimeout(new RolloutStatusCallable(myRollout.getId()),
                 conditionRolloutTargetCount, 15000, 500)).as("Rollout status").isNotNull();
 
-        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        myRollout = (JpaRollout) rolloutManagement.findRolloutById(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 100L);
@@ -959,7 +959,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        final Rollout rolloutToCreate = new JpaRollout();
+        final JpaRollout rolloutToCreate = new JpaRollout();
         rolloutToCreate.setName(rolloutName);
         rolloutToCreate.setDescription(rolloutDescription);
         rolloutToCreate.setTargetFilterQuery(filterQuery);
