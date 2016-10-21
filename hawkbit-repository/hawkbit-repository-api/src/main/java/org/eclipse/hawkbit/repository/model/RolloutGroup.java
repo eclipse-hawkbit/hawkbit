@@ -153,6 +153,23 @@ public interface RolloutGroup extends NamedEntity {
     String getSuccessActionExp();
 
     /**
+     * @param successAction
+     *            which is executed if the {@link RolloutGroupSuccessCondition}
+     *            is met
+     */
+    void setSuccessAction(RolloutGroupSuccessAction successAction);
+
+    /**
+     *
+     * @param successActionExp
+     *            a String representation of the expression to be evaluated by
+     *            the {@link RolloutGroupSuccessAction} might be {@code null} if
+     *            no expression must be set for the
+     *            {@link RolloutGroupSuccessAction}
+     */
+    void setSuccessActionExp(String successActionExp);
+
+    /**
      * @return the total amount of targets containing in this group
      */
     int getTotalTargets();
@@ -169,10 +186,41 @@ public interface RolloutGroup extends NamedEntity {
     void setTotalTargetCountStatus(TotalTargetCountStatus totalTargetCountStatus);
 
     /**
-     * Rollout goup state machine.
+     * @return the target filter query, that is used to assign Targets to this
+     *         Group
+     */
+    String getTargetFilterQuery();
+
+    /**
+     * @param targetFilterQuery
+     *            the target filter query, that is used to assign Targets to
+     *            this Group. Can be null, if no restrictions should apply.
+     */
+    void setTargetFilterQuery(String targetFilterQuery);
+
+    /**
+     * @return the percentage of matching Targets that should be assigned to
+     *         this Group
+     */
+    float getTargetPercentage();
+
+    /**
+     * @param targetPercentage
+     *            the percentage of matching Targets that should be assigned to
+     *            this Group
+     */
+    void setTargetPercentage(float targetPercentage);
+
+    /**
+     * Rollout group state machine.
      *
      */
-    public enum RolloutGroupStatus {
+    enum RolloutGroupStatus {
+
+        /**
+         * Group has been defined, but not all targets have been assigned yet.
+         */
+        CREATING,
 
         /**
          * Ready to start the group.
@@ -198,18 +246,18 @@ public interface RolloutGroup extends NamedEntity {
         /**
          * Group is running.
          */
-        RUNNING;
+        RUNNING
     }
 
     /**
      * The condition to evaluate if an group is success state.
      */
-    public enum RolloutGroupSuccessCondition {
+    enum RolloutGroupSuccessCondition {
         THRESHOLD("thresholdRolloutGroupSuccessCondition");
 
         private final String beanName;
 
-        private RolloutGroupSuccessCondition(final String beanName) {
+        RolloutGroupSuccessCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -224,12 +272,12 @@ public interface RolloutGroup extends NamedEntity {
     /**
      * The condition to evaluate if an group is in error state.
      */
-    public enum RolloutGroupErrorCondition {
+    enum RolloutGroupErrorCondition {
         THRESHOLD("thresholdRolloutGroupErrorCondition");
 
         private final String beanName;
 
-        private RolloutGroupErrorCondition(final String beanName) {
+        RolloutGroupErrorCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -242,14 +290,14 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#errorCondition} is hit.
+     * The actions executed when the {@link RolloutGroup#getErrorCondition()} is hit.
      */
-    public enum RolloutGroupErrorAction {
+    enum RolloutGroupErrorAction {
         PAUSE("pauseRolloutGroupAction");
 
         private final String beanName;
 
-        private RolloutGroupErrorAction(final String beanName) {
+        RolloutGroupErrorAction(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -262,15 +310,15 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#successCondition} is
+     * The actions executed when the {@link RolloutGroup#getSuccessCondition()} is
      * hit.
      */
-    public enum RolloutGroupSuccessAction {
+    enum RolloutGroupSuccessAction {
         NEXTGROUP("startNextRolloutGroupAction");
 
         private final String beanName;
 
-        private RolloutGroupSuccessAction(final String beanName) {
+        RolloutGroupSuccessAction(final String beanName) {
             this.beanName = beanName;
         }
 

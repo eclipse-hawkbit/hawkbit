@@ -73,7 +73,9 @@ public class RolloutScheduler {
             LOGGER.info("Checking rollouts for {} tenants", tenants.size());
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
-                    rolloutManagement.checkRunningRollouts(rolloutProperties.getScheduler().getFixedDelay());
+                    final long fixedDelay = rolloutProperties.getScheduler().getFixedDelay();
+                    rolloutManagement.checkCreatingRollouts(fixedDelay);
+                    rolloutManagement.checkRunningRollouts(fixedDelay);
                     return null;
                 });
             }

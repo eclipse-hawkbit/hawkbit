@@ -8,12 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Model for the rollout group annotated with json-annotations for easier
@@ -21,13 +22,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtRolloutGroupResponseBody extends MgmtNamedEntity {
+public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
     @JsonProperty(value = "id", required = true)
     private Long rolloutGroupId;
 
     @JsonProperty(required = true)
     private String status;
+
+    private int totalTargets;
+
+    @JsonProperty(required = true)
+    private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
 
     /**
      * @return the rolloutGroupId
@@ -58,4 +64,17 @@ public class MgmtRolloutGroupResponseBody extends MgmtNamedEntity {
     public void setStatus(final String status) {
         this.status = status;
     }
+
+    public int getTotalTargets() {
+        return totalTargets;
+    }
+
+    public void setTotalTargets(int totalTargets) {
+        this.totalTargets = totalTargets;
+    }
+
+    public Map<String, Long> getTotalTargetsPerStatus() {
+        return totalTargetsPerStatus;
+    }
+
 }

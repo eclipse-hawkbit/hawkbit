@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
@@ -583,6 +584,30 @@ public class JpaTargetManagement implements TargetManagement {
                                 .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
                 pageRequest);
 
+    }
+
+    @Override
+    public Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull final Pageable pageRequest,
+                                                                               final List<RolloutGroup> groups, @NotNull final String targetFilterQuery) {
+
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+                virtualPropertyReplacer);
+
+        return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
+                TargetSpecifications.isNotInRolloutGroups(groups).toPredicate(root, cq, cb)), pageRequest);
+
+    }
+
+    @Override
+    public Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(final List<RolloutGroup> groups,
+                                                                        @NotNull final String targetFilterQuery) {
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+                virtualPropertyReplacer);
+        final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
+        specList.add(spec);
+        specList.add(TargetSpecifications.isNotInRolloutGroups(groups));
+
+        return countByCriteriaAPI(specList);
     }
 
     @Override

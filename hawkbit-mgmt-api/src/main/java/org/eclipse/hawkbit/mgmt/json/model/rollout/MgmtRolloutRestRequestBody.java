@@ -8,12 +8,14 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
+
+import java.util.List;
 
 /**
  * Model for request containing a rollout body e.g. in a POST request of
@@ -21,66 +23,18 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtRolloutRestRequestBody extends MgmtNamedEntity {
+public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEntity {
 
     private String targetFilterQuery;
     private long distributionSetId;
 
-    private int amountGroups = 1;
-
-    private MgmtRolloutCondition successCondition = new MgmtRolloutCondition();
-    private MgmtRolloutSuccessAction successAction = new MgmtRolloutSuccessAction();
-    private MgmtRolloutCondition errorCondition = null;
-    private MgmtRolloutErrorAction errorAction = null;
+    private Integer amountGroups;
 
     private Long forcetime;
 
     private MgmtActionType type;
 
-    /**
-     * @return the finishCondition
-     */
-    public MgmtRolloutCondition getSuccessCondition() {
-        return successCondition;
-    }
-
-    /**
-     * @param successCondition
-     *            the finishCondition to set
-     */
-    public void setSuccessCondition(final MgmtRolloutCondition successCondition) {
-        this.successCondition = successCondition;
-    }
-
-    /**
-     * @return the successAction
-     */
-    public MgmtRolloutSuccessAction getSuccessAction() {
-        return successAction;
-    }
-
-    /**
-     * @param successAction
-     *            the successAction to set
-     */
-    public void setSuccessAction(final MgmtRolloutSuccessAction successAction) {
-        this.successAction = successAction;
-    }
-
-    /**
-     * @return the errorCondition
-     */
-    public MgmtRolloutCondition getErrorCondition() {
-        return errorCondition;
-    }
-
-    /**
-     * @param errorCondition
-     *            the errorCondition to set
-     */
-    public void setErrorCondition(final MgmtRolloutCondition errorCondition) {
-        this.errorCondition = errorCondition;
-    }
+    private List<MgmtRolloutGroup> groups;
 
     /**
      * @return the targetFilterQuery
@@ -115,7 +69,7 @@ public class MgmtRolloutRestRequestBody extends MgmtNamedEntity {
     /**
      * @return the groupSize
      */
-    public int getAmountGroups() {
+    public Integer getAmountGroups() {
         return amountGroups;
     }
 
@@ -123,7 +77,7 @@ public class MgmtRolloutRestRequestBody extends MgmtNamedEntity {
      * @param groupSize
      *            the groupSize to set
      */
-    public void setAmountGroups(final int groupSize) {
+    public void setAmountGroups(final Integer groupSize) {
         this.amountGroups = groupSize;
     }
 
@@ -158,18 +112,16 @@ public class MgmtRolloutRestRequestBody extends MgmtNamedEntity {
     }
 
     /**
-     * @return the errorAction
+     * @return the List of defined Groups
      */
-    public MgmtRolloutErrorAction getErrorAction() {
-        return errorAction;
+    public List<MgmtRolloutGroup> getGroups() {
+        return groups;
     }
 
     /**
-     * @param errorAction
-     *            the errorAction to set
+     * @param groups List of {@link MgmtRolloutGroup}
      */
-    public void setErrorAction(final MgmtRolloutErrorAction errorAction) {
-        this.errorAction = errorAction;
+    public void setGroups(List<MgmtRolloutGroup> groups) {
+        this.groups = groups;
     }
-
 }
