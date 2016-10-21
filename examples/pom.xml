@@ -21,31 +21,27 @@
    <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
 
-   <profiles>
-      <profile>
-         <id>noExampleApp</id>
-         <modules>
-            <module>hawkbit-example-core-feign-client</module>
-            <module>hawkbit-example-ddi-feign-client</module>
-            <module>hawkbit-example-mgmt-feign-client</module>
-            <module>hawkbit-example-mgmt-simulator</module>
-         </modules>
-      </profile>
-      <profile>
-         <id>default</id>
-         <activation>
-            <activeByDefault>true</activeByDefault>
-         </activation>
-         <modules>
-            <module>hawkbit-device-simulator</module>
-            <module>hawkbit-example-app</module>
-            <module>hawkbit-example-core-feign-client</module>
-            <module>hawkbit-example-ddi-feign-client</module>
-            <module>hawkbit-example-mgmt-feign-client</module>
-            <module>hawkbit-example-mgmt-simulator</module>
-         </modules>
-      </profile>
-   </profiles>
+   <distributionManagement>
+      <repository>
+         <id>repo.eclipse.org</id>
+         <name>hawkBit Repository - Release</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-releases</url>
+      </repository>
+      <snapshotRepository>
+         <id>repo.eclipse.org</id>
+         <name>hawkBit Repository - Release</name>
+         <url>https://repo.eclipse.org/content/repositories/hawkbit-snapshots</url>
+      </snapshotRepository>
+   </distributionManagement>
+
+   <modules>
+      <module>hawkbit-device-simulator</module>
+      <module>hawkbit-example-app</module>
+      <module>hawkbit-example-core-feign-client</module>
+      <module>hawkbit-example-ddi-feign-client</module>
+      <module>hawkbit-example-mgmt-feign-client</module>
+      <module>hawkbit-example-mgmt-simulator</module>
+   </modules>
 
    <dependencyManagement>
       <dependencies>
