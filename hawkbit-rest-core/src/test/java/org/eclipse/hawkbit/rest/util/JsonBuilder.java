@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -398,7 +399,13 @@ public abstract class JsonBuilder {
     }
 
     public static String rollout(final String name, final String description, final int groupSize,
-            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
+                                 final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null);
+    }
+
+    public static String rollout(final String name, final String description, final Integer groupSize,
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+                                 final List<RolloutGroup> groups) {
         final JSONObject json = new JSONObject();
         json.put("name", name);
         json.put("description", description);
@@ -410,22 +417,64 @@ public abstract class JsonBuilder {
             final JSONObject successCondition = new JSONObject();
             json.put("successCondition", successCondition);
             successCondition.put("condition", conditions.getSuccessCondition().toString());
-            successCondition.put("expression", conditions.getSuccessConditionExp().toString());
+            successCondition.put("expression", conditions.getSuccessConditionExp());
 
             final JSONObject successAction = new JSONObject();
             json.put("successAction", successAction);
             successAction.put("action", conditions.getSuccessAction().toString());
-            successAction.put("expression", conditions.getSuccessActionExp().toString());
+            successAction.put("expression", conditions.getSuccessActionExp());
 
             final JSONObject errorCondition = new JSONObject();
             json.put("errorCondition", errorCondition);
             errorCondition.put("condition", conditions.getErrorCondition().toString());
-            errorCondition.put("expression", conditions.getErrorConditionExp().toString());
+            errorCondition.put("expression", conditions.getErrorConditionExp());
 
             final JSONObject errorAction = new JSONObject();
             json.put("errorAction", errorAction);
             errorAction.put("action", conditions.getErrorAction().toString());
-            errorAction.put("expression", conditions.getErrorActionExp().toString());
+            errorAction.put("expression", conditions.getErrorActionExp());
+        }
+
+        if(groups != null) {
+            final JSONArray jsonGroups = new JSONArray();
+
+            for (RolloutGroup group : groups) {
+                final JSONObject jsonGroup = new JSONObject();
+                jsonGroup.put("name", group.getName());
+                jsonGroup.put("description", group.getDescription());
+                jsonGroup.put("targetFilterQuery", group.getTargetFilterQuery());
+                jsonGroup.put("targetPercentage", group.getTargetPercentage());
+
+                if(group.getSuccessCondition() != null) {
+                    final JSONObject successCondition = new JSONObject();
+                    jsonGroup.put("successCondition", successCondition);
+                    successCondition.put("condition", group.getSuccessCondition().toString());
+                    successCondition.put("expression", group.getSuccessConditionExp());
+                }
+                if(group.getSuccessAction() != null) {
+                    final JSONObject successAction = new JSONObject();
+                    jsonGroup.put("successAction", successAction);
+                    successAction.put("action", group.getSuccessAction().toString());
+                    successAction.put("expression", group.getSuccessActionExp());
+                }
+                if(group.getErrorCondition() != null) {
+                    final JSONObject errorCondition = new JSONObject();
+                    jsonGroup.put("errorCondition", errorCondition);
+                    errorCondition.put("condition", group.getErrorCondition().toString());
+                    errorCondition.put("expression", group.getErrorConditionExp());
+                }
+                if(group.getErrorAction() != null) {
+                    final JSONObject errorAction = new JSONObject();
+                    jsonGroup.put("errorAction", errorAction);
+                    errorAction.put("action", group.getErrorAction().toString());
+                    errorAction.put("expression", group.getErrorActionExp());
+                }
+
+                jsonGroups.put(jsonGroup);
+            }
+
+            json.put("groups", jsonGroups);
+
         }
 
         return json.toString();

@@ -19,6 +19,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -31,7 +32,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
+import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -252,6 +257,24 @@ public final class TargetSpecifications {
                     distributionSetId));
 
             return cb.isNull(actionsJoin.get(JpaAction_.id));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are not in the
+     * given {@link Rollout}
+     *
+     * @param groups
+     *            the {@link Rollout}
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isNotInRolloutGroups(final List<RolloutGroup> groups) {
+        return (targetRoot, query, cb) -> {
+            Subquery<RolloutTargetGroup> sq = query.subquery(RolloutTargetGroup.class);
+            Root<RolloutTargetGroup> sqRoot = sq.from(RolloutTargetGroup.class);
+            Predicate inRolloutGroups = sqRoot.get(RolloutTargetGroup_.rolloutGroup).in(groups);
+            sq.where(cb.and(cb.equal(sqRoot.get(RolloutTargetGroup_.target), targetRoot), inRolloutGroups));
+            return cb.not(cb.exists(sq));
         };
     }
 

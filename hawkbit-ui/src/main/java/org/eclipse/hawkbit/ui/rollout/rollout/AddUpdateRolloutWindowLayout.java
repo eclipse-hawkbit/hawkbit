@@ -491,7 +491,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rolloutToCreate.setActionType(getActionType());
         rolloutToCreate.setForcedTime(getForcedTimeStamp());
 
-        rolloutToCreate = rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
+        rolloutToCreate = rolloutManagement.createRollout(rolloutToCreate, amountGroup, conditions);
         return rolloutToCreate;
     }
 

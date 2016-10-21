@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -287,6 +289,36 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery);
+
+    /**
+     * Finds all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param targetFilterQuery
+     *            RSQL filter
+     * @return the found {@link TargetIdName}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
+            List<RolloutGroup> groups, @NotNull String targetFilterQuery);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s
+     *
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param targetFilterQuery
+     *            RSQL filter
+     * @return the found {@link TargetIdName}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(List<RolloutGroup> groups,
+            @NotNull String targetFilterQuery);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet} without

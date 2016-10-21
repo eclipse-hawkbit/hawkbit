@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.RolloutVerificationException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -143,10 +145,22 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 .successCondition(successCondition, successConditionExpr)
                 .successAction(successAction, successActionExpr).errorCondition(errorCondition, errorConditionExpr)
                 .errorAction(errorAction, errorActionExpr).build();
-        final Rollout rollout = this.rolloutManagement.createRollout(
-                MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet,
-                        rolloutRequestBody.getTargetFilterQuery()),
-                rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
+
+        Rollout rollout = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
+
+        if (rolloutRequestBody.getGroups() != null) {
+            final List<RolloutGroup> rolloutGroups = rolloutRequestBody.getGroups().stream()
+                    .map(mgmtRolloutGroup -> MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup))
+                    .collect(Collectors.toList());
+            rollout = rolloutManagement.createRollout(rollout, rolloutGroups, rolloutGroupConditions);
+
+        } else if (rolloutRequestBody.getAmountGroups() != null) {
+            rollout = rolloutManagement.createRollout(rollout, rolloutRequestBody.getAmountGroups(),
+                    rolloutGroupConditions);
+
+        } else {
+            throw new RolloutVerificationException("Either 'amountGroups' or 'groups' must be defined in the request");
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout));
     }

@@ -33,6 +33,14 @@ public enum TargetFields implements FieldNameProvider {
      */
     DESCRIPTION("description"),
     /**
+     * The createdAt field.
+     */
+    CREATEDAT("createdAt"),
+    /**
+     * The createdAt field.
+     */
+    LASTMODIFIEDAT("lastModifiedAt"),
+    /**
      * The controllerId field.
      */
     CONTROLLERID("controllerId"),
@@ -75,19 +83,19 @@ public enum TargetFields implements FieldNameProvider {
     private List<String> subEntityAttribues;
     private boolean mapField;
 
-    private TargetFields(final String fieldName) {
+    TargetFields(final String fieldName) {
         this(fieldName, false, Collections.emptyList());
     }
 
-    private TargetFields(final String fieldName, final boolean isMapField) {
+    TargetFields(final String fieldName, final boolean isMapField) {
         this(fieldName, isMapField, Collections.emptyList());
     }
 
-    private TargetFields(final String fieldName, final String... subEntityAttribues) {
+    TargetFields(final String fieldName, final String... subEntityAttribues) {
         this(fieldName, false, Arrays.asList(subEntityAttribues));
     }
 
-    private TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues) {
+    TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues) {
         this.fieldName = fieldName;
         this.mapField = mapField;
         this.subEntityAttribues = subEntityAttribues;
