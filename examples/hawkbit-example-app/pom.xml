@@ -59,6 +59,11 @@
       <!-- Hawkbit -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-extension-uaa</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-autoconfigure</artifactId>
          <version>${project.version}</version>
       </dependency>
