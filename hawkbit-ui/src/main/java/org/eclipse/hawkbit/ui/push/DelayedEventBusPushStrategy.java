@@ -136,23 +136,23 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                 return;
             }
 
+            final WrappedSession wrappedSession = vaadinSession.getSession();
+            if (wrappedSession == null) {
+                return;
+            }
+
             final List<TenantAwareEvent> events = new ArrayList<>(size);
             final int eventsSize = queue.drainTo(events);
+
+            addRolloutChangeEvents(rolloutChangeEvent, rolloutGroupChangeEvent, events);
 
             if (events.isEmpty()) {
                 LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", vaadinUI.getUIId());
                 return;
             }
 
-            final WrappedSession wrappedSession = vaadinSession.getSession();
-            if (wrappedSession == null) {
-                return;
-            }
-
             LOG.debug("UI EventBus aggregator dispatches {} events for session {} for UI {}", eventsSize, vaadinSession,
                     vaadinUI.getUIId());
-
-            addRolloutChangeEvents(rolloutChangeEvent, rolloutGroupChangeEvent, events);
 
             doDispatch(events, wrappedSession);
 
