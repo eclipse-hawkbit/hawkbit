@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -119,6 +120,31 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         twinTableLayout.addComponent(distTypeSelectLayout);
 
         mainLayout.addComponent(twinTableLayout, 2, 0);
+    }
+
+    @Override
+    protected void previewButtonClicked() {
+        if (!tagPreviewBtnClicked) {
+            final String selectedOption = (String) optiongroup.getValue();
+            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTagStr)
+                    && null != tagNameComboBox.getValue()) {
+
+                final DistributionSetType existedDistType = distributionSetManagement
+                        .findDistributionSetTypeByName(tagNameComboBox.getValue().toString());
+                if (null != existedDistType) {
+                    getColorPickerLayout().setSelectedColor(existedDistType.getColour() != null
+                            ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
+                            : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                } else {
+                    getColorPickerLayout().setSelectedColor(
+                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                }
+            }
+            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+        }
+        tagPreviewBtnClicked = !tagPreviewBtnClicked;
+        colorPickerLayout.setVisible(tagPreviewBtnClicked);
+
     }
 
     private HorizontalLayout createTwinColumnLayout() {

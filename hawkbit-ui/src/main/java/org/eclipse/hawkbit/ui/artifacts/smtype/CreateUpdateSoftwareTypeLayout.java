@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -91,6 +92,35 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
+    }
+
+    /**
+     * Open color picker on click of preview button. Auto select the color based
+     * on target tag if already selected.
+     */
+    @Override
+    protected void previewButtonClicked() {
+        if (!tagPreviewBtnClicked) {
+            final String selectedOption = (String) optiongroup.getValue();
+            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTagStr)) {
+                if (null != tagNameComboBox.getValue()) {
+
+                    final SoftwareModuleType typeSelected = swTypeManagementService
+                            .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
+                    if (null != typeSelected) {
+                        getColorPickerLayout().setSelectedColor(typeSelected.getColour() != null
+                                ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
+                                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                    }
+                } else {
+                    getColorPickerLayout().setSelectedColor(
+                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                }
+            }
+            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+        }
+        tagPreviewBtnClicked = !tagPreviewBtnClicked;
+        colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
