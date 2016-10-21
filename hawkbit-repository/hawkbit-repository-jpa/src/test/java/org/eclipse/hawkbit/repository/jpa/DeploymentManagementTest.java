@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.DeploymentManagementTest.DeploymentTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -46,11 +45,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -69,14 +68,23 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
-@SpringApplicationConfiguration(classes = { DeploymentTestConfiguration.class })
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
-    @Autowired
     private EventHandlerStub eventHandlerStub;
 
-    @Autowired
     private CancelEventHandlerStub cancelEventHandlerStub;
+
+    @Autowired
+    private ConfigurableApplicationContext applicationContext;
+
+    @Before
+    public void addHandler() {
+        eventHandlerStub = new EventHandlerStub();
+        applicationContext.addApplicationListener(eventHandlerStub);
+
+        cancelEventHandlerStub = new CancelEventHandlerStub();
+        applicationContext.addApplicationListener(cancelEventHandlerStub);
+    }
 
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
@@ -1014,34 +1022,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    /**
-     * 
-     * Test configuration for EventHandlerStub and CancelEventHandlerStub.
-     *
-     */
-    public static class DeploymentTestConfiguration {
-
-        /**
-         * 
-         * @return the EventHandlerStub bean.
-         */
-        @Bean
-        public EventHandlerStub eventHandlerStubBean() {
-            return new EventHandlerStub();
-        }
-
-        /**
-         * 
-         * @return the CancelEventHandlerStub bean.
-         */
-        @Bean
-        public CancelEventHandlerStub bancelEventHandlerStubBean() {
-            return new CancelEventHandlerStub();
-        }
-
-    }
-
-    protected static class EventHandlerStub {
+    protected static class EventHandlerStub implements ApplicationListener<TargetAssignDistributionSetEvent> {
         private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
         private CountDownLatch latch;
         private int expectedNumberOfEvents;
@@ -1056,15 +1037,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
-        @EventListener(classes = TargetAssignDistributionSetEvent.class)
-        public void handleEvent(final TargetAssignDistributionSetEvent event) {
-            if (latch == null) {
-                return;
-            }
-            events.add(event);
-            latch.countDown();
-        }
-
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
@@ -1075,9 +1047,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             return handledEvents;
 
         }
+
+        @Override
+        public void onApplicationEvent(final TargetAssignDistributionSetEvent event) {
+            if (latch == null) {
+                return;
+            }
+            events.add(event);
+            latch.countDown();
+
+        }
     }
 
-    private static class CancelEventHandlerStub {
+    private static class CancelEventHandlerStub implements ApplicationListener<CancelTargetAssignmentEvent> {
         private final List<CancelTargetAssignmentEvent> events = Collections.synchronizedList(new LinkedList<>());
         private CountDownLatch latch;
         private int expectedNumberOfEvents;
@@ -1088,15 +1070,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             this.latch = new CountDownLatch(expectedNumberOfEvents);
         }
 
-        @EventListener(classes = CancelTargetAssignmentEvent.class)
-        public void handleEvent(final CancelTargetAssignmentEvent event) {
-            if (latch == null) {
-                return;
-            }
-            events.add(event);
-            latch.countDown();
-        }
-
         public List<CancelTargetAssignmentEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
@@ -1104,6 +1077,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;
+        }
+
+        @Override
+        public void onApplicationEvent(final CancelTargetAssignmentEvent event) {
+            if (latch == null) {
+                return;
+            }
+            events.add(event);
+            latch.countDown();
         }
     }
 
