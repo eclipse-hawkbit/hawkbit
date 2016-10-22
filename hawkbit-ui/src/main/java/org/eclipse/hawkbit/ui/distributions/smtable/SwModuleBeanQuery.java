@@ -36,9 +36,9 @@ import com.google.common.base.Strings;
 public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
     private transient SoftwareManagement softwareManagementService;
-    private Long type;
-    private String searchText;
-    private Long orderByDistId;
+    private final Long type;
+    private final String searchText;
+    private final Long orderByDistId;
 
     /**
      * Parametric Constructor.
@@ -58,15 +58,20 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
                     .map(t -> t.getId()).orElse(null);
-            searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(searchText)) {
-                searchText = String.format("%%%s%%", searchText);
+            final String text = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
+            if (!Strings.isNullOrEmpty(text)) {
+                searchText = String.format("%%%s%%", text);
+            } else {
+                searchText = null;
             }
-            orderByDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
-            if (orderByDistId == null) {
-                orderByDistId = 0L;
-            }
+            orderByDistId = Optional.ofNullable((Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION))
+                    .orElse(0L);
+            return;
         }
+
+        orderByDistId = 0L;
+        type = null;
+        searchText = null;
     }
 
     @Override
@@ -79,10 +84,10 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         return getSoftwareManagement()
                 .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                         new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type)
-                .getContent().stream().map(this::getProxyBean).collect(Collectors.toList());
+                .getContent().stream().map(SwModuleBeanQuery::getProxyBean).collect(Collectors.toList());
     }
 
-    private ProxyBaseSwModuleItem getProxyBean(final AssignedSoftwareModule customSoftwareModule) {
+    private static ProxyBaseSwModuleItem getProxyBean(final AssignedSoftwareModule customSoftwareModule) {
         final SoftwareModule bean = customSoftwareModule.getSoftwareModule();
         final ProxyBaseSwModuleItem proxyItem = new ProxyBaseSwModuleItem();
         proxyItem.setSwId(bean.getId());
