@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
@@ -31,6 +32,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
@@ -40,6 +42,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -142,6 +145,16 @@ public class TestConfiguration implements AsyncConfigurer {
         serviceMatcher.setMatcher(new AntPathMatcher(":"));
         serviceMatcher.setApplicationContext(applicationContext);
         return serviceMatcher;
+    }
+
+    /**
+     * 
+     * @return the protostuff io message converter
+     */
+    @Bean
+    @ConditionalOnBusEnabled
+    public MessageConverter busProtoBufConverter() {
+        return new BusProtoStuffMessageConverter();
     }
 
 }

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;

@@ -8,13 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A base definition class for remote events which contain a tenant aware base
@@ -25,12 +24,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteIdEvent {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteEntityEvent.class);
+
     private static final long serialVersionUID = 1L;
 
-    @JsonProperty(required = true)
-    private Class<? extends E> entityClass;
+    private String entityClass;
 
-    @JsonIgnore
     private transient E entity;
 
     /**
@@ -45,11 +44,8 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    protected RemoteEntityEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends E> entityClass,
-            @JsonProperty("originService") final String applicationId) {
+    protected RemoteEntityEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
         super(entityId, tenant, applicationId);
         this.entityClass = entityClass;
     }
@@ -62,19 +58,28 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
      * @param applicationId
      *            the origin application id
      */
-    @SuppressWarnings("unchecked")
     protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
-        this(baseEntity.getTenant(), baseEntity.getId(), (Class<? extends E>) baseEntity.getClass(), applicationId);
+        this(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass().getName(), applicationId);
         this.entity = baseEntity;
     }
 
-    @JsonIgnore
     public E getEntity() {
         if (entity == null) {
-            entity = EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(),
-                    getEntityId(), entityClass);
+            entity = reloadEntityFromRepository();
         }
         return entity;
+    }
+
+    @SuppressWarnings("unchecked")
+    private E reloadEntityFromRepository() {
+        try {
+            final Class<E> clazz = (Class<E>) ClassUtils.getClass(entityClass);
+            return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(), getEntityId(),
+                    clazz);
+        } catch (final ClassNotFoundException e) {
+            LOG.error("Cannot reload entity because class is not found", e);
+        }
+        return null;
     }
 
 }

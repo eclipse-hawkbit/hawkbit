@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 
 /**
  * EventHolder for {@link TargetInfoUpdateEvent}s.

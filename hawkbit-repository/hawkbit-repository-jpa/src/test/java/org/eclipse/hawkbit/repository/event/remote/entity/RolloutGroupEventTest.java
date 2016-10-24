@@ -12,6 +12,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.UUID;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;

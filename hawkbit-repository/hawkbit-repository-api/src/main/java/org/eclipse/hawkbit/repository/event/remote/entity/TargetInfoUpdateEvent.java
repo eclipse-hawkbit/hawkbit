@@ -8,15 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 
 /**
- * Defines the the remote of creating a new {@link DistributionSet}.
- *
+ * TenantAwareEvent for update the targets info.
  */
-public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionSet> {
+public class TargetInfoUpdateEvent extends RemoteEntityEvent<Target> {
 
     private static final long serialVersionUID = 1L;
+
+    private transient TargetInfo targetInfo;
 
     /**
      * Constructor for json serialization.
@@ -29,9 +31,9 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
      *            the entity entityClassName
      * @param applicationId
      *            the origin application id
-     * @throws ClassNotFoundException
      */
-    protected DistributionSetCreatedEvent(final String tenant, final Long entityId, final String entityClass,
+
+    protected TargetInfoUpdateEvent(final String tenant, final Long entityId, final String entityClass,
             final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
     }
@@ -39,13 +41,21 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
     /**
      * Constructor.
      * 
-     * @param distributionSet
-     *            the created distributionSet
+     * @param targetInfo
+     *            the target info
      * @param applicationId
      *            the origin application id
      */
-    public DistributionSetCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
-        super(distributionSet, applicationId);
+    public TargetInfoUpdateEvent(final TargetInfo targetInfo, final String applicationId) {
+        super(targetInfo.getTarget(), applicationId);
+        this.targetInfo = targetInfo;
+    }
+
+    public TargetInfo getTargetInfo() {
+        if (targetInfo == null && getEntity() != null) {
+            targetInfo = getEntity().getTargetInfo();
+        }
+        return targetInfo;
     }
 
 }

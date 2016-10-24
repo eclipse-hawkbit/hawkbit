@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 

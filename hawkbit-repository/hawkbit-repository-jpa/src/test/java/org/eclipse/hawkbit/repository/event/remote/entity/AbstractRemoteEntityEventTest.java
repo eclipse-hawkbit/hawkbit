@@ -13,19 +13,10 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -57,14 +48,13 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
             assertEntity(baseEntity, event);
             return event;
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | SecurityException | JsonProcessingException e) {
+                | SecurityException e) {
             fail("Exception should not happen " + e.getMessage());
         }
         return null;
     }
 
-    protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event)
-            throws JsonProcessingException {
+    protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event) {
         assertThat(event.getEntity()).isSameAs(baseEntity);
 
         final Message<?> message = createMessage(event);
@@ -72,13 +62,6 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
                 .fromMessage(message, event.getClass());
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
         return underTestCreatedEvent;
-    }
-
-    private Message<String> createMessage(final RemoteEntityEvent<?> event) throws JsonProcessingException {
-        final Map<String, MimeType> headers = Maps.newLinkedHashMap();
-        headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
-        final String json = new ObjectMapper().writeValueAsString(event);
-        return MessageBuilder.withPayload(json).copyHeaders(headers).build();
     }
 
     protected abstract E createEntity();

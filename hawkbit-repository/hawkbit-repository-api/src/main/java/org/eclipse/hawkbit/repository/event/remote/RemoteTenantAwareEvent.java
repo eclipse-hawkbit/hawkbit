@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * A distributed tenant aware event. It's the base class of the other
  * distributed events. All the necessary information of distributing events to
@@ -23,8 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
-    @JsonProperty(required = true)
-    private transient String tenant;
+
+    private final String tenant;
 
     /**
      * for serialization libs like jackson
@@ -34,9 +31,7 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
      * @param applicationId
      *            the applicationId
      */
-    @JsonCreator
-    protected RemoteTenantAwareEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("originService") final String applicationId) {
+    protected RemoteTenantAwareEvent(final String tenant, final String applicationId) {
         this(new Object(), tenant, applicationId);
     }
 

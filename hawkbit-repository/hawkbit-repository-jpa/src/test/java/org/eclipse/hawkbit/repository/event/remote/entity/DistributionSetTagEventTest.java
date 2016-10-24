@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.junit.Test;
 

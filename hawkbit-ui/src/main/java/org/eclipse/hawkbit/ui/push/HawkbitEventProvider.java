@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -22,6 +21,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCrea
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;

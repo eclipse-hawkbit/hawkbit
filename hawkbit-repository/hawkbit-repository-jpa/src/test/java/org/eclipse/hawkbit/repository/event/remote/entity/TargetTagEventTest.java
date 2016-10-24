@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Test;
 

@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.model.Target;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Defines the remote event for updating a {@link Target}.
  *
@@ -33,11 +30,8 @@ public class TargetUpdatedEvent extends RemoteEntityEvent<Target> {
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    public TargetUpdatedEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends Target> entityClass,
-            @JsonProperty("originService") final String applicationId) {
+    public TargetUpdatedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
     }
 

@@ -8,19 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * TenantAwareEvent that contains an updated download progress for a given ActionStatus
- * that was written for a download request.
+ * TenantAwareEvent that contains an updated download progress for a given
+ * ActionStatus that was written for a download request.
  *
  */
 public class DownloadProgressEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
-    @JsonProperty(required = true)
     private final Long shippedBytesSinceLast;
 
     /**
@@ -33,10 +29,7 @@ public class DownloadProgressEvent extends RemoteTenantAwareEvent {
      * @param applicationId
      *            the application id.
      */
-    @JsonCreator
-    public DownloadProgressEvent(final @JsonProperty("tenant") String tenant,
-            final @JsonProperty("shippedBytesSinceLast") Long shippedBytesSinceLast,
-            final @JsonProperty("originService") String applicationId) {
+    public DownloadProgressEvent(final String tenant, final Long shippedBytesSinceLast, final String applicationId) {
         super(shippedBytesSinceLast, tenant, applicationId);
         this.shippedBytesSinceLast = shippedBytesSinceLast;
     }

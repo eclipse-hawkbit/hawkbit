@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Defines the remote event of delete a {@link TargetTag}.
  *
@@ -31,9 +28,7 @@ public class TargetTagDeletedEvent extends RemoteIdEvent {
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    public TargetTagDeletedEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
+    public TargetTagDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
         super(entityId, tenant, applicationId);
     }
 }

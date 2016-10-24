@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Defines the the remote event of delete a {@link DistributionSetTag}.
  */
@@ -30,9 +27,8 @@ public class DistributionSetTagDeletedEvent extends RemoteIdEvent {
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    public DistributionSetTagDeletedEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId, @JsonProperty("originService") final String applicationId) {
+
+    public DistributionSetTagDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
         super(entityId, tenant, applicationId);
     }
 }

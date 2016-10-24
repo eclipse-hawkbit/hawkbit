@@ -40,7 +40,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;

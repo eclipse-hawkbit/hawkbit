@@ -114,6 +114,14 @@
          <groupId>com.h2database</groupId>
          <artifactId>h2</artifactId>
       </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-runtime</artifactId>
+      </dependency>
    </dependencies>
 
 </project>

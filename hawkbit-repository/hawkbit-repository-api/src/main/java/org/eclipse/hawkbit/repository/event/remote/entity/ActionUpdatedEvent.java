@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.model.Action;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Defines the remote event of updated a {@link Action}.
  */
@@ -31,11 +28,8 @@ public class ActionUpdatedEvent extends RemoteEntityEvent<Action> {
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    protected ActionUpdatedEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId,
-            @JsonProperty("entityClass") final Class<? extends Action> entityClass,
-            @JsonProperty("originService") final String applicationId) {
+    protected ActionUpdatedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
     }
 

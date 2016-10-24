@@ -30,7 +30,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -168,8 +168,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetInfoUpdateEvents(final TargetInfoUpdateEventContainer eventContainer) {
         onTargetUpdateEvents(eventContainer.getEvents().stream()
-                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity().getTarget())
-                .collect(Collectors.toList()));
+                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
     }
 
     /**

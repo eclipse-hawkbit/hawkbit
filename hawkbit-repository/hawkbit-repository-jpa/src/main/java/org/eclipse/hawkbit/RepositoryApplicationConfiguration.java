@@ -67,7 +67,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
-import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -82,6 +81,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.google.common.collect.Maps;
+
 /**
  * General configuration for hawkBit's Repository.
  *
@@ -95,7 +95,6 @@ import com.google.common.collect.Maps;
 @EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@RemoteApplicationEventScan("org.eclipse.hawkbit.repository.event")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
@@ -425,8 +424,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     public EventEntityManager eventEntityManager(final TenantAware aware, final EntityManager entityManager) {
         return new JpaEventEntityManager(aware, entityManager);
     }
-    
-       /**
+
+    /**
      * {@link AutoAssignChecker} bean.
      *
      * @param targetFilterQueryManagement
@@ -441,9 +440,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignChecker autoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement,
-            TargetManagement targetManagement, DeploymentManagement deploymentManagement,
-            PlatformTransactionManager transactionManager) {
+    public AutoAssignChecker autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
@@ -463,8 +462,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignScheduler autoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
-            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+    public AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware,
+            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final AutoAssignChecker autoAssignChecker) {
         return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
 

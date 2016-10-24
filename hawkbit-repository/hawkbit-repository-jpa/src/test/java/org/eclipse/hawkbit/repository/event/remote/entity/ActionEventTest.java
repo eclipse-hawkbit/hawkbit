@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;

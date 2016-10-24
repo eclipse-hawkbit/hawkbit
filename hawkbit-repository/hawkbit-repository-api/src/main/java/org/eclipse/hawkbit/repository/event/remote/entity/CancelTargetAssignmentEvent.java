@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.model.Target;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Event that gets sent when the assignment of a distribution set to a target
  * gets canceled.
@@ -21,7 +18,6 @@ public class CancelTargetAssignmentEvent extends RemoteEntityEvent<Target> {
 
     private static final long serialVersionUID = 1L;
 
-    @JsonProperty(required = true)
     private final Long actionId;
 
     /**
@@ -38,11 +34,8 @@ public class CancelTargetAssignmentEvent extends RemoteEntityEvent<Target> {
      * @param applicationId
      *            the origin application id
      */
-    @JsonCreator
-    public CancelTargetAssignmentEvent(@JsonProperty("tenant") final String tenant,
-            @JsonProperty("entityId") final Long entityId, @JsonProperty("actionId") final Long actionId,
-            @JsonProperty("entityClass") final Class<? extends Target> entityClass,
-            @JsonProperty("originService") final String applicationId) {
+    public CancelTargetAssignmentEvent(final String tenant, final Long entityId, final Long actionId,
+            final String entityClass, final String applicationId) {
         super(tenant, entityId, entityClass, applicationId);
         this.actionId = actionId;
     }

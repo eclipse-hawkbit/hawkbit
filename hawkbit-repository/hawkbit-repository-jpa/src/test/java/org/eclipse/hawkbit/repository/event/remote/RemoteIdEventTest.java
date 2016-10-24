@@ -14,8 +14,6 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 
@@ -54,20 +52,6 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     @Description("Verifies that the target tag id is correct reloaded")
     public void testTargetTagDeletedEvent() {
         assertAndCreateRemoteEvent(TargetTagDeletedEvent.class);
-    }
-
-    @Test
-    @Description("Verifies that the target info update reload the entity correct")
-    public void testTargetInfoUpdateEvent() throws JsonProcessingException {
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("test"));
-        final TargetInfo targetInfo = targetManagement.findTargetByControllerID(target.getControllerId())
-                .getTargetInfo();
-        final TargetInfoUpdateEvent infoUpdateEvent = new TargetInfoUpdateEvent(targetInfo, "node");
-        final TargetInfoUpdateEvent underTest = (TargetInfoUpdateEvent) assertEntity(target.getId(), infoUpdateEvent);
-
-        assertThat(underTest.getEntity().getTarget().getControllerId())
-                .isEqualTo(targetInfo.getTarget().getControllerId());
-        assertThat(underTest.getEntity()).isEqualTo(targetInfo);
     }
 
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {
