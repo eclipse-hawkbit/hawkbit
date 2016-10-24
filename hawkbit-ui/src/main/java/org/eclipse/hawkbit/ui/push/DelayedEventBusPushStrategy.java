@@ -243,7 +243,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                     LOG.debug("UI EventBus aggregator of UI {} left lock on session.", vaadinUI.getUIId());
                 }).get();
             } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Wait for Vaadin session for UI {} interrupted!", vaadinUI.getUIId(), e);
+                LOG.warn("Wait for Vaadin session for UI {} interrupted!", vaadinUI.getUIId(), e);
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }

@@ -33,9 +33,9 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Maps;

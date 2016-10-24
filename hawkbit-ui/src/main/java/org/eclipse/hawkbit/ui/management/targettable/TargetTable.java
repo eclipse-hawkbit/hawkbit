@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -410,6 +411,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .getClickedStatusTargetTags();
             queryConfig.put(SPUIDefinitions.FILTER_BY_STATUS, statusList);
         }
+        if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
+            queryConfig.put(SPUIDefinitions.FILTER_BY_OVERDUE_STATE, Boolean.TRUE);
+        }
         return queryConfig;
     }
 
@@ -460,7 +464,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     /**
      * Add listener to pin.
      *
-     * @param pinBtn
+     * @param event
      *            as event
      */
     private void addPinClickListener(final ClickEvent event) {
@@ -842,6 +846,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         managementUIState.setTargetsCountAll(totalTargetsCount);
 
         Collection<TargetUpdateStatus> status = null;
+        Boolean overdueState = null;
         String[] targetTags = null;
         Long distributionId = null;
         String searchText = null;
@@ -852,6 +857,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
         if (isFilteredByStatus()) {
             status = managementUIState.getTargetTableFilters().getClickedStatusTargetTags();
+        }
+        if (managementUIState.getTargetTableFilters().isOverdueFilterEnabled()) {
+            overdueState = managementUIState.getTargetTableFilters().isOverdueFilterEnabled();
         }
         if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
             distributionId = managementUIState.getTargetTableFilters().getDistributionSet().get().getId();
@@ -864,25 +872,29 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
         }
 
-        final long size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
-                noTagClicked, pinnedDistId);
+        final long size = getTargetsCountWithFilter(totalTargetsCount, pinnedDistId,
+                new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
 
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
             managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
         }
     }
 
-    private long getTargetsCountWithFilter(final long totalTargetsCount, final Collection<TargetUpdateStatus> status,
-            final String[] targetTags, final Long distributionId, final String searchText, final Boolean noTagClicked,
-            final Long pinnedDistId) {
+    private long getTargetsCountWithFilter(final long totalTargetsCount,
+            final Long pinnedDistId, final FilterParams filterParams) {
         final long size;
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
             size = targetManagement.countTargetByTargetFilterQuery(
                     managementUIState.getTargetTableFilters().getTargetFilterQuery().get());
-        } else if (noFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
+        } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
+                filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
+                filterParams.getFilterBySearchText())) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countTargetByFilters(status, searchText, distributionId, noTagClicked, targetTags);
+            size = targetManagement.countTargetByFilters(filterParams.getFilterByStatus(),
+                    filterParams.getOverdueState(), filterParams.getFilterBySearchText(),
+                    filterParams.getFilterByDistributionId(), filterParams.getSelectTargetWithNoTag(),
+                    filterParams.getFilterByTagNames());
         }
         return size;
     }

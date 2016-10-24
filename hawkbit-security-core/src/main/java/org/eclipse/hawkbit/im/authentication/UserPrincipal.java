@@ -36,6 +36,7 @@ public class UserPrincipal implements UserDetails, Serializable {
     private final String lastname;
     private final String loginname;
     private final String tenant;
+    private final String email;
 
     /**
      * @param username
@@ -48,14 +49,17 @@ public class UserPrincipal implements UserDetails, Serializable {
      *            the login name of user
      * @param tenant
      *            the tenant of the user
+     * @param email
+     *            address of the user
      */
     public UserPrincipal(final String username, final String firstname, final String lastname, final String loginname,
-            final String tenant) {
+            final String tenant, final String email) {
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
         this.loginname = loginname;
         this.tenant = tenant;
+        this.email = email;
     }
 
     /**
@@ -94,68 +98,35 @@ public class UserPrincipal implements UserDetails, Serializable {
         return tenant;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#getAuthorities(
-     * )
-     */
+    public String getEmail() {
+        return email;
+    }
+
     @Override
     public Collection<SimpleGrantedAuthority> getAuthorities() {
         return Collections.emptyList();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#getPassword()
-     */
     @Override
     public String getPassword() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isAccountNonExpired()
-     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isAccountNonLocked()
-     */
     @Override
     public boolean isAccountNonLocked() {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.core.userdetails.UserDetails#
-     * isCredentialsNonExpired()
-     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.core.userdetails.UserDetails#isEnabled()
-     */
     @Override
     public boolean isEnabled() {
         return true;

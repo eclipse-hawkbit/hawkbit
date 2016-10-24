@@ -54,10 +54,10 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     }
 
     private void startNextGroup(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        // retrieve all actions accroding to the parent group of the finished
+        // retrieve all actions according to the parent group of the finished
         // rolloutGroup, so retrieve all child-group actions which need to be
         // started.
-        final List<Action> rolloutGroupActions = deploymentManagement.findActionsByRolloutGroupParentAndStatus(rollout,
+        final List<Long> rolloutGroupActions = deploymentManagement.findActionsByRolloutGroupParentAndStatus(rollout,
                 rolloutGroup, Action.Status.SCHEDULED);
         logger.debug("{} Next actions to start for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
                 rolloutGroup);
@@ -65,14 +65,8 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
         logger.debug("{} actions started for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
                 rolloutGroup);
         if (!rolloutGroupActions.isEmpty()) {
-            // get all next scheduled groups based on the found actions and set
-            // them in state running
-            rolloutGroupActions.forEach(action -> {
-                final RolloutGroup nextGroup = action.getRolloutGroup();
-                logger.debug("Rolloutgroup {} is now running", nextGroup);
-                nextGroup.setStatus(RolloutGroupStatus.RUNNING);
-                rolloutGroupRepository.save((JpaRolloutGroup) nextGroup);
-            });
+            // get all next scheduled groups and set them in state running
+            rolloutGroupRepository.setStatusForCildren(RolloutGroupStatus.RUNNING, rolloutGroup);
         } else {
             logger.info("No actions to start for next rolloutgroup of parent {}", rolloutGroup);
             // nothing for next group, just finish the group, this can happen

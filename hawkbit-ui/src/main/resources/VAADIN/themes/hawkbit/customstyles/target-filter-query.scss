@@ -9,9 +9,9 @@
 @mixin target-filter-query {
 
 .gwt-MenuBar-autocomplete {
-      cursor: default;  
+      cursor: default;
    }
-   
+
    .gwt-MenuBar-autocomplete .gwt-MenuItem{
       border-radius: 3px !important;
       cursor: pointer !important;
@@ -21,7 +21,7 @@
 	  position: relative !important;
       white-space: nowrap !important;
     }
-    
+
 .gwt-MenuBar-autocomplete .gwt-MenuItem-selected {
     background-color: $hawkbit-primary-color;
     background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%) !important;

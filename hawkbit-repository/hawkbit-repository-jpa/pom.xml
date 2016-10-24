@@ -131,22 +131,16 @@
          <artifactId>fest-assert</artifactId>
          <scope>test</scope>
       </dependency>
-        <dependency>
-         <groupId>com.jayway.awaitility</groupId>
-         <artifactId>awaitility</artifactId>
+      <dependency>
+         <groupId>org.powermock</groupId>
+         <artifactId>powermock-module-junit4</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-core</artifactId>
+         <groupId>org.powermock</groupId>
+         <artifactId>powermock-api-mockito</artifactId>
          <scope>test</scope>
       </dependency>
-      <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-runtime</artifactId>
-         <scope>test</scope>
-      </dependency>
-      
    </dependencies>
 
    <build>

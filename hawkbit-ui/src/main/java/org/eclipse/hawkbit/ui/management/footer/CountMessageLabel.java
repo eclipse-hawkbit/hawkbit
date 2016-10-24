@@ -141,6 +141,7 @@ public class CountMessageLabel extends Label {
             }
             message.append(HawkbitCommonUtil.SP_STRING_PIPE);
             final String status = i18n.get("label.filter.status");
+            final String overdue = i18n.get("label.filter.overdue");
             final String tags = i18n.get("label.filter.tags");
             final String text = i18n.get("label.filter.text");
             final String dists = i18n.get("label.filter.dist");
@@ -148,6 +149,7 @@ public class CountMessageLabel extends Label {
             final StringBuilder filterMesgBuf = new StringBuilder(i18n.get("label.filter"));
             filterMesgBuf.append(HawkbitCommonUtil.SP_STRING_SPACE);
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
+            filterMesgBuf.append(getOverdueStateMsg(targFilParams.isOverdueFilterEnabled(), overdue));
             filterMesgBuf
                     .append(getTagsMsg(targFilParams.isNoTagSelected(), targFilParams.getClickedTargetTags(), tags));
             filterMesgBuf.append(
@@ -218,6 +220,17 @@ public class CountMessageLabel extends Label {
      */
     private static String getStatusMsg(final List<TargetUpdateStatus> status, final String param) {
         return status.isEmpty() ? HawkbitCommonUtil.SP_STRING_SPACE : param;
+    }
+
+    /**
+     * Get Overdue State Message.
+     *
+     * @param overdueState
+     *            as flag
+     * @return String as msg.
+     */
+    private static String getOverdueStateMsg(final boolean overdueState, final String param) {
+        return !overdueState ? HawkbitCommonUtil.SP_STRING_SPACE : param;
     }
 
     /**

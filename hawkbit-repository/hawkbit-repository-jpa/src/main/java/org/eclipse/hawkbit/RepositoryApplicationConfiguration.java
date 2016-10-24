@@ -173,7 +173,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * 
+     *
      * @return the singleton instance of the
      *         {@link AfterTransactionCommitExecutorHolder}
      */
@@ -235,7 +235,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaSystemManagement} bean.
-     * 
+     *
      * @return a new {@link SystemManagement}
      */
     @Bean
@@ -246,7 +246,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaReportManagement} bean.
-     * 
+     *
      * @return a new {@link ReportManagement}
      */
     @Bean
@@ -257,7 +257,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaDistributionSetManagement} bean.
-     * 
+     *
      * @return a new {@link DistributionSetManagement}
      */
     @Bean
@@ -268,7 +268,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTenantStatsManagement} bean.
-     * 
+     *
      * @return a new {@link TenantStatsManagement}
      */
     @Bean
@@ -279,7 +279,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTenantConfigurationManagement} bean.
-     * 
+     *
      * @return a new {@link TenantConfigurationManagement}
      */
     @Bean
@@ -290,7 +290,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTenantConfigurationManagement} bean.
-     * 
+     *
      * @return a new {@link TenantConfigurationManagement}
      */
     @Bean
@@ -301,7 +301,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
-     * 
+     *
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
@@ -312,7 +312,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTagManagement} bean.
-     * 
+     *
      * @return a new {@link TagManagement}
      */
     @Bean
@@ -323,7 +323,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaSoftwareManagement} bean.
-     * 
+     *
      * @return a new {@link SoftwareManagement}
      */
     @Bean
@@ -334,7 +334,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaRolloutManagement} bean.
-     * 
+     *
      * @return a new {@link RolloutManagement}
      */
     @Bean
@@ -345,7 +345,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaRolloutGroupManagement} bean.
-     * 
+     *
      * @return a new {@link RolloutGroupManagement}
      */
     @Bean
@@ -356,7 +356,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaDeploymentManagement} bean.
-     * 
+     *
      * @return a new {@link DeploymentManagement}
      */
     @Bean
@@ -367,7 +367,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaControllerManagement} bean.
-     * 
+     *
      * @return a new {@link ControllerManagement}
      */
     @Bean
@@ -378,7 +378,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaArtifactManagement} bean.
-     * 
+     *
      * @return a new {@link ArtifactManagement}
      */
 
@@ -390,7 +390,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaEntityFactory} bean.
-     * 
+     *
      * @return a new {@link EntityFactory}
      */
     @Bean

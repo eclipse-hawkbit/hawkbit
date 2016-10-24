@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
