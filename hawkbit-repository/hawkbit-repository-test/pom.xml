@@ -79,5 +79,13 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-stream-test-support</artifactId>
      </dependency>
+     <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-runtime</artifactId>
+      </dependency>
   </dependencies>
 </project>
