@@ -150,8 +150,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements);
     }
 
-    @Override
-    public DistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
+    public JpaDistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
         if (elements == null) {
             elements = new HashSet<>();
         }
@@ -161,8 +160,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return this;
     }
 
-    @Override
-    public DistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
+    public JpaDistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
         if (elements == null) {
             elements = new HashSet<>();
         }
@@ -172,8 +170,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return this;
     }
 
-    @Override
-    public DistributionSetType removeModuleType(final Long smTypeId) {
+    public JpaDistributionSetType removeModuleType(final Long smTypeId) {
         if (elements == null) {
             return this;
         }

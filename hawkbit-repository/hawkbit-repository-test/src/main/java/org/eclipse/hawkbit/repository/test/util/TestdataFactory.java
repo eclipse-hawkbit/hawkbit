@@ -440,7 +440,8 @@ public class TestdataFactory {
         mandatory.forEach(type::addMandatoryModuleType);
         optional.forEach(type::addOptionalModuleType);
 
-        return distributionSetManagement.createDistributionSetType(type);
+        final DistributionSetType result = distributionSetManagement.createDistributionSetType(type);
+
     }
 
     /**
@@ -474,7 +475,7 @@ public class TestdataFactory {
             return findSoftwareModuleTypeByKey;
         }
         return softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType(key, key, LOREM.words(10), maxAssignments));
+                entityFactory.generateSoftwareModuleType(key, key, LOREM.words(10), null, maxAssignments));
     }
 
     /**

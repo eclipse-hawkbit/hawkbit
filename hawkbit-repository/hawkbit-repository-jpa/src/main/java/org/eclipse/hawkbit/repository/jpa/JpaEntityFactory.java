@@ -158,11 +158,6 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public SoftwareModuleType generateSoftwareModuleType() {
-        return new JpaSoftwareModuleType();
-    }
-
-    @Override
     public SoftwareModule generateSoftwareModule(final SoftwareModuleType type, final String name, final String version,
             final String description, final String vendor) {
 
@@ -182,8 +177,8 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Override
     public SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
-            final int maxAssignments) {
-        return new JpaSoftwareModuleType(key, name, description, maxAssignments);
+            final String colour, final int maxAssignments) {
+        return new JpaSoftwareModuleType(key, name, description, maxAssignments, colour);
     }
 
     @Override

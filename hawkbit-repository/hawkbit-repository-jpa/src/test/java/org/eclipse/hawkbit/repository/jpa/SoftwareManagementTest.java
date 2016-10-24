@@ -585,8 +585,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
+
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
 
         // found in test
         final SoftwareModule unassigned = softwareManagement
@@ -638,8 +642,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
+
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
 
         // test modules
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
@@ -674,8 +682,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
+
         final SoftwareModule four = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(osType, "found", "3.0.2", null, ""));
 
@@ -758,8 +770,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
+
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
 
         // test modules
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));

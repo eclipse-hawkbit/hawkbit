@@ -81,7 +81,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .containsOnly(osType);
 
         // add JVM
-        updatableType = distributionSetManagement.assignOptionalSoftwareModuleTypes(updatableType.getId(),
+        updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(runtimeType.getId()));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .containsOnly(osType, runtimeType);
@@ -143,7 +143,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
 
-        nonUpdatableType.removeModuleType(osType.getId());
         try {
             distributionSetManagement.unassignSoftwareModuleType(nonUpdatableType.getId(), osType.getId());
             fail("Should not have worked as DS is in use.");
@@ -449,8 +448,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-B"));
         final DistributionSetTag dsTagC = tagManagement
                 .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-C"));
-        final DistributionSetTag dsTagD = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-D"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-D"));
 
         Collection<DistributionSet> ds100Group1 = testdataFactory.createDistributionSets("", 100);
         Collection<DistributionSet> ds100Group2 = testdataFactory.createDistributionSets("test2", 100);
@@ -458,9 +456,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsInComplete = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("notcomplete", "1", "", standardDsType, null));
 
-        final DistributionSetType newType = distributionSetManagement.createDistributionSetType(
-                new JpaDistributionSetType("foo", "bar", "test").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(appType).addOptionalModuleType(runtimeType));
+        final DistributionSetType newType = distributionSetManagement
+                .createDistributionSetType(new JpaDistributionSetType("foo", "bar", "test"));
+
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(newType.getId(),
+                Lists.newArrayList(osType.getId()));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(newType.getId(),
+                Lists.newArrayList(appType.getId(), runtimeType.getId()));
 
         final DistributionSet dsNewType = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtype", "1", "", newType, dsDeleted.getModules()));
@@ -480,7 +482,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(203);
 
         // Find all
-        List<DistributionSet> expected = new ArrayList<DistributionSet>();
+        List<DistributionSet> expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsDeleted);
