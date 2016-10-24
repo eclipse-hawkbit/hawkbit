@@ -15,7 +15,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.messaging.Message;
 
 import ru.yandex.qatools.allure.annotations.Features;
@@ -26,11 +25,17 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Entity Events")
-public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extends AbstractRemoteEventTest {
+public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEventTest {
 
     protected RemoteEntityEvent<?> assertAndCreateRemoteEvent(final Class<? extends RemoteEntityEvent<?>> eventType) {
-
         final E baseEntity = createEntity();
+        final RemoteEntityEvent<?> event = createRemoteEvent(baseEntity, eventType);
+        assertEntity(baseEntity, event);
+        return event;
+    }
+
+    protected RemoteEntityEvent<?> createRemoteEvent(final E baseEntity,
+            final Class<? extends RemoteEntityEvent<?>> eventType) {
 
         Constructor<?> constructor = null;
         for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
@@ -45,7 +50,6 @@ public abstract class AbstractRemoteEntityEventTest<E extends BaseEntity> extend
 
         try {
             final RemoteEntityEvent<?> event = (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
-            assertEntity(baseEntity, event);
             return event;
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | SecurityException e) {
