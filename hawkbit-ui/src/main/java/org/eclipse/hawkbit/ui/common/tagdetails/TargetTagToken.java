@@ -105,7 +105,11 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         }
     }
 
-    void processTargetTagAssigmentResult(final TargetTagAssignmentResult assignmentResult) {
+    /**
+     * 
+     * @param assignmentResult
+     */
+    public void processTargetTagAssigmentResult(final TargetTagAssignmentResult assignmentResult) {
         final TargetTag targetTag = assignmentResult.getTargetTag();
         if (isAssign(assignmentResult)) {
             addNewToken(targetTag.getId());
