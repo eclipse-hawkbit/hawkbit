@@ -21,14 +21,9 @@ import org.springframework.messaging.converter.AbstractMessageConverter;
 
 import com.google.common.collect.Maps;
 
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
-
 /**
  * Test the remote entity events.
  */
-@Features("Component Tests - Repository")
-@Stories("Entity Id Events")
 public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired
@@ -42,5 +37,10 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
         final Map<String, Object> headers = Maps.newLinkedHashMap();
         headers.put(MessageHeaders.CONTENT_TYPE, BusProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF);
         return abstractMessageConverter.toMessage(event, new MutableMessageHeaders(headers));
+    }
+
+    protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
+        final Map<String, Object> headers = Maps.newLinkedHashMap();
+        return abstractMessageConverter.toMessage(event, new MessageHeaders(headers));
     }
 }

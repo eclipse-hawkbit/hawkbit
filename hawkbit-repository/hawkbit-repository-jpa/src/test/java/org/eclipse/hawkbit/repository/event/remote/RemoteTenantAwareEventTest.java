@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -17,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConversionException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -29,8 +31,21 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     @Test
+    @Description("Verifies that a immutable header is not work")
+    public void testMessageWithImmutableHeader() throws JsonProcessingException {
+        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
+
+        try {
+            createMessageWithImmutableHeader(downloadProgressEvent);
+            fail("MessageConversionException should happen");
+        } catch (final MessageConversionException e) {
+            // ok
+        }
+    }
+
+    @Test
     @Description("Verifies that the download progress reloading by remote events works")
-    public void reloadDownloadProgessByRemoteEvent() throws JsonProcessingException {
+    public void reloadDownloadProgessByRemoteEvent() {
         final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
 
         final Message<?> message = createMessage(downloadProgressEvent);
@@ -42,7 +57,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     @Test
     @Description("Verifies that target assignment event works")
-    public void testTargetAssignDistributionSetEvent() throws JsonProcessingException {
+    public void testTargetAssignDistributionSetEvent() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final JpaAction generateAction = (JpaAction) entityFactory.generateAction();
         generateAction.setActionType(ActionType.FORCED);

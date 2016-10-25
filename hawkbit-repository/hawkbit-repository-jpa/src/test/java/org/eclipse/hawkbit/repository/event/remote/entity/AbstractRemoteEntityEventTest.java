@@ -12,7 +12,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 import org.springframework.messaging.Message;
@@ -49,10 +48,8 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
         }
 
         try {
-            final RemoteEntityEvent<?> event = (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
-            return event;
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | SecurityException e) {
+            return (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
+        } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
         }
         return null;

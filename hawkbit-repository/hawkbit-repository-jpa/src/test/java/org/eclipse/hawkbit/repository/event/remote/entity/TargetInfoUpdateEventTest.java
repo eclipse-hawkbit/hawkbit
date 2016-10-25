@@ -41,7 +41,7 @@ public class TargetInfoUpdateEventTest extends AbstractRemoteEntityEventTest<Tar
 
         assertThat(underTestCreatedEvent.getEntity().getControllerId())
                 .isEqualTo(targetInfo.getTarget().getControllerId());
-        assertThat(underTestCreatedEvent.getTargetInfo()).isEqualTo(targetInfo);
+        assertThat(underTestCreatedEvent.getTargetInfo().getTarget().getId()).isEqualTo(targetInfo.getTarget().getId());
     }
 
     @Override
