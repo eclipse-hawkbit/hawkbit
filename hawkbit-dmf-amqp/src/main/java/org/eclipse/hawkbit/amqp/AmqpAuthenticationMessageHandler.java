@@ -116,19 +116,19 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      * 
      * @param secruityToken
      *            the security token which holds the target ID to check on
-     * @param localArtifact
-     *            the local artifact to verify if the given target is allowed to
-     *            download this artifact
+     * @param artifact
+     *            the artifact to verify if the given target is allowed to
+     *            download it
      */
     private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
-            final org.eclipse.hawkbit.repository.model.Artifact localArtifact) {
+            final org.eclipse.hawkbit.repository.model.Artifact artifact) {
 
         if (secruityToken.getControllerId() != null) {
-            checkByControllerId(localArtifact, secruityToken.getControllerId());
+            checkByControllerId(artifact, secruityToken.getControllerId());
         } else if (secruityToken.getTargetId() != null) {
-            checkByTargetId(localArtifact, secruityToken.getTargetId());
+            checkByTargetId(artifact, secruityToken.getTargetId());
         } else {
-            LOG.info("anonymous download no authentication check for artifact {}", localArtifact);
+            LOG.info("anonymous download no authentication check for artifact {}", artifact);
             return;
         }
 
