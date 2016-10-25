@@ -43,9 +43,7 @@ public class JpaEventEntityManager implements EventEntityManager {
     @Override
     public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id,
             final Class<E> entityType) {
-        return tenantAware.runAsTenant(tenant, () -> {
-            return entityManager.find(entityType, id);
-        });
+        return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 
 }
