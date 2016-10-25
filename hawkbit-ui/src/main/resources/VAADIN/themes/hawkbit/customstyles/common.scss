@@ -86,7 +86,7 @@
     }
     .view-header:after {
       background: $logo-image no-repeat right top;
-      background-position: right 0 top 8px;
+      background-position: right 5px top 8px;
       content: "";
       height: 80px;
       position: absolute;
@@ -143,15 +143,15 @@
   .valo-menu-title {
     line-height: 1.2;
   }
-  
+
   .v-menubar-user-menu:after {
     display: none;
   }
-  
+
   .v-menubar-menuitem-user-menuitem {
     width: 100%;
   }
-  
+
   .v-menubar-user-menu > .v-menubar-menuitem {
     white-space: normal !important;
     .v-icon {
@@ -282,15 +282,15 @@
   .links {
     padding-left: 22px;
   }
-  
+
    .font-icon{
 	font-family:FontAwesome;
 	font-style:normal;
 	font-weight:normal;
   }
-  
+
   .form-lastrow {
 	padding-bottom: 12px !important;
   }
-  
+
 }
