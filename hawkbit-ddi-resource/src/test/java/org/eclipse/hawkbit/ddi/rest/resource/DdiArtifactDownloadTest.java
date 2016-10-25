@@ -94,7 +94,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
@@ -103,9 +103,9 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // no artifact available
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/123455",
-                target.getControllerId(), ds.findFirstModuleByType(osType).getId())).andExpect(status().isNotFound());
+                target.getControllerId(), getOsModule(ds))).andExpect(status().isNotFound());
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/123455.MD5SUM",
-                target.getControllerId(), ds.findFirstModuleByType(osType).getId())).andExpect(status().isNotFound());
+                target.getControllerId(), getOsModule(ds))).andExpect(status().isNotFound());
 
         // SM does not exist
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/1234567890/artifacts/{filename}",
@@ -115,55 +115,56 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // test now consistent data to test allowed methods
         mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename()).header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        .header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
                 .andExpect(status().isOk());
         mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isOk());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isOk());
 
         // test failed If-match
         mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename()).header("If-Match", "fsjkhgjfdhg")).andExpect(status().isPreconditionFailed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        .header("If-Match", "fsjkhgjfdhg"))
+                .andExpect(status().isPreconditionFailed());
 
         // test invalid range
         mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename()).header("Range", "bytes=1-10,hdsfjksdh"))
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        .header("Range", "bytes=1-10,hdsfjksdh"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         mvc.perform(get("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename()).header("Range", "bytes=100-10"))
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        .header("Range", "bytes=100-10"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         // not allowed methods
         mvc.perform(put("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(delete("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(post("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(put("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(delete("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(post("/{tenant}/controller/v1/{targetid}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), ds.findFirstModuleByType(osType).getId(),
-                artifact.getFilename())).andExpect(status().isMethodNotAllowed());
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
@@ -178,7 +179,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
@@ -192,8 +193,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         // test now consistent data to test allowed methods
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1", false);
 
         mvc.perform(
                 get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(), "file1")
@@ -272,16 +273,15 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                target.getControllerId(), ds.findFirstModuleByType(osType).getId(), artifact.getFilename()))
-                .andExpect(status().isNotFound());
+                target.getControllerId(), getOsModule(ds), artifact.getFilename())).andExpect(status().isNotFound());
 
         // now assign and download successful
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
         final MvcResult result = mvc
                 .perform(
                         get("/{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                tenantAware.getCurrentTenant(), target.getControllerId(),
-                                ds.findFirstModuleByType(osType).getId(), artifact.getFilename()))
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
+                                artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
                 .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
@@ -308,15 +308,15 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1", false);
 
         // download
         final MvcResult result = mvc
                 .perform(
                         get("/{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
-                                tenantAware.getCurrentTenant(), target.getControllerId(),
-                                ds.findFirstModuleByType(osType).getId(), artifact.getFilename()))
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
+                                artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Disposition",
                         "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
                 .andReturn();
@@ -348,11 +348,10 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        artifactManagement.createArtifact(new ByteArrayInputStream(random), ds.findFirstModuleByType(osType).getId(),
-                "file1.tar.bz2", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds), "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
         mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
                 .andExpect(status().isNotFound());
 
@@ -382,15 +381,15 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1", false);
 
         // download fails as artifact is not yet assigned to target
         mvc.perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
                 "file1.tar.bz2")).andExpect(status().isNotFound());
 
         // now assign and download successful
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
         final MvcResult result = mvc
                 .perform(get("/{tenant}/controller/artifacts/v1/filename/{filename}", tenantAware.getCurrentTenant(),
                         "file1"))
@@ -434,13 +433,13 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1", false);
 
         assertThat(random.length).isEqualTo(resultLength);
 
         // now assign and download successful
-        deploymentManagement.assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, targets);
 
         final int range = 100 * 1024;
 
@@ -538,8 +537,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
         mvc.perform(get("/controller/artifacts/v1/filename/{filename}", "file1.tar.bz2"))
@@ -558,8 +557,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), getOsModule(ds),
+                "file1.tar.bz2", false);
 
         // download
         final MvcResult result = mvc

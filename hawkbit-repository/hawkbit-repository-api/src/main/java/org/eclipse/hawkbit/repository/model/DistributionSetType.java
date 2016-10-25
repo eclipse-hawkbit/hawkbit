@@ -117,12 +117,6 @@ public interface DistributionSetType extends NamedEntity {
     String getKey();
 
     /**
-     * @param key
-     *            of this {@link DistributionSetType}.
-     */
-    void setKey(String key);
-
-    /**
      * @param distributionSet
      *            to check for completeness
      * @return <code>true</code> if the all mandatory software module types are
@@ -134,11 +128,5 @@ public interface DistributionSetType extends NamedEntity {
      * @return get color code to by used in management UI views.
      */
     String getColour();
-
-    /**
-     * @param colour
-     *            code to by used in management UI views.
-     */
-    void setColour(final String colour);
 
 }

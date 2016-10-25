@@ -106,7 +106,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the distribution set created event is published when a distribution set has been created")
     public void distributionSetCreatedEventIsPublished() throws InterruptedException {
         final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
-                null, null);
+                null, null, false);
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 
@@ -121,7 +121,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void distributionSetDeletedEventIsPublished() throws InterruptedException {
 
         final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
-                null, null);
+                null, null, false);
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 

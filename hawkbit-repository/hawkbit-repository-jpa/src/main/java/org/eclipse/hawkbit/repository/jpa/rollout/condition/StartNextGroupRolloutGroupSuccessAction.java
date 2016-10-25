@@ -68,10 +68,10 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             // get all next scheduled groups based on the found actions and set
             // them in state running
             rolloutGroupActions.forEach(action -> {
-                final RolloutGroup nextGroup = action.getRolloutGroup();
+                final JpaRolloutGroup nextGroup = (JpaRolloutGroup) action.getRolloutGroup();
                 logger.debug("Rolloutgroup {} is now running", nextGroup);
                 nextGroup.setStatus(RolloutGroupStatus.RUNNING);
-                rolloutGroupRepository.save((JpaRolloutGroup) nextGroup);
+                rolloutGroupRepository.save(nextGroup);
             });
         } else {
             logger.info("No actions to start for next rolloutgroup of parent {}", rolloutGroup);

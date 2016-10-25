@@ -102,7 +102,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return rollout;
     }
 
-    @Override
     public void setRollout(final Rollout rollout) {
         this.rollout = (JpaRollout) rollout;
     }
@@ -112,7 +111,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return status;
     }
 
-    @Override
     public void setStatus(final RolloutGroupStatus status) {
         this.status = status;
     }
@@ -139,7 +137,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return successCondition;
     }
 
-    @Override
     public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
         successCondition = finishCondition;
     }
@@ -149,7 +146,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return successConditionExp;
     }
 
-    @Override
     public void setSuccessConditionExp(final String finishExp) {
         successConditionExp = finishExp;
     }
@@ -159,7 +155,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorCondition;
     }
 
-    @Override
     public void setErrorCondition(final RolloutGroupErrorCondition errorCondition) {
         this.errorCondition = errorCondition;
     }
@@ -169,7 +164,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorConditionExp;
     }
 
-    @Override
     public void setErrorConditionExp(final String errorExp) {
         errorConditionExp = errorExp;
     }
@@ -179,7 +173,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorAction;
     }
 
-    @Override
     public void setErrorAction(final RolloutGroupErrorAction errorAction) {
         this.errorAction = errorAction;
     }
@@ -189,7 +182,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorActionExp;
     }
 
-    @Override
     public void setErrorActionExp(final String errorActionExp) {
         this.errorActionExp = errorActionExp;
     }
@@ -236,7 +228,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
      * @param totalTargetCountStatus
      *            the totalTargetCountStatus to set
      */
-    @Override
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
     }

@@ -191,7 +191,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
@@ -207,7 +206,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }

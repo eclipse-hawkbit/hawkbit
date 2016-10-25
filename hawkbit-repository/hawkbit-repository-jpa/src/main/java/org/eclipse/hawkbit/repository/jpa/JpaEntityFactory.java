@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -76,8 +77,9 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Override
     public DistributionSet generateDistributionSet(final String name, final String version, final String description,
-            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
-        return new JpaDistributionSet(name, version, description, type, moduleList);
+            final DistributionSetType type, final Collection<SoftwareModule> moduleList,
+            final boolean requiredMigrationstep) {
+        return new JpaDistributionSet(name, version, description, type, moduleList, requiredMigrationstep);
     }
 
     @Override
@@ -103,11 +105,6 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public Target generateTarget(final String controllerID) {
         return generateTarget(controllerID, null, null, null);
-    }
-
-    @Override
-    public Target generateTarget(final String controllerID, final String description) {
-        return generateTarget(controllerID, null, description, null);
     }
 
     @Override
@@ -182,11 +179,6 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public Rollout generateRollout() {
-        return new JpaRollout();
-    }
-
-    @Override
     public RolloutGroup generateRolloutGroup() {
         return new JpaRolloutGroup();
     }
@@ -194,11 +186,6 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public Action generateAction() {
         return new JpaAction();
-    }
-
-    @Override
-    public ActionStatus generateActionStatus() {
-        return new JpaActionStatus();
     }
 
     @Override
@@ -211,7 +198,7 @@ public class JpaEntityFactory implements EntityFactory {
     public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
             final Collection<String> messages) {
 
-        final ActionStatus result = new JpaActionStatus((JpaAction) action, status, occurredAt, null);
+        final JpaActionStatus result = new JpaActionStatus((JpaAction) action, status, occurredAt, null);
         messages.forEach(result::addMessage);
 
         return result;
@@ -225,6 +212,48 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public Artifact generateArtifact() {
         return new JpaArtifact();
+    }
+
+    @Override
+    public DistributionSetType generateDistributionSetType(final String key, final String name,
+            final String description, final Collection<SoftwareModuleType> mandatory,
+            final Collection<SoftwareModuleType> optional) {
+        final JpaDistributionSetType result = (JpaDistributionSetType) generateDistributionSetType(key, name,
+                description);
+        mandatory.forEach(result::addMandatoryModuleType);
+        optional.forEach(result::addOptionalModuleType);
+
+        return result;
+    }
+
+    @Override
+    public Rollout generateRollout(final String name, final String description, final DistributionSet set,
+            final String filterQuery, final ActionType actionType, final long forcedTime) {
+
+        final JpaRollout rollout = new JpaRollout();
+
+        rollout.setName(name);
+        rollout.setDescription(description);
+        rollout.setDistributionSet(set);
+        rollout.setTargetFilterQuery(filterQuery);
+        rollout.setActionType(actionType);
+        rollout.setForcedTime(forcedTime);
+
+        return rollout;
+    }
+
+    @Override
+    public Rollout generateRollout(final String name, final String description, final DistributionSet set,
+            final String filterQuery) {
+
+        final JpaRollout rollout = new JpaRollout();
+
+        rollout.setName(name);
+        rollout.setDescription(description);
+        rollout.setDistributionSet(set);
+        rollout.setTargetFilterQuery(filterQuery);
+
+        return rollout;
     }
 
 }

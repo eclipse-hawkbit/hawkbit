@@ -60,8 +60,7 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         assertThat(type).as("persited entity is not equal to regular object")
                 .isNotEqualTo(new JpaSoftwareModuleType("test", "test", "test", 1));
 
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type.getId(), null, "another",
-                null);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type.getId(), "another", null);
         assertThat(type).as("Changed entity is not equal to the previous version").isNotEqualTo(updated);
     }
 

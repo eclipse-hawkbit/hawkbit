@@ -76,7 +76,6 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
         return defaultDsType;
     }
 
-    @Override
     public void setDefaultDsType(final DistributionSetType defaultDsType) {
         this.defaultDsType = (JpaDistributionSetType) defaultDsType;
     }

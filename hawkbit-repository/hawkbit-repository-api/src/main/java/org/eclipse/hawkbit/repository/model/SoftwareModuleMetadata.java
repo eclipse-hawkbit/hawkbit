@@ -18,11 +18,4 @@ public interface SoftwareModuleMetadata extends MetaData {
      * @return {@link SoftwareModule} this entry belongs to.
      */
     SoftwareModule getSoftwareModule();
-
-    /**
-     * @param softwareModule
-     *            this entry belongs to.
-     */
-    void setSoftwareModule(SoftwareModule softwareModule);
-
 }

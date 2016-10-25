@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -42,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -117,7 +117,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
                 rolloutGroupIds);
 
-        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+        for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()));
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
@@ -128,7 +128,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public RolloutGroup findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = findRolloutGroupById(rolloutGroupId);
+        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) findRolloutGroupById(rolloutGroupId);
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 

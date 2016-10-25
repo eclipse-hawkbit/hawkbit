@@ -131,12 +131,10 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return occurredAt;
     }
 
-    @Override
     public void setOccurredAt(final Long occurredAt) {
         this.occurredAt = occurredAt;
     }
 
-    @Override
     public final void addMessage(final String message) {
         if (message != null) {
             if (messages == null) {
@@ -160,7 +158,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return action;
     }
 
-    @Override
     public void setAction(final Action action) {
         this.action = (JpaAction) action;
     }
@@ -170,7 +167,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return status;
     }
 
-    @Override
     public void setStatus(final Status status) {
         this.status = status;
     }

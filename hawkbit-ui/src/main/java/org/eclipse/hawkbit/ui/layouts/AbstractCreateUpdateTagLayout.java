@@ -551,22 +551,17 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * update tag.
      */
     protected void updateExistingTag(final Tag targetObj) {
-        final String nameUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String descUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
 
-        if (null != nameUpdateValue) {
-            targetObj.setName(nameUpdateValue);
             targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
             targetObj.setColour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
             if (targetObj instanceof TargetTag) {
-                tagManagement.updateTargetTag((TargetTag) targetObj);
+                tagManagement.updateTargetTag(targetObj.getId(), );
             } else if (targetObj instanceof DistributionSetTag) {
                 tagManagement.updateDistributionSetTag((DistributionSetTag) targetObj);
             }
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
-        } else {
-            uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
-        }
+         
     }
 
     protected void displaySuccess(final String tagName) {

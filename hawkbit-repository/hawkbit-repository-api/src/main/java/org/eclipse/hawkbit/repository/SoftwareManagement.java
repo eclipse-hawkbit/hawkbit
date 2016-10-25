@@ -199,6 +199,17 @@ public interface SoftwareManagement {
     Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull Pageable pageable, String searchText, Long typeId);
 
     /**
+     * Finds {@link SoftwareModuleType} by given id.
+     *
+     * @param ids
+     *            to search for
+     * @return the found {@link SoftwareModuleType}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
+    List<SoftwareModuleType> findSoftwareModuleTypesById(@NotEmpty Collection<Long> ids);
+
+    /**
      * Finds {@link SoftwareModule} by given id.
      *
      * @param id
@@ -447,8 +458,6 @@ public interface SoftwareManagement {
      *
      * @param smTypeid
      *            to update
-     * @param name
-     *            to update or <code>null</code>
      * @param description
      *            to update or <code>null</code>
      * @param colour
@@ -461,12 +470,12 @@ public interface SoftwareManagement {
      *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleType updateSoftwareModuleType(@NotNull Long smTypeid, String name, String description, String colour);
+    SoftwareModuleType updateSoftwareModuleType(@NotNull Long smTypeid, String description, String colour);
 
     /**
      * Finds all meta data by the given software module id.
      *
-     * @param softwareModuleId
+     * @param moduleId
      *            the software module id to retrieve the meta data from
      * 
      * 

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -45,13 +46,6 @@ public interface EntityFactory {
      * @return {@link Action} object
      */
     Action generateAction();
-
-    /**
-     * Generates an empty {@link ActionStatus} object without persisting it.
-     * 
-     * @return {@link ActionStatus} object
-     */
-    ActionStatus generateActionStatus();
 
     /**
      * Generates an {@link ActionStatus} object without persisting it.
@@ -105,6 +99,13 @@ public interface EntityFactory {
             final String message);
 
     /**
+     * Generates an empty {@link Artifact} without persisting it.
+     * 
+     * @return {@link Artifact} object
+     */
+    Artifact generateArtifact();
+
+    /**
      * Generates an {@link DistributionSet} without persisting it.
      * 
      * @param name
@@ -117,11 +118,13 @@ public interface EntityFactory {
      *            {@link DistributionSet#getType()}
      * @param moduleList
      *            {@link DistributionSet#getModules()}
+     * @param requiredMigrationStep
+     *            {@link DistributionSet#isRequiredMigrationStep()}
      * 
      * @return {@link DistributionSet} object
      */
     DistributionSet generateDistributionSet(@NotNull String name, @NotNull String version, String description,
-            DistributionSetType type, Collection<SoftwareModule> moduleList);
+            DistributionSetType type, Collection<SoftwareModule> moduleList, boolean requiredMigrationStep);
 
     /**
      * Generates an empty {@link DistributionSetMetadata} element without
@@ -198,11 +201,33 @@ public interface EntityFactory {
     DistributionSetType generateDistributionSetType(@NotNull String key, @NotNull String name, String description);
 
     /**
+     * Generates a {@link DistributionSetType} without persisting it.
+     * 
+     * @param key
+     *            {@link DistributionSetType#getKey()}
+     * @param name
+     *            {@link DistributionSetType#getName()}
+     * @param description
+     *            {@link DistributionSetType#getDescription()}
+     * @param mandatory
+     *            list of {@link SoftwareModuleType}s
+     * @param optional
+     *            list of {@link SoftwareModuleType}s
+     * 
+     * @return {@link DistributionSetType} object
+     */
+    DistributionSetType generateDistributionSetType(String key, String name, String description,
+            Collection<SoftwareModuleType> mandatory, Collection<SoftwareModuleType> optional);
+
+    /**
      * Generates an empty {@link Rollout} without persisting it.
      * 
      * @return {@link Rollout} object
      */
-    Rollout generateRollout();
+    Rollout generateRollout(String name, String description, DistributionSet set, String targetFilterQuery,
+            ActionType actionType, long forcedTime);
+
+    Rollout generateRollout(String name, String description, DistributionSet set, String targetFilterQuery);
 
     /**
      * Generates an empty {@link RolloutGroup} without persisting it.
@@ -303,20 +328,6 @@ public interface EntityFactory {
     Target generateTarget(@NotEmpty String controllerID, String name, String description, String securityToken);
 
     /**
-     * Generates an empty {@link Target} without persisting it.
-     * {@link Target#getSecurityToken()} is generated. {@link Target#getName()}
-     * is equal to {@link Target#getControllerId()}.
-     * 
-     * @param controllerID
-     *            of the {@link Target}
-     * @param description
-     *            of the {@link Target}
-     * 
-     * @return {@link Target} object
-     */
-    Target generateTarget(@NotEmpty String controllerID, String description);
-
-    /**
      * Generates an empty {@link TargetFilterQuery} without persisting it.
      * 
      * @return {@link TargetFilterQuery} object
@@ -375,12 +386,5 @@ public interface EntityFactory {
      * @return {@link TargetTag} object
      */
     TargetTag generateTargetTag(@NotNull String name, String description, String colour);
-
-    /**
-     * Generates an empty {@link Artifact} without persisting it.
-     * 
-     * @return {@link Artifact} object
-     */
-    Artifact generateArtifact();
 
 }

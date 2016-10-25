@@ -92,7 +92,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return {@link List} of found {@link Target}s.
      */
     @Query(value = "SELECT DISTINCT t from JpaTarget t JOIN t.tags tt WHERE tt.name = :tagname AND t.controllerId IN :targets")
-    List<Target> findByTagNameAndControllerIdIn(@Param("tagname") final String tag,
+    List<JpaTarget> findByTagNameAndControllerIdIn(@Param("tagname") final String tag,
             @Param("targets") final Collection<String> controllerIds);
 
     /**

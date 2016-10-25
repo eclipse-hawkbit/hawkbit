@@ -45,7 +45,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final Target target = entityFactory.generateTarget("targetId123", "targetId123");
+        final Target target = testdataFactory.generateTarget("targetId123", "targetId123");
         final TargetInfo targetInfo = target.getTargetInfo();
         targetInfo.getControllerAttributes().put("revision", "1.1");
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -69,7 +69,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag);
 
-        deploymentManagement.assignDistributionSet(ds.getId(), target.getControllerId());
+        assignDistributionSet(ds.getId(), target.getControllerId());
     }
 
     @Test

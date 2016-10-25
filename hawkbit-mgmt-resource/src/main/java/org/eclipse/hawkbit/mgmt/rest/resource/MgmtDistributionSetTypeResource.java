@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
 /**
  * REST Resource handling for {@link SoftwareModule} and related
@@ -189,9 +189,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> removeMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-
-        final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
-        distributionSetManagement.unassignSoftwareModuleType(distributionSetTypeId, foundSmType);
+        distributionSetManagement.unassignSoftwareModuleType(distributionSetTypeId, softwareModuleTypeId);
 
         return ResponseEntity.ok().build();
     }
@@ -208,8 +206,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> addMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
-        final SoftwareModuleType smType = findSoftwareModuleTypeWithExceptionIfNotFound(smtId.getId());
-        distributionSetManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId, Sets.newHashSet(smType));
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId,
+                Lists.newArrayList(smtId.getId()));
 
         return ResponseEntity.ok().build();
     }
@@ -218,8 +216,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> addOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
-        final SoftwareModuleType smType = findSoftwareModuleTypeWithExceptionIfNotFound(smtId.getId());
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId, Sets.newHashSet(smType));
+        distributionSetManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId,
+                Lists.newArrayList(smtId.getId()));
 
         return ResponseEntity.ok().build();
     }

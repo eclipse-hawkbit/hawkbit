@@ -138,7 +138,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
             final Target createTarget = targetManagement.createTarget(new JpaTarget("t" + month));
-            final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
+            final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
                     deploymentManagement.findActionWithDetails(result.getActions().get(0)),
@@ -160,7 +160,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
             final Target createTarget = targetManagement.createTarget(new JpaTarget("t2" + month));
-            final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
+            final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
                     deploymentManagement.findActionWithDetails(result.getActions().get(0)),
@@ -196,15 +196,15 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
                 .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget2.getControllerId());
-        deploymentManagement.assignDistributionSet(distributionSet11.getId(), knownTarget3.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget2.getControllerId());
+        assignDistributionSet(distributionSet11.getId(), knownTarget3.getControllerId());
 
         // ds2=[target4]
-        deploymentManagement.assignDistributionSet(distributionSet2.getId(), knownTarget4.getControllerId());
+        assignDistributionSet(distributionSet2.getId(), knownTarget4.getControllerId());
 
         // ds3=[target5] --> ONLY ASSIGNED AND NOT INSTALLED
-        deploymentManagement.assignDistributionSet(distributionSet3.getId(), knownTarget5.getControllerId());
+        assignDistributionSet(distributionSet3.getId(), knownTarget5.getControllerId());
 
         // set installed status
         sendUpdateActionStatusToTargets(distributionSet1, Lists.newArrayList(knownTarget1, knownTarget2),
@@ -250,7 +250,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         // Test cache evict
         final Target knownTarget6 = targetManagement.createTarget(new JpaTarget("t6"));
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
         sendUpdateActionStatusToTargets(distributionSet1, Lists.newArrayList(knownTarget6), Status.FINISHED,
                 "some message");
         distributionUsage = reportManagement.distributionUsageInstalled(100);
@@ -367,12 +367,12 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
                 .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget2.getControllerId());
-        deploymentManagement.assignDistributionSet(distributionSet11.getId(), knownTarget3.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget2.getControllerId());
+        assignDistributionSet(distributionSet11.getId(), knownTarget3.getControllerId());
 
         // ds2=[target4]
-        deploymentManagement.assignDistributionSet(distributionSet2.getId(), knownTarget4.getControllerId());
+        assignDistributionSet(distributionSet2.getId(), knownTarget4.getControllerId());
 
         // expect: ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3],
         // ds2=[target4], ds3=[]
@@ -416,7 +416,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         // test cache evict
         final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
-        deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget5.getControllerId());
+        assignDistributionSet(distributionSet1.getId(), knownTarget5.getControllerId());
         distributionUsage = reportManagement.distributionUsageAssigned(100);
         for (final InnerOuterDataReportSeries<String> innerOuterDataReportSeries : distributionUsage) {
             final DataReportSeriesItem<String> dataReportSeriesItem = innerOuterDataReportSeries.getInnerSeries()

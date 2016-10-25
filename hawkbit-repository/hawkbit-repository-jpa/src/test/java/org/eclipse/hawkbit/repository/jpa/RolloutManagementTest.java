@@ -455,7 +455,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         targetToCancel.add(targetList.get(1));
         targetToCancel.add(targetList.get(2));
         final DistributionSet dsForCancelTest = testdataFactory.createDistributionSet("dsForTest");
-        deploymentManagement.assignDistributionSet(dsForCancelTest, targetToCancel);
+        assignDistributionSet(dsForCancelTest, targetToCancel);
         // 5 targets are canceling but still have the status running and 5 are
         // still in SCHEDULED
         final Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();

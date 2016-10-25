@@ -34,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 
+import com.google.common.collect.Lists;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
@@ -374,46 +375,37 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private void updateDistributionSetType(final DistributionSetType existingType) {
 
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-        /* remove all SW Module Types before update SW Module Types */
-        final DistributionSetType updateDistSetType = removeSWModuleTypesFromDistSetType(existingType.getName());
 
-        if (null != typeNameValue) {
-            updateDistSetType.setName(typeNameValue);
-            updateDistSetType.setKey(typeKeyValue);
-            updateDistSetType.setDescription(typeDescValue);
-
-            if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
-                    && !itemIds.isEmpty()) {
-                for (final Long id : itemIds) {
-                    final Item item = selectedTable.getItem(id);
-                    final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
-                    final Boolean isMandatory = mandatoryCheckBox.getValue();
-                    final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
-                    final SoftwareModuleType swModuleType = softwareManagement
-                            .findSoftwareModuleTypeByName(distTypeName);
-                    checkMandatoryAndAddMandatoryModuleType(updateDistSetType, isMandatory, swModuleType);
-                }
+        if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
+                && !itemIds.isEmpty()) {
+            for (final Long id : itemIds) {
+                final Item item = selectedTable.getItem(id);
+                final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
+                final Boolean isMandatory = mandatoryCheckBox.getValue();
+                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
+                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
+                checkMandatoryAndAddMandatoryModuleType(existingType, isMandatory, swModuleType);
             }
-            updateDistSetType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-            distributionSetManagement.updateDistributionSetType(updateDistSetType);
-            uiNotification
-                    .displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
-            eventBus.publish(this,
-                    new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
-        } else {
-            uiNotification.displayValidationError(i18n.get("message.type.update.mandatory "));
         }
+        final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(
+                existingType.getId(), typeDescValue,
+                ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
+        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
+        eventBus.publish(this,
+                new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
+
     }
 
-    private static void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType updateDistSetType,
+    private void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType existingType,
             final Boolean isMandatory, final SoftwareModuleType swModuleType) {
+
         if (isMandatory) {
-            updateDistSetType.addMandatoryModuleType(swModuleType);
+            distributionSetManagement.assignMandatorySoftwareModuleTypes(existingType.getId(),
+                    Lists.newArrayList(swModuleType.getId()));
         } else {
-            updateDistSetType.addOptionalModuleType(swModuleType);
+            distributionSetManagement.assignOptionalSoftwareModuleTypes(existingType.getId(),
+                    Lists.newArrayList(swModuleType.getId()));
         }
     }
 

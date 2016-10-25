@@ -24,8 +24,16 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.*;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.Test;
 import org.springframework.data.domain.Slice;
 
@@ -61,7 +69,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ-A";
         List<Target> targAs = new ArrayList<Target>();
-        for (Target t : testdataFactory.generateTargets(100, targetDsAIdPref, targetDsAIdPref.concat(" description"))) {
+        for (final Target t : testdataFactory.generateTargets(100, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"))) {
             targAs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryNotOverdue,
                     t.getTargetInfo().getAddress()));
         }
@@ -69,7 +78,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = new ArrayList<Target>();
-        for (Target t : testdataFactory.generateTargets(100, targetDsBIdPref, targetDsBIdPref.concat(" description"))) {
+        for (final Target t : testdataFactory.generateTargets(100, targetDsBIdPref,
+                targetDsBIdPref.concat(" description"))) {
             targBs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryAlwaysOverdue,
                     t.getTargetInfo().getAddress()));
         }
@@ -78,7 +88,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final String targetDsCIdPref = "targ-C";
         List<Target> targCs = new ArrayList<Target>();
-        for (Target t : testdataFactory.generateTargets(100, targetDsCIdPref, targetDsCIdPref.concat(" description"))) {
+        for (final Target t : testdataFactory.generateTargets(100, targetDsCIdPref,
+                targetDsCIdPref.concat(" description"))) {
             targCs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryAlwaysOverdue,
                     t.getTargetInfo().getAddress()));
         }
@@ -86,28 +97,28 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targCs = targetManagement.toggleTagAssignment(targCs, targTagW).getAssignedEntity();
 
         final String targetDsDIdPref = "targ-D";
-        List<Target> targDs = new ArrayList<Target>();
-        for (Target t : testdataFactory.generateTargets(100, targetDsDIdPref, targetDsDIdPref.concat(" description"))) {
+        final List<Target> targDs = new ArrayList<Target>();
+        for (final Target t : testdataFactory.generateTargets(100, targetDsDIdPref,
+                targetDsDIdPref.concat(" description"))) {
             targDs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetNull,
                     t.getTargetInfo().getAddress()));
         }
 
         final String assignedC = targCs.iterator().next().getControllerId();
-        deploymentManagement.assignDistributionSet(setA.getId(), assignedC);
+        assignDistributionSet(setA.getId(), assignedC);
         final String assignedA = targAs.iterator().next().getControllerId();
-        deploymentManagement.assignDistributionSet(setA.getId(), assignedA);
+        assignDistributionSet(setA.getId(), assignedA);
         final String assignedB = targBs.iterator().next().getControllerId();
-        deploymentManagement.assignDistributionSet(setA.getId(), assignedB);
+        assignDistributionSet(setA.getId(), assignedB);
         final String installedC = targCs.iterator().next().getControllerId();
-        final Long actionId = deploymentManagement.assignDistributionSet(installedSet.getId(), assignedC).getActions()
-                .get(0);
+        final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getActions().get(0);
 
         // set one installed DS also
         final Action action = deploymentManagement.findActionWithDetails(actionId);
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
                 new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
-        deploymentManagement.assignDistributionSet(setA.getId(), installedC);
+        assignDistributionSet(setA.getId(), installedC);
 
         final List<TargetUpdateStatus> unknown = new ArrayList<>();
         unknown.add(TargetUpdateStatus.UNKNOWN);
@@ -344,7 +355,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         assertThat(targetManagement
                 .findTargetByFilters(pageReq, pending, null, null, setA.getId(), Boolean.FALSE, new String[0])
-                .getContent()).as("has number of elements").hasSize(3).as("that number is also returned by count query")
+                .getContent()).as("has number of elements").hasSize(3)
+                        .as("that number is also returned by count query")
                         .hasSize(Ints.saturatedCast(targetManagement.countTargetByFilters(pending, null, null,
                                 setA.getId(), Boolean.FALSE, new String[0])))
                         .as("and contains the following elements").containsAll(expected)
@@ -419,8 +431,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement
                 .findTargetByFilters(pageReq, unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0])
                 .getContent()).as("has number of elements").hasSize(99)
-                        .as("that number is also returned by count query").hasSize(Ints.saturatedCast(targetManagement
-                                .countTargetByFilters(unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0])))
+                        .as("that number is also returned by count query")
+                        .hasSize(Ints.saturatedCast(targetManagement.countTargetByFilters(unknown, null, "%targ-A%",
+                                null, Boolean.FALSE, new String[0])))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
@@ -442,7 +455,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         assertThat(targetManagement
                 .findTargetByFilters(pageReq, unknown, null, null, setA.getId(), Boolean.FALSE, new String[0])
-                .getContent()).as("has number of elements").hasSize(0).as("that number is also returned by count query")
+                .getContent()).as("has number of elements").hasSize(0)
+                        .as("that number is also returned by count query")
                         .hasSize(Ints.saturatedCast(targetManagement.countTargetByFilters(unknown, null, null,
                                 setA.getId(), Boolean.FALSE, new String[0])))
                         .as("and filter query returns the same result")
@@ -728,9 +742,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
-        targAssigned = Lists
-                .newLinkedList(deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity());
-        targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedEntity();
+        targAssigned = Lists.newLinkedList(assignDistributionSet(ds, targAssigned).getAssignedEntity());
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
@@ -762,14 +775,14 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long[] overdueMix = { lastTargetQueryAlwaysOverdue, lastTargetQueryNotOverdue,
                 lastTargetQueryAlwaysOverdue, lastTargetNull, lastTargetQueryAlwaysOverdue };
 
-        List<Target> notAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "not",
+        final List<Target> notAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "not",
                 "first description");
-        List<Target> targAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "assigned",
+        final List<Target> targAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "assigned",
                 "first description");
-        List<Target> targInstalledToBeCreated = testdataFactory.generateTargets(overdueMix.length, "installed",
+        final List<Target> targInstalledToBeCreated = testdataFactory.generateTargets(overdueMix.length, "installed",
                 "first description");
 
-        List<Target> notAssigned = new ArrayList<>();
+        final List<Target> notAssigned = new ArrayList<>();
         List<Target> targAssigned = new ArrayList<>();
         List<Target> targInstalled = new ArrayList<>();
 
@@ -784,8 +797,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
-        targAssigned = deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity();
-        targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedEntity();
+        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity();
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
@@ -816,7 +829,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targetManagement.createTargets(testdataFactory.generateTargets(10, "unassigned"));
         List<Target> assignedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
 
-        deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
+        assignDistributionSet(assignedSet, assignedtargets);
 
         // get final updated version of targets
         assignedtargets = targetManagement.findTargetByControllerID(
@@ -834,17 +847,17 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .createTargetFilterQuery(entityFactory.generateTargetFilterQuery("tfq", "name==*"));
-        List<Target> unassignedTargets = targetManagement
+        final List<Target> unassignedTargets = targetManagement
                 .createTargets(testdataFactory.generateTargets(12, "unassigned"));
-        List<Target> assignedTargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
+        final List<Target> assignedTargets = targetManagement
+                .createTargets(testdataFactory.generateTargets(10, "assigned"));
 
-        deploymentManagement.assignDistributionSet(assignedSet, assignedTargets);
+        assignDistributionSet(assignedSet, assignedTargets);
 
-        List<Target> result = targetManagement.findAllTargetsByTargetFilterQueryAndNonDS(pageReq,
-                assignedSet.getId(), tfq).getContent();
-        assertThat(result)
-                .as("count of targets").hasSize(unassignedTargets.size())
-                .as("contains all targets").containsAll(unassignedTargets);
+        final List<Target> result = targetManagement
+                .findAllTargetsByTargetFilterQueryAndNonDS(pageReq, assignedSet.getId(), tfq).getContent();
+        assertThat(result).as("count of targets").hasSize(unassignedTargets.size()).as("contains all targets")
+                .containsAll(unassignedTargets);
 
     }
 
@@ -857,13 +870,13 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
-        deploymentManagement.assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
+        assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
             final Action action = deploymentManagement.findActionWithDetails(actionId);
             action.setStatus(Status.FINISHED);
             controllerManagament.addUpdateActionStatus(
                     new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
         });
-        deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
+        assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets
         installedtargets = targetManagement.findTargetByControllerID(

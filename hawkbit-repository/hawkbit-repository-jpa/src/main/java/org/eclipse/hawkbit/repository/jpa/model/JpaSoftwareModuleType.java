@@ -99,7 +99,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         // Default Constructor for JPA.
     }
 
-    @Override
     public void setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
     }
@@ -137,7 +136,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         return "SoftwareModuleType [key=" + key + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }

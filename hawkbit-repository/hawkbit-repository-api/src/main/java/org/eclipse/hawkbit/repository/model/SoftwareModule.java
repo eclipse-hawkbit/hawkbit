@@ -16,11 +16,6 @@ import java.util.Optional;
  *
  */
 public interface SoftwareModule extends NamedVersionedEntity {
-    /**
-     * @param artifact
-     *            is added to the assigned {@link Artifact}s.
-     */
-    void addArtifact(Artifact artifact);
 
     /**
      * @param artifactId

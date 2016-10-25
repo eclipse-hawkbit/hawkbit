@@ -50,7 +50,6 @@ public abstract class AbstractJpaMetaData implements MetaData {
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
@@ -60,7 +59,6 @@ public abstract class AbstractJpaMetaData implements MetaData {
         return value;
     }
 
-    @Override
     public void setValue(final String value) {
         this.value = value;
     }

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.apache.tika.metadata.Metadata;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -50,6 +51,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,7 +257,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSet createDistributionSet(final DistributionSet dSet) {
         prepareDsSave(dSet);
         if (dSet.getType() == null) {
-            dSet.setType(systemManagement.getTenantMetadata().getDefaultDsType());
+            ((JpaDistributionSet) dSet).setType(systemManagement.getTenantMetadata().getDefaultDsType());
         }
         return distributionSetRepository.save((JpaDistributionSet) dSet);
     }
@@ -278,7 +280,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         for (final DistributionSet ds : distributionSets) {
             prepareDsSave(ds);
             if (ds.getType() == null) {
-                ds.setType(systemManagement.getTenantMetadata().getDefaultDsType());
+                ((JpaDistributionSet) ds).setType(systemManagement.getTenantMetadata().getDefaultDsType());
             }
         }
 
@@ -596,21 +598,20 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata createDistributionSetMetadata(final DistributionSetMetadata md) {
-        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) md;
+    public DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
 
-        if (distributionSetMetadataRepository.exists(metadata.getId())) {
+        if (distributionSetMetadataRepository.exists(new DsMetadataCompositeKey(dsId, md.get))) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
 
-        touch(metadata.getDistributionSet());
+        touch(dsId);
         return distributionSetMetadataRepository.save(metadata);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public List<DistributionSetMetadata> createDistributionSetMetadata(final Collection<DistributionSetMetadata> md) {
+    public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<Metadata> md) {
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final Collection<JpaDistributionSetMetadata> metadata = (Collection) md;
@@ -618,7 +619,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         for (final JpaDistributionSetMetadata distributionSetMetadata : metadata) {
             checkAndThrowAlreadyIfDistributionSetMetadataExists(distributionSetMetadata.getId());
         }
-        metadata.forEach(m -> touch(m.getDistributionSet()));
+        metadata.forEach(m -> touch(m.getDistributionSet().getId()));
 
         return new ArrayList<>(
                 (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
@@ -627,34 +628,35 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata updateDistributionSetMetadata(final DistributionSetMetadata md) {
-        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) md;
+    public DistributionSetMetadata updateDistributionSetMetadata(final Long dsId, final String key,
+            final String value) {
 
         // check if exists otherwise throw entity not found exception
-        findOne(metadata.getDistributionSet(), metadata.getKey());
+        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) findOne(dsId, key);
+        toUpdate.setValue(value);
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        touch(metadata.getDistributionSet());
-        return distributionSetMetadataRepository.save(metadata);
+        touch(dsId);
+        return distributionSetMetadataRepository.save(toUpdate);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void deleteDistributionSetMetadata(final DistributionSet distributionSet, final String key) {
+    public void deleteDistributionSetMetadata(final Long distributionSet, final String key) {
         touch(distributionSet);
         distributionSetMetadataRepository.delete(new DsMetadataCompositeKey(distributionSet, key));
     }
 
     /**
-     * Method to get the latest distribution set based on ds ID after the
+     * Method to get the latest distribution set based on DS ID after the
      * metadata changes for that distribution set.
      *
      * @param distributionSet
      *            Distribution set
      */
-    private void touch(final DistributionSet distributionSet) {
-        final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet.getId());
+    private void touch(final Long distributionSet) {
+        final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet);
         // merge base distribution set so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base distribution set itself for
@@ -702,7 +704,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public DistributionSetMetadata findOne(final DistributionSet distributionSet, final String key) {
+    public DistributionSetMetadata findOne(final Long distributionSet, final String key) {
         final DistributionSetMetadata findOne = distributionSetMetadataRepository
                 .findOne(new DsMetadataCompositeKey(distributionSet, key));
         if (findOne == null) {
@@ -887,5 +889,16 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Long countDistributionSetsByType(final DistributionSetType type) {
         return distributionSetRepository.countByType((JpaDistributionSetType) type);
+    }
+
+    @Override
+    public DistributionSet updateDistributionSet(final Long setId, final boolean requiredMigrationStep) {
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+
+        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
+
+        set.setRequiredMigrationStep(requiredMigrationStep);
+
+        return distributionSetRepository.save(set);
     }
 }

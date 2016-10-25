@@ -23,9 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -175,7 +172,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final Target target = targetManagement.findTargetByControllerID("4711");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4711" });
+        assignDistributionSet(ds.getId(), "4711");
 
         final Action updateAction = deploymentManagement.findActiveActionsByTarget(target).get(0);
         final String etagWithFirstUpdate = mvc
@@ -208,7 +205,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         // Now another deployment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
-        deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4711" });
+        assignDistributionSet(ds2.getId(), "4711");
 
         final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target).get(0);
 
@@ -286,9 +283,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final Target target = entityFactory.generateTarget("911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())

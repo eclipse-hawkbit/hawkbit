@@ -40,32 +40,13 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     String getName();
 
     /**
-     * @param name
-     *            of the {@link TargetFilterQuery}.
-     */
-    void setName(String name);
-
-    /**
      * @return RSQL query
      */
     String getQuery();
 
     /**
-     * @param query
-     *            in RSQL notation.
-     */
-    void setQuery(String query);
-
-    /**
      * @return the auto assign {@link DistributionSet} if given.
      */
     DistributionSet getAutoAssignDistributionSet();
-
-    /**
-     * @param distributionSet
-     *                      the {@link DistributionSet} that should be assigned to a
-     *                      target when this filter matches.
-     */
-    void setAutoAssignDistributionSet(DistributionSet distributionSet);
 
 }

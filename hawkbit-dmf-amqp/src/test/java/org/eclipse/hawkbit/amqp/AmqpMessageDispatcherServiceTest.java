@@ -85,7 +85,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Override
     public void before() throws Exception {
         super.before();
-        testTarget = entityFactory.generateTarget(CONTROLLER_ID, TEST_TOKEN);
+        testTarget = entityFactory.generateTarget(CONTROLLER_ID, null, null, TEST_TOKEN);
         testTarget.getTargetInfo().setAddress(AMQP_URI.toString());
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);

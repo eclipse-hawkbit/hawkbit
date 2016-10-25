@@ -58,25 +58,4 @@ public interface Target extends NamedEntity {
      */
     String getSecurityToken();
 
-    /**
-     * @param token
-     *            new securityToken
-     */
-    void setSecurityToken(String token);
-
-    /**
-     * @param tag
-     *            to add
-     * @return <code>true</code> if tag could be added sucessfully (i.e. was not
-     *         already in the list).
-     */
-    boolean addTag(TargetTag tag);
-
-    /**
-     * @param tag
-     *            to remove
-     * @return <code>true</code> if tag was in the list and removed
-     */
-    boolean removeTag(TargetTag tag);
-
 }

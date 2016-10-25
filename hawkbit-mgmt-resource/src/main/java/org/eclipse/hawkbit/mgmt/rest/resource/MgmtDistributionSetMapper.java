@@ -116,13 +116,9 @@ public final class MgmtDistributionSetMapper {
                     .add(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
         }
 
-        final DistributionSet result = entityFactory.generateDistributionSet(dsRest.getName(), dsRest.getVersion(),
-                dsRest.getDescription(),
-                findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement), modules);
-
-        result.setRequiredMigrationStep(dsRest.isRequiredMigrationStep());
-
-        return result;
+        return entityFactory.generateDistributionSet(dsRest.getName(), dsRest.getVersion(), dsRest.getDescription(),
+                findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement), modules,
+                dsRest.isRequiredMigrationStep());
     }
 
     /**

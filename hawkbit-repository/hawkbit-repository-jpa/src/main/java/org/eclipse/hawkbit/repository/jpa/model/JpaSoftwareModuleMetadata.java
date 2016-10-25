@@ -54,7 +54,6 @@ public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements So
         return softwareModule;
     }
 
-    @Override
     public void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
     }

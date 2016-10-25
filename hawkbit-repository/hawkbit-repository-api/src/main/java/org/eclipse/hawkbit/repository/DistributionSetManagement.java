@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.tika.metadata.Metadata;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.DistributionSetCreationFailedMissingMandatoryModuleException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -128,6 +129,9 @@ public interface DistributionSetManagement {
     /**
      * creates a list of distribution set meta data entries.
      *
+     * @param dsId
+     *            if the {@link DistributionSet} the metadata has to be created
+     *            for
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created distribution set meta data entries
@@ -136,11 +140,15 @@ public interface DistributionSetManagement {
      *             specific key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSetMetadata> createDistributionSetMetadata(@NotEmpty Collection<DistributionSetMetadata> metadata);
+    List<DistributionSetMetadata> createDistributionSetMetadata(@NotNull Long dsId,
+            @NotEmpty Collection<Metadata> metadata);
 
     /**
      * creates or updates a single distribution set meta data entry.
      *
+     * @param dsId
+     *            if the {@link DistributionSet} the metadata has to be created
+     *            for
      * @param metadata
      *            the meta data entry to create or update
      * @return the updated or created distribution set meta data entry
@@ -149,7 +157,7 @@ public interface DistributionSetManagement {
      *             key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata createDistributionSetMetadata(@NotNull DistributionSetMetadata metadata);
+    DistributionSetMetadata createDistributionSetMetadata(@NotNull Long dsId, @NotNull Metadata metadata);
 
     /**
      * Creates multiple {@link DistributionSet}s.
@@ -218,13 +226,13 @@ public interface DistributionSetManagement {
     /**
      * deletes a distribution set meta data entry.
      *
-     * @param distributionSet
+     * @param dsId
      *            where meta data has to be deleted
      * @param key
      *            of the meta data element
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteDistributionSetMetadata(@NotNull final DistributionSet distributionSet, @NotNull final String key);
+    void deleteDistributionSetMetadata(@NotNull final Long dsId, @NotNull final String key);
 
     /**
      * Deletes or mark as delete in case the type is in use.
@@ -484,8 +492,8 @@ public interface DistributionSetManagement {
     /**
      * finds a single distribution set meta data by its id.
      *
-     * @param distributionSet
-     *            where meta data has to rind
+     * @param setId
+     *            of the {@link DistributionSet}
      * @param key
      *            of the meta data element
      * @return the found DistributionSetMetadata or {@code null} if not exits
@@ -493,7 +501,7 @@ public interface DistributionSetManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetMetadata findOne(@NotNull DistributionSet distributionSet, @NotEmpty String key);
+    DistributionSetMetadata findOne(@NotNull Long setId, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -602,10 +610,30 @@ public interface DistributionSetManagement {
     DistributionSet updateDistributionSet(@NotNull Long setId, String name, String description, String version);
 
     /**
+     * Updates existing {@link DistributionSet}.
+     *
+     * @param setId
+     *            to update
+     * @param requiredMigrationStep
+     *            to update or <code>null</code>
+     * 
+     * @return the saved entity.
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSet updateDistributionSet(@NotNull Long setId, boolean requiredMigrationStep);
+
+    /**
      * updates a distribution set meta data value if corresponding entry exists.
      *
-     * @param metadata
-     *            the meta data entry to be updated
+     * @param dsId
+     *            {@link DistributionSet} of the meta data entry to be updated
+     * @param key
+     *            of the meta data entry to be updated
+     * @param value
+     *            to update
      * @return the updated meta data entry
      * 
      * @throws EntityNotFoundException
@@ -613,7 +641,8 @@ public interface DistributionSetManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata updateDistributionSetMetadata(@NotNull DistributionSetMetadata metadata);
+    DistributionSetMetadata updateDistributionSetMetadata(@NotNull Long dsId, @NotEmpty String key,
+            @NotEmpty String value);
 
     /**
      * Updates existing {@link DistributionSetType}.

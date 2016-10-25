@@ -241,18 +241,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
-
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-        if (null != typeNameValue) {
-            swTypeManagementService.updateSoftwareModuleType(existingType.getId(), typeNameValue, typeDescValue,
-                    ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-            uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
-            eventBus.publish(this,
-                    new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
-        } else {
-            uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
-        }
+
+        swTypeManagementService.updateSoftwareModuleType(existingType.getId(), typeDescValue,
+                ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
+        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
+        eventBus.publish(this,
+                new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }
 
     @Override

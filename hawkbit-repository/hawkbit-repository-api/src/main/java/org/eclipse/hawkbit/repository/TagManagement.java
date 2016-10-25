@@ -260,8 +260,8 @@ public interface TagManagement {
      * @return the updated {@link TargetTag}
      * 
      * @throws EntityNotFoundException
-     *             in case the {@link DistributionSetTag} does not exists and
-     *             cannot be updated
+     *             in case the {@link TargetTag} does not exists and cannot be
+     *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTag updateTargetTag(@NotNull Long targetTagId, String name, String description, String colour);

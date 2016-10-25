@@ -102,7 +102,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return distributionSet;
     }
 
-    @Override
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
@@ -121,7 +120,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return targetFilterQuery;
     }
 
-    @Override
     public void setTargetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
     }
@@ -148,7 +146,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return actionType;
     }
 
-    @Override
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
     }
@@ -158,7 +155,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return forcedTime;
     }
 
-    @Override
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
     }

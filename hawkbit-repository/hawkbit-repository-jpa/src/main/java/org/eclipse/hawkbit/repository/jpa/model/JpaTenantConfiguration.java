@@ -66,7 +66,6 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
@@ -76,7 +75,6 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
         return value;
     }
 
-    @Override
     public void setValue(final String value) {
         this.value = value;
     }

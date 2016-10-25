@@ -131,14 +131,10 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModuleType updateSoftwareModuleType(final Long smTypeid, final String name, final String description,
+    public SoftwareModuleType updateSoftwareModuleType(final Long smTypeid, final String description,
             final String colour) {
 
         final JpaSoftwareModuleType type = findSoftwareModuleTypeAndThrowExceptionIfNotFound(smTypeid);
-
-        if (name != null) {
-            type.setName(name);
-        }
 
         if (description != null) {
             type.setDescription(description);
@@ -652,6 +648,11 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleType> types) {
 
         return types.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SoftwareModuleType> findSoftwareModuleTypesById(final Collection<Long> ids) {
+        return Collections.unmodifiableList(softwareModuleTypeRepository.findByIdIn(ids));
     }
 
 }

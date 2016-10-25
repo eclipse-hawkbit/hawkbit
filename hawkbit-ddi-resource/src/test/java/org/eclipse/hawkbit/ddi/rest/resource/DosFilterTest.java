@@ -151,7 +151,7 @@ public class DosFilterTest extends AbstractRestIntegrationTest {
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(target);
 
-        final Iterable<Target> saved = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity();
+        final Iterable<Target> saved = assignDistributionSet(ds, toAssign).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(target)).hasSize(1);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(target).get(0);

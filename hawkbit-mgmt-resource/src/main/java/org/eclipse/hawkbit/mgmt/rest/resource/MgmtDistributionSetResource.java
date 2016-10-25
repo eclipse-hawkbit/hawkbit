@@ -125,7 +125,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         LOG.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
         final String defaultDsKey = systemSecurityContext
-                .runAsSystem(() -> this.systemManagement.getTenantMetadata().getDefaultDsType().getKey());
+                .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
         final Collection<DistributionSet> createdDSets = this.distributionSetManagement
@@ -354,10 +354,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<Void> deleteAssignSoftwareModules(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
-        // check if distribution set and software module exist otherwise throw
-        // exception immediately
-        final SoftwareModule sm = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId);
-        this.distributionSetManagement.unassignSoftwareModule(distributionSetId, sm);
+        this.distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
         return ResponseEntity.ok().build();
     }
 

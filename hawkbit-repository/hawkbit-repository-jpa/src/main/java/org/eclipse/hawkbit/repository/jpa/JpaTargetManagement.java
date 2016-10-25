@@ -358,7 +358,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> targetIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
-        final List<Target> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName, targetIds);
+        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
+                targetIds);
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
@@ -366,7 +367,7 @@ public class JpaTargetManagement implements TargetManagement {
         if (alreadyAssignedTargets.size() == allTargets.size()) {
             alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
             final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
-                    Collections.emptyList(), alreadyAssignedTargets, tag);
+                    Collections.emptyList(), Collections.unmodifiableList(alreadyAssignedTargets), tag);
 
             afterCommit.afterCommit(
                     () -> eventBus.post(new TargetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant())));

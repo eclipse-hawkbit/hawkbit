@@ -236,8 +236,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addCancelActionStatus(final ActionStatus actionStatus) {
-        final JpaAction action = (JpaAction) actionStatus.getAction();
+    public Action addCancelActionStatus(final ActionStatus actionS) {
+        final JpaAction action = (JpaAction) actionS.getAction();
+        final JpaActionStatus actionStatus = (JpaActionStatus) actionS;
 
         checkForToManyStatusEntries(action);
         action.setStatus(actionStatus.getStatus());
@@ -258,12 +259,12 @@ public class JpaControllerManagement implements ControllerManagement {
             // do nothing
         }
         actionRepository.save(action);
-        actionStatusRepository.save((JpaActionStatus) actionStatus);
+        actionStatusRepository.save(actionStatus);
 
         return action;
     }
 
-    private void handleFinishedCancelation(final ActionStatus actionStatus, final JpaAction action) {
+    private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
         // in case of successful cancellation we also report the success at
         // the canceled action itself.
         actionStatus.addMessage(

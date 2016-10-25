@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,16 +20,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
  * Test class for {@link AutoAssignChecker}.
@@ -44,32 +44,35 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     @Description("Test auto assignment of a DS to filtered targets")
     public void checkAutoAssign() {
 
-        final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will be auto assigned
+        final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will
+                                                                                   // be
+                                                                                   // auto
+                                                                                   // assigned
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .createTargetFilterQuery(new JpaTargetFilterQuery("filterA", "name==*"));
         targetFilterQuery.setAutoAssignDistributionSet(setA);
         targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
 
-
         final String targetDsAIdPref = "targ";
-        List<Target> targets = targetManagement.createTargets(
+        final List<Target> targets = targetManagement.createTargets(
                 testdataFactory.generateTargets(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
-        int targetsCount = targets.size();
+        final int targetsCount = targets.size();
 
         // assign set A to first 10 targets
-        deploymentManagement.assignDistributionSet(setA, targets.subList(0, 10));
+        assignDistributionSet(setA, targets.subList(0, 10));
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(0, 10), targetsCount);
 
         // assign set B to first 5 targets
-        // they have now 2 DS in their action history and should not get updated with dsA
-        deploymentManagement.assignDistributionSet(setB, targets.subList(0, 5));
+        // they have now 2 DS in their action history and should not get updated
+        // with dsA
+        assignDistributionSet(setB, targets.subList(0, 5));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
         // assign set B to next 10 targets
-        deploymentManagement.assignDistributionSet(setB, targets.subList(10, 20));
+        assignDistributionSet(setB, targets.subList(10, 20));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
@@ -93,7 +96,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         // incomplete distribution set that will be assigned
         final DistributionSet setF = distributionSetManagement
                 .createDistributionSet(entityFactory.generateDistributionSet("dsA", "1", "incomplete ds",
-                        testdataFactory.findOrCreateDefaultTestDsType(), null));
+                        testdataFactory.findOrCreateDefaultTestDsType(), null, false));
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
@@ -109,16 +112,16 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         targetFilterQueryManagement.createTargetFilterQuery(
                 new JpaTargetFilterQuery("filterB", "id==" + targetDsAIdPref + "*", (JpaDistributionSet) setA));
 
-        List<Target> targetsF = targetManagement.createTargets(
+        final List<Target> targetsF = targetManagement.createTargets(
                 testdataFactory.generateTargets(10, targetDsFIdPref, targetDsFIdPref.concat(" description")));
 
-        List<Target> targetsA = targetManagement.createTargets(
+        final List<Target> targetsA = targetManagement.createTargets(
                 testdataFactory.generateTargets(10, targetDsAIdPref, targetDsAIdPref.concat(" description")));
 
-        int targetsCount = targetsA.size() + targetsF.size();
+        final int targetsCount = targetsA.size() + targetsF.size();
 
         // assign set B to first 5 targets of fail group
-        deploymentManagement.assignDistributionSet(setB, targetsF.subList(0, 5));
+        assignDistributionSet(setB, targetsF.subList(0, 5));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
@@ -133,18 +136,21 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * @param set the expected distribution set
-     * @param targets the targets that should have it
+     * @param set
+     *            the expected distribution set
+     * @param targets
+     *            the targets that should have it
      */
     @Step
-    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, List<Target> targets, int count) {
-        List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets,
+            final int count) {
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        Slice<Target> targetsAll = targetManagement.findTargetsAll(new PageRequest(0, 1000));
+        final Slice<Target> targetsAll = targetManagement.findTargetsAll(new PageRequest(0, 1000));
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
-        for (Target target : targetsAll) {
-            if(targetIds.contains(target.getId())) {
+        for (final Target target : targetsAll) {
+            if (targetIds.contains(target.getId())) {
                 assertThat(target.getAssignedDistributionSet()).as("assigned DS").isEqualTo(set);
             }
         }

@@ -54,7 +54,6 @@ public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements T
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }

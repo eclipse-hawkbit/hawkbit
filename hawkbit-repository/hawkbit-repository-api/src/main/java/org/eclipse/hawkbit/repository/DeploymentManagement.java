@@ -42,26 +42,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface DeploymentManagement {
-
-    /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s.
-     *
-     * @param pset
-     *            {@link DistributionSet} which is assigned to the
-     *            {@link Target}s
-     * @param targets
-     *            the {@link Target}s which should obtain the
-     *            {@link DistributionSet}
-     *
-     * @return the changed targets
-     *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}. *
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull DistributionSet pset,
-            @NotEmpty List<Target> targets);
+    // TODO remove target id
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -74,17 +55,20 @@ public interface DeploymentManagement {
      * @param forcedTimestamp
      *            the time when the action should be forced, only necessary for
      *            {@link ActionType#TIMEFORCED}
-     * @param targetIDs
+     * @param controllerIDs
      *            the IDs of the target to assign the distribution set
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
+     * 
+     * @throw {@link EntityNotFoundException} if either provided
+     *        {@link DistributionSet} or {@link Target}s do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID, final ActionType actionType,
-            final long forcedTimestamp, @NotEmpty final String... targetIDs);
+    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotNull ActionType actionType,
+            long forcedTimestamp, @NotEmpty Collection<String> controllerIDs);
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -99,6 +83,9 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
+     * 
+     * @throw {@link EntityNotFoundException} if either provided
+     *        {@link DistributionSet} or {@link Target}s do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
@@ -119,11 +106,13 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
+     * 
+     * @throw {@link EntityNotFoundException} if either provided
+     *        {@link DistributionSet} or {@link Target}s do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
-                                                          @NotEmpty Collection<TargetWithActionType> targets,
-                                                          String actionMessage);
+            @NotEmpty Collection<TargetWithActionType> targets, String actionMessage);
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -142,33 +131,13 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
+     * 
+     * @throw {@link EntityNotFoundException} if either provided
+     *        {@link DistributionSet} or {@link Target}s do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
             @NotEmpty Collection<TargetWithActionType> targets, Rollout rollout, RolloutGroup rolloutGroup);
-
-    /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s by
-     * their IDs.
-     *
-     * @param dsID
-     *            {@link DistributionSet} which is assigned to the
-     *            {@link Target}s
-     * @param targetIDs
-     *            IDs of the {@link Target}s which should obtain the
-     *            {@link DistributionSet}
-     *
-     * @return the changed targets
-     *
-     * @throws EntityNotFoundException
-     *             if {@link DistributionSet} does not exist.
-     *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotEmpty String... targetIDs);
 
     /**
      * Cancels given {@link Action} for given {@link Target}. The method will

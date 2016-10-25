@@ -14,6 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
@@ -22,10 +23,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -52,44 +51,24 @@ final class MgmtDistributionSetTypeMapper {
 
     static DistributionSetType fromRequest(final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-
-        final DistributionSetType result = entityFactory.generateDistributionSetType(smsRest.getKey(),
-                smsRest.getName(), smsRest.getDescription());
-
-        addMandatoryModules(softwareManagement, smsRest, result);
-        addOptionalModules(softwareManagement, smsRest, result);
-
-        return result;
+        return entityFactory.generateDistributionSetType(smsRest.getKey(), smsRest.getName(), smsRest.getDescription(),
+                getMandatoryModules(softwareManagement, smsRest), getOptionalmodules(softwareManagement, smsRest));
     }
 
-    private static void addOptionalModules(final SoftwareManagement softwareManagement,
-            final MgmtDistributionSetTypeRequestBodyPost smsRest, final DistributionSetType result) {
-        if (!CollectionUtils.isEmpty(smsRest.getOptionalmodules())) {
-            smsRest.getOptionalmodules().stream().map(opt -> {
-                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(opt.getId());
-
-                if (smType == null) {
-                    throw new EntityNotFoundException("SoftwareModuleType with ID " + opt.getId() + " not found");
-                }
-
-                return smType;
-            }).forEach(result::addOptionalModuleType);
-        }
+    private static Collection<SoftwareModuleType> getMandatoryModules(final SoftwareManagement softwareManagement,
+            final MgmtDistributionSetTypeRequestBodyPost smsRest) {
+        return Optional.ofNullable(smsRest.getMandatorymodules())
+                .map(modules -> softwareManagement.findSoftwareModuleTypesById(
+                        modules.stream().map(opt -> opt.getId()).collect(Collectors.toList())))
+                .orElse(Collections.emptyList());
     }
 
-    private static void addMandatoryModules(final SoftwareManagement softwareManagement,
-            final MgmtDistributionSetTypeRequestBodyPost smsRest, final DistributionSetType result) {
-        if (!CollectionUtils.isEmpty(smsRest.getMandatorymodules())) {
-            smsRest.getMandatorymodules().stream().map(mand -> {
-                final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeById(mand.getId());
-
-                if (smType == null) {
-                    throw new EntityNotFoundException("SoftwareModuleType with ID " + mand.getId() + " not found");
-                }
-
-                return smType;
-            }).forEach(result::addMandatoryModuleType);
-        }
+    private static Collection<SoftwareModuleType> getOptionalmodules(final SoftwareManagement softwareManagement,
+            final MgmtDistributionSetTypeRequestBodyPost smsRest) {
+        return Optional.ofNullable(smsRest.getOptionalmodules())
+                .map(modules -> softwareManagement.findSoftwareModuleTypesById(
+                        modules.stream().map(opt -> opt.getId()).collect(Collectors.toList())))
+                .orElse(Collections.emptyList());
     }
 
     static List<MgmtDistributionSetType> toTypesResponse(final List<DistributionSetType> types) {

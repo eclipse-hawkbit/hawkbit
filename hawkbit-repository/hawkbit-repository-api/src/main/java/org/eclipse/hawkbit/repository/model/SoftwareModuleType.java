@@ -22,23 +22,10 @@ public interface SoftwareModuleType extends NamedEntity {
     String getKey();
 
     /**
-     * @param key
-     *            of this {@link SoftwareModuleType}.
-     */
-    void setKey(String key);
-
-    /**
      * @return maximum assignments of an {@link SoftwareModule} of this type to
      *         a {@link DistributionSet}.
      */
     int getMaxAssignments();
-
-    /**
-     * @param maxAssignments
-     *            of an {@link SoftwareModule} of this type to a
-     *            {@link DistributionSet}.
-     */
-    void setMaxAssignments(int maxAssignments);
 
     /**
      * @return <code>true</code> if the type is deleted and only kept for

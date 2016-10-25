@@ -114,7 +114,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
                                     final DistributionSet ds = testdataFactory
                                             .createDistributionSet("to be deployed" + x, true);
 
-                                    deploymentManagement.assignDistributionSet(ds, createdTargets);
+                                    assignDistributionSet(ds, createdTargets);
                                 }
                             }
                         }

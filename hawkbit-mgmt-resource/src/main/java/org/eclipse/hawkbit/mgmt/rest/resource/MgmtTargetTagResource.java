@@ -106,9 +106,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             @RequestBody final MgmtTagRequestBodyPut restTargetTagRest) {
         LOG.debug("update {} target tag", restTargetTagRest);
 
-        final TargetTag targetTag = findTargetTagById(targetTagId);
-        MgmtTagMapper.updateTag(restTargetTagRest, targetTag);
-        final TargetTag updateTargetTag = this.tagManagement.updateTargetTag(targetTag);
+        final TargetTag updateTargetTag = tagManagement.updateTargetTag(targetTagId, restTargetTagRest.getName(),
+                restTargetTagRest.getDescription(), restTargetTagRest.getColour());
 
         LOG.debug("target tag updated");
 

@@ -46,7 +46,7 @@ public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements D
     }
 
     public DsMetadataCompositeKey getId() {
-        return new DsMetadataCompositeKey(distributionSet, getKey());
+        return new DsMetadataCompositeKey(distributionSet.getId(), getKey());
     }
 
     public void setDistributionSet(final DistributionSet distributionSet) {

@@ -65,8 +65,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), null, null,
-                null);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), null, null);
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity to be equal to created version")
@@ -79,7 +78,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), null, "changed",
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created.getId(), "changed",
                 "changed");
 
         assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
@@ -217,7 +216,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
-        deploymentManagement.assignDistributionSet(ds.getId(), new String[] { target.getControllerId() });
+        assignDistributionSet(ds.getId(), target.getControllerId());
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
                         .isEqualTo(TargetUpdateStatus.PENDING);
@@ -390,7 +389,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         distributionSetManagement.assignSoftwareModules(disSet.getId(), Sets.newHashSet(assignedModule.getId()));
 
         // [STEP3]: Assign DistributionSet to a Device
-        deploymentManagement.assignDistributionSet(disSet, Lists.newArrayList(target));
+        assignDistributionSet(disSet, Lists.newArrayList(target));
 
         // [STEP4]: Delete the DistributionSet
         distributionSetManagement.deleteDistributionSet(disSet);
@@ -498,11 +497,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
         distributionSetManagement.assignSoftwareModules(disSetX.getId(), Sets.newHashSet(moduleX.getId()));
-        deploymentManagement.assignDistributionSet(disSetX, Lists.newArrayList(target));
+        assignDistributionSet(disSetX, Lists.newArrayList(target));
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
         distributionSetManagement.assignSoftwareModules(disSetY.getId(), Sets.newHashSet(moduleY.getId()));
-        deploymentManagement.assignDistributionSet(disSetY, Lists.newArrayList(target));
+        assignDistributionSet(disSetY, Lists.newArrayList(target));
 
         // [STEP5]: Delete SoftwareModuleX
         softwareManagement.deleteSoftwareModule(moduleX.getId());
@@ -584,12 +583,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // test meta data
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetManagement
                 .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
 
         distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(osType.getId()));
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(testType.getId()));
 
         // found in test
@@ -641,12 +640,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // test meta data
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetManagement
                 .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
 
         distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(osType.getId()));
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(testType.getId()));
 
         // test modules
@@ -681,11 +680,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     public void countSoftwareModuleTypesAll() {
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetManagement
                 .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
         distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(osType.getId()));
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(testType.getId()));
 
         final SoftwareModule four = softwareManagement
@@ -769,12 +768,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // test meta data
         final SoftwareModuleType testType = softwareManagement
                 .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
+        DistributionSetType testDsType = distributionSetManagement
                 .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc"));
 
         distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(osType.getId()));
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
                 Lists.newArrayList(testType.getId()));
 
         // test modules

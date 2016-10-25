@@ -203,10 +203,9 @@ public class TestdataFactory {
                         prefix + " Firmware", version + "." + new SecureRandom().nextInt(100), LOREM.words(20),
                         prefix + " vendor Limited Inc, California"));
 
-        return distributionSetManagement
-                .createDistributionSet(generateDistributionSet(prefix != null && prefix.length() > 0 ? prefix : "DS",
-                        version, findOrCreateDefaultTestDsType(), Lists.newArrayList(osMod, runtimeMod, appMod))
-                                .setRequiredMigrationStep(isRequiredMigrationStep));
+        return distributionSetManagement.createDistributionSet(generateDistributionSet(
+                prefix != null && prefix.length() > 0 ? prefix : "DS", version, findOrCreateDefaultTestDsType(),
+                Lists.newArrayList(osMod, runtimeMod, appMod), isRequiredMigrationStep));
     }
 
     /**
@@ -297,7 +296,7 @@ public class TestdataFactory {
     public DistributionSet createDistributionSetWithNoSoftwareModules(final String name, final String version) {
 
         final DistributionSet dis = entityFactory.generateDistributionSet(name, version, DEFAULT_DESCRIPTION,
-                findOrCreateDefaultTestDsType(), null);
+                findOrCreateDefaultTestDsType(), null, false);
         return distributionSetManagement.createDistributionSet(dis);
     }
 
@@ -436,12 +435,9 @@ public class TestdataFactory {
         }
 
         final DistributionSetType type = entityFactory.generateDistributionSetType(dsTypeKey, dsTypeName,
-                LOREM.words(10));
-        mandatory.forEach(type::addMandatoryModuleType);
-        optional.forEach(type::addOptionalModuleType);
+                LOREM.words(10), mandatory, optional);
 
-        final DistributionSetType result = distributionSetManagement.createDistributionSetType(type);
-
+        return distributionSetManagement.createDistributionSetType(type);
     }
 
     /**
@@ -494,7 +490,30 @@ public class TestdataFactory {
      */
     public DistributionSet generateDistributionSet(final String name, final String version,
             final DistributionSetType type, final Collection<SoftwareModule> modules) {
-        return entityFactory.generateDistributionSet(name, version, LOREM.words(10), type, modules);
+        return entityFactory.generateDistributionSet(name, version, LOREM.words(10), type, modules, false);
+    }
+
+    /**
+     * builder method for creating a {@link DistributionSet}.
+     *
+     * @param name
+     *            {@link DistributionSet#getName()}
+     * @param version
+     *            {@link DistributionSet#getVersion()}
+     * @param type
+     *            {@link DistributionSet#getType()}
+     * @param modules
+     *            {@link DistributionSet#getModules()}
+     * @param requiredMigrationStep
+     *            {@link DistributionSet#isRequiredMigrationStep()}
+     * 
+     * @return the created {@link DistributionSet}
+     */
+    public DistributionSet generateDistributionSet(final String name, final String version,
+            final DistributionSetType type, final Collection<SoftwareModule> modules,
+            final boolean requiredMigrationStep) {
+        return entityFactory.generateDistributionSet(name, version, LOREM.words(10), type, modules,
+                requiredMigrationStep);
     }
 
     /**
@@ -507,7 +526,7 @@ public class TestdataFactory {
      */
     public DistributionSet generateDistributionSet(final String name) {
         return entityFactory.generateDistributionSet(name, DEFAULT_VERSION, LOREM.words(10),
-                findOrCreateDefaultTestDsType(), null);
+                findOrCreateDefaultTestDsType(), null, false);
     }
 
     /**
@@ -705,16 +724,12 @@ public class TestdataFactory {
         return list;
     }
 
-    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA, final String... msgs) {
+    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,
+            final Collection<String> msgs) {
         updActA.setStatus(status);
 
-        final ActionStatus statusMessages = entityFactory.generateActionStatus();
-        statusMessages.setAction(updActA);
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
+        final ActionStatus statusMessages = entityFactory.generateActionStatus(updActA, status,
+                System.currentTimeMillis(), msgs);
 
         return controllerManagament.addUpdateActionStatus(statusMessages);
     }

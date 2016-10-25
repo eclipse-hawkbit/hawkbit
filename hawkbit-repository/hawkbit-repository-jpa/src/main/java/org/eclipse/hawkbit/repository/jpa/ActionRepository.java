@@ -134,7 +134,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link UpdateAction}s
      */
     @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds order by a.id")
-    Page<Action> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final JpaTarget target,
+    Page<JpaAction> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final JpaTarget target,
             @Param("ds") JpaDistributionSet ds);
 
     /**
@@ -146,7 +146,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions according to the searched target
      */
     @Query("Select a from JpaAction a where a.target = :target order by a.id")
-    List<Action> findByTarget(@Param("target") final JpaTarget target);
+    List<JpaAction> findByTarget(@Param("target") final JpaTarget target);
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag

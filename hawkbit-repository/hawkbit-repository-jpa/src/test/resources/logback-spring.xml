@@ -12,7 +12,7 @@
 <configuration>
    <include resource="org/springframework/boot/logging/logback/base.xml" />
    
-<!--    <logger name="org.eclipse.persistence" level="DEBUG" /> -->
+   <logger name="org.eclipse.persistence" level="ERROR" />
 
    <Root level="INFO">
       <appender-ref ref="CONSOLE" />

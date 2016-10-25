@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -201,7 +200,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Target createTarget = targetManagement.createTarget(entityFactory.generateTarget("knownTargetId"));
 
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(createTarget));
+        assignDistributionSet(dsA, Lists.newArrayList(createTarget));
 
         final String rsqlPendingStatus = "status==pending";
         final String rsqlFinishedStatus = "status==finished";
@@ -342,9 +341,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setDescription("old description");
-        t.setName(knownNameNotModiy);
+        final Target t = entityFactory.generateTarget(knownControllerId, knownNameNotModiy, "old description", null);
         targetManagement.createTarget(t);
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
@@ -367,8 +364,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("securityToken", knownNewToken).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setName(knownNameNotModiy);
+        final Target t = entityFactory.generateTarget(knownControllerId, knownNameNotModiy, "old description", null);
         targetManagement.createTarget(t);
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
@@ -391,8 +387,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("address", knownNewAddress).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setName(knownNameNotModiy);
+        final Target t = entityFactory.generateTarget(knownControllerId, knownNameNotModiy, "old description", null);
         targetManagement.createTarget(t);
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
@@ -578,7 +573,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String knownName = "someName";
         createSingleTarget(knownControllerId, knownName);
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        deploymentManagement.assignDistributionSet(ds.getId(), knownControllerId);
+        assignDistributionSet(ds.getId(), knownControllerId);
 
         // test
 
@@ -674,12 +669,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Verfies that a mandatory properties of new targets are validated as not null.")
     public void createTargetWithMissingMandatoryPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setName(null);
-
         final MvcResult mvcResult = mvc
-                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
+                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content("[{\"name\":\"id1\"}]")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
@@ -695,8 +686,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setName(RandomStringUtils.randomAscii(80));
+        final Target test1 = entityFactory.generateTarget("id1", RandomStringUtils.randomAscii(80), null, null);
 
         final MvcResult mvcResult = mvc
                 .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
@@ -715,16 +705,10 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     @Test
     public void createTargetsListReturnsSuccessful() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setDescription("testid1");
-        test1.setName("testname1");
+        final Target test1 = entityFactory.generateTarget("id1", "testname1", "testid1", "token");
         test1.getTargetInfo().setAddress("amqp://test123/foobar");
-        final Target test2 = entityFactory.generateTarget("id2");
-        test2.setDescription("testid2");
-        test2.setName("testname2");
-        final Target test3 = entityFactory.generateTarget("id3");
-        test3.setName("testname3");
-        test3.setDescription("testid3");
+        final Target test2 = entityFactory.generateTarget("id2", "testname2", "testid2", null);
+        final Target test3 = entityFactory.generateTarget("id3", "testname3", "testid3", null);
 
         final List<Target> targets = new ArrayList<>();
         targets.add(test1);
@@ -1073,12 +1057,11 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final DistributionSet two = sets.next();
 
         // Update
-        final List<Target> updatedTargets = deploymentManagement.assignDistributionSet(one, targets)
-                .getAssignedEntity();
+        final List<Target> updatedTargets = assignDistributionSet(one, targets).getAssignedEntity();
         // 2nd update
         // sleep 10ms to ensure that we can sort by reportedAt
         Thread.sleep(10);
-        deploymentManagement.assignDistributionSet(two, updatedTargets);
+        assignDistributionSet(two, updatedTargets);
 
         // two updates, one cancellation
         final List<Action> actions = deploymentManagement.findActionsByTarget(target);
@@ -1286,9 +1269,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     private Target createSingleTarget(final String controllerId, final String name) {
-        final Target target = entityFactory.generateTarget(controllerId);
-        target.setName(name);
-        target.setDescription(TARGET_DESCRIPTION_TEST);
+        final Target target = entityFactory.generateTarget(controllerId, name, TARGET_DESCRIPTION_TEST, null);
         targetManagement.createTarget(target);
         return controllerManagament.updateLastTargetQuery(controllerId, null);
     }
@@ -1304,9 +1285,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final Target target = entityFactory.generateTarget(str);
-            target.setName(str);
-            target.setDescription(str);
+            final Target target = entityFactory.generateTarget(str, str, str, null);
             targetManagement.createTarget(target);
             controllerManagament.updateLastTargetQuery(str, null);
             character++;
@@ -1335,7 +1314,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final Target tA = targetManagement
                 .createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
         // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, newArrayList(tA));
+        assignDistributionSet(dsA, Lists.newArrayList(tA));
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
         assertThat(actionsByTarget.getContent()).hasSize(1);

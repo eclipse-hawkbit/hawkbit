@@ -556,10 +556,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = entityFactory.generateRollout();
-        rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
-        rollout.setName(name);
-        rollout.setTargetFilterQuery(targetFilterQuery);
+        final Rollout rollout = entityFactory.generateRollout(name, null,
+                distributionSetManagement.findDistributionSetById(distributionSetId), targetFilterQuery);
         return rolloutManagement.createRollout(rollout, amountGroups, new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }

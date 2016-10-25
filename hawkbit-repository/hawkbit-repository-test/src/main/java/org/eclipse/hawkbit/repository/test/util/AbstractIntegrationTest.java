@@ -11,11 +11,15 @@ package org.eclipse.hawkbit.repository.test.util;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -27,8 +31,12 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -61,6 +69,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.google.common.collect.Lists;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
 
@@ -172,6 +182,23 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         this.environment = environment;
     }
 
+    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Lists.newArrayList(new TargetWithActionType(controllerId, ActionType.FORCED,
+                        org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME)));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
+            final List<Target> targets) {
+        return deploymentManagement.assignDistributionSet(pset.getId(), ActionType.FORCED,
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
+                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+    }
+
+    protected Long getOsModule(final DistributionSet ds) {
+        return ds.findFirstModuleByType(osType).getId();
+    }
+
     @Before
     public void before() throws Exception {
         mvc = createMvcWebAppContext().build();
@@ -179,18 +206,18 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule.runAsPrivileged(
-                () -> softwareManagement.updateSoftwareModuleType(osType.getId(), null, description, null));
+        osType = securityRule
+                .runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(osType.getId(), description, null));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule.runAsPrivileged(
-                () -> softwareManagement.updateSoftwareModuleType(appType.getId(), null, description, null));
+        appType = securityRule
+                .runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(appType.getId(), description, null));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
         runtimeType = securityRule.runAsPrivileged(
-                () -> softwareManagement.updateSoftwareModuleType(runtimeType.getId(), null, description, null));
+                () -> softwareManagement.updateSoftwareModuleType(runtimeType.getId(), description, null));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }

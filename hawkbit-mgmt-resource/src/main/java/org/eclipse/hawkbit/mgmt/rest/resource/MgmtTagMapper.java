@@ -12,7 +12,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
@@ -97,23 +99,16 @@ final class MgmtTagMapper {
     }
 
     static List<TargetTag> mapTargeTagFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtTagRequestBodyPut> tags) {
-        final List<TargetTag> mappedList = new ArrayList<>();
-        for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(entityFactory.generateTargetTag(targetTagRest.getName(), targetTagRest.getDescription(),
-                    targetTagRest.getColour()));
-        }
-        return mappedList;
+            final Collection<MgmtTagRequestBodyPut> tags) {
+        return tags.stream().map(tagRest -> entityFactory.generateTargetTag(tagRest.getName(), tagRest.getDescription(),
+                tagRest.getColour())).collect(Collectors.toList());
     }
 
     static List<DistributionSetTag> mapDistributionSetTagFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtTagRequestBodyPut> tags) {
-        final List<DistributionSetTag> mappedList = new ArrayList<>();
-        for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(entityFactory.generateDistributionSetTag(targetTagRest.getName(),
-                    targetTagRest.getDescription(), targetTagRest.getColour()));
-        }
-        return mappedList;
+            final Collection<MgmtTagRequestBodyPut> tags) {
+
+        return tags.stream().map(tagRest -> entityFactory.generateDistributionSetTag(tagRest.getName(),
+                tagRest.getDescription(), tagRest.getColour())).collect(Collectors.toList());
     }
 
     private static void mapTag(final MgmtTag response, final Tag tag) {

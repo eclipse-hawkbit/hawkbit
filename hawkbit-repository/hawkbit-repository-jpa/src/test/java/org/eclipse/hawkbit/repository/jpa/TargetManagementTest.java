@@ -212,13 +212,13 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final long current = System.currentTimeMillis();
         controllerManagament.updateLastTargetQuery("4711", null);
 
-        final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(set.getId(), "4711");
+        final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
         final JpaAction action = (JpaAction) deploymentManagement.findActionWithDetails(result.getActions().get(0));
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
                 new JpaActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
-        deploymentManagement.assignDistributionSet(set2.getId(), "4711");
+        assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.findTargetByControllerIDWithDetails("4711");
         // read data

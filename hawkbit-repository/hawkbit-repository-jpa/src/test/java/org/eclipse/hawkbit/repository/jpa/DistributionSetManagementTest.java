@@ -272,7 +272,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(ah2.getId()));
 
         // assign target
-        deploymentManagement.assignDistributionSet(ds.getId(), target.getControllerId());
+        assignDistributionSet(ds.getId(), target.getControllerId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
 
         // not allowed as it is assigned now
@@ -286,7 +286,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // not allowed as it is assigned now
         try {
             ds = distributionSetManagement.unassignSoftwareModule(ds.getId(),
-                    ds.findFirstModuleByType(appType).get().getId());
+                    ds.findFirstModuleByType(appType).getId());
             fail("Expected EntityReadOnlyException");
         } catch (final EntityReadOnlyException e) {
 
@@ -332,12 +332,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // legal update of module addition
         distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os2.getId()));
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
-        assertThat(ds.findFirstModuleByType(osType).get()).isEqualTo(os2);
+        assertThat(ds.findFirstModuleByType(osType)).isEqualTo(os2);
 
         // legal update of module removal
-        distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).get().getId());
+        distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).getId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
-        assertThat(ds.findFirstModuleByType(appType).isPresent()).isFalse();
+        assertThat(ds.findFirstModuleByType(appType)).isNull();
 
         // Update description
         distributionSetManagement.updateDistributionSet(ds.getId(), "a new name", "a new description", "a new version");
@@ -411,15 +411,15 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final Target tSecond = tIterator.next();
 
         // set assigned
-        deploymentManagement.assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
-        deploymentManagement.assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
+        assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
+        assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
         // set installed
         final ArrayList<Target> installedDSSecond = new ArrayList<>();
         installedDSSecond.add(tSecond);
         sendUpdateActionStatusToTargets(dsSecond, installedDSSecond, Status.FINISHED,
                 Lists.newArrayList("some message"));
 
-        deploymentManagement.assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
+        assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
 
         final DistributionSetFilterBuilder distributionSetFilterBuilder = new DistributionSetFilterBuilder()
                 .setIsDeleted(false).setIsComplete(true).setSelectDSWithNoTag(Boolean.FALSE);
@@ -456,18 +456,18 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsInComplete = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("notcomplete", "1", "", standardDsType, null));
 
-        final DistributionSetType newType = distributionSetManagement
+        DistributionSetType newType = distributionSetManagement
                 .createDistributionSetType(new JpaDistributionSetType("foo", "bar", "test"));
 
         distributionSetManagement.assignMandatorySoftwareModuleTypes(newType.getId(),
                 Lists.newArrayList(osType.getId()));
-        distributionSetManagement.assignOptionalSoftwareModuleTypes(newType.getId(),
+        newType = distributionSetManagement.assignOptionalSoftwareModuleTypes(newType.getId(),
                 Lists.newArrayList(appType.getId(), runtimeType.getId()));
 
         final DistributionSet dsNewType = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtype", "1", "", newType, dsDeleted.getModules()));
 
-        deploymentManagement.assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
+        assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
         distributionSetManagement.deleteDistributionSet(dsDeleted);
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
@@ -768,9 +768,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 dsToTargetAssigned.getVersion());
         final Target target = new JpaTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
-        deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
 
         // create assigned rollout
         createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
@@ -796,12 +794,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 dsToTargetAssigned.getVersion());
         final Target target = new JpaTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = Lists.newArrayList(savedTarget);
-        DistributionSetAssignmentResult assignmentResult = deploymentManagement
-                .assignDistributionSet(dsToTargetAssigned, toAssign);
+        DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
+                savedTarget.getControllerId());
         assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
 
-        assignmentResult = deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
         assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
 
         assertThat(distributionSetRepository.findAll()).hasSize(1);

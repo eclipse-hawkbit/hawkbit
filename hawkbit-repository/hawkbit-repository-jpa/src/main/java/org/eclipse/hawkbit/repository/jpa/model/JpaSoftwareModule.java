@@ -108,7 +108,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.type = (JpaSoftwareModuleType) type;
     }
 
-    @Override
     public void addArtifact(final Artifact artifact) {
         if (null == artifacts) {
             artifacts = new ArrayList<>(4);

@@ -52,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
+
 /**
  * REST Resource handling target CRUD operations.
  */
@@ -278,8 +280,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), controllerId).getAssignedEntity()
-                .iterator();
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Lists.newArrayList(controllerId))
+                .getAssignedEntity().iterator();
         if (changed.hasNext()) {
             return new ResponseEntity<>(HttpStatus.OK);
         }

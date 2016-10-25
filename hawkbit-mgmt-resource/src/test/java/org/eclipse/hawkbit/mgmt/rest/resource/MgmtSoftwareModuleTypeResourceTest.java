@@ -57,10 +57,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests.")
     public void getSoftwareModuleTypes() throws Exception {
-        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
-        testType.setDescription("Desc1234");
-        testType = softwareManagement.updateSoftwareModuleType(testType);
+        final SoftwareModuleType testType = createTestType();
 
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -95,14 +92,18 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                 .andExpect(jsonPath("$.total", equalTo(4)));
     }
 
+    private SoftwareModuleType createTestType() {
+        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", null, 5));
+        testType = softwareManagement.updateSoftwareModuleType(testType.getId(), "Desc1234", null);
+        return testType;
+    }
+
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with sorting by MAXASSIGNMENTS field.")
     public void getSoftwareModuleTypesSortedByMaxAssignments() throws Exception {
-        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
-        testType.setDescription("Desc1234");
-        testType = softwareManagement.updateSoftwareModuleType(testType);
+        final SoftwareModuleType testType = createTestType();
 
         // descending
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
@@ -143,14 +144,14 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws JSONException, Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
-        types.add(entityFactory.generateSoftwareModuleType("test-1", "TestName-1", "Desc-1", -1));
+        types.add(entityFactory.generateSoftwareModuleType("test-1", "TestName-1", "Desc-1", "col-1", -1));
 
         mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         types.clear();
-        types.add(entityFactory.generateSoftwareModuleType("test0", "TestName0", "Desc0", 0));
+        types.add(entityFactory.generateSoftwareModuleType("test0", "TestName0", "Desc0", "col0", 0));
 
         mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -163,9 +164,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     public void createSoftwareModuleTypes() throws JSONException, Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
-        types.add(entityFactory.generateSoftwareModuleType("test1", "TestName1", "Desc1", 1));
-        types.add(entityFactory.generateSoftwareModuleType("test2", "TestName2", "Desc2", 2));
-        types.add(entityFactory.generateSoftwareModuleType("test3", "TestName3", "Desc3", 3));
+        types.add(entityFactory.generateSoftwareModuleType("test1", "TestName1", "Desc1", "col1", 1));
+        types.add(entityFactory.generateSoftwareModuleType("test2", "TestName2", "Desc2", "col2", 2));
+        types.add(entityFactory.generateSoftwareModuleType("test3", "TestName3", "Desc3", "col3", 3));
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
@@ -207,10 +208,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} GET requests.")
     public void getSoftwareModuleType() throws Exception {
-        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
-        testType.setDescription("Desc1234");
-        testType = softwareManagement.updateSoftwareModuleType(testType);
+        final SoftwareModuleType testType = createTestType();
 
         mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -229,7 +227,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteSoftwareModuleTypeUnused() throws Exception {
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", "col", 5));
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
 
@@ -244,7 +242,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteSoftwareModuleTypeUsed() throws Exception {
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", "col", 5));
         softwareManagement.createSoftwareModule(
                 entityFactory.generateSoftwareModule(testType, "name", "version", "description", "vendor"));
 
@@ -260,7 +258,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} PUT requests.")
     public void updateSoftwareModuleTypeOnlyDescriptionAndNameUntouched() throws Exception {
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", "col", 5));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -316,7 +314,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", "col", 5));
 
         final List<SoftwareModuleType> types = Lists.newArrayList(testType);
 
@@ -343,7 +341,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                 .andExpect(status().isBadRequest());
 
         final SoftwareModuleType toLongName = entityFactory.generateSoftwareModuleType("test123",
-                RandomStringUtils.randomAscii(80), "Desc123", 5);
+                RandomStringUtils.randomAscii(80), "Desc123", "col", 5);
         mvc.perform(post("/rest/v1/softwaremoduletypes")
                 .content(JsonBuilder.softwareModuleTypes(Lists.newArrayList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -367,9 +365,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Search erquest of software module types.")
     public void searchSoftwareModuleTypeRsql() throws Exception {
         final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", "col", 5));
         final SoftwareModuleType testType2 = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test1234", "TestName1234", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test1234", "TestName1234", "Desc123", "col", 5));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 

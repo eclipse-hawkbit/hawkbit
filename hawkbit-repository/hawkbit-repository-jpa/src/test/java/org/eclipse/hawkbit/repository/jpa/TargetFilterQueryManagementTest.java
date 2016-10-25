@@ -8,6 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -17,18 +27,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.Test;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
-
-import java.util.Iterator;
-import java.util.List;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 /**
  * Test class for {@link TargetFilterQueryManagement}.
@@ -58,7 +62,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement
                 .createTargetFilterQuery(new JpaTargetFilterQuery("someOtherFilter", "name==PendingTargets002"));
 
-        List<TargetFilterQuery> results = targetFilterQueryManagement
+        final List<TargetFilterQuery> results = targetFilterQueryManagement
                 .findTargetFilterQueryByFilter(new PageRequest(0, 10), "name==" + filterName).getContent();
         assertEquals("Search result should have 1 result", 1, results.size());
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery, results.get(0));
@@ -123,17 +127,15 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
 
-        final DistributionSet distributionSet = distributionSetManagement.createDistributionSet(new JpaDistributionSet(
-                "dist_Set_01", "0.1", "", null, null
-        ));
+        final DistributionSet distributionSet = distributionSetManagement
+                .createDistributionSet(new JpaDistributionSet("dist_Set_01", "0.1", "", null, null));
 
         targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
         targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
 
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
 
-        assertEquals("Returns correct distribution set", distributionSet,
-                tfq.getAutoAssignDistributionSet());
+        assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
     }
 
@@ -144,17 +146,15 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
 
-        final DistributionSet distributionSet = distributionSetManagement.createDistributionSet(new JpaDistributionSet(
-                "dist_Set_02", "0.1", "", null, null
-        ));
+        final DistributionSet distributionSet = distributionSetManagement
+                .createDistributionSet(new JpaDistributionSet("dist_Set_02", "0.1", "", null, null));
 
         targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
         targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
 
         // Check if target filter query is there
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
-        assertEquals("Returns correct distribution set", distributionSet,
-                tfq.getAutoAssignDistributionSet());
+        assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
         distributionSetManagement.deleteDistributionSet(distributionSet);
 
@@ -169,12 +169,12 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test to implicitly remove the auto assign distribution set when the ds is soft deleted")
     public void implicitlyRemoveAssignDistributionSet() {
         final String filterName = "target_filter_03";
-        DistributionSet distributionSet = testdataFactory.createDistributionSet("dist_set");
-        Target target = testdataFactory.createTarget();
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dist_set");
+        final Target target = testdataFactory.createTarget();
 
         // Assign the distribution set to an target, to force a soft delete in a
         // later step
-        deploymentManagement.assignDistributionSet(distributionSet.getId(), target.getControllerId());
+        assignDistributionSet(distributionSet.getId(), target.getControllerId());
 
         targetFilterQueryManagement.createTargetFilterQuery(
                 new JpaTargetFilterQuery(filterName, "name==PendingTargets001", (JpaDistributionSet) distributionSet));

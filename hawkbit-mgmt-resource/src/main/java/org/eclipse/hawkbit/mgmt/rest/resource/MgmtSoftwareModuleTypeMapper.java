@@ -45,13 +45,8 @@ final class MgmtSoftwareModuleTypeMapper {
 
     static SoftwareModuleType fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        final SoftwareModuleType result = entityFactory.generateSoftwareModuleType();
-        result.setName(smsRest.getName());
-        result.setKey(smsRest.getKey());
-        result.setDescription(smsRest.getDescription());
-        result.setMaxAssignments(smsRest.getMaxAssignments());
-
-        return result;
+        return entityFactory.generateSoftwareModuleType(smsRest.getKey(), smsRest.getName(), smsRest.getDescription(),
+                smsRest.getColour(), smsRest.getMaxAssignments());
     }
 
     static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {

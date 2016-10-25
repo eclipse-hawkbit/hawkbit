@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,8 +69,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,32 +131,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
-    private SystemSecurityContext systemSecurityContext;
-
-    @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Modifying
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
-    public DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
-            final List<Target> targets) {
-
-        return assignDistributionSetByTargetId((JpaDistributionSet) pset,
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()),
-                ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME);
-
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
-        return assignDistributionSet(dsID, ActionType.FORCED,
-                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, targetIDs);
-    }
 
     @Override
     @Modifying
@@ -169,8 +141,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
-            final long forcedTimestamp, final String... targetIDs) {
-        return assignDistributionSet(dsID, Arrays.stream(targetIDs)
+            final long forcedTimestamp, final Collection<String> targetIDs) {
+        return assignDistributionSet(dsID, targetIDs.stream()
                 .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()));
     }
 
@@ -403,14 +375,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return cancelledTargetIds;
 
-    }
-
-    private DistributionSetAssignmentResult assignDistributionSetByTargetId(@NotNull final JpaDistributionSet set,
-            @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
-
-        return assignDistributionSetToTargets(set, tIDs.stream()
-                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
-                null);
     }
 
     @Override
