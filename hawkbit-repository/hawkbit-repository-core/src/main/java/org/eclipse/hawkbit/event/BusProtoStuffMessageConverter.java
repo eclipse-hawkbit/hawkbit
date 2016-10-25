@@ -28,7 +28,7 @@ import io.protostuff.runtime.RuntimeSchema;
 
 /**
  * A customize message converter for the spring cloud events. The converter is
- * registered fot the application/binary+protostuff type.
+ * registered for the application/binary+protostuff type.
  *
  */
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
@@ -55,11 +55,11 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
         final Object payload = message.getPayload();
 
         try {
-            final Class<?> eventClass = ClassUtils
+            final Class<?> deserializeClass = ClassUtils
                     .getClass(message.getHeaders().get(DEFAULT_CLASS_FIELD_NAME).toString());
             if (payload instanceof byte[]) {
                 @SuppressWarnings("unchecked")
-                final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(eventClass);
+                final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(deserializeClass);
                 final Object deserializeEvent = schema.newMessage();
                 ProtobufIOUtil.mergeFrom((byte[]) message.getPayload(), deserializeEvent, schema);
                 return deserializeEvent;
@@ -76,19 +76,19 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     protected Object convertToInternal(final Object payload, final MessageHeaders headers,
             final Object conversionHint) {
         checkIfHeaderMutable(headers);
-        final Class<? extends Object> eventClass = payload.getClass();
+        final Class<? extends Object> serializeClass = payload.getClass();
         @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(eventClass);
+        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
-        final byte[] protostuff;
+        final byte[] serializeByte;
         try {
-            protostuff = ProtostuffIOUtil.toByteArray(payload, schema, buffer);
+            serializeByte = ProtostuffIOUtil.toByteArray(payload, schema, buffer);
         } finally {
             buffer.clear();
         }
 
-        headers.put(DEFAULT_CLASS_FIELD_NAME, eventClass.getName());
-        return protostuff;
+        headers.put(DEFAULT_CLASS_FIELD_NAME, serializeClass.getName());
+        return serializeByte;
     }
 
     private static void checkIfHeaderMutable(final MessageHeaders headers) {

@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -44,12 +43,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Cancel Action Resource")
 public class DdiCancelActionTest extends AbstractRestIntegrationTest {
-
-    /**
-     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
-     * Spring version 4.3.2
-     */
-    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     @Test
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")

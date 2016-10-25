@@ -53,6 +53,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
@@ -81,6 +82,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected static Logger LOG = null;
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
+
+    /**
+     * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
+     * version 4.3.2 @see https://jira.spring.io/browse/SPR-14577
+     */
+    protected static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One

@@ -170,23 +170,23 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
         private Optional<RolloutChangeEvent> getRolloutChangeEvent() {
             final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
-            if (rolloutIterator.hasNext()) {
-                final RolloutEventKey eventKey = rolloutIterator.next();
-                rolloutEvents.clear();
-                return Optional.of(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
+            if (!rolloutIterator.hasNext()) {
+                return Optional.empty();
             }
-            return Optional.empty();
+            final RolloutEventKey eventKey = rolloutIterator.next();
+            rolloutEvents.clear();
+            return Optional.of(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
         }
 
         private Optional<RolloutGroupChangeEvent> getRolloutGroupChangeEvent() {
             final Iterator<RolloutEventKey> rolloutIterator = rolloutGroupEvents.iterator();
-            if (rolloutIterator.hasNext()) {
-                final RolloutEventKey eventKey = rolloutIterator.next();
-                rolloutGroupEvents.clear();
-                return Optional
-                        .of(new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
+            if (!rolloutIterator.hasNext()) {
+                return Optional.empty();
             }
-            return Optional.empty();
+            final RolloutEventKey eventKey = rolloutIterator.next();
+            rolloutGroupEvents.clear();
+            return Optional
+                    .of(new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
         }
 
         private int calculateQueueSize(final Optional<RolloutChangeEvent> rolloutChangeEvent,

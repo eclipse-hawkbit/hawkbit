@@ -339,14 +339,20 @@ public class AmqpConfiguration {
     }
 
     /**
-     * create bean.
+     * create the authentication bean for controller over amqp.
      * 
      * @param systemManagement
+     *            the systemManagement
      * @param controllerManagement
+     *            the controllerManagement
      * @param tenantConfigurationManagement
+     *            the tenantConfigurationManagement
      * @param tenantAware
+     *            the tenantAware
      * @param ddiSecruityProperties
+     *            the ddiSecruityProperties
      * @param systemSecurityContext
+     *            the systemSecurityContext
      * @return the bean
      */
     @Bean
@@ -360,14 +366,22 @@ public class AmqpConfiguration {
     }
 
     /**
+     * Create the dispatcher bean.
      * 
      * @param rabbitTemplate
+     *            the rabbitTemplate.
      * @param amqpSenderService
+     *            to send messages
      * @param artifactUrlHandler
+     *            the artifactUrlHandler
      * @param systemSecurityContext
+     *            the systemSecurityContext
      * @param systemManagement
+     *            the systemManagement
      * @param targetManagement
+     *            the targetManagement
      * @param controllerManagement
+     *            the controllerManagement
      * @return the bean
      */
     @Bean

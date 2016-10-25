@@ -42,12 +42,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Config Data Resource")
 public class DdiConfigDataTest extends AbstractRestIntegrationTest {
 
-    /**
-     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
-     * Spring version 4.3.2
-     */
-    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
-
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "are requested only once from the device.")
@@ -81,8 +75,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content()
-                        .contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.configData.href").doesNotExist());
     }

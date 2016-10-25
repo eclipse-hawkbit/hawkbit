@@ -44,7 +44,6 @@ import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -63,12 +62,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoDB {
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
-
-    /**
-     * Constant class for MediaType HAL with encoding UTF-8. Necessary since
-     * Spring version 4.3.2
-     */
-    private static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     @Test()
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
