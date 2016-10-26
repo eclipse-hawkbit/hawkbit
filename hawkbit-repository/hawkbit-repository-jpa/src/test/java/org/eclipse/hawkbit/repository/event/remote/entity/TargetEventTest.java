@@ -10,13 +10,8 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -43,7 +38,7 @@ public class TargetEventTest extends AbstractRemoteEntityEventTest<Target> {
 
     @Test
     @Description("Verifies that cancel target assignment event works")
-    public void testCancelTargetAssignmentEvent() throws JsonProcessingException {
+    public void testCancelTargetAssignmentEvent() {
         final Target target = createEntity();
         final CancelTargetAssignmentEvent assignmentEvent = new CancelTargetAssignmentEvent(target, 1L, "node");
         final CancelTargetAssignmentEvent underTest = (CancelTargetAssignmentEvent) assertEntity(target,

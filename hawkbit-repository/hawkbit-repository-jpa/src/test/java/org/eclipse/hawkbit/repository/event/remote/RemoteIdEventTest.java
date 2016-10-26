@@ -12,12 +12,9 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import org.junit.Test;
 import org.springframework.messaging.Message;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -63,13 +60,12 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
         try {
             final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance("tenant", entityId, "Node");
             assertEntity(entityId, event);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | SecurityException | JsonProcessingException e) {
+        } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
         }
     }
 
-    protected RemoteIdEvent assertEntity(final Long id, final RemoteIdEvent event) throws JsonProcessingException {
+    protected RemoteIdEvent assertEntity(final Long id, final RemoteIdEvent event) {
         assertThat(event.getEntityId()).isSameAs(id);
 
         final Message<?> message = createMessage(event);

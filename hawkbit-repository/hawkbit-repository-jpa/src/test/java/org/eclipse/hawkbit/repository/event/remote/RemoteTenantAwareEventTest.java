@@ -20,8 +20,6 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -32,7 +30,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     @Test
     @Description("Verifies that a immutable header is not work")
-    public void testMessageWithImmutableHeader() throws JsonProcessingException {
+    public void testMessageWithImmutableHeader() {
         final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
 
         try {
