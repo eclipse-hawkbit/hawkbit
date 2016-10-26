@@ -86,7 +86,7 @@
     }
     .view-header:after {
       background: $logo-image no-repeat right top;
-      background-position: right 5px top 8px;
+      background-position: $logo-position;
       content: "";
       height: 80px;
       position: absolute;
