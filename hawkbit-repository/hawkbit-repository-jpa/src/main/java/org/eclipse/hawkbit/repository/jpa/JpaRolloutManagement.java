@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutFields;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -99,6 +100,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private RolloutTargetGroupRepository rolloutTargetGroupRepository;
+
+    @Autowired
+    private RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -404,18 +408,19 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         for (final JpaRollout rollout : rolloutsToCheck) {
             LOGGER.debug("Checking rollout {}", rollout);
-            final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+
+            final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
                     RolloutGroupStatus.RUNNING);
 
-            if (rolloutGroups.isEmpty()) {
+            if (rolloutGroupsRunning.isEmpty()) {
                 // no running rollouts, probably there was an error
                 // somewhere at the latest group. And the latest group has
                 // been switched from running into error state. So we need
                 // to find the latest group which
                 executeLatestRolloutGroup(rollout);
             } else {
-                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroups.size());
-                executeRolloutGroups(rollout, rolloutGroups);
+                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
+                executeRolloutGroups(rollout, rolloutGroupsRunning);
             }
 
             if (isRolloutComplete(rollout)) {
@@ -458,6 +463,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
+
+            checkIfTargetsOfRolloutGroupDeleted(rolloutGroup);
+
             // error state check, do we need to stop the whole
             // rollout because of error?
             final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
@@ -476,6 +484,27 @@ public class JpaRolloutManagement implements RolloutManagement {
                 }
             }
         }
+    }
+
+    private void checkIfTargetsOfRolloutGroupDeleted(final JpaRolloutGroup rolloutGroup) {
+
+        final long countTargetsOfRolloutGroup = rolloutGroupManagement
+                .findRolloutGroupTargets(rolloutGroup, new OffsetBasedPageRequest(0, 1, null)).getTotalElements();
+
+        if (rolloutGroup.getTotalTargets() != countTargetsOfRolloutGroup) {
+            // targets have been deleted and we have to update the
+            // total target count in the rollout and the rollout group
+            final JpaRollout jpaRollout = (JpaRollout) rolloutGroup.getRollout();
+            final long updatedTargetCount = jpaRollout.getTotalTargets()
+                    - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
+            jpaRollout.setTotalTargets(updatedTargetCount);
+            final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
+            jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
+
+            rolloutRepository.save(jpaRollout);
+            rolloutGroupRepository.save(jpaRolloutGroup);
+        }
+
     }
 
     private void executeLatestRolloutGroup(final JpaRollout rollout) {
@@ -656,7 +685,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
-        final int totalGroup = rolloutGroup.getTotalTargets();
+        final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);
         if (totalGroup == 0) {
