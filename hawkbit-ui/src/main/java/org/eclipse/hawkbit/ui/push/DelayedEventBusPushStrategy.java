@@ -86,8 +86,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
 
-    private static final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
-    private static final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
+    private final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
+    private final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());
@@ -302,7 +302,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         }
     }
 
-    private static void collectRolloutEvent(final TenantAwareEvent event) {
+    private void collectRolloutEvent(final TenantAwareEvent event) {
         Long rolloutId = null;
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
