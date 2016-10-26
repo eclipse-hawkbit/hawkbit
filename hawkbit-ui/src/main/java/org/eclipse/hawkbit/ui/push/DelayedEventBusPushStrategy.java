@@ -174,17 +174,17 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                 return Optional.empty();
             }
             final RolloutEventKey eventKey = rolloutIterator.next();
-            rolloutEvents.clear();
+            rolloutIterator.remove();
             return Optional.of(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
         }
 
         private Optional<RolloutGroupChangeEvent> getRolloutGroupChangeEvent() {
-            final Iterator<RolloutEventKey> rolloutIterator = rolloutGroupEvents.iterator();
-            if (!rolloutIterator.hasNext()) {
+            final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
+            if (!rolloutGroupIterator.hasNext()) {
                 return Optional.empty();
             }
-            final RolloutEventKey eventKey = rolloutIterator.next();
-            rolloutGroupEvents.clear();
+            final RolloutEventKey eventKey = rolloutGroupIterator.next();
+            rolloutGroupIterator.remove();
             return Optional
                     .of(new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
         }
