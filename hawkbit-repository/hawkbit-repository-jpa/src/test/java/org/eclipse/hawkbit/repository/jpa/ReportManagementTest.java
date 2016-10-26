@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.ReportManagement.DateTypes;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -535,7 +535,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             final Status status, final String... msgs) {
         final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
+            final List<JpaAction> findByTarget = actionRepository.findByTarget((JpaTarget) t);
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
             }
@@ -545,16 +545,14 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
             final String... msgs) {
-        updActA.setStatus(status);
 
-        final ActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setAction(updActA);
+        final JpaActionStatus statusMessages = new JpaActionStatus();
         statusMessages.setOccurredAt(System.currentTimeMillis());
         statusMessages.setStatus(status);
         for (final String msg : msgs) {
             statusMessages.addMessage(msg);
         }
-        controllerManagament.addUpdateActionStatus(statusMessages);
+        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
@@ -562,11 +560,6 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         private Calendar datetime = Calendar.getInstance();
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.springframework.data.auditing.DateTimeProvider#getNow()
-         */
         @Override
         public Calendar getNow() {
             return datetime;

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.apache.tika.metadata.Metadata;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -600,29 +599,25 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     public DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
 
-        if (distributionSetMetadataRepository.exists(new DsMetadataCompositeKey(dsId, md.get))) {
-            throwMetadataKeyAlreadyExists(metadata.getId().getKey());
+        if (distributionSetMetadataRepository.exists(new DsMetadataCompositeKey(dsId, md.getKey()))) {
+            throwMetadataKeyAlreadyExists(md.getKey());
         }
 
-        touch(dsId);
-        return distributionSetMetadataRepository.save(metadata);
+        return distributionSetMetadataRepository
+                .save(new JpaDistributionSetMetadata(md.getKey(), touch(dsId), md.getValue()));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<Metadata> md) {
+    public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<MetaData> md) {
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        final Collection<JpaDistributionSetMetadata> metadata = (Collection) md;
+        md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
+                new DsMetadataCompositeKey(dsId, meta.getKey())));
 
-        for (final JpaDistributionSetMetadata distributionSetMetadata : metadata) {
-            checkAndThrowAlreadyIfDistributionSetMetadataExists(distributionSetMetadata.getId());
-        }
-        metadata.forEach(m -> touch(m.getDistributionSet().getId()));
-
-        return new ArrayList<>(
-                (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
+        return new ArrayList<>((Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(
+                md.stream().map(meta -> new JpaDistributionSetMetadata(meta.getKey(), touch(dsId), meta.getValue()))
+                        .collect(Collectors.toList())));
     }
 
     @Override
@@ -655,13 +650,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      * @param distributionSet
      *            Distribution set
      */
-    private void touch(final Long distributionSet) {
+    private JpaDistributionSet touch(final Long distributionSet) {
         final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet);
+
         // merge base distribution set so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base distribution set itself for
         // auditing purposes.
-        entityManager.merge((JpaDistributionSet) latestDistributionSet).setLastModifiedAt(0L);
+        final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) latestDistributionSet);
+        result.setLastModifiedAt(0L);
+
+        return result;
     }
 
     @Override

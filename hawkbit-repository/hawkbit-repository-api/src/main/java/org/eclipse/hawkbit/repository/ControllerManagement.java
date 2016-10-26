@@ -47,16 +47,24 @@ public interface ControllerManagement {
      * Adds an {@link ActionStatus} for a cancel {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
      * 
+     * @param actionId
+     *            to be updated
      * @param actionStatus
      *            to be added
-     * @return the persisted {@link Action}
+     * @return the updated {@link Action}
      * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      * 
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
+     * @throws EntityNotFoundException
+     *             if given action does not exist
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
+    Action addCancelActionStatus(@NotNull Long actionId, @NotNull ActionStatus actionStatus);
 
     /**
      * Sends the download progress and notifies the {@link EventBus} with a
@@ -78,18 +86,28 @@ public interface ControllerManagement {
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
      * . No state changes.
      * 
+     * @param actionId
+     *            to be updated
      * @param statusMessage
      *            to add to the action
      * 
-     * @return create {@link ActionStatus} entity
+     * @return created {@link ActionStatus} entity
+     * 
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
+     * @throws EntityNotFoundException
+     *             if given action does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    ActionStatus addInformationalActionStatus(@NotNull ActionStatus statusMessage);
+    ActionStatus addInformationalActionStatus(@NotNull Long actionId, @NotNull ActionStatus statusMessage);
 
     /**
      * Adds an {@link ActionStatus} entry for an update {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
      *
+     * @param actionId
+     *            to be updated
      * @param actionStatus
      *            to be added
      * @return the updated {@link Action}
@@ -99,9 +117,12 @@ public interface ControllerManagement {
      * @throws TooManyStatusEntriesException
      *             if more than the allowed number of status entries are
      *             inserted
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addUpdateActionStatus(@NotNull ActionStatus actionStatus);
+    Action addUpdateActionStatus(@NotNull Long actionId, @NotNull ActionStatus actionStatus);
 
     /**
      * Retrieves all {@link Action}s which are active and assigned to a

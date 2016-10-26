@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -528,7 +529,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public SoftwareModuleMetadata createSoftwareModuleMetadata(final SoftwareModuleMetadata md) {
+    public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
 
         if (softwareModuleMetadataRepository.exists(metadata.getId())) {
@@ -545,7 +546,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Collection<SoftwareModuleMetadata> md) {
+    public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
+            final Collection<MetaData> md) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaSoftwareModuleMetadata> metadata = (Collection) md;
 
@@ -559,7 +561,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public SoftwareModuleMetadata updateSoftwareModuleMetadata(final SoftwareModuleMetadata md) {
+    public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
 
         // check if exists otherwise throw entity not found exception

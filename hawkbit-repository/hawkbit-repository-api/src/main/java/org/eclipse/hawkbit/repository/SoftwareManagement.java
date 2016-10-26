@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -89,7 +90,9 @@ public interface SoftwareManagement {
 
     /**
      * creates a list of software module meta data entries.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created software module meta data entries
@@ -98,11 +101,14 @@ public interface SoftwareManagement {
      *             specific key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<SoftwareModuleMetadata> createSoftwareModuleMetadata(@NotNull Collection<SoftwareModuleMetadata> metadata);
+    List<SoftwareModuleMetadata> createSoftwareModuleMetadata(@NotNull Long moduleId,
+            @NotNull Collection<MetaData> metadata);
 
     /**
      * creates or updates a single software module meta data entry.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entry to create or update
      * @return the updated or created software module meta data entry
@@ -111,7 +117,7 @@ public interface SoftwareManagement {
      *             key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull SoftwareModuleMetadata metadata);
+    SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
 
     /**
      * Creates multiple {@link SoftwareModuleType}s.
@@ -440,7 +446,9 @@ public interface SoftwareManagement {
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entry to be updated
      * 
@@ -451,7 +459,7 @@ public interface SoftwareManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull SoftwareModuleMetadata metadata);
+    SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
 
     /**
      * Updates existing {@link SoftwareModuleType}.

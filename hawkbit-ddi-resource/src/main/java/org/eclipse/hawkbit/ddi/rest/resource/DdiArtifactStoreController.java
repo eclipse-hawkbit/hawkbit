@@ -141,20 +141,16 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());
         final String range = request.getHeader("Range");
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
-        actionStatus.setStatus(Status.DOWNLOAD);
-
+        String message;
         if (range != null) {
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
-                    + " of: " + request.getRequestURI());
+            message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
+                    + request.getRequestURI();
         } else {
-            actionStatus.addMessage(
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
+            message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI();
         }
 
-        return controllerManagement.addInformationalActionStatus(actionStatus);
+        return controllerManagement.addInformationalActionStatus(
+                entityFactory.generateActionStatus(action, Status.DOWNLOAD, System.currentTimeMillis(), message));
     }
 
 }

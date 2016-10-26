@@ -52,18 +52,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        JpaActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
-                System.currentTimeMillis());
+        JpaActionStatus actionStatusMessage = new JpaActionStatus(Action.Status.RUNNING, System.currentTimeMillis());
         actionStatusMessage.addMessage("foobar");
         savedAction.setStatus(Status.RUNNING);
-        controllerManagament.addUpdateActionStatus(actionStatusMessage);
+        controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.FINISHED, System.currentTimeMillis());
+        actionStatusMessage = new JpaActionStatus(Action.Status.FINISHED, System.currentTimeMillis());
         actionStatusMessage.addMessage(RandomStringUtils.randomAscii(512));
         savedAction.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(actionStatusMessage);
+        controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
@@ -104,26 +103,26 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         // test and verify
-        final JpaActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
+        final JpaActionStatus actionStatusMessage = new JpaActionStatus(Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("running");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage);
+        savedAction = controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        final JpaActionStatus actionStatusMessage2 = new JpaActionStatus(savedAction, Action.Status.ERROR,
+        final JpaActionStatus actionStatusMessage2 = new JpaActionStatus(Action.Status.ERROR,
                 System.currentTimeMillis());
         actionStatusMessage2.addMessage("error");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2);
+        savedAction = controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage2);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
 
         // try with disabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(true);
-        final JpaActionStatus actionStatusMessage3 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
+        final JpaActionStatus actionStatusMessage3 = new JpaActionStatus(Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage3.addMessage("finish");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage3);
+        savedAction = controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage3);
 
         // test
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
@@ -131,10 +130,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // try with enabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(false);
-        final JpaActionStatus actionStatusMessage4 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
+        final JpaActionStatus actionStatusMessage4 = new JpaActionStatus(Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage4.addMessage("finish");
-        controllerManagament.addUpdateActionStatus(actionStatusMessage3);
+        controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage3);
 
         // test
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
@@ -150,10 +149,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final Action action = prepareFinishedUpdate("Rabbit");
 
-        final JpaActionStatus actionStatusMessage1 = new JpaActionStatus(action, Action.Status.RUNNING,
+        final JpaActionStatus actionStatusMessage1 = new JpaActionStatus(Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage1.addMessage("got some additional feedback");
-        controllerManagament.addUpdateActionStatus(actionStatusMessage1);
+        controllerManagament.addUpdateActionStatus(action.getId(), actionStatusMessage1);
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
@@ -170,10 +169,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         Action action = prepareFinishedUpdate("Rabbit");
 
-        final JpaActionStatus actionStatusMessage1 = new JpaActionStatus(action, Action.Status.RUNNING,
+        final JpaActionStatus actionStatusMessage1 = new JpaActionStatus(Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage1.addMessage("got some additional feedback");
-        action = controllerManagament.addUpdateActionStatus(actionStatusMessage1);
+        action = controllerManagament.addUpdateActionStatus(action.getId(), actionStatusMessage1);
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
@@ -192,17 +191,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         // test and verify
-        final JpaActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
+        final JpaActionStatus actionStatusMessage = new JpaActionStatus(Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("running");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage);
+        savedAction = controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID(controllerId).getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        final JpaActionStatus actionStatusMessage2 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
+        final JpaActionStatus actionStatusMessage2 = new JpaActionStatus(Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage2.addMessage("finish");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2);
+        savedAction = controllerManagament.addUpdateActionStatus(savedAction.getId(), actionStatusMessage2);
 
         // test
         assertThat(targetManagement.findTargetByControllerID(controllerId).getTargetInfo().getUpdateStatus())

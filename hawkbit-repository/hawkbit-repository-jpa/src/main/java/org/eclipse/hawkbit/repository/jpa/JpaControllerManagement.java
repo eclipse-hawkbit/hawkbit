@@ -18,7 +18,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -187,7 +186,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Action findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+        return getActionAndThrowExceptionIfNotFound(actionId);
     }
 
     @Override
@@ -236,8 +235,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addCancelActionStatus(final ActionStatus actionS) {
-        final JpaAction action = (JpaAction) actionS.getAction();
+    public Action addCancelActionStatus(final Long actionId, final ActionStatus actionS) {
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
         final JpaActionStatus actionStatus = (JpaActionStatus) actionS;
 
         checkForToManyStatusEntries(action);
@@ -276,8 +275,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
-        final JpaAction action = (JpaAction) actionStatus.getAction();
+    public Action addUpdateActionStatus(final Long actionId, final ActionStatus actionStatus) {
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
@@ -308,8 +307,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        final JpaAction mergedAction = entityManager.merge(action);
-        JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
+        JpaTarget mergedTarget = (JpaTarget) action.getTarget();
         // check for a potential DOS attack
         checkForToManyStatusEntries(action);
 
@@ -317,10 +315,10 @@ public class JpaControllerManagement implements ControllerManagement {
         case ERROR:
             mergedTarget = DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.ERROR, false,
                     targetInfoRepository, entityManager);
-            handleErrorOnAction(mergedAction, mergedTarget);
+            handleErrorOnAction(action, mergedTarget);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(mergedTarget, mergedAction);
+            handleFinishedAndStoreInTargetStatus(mergedTarget, action);
             break;
         case CANCELED:
         case WARNING:
@@ -333,7 +331,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
 
-        return actionRepository.save(mergedAction);
+        action.setStatus(actionStatus.getStatus());
+
+        return actionRepository.save(action);
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -469,8 +469,18 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public ActionStatus addInformationalActionStatus(final ActionStatus statusMessage) {
+    public ActionStatus addInformationalActionStatus(final Long actionId, final ActionStatus statusMessage) {
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+        ((JpaActionStatus) statusMessage).setAction(action);
+
+        checkForToManyStatusEntries(action);
+
         return actionStatusRepository.save((JpaActionStatus) statusMessage);
+    }
+
+    private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
+        return Optional.ofNullable(actionRepository.findById(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with ID " + actionId + " not found!"));
     }
 
     @Override

@@ -203,8 +203,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         secondAction = (JpaAction) deploymentManagement.findActionWithDetails(secondAction.getId());
         // confirm cancellation
         secondAction.setStatus(Status.CANCELED);
-        controllerManagement
-                .addCancelActionStatus(new JpaActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()));
+        controllerManagement.addCancelActionStatus(secondAction.getId(),
+                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(4);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).as("wrong ds")
                 .isEqualTo(dsFirst);
@@ -217,8 +217,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId());
         // confirm cancellation
         firstAction.setStatus(Status.CANCELED);
-        controllerManagement
-                .addCancelActionStatus(new JpaActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()));
+        controllerManagement.addCancelActionStatus(firstAction.getId(),
+                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(6);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsInstalled);
@@ -256,8 +256,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // confirm cancellation
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId());
         firstAction.setStatus(Status.CANCELED);
-        controllerManagement
-                .addCancelActionStatus(new JpaActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()));
+        controllerManagement.addCancelActionStatus(firstAction.getId(),
+                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsSecond);
@@ -273,8 +273,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("wrong assigned ds").isEqualTo(dsSecond);
         // confirm cancellation
         secondAction.setStatus(Status.CANCELED);
-        controllerManagement
-                .addCancelActionStatus(new JpaActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()));
+        controllerManagement.addCancelActionStatus(secondAction.getId(),
+                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
         // cancelled success -> back to dsInstalled
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong installed ds").isEqualTo(dsInstalled);
@@ -734,13 +734,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         updActA.setStatus(status);
 
         final JpaActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setAction(updActA);
         statusMessages.setOccurredAt(System.currentTimeMillis());
         statusMessages.setStatus(status);
         for (final String msg : msgs) {
             statusMessages.addMessage(msg);
         }
-        controllerManagament.addUpdateActionStatus(statusMessages);
+        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
@@ -780,8 +779,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, (JpaDistributionSet) dsA);
         final JpaAction action = (JpaAction) updAct.getContent().get(0);
         action.setStatus(Status.FINISHED);
-        final ActionStatus statusMessage = new JpaActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "");
-        controllerManagament.addUpdateActionStatus(statusMessage);
+        final ActionStatus statusMessage = new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "");
+        controllerManagament.addUpdateActionStatus(action.getId(), statusMessage);
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 

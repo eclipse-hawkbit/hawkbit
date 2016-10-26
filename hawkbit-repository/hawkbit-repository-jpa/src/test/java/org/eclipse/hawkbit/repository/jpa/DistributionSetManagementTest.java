@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -245,7 +245,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetMetadata metadata = new JpaDistributionSetMetadata(knownKey, ds, knownValue);
         final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) distributionSetManagement
-                .createDistributionSetMetadata(metadata);
+                .createDistributionSetMetadata(ds.getId(), metadata);
 
         assertThat(createdMetadata).isNotNull();
         assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
@@ -362,22 +362,17 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(ds.getOptLockRevision()).isEqualTo(1);
 
         // create an DS meta data entry
-        final DistributionSetMetadata dsMetadata = distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata(knownKey, ds, knownValue));
+        distributionSetManagement.createDistributionSetMetadata(ds.getId(),
+                new JpaDistributionSetMetadata(knownKey, ds, knownValue));
 
         DistributionSet changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId());
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
-
-        // modifying the meta data value
-        dsMetadata.setValue(knownUpdateValue);
-        dsMetadata.setKey(knownKey);
-        ((JpaDistributionSetMetadata) dsMetadata).setDistributionSet(changedLockRevisionDS);
 
         Thread.sleep(100);
 
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
-                .updateDistributionSetMetadata(dsMetadata);
+                .updateDistributionSetMetadata(ds.getId(), knownKey, knownUpdateValue);
         // we are updating the sw meta data so also modifying the base software
         // module so opt lock
         // revision must be three
@@ -681,7 +676,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             final Status status, final Collection<String> msgs) {
         final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
+            final List<JpaAction> findByTarget = actionRepository.findByTarget((JpaTarget) t);
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
             }
@@ -726,16 +721,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         for (int index = 0; index < 10; index++) {
 
-            ds1 = distributionSetManagement
-                    .createDistributionSetMetadata(new JpaDistributionSetMetadata("key" + index, ds1, "value" + index))
-                    .getDistributionSet();
+            ds1 = distributionSetManagement.createDistributionSetMetadata(ds1.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds1, "value" + index)).getDistributionSet();
         }
 
         for (int index = 0; index < 20; index++) {
 
-            ds2 = distributionSetManagement
-                    .createDistributionSetMetadata(new JpaDistributionSetMetadata("key" + index, ds2, "value" + index))
-                    .getDistributionSet();
+            ds2 = distributionSetManagement.createDistributionSetMetadata(ds2.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds2, "value" + index)).getDistributionSet();
         }
 
         final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement
@@ -822,14 +815,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
             final Collection<String> msgs) {
-        updActA.setStatus(status);
 
-        final ActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setAction(updActA);
+        final JpaActionStatus statusMessages = new JpaActionStatus();
         statusMessages.setOccurredAt(System.currentTimeMillis());
         statusMessages.setStatus(status);
         msgs.forEach(statusMessages::addMessage);
-        controllerManagament.addUpdateActionStatus(statusMessages);
+        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 

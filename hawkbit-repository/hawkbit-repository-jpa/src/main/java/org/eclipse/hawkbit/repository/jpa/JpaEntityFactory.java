@@ -189,16 +189,15 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
-            final String message) {
-        return new JpaActionStatus((JpaAction) action, status, occurredAt, message);
+    public ActionStatus generateActionStatus(final Status status, final Long occurredAt, final String message) {
+        return new JpaActionStatus(status, occurredAt, message);
     }
 
     @Override
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
+    public ActionStatus generateActionStatus(final Status status, final Long occurredAt,
             final Collection<String> messages) {
 
-        final JpaActionStatus result = new JpaActionStatus((JpaAction) action, status, occurredAt, null);
+        final JpaActionStatus result = new JpaActionStatus(status, occurredAt, null);
         messages.forEach(result::addMessage);
 
         return result;

@@ -540,7 +540,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActionsByTarget(final Target target) {
-        return actionRepository.findByTarget((JpaTarget) target);
+        return Collections.unmodifiableList(actionRepository.findByTarget((JpaTarget) target));
     }
 
     @Override

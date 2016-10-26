@@ -13,7 +13,6 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import org.apache.tika.metadata.Metadata;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.DistributionSetCreationFailedMissingMandatoryModuleException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -30,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -141,7 +141,7 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<DistributionSetMetadata> createDistributionSetMetadata(@NotNull Long dsId,
-            @NotEmpty Collection<Metadata> metadata);
+            @NotEmpty Collection<MetaData> metadata);
 
     /**
      * creates or updates a single distribution set meta data entry.
@@ -157,7 +157,7 @@ public interface DistributionSetManagement {
      *             key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata createDistributionSetMetadata(@NotNull Long dsId, @NotNull Metadata metadata);
+    DistributionSetMetadata createDistributionSetMetadata(@NotNull Long dsId, @NotNull MetaData metadata);
 
     /**
      * Creates multiple {@link DistributionSet}s.

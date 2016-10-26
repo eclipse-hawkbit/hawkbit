@@ -65,8 +65,6 @@ public interface EntityFactory {
     /**
      * Generates an {@link ActionStatus} object without persisting it.
      * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
      * @param status
      *            as reflected by this {@link ActionStatus}.
      * @param occurredAt
@@ -77,14 +75,11 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt,
-            final Collection<String> messages);
+    ActionStatus generateActionStatus(@NotNull Status status, Long occurredAt, final Collection<String> messages);
 
     /**
      * Generates an {@link ActionStatus} object without persisting it.
      * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
      * @param status
      *            as reflected by this {@link ActionStatus}.
      * @param occurredAt
@@ -95,8 +90,7 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt,
-            final String message);
+    ActionStatus generateActionStatus(@NotNull Status status, Long occurredAt, final String message);
 
     /**
      * Generates an empty {@link Artifact} without persisting it.
