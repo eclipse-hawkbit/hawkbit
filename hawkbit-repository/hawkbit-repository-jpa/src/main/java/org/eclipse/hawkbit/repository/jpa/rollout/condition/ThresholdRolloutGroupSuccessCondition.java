@@ -8,17 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,9 +24,6 @@ import org.springframework.stereotype.Component;
 @Component("thresholdRolloutGroupSuccessCondition")
 public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
-
-    @Autowired
-    private RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -45,24 +38,17 @@ public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupCondit
             return true;
         }
 
-        final long finishedByStatus = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
+        final long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.FINISHED);
-        final long finished = finishedByStatus + countDeletedTargets(rolloutGroup);
-
         try {
             final Integer threshold = Integer.valueOf(expression);
             // calculate threshold
-            return ((float) finished / totalGroup) >= ((float) threshold / 100F);
+            return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
+
         } catch (final NumberFormatException e) {
             LOGGER.error("Cannot evaluate condition expression " + expression, e);
             return false;
         }
-    }
-
-    private long countDeletedTargets(final RolloutGroup rolloutGroup) {
-        final Page<Target> targetsOfRolloutGroup = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup,
-                new OffsetBasedPageRequest(0, 1, null));
-        return rolloutGroup.getTotalTargets() - targetsOfRolloutGroup.getTotalElements();
     }
 
 }
