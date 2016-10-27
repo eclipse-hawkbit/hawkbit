@@ -16,12 +16,12 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -376,10 +376,10 @@ public interface EntityFactory {
     TargetTag generateTargetTag(@NotNull String name, String description, String colour);
 
     /**
-     * Generates an empty {@link LocalArtifact} without persisting it.
+     * Generates an empty {@link Artifact} without persisting it.
      * 
-     * @return {@link LocalArtifact} object
+     * @return {@link Artifact} object
      */
-    LocalArtifact generateLocalArtifact();
+    Artifact generateArtifact();
 
 }

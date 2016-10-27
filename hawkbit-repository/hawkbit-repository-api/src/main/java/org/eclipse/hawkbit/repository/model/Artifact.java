@@ -17,6 +17,10 @@ import com.google.common.io.BaseEncoding;
  *
  */
 public interface Artifact extends TenantAwareBaseEntity {
+    /**
+     * @return the filename that was provided during upload.
+     */
+    String getFilename();
 
     /**
      * @return {@link SoftwareModule} this {@link Artifact} belongs to.

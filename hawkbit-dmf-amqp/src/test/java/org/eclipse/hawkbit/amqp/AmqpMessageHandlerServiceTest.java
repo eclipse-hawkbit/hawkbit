@@ -49,7 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -300,8 +300,8 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
-        final LocalArtifact localArtifactMock = mock(LocalArtifact.class);
-        when(artifactManagementMock.findFirstLocalArtifactsBySHA1(anyString())).thenReturn(localArtifactMock);
+        final Artifact localArtifactMock = mock(Artifact.class);
+        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
         when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
                 .thenThrow(EntityNotFoundException.class);
 
@@ -325,12 +325,12 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         // mock
-        final LocalArtifact localArtifactMock = mock(LocalArtifact.class);
+        final Artifact localArtifactMock = mock(Artifact.class);
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
-        when(artifactManagementMock.findFirstLocalArtifactsBySHA1(anyString())).thenReturn(localArtifactMock);
+        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), localArtifactMock))
                 .thenReturn(true);
-        when(artifactManagementMock.loadLocalArtifactBinary(localArtifactMock)).thenReturn(dbArtifactMock);
+        when(artifactManagementMock.loadArtifactBinary(localArtifactMock)).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
         when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash("sha1", "md5"));

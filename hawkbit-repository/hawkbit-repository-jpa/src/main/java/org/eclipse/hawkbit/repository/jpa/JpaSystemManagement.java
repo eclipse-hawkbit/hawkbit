@@ -84,13 +84,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private DistributionSetTagRepository distributionSetTagRepository;
 
     @Autowired
-    private ExternalArtifactRepository externalArtifactRepository;
-
-    @Autowired
     private LocalArtifactRepository artifactRepository;
-
-    @Autowired
-    private ExternalArtifactProviderRepository externalArtifactProviderRepository;
 
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
@@ -229,8 +223,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             rolloutGroupRepository.deleteByTenantIgnoreCase(tenant);
             rolloutRepository.deleteByTenantIgnoreCase(tenant);
             artifactRepository.deleteByTenantIgnoreCase(tenant);
-            externalArtifactRepository.deleteByTenantIgnoreCase(tenant);
-            externalArtifactProviderRepository.deleteByTenantIgnoreCase(tenant);
             targetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetRepository.deleteByTenantIgnoreCase(tenant);

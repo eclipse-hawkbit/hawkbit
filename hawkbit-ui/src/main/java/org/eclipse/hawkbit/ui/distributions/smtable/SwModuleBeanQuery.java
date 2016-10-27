@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -22,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.springframework.data.domain.Slice;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -36,9 +36,9 @@ import com.google.common.base.Strings;
 public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
     private transient SoftwareManagement softwareManagementService;
-    private SoftwareModuleType type;
-    private String searchText = null;
-    private Long orderByDistId = 0L;
+    private final Long type;
+    private final String searchText;
+    private final Long orderByDistId;
 
     /**
      * Parametric Constructor.
@@ -56,16 +56,22 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
-            type = (SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE);
-            searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
-            if (!Strings.isNullOrEmpty(searchText)) {
-                searchText = String.format("%%%s%%", searchText);
+            type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
+                    .map(t -> t.getId()).orElse(null);
+            final String text = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
+            if (!Strings.isNullOrEmpty(text)) {
+                searchText = String.format("%%%s%%", text);
+            } else {
+                searchText = null;
             }
-            orderByDistId = (Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION);
-            if (orderByDistId == null) {
-                orderByDistId = 0L;
-            }
+            orderByDistId = Optional.ofNullable((Long) queryConfig.get(SPUIDefinitions.ORDER_BY_DISTRIBUTION))
+                    .orElse(0L);
+            return;
         }
+
+        orderByDistId = 0L;
+        type = null;
+        searchText = null;
     }
 
     @Override
@@ -75,20 +81,13 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
-        final Slice<AssignedSoftwareModule> swModuleBeans;
-        final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
-
-        swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-                new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type);
-
-        for (final AssignedSoftwareModule swModule : swModuleBeans) {
-            proxyBeans.add(getProxyBean(swModule));
-        }
-
-        return proxyBeans;
+        return getSoftwareManagement()
+                .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+                        new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type)
+                .getContent().stream().map(SwModuleBeanQuery::getProxyBean).collect(Collectors.toList());
     }
 
-    private ProxyBaseSwModuleItem getProxyBean(final AssignedSoftwareModule customSoftwareModule) {
+    private static ProxyBaseSwModuleItem getProxyBean(final AssignedSoftwareModule customSoftwareModule) {
         final SoftwareModule bean = customSoftwareModule.getSoftwareModule();
         final ProxyBaseSwModuleItem proxyItem = new ProxyBaseSwModuleItem();
         proxyItem.setSwId(bean.getId());

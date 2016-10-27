@@ -57,9 +57,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected ActionStatusRepository actionStatusRepository;
 
     @Autowired
-    protected ExternalArtifactRepository externalArtifactRepository;
-
-    @Autowired
     protected LocalArtifactRepository artifactRepository;
 
     @Autowired

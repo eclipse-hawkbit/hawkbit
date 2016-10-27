@@ -56,9 +56,6 @@ public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractInte
     protected ActionStatusRepository actionStatusRepository;
 
     @Autowired
-    protected ExternalArtifactRepository externalArtifactRepository;
-
-    @Autowired
     protected LocalArtifactRepository artifactRepository;
 
     @Autowired

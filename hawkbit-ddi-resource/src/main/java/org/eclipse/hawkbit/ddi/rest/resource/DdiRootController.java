@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
@@ -154,9 +154,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             // Exception squid:S3655 - Optional access is checked in checkModule
             // subroutine
             @SuppressWarnings("squid:S3655")
-            final LocalArtifact artifact = module.getLocalArtifactByFilename(fileName).get();
+            final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact);
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -196,7 +196,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
-        return null == module || !module.getLocalArtifactByFilename(fileName).isPresent();
+        return null == module || !module.getArtifactByFilename(fileName).isPresent();
     }
 
     @Override
@@ -219,7 +219,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         try {
             DataConversionHelper.writeMD5FileResponse(fileName, requestResponseContextHolder.getHttpServletResponse(),
-                    module.getLocalArtifactByFilename(fileName).get());
+                    module.getArtifactByFilename(fileName).get());
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
@@ -71,7 +71,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     @Override
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final String targetid) {
-        final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
+        final List<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
             LOG.warn("Software artifact with name {} could not be found.", fileName);
@@ -82,13 +82,13 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
             LOG.warn("Software artifact name {} is not unique. We will use the first entry.", fileName);
         }
         ResponseEntity<InputStream> result;
-        final LocalArtifact artifact = foundArtifacts.get(0);
+        final Artifact artifact = foundArtifacts.get(0);
 
         final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
-            final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact);
 
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous
@@ -112,7 +112,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     @Override
     public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName) {
-        final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
+        final List<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
             LOG.warn("Softeare artifact with name {} could not be found.", fileName);
@@ -133,7 +133,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     }
 
     private ActionStatus checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
-            final LocalArtifact artifact) {
+            final Artifact artifact) {
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, securityProperties));
 

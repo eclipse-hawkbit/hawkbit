@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
@@ -99,7 +98,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         // no artifact available
@@ -193,7 +192,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         // test now consistent data to test allowed methods
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         mvc.perform(
@@ -268,7 +267,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         // download fails as artifact is not yet assigned
@@ -309,7 +308,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         // download
@@ -349,8 +348,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), ds.findFirstModuleByType(osType).getId(),
+                "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
         deploymentManagement.assignDistributionSet(ds, targets);
@@ -383,7 +382,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         // download fails as artifact is not yet assigned to target
@@ -435,7 +434,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1", false);
 
         assertThat(random.length).isEqualTo(resultLength);
@@ -539,7 +538,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
 
         // download fails as artifact is not yet assigned to target
@@ -559,7 +558,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).getId(), "file1.tar.bz2", false);
 
         // download

@@ -11,6 +11,8 @@
 -->
 <configuration>
    <include resource="org/springframework/boot/logging/logback/base.xml" />
+   
+<!--    <logger name="org.eclipse.persistence" level="DEBUG" /> -->
 
    <Root level="INFO">
       <appender-ref ref="CONSOLE" />

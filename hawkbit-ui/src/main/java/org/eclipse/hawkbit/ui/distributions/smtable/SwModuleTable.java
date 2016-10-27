@@ -118,7 +118,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
-            UI.getCurrent().access(() -> refreshFilter());
+            UI.getCurrent().access(this::refreshFilter);
         }
     }
 
@@ -400,7 +400,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 

@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +71,7 @@ public final class RestResourceConversionHelper {
      *
      * @return http code
      */
-    public static ResponseEntity<InputStream> writeFileResponse(final LocalArtifact artifact,
+    public static ResponseEntity<InputStream> writeFileResponse(final Artifact artifact,
             final HttpServletResponse servletResponse, final HttpServletRequest request, final DbArtifact file) {
         return writeFileResponse(artifact, servletResponse, request, file, null, null);
     }
@@ -104,7 +104,7 @@ public final class RestResourceConversionHelper {
      * @see <a href="https://tools.ietf.org/html/rfc7233">https://tools.ietf.org
      *      /html/rfc7233</a>
      */
-    public static ResponseEntity<InputStream> writeFileResponse(final LocalArtifact artifact,
+    public static ResponseEntity<InputStream> writeFileResponse(final Artifact artifact,
             final HttpServletResponse response, final HttpServletRequest request, final DbArtifact file,
             final ControllerManagement controllerManagement, final Long statusId) {
 
@@ -173,7 +173,7 @@ public final class RestResourceConversionHelper {
         return result;
     }
 
-    private static void handleFullFileRequest(final LocalArtifact artifact, final HttpServletResponse response,
+    private static void handleFullFileRequest(final Artifact artifact, final HttpServletResponse response,
             final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
             final ByteRange full) {
         final ByteRange r = full;
@@ -240,7 +240,7 @@ public final class RestResourceConversionHelper {
         }
     }
 
-    private static void handleMultipartRangeRequest(final LocalArtifact artifact, final HttpServletResponse response,
+    private static void handleMultipartRangeRequest(final Artifact artifact, final HttpServletResponse response,
             final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
             final List<ByteRange> ranges) {
         response.setContentType("multipart/byteranges; boundary=" + MULTIPART_BOUNDARY);
@@ -268,7 +268,7 @@ public final class RestResourceConversionHelper {
         }
     }
 
-    private static void handleStandardRangeRequest(final LocalArtifact artifact, final HttpServletResponse response,
+    private static void handleStandardRangeRequest(final Artifact artifact, final HttpServletResponse response,
             final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
             final List<ByteRange> ranges) {
         final ByteRange r = ranges.get(0);

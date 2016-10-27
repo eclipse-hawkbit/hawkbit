@@ -23,9 +23,6 @@ import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.ExternalArtifact;
-import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
@@ -38,59 +35,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface ArtifactManagement {
-
-    /**
-     * Creates {@link ExternalArtifact} based on given provider.
-     *
-     * @param externalRepository
-     *            the artifact is located in
-     * @param urlSuffix
-     *            of the artifact
-     *            {@link ExternalArtifactProvider#getDefaultSuffix()} is used if
-     *            empty.
-     * @param moduleId
-     *            to assign the artifact to
-     *
-     * @return created {@link ExternalArtifact}
-     *
-     * @throws EntityNotFoundException
-     *             if {@link SoftwareModule} with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    ExternalArtifact createExternalArtifact(@NotNull ExternalArtifactProvider externalRepository, String urlSuffix,
-            @NotNull Long moduleId);
-
     /**
      * @return the total amount of local artifacts stored in the artifact
      *         management
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countLocalArtifactsAll();
-
-    /**
-     * @return the total amount of external artifacts stored in the artifact
-     *         management
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Long countExternalArtifactsAll();
-
-    /**
-     * Persists {@link ExternalArtifactProvider} based on given properties.
-     *
-     * @param name
-     *            of the provided
-     * @param description
-     *            which is optional
-     * @param basePath
-     *            of all {@link ExternalArtifact}s of the provider
-     * @param defaultUrlSuffix
-     *            that is used if {@link ExternalArtifact#getUrlSuffix()} is
-     *            empty.
-     * @return created {@link ExternalArtifactProvider}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    ExternalArtifactProvider createExternalArtifactProvider(@NotEmpty String name, String description,
-            @NotNull String basePath, String defaultUrlSuffix);
+    Long countArtifactsAll();
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -106,12 +56,12 @@ public interface ArtifactManagement {
      *            to <code>true</code> if the artifact binary can be overridden
      *            if it already exists
      *
-     * @return uploaded {@link LocalArtifact}
+     * @return uploaded {@link Artifact}
      *
      * @throw ArtifactUploadFailedException if upload fails
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    LocalArtifact createLocalArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
+    Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
             final boolean overrideExisting);
 
     /**
@@ -130,13 +80,13 @@ public interface ArtifactManagement {
      * @param contentType
      *            the contentType of the file
      *
-     * @return uploaded {@link LocalArtifact}
+     * @return uploaded {@link Artifact}
      *
      * @throw ArtifactUploadFailedException if upload fails
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    LocalArtifact createLocalArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId,
-            @NotNull String filename, final boolean overrideExisting, @NotNull String contentType);
+    Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, @NotNull String filename,
+            final boolean overrideExisting, @NotNull String contentType);
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -157,7 +107,7 @@ public interface ArtifactManagement {
      *            if it already exists
      * @param contentType
      *            the contentType of the file
-     * @return uploaded {@link LocalArtifact}
+     * @return uploaded {@link Artifact}
      *
      * @throws EntityNotFoundException
      *             if given software module does not exist
@@ -171,24 +121,12 @@ public interface ArtifactManagement {
      *             if check against provided SHA1 checksum failed
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    LocalArtifact createLocalArtifact(@NotNull InputStream stream, @NotNull Long moduleId, @NotEmpty String filename,
+    Artifact createArtifact(@NotNull InputStream stream, @NotNull Long moduleId, @NotEmpty String filename,
             String providedMd5Sum, String providedSha1Sum, boolean overrideExisting, String contentType);
 
     /**
-     * Deletes {@link Artifact} based on given id.
-     *
-     * @param id
-     *            of the {@link Artifact} that has to be deleted.
-     * @throws ArtifactDeleteFailedException
-     *             if deletion failed (MongoDB is not available)
-     *
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteExternalArtifact(@NotNull Long id);
-
-    /**
      * Garbage collects local artifact binary file if only referenced by given
-     * {@link LocalArtifact} metadata object.
+     * {@link Artifact} metadata object.
      *
      * @param onlyByThisReferenced
      *            the related local artifact
@@ -196,7 +134,7 @@ public interface ArtifactManagement {
      * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearLocalArtifactBinary(@NotNull LocalArtifact onlyByThisReferenced);
+    boolean clearArtifactBinary(@NotNull Artifact onlyByThisReferenced);
 
     /**
      * Deletes {@link Artifact} based on given id.
@@ -208,19 +146,19 @@ public interface ArtifactManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteLocalArtifact(@NotNull Long id);
+    void deleteArtifact(@NotNull Long id);
 
     /**
-     * Searches for {@link LocalArtifact} with given {@link Identifiable}.
+     * Searches for {@link Artifact} with given {@link Identifiable}.
      *
      * @param id
      *            to search for
-     * @return found {@link LocalArtifact} or <code>null</code> is it could not
-     *         be found.
+     * @return found {@link Artifact} or <code>null</code> is it could not be
+     *         found.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    LocalArtifact findLocalArtifact(@NotNull Long id);
+    Artifact findArtifact(@NotNull Long id);
 
     /**
      * Find by artifact by software module id and filename.
@@ -229,11 +167,11 @@ public interface ArtifactManagement {
      *            file name
      * @param softwareModuleId
      *            software module id.
-     * @return LocalArtifact if artifact present
+     * @return Artifact if artifact present
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<LocalArtifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
+    List<Artifact> findByFilenameAndSoftwareModule(@NotNull String filename, @NotNull Long softwareModuleId);
 
     /**
      * Find all local artifact by sha1 and return the first artifact.
@@ -244,18 +182,18 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    LocalArtifact findFirstLocalArtifactsBySHA1(@NotNull String sha1);
+    Artifact findFirstArtifactBySHA1(@NotNull String sha1);
 
     /**
      * Searches for {@link Artifact} with given file name.
      *
      * @param filename
      *            to search for
-     * @return found List of {@link LocalArtifact}s.
+     * @return found List of {@link Artifact}s.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<LocalArtifact> findLocalArtifactByFilename(@NotNull String filename);
+    List<Artifact> findArtifactByFilename(@NotNull String filename);
 
     /**
      * Get local artifact for a base software module.
@@ -264,38 +202,13 @@ public interface ArtifactManagement {
      *            Pageable
      * @param swId
      *            software module id
-     * @return Page<LocalArtifact>
+     * @return Page<Artifact>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<LocalArtifact> findLocalArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
+    Page<Artifact> findArtifactBySoftwareModule(@NotNull Pageable pageReq, @NotNull Long swId);
 
     /**
-     * Finds {@link SoftwareModule} by given id.
-     *
-     * @param id
-     *            to search for
-     * @return the found {@link SoftwareModule}s or <code>null</code> if not
-     *         found.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    SoftwareModule findSoftwareModuleById(@NotNull Long id);
-
-    /**
-     * Retrieves software module including details (
-     * {@link SoftwareModule#getArtifacts()}).
-     *
-     * @param id
-     *            parameter
-     * @param isDeleted
-     *            parameter
-     * @return the found {@link SoftwareModule}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModule findSoftwareModuleWithDetails(@NotNull Long id);
-
-    /**
-     * Loads {@link DbArtifact} from store for given {@link LocalArtifact}.
+     * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
      * @param artifact
      *            to search for
@@ -306,6 +219,6 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadLocalArtifactBinary(@NotNull LocalArtifact artifact);
+    DbArtifact loadArtifactBinary(@NotNull Artifact artifact);
 
 }
