@@ -253,16 +253,16 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     private void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             final String selectedOption = (String) optiongroup.getValue();
-            if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagStr)) {
+            if (selectedOption == null) {
                 return;
             }
 
             if (tagNameComboBox.getValue() == null) {
                 colorPickerLayout
                         .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                return;
+            } else {
+                colorPickerLayout.setSelectedColor(getColorForColorPicker());
             }
-            colorPickerLayout.setSelectedColor(getColorForColorPicker());
         }
 
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
