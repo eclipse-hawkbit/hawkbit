@@ -52,7 +52,9 @@ import org.springframework.data.domain.Sort.Direction;
 import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
+import ru.yandex.qatools.allure.annotations.Title;
 
 /**
  * Junit tests for RolloutManagment.
@@ -161,50 +163,89 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Title("Deleting targets of a rollout")
     @Description("Verfiying that next group is started when targets of the group have been deleted.")
     public void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
+
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
         final String successCondition = "100";
         final String errorCondition = "80";
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
+        finishActionAndDeleteTargetsOfFirstRunningGroup(createdRollout);
+
+        checkStatusOfRolloutGroupsAfterDeletingTargets(createdRollout);
+
+        finishActionAndDeleteTargetsOfSecondRunningGroup(createdRollout);
+
+        deleteThrirdGroup(createdRollout);
+
+        checkStatusOfRolloutAndRolloutGroupsAfterDeletingTargets(createdRollout);
+
+    }
+
+    @Step("Create a rollout by the given parameter and start it.")
+    public Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
+            final int amountGroups, final String successCondition, final String errorCondition) {
+
         final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
         rolloutManagement.startRollout(createdRollout);
+        return createdRollout;
+    }
 
+    @Step("Finish three actions of the rollout group and delete two targets")
+    public void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
         // finish group one by finishing targets and deleting targets
-        List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
                 Status.RUNNING);
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
         targetManagement.deleteTargets(runningActions.get(3).getTarget().getId(),
                 runningActions.get(4).getTarget().getId());
+    }
 
+    @Step("Check the status of the rollout groups")
+    public void checkStatusOfRolloutGroupsAfterDeletingTargets(final Rollout createdRollout) {
         rolloutManagement.checkRunningRollouts(0);
         // validate that the second group is in running state
-        List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
                 createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+    }
 
-        // finish one action and delete the other targets of group two
-        runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
+    @Step("Finish one action of the rollout group and delete four targets")
+    public void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.RUNNING);
         finishAction(runningActions.get(0));
         targetManagement.deleteTargets(runningActions.get(1).getTarget().getId(),
                 runningActions.get(2).getTarget().getId(), runningActions.get(3).getTarget().getId(),
                 runningActions.get(4).getTarget().getId());
 
+    }
+
+    @Step("Delete all targets of the rollout group")
+    public void deleteThrirdGroup(final Rollout createdRollout) {
         // delete all targets of the third group
-        runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout, Status.SCHEDULED);
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.SCHEDULED);
         targetManagement.deleteTargets(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                 runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId());
+    }
 
-        // validate that groups and rollout finished correctly
+    @Step("Check the status of the rollout groups and the rollout")
+    public void checkStatusOfRolloutAndRolloutGroupsAfterDeletingTargets(final Rollout createdRollout) {
         rolloutManagement.checkRunningRollouts(0);
-        runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(createdRollout.getId(),
-                new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
+                createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
         assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
