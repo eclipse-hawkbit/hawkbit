@@ -29,8 +29,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -85,12 +83,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "total_targets")
     private long totalTargets;
 
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
-    private int rolloutGroupsTotal;
-
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
+    @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
 
     @Transient
@@ -169,14 +162,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setTotalTargets(final long totalTargets) {
         this.totalTargets = totalTargets;
-    }
-
-    public int getRolloutGroupsTotal() {
-        return rolloutGroupsTotal;
-    }
-
-    public void setRolloutGroupsTotal(final int rolloutGroupsTotal) {
-        this.rolloutGroupsTotal = rolloutGroupsTotal;
     }
 
     @Override

@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
@@ -162,14 +161,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public EntityInterceptorHolder entityInterceptorHolder() {
         return EntityInterceptorHolder.getInstance();
-    }
-
-    /**
-     * @return the singleton instance of the {@link CacheManagerHolder}
-     */
-    @Bean
-    public CacheManagerHolder cacheManagerHolder() {
-        return CacheManagerHolder.getInstance();
     }
 
     /**
