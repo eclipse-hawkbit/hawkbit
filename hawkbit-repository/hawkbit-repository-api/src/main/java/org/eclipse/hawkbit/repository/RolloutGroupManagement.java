@@ -150,4 +150,14 @@ public interface RolloutGroupManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
+
+    /**
+     * Count targets of rollout group.
+     * 
+     * @param rolloutGroup
+     *            the rollout group for the count
+     * @return the target rollout group count
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    Long countTargetsOfRolloutsGroup(@NotNull RolloutGroup rolloutGroup);
 }
