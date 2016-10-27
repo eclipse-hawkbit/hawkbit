@@ -247,6 +247,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         offerEvent(event);
     }
 
+    private void offerEventIfNotContains(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
+        if (queue.contains(event)) {
+            return;
+        }
+        offerEvent(event);
+    }
+
     private void offerEvent(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         if (!queue.offer(event)) {
             LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
@@ -276,11 +283,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         if (rolloutId == null) {
             return;
         }
-        offerEvent(new RolloutChangeEvent(event.getTenant(), rolloutId));
-        offerEvent(new RolloutChangeEvent(event.getTenant(), rolloutId));
+        offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));
 
         if (rolloutGroupId != null) {
-            offerEvent(new RolloutGroupChangeEvent(event.getTenant(), rolloutId, rolloutGroupId));
+            offerEventIfNotContains(new RolloutGroupChangeEvent(event.getTenant(), rolloutId, rolloutGroupId));
         }
     }
 
