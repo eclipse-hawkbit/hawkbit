@@ -488,9 +488,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void checkIfTargetsOfRolloutGroupDeleted(final JpaRolloutGroup rolloutGroup) {
 
-        final long countTargetsOfRolloutGroup = rolloutGroupManagement
-                .findRolloutGroupTargets(rolloutGroup, new OffsetBasedPageRequest(0, 1, null)).getTotalElements();
-
+        final long countTargetsOfRolloutGroup = rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup);
         if (rolloutGroup.getTotalTargets() != countTargetsOfRolloutGroup) {
             // targets have been deleted and we have to update the
             // total target count in the rollout and the rollout group
