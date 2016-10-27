@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
@@ -66,8 +67,9 @@ import com.mongodb.MongoClientOptions;
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
     @Bean
-    public TestRepositoryManagement testRepositoryManagement() {
-        return new JpaTestRepositoryManagement();
+    public TestRepositoryManagement testRepositoryManagement(final SystemSecurityContext systemSecurityContext,
+            final SystemManagement systemManagement) {
+        return new JpaTestRepositoryManagement(cacheManager(), systemSecurityContext, systemManagement);
     }
 
     @Bean
@@ -94,7 +96,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public TenancyCacheManager cacheManager() {
+    public TenantAwareCacheManager cacheManager() {
         return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware());
     }
 
@@ -139,8 +141,8 @@ public class TestConfiguration implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
     }
-    
-     /**
+
+    /**
      *
      * @return returns a VirtualPropertyReplacer
      */
