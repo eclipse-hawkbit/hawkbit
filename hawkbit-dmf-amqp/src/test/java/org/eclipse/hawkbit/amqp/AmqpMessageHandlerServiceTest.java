@@ -358,8 +358,8 @@ public class AmqpMessageHandlerServiceTest {
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
-        when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
-        when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
+        when(controllerManagementMock.addUpdateActionStatus(22L, Matchers.any())).thenReturn(action);
+        when(entityFactoryMock.generateActionStatus(Matchers.any(), Matchers.any())).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 

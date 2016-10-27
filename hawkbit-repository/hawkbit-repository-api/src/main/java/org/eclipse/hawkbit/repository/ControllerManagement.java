@@ -125,17 +125,6 @@ public interface ControllerManagement {
     Action addUpdateActionStatus(@NotNull Long actionId, @NotNull ActionStatus actionStatus);
 
     /**
-     * Retrieves all {@link Action}s which are active and assigned to a
-     * {@link Target}.
-     *
-     * @param target
-     *            the target to retrieve the actions from
-     * @return a list of actions assigned to given target which are active
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> findActiveActionByTarget(@NotNull Target target);
-
-    /**
      * Retrieves oldest {@link Action} that is active and assigned to a
      * {@link Target}.
      *

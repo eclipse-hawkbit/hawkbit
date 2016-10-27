@@ -12,34 +12,26 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaMetaData;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -54,19 +46,8 @@ import org.springframework.validation.annotation.Validated;
 public class JpaEntityFactory implements EntityFactory {
 
     @Override
-    public DistributionSetType generateDistributionSetType() {
-        return new JpaDistributionSetType();
-    }
-
-    @Override
-    public DistributionSetMetadata generateDistributionSetMetadata() {
-        return new JpaDistributionSetMetadata();
-    }
-
-    @Override
-    public DistributionSetMetadata generateDistributionSetMetadata(final DistributionSet distributionSet,
-            final String key, final String value) {
-        return new JpaDistributionSetMetadata(key, distributionSet, value);
+    public MetaData generateMetadata(final String key, final String value) {
+        return new JpaMetaData(key, value);
     }
 
     @Override
@@ -108,16 +89,6 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public TargetTag generateTargetTag() {
-        return new JpaTargetTag();
-    }
-
-    @Override
-    public DistributionSetTag generateDistributionSetTag() {
-        return new JpaDistributionSetTag();
-    }
-
-    @Override
     public TargetTag generateTargetTag(final String name, final String description, final String colour) {
         return new JpaTargetTag(name, description, colour);
     }
@@ -139,11 +110,6 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public TargetFilterQuery generateTargetFilterQuery() {
-        return new JpaTargetFilterQuery();
-    }
-
-    @Override
     public TargetFilterQuery generateTargetFilterQuery(final String name, final String query) {
         return new JpaTargetFilterQuery(name, query);
     }
@@ -162,30 +128,9 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public SoftwareModuleMetadata generateSoftwareModuleMetadata() {
-        return new JpaSoftwareModuleMetadata();
-    }
-
-    @Override
-    public SoftwareModuleMetadata generateSoftwareModuleMetadata(final SoftwareModule softwareModule, final String key,
-            final String value) {
-        return new JpaSoftwareModuleMetadata(key, softwareModule, value);
-    }
-
-    @Override
     public SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
             final String colour, final int maxAssignments) {
         return new JpaSoftwareModuleType(key, name, description, maxAssignments, colour);
-    }
-
-    @Override
-    public RolloutGroup generateRolloutGroup() {
-        return new JpaRolloutGroup();
-    }
-
-    @Override
-    public Action generateAction() {
-        return new JpaAction();
     }
 
     @Override
@@ -204,13 +149,8 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt) {
-        return new JpaActionStatus(action, status, occurredAt);
-    }
-
-    @Override
-    public Artifact generateArtifact() {
-        return new JpaArtifact();
+    public ActionStatus generateActionStatus(final Status status, final Long occurredAt) {
+        return new JpaActionStatus(status, occurredAt);
     }
 
     @Override

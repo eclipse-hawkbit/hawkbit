@@ -597,38 +597,27 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
-
-        if (distributionSetMetadataRepository.exists(new DsMetadataCompositeKey(dsId, md.getKey()))) {
-            throwMetadataKeyAlreadyExists(md.getKey());
-        }
-
-        return distributionSetMetadataRepository
-                .save(new JpaDistributionSetMetadata(md.getKey(), touch(dsId), md.getValue()));
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
     public List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final Collection<MetaData> md) {
 
         md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
                 new DsMetadataCompositeKey(dsId, meta.getKey())));
 
-        return new ArrayList<>((Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(
-                md.stream().map(meta -> new JpaDistributionSetMetadata(meta.getKey(), touch(dsId), meta.getValue()))
+        final JpaDistributionSet set = touch(dsId);
+
+        return new ArrayList<>((Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository
+                .save(md.stream().map(meta -> new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue()))
                         .collect(Collectors.toList())));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata updateDistributionSetMetadata(final Long dsId, final String key,
-            final String value) {
+    public DistributionSetMetadata updateDistributionSetMetadata(final Long dsId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) findOne(dsId, key);
-        toUpdate.setValue(value);
+        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) findDistributionSetMetadata(dsId,
+                md.getKey());
+        toUpdate.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
         touch(dsId);
@@ -647,11 +636,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      * Method to get the latest distribution set based on DS ID after the
      * metadata changes for that distribution set.
      *
-     * @param distributionSet
+     * @param distId
      *            Distribution set
      */
-    private JpaDistributionSet touch(final Long distributionSet) {
-        final DistributionSet latestDistributionSet = findDistributionSetById(distributionSet);
+    private JpaDistributionSet touch(final Long distId) {
+        final DistributionSet latestDistributionSet = findDistributionSetAndThrowExceptionIfNotFound(distId);
 
         // merge base distribution set so optLockRevision gets updated and audit
         // log written because
@@ -703,7 +692,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public DistributionSetMetadata findOne(final Long distributionSet, final String key) {
+    public DistributionSetMetadata findDistributionSetMetadata(final Long distributionSet, final String key) {
         final DistributionSetMetadata findOne = distributionSetMetadataRepository
                 .findOne(new DsMetadataCompositeKey(distributionSet, key));
         if (findOne == null) {

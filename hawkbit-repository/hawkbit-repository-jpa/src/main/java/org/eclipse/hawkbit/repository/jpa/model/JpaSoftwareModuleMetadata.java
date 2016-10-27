@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 @IdClass(SwMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_sw_metadata")
-public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements SoftwareModuleMetadata {
+public class JpaSoftwareModuleMetadata extends JpaMetaData implements SoftwareModuleMetadata {
     private static final long serialVersionUID = 1L;
 
     @Id

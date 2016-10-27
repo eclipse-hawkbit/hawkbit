@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -40,12 +40,12 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
         softwareModuleId = softwareModule.getId();
 
-        final List<SoftwareModuleMetadata> metadata = new ArrayList<>();
+        final List<MetaData> metadata = new ArrayList<>(5);
         for (int i = 0; i < 5; i++) {
-            metadata.add(new JpaSoftwareModuleMetadata("" + i, softwareModule, "" + i));
+            metadata.add(entityFactory.generateMetadata("" + i, "" + i));
         }
 
-        softwareManagement.createSoftwareModuleMetadata(metadata);
+        softwareManagement.createSoftwareModuleMetadata(softwareModule.getId(), metadata);
 
     }
 

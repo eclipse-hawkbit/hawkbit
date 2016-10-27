@@ -8,14 +8,20 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
@@ -63,9 +69,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected TargetInfoRepository targetInfoRepository;
 
     @Autowired
-    protected GridFsOperations operations;
-
-    @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
@@ -73,4 +76,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
+        return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);
+    }
 }

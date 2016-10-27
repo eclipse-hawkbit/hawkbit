@@ -112,11 +112,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .as("group which should be in scheduled state is in " + group.getStatus() + " state"));
         // verify that the first group actions has been started and are in state
         // running
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
-                Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         assertThat(runningActions).hasSize(amountTargetsForRollout / amountGroups);
         // the rest targets are only scheduled
-        assertThat(deploymentManagement.findActionsByRolloutAndStatus(createdRollout, Status.SCHEDULED))
+        assertThat(findActionsByRolloutAndStatus(createdRollout, Status.SCHEDULED))
                 .hasSize(amountTargetsForRollout - (amountTargetsForRollout / amountGroups));
     }
 
@@ -132,8 +131,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(createdRollout);
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
-                Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         // finish one action should be sufficient due the finish condition is at
         // 50%
         final JpaAction action = (JpaAction) runningActions.get(0);
@@ -174,8 +172,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.startRollout(createdRollout);
         // set both actions in error state so error condition is hit and error
         // action is executed
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
-                Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
 
         // finish actions with error
         for (final Action action : runningActions) {
@@ -216,8 +213,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.startRollout(createdRollout);
         // set both actions in error state so error condition is hit and error
         // action is executed
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
-                Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         // finish actions with error
         for (final Action action : runningActions) {
             controllerManagament.addUpdateActionStatus(action.getId(),
@@ -433,8 +429,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.startRollout(createdRollout);
         createdRollout = rolloutManagement.findRolloutById(createdRollout.getId());
         // 5 targets are running
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
-                Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         assertThat(runningActions.size()).isEqualTo(5);
 
         // 5 targets are in the group and the DS has been assigned
@@ -448,7 +443,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             assertThat(assignedDs.getId()).isEqualTo(ds.getId());
         }
 
-        final List<Target> targetToCancel = new ArrayList<Target>();
+        final List<Target> targetToCancel = new ArrayList<>();
         targetToCancel.add(targetList.get(0));
         targetToCancel.add(targetList.get(1));
         targetToCancel.add(targetList.get(2));
@@ -966,7 +961,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         for (final Action action : runningActions) {
             controllerManagament.addUpdateActionStatus(action.getId(),
                     new JpaActionStatus(status, System.currentTimeMillis(), ""));
@@ -976,7 +971,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     private int changeStatusForRunningActions(final Rollout rollout, final Status status,
             final int amountOfTargetsToGetChanged) {
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
         for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
             controllerManagament.addUpdateActionStatus(runningActions.get(i).getId(),

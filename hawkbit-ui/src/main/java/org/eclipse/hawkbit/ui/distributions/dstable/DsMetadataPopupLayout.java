@@ -41,7 +41,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected void checkForDuplicate(final DistributionSet entity, final String value) {
-        distributionSetManagement.findOne(entity, value);
+        distributionSetManagement.findDistributionSetMetadata(entity, value);
     }
 
     /**

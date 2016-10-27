@@ -68,30 +68,6 @@ public interface ArtifactManagement {
      * Persists artifact binary as provided by given InputStream. assign the
      * artifact in addition to given {@link SoftwareModule}.
      *
-     * @param inputStream
-     *            to read from for artifact binary
-     * @param moduleId
-     *            to assign the new artifact to
-     * @param filename
-     *            of the artifact
-     * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overridden
-     *            if it already exists
-     * @param contentType
-     *            the contentType of the file
-     *
-     * @return uploaded {@link Artifact}
-     *
-     * @throw ArtifactUploadFailedException if upload fails
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    Artifact createArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, @NotNull String filename,
-            final boolean overrideExisting, @NotNull String contentType);
-
-    /**
-     * Persists artifact binary as provided by given InputStream. assign the
-     * artifact in addition to given {@link SoftwareModule}.
-     *
      * @param stream
      *            to read from for artifact binary
      * @param moduleId
@@ -103,7 +79,7 @@ public interface ArtifactManagement {
      * @param providedMd5Sum
      *            optional md5 checksum to check the new file against
      * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overdiden
+     *            to <code>true</code> if the artifact binary can be overridden
      *            if it already exists
      * @param contentType
      *            the contentType of the file

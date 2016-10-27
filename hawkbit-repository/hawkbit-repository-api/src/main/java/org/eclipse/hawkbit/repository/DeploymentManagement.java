@@ -42,7 +42,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface DeploymentManagement {
-    // TODO remove target id
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -233,18 +232,6 @@ public interface DeploymentManagement {
     Action findAction(@NotNull Long actionId);
 
     /**
-     * Retrieves all actions for a specific rollout and in a specific status.
-     *
-     * @param rollout
-     *            the rollout the actions beglong to
-     * @param actionStatus
-     *            the status of the actions
-     * @return the actions referring a specific rollout an in a specific status
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActionsByRolloutAndStatus(@NotNull Rollout rollout, @NotNull Action.Status actionStatus);
-
-    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
@@ -398,38 +385,12 @@ public interface DeploymentManagement {
      * Retrieves all active {@link Action}s of a specific target ordered by
      * action ID.
      *
-     * @param pageable
-     *            the pagination parameter
-     * @param target
-     *            the target associated with the actions
-     * @return a paged list of actions associated with the given target
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
-
-    /**
-     * Retrieves all active {@link Action}s of a specific target ordered by
-     * action ID.
-     *
      * @param target
      *            the target associated with the actions
      * @return a list of actions associated with the given target
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActiveActionsByTarget(@NotNull Target target);
-
-    /**
-     * Retrieves all inactive {@link Action}s of a specific target ordered by
-     * action ID.
-     *
-     * @param pageable
-     *            the pagination parameter
-     * @param target
-     *            the target associated with the actions
-     * @return a paged list of actions associated with the given target
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Action> findInActiveActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
 
     /**
      * Retrieves all inactive {@link Action}s of a specific target ordered by

@@ -165,12 +165,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         assertThat(artifactManagement.countArtifactsAll()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
-        assertTrue("Wrong artifact content",
-                IOUtils.contentEquals(new ByteArrayInputStream(random),
-                        artifactManagement
-                                .loadArtifactBinary(
-                                        softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
-                                .getFileInputStream()));
+        assertTrue("Wrong artifact content", IOUtils.contentEquals(new ByteArrayInputStream(random),
+                artifactManagement
+                        .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
+                        .getFileInputStream()));
 
         // hashes
         assertThat(artifactManagement.findArtifactByFilename("origFilename").get(0).getSha1Hash()).as("Wrong sha1 hash")
@@ -963,8 +961,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
 
         final SoftwareModule sm = softwareManagement
                 .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
-        softwareManagement
-                .createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+        softwareManagement.createSoftwareModuleMetadata(sm.getId(),
+                entityFactory.generateMetadata(knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -987,8 +985,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
 
         final SoftwareModule sm = softwareManagement
                 .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
-        softwareManagement
-                .createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+        softwareManagement.createSoftwareModuleMetadata(sm.getId(),
+                entityFactory.generateMetadata(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -1011,9 +1009,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareManagement.createSoftwareModuleMetadata(
-                    entityFactory.generateSoftwareModuleMetadata(softwareManagement.findSoftwareModuleById(sm.getId()),
-                            knownKeyPrefix + index, knownValuePrefix + index));
+            softwareManagement.createSoftwareModuleMetadata(sm.getId(),
+                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

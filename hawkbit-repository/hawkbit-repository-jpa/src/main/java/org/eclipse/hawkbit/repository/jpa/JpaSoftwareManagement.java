@@ -530,17 +530,17 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
 
-        if (softwareModuleMetadataRepository.exists(metadata.getId())) {
-            throwMetadataKeyAlreadyExists(metadata.getId().getKey());
+        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
+
+        return softwareModuleMetadataRepository
+                .save(new JpaSoftwareModuleMetadata(md.getKey(), touch(moduleId), md.getValue()));
+    }
+
+    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId, final MetaData md) {
+        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
+            throwMetadataKeyAlreadyExists(md.getKey());
         }
-        // merge base software module so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base software module itself for
-        // auditing purposes.
-        entityManager.merge((JpaSoftwareModule) metadata.getSoftwareModule()).setLastModifiedAt(-1L);
-        return softwareModuleMetadataRepository.save(metadata);
     }
 
     @Override
@@ -548,35 +548,54 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Modifying
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
             final Collection<MetaData> md) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaSoftwareModuleMetadata> metadata = (Collection) md;
+        md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
 
-        for (final JpaSoftwareModuleMetadata softwareModuleMetadata : metadata) {
-            checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(softwareModuleMetadata.getId());
-        }
-        metadata.forEach(m -> entityManager.merge((JpaSoftwareModule) m.getSoftwareModule()).setLastModifiedAt(-1L));
-        return Collections.unmodifiableList(softwareModuleMetadataRepository.save(metadata));
+        final JpaSoftwareModule module = touch(moduleId);
+
+        return new ArrayList<>(softwareModuleMetadataRepository
+                .save(md.stream().map(meta -> new JpaSoftwareModuleMetadata(meta.getKey(), module, meta.getValue()))
+                        .collect(Collectors.toList())));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
 
         // check if exists otherwise throw entity not found exception
-        findSoftwareModuleMetadata(metadata.getId());
-        // touch it to update the lock revision because we are modifying the
-        // software module
-        // indirectly
-        entityManager.merge((JpaSoftwareModule) metadata.getSoftwareModule()).setLastModifiedAt(-1L);
+        final JpaSoftwareModuleMetadata metadata = findSoftwareModuleMetadata(
+                new SwMetadataCompositeKey(moduleId, md.getKey()));
+        metadata.setValue(md.getValue());
+
+        touch(moduleId);
         return softwareModuleMetadataRepository.save(metadata);
+    }
+
+    /**
+     * Method to get the latest module based on ID after the metadata changes
+     * for that module.
+     *
+     * @param distributionSet
+     *            Distribution set
+     */
+    private JpaSoftwareModule touch(final Long moduleId) {
+        final JpaSoftwareModule latestModule = softwareModuleRepository.findOne(moduleId);
+
+        // merge base distribution set so optLockRevision gets updated and audit
+        // log written because
+        // modifying metadata is modifying the base distribution set itself for
+        // auditing purposes.
+        final JpaSoftwareModule result = entityManager.merge(latestModule);
+        result.setLastModifiedAt(0L);
+
+        return result;
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
+        touch(moduleId);
         softwareModuleMetadataRepository.delete(new SwMetadataCompositeKey(moduleId, key));
     }
 
@@ -618,8 +637,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         return findSoftwareModuleMetadata(new SwMetadataCompositeKey(moduleId, key));
     }
 
-    private SoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
-        final SoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
+    private JpaSoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
+        final JpaSoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
         if (findOne == null) {
             throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");
         }

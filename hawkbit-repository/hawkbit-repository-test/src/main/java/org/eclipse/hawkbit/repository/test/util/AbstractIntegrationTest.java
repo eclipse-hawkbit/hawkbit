@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.test.util;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,9 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -193,6 +196,10 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         return deploymentManagement.assignDistributionSet(pset.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+    }
+
+    protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
+        return distributionSetManagement.createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
     }
 
     protected Long getOsModule(final DistributionSet ds) {

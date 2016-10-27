@@ -579,8 +579,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
         }
 
-        final List<Target> updatedTsDsA = sendUpdateActionStatusToTargets(dsA, deployResWithDsA.getDeployedTargets(),
-                Status.FINISHED, new String[] { "alles gut" });
+        final List<Target> updatedTsDsA = testdataFactory
+                .sendUpdateActionStatusToTargets(deployResWithDsA.getDeployedTargets(), Status.FINISHED,
+                        Collections.singletonList("alles gut"))
+                .stream().map(action -> action.getTarget()).collect(Collectors.toList());
 
         // verify, that dsA is deployed correctly
         assertThat(updatedTsDsA).as("ds is not deployed correctly").isEqualTo(deployResWithDsA.getDeployedTargets());
@@ -655,7 +657,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             distributionSetManagement.deleteDistributionSet(ds.getId());
             final DistributionSet foundDS = distributionSetManagement.findDistributionSetById(ds.getId());
             assertThat(foundDS).as("founded should not be null").isNotNull();
-            assertThat(foundDS.isDeleted()).as("founded ds should be deleted").isTrue();
+            assertThat(foundDS.isDeleted()).as("found ds should be deleted").isTrue();
         }
 
         // verify that deleted attribute is used correctly
@@ -667,8 +669,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(allFoundDS).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
-            sendUpdateActionStatusToTargets(ds, deploymentResult.getDeployedTargets(), Status.FINISHED,
-                    "blabla alles gut");
+            testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
+                    Collections.singletonList("blabla alles gut"));
         }
         // try to delete again
         distributionSetManagement.deleteDistributionSet(deploymentResult.getDistributionSetIDs()
@@ -702,8 +704,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
-            sendUpdateActionStatusToTargets(ds, deploymentResult.getDeployedTargets(), Status.FINISHED,
-                    "blabla alles gut");
+            testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
+                    Collections.singletonList("blabla alles gut"));
         }
 
         assertThat(targetManagement.countTargetsAll()).as("size of targets is wrong").isNotZero();
@@ -715,32 +717,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(targetManagement.countTargetsAll()).as("size of targets should be zero").isZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isZero();
-    }
-
-    private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
-            final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<>();
-        for (final Target t : targs) {
-            final List<JpaAction> findByTarget = actionRepository.findByTarget((JpaTarget) t);
-            for (final JpaAction action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
-            }
-        }
-        return result;
-    }
-
-    private Target sendUpdateActionStatusToTarget(final Status status, final JpaAction updActA, final Target t,
-            final String... msgs) {
-        updActA.setStatus(status);
-
-        final JpaActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
-        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
     @Test
@@ -954,13 +930,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private class DeploymentResult
 
     {
-        final List<Long> deployedTargetIDs = new ArrayList<Long>();
-        final List<Long> undeployedTargetIDs = new ArrayList<Long>();
-        final List<Long> distributionSetIDs = new ArrayList<Long>();
+        final List<Long> deployedTargetIDs = new ArrayList<>();
+        final List<Long> undeployedTargetIDs = new ArrayList<>();
+        final List<Long> distributionSetIDs = new ArrayList<>();
 
-        private final List<Target> undeployedTargets = new ArrayList<Target>();
-        private final List<Target> deployedTargets = new ArrayList<Target>();
-        private final List<DistributionSet> distributionSets = new ArrayList<DistributionSet>();
+        private final List<Target> undeployedTargets = new ArrayList<>();
+        private final List<Target> deployedTargets = new ArrayList<>();
+        private final List<DistributionSet> distributionSets = new ArrayList<>();
 
         public DeploymentResult(final Iterable<Target> deployedTs, final Iterable<Target> undeployedTs,
                 final Iterable<DistributionSet> dss, final String deployedTargetPrefix,
@@ -1068,7 +1044,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         public List<CancelTargetAssignmentEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
-            final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<CancelTargetAssignmentEvent>(events);
+            final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<>(events);
             assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;

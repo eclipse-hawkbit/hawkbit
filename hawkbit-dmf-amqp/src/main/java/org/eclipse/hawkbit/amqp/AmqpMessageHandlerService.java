@@ -232,73 +232,81 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = createActionStatus(message, actionUpdateStatus, action);
-        updateLastPollTime(action.getTarget());
-
-        switch (actionUpdateStatus.getActionStatus()) {
-        case DOWNLOAD:
-            actionStatus.setStatus(Status.DOWNLOAD);
-            break;
-        case RETRIEVED:
-            actionStatus.setStatus(Status.RETRIEVED);
-            break;
-        case RUNNING:
-            actionStatus.setStatus(Status.RUNNING);
-            break;
-        case CANCELED:
-            actionStatus.setStatus(Status.CANCELED);
-            break;
-        case FINISHED:
-            actionStatus.setStatus(Status.FINISHED);
-            break;
-        case ERROR:
-            actionStatus.setStatus(Status.ERROR);
-            break;
-        case WARNING:
-            actionStatus.setStatus(Status.WARNING);
-            break;
-        case CANCEL_REJECTED:
-            handleCancelRejected(message, action, actionStatus);
-            break;
-        default:
-            logAndThrowMessageError(message, "Status for action does not exisit.");
+        final List<String> messages = actionUpdateStatus.getMessage();
+        if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
+                    + convertCorrelationId(message));
         }
 
-        final Action addUpdateActionStatus = getUpdateActionStatus(actionStatus);
+        updateLastPollTime(action.getTarget());
+
+        final ActionStatus actionStatus = entityFactory.generateActionStatus(
+                mapStatus(message, actionUpdateStatus, action), System.currentTimeMillis(), messages);
+
+        final Action addUpdateActionStatus = getUpdateActionStatus(actionUpdateStatus.getActionId(), actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
 
-    private void updateLastPollTime(final Target target) {
-        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
-    }
-
-    private ActionStatus createActionStatus(final Message message, final ActionUpdateStatus actionUpdateStatus,
-            final Action action) {
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
-
-        if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + convertCorrelationId(message));
+    private Status mapStatus(final Message message, final ActionUpdateStatus actionUpdateStatus, final Action action) {
+        Status status = null;
+        switch (actionUpdateStatus.getActionStatus()) {
+        case DOWNLOAD:
+            status = Status.DOWNLOAD;
+            break;
+        case RETRIEVED:
+            status = Status.RETRIEVED;
+            break;
+        case RUNNING:
+            status = Status.RUNNING;
+            break;
+        case CANCELED:
+            status = Status.CANCELED;
+            break;
+        case FINISHED:
+            status = Status.FINISHED;
+            break;
+        case ERROR:
+            status = Status.ERROR;
+            break;
+        case WARNING:
+            status = Status.WARNING;
+            break;
+        case CANCEL_REJECTED:
+            status = hanldeCancelRejectedState(message, action, status);
+            break;
+        default:
+            logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
-        return actionStatus;
+        return status;
+    }
+
+    private Status hanldeCancelRejectedState(final Message message, final Action action, Status status) {
+        if (action.isCancelingOrCanceled()) {
+            status = Status.WARNING;
+        } else {
+            logAndThrowMessageError(message,
+                    "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
+        }
+        return status;
+    }
+
+    private void updateLastPollTime(final Target target) {
+        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
     }
 
     private static String convertCorrelationId(final Message message) {
         return new String(message.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8);
     }
 
-    private Action getUpdateActionStatus(final ActionStatus actionStatus) {
+    private Action getUpdateActionStatus(final Long actionId, final ActionStatus actionStatus) {
         if (actionStatus.getStatus().equals(Status.CANCELED)) {
-            return controllerManagement.addCancelActionStatus(actionStatus);
+            return controllerManagement.addCancelActionStatus(actionId, actionStatus);
         }
-        return controllerManagement.addUpdateActionStatus(actionStatus);
+        return controllerManagement.addUpdateActionStatus(actionId, actionStatus);
     }
 
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
@@ -317,20 +325,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                     "Got intermediate notification about action " + actionId + " but action does not exist");
         }
         return action;
-    }
-
-    private static void handleCancelRejected(final Message message, final Action action,
-            final ActionStatus actionStatus) {
-        if (action.isCancelingOrCanceled()) {
-
-            actionStatus.setStatus(Status.WARNING);
-
-            // cancel action rejected, write warning status message and fall
-            // back to running action status
-        } else {
-            logAndThrowMessageError(message,
-                    "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
-        }
     }
 
 }

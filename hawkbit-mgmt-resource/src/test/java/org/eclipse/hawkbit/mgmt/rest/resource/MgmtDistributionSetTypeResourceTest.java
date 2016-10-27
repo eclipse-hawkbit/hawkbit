@@ -142,8 +142,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         final List<DistributionSetType> types = new ArrayList<>();
         types.add(entityFactory.generateDistributionSetType("test1", "TestName1", "Desc1", Lists.newArrayList(osType),
                 Lists.newArrayList(runtimeType)));
-        types.add(entityFactory.generateDistributionSetType("test2", "TestName2", "Desc2", Lists.newArrayList(osType),
-                Lists.newArrayList(runtimeType, appType)));
+        types.add(entityFactory.generateDistributionSetType("test2", "TestName2", "Desc2", Collections.emptyList(),
+                Lists.newArrayList(osType, runtimeType, appType)));
         types.add(entityFactory.generateDistributionSetType("test3", "TestName3", "Desc3", Lists.newArrayList(osType),
                 Lists.newArrayList(runtimeType)));
 

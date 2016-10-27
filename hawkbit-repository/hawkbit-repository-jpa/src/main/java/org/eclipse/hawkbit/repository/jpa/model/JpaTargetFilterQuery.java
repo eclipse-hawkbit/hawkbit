@@ -109,7 +109,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
         return autoAssignDistributionSet;
     }
 
-    public void setAutoAssignDistributionSet(final DistributionSet distributionSet) {
-        autoAssignDistributionSet = (JpaDistributionSet) distributionSet;
+    public void setAutoAssignDistributionSet(final JpaDistributionSet distributionSet) {
+        this.autoAssignDistributionSet = distributionSet;
     }
 }

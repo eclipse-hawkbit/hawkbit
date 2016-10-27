@@ -14,20 +14,17 @@ import static org.fest.assertions.api.Assertions.fail;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.ReportManagement.DateTypes;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -58,6 +55,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Report Management")
 public class ReportManagementTest extends AbstractJpaIntegrationTest {
+
+    private static final String TEST_MESSAGE = "some message";
 
     @Autowired
     private ReportManagement reportManagement;
@@ -207,12 +206,9 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(distributionSet3.getId(), knownTarget5.getControllerId());
 
         // set installed status
-        sendUpdateActionStatusToTargets(distributionSet1, Lists.newArrayList(knownTarget1, knownTarget2),
-                Status.FINISHED, "some message");
-        sendUpdateActionStatusToTargets(distributionSet11, Lists.newArrayList(knownTarget3), Status.FINISHED,
-                "some message");
-        sendUpdateActionStatusToTargets(distributionSet2, Lists.newArrayList(knownTarget4), Status.FINISHED,
-                "some message");
+        testdataFactory.sendUpdateActionStatusToTargets(
+                Lists.newArrayList(knownTarget1, knownTarget2, knownTarget3, knownTarget4), Status.FINISHED,
+                Collections.singletonList(TEST_MESSAGE));
 
         List<InnerOuterDataReportSeries<String>> distributionUsage = reportManagement.distributionUsageInstalled(100);
 
@@ -251,8 +247,8 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         // Test cache evict
         final Target knownTarget6 = targetManagement.createTarget(new JpaTarget("t6"));
         assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
-        sendUpdateActionStatusToTargets(distributionSet1, Lists.newArrayList(knownTarget6), Status.FINISHED,
-                "some message");
+        testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(knownTarget6), Status.FINISHED,
+                Collections.singletonList(TEST_MESSAGE));
         distributionUsage = reportManagement.distributionUsageInstalled(100);
         for (final InnerOuterDataReportSeries<String> innerOuterDataReportSeries : distributionUsage) {
             final DataReportSeriesItem<String> dataReportSeriesItem = innerOuterDataReportSeries.getInnerSeries()
@@ -529,31 +525,6 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             targetInfo.setUpdateStatus(status);
             targetInfoRepository.save(targetInfo);
         }
-    }
-
-    private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
-            final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<>();
-        for (final Target t : targs) {
-            final List<JpaAction> findByTarget = actionRepository.findByTarget((JpaTarget) t);
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
-            }
-        }
-        return result;
-    }
-
-    private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
-            final String... msgs) {
-
-        final JpaActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
-        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
     private class DynamicDateTimeProvider implements DateTimeProvider {

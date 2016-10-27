@@ -53,8 +53,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         // target filter query that matches all targets
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .createTargetFilterQuery(new JpaTargetFilterQuery("filterA", "name==*"));
-        targetFilterQuery.setAutoAssignDistributionSet(setA);
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
+        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery.getId(), setA.getId());
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = targetManagement.createTargets(

@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
-public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements DistributionSetMetadata {
+public class JpaDistributionSetMetadata extends JpaMetaData implements DistributionSetMetadata {
     private static final long serialVersionUID = 1L;
 
     @Id

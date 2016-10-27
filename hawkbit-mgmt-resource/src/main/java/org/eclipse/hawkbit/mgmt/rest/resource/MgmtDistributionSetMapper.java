@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
@@ -121,21 +122,14 @@ public final class MgmtDistributionSetMapper {
                 dsRest.isRequiredMigrationStep());
     }
 
-    /**
-     * From {@link MgmtMetadata} to {@link DistributionSetMetadata}.
-     *
-     * @param ds
-     * @param metadata
-     * @return
-     */
-    static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
-            final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
+    static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
         if (metadata == null) {
             return Collections.emptyList();
         }
 
-        return metadata.stream().map(metadataRest -> entityFactory.generateDistributionSetMetadata(ds,
-                metadataRest.getKey(), metadataRest.getValue())).collect(Collectors.toList());
+        return metadata.stream()
+                .map(metadataRest -> entityFactory.generateMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**

@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -135,6 +136,9 @@ public interface DistributionSetManagement {
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created distribution set meta data entries
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
@@ -142,22 +146,6 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<DistributionSetMetadata> createDistributionSetMetadata(@NotNull Long dsId,
             @NotEmpty Collection<MetaData> metadata);
-
-    /**
-     * creates or updates a single distribution set meta data entry.
-     *
-     * @param dsId
-     *            if the {@link DistributionSet} the metadata has to be created
-     *            for
-     * @param metadata
-     *            the meta data entry to create or update
-     * @return the updated or created distribution set meta data entry
-     * @throws EntityAlreadyExistsException
-     *             in case the meta data entry already exists for the specific
-     *             key
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata createDistributionSetMetadata(@NotNull Long dsId, @NotNull MetaData metadata);
 
     /**
      * Creates multiple {@link DistributionSet}s.
@@ -197,7 +185,7 @@ public interface DistributionSetManagement {
     /**
      * <p>
      * {@link DistributionSet} can be deleted/erased from the repository if they
-     * have never been assigned to any {@link UpdateAction} or {@link Target}.
+     * have never been assigned to any {@link Action} or {@link Target}.
      * </p>
      *
      * <p>
@@ -214,8 +202,8 @@ public interface DistributionSetManagement {
 
     /**
      * Deleted {@link DistributionSet}s by their IDs. That is either a soft
-     * delete of the entities have been linked to an {@link UpdateAction} before
-     * or a hard delete if not.
+     * delete of the entities have been linked to an {@link Action} before or a
+     * hard delete if not.
      *
      * @param distributionSetIDs
      *            to be deleted
@@ -230,6 +218,9 @@ public interface DistributionSetManagement {
      *            where meta data has to be deleted
      * @param key
      *            of the meta data element
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void deleteDistributionSetMetadata(@NotNull final Long dsId, @NotNull final String key);
@@ -255,7 +246,7 @@ public interface DistributionSetManagement {
 
     /**
      * Find {@link DistributionSet} based on given ID without details, e.g.
-     * {@link DistributionSet#getAgentHub()}.
+     * {@link DistributionSet#getModules()}.
      *
      * @param distid
      *            to look for.
@@ -266,7 +257,7 @@ public interface DistributionSetManagement {
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
-     * details, e.g. {@link DistributionSet#getAgentHub()}.
+     * details, e.g. {@link DistributionSet#getModules()}.
      *
      * Note: for performance reasons it is recommended to use
      * {@link #findDistributionSetById(Long)} if details are not necessary.
@@ -364,9 +355,6 @@ public interface DistributionSetManagement {
      *            to <code>true</code> for returning only completed distribution
      *            sets or <code>false</code> for only incomplete ones nor
      *            <code>null</code> to return both.
-     * @param complete
-     *            set to if <code>false</code> incomplete DS should also be
-     *            shown.
      *
      *
      * @return all found {@link DistributionSet}s
@@ -384,9 +372,9 @@ public interface DistributionSetManagement {
      *            the pagination parameter
      * @param deleted
      *            if TRUE, {@link DistributionSet}s marked as deleted are
-     *            returned. If FALSE, on {@link DistributionSet}s with
-     *            {@link DistributionSet#isDeleted()} == FALSE are returned.
-     *            <code>null</code> if both are to be returned
+     *            returned. If FALSE, on {@link DistributionSet}s not marked as
+     *            deleted are returned. <code>null</code> if both are to be
+     *            returned
      * @return all found {@link DistributionSet}s
      * 
      * @throws RSQLParameterUnsupportedFieldException
@@ -404,7 +392,7 @@ public interface DistributionSetManagement {
      * following order:
      * <p>
      * 1) {@link DistributionSet}s which have the given {@link Target} as
-     * {@link TargetStatus#getInstalledDistributionSet()}
+     * {@link TargetInfo#getInstalledDistributionSet()}
      * <p>
      * 2) {@link DistributionSet}s which have the given {@link Target} as
      * {@link Target#getAssignedDistributionSet()}
@@ -418,7 +406,7 @@ public interface DistributionSetManagement {
      *            has details of filters to be applied
      * @param assignedOrInstalled
      *            the controllerID of the Target to be ordered by
-     * @return
+     * @return {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSet> findDistributionSetsAllOrderedByLinkTarget(@NotNull Pageable pageable,
@@ -501,7 +489,7 @@ public interface DistributionSetManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetMetadata findOne(@NotNull Long setId, @NotEmpty String key);
+    DistributionSetMetadata findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -630,10 +618,8 @@ public interface DistributionSetManagement {
      *
      * @param dsId
      *            {@link DistributionSet} of the meta data entry to be updated
-     * @param key
-     *            of the meta data entry to be updated
-     * @param value
-     *            to update
+     * @param md
+     *            meta data entry to be updated
      * @return the updated meta data entry
      * 
      * @throws EntityNotFoundException
@@ -641,8 +627,7 @@ public interface DistributionSetManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata updateDistributionSetMetadata(@NotNull Long dsId, @NotEmpty String key,
-            @NotEmpty String value);
+    DistributionSetMetadata updateDistributionSetMetadata(@NotNull Long dsId, @NotNull MetaData md);
 
     /**
      * Updates existing {@link DistributionSetType}.

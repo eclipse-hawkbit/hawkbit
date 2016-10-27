@@ -113,8 +113,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
 
         final String newQuery = "status==UNKNOWN";
-        targetFilterQuery.setQuery(newQuery);
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
+        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery.getId(), null, newQuery);
         assertEquals("Returns updated target filter query", newQuery,
                 targetFilterQueryManagement.findTargetFilterQueryByName(filterName).getQuery());
 
@@ -130,8 +129,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet distributionSet = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("dist_Set_01", "0.1", "", null, null));
 
-        targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
+        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery.getId(), distributionSet.getId());
 
         final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
 
@@ -149,8 +147,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet distributionSet = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("dist_Set_02", "0.1", "", null, null));
 
-        targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
+        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery.getId(), distributionSet.getId());
 
         // Check if target filter query is there
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
@@ -227,8 +224,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         assertEquals("Returns correct target filter query", tfq.getId(), tfqList.iterator().next().getId());
 
-        tfq2.setAutoAssignDistributionSet(distributionSet);
-        targetFilterQueryManagement.updateTargetFilterQuery(tfq2);
+        targetFilterQueryManagement.updateTargetFilterQuery(tfq2.getId(), distributionSet.getId());
 
         // check if find works for two
         tfqList = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500),

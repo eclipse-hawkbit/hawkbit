@@ -358,7 +358,8 @@ public class TestdataFactory {
      */
     public DistributionSet createUpdatedDistributionSet() {
         DistributionSet set = createDistributionSet("");
-        set = distributionSetManagement.updateDistributionSet(set.getId(), null, null, DEFAULT_VERSION);
+        set = distributionSetManagement.updateDistributionSet(set.getId(), null, "Updated " + DEFAULT_DESCRIPTION,
+                DEFAULT_VERSION);
 
         set.getModules().forEach(module -> softwareManagement.updateSoftwareModule(module.getId(),
                 "Updated " + DEFAULT_DESCRIPTION, null));
@@ -726,12 +727,9 @@ public class TestdataFactory {
 
     private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,
             final Collection<String> msgs) {
-        updActA.setStatus(status);
 
-        final ActionStatus statusMessages = entityFactory.generateActionStatus(updActA, status,
-                System.currentTimeMillis(), msgs);
-
-        return controllerManagament.addUpdateActionStatus(statusMessages);
+        return controllerManagament.addUpdateActionStatus(updActA.getId(),
+                entityFactory.generateActionStatus(status, System.currentTimeMillis(), msgs));
     }
 
     /**
@@ -748,7 +746,7 @@ public class TestdataFactory {
      * @return updated {@link Action}.
      */
     public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
-            final String... msgs) {
+            final Collection<String> msgs) {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
             final List<Action> findByTarget = deploymentManagement.findActionsByTarget(target);

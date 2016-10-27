@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -73,6 +74,7 @@ public interface TargetFilterQueryManagement {
 
     /**
      * Counts all target filter queries
+     * 
      * @return the number of all target filter queries
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -135,7 +137,8 @@ public interface TargetFilterQueryManagement {
             DistributionSet distributionSet, String rsqlParam);
 
     /**
-     * Retrieves all target filter query with auto assign DS which {@link TargetFilterQuery}.
+     * Retrieves all target filter query with auto assign DS which
+     * {@link TargetFilterQuery}.
      *
      *
      * @return the page with the found {@link TargetFilterQuery}
@@ -169,10 +172,36 @@ public interface TargetFilterQueryManagement {
     /**
      * updates the {@link TargetFilterQuery}.
      *
-     * @param targetFilterQuery
+     * @param queryId
      *            to be updated
+     * @param name
+     *            to be updated or <code>null</code>
+     * @param query
+     *            string to be updated or <code>null</code>
+     * @param autoAssignDs
+     *            to be updated or <code>null</code>
      * @return the updated {@link TargetFilterQuery}
+     * 
+     * @throws EntityNotFoundException
+     *             if either {@link TargetFilterQuery} and/or autoAssignDs are
+     *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQuery(@NotNull TargetFilterQuery targetFilterQuery);
+    TargetFilterQuery updateTargetFilterQuery(@NotNull Long queryId, String name, String query);
+
+    /**
+     * updates the {@link TargetFilterQuery}.
+     *
+     * @param queryId
+     *            to be updated
+     * @param autoAssignDs
+     *            to be updated or <code>null</code> to remove functionality
+     * @return the updated {@link TargetFilterQuery}
+     * 
+     * @throws EntityNotFoundException
+     *             if either {@link TargetFilterQuery} and/or autoAssignDs are
+     *             provided but not found
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetFilterQuery updateTargetFilterQuery(@NotNull Long queryId, Long autoAssignDs);
 }

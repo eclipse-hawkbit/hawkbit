@@ -45,7 +45,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final Target target = testdataFactory.generateTarget("targetId123", "targetId123");
+        final Target target = entityFactory.generateTarget("targetId123", "targetName123", "targetDesc123", null);
         final TargetInfo targetInfo = target.getTargetInfo();
         targetInfo.getControllerAttributes().put("revision", "1.1");
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -85,21 +85,21 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by name")
     public void testFilterByParameterName() {
-        assertRSQLQuery(TargetFields.NAME.name() + "==targetId123", 1);
+        assertRSQLQuery(TargetFields.NAME.name() + "==targetName123", 1);
         assertRSQLQuery(TargetFields.NAME.name() + "==target*", 4);
         assertRSQLQuery(TargetFields.NAME.name() + "==noExist*", 0);
-        assertRSQLQuery(TargetFields.NAME.name() + "=in=(targetId123,notexist)", 1);
-        assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetId123,notexist)", 3);
+        assertRSQLQuery(TargetFields.NAME.name() + "=in=(targetName123,notexist)", 1);
+        assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetName123,notexist)", 3);
     }
 
     @Test
     @Description("Test filter target by description")
     public void testFilterByParameterDescription() {
-        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==targetId123", 1);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==targetDesc123", 1);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==target*", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==noExist*", 0);
-        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=in=(targetId123,notexist)", 1);
-        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=out=(targetId123,notexist)", 1);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=in=(targetDesc123,notexist)", 1);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=out=(targetDesc123,notexist)", 1);
     }
 
     @Test

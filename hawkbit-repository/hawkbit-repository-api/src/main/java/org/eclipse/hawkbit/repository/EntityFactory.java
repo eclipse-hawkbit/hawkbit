@@ -13,20 +13,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -41,17 +37,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 public interface EntityFactory {
 
     /**
-     * Generates an empty {@link Action} without persisting it.
-     * 
-     * @return {@link Action} object
-     */
-    Action generateAction();
-
-    /**
      * Generates an {@link ActionStatus} object without persisting it.
      * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
      * @param status
      *            as reflected by this {@link ActionStatus}.
      * @param occurredAt
@@ -60,7 +47,7 @@ public interface EntityFactory {
      * 
      * @return {@link ActionStatus} object
      */
-    ActionStatus generateActionStatus(@NotNull Action action, @NotNull Status status, Long occurredAt);
+    ActionStatus generateActionStatus(@NotNull Status status, Long occurredAt);
 
     /**
      * Generates an {@link ActionStatus} object without persisting it.
@@ -93,13 +80,6 @@ public interface EntityFactory {
     ActionStatus generateActionStatus(@NotNull Status status, Long occurredAt, final String message);
 
     /**
-     * Generates an empty {@link Artifact} without persisting it.
-     * 
-     * @return {@link Artifact} object
-     */
-    Artifact generateArtifact();
-
-    /**
      * Generates an {@link DistributionSet} without persisting it.
      * 
      * @param name
@@ -121,35 +101,16 @@ public interface EntityFactory {
             DistributionSetType type, Collection<SoftwareModule> moduleList, boolean requiredMigrationStep);
 
     /**
-     * Generates an empty {@link DistributionSetMetadata} element without
-     * persisting it.
+     * Generates an {@link MetaData} element without persisting it.
      * 
-     * @return {@link DistributionSetMetadata} object
-     */
-    DistributionSetMetadata generateDistributionSetMetadata();
-
-    /**
-     * Generates an {@link DistributionSetMetadata} element without persisting
-     * it.
-     * 
-     * @param distributionSet
-     *            {@link DistributionSetMetadata#getDistributionSet()}
      * @param key
-     *            {@link DistributionSetMetadata#getKey()}
+     *            {@link MetaData#getKey()}
      * @param value
-     *            {@link DistributionSetMetadata#getValue()}
+     *            {@link MetaData#getValue()}
      * 
-     * @return {@link DistributionSetMetadata} object
+     * @return {@link MetaData} object
      */
-    DistributionSetMetadata generateDistributionSetMetadata(@NotNull DistributionSet distributionSet,
-            @NotNull String key, String value);
-
-    /**
-     * Generates an empty {@link DistributionSetTag} without persisting it.
-     * 
-     * @return {@link DistributionSetTag} object
-     */
-    DistributionSetTag generateDistributionSetTag();
+    MetaData generateMetadata(@NotEmpty String key, @NotNull String value);
 
     /**
      * Generates a {@link DistributionSetTag} without persisting it.
@@ -172,13 +133,6 @@ public interface EntityFactory {
      * @return {@link DistributionSetTag} object
      */
     DistributionSetTag generateDistributionSetTag(@NotNull String name, String description, String colour);
-
-    /**
-     * Generates an empty {@link DistributionSetType} without persisting it.
-     * 
-     * @return {@link DistributionSetType} object
-     */
-    DistributionSetType generateDistributionSetType();
 
     /**
      * Generates a {@link DistributionSetType} without persisting it.
@@ -216,19 +170,41 @@ public interface EntityFactory {
     /**
      * Generates an empty {@link Rollout} without persisting it.
      * 
+     * @param name
+     *            {@link Rollout#getName()}
+     * @param description
+     *            {@link Rollout#getDescription()}
+     * @param set
+     *            {@link Rollout#getDistributionSet()}
+     * @param targetFilterQuery
+     *            {@link Rollout#getTargetFilterQuery()}
+     * @param actionType
+     *            {@link Rollout#getActionType()}
+     * @param forcedTime
+     *            {@link Rollout#getForcedTime()}
+     * 
      * @return {@link Rollout} object
      */
     Rollout generateRollout(String name, String description, DistributionSet set, String targetFilterQuery,
             ActionType actionType, long forcedTime);
 
-    Rollout generateRollout(String name, String description, DistributionSet set, String targetFilterQuery);
-
     /**
-     * Generates an empty {@link RolloutGroup} without persisting it.
+     * Generates an empty {@link Rollout} without persisting it.
      * 
-     * @return {@link RolloutGroup} object
+     * @param name
+     *            {@link Rollout#getName()}
+     * @param description
+     *            {@link Rollout#getDescription()}
+     * @param set
+     *            {@link Rollout#getDistributionSet()}
+     * @param targetFilterQuery
+     *            {@link Rollout#getTargetFilterQuery()}
+     * @param actionType
+     *            {@link Rollout#getActionType()}
+     * 
+     * @return {@link Rollout} object
      */
-    RolloutGroup generateRolloutGroup();
+    Rollout generateRollout(String name, String description, DistributionSet set, String targetFilterQuery);
 
     /**
      * Generates a {@link SoftwareModule} without persisting it.
@@ -248,29 +224,6 @@ public interface EntityFactory {
      */
     SoftwareModule generateSoftwareModule(@NotNull SoftwareModuleType type, @NotNull String name,
             @NotNull String version, String description, String vendor);
-
-    /**
-     * Generates an empty {@link SoftwareModuleMetadata} pair without persisting
-     * it.
-     * 
-     * @return {@link SoftwareModuleMetadata} object
-     */
-    SoftwareModuleMetadata generateSoftwareModuleMetadata();
-
-    /**
-     * Generates a {@link SoftwareModuleMetadata} pair without persisting it.
-     * 
-     * @param softwareModule
-     *            {@link SoftwareModuleMetadata#getSoftwareModule()}
-     * @param key
-     *            {@link SoftwareModuleMetadata#getKey()}
-     * @param value
-     *            {@link SoftwareModuleMetadata#getValue()}
-     * 
-     * @return {@link SoftwareModuleMetadata} object
-     */
-    SoftwareModuleMetadata generateSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotNull String key,
-            String value);
 
     /**
      * Generates a {@link SoftwareModuleType} without persisting it.
@@ -322,13 +275,6 @@ public interface EntityFactory {
     Target generateTarget(@NotEmpty String controllerID, String name, String description, String securityToken);
 
     /**
-     * Generates an empty {@link TargetFilterQuery} without persisting it.
-     * 
-     * @return {@link TargetFilterQuery} object
-     */
-    TargetFilterQuery generateTargetFilterQuery();
-
-    /**
      * Generates an {@link TargetFilterQuery} without persisting it.
      *
      * @param name
@@ -351,13 +297,6 @@ public interface EntityFactory {
      * @return {@link TargetFilterQuery} object
      */
     TargetFilterQuery generateTargetFilterQuery(String name, String query, DistributionSet autoAssignDS);
-
-    /**
-     * Generates an empty {@link TargetTag} without persisting it.
-     * 
-     * @return {@link TargetTag} object
-     */
-    TargetTag generateTargetTag();
 
     /**
      * Generates a {@link TargetTag} without persisting it.

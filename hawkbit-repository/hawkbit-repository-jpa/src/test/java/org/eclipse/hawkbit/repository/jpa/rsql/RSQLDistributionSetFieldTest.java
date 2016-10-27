@@ -16,7 +16,6 @@ import java.util.Arrays;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -39,14 +38,12 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
         ds = distributionSetManagement.updateDistributionSet(ds.getId(), null, "DS", null);
-        distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds, "metaValue"));
+        createDistributionSetMetadata(ds.getId(), entityFactory.generateMetadata("metaKey", "metaValue"));
 
         DistributionSet ds2 = testdataFactory.createDistributionSets("NewDS", 3).get(0);
 
         ds2 = distributionSetManagement.updateDistributionSet(ds2.getId(), null, "DS%", null);
-        distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds2, "value"));
+        createDistributionSetMetadata(ds2.getId(), entityFactory.generateMetadata("metaKey", "value"));
 
         final DistributionSetTag targetTag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag1"));
         tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag2"));

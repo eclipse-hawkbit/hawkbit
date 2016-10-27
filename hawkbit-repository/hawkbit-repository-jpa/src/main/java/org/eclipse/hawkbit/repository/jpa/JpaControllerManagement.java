@@ -167,11 +167,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<Action> findActiveActionByTarget(final Target target) {
-        return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
-    }
-
-    @Override
     public Optional<Action> findOldestActiveActionByTarget(final Target target) {
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
@@ -257,7 +252,7 @@ public class JpaControllerManagement implements ControllerManagement {
         default:
             // do nothing
         }
-        actionRepository.save(action);
+        actionStatus.setAction(actionRepository.save(action));
         actionStatusRepository.save(actionStatus);
 
         return action;
@@ -327,6 +322,7 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         }
 
+        actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
 
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());

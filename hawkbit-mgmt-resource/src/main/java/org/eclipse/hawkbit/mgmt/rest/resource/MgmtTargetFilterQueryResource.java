@@ -55,7 +55,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") Long filterId) {
+    public ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") final Long filterId) {
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget);
@@ -65,10 +65,10 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam) {
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -78,8 +78,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<TargetFilterQuery> findFilterPage = filterManagement
-                    .findTargetFilterQueryByFilter(pageable, rsqlParam);
+            final Page<TargetFilterQuery> findFilterPage = filterManagement.findTargetFilterQueryByFilter(pageable,
+                    rsqlParam);
             countTargetsAll = findFilterPage.getTotalElements();
             findTargetFiltersAll = findFilterPage;
         } else {
@@ -89,11 +89,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
         final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper
                 .toResponse(findTargetFiltersAll.getContent());
-        return new ResponseEntity<>(new PagedList<MgmtTargetFilterQuery>(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter) {
+    public ResponseEntity<MgmtTargetFilterQuery> createFilter(
+            @RequestBody final MgmtTargetFilterQueryRequestBody filter) {
         final TargetFilterQuery createdTarget = filterManagement
                 .createTargetFilterQuery(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
@@ -101,65 +102,46 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") Long filterId,
-            @RequestBody MgmtTargetFilterQueryRequestBody targetFilterRest) {
+    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") final Long filterId,
+            @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
+        LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery existingFilter = findFilterWithExceptionIfNotFound(filterId);
-        LOG.debug("updating target filter query {}", existingFilter.getId());
-        if (targetFilterRest.getName() != null) {
-            existingFilter.setName(targetFilterRest.getName());
-        }
-        if (targetFilterRest.getQuery() != null) {
-            existingFilter.setQuery(targetFilterRest.getQuery());
-        }
-
-        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(existingFilter);
+        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filterId,
+                targetFilterRest.getName(), targetFilterRest.getQuery());
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId) {
-        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-        filterManagement.deleteTargetFilterQuery(filter.getId());
+    public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
+        findFilterWithExceptionIfNotFound(filterId);
+        filterManagement.deleteTargetFilterQuery(filterId);
         LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") Long filterId,
-            @RequestBody MgmtId dsId) {
-        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
+    public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
+            @PathVariable("filterId") final Long filterId, @RequestBody final MgmtId dsId) {
 
-        DistributionSet distributionSet;
-        distributionSet = distributionSetManagement.findDistributionSetById(dsId.getId());
-        if (distributionSet == null) {
-            throw new EntityNotFoundException("DistributionSet with Id {" + dsId + "} does not exist");
-        }
-
-        filter.setAutoAssignDistributionSet(distributionSet);
-
-        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filter);
+        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filterId, dsId.getId());
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") Long filterId) {
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
+            @PathVariable("filterId") final Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-        DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
-        MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
+        final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
+        final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
         final HttpStatus retStatus = distributionSetRest == null ? HttpStatus.NO_CONTENT : HttpStatus.OK;
         return new ResponseEntity<>(distributionSetRest, retStatus);
     }
 
     @Override
-    public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") Long filterId) {
-        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-
-        filter.setAutoAssignDistributionSet(null);
-
-        filterManagement.updateTargetFilterQuery(filter);
+    public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
+        filterManagement.updateTargetFilterQuery(filterId, null);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

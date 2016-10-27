@@ -812,7 +812,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModuleMetadata swMetadata2 = new JpaSoftwareModuleMetadata(knownKey2, ah, knownValue2);
 
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement
-                .createSoftwareModuleMetadata(Lists.newArrayList(swMetadata1, swMetadata2));
+                .createSoftwareModuleMetadata(ah.getId(), Lists.newArrayList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
@@ -835,10 +835,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
+        softwareManagement.createSoftwareModuleMetadata(ah.getId(),
+                entityFactory.generateMetadata(knownKey1, knownValue1));
 
         try {
-            softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue2));
+            softwareManagement.createSoftwareModuleMetadata(ah.getId(),
+                    entityFactory.generateMetadata(knownKey1, knownValue2));
             fail("should not have worked as module metadata already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -861,7 +863,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         // create an software module meta data entry
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement.createSoftwareModuleMetadata(
-                Collections.singleton(new JpaSoftwareModuleMetadata(knownKey, ah, knownValue)));
+                ah.getId(), Collections.singleton(entityFactory.generateMetadata(knownKey, knownValue)));
         assertThat(softwareModuleMetadata).hasSize(1);
         // base software module should have now the opt lock revision one
         // because we are modifying the
@@ -869,15 +871,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
-        // modifying the meta data value
-        softwareModuleMetadata.get(0).setValue(knownUpdateValue);
-        softwareModuleMetadata.get(0).setSoftwareModule(softwareManagement.findSoftwareModuleById(ah.getId()));
-        softwareModuleMetadata.get(0).setKey(knownKey);
-
         // update the software module metadata
         Thread.sleep(100);
-        final SoftwareModuleMetadata updated = softwareManagement
-                .updateSoftwareModuleMetadata(softwareModuleMetadata.get(0));
+        final SoftwareModuleMetadata updated = softwareManagement.updateSoftwareModuleMetadata(ah.getId(),
+                entityFactory.generateMetadata(knownKey, knownUpdateValue));
         // we are updating the sw meta data so also modiying the base software
         // module so opt lock
         // revision must be two
@@ -900,7 +897,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement
+                .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
         assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
@@ -921,7 +919,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement
+                .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
         try {
@@ -943,15 +942,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .createSoftwareModule(new JpaSoftwareModule(osType, "os", "1.0.1", null, ""));
 
         for (int index = 0; index < 10; index++) {
-            sw1 = softwareManagement
-                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw1, "value" + index))
-                    .getSoftwareModule();
+            sw1 = softwareManagement.createSoftwareModuleMetadata(sw1.getId(),
+                    entityFactory.generateMetadata("key" + index, "value" + index)).getSoftwareModule();
         }
 
         for (int index = 0; index < 20; index++) {
-            sw2 = softwareManagement
-                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index))
-                    .getSoftwareModule();
+            sw2 = softwareManagement.createSoftwareModuleMetadata(sw2.getId(),
+                    new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index)).getSoftwareModule();
         }
 
         final Page<SoftwareModuleMetadata> metadataOfSw1 = softwareManagement

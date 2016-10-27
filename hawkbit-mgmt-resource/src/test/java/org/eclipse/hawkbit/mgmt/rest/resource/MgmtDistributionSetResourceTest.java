@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -289,7 +290,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         assignDistributionSet(createdDs.getId(), knownTargetId);
         // make it in install state
         testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(createTarget), Status.FINISHED,
-                "some message");
+                Collections.singletonList("some message"));
 
         mvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/installedTargets"))
@@ -756,8 +757,10 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement.findOne(testDS, knownKey1);
-        final DistributionSetMetadata metaKey2 = distributionSetManagement.findOne(testDS, knownKey2);
+        final DistributionSetMetadata metaKey1 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey1);
+        final DistributionSetMetadata metaKey2 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey2);
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -772,8 +775,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String updateValue = "valueForUpdate";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -783,7 +785,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final DistributionSetMetadata assertDS = distributionSetManagement.findOne(testDS, knownKey);
+        final DistributionSetMetadata assertDS = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey);
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -796,14 +799,13 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValue = "knownValue";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         try {
-            distributionSetManagement.findOne(testDS, knownKey);
+            distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey);
             fail("expected EntityNotFoundException but didn't throw");
         } catch (final EntityNotFoundException e) {
             // ok as expected
@@ -817,8 +819,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -836,9 +837,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownKeyPrefix + index,
-                    knownValuePrefix + index));
+            createDistributionSetMetadata(testDS.getId(),
+                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
@@ -916,9 +916,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownKeyPrefix + index,
-                    knownValuePrefix + index));
+            createDistributionSetMetadata(testDS.getId(),
+                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

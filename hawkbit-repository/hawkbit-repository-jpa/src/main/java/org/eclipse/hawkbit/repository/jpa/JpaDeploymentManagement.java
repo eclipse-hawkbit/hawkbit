@@ -590,11 +590,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final Target target) {
-        return actionRepository.findByActiveAndTarget(pageable, (JpaTarget) target, true);
-    }
-
-    @Override
     public List<Action> findActiveActionsByTarget(final Target target) {
         return actionRepository.findByActiveAndTarget((JpaTarget) target, true);
     }
@@ -602,11 +597,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public List<Action> findInActiveActionsByTarget(final Target target) {
         return actionRepository.findByActiveAndTarget((JpaTarget) target, false);
-    }
-
-    @Override
-    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final Target target) {
-        return actionRepository.findByActiveAndTarget(pageable, (JpaTarget) target, false);
     }
 
     @Override
@@ -646,11 +636,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
         return actionRepository.findByRolloutAndRolloutGroupParentAndStatus((JpaRollout) rollout,
                 (JpaRolloutGroup) rolloutGroupParent, actionStatus);
-    }
-
-    @Override
-    public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);
     }
 
     @Override

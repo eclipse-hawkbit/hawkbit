@@ -67,7 +67,7 @@ public final class MgmtTargetFilterQueryMapper {
         targetRest.setCreatedAt(filter.getCreatedAt());
         targetRest.setLastModifiedAt(filter.getLastModifiedAt());
 
-        DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
+        final DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
         }
@@ -82,11 +82,8 @@ public final class MgmtTargetFilterQueryMapper {
 
     static TargetFilterQuery fromRequest(final EntityFactory entityFactory,
             final MgmtTargetFilterQueryRequestBody filterRest) {
-        final TargetFilterQuery filter = entityFactory.generateTargetFilterQuery();
-        filter.setName(filterRest.getName());
-        filter.setQuery(filterRest.getQuery());
 
-        return filter;
+        return entityFactory.generateTargetFilterQuery(filterRest.getName(), filterRest.getQuery());
     }
 
 }

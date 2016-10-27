@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -214,10 +213,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
-        final JpaAction action = (JpaAction) deploymentManagement.findActionWithDetails(result.getActions().get(0));
-        action.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(
-                new JpaActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
+        controllerManagament.addUpdateActionStatus(result.getActions().get(0),
+                new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "message"));
         assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.findTargetByControllerIDWithDetails("4711");

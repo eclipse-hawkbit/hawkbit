@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -65,14 +66,15 @@ public final class MgmtSoftwareModuleMapper {
                 smsRest.getVersion(), smsRest.getDescription(), smsRest.getVendor());
     }
 
-    static List<SoftwareModuleMetadata> fromRequestSwMetadata(final EntityFactory entityFactory,
-            final SoftwareModule sw, final Collection<MgmtMetadata> metadata) {
+    static List<MetaData> fromRequestSwMetadata(final EntityFactory entityFactory,
+            final Collection<MgmtMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
 
-        return metadata.stream().map(metadataRest -> entityFactory.generateSoftwareModuleMetadata(sw,
-                metadataRest.getKey(), metadataRest.getValue())).collect(Collectors.toList());
+        return metadata.stream()
+                .map(metadataRest -> entityFactory.generateMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .collect(Collectors.toList());
     }
 
     static List<SoftwareModule> smFromRequest(final EntityFactory entityFactory,

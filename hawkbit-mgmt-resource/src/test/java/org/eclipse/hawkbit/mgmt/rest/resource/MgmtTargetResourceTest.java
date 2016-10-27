@@ -110,9 +110,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final int limitSize = 2;
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-        actions.get(0).setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(entityFactory.generateActionStatus(actions.get(0), Status.FINISHED,
-                System.currentTimeMillis(), "testmessage"));
+        controllerManagament.addUpdateActionStatus(actions.get(0).getId(),
+                entityFactory.generateActionStatus(Status.FINISHED, System.currentTimeMillis(), "testmessage"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
         final ActionStatus status = deploymentManagement
@@ -688,10 +687,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
         final Target test1 = entityFactory.generateTarget("id1", RandomStringUtils.randomAscii(80), null, null);
 
-        final MvcResult mvcResult = mvc
-                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
-                        .contentType(MediaType.APPLICATION_JSON))
+        final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
+                .content(JsonBuilder.targets(Lists.newArrayList(test1), true)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
         assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
@@ -1297,10 +1294,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
      *
      */
     private void feedbackToByInSync(final Long actionId) {
-        final Action action = deploymentManagement.findAction(actionId);
-
-        final ActionStatus actionStatus = entityFactory.generateActionStatus(action, Status.FINISHED, 0L);
-        controllerManagement.addUpdateActionStatus(actionStatus);
+        final ActionStatus actionStatus = entityFactory.generateActionStatus(Status.FINISHED, 0L);
+        controllerManagement.addUpdateActionStatus(actionId, actionStatus);
     }
 
     /**

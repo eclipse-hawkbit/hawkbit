@@ -19,14 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -115,20 +112,14 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         // set one installed DS also
         final Action action = deploymentManagement.findActionWithDetails(actionId);
-        action.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(
-                new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
+        controllerManagament.addUpdateActionStatus(actionId,
+                new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "message"));
         assignDistributionSet(setA.getId(), installedC);
 
-        final List<TargetUpdateStatus> unknown = new ArrayList<>();
-        unknown.add(TargetUpdateStatus.UNKNOWN);
-
-        final List<TargetUpdateStatus> pending = new ArrayList<>();
-        pending.add(TargetUpdateStatus.PENDING);
-
-        final List<TargetUpdateStatus> both = new ArrayList<>();
-        both.add(TargetUpdateStatus.UNKNOWN);
-        both.add(TargetUpdateStatus.PENDING);
+        final List<TargetUpdateStatus> unknown = Lists.newArrayList(TargetUpdateStatus.UNKNOWN);
+        final List<TargetUpdateStatus> pending = Lists.newArrayList(TargetUpdateStatus.PENDING);
+        final List<TargetUpdateStatus> both = Lists.newArrayList(TargetUpdateStatus.UNKNOWN,
+                TargetUpdateStatus.PENDING);
 
         // get final updated version of targets
         targAs = targetManagement.findTargetByControllerID(
@@ -744,7 +735,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         targAssigned = Lists.newLinkedList(assignDistributionSet(ds, targAssigned).getAssignedEntity());
         targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
-        targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
+        targInstalled = testdataFactory
+                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
+                .stream().map(action -> action.getTarget()).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
                 new FilterParams(null, null, null, null, Boolean.FALSE, new String[0]));
@@ -799,7 +792,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity();
         targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
-        targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
+        targInstalled = testdataFactory
+                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
+                .stream().map(action -> action.getTarget()).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
                 new FilterParams(null, null, Boolean.TRUE, null, Boolean.FALSE, new String[0]));
@@ -870,12 +865,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
-            final Action action = deploymentManagement.findActionWithDetails(actionId);
-            action.setStatus(Status.FINISHED);
-            controllerManagament.addUpdateActionStatus(
-                    new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
-        });
+        assignDistributionSet(installedSet, installedtargets).getActions()
+                .forEach(actionId -> controllerManagament.addUpdateActionStatus(actionId,
+                        new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "message")));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets
@@ -887,32 +879,4 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .as("and that means the following expected amount").hasSize(10);
 
     }
-
-    private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
-            final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<>();
-        for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
-            }
-        }
-        return result;
-    }
-
-    private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
-            final String... msgs) {
-        updActA.setStatus(status);
-
-        final ActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setAction(updActA);
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
-        controllerManagament.addUpdateActionStatus(statusMessages);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
-    }
-
 }

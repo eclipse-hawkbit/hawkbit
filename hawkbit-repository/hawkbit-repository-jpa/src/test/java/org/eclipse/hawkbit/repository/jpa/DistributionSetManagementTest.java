@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,8 +22,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -30,7 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -244,8 +242,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
 
         final DistributionSetMetadata metadata = new JpaDistributionSetMetadata(knownKey, ds, knownValue);
-        final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) distributionSetManagement
-                .createDistributionSetMetadata(ds.getId(), metadata);
+        final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) createDistributionSetMetadata(
+                ds.getId(), metadata);
 
         assertThat(createdMetadata).isNotNull();
         assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
@@ -362,8 +360,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(ds.getOptLockRevision()).isEqualTo(1);
 
         // create an DS meta data entry
-        distributionSetManagement.createDistributionSetMetadata(ds.getId(),
-                new JpaDistributionSetMetadata(knownKey, ds, knownValue));
+        createDistributionSetMetadata(ds.getId(), new JpaDistributionSetMetadata(knownKey, ds, knownValue));
 
         DistributionSet changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId());
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
@@ -372,7 +369,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
-                .updateDistributionSetMetadata(ds.getId(), knownKey, knownUpdateValue);
+                .updateDistributionSetMetadata(ds.getId(), entityFactory.generateMetadata(knownKey, knownUpdateValue));
         // we are updating the sw meta data so also modifying the base software
         // module so opt lock
         // revision must be three
@@ -409,9 +406,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
         assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
         // set installed
-        final ArrayList<Target> installedDSSecond = new ArrayList<>();
-        installedDSSecond.add(tSecond);
-        sendUpdateActionStatusToTargets(dsSecond, installedDSSecond, Status.FINISHED,
+        testdataFactory.sendUpdateActionStatusToTargets(Collections.singleton(tSecond), Status.FINISHED,
                 Lists.newArrayList("some message"));
 
         assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
@@ -501,7 +496,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         .hasSize(202);
 
         // search for completed
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsDeleted);
@@ -513,7 +508,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsInComplete);
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(1)
@@ -566,7 +561,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsNewType);
@@ -577,14 +572,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(201)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsInComplete);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(1)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsDeleted);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setIsDeleted(Boolean.TRUE);
@@ -672,18 +667,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         return new DistributionSetFilterBuilder();
     }
 
-    private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Collection<Target> targs,
-            final Status status, final Collection<String> msgs) {
-        final List<Target> result = new ArrayList<>();
-        for (final Target t : targs) {
-            final List<JpaAction> findByTarget = actionRepository.findByTarget((JpaTarget) t);
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
-            }
-        }
-        return result;
-    }
-
     @Test
     @Description("Simple DS load without the related data that should be loaded lazy.")
     public void findDistributionSetsWithoutLazy() {
@@ -721,13 +704,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         for (int index = 0; index < 10; index++) {
 
-            ds1 = distributionSetManagement.createDistributionSetMetadata(ds1.getId(),
+            ds1 = createDistributionSetMetadata(ds1.getId(),
                     new JpaDistributionSetMetadata("key" + index, ds1, "value" + index)).getDistributionSet();
         }
 
         for (int index = 0; index < 20; index++) {
 
-            ds2 = distributionSetManagement.createDistributionSetMetadata(ds2.getId(),
+            ds2 = createDistributionSetMetadata(ds2.getId(),
                     new JpaDistributionSetMetadata("key" + index, ds2, "value" + index)).getDistributionSet();
         }
 
@@ -811,17 +794,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         rolloutToCreate.setTargetFilterQuery(filterQuery);
         rolloutToCreate.setDistributionSet(distributionSet);
         return rolloutManagement.createRollout(rolloutToCreate, groupSize, conditions);
-    }
-
-    private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
-            final Collection<String> msgs) {
-
-        final JpaActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        msgs.forEach(statusMessages::addMessage);
-        controllerManagament.addUpdateActionStatus(updActA.getId(), statusMessages);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
 }
