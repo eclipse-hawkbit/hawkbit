@@ -42,4 +42,49 @@ public class RolloutGroupChangeEvent extends TenantAwareUiEvent {
     public Long getRolloutGroupId() {
         return rolloutGroupId;
     }
+
+    @Override
+    public String toString() {
+        return "RolloutGroupChangeEvent [rolloutId=" + rolloutId + ", rolloutGroupId=" + rolloutGroupId
+                + ", getTenant()=" + getTenant() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
+        result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RolloutGroupChangeEvent other = (RolloutGroupChangeEvent) obj;
+        if (rolloutGroupId == null) {
+            if (other.rolloutGroupId != null) {
+                return false;
+            }
+        } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
+            return false;
+        }
+        if (rolloutId == null) {
+            if (other.rolloutId != null) {
+                return false;
+            }
+        } else if (!rolloutId.equals(other.rolloutId)) {
+            return false;
+        }
+        return true;
+    }
+
 }

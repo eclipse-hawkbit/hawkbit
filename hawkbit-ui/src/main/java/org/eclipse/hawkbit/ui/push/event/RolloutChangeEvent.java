@@ -33,4 +33,40 @@ public class RolloutChangeEvent extends TenantAwareUiEvent {
     public Long getRolloutId() {
         return rolloutId;
     }
+
+    @Override
+    public String toString() {
+        return "RolloutChangeEvent [rolloutId=" + rolloutId + ", getTenant()=" + getTenant() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RolloutChangeEvent other = (RolloutChangeEvent) obj;
+        if (rolloutId == null) {
+            if (other.rolloutId != null) {
+                return false;
+            }
+        } else if (!rolloutId.equals(other.rolloutId)) {
+            return false;
+        }
+        return true;
+    }
+
 }

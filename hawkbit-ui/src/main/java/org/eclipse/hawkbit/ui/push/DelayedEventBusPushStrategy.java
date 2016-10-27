@@ -10,9 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +19,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -47,6 +44,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
 
+import com.google.common.collect.Lists;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.VaadinSession.State;
 import com.vaadin.server.WrappedSession;
@@ -86,8 +84,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
 
-    private final Set<RolloutEventKey> rolloutEvents = ConcurrentHashMap.newKeySet();
-    private final Set<RolloutEventKey> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
+    private final Set<RolloutChangeEvent> rolloutEvents = ConcurrentHashMap.newKeySet();
+    private final Set<RolloutGroupChangeEvent> rolloutGroupEvents = ConcurrentHashMap.newKeySet();
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());
@@ -127,10 +125,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             LOG.debug("UI EventBus aggregator started for UI {}", vaadinUI.getUIId());
             final long timestamp = System.currentTimeMillis();
 
-            final Optional<RolloutChangeEvent> rolloutChangeEvent = getRolloutChangeEvent();
-            final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent = getRolloutGroupChangeEvent();
+            final List<RolloutChangeEvent> rolloutChangeEvent = copyAndClearRolloutChangeEvents();
+            final List<RolloutGroupChangeEvent> rolloutGroupChangeEvent = copyAndClearRolloutChangeGroupEvents();
 
-            final int size = calculateQueueSize(rolloutChangeEvent, rolloutGroupChangeEvent);
+            final int rolloutChangeEventSize = rolloutChangeEvent.size();
+            final int rolloutGroupChangeEventSize = rolloutGroupChangeEvent.size();
+            final int size = queue.size() + rolloutChangeEventSize + rolloutGroupChangeEventSize;
             if (size <= 0) {
                 LOG.debug("UI EventBus aggregator for UI {} has nothing to do.", vaadinUI.getUIId());
                 return;
@@ -142,7 +142,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             }
 
             final List<TenantAwareEvent> events = new ArrayList<>(size);
-            final int eventsSize = queue.drainTo(events);
+            final int eventsSize = queue.drainTo(events) + rolloutChangeEventSize + rolloutGroupChangeEventSize;
 
             addRolloutChangeEvents(rolloutChangeEvent, rolloutGroupChangeEvent, events);
 
@@ -161,42 +161,22 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
         }
 
-        private void addRolloutChangeEvents(final Optional<RolloutChangeEvent> rolloutChangeEvent,
-                final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent, final List<TenantAwareEvent> events) {
-            rolloutChangeEvent.ifPresent(events::add);
-            rolloutGroupChangeEvent.ifPresent(events::add);
-
+        private void addRolloutChangeEvents(final List<RolloutChangeEvent> rolloutChangeEvent,
+                final List<RolloutGroupChangeEvent> rolloutGroupChangeEvent, final List<TenantAwareEvent> events) {
+            events.addAll(rolloutChangeEvent);
+            events.addAll(rolloutGroupChangeEvent);
         }
 
-        private Optional<RolloutChangeEvent> getRolloutChangeEvent() {
-            final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
-            if (!rolloutIterator.hasNext()) {
-                return Optional.empty();
-            }
-            final RolloutEventKey eventKey = rolloutIterator.next();
-            rolloutIterator.remove();
-            return Optional.of(new RolloutChangeEvent(eventKey.tenant, eventKey.rolloutId));
+        private List<RolloutChangeEvent> copyAndClearRolloutChangeEvents() {
+            final List<RolloutChangeEvent> rolloutChangeEvents = Lists.newArrayList(rolloutEvents);
+            rolloutEvents.clear();
+            return rolloutChangeEvents;
         }
 
-        private Optional<RolloutGroupChangeEvent> getRolloutGroupChangeEvent() {
-            final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
-            if (!rolloutGroupIterator.hasNext()) {
-                return Optional.empty();
-            }
-            final RolloutEventKey eventKey = rolloutGroupIterator.next();
-            rolloutGroupIterator.remove();
-            return Optional
-                    .of(new RolloutGroupChangeEvent(eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
-        }
-
-        private int calculateQueueSize(final Optional<RolloutChangeEvent> rolloutChangeEvent,
-                final Optional<RolloutGroupChangeEvent> rolloutGroupChangeEvent) {
-            final AtomicInteger size = new AtomicInteger(queue.size());
-
-            rolloutChangeEvent.ifPresent(event -> size.incrementAndGet());
-            rolloutGroupChangeEvent.ifPresent(event -> size.incrementAndGet());
-
-            return size.get();
+        private List<RolloutGroupChangeEvent> copyAndClearRolloutChangeGroupEvents() {
+            final List<RolloutGroupChangeEvent> rolloutChangeEvents = Lists.newArrayList(rolloutGroupEvents);
+            rolloutGroupEvents.clear();
+            return rolloutChangeEvents;
         }
 
         /**
@@ -322,11 +302,12 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             rolloutGroupId = rolloutGroup.getId();
         }
 
-        if (rolloutId != null) {
-            rolloutEvents.add(new RolloutEventKey(rolloutId, event.getTenant()));
-            if (rolloutGroupId != null) {
-                rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
-            }
+        if (rolloutId == null) {
+            return;
+        }
+        rolloutEvents.add(new RolloutChangeEvent(event.getTenant(), rolloutId));
+        if (rolloutGroupId != null) {
+            rolloutGroupEvents.add(new RolloutGroupChangeEvent(event.getTenant(), rolloutId, rolloutGroupId));
         }
     }
 
@@ -342,75 +323,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             return rollout.getId();
         }
         return null;
-    }
-
-    /**
-     * The rollout key in the concurrent set to be hold.
-     * 
-     *
-     */
-    private static final class RolloutEventKey {
-        private final Long rolloutId;
-        private final String tenant;
-        private final Long rolloutGroupId;
-
-        private RolloutEventKey(final Long rolloutId, final Long rolloutGroupId, final String tenant) {
-            this.rolloutGroupId = rolloutGroupId;
-            this.rolloutId = rolloutId;
-            this.tenant = tenant;
-        }
-
-        private RolloutEventKey(final Long rolloutId, final String tenant) {
-            this(rolloutId, null, tenant);
-        }
-
-        @Override
-        public int hashCode() {// NOSONAR - as this is generated
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
-            result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
-            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {// NOSONAR - as this is
-                                                 // generated
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final RolloutEventKey other = (RolloutEventKey) obj;
-            if (rolloutGroupId == null) {
-                if (other.rolloutGroupId != null) {
-                    return false;
-                }
-            } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
-                return false;
-            }
-            if (rolloutId == null) {
-                if (other.rolloutId != null) {
-                    return false;
-                }
-            } else if (!rolloutId.equals(other.rolloutId)) {
-                return false;
-            }
-            if (tenant == null) {
-                if (other.tenant != null) {
-                    return false;
-                }
-            } else if (!tenant.equals(other.tenant)) {
-                return false;
-            }
-            return true;
-        }
-
     }
 
 }
