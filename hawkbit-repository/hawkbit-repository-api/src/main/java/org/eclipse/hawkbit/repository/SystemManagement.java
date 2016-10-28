@@ -85,14 +85,14 @@ public interface SystemManagement {
     TenantMetaData getTenantMetadata(@NotNull String tenant);
 
     /**
-     * Update call for {@link TenantMetaData}.
+     * Update call for {@link TenantMetaData} of the current tenant.
      *
-     * @param metaData
+     * @param defaultDsType
      *            to update
      * @return updated {@link TenantMetaData} entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    TenantMetaData updateTenantMetadata(@NotNull TenantMetaData metaData);
+    TenantMetaData updateTenantMetadata(@NotNull Long defaultDsType);
 
     /**
      * Returns {@link TenantMetaData} of given tenant ID.

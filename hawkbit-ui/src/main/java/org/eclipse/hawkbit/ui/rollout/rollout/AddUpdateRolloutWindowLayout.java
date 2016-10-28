@@ -424,21 +424,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         if (rolloutForEdit == null) {
             return;
         }
-        rolloutForEdit.setName(rolloutName.getValue());
-        rolloutForEdit.setDescription(description.getValue());
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
-        rolloutForEdit
-                .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
-        rolloutForEdit.setActionType(getActionType());
-        rolloutForEdit.setForcedTime(getForcedTimeStamp());
-        final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-        final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
-        for (final RolloutGroup rolloutGroup : rolloutForEdit.getRolloutGroups()) {
-            rolloutGroup.setErrorConditionExp(triggerThreshold.getValue());
-            rolloutGroup.setSuccessConditionExp(String.valueOf(errorThresoldPercent));
-        }
-        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
+        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit.getId(), rolloutName.getValue(),
+                description.getValue());
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
         eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
     }
@@ -471,9 +459,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Rollout saveRollout() {
-        Rollout rolloutToCreate = entityFactory.generateRollout();
+
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-        final String targetFilter = getTargetFilterQuery();
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
@@ -483,16 +470,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
-        rolloutToCreate.setName(rolloutName.getValue());
-        rolloutToCreate.setDescription(description.getValue());
-        rolloutToCreate.setTargetFilterQuery(targetFilter);
-        rolloutToCreate
-                .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
-        rolloutToCreate.setActionType(getActionType());
-        rolloutToCreate.setForcedTime(getForcedTimeStamp());
 
-        rolloutToCreate = rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
-        return rolloutToCreate;
+        final Rollout rolloutToCreate = entityFactory.generateRollout(rolloutName.getValue(), description.getValue(),
+                distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()),
+                getTargetFilterQuery(), getActionType(), getForcedTimeStamp());
+
+        return rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
     }
 
     private String getTargetFilterQuery() {

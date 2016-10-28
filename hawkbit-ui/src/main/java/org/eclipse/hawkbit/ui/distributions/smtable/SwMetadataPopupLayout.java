@@ -51,8 +51,8 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected SoftwareModuleMetadata createMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareManagement
-                .createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(entity, key, value));
+        final SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entity.getId(),
+                entityFactory.generateMetadata(key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata));
         return swMetadata;
@@ -63,8 +63,8 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected SoftwareModuleMetadata updateMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = softwareManagement
-                .updateSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(entity, key, value));
+        final SoftwareModuleMetadata swMetadata = softwareManagement.updateSoftwareModuleMetadata(entity.getId(),
+                entityFactory.generateMetadata(key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
@@ -79,9 +79,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
      */
     @Override
     protected void deleteMetadata(final SoftwareModule entity, final String key, final String value) {
-        final SoftwareModuleMetadata swMetadata = entityFactory.generateSoftwareModuleMetadata(entity, key, value);
         softwareManagement.deleteSoftwareModuleMetadata(entity.getId(), key);
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA, swMetadata));
+        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA,
+                entityFactory.generateMetadata(key, value)));
     }
 
     @Override

@@ -28,8 +28,8 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -551,17 +551,19 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * update tag.
      */
     protected void updateExistingTag(final Tag targetObj) {
+        final String tagNameUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String descUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+        final String colorPickedUpdateValue = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
 
-            targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
-            targetObj.setColour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
-            if (targetObj instanceof TargetTag) {
-                tagManagement.updateTargetTag(targetObj.getId(), );
-            } else if (targetObj instanceof DistributionSetTag) {
-                tagManagement.updateDistributionSetTag((DistributionSetTag) targetObj);
-            }
-            uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
-         
+        if (targetObj instanceof TargetTag) {
+            tagManagement.updateTargetTag(targetObj.getId(), tagNameUpdateValue, descUpdateValue,
+                    colorPickedUpdateValue);
+        } else if (targetObj instanceof DistributionSetTag) {
+            tagManagement.updateDistributionSetTag(targetObj.getId(), tagNameUpdateValue, descUpdateValue,
+                    colorPickedUpdateValue);
+        }
+        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
+
     }
 
     protected void displaySuccess(final String tagName) {

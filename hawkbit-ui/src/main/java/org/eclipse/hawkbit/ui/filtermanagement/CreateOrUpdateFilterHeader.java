@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.filtermanagement.AutoCompleteTextFieldComponent.FilterQueryChangeListener;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -250,12 +249,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             }
         };
 
-        queryTextField.addTextChangeListener(new FilterQueryChangeListener() {
-            @Override
-            public void queryChanged(final boolean valid, final String query) {
-                enableDisableSaveButton(!valid, query);
-            }
-        });
+        queryTextField.addTextChangeListener((valid, query) -> enableDisableSaveButton(!valid, query));
 
     }
 
@@ -402,9 +396,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = entityFactory.generateTargetFilterQuery();
-        targetFilterQuery.setName(nameTextField.getValue());
-        targetFilterQuery.setQuery(queryTextField.getValue());
+        final TargetFilterQuery targetFilterQuery = entityFactory.generateTargetFilterQuery(nameTextField.getValue(),
+                queryTextField.getValue());
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
         notification.displaySuccess(
                 i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
@@ -417,10 +410,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             return;
         }
         final TargetFilterQuery targetFilterQuery = tfQuery.get();
-        targetFilterQuery.setName(nameTextField.getValue());
-        targetFilterQuery.setQuery(queryTextField.getValue());
-        final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement
-                .updateTargetFilterQuery(targetFilterQuery);
+        final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement.updateTargetFilterQuery(
+                targetFilterQuery.getId(), nameTextField.getValue(), queryTextField.getValue());
         filterManagementUIState.setTfQuery(updatedTargetFilter);
         oldFilterName = nameTextField.getValue();
         oldFilterQuery = queryTextField.getValue();

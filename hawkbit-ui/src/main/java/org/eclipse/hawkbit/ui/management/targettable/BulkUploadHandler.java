@@ -327,7 +327,7 @@ public class BulkUploadHandler extends CustomComponent
                 return i18n.get("message.bulk.upload.assignment.failed");
             }
             deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
-                    forcedTimeStamp, targetsList.toArray(new String[targetsList.size()]));
+                    forcedTimeStamp, targetsList);
             return null;
         }
 
@@ -398,24 +398,13 @@ public class BulkUploadHandler extends CustomComponent
                 final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
                 /* create new target entity */
-                final Target newTarget = entityFactory.generateTarget(newControllerId);
-                setTargetValues(newTarget, newName, newDesc);
+                final Target newTarget = entityFactory.generateTarget(newControllerId, newName, newDesc, null);
                 targetManagement.createTarget(newTarget);
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
                 successfullTargetCount++;
             }
 
         }
-    }
-
-    private static void setTargetValues(final Target target, final String name, final String description) {
-        if (null == name) {
-            target.setName(target.getControllerId());
-        } else {
-            target.setName(name);
-        }
-        target.setName(name == null ? target.getControllerId() : name);
-        target.setDescription(description);
     }
 
     private boolean mandatoryCheck(final String newControlllerId) {

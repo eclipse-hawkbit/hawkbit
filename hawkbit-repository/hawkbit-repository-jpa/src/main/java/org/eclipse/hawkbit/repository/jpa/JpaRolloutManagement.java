@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -32,7 +34,6 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -47,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -68,7 +70,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -585,31 +586,24 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rolloutRepository.findByName(rolloutName);
     }
 
-    /**
-     * Update rollout details.
-     *
-     * @param rollout
-     *            rollout to be updated
-     *
-     * @return Rollout updated rollout
-     */
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public Rollout updateRollout(final Rollout rollout) {
-        Assert.notNull(rollout.getId());
-        return rolloutRepository.save((JpaRollout) rollout);
+    public Rollout updateRollout(final Long rolloutId, final String name, final String description) {
+        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+
+        if (name != null) {
+            rollout.setName(name);
+        }
+
+        if (description != null) {
+            rollout.setDescription(description);
+        }
+
+        return rolloutRepository.save(rollout);
     }
 
-    /**
-     * Get count of targets in different status in rollout.
-     *
-     * @param pageable
-     *            the page request to sort and limit the result
-     * @return a list of rollouts with details of targets count for different
-     *         statuses
-     *
-     */
     @Override
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable) {
         final Page<JpaRollout> rollouts = rolloutRepository.findAll(pageable);

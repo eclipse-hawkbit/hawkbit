@@ -589,29 +589,21 @@ public interface DistributionSetManagement {
      *            to update or <code>null</code>
      * @param version
      *            to update or <code>null</code>
-     * @return the saved entity.
-     * 
-     * @throws EntityNotFoundException
-     *             if given set does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet updateDistributionSet(@NotNull Long setId, String name, String description, String version);
-
-    /**
-     * Updates existing {@link DistributionSet}.
-     *
-     * @param setId
-     *            to update
      * @param requiredMigrationStep
      *            to update or <code>null</code>
-     * 
+     * @param type
+     *            {@link DistributionSetType} to update or <code>null</code>
      * @return the saved entity.
      * 
      * @throws EntityNotFoundException
      *             if given set does not exist
+     * @throws EntityReadOnlyException
+     *             if user tries to change requiredMigrationStep or type on a DS
+     *             that is already assigned to targets
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet updateDistributionSet(@NotNull Long setId, boolean requiredMigrationStep);
+    DistributionSet updateDistributionSet(@NotNull Long setId, String name, String description, String version,
+            Boolean requiredMigrationStep, Long type);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.

@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetTypeBeanQuery.class);
 
     private final Sort sort = new Sort(Direction.ASC, "name");
-    private transient Page<DistributionSetType> firstPageDistSetType = null;
+    private transient Page<DistributionSetType> firstPageDistSetType;
     private transient DistributionSetManagement distributionSetManagement;
     private transient EntityFactory entityFactory;
 
@@ -59,9 +58,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     @Override
     protected DistributionSetType constructBean() {
-        final DistributionSetType result = getEntityFactory().generateDistributionSetType("", "", "");
-        result.setColour("");
-        return result;
+        return getEntityFactory().generateDistributionSetType("", "", "");
     }
 
     @Override
@@ -93,7 +90,6 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     @Override
     protected List<DistributionSetType> loadBeans(final int startIndex, final int count) {
         Page<DistributionSetType> typeBeans;
-        final List<DistributionSetType> distSetTypeList = new ArrayList<>();
         if (startIndex == 0 && firstPageDistSetType != null) {
             typeBeans = firstPageDistSetType;
         } else {
@@ -101,8 +97,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
                     .findDistributionSetTypesAll(new OffsetBasedPageRequest(startIndex, count, sort));
         }
 
-        distSetTypeList.addAll(typeBeans.getContent());
-        return distSetTypeList;
+        return typeBeans.getContent();
     }
 
     @Override

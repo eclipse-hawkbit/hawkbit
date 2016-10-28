@@ -174,7 +174,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSet updateDistributionSet(final Long setId, final String name, final String description,
-            final String version) {
+            final String version, final Boolean requiredMigrationStep, final Long typeId) {
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
 
@@ -188,6 +188,19 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (version != null) {
             set.setVersion(version);
+        }
+
+        if (requiredMigrationStep != null && !requiredMigrationStep.equals(set.isRequiredMigrationStep())) {
+            checkDistributionSetIsAllowedToModify(set);
+            set.setRequiredMigrationStep(requiredMigrationStep);
+        }
+
+        if (typeId != null) {
+            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(typeId);
+            if (type.getId().equals(set.getType().getId())) {
+                checkDistributionSetIsAllowedToModify(set);
+                set.setType(type);
+            }
         }
 
         return distributionSetRepository.save(set);
@@ -300,7 +313,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException("Not all given software modules where found.");
         }
 
-        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
+        checkDistributionSetIsAllowedToModify(set);
 
         modules.forEach(set::addModule);
 
@@ -314,7 +327,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
+        checkDistributionSetIsAllowedToModify(set);
 
         set.removeModule(module);
 
@@ -753,7 +766,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetSoftwareModulesIsAllowedToModify(final JpaDistributionSet distributionSet) {
+    private void checkDistributionSetIsAllowedToModify(final JpaDistributionSet distributionSet) {
         if (actionRepository.countByDistributionSet(distributionSet) > 0) {
             throw new EntityReadOnlyException(
                     String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
@@ -877,16 +890,5 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Long countDistributionSetsByType(final DistributionSetType type) {
         return distributionSetRepository.countByType((JpaDistributionSetType) type);
-    }
-
-    @Override
-    public DistributionSet updateDistributionSet(final Long setId, final boolean requiredMigrationStep) {
-        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
-
-        checkDistributionSetSoftwareModulesIsAllowedToModify(set);
-
-        set.setRequiredMigrationStep(requiredMigrationStep);
-
-        return distributionSetRepository.save(set);
     }
 }

@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -136,16 +135,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        /* get latest entity */
-        final Target latestTarget = targetManagement.findTargetByControllerIDWithDetails(controllerId);
-        /* update new name & desc */
-        setTargetValues(latestTarget, newName, newDesc);
         /* save updated entity */
-        targetManagement.updateTarget(latestTarget);
+        final Target target = targetManagement.updateTarget(controllerId, newName, newDesc, null, null);
         /* display success msg */
-        uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { latestTarget.getName() }));
+        uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { target.getName() }));
         // publishing through event bus
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
     }
 
     private void addNewTarget() {
@@ -154,9 +149,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
         /* create new target entity */
-        Target newTarget = entityFactory.generateTarget(newControlllerId);
-        /* set values to the new target entity */
-        setTargetValues(newTarget, newName, newDesc);
+        Target newTarget = entityFactory.generateTarget(newControlllerId, newName, newDesc, null);
         /* save new target */
         newTarget = targetManagement.createTarget(newTarget);
         final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
@@ -202,11 +195,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.clear();
         descTextArea.clear();
         editTarget = Boolean.FALSE;
-    }
-
-    private void setTargetValues(final Target target, final String name, final String description) {
-        target.setName(name == null ? target.getControllerId() : name);
-        target.setDescription(description);
     }
 
     private boolean isDuplicate() {

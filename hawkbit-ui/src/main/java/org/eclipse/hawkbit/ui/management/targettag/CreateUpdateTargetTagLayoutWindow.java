@@ -121,14 +121,12 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     protected void createNewTag() {
         super.createNewTag();
         if (isNotEmpty(getTagNameValue())) {
-            TargetTag newTargetTag = entityFactory.generateTargetTag(getTagNameValue());
-            if (isNotEmpty(getTagDescValue())) {
-                newTargetTag.setDescription(getTagDescValue());
-            }
-            newTargetTag.setColour(ColorPickerConstants.START_COLOR.getCSS());
+            String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (isNotEmpty(getColorPicked())) {
-                newTargetTag.setColour(getColorPicked());
+                colour = getColorPicked();
             }
+
+            TargetTag newTargetTag = entityFactory.generateTargetTag(getTagNameValue(), getTagDescValue(), colour);
             newTargetTag = tagManagement.createTargetTag(newTargetTag);
             displaySuccess(newTargetTag.getName());
         } else {

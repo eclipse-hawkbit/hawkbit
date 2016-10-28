@@ -330,10 +330,14 @@ public interface RolloutManagement {
      *
      * @param rollout
      *            rollout to be updated
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
      *
      * @return Rollout updated rollout
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout updateRollout(@NotNull Rollout rollout);
+    Rollout updateRollout(@NotNull Long rollout, String name, String description);
 
 }

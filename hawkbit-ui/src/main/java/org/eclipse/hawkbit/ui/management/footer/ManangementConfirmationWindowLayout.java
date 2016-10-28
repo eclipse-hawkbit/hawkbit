@@ -33,9 +33,9 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Maps;
@@ -169,9 +169,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         for (final Map.Entry<Long, ArrayList<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
             tempIdList = saveAssignedList.get(mapEntry.getKey());
-            final String[] ids = tempIdList.stream().map(t -> t.getControllerId()).toArray(size -> new String[size]);
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
-                    .assignDistributionSet(mapEntry.getKey(), actionType, forcedTimeStamp, ids);
+                    .assignDistributionSet(mapEntry.getKey(), actionType, forcedTimeStamp,
+                            tempIdList.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
 
             if (distributionSetAssignmentResult.getAssigned() > 0) {
                 successAssignmentCount += distributionSetAssignmentResult.getAssigned();

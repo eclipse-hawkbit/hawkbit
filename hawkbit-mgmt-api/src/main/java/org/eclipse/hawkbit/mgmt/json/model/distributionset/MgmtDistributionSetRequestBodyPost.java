@@ -41,7 +41,7 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
     private List<MgmtSoftwareModuleAssigment> modules;
 
     @JsonProperty
-    private boolean requiredMigrationStep;
+    private Boolean requiredMigrationStep;
 
     @JsonProperty
     private String type;
