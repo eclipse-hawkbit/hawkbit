@@ -16,42 +16,43 @@ import java.util.Optional;
  *
  */
 public interface SoftwareModule extends NamedVersionedEntity {
-
     /**
      * @param artifact
      *            is added to the assigned {@link Artifact}s.
      */
-    void addArtifact(LocalArtifact artifact);
-
-    /**
-     * @param artifact
-     *            is added to the assigned {@link Artifact}s.
-     */
-    void addArtifact(ExternalArtifact artifact);
-
+    void addArtifact(Artifact artifact);
+    
     /**
      * @param artifactId
      *            to look for
      * @return found {@link Artifact}
      */
-    Optional<LocalArtifact> getLocalArtifact(Long artifactId);
+    default Optional<Artifact> getArtifact(final Long artifactId) {
+        if (getArtifacts().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return getArtifacts().stream().filter(artifact -> artifact.getId().equals(artifactId)).findFirst();
+    }
 
     /**
      * @param fileName
      *            to look for
      * @return found {@link Artifact}
      */
-    Optional<LocalArtifact> getLocalArtifactByFilename(String fileName);
+    default Optional<Artifact> getArtifactByFilename(final String fileName) {
+        if (getArtifacts().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return getArtifacts().stream().filter(artifact -> artifact.getFilename().equalsIgnoreCase(fileName.trim()))
+                .findFirst();
+    }
 
     /**
      * @return immutable list of all artifacts
      */
     List<Artifact> getArtifacts();
-
-    /**
-     * @return immutable list of local artifacts only
-     */
-    List<LocalArtifact> getLocalArtifacts();
 
     /**
      * @return the vendor of this software module
@@ -65,18 +66,6 @@ public interface SoftwareModule extends NamedVersionedEntity {
     void setVendor(String vendor);
 
     /**
-     * @param artifact
-     *            is removed from the assigned {@link LocalArtifact}s.
-     */
-    void removeArtifact(LocalArtifact artifact);
-
-    /**
-     * @param artifact
-     *            is removed from the assigned {@link ExternalArtifact}s.
-     */
-    void removeArtifact(ExternalArtifact artifact);
-
-    /**
      * @return the type of the software module
      */
     SoftwareModuleType getType();
@@ -88,24 +77,10 @@ public interface SoftwareModule extends NamedVersionedEntity {
     boolean isDeleted();
 
     /**
-     * Marks or un-marks this software module as deleted.
-     * 
-     * @param deleted
-     *            {@code true} if the software module should be marked as
-     *            deleted otherwise {@code false}
-     */
-    void setDeleted(boolean deleted);
-
-    /**
      * @param type
      *            the module type for this software module
      */
     void setType(SoftwareModuleType type);
-
-    /**
-     * @return immutable list of meta data elements.
-     */
-    List<SoftwareModuleMetadata> getMetadata();
 
     /**
      * @return immutable list of {@link DistributionSet}s the module is assigned

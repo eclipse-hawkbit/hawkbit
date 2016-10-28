@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
@@ -85,13 +85,13 @@ public final class DataConversionHelper {
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
 
-        return module.getLocalArtifacts().stream()
+        return module.getArtifacts().stream()
                 .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement))
                 .collect(Collectors.toList());
     }
 
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
-            final LocalArtifact artifact, final SystemManagement systemManagement) {
+            final Artifact artifact, final SystemManagement systemManagement) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
         file.setFilename(artifact.getFilename());
@@ -157,8 +157,8 @@ public final class DataConversionHelper {
         return result;
     }
 
-    static void writeMD5FileResponse(final String fileName, final HttpServletResponse response,
-            final LocalArtifact artifact) throws IOException {
+    static void writeMD5FileResponse(final String fileName, final HttpServletResponse response, final Artifact artifact)
+            throws IOException {
         final StringBuilder builder = new StringBuilder();
         builder.append(artifact.getMd5Hash());
         builder.append("  ");

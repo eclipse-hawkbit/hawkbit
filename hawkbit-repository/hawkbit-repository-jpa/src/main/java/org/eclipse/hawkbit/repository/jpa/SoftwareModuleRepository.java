@@ -107,7 +107,7 @@ public interface SoftwareModuleRepository
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
      */
-    Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, JpaSoftwareModuleType type);
+    Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, SoftwareModuleType type);
 
     /**
      * retrieves all software modules with a given {@link SoftwareModuleType}

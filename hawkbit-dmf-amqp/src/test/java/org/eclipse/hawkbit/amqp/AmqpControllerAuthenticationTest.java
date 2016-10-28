@@ -32,10 +32,10 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -158,16 +158,16 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager.postConstruct();
 
-        final LocalArtifact testArtifact = new JpaLocalArtifact("afilename", "afilename", new JpaSoftwareModule(
+        final Artifact testArtifact = new JpaArtifact("afilename", "afilename", new JpaSoftwareModule(
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
 
-        when(artifactManagementMock.findLocalArtifact(ARTIFACT_ID)).thenReturn(testArtifact);
-        when(artifactManagementMock.findFirstLocalArtifactsBySHA1(SHA1)).thenReturn(testArtifact);
+        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(testArtifact);
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(testArtifact);
 
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);
         artifact.setHashes(new DbArtifactHash("sha1 test", "md5 test"));
-        when(artifactManagementMock.loadLocalArtifactBinary(testArtifact)).thenReturn(artifact);
+        when(artifactManagementMock.loadArtifactBinary(testArtifact)).thenReturn(artifact);
 
         when(applicationContext.getId()).thenReturn("node");
 

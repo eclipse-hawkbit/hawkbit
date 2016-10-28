@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -306,19 +305,19 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link LocalArtifact}s for given {@link SoftwareModule} with a
-     * small text payload.
+     * Creates {@link Artifact}s for given {@link SoftwareModule} with a small
+     * text payload.
      * 
      * @param moduleId
      *            the {@link Artifact}s belong to.
      * 
-     * @return {@link LocalArtifact} entity.
+     * @return {@link Artifact} entity.
      */
-    public List<LocalArtifact> createLocalArtifacts(final Long moduleId) {
-        final List<LocalArtifact> artifacts = new ArrayList<>();
+    public List<Artifact> createArtifacts(final Long moduleId) {
+        final List<Artifact> artifacts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             final InputStream stubInputStream = IOUtils.toInputStream("some test data" + i, Charset.forName("UTF-8"));
-            artifacts.add(artifactManagement.createLocalArtifact(stubInputStream, moduleId, "filename" + i, false));
+            artifacts.add(artifactManagement.createArtifact(stubInputStream, moduleId, "filename" + i, false));
 
         }
 

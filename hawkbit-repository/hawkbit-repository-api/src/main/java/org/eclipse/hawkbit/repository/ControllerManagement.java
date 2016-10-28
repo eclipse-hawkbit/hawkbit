@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -198,7 +198,7 @@ public interface ControllerManagement {
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull String controllerId, @NotNull LocalArtifact localArtifact);
+    boolean hasTargetArtifactAssigned(@NotNull String controllerId, @NotNull Artifact localArtifact);
 
     /**
      * Checks if a given target has currently or has even been assigned to the
@@ -217,7 +217,7 @@ public interface ControllerManagement {
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotNull LocalArtifact localArtifact);
+    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotNull Artifact localArtifact);
 
     /**
      * Registers retrieved status for given {@link Target} and {@link Action} if

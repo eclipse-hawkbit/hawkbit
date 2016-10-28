@@ -20,7 +20,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 import com.mongodb.gridfs.GridFS;
@@ -36,7 +36,7 @@ import com.mongodb.gridfs.GridFSFile;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifact {
+public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 
     @NotNull
@@ -53,10 +53,19 @@ public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifa
     @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
     private JpaSoftwareModule softwareModule;
 
+    @Column(name = "sha1_hash", length = 40, nullable = true)
+    private String sha1Hash;
+
+    @Column(name = "md5_hash", length = 32, nullable = true)
+    private String md5Hash;
+
+    @Column(name = "file_size")
+    private long size;
+
     /**
      * Default constructor.
      */
-    public JpaLocalArtifact() {
+    public JpaArtifact() {
         super();
     }
 
@@ -70,7 +79,7 @@ public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifa
      * @param softwareModule
      *            of this artifact
      */
-    public JpaLocalArtifact(@NotNull final String gridFsFileName, @NotNull final String filename,
+    public JpaArtifact(@NotNull final String gridFsFileName, @NotNull final String filename,
             final SoftwareModule softwareModule) {
         setSoftwareModule(softwareModule);
         this.gridFsFileName = gridFsFileName;
@@ -78,23 +87,30 @@ public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifa
     }
 
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
+    public String getMd5Hash() {
+        return md5Hash;
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof LocalArtifact)) {
-            return false;
-        }
+    public String getSha1Hash() {
+        return sha1Hash;
+    }
 
-        return true;
+    public void setMd5Hash(final String md5Hash) {
+        this.md5Hash = md5Hash;
+    }
+
+    public void setSha1Hash(final String sha1Hash) {
+        this.sha1Hash = sha1Hash;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(final long size) {
+        this.size = size;
     }
 
     @Override

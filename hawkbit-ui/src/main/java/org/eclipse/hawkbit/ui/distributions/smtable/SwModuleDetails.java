@@ -153,7 +153,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
             } else {
-                maxAssign = getI18n().get("label.multiAssign.type"); 
+                maxAssign = getI18n().get("label.multiAssign.type");
             }
             updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
@@ -217,7 +217,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(getSelectedBaseEntityId());
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(getSelectedBaseEntityId());
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 }

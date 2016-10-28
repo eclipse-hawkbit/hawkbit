@@ -24,9 +24,9 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -237,24 +237,29 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
 
         // standard searches
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType).getContent()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType).getContent().get(0))
-                .isEqualTo(os);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType).getContent().get(0))
-                .isEqualTo(jvm);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType).getContent()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType).getContent().get(0))
-                .isEqualTo(ah);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType).getContent()).hasSize(2);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType.getId()).getContent().get(0))
+                .isEqualTo(os);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType.getId()).getContent())
+                .hasSize(1);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "oracle%", runtimeType.getId()).getContent()
+                .get(0)).isEqualTo(jvm);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType.getId()).getContent())
+                .hasSize(1);
+        assertThat(
+                softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0.1", appType.getId()).getContent().get(0))
+                        .isEqualTo(ah);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent())
+                .hasSize(2);
 
         // no we search with on entity marked as deleted
         softwareManagement.deleteSoftwareModule(
-                softwareManagement.findSoftwareModuleByAssignedToAndType(pageReq, ds, appType).getContent().get(0));
+                softwareModuleRepository.findByAssignedToAndType(pageReq, ds, appType).getContent().get(0).getId());
 
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType).getContent()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType).getContent().get(0))
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent())
+                .hasSize(1);
+        assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "1.0%", appType.getId()).getContent().get(0))
                 .isEqualTo(ah);
     }
 
@@ -294,11 +299,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final SoftwareModule two = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(osType, "two", "two", null, ""));
         // ignored
-        softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.deleteSoftwareModule(softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")).getId());
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "three", "3.0.2", null, ""));
 
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent())
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent())
                 .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
                 .contains(two, one);
     }
@@ -310,27 +315,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
         softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "two", "two", null, ""));
         // ignored
-        softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.deleteSoftwareModule(softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")).getId());
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Expected to find the following number of modules:")
                 .isEqualTo(2);
-    }
-
-    @Test
-    @Description("Counts for software modules by type.")
-    public void countSoftwareModulesByType() {
-        // found in test
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "two", "two", null, ""));
-
-        // ignored
-        softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "three", "3.0.2", null, ""));
-
-        assertThat(softwareManagement.countSoftwareModulesByType(osType))
-                .as("Expected to find the following number of modules:").isEqualTo(2);
     }
 
     @Test
@@ -382,7 +371,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final Artifact artifact2 = artifactsIt.next();
 
         // [STEP2]: Delete unassigned SoftwareModule
-        softwareManagement.deleteSoftwareModule(unassignedModule);
+        softwareManagement.deleteSoftwareModule(unassignedModule.getId());
 
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModule is deleted
@@ -412,7 +401,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         distributionSetManagement.assignSoftwareModules(disSet, Sets.newHashSet(assignedModule));
 
         // [STEP3]: Delete the assigned SoftwareModule
-        softwareManagement.deleteSoftwareModule(assignedModule);
+        softwareManagement.deleteSoftwareModule(assignedModule.getId());
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
@@ -454,7 +443,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         distributionSetManagement.deleteDistributionSet(disSet);
 
         // [STEP5]: Delete the assigned SoftwareModule
-        softwareManagement.deleteSoftwareModule(assignedModule);
+        softwareManagement.deleteSoftwareModule(assignedModule.getId());
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
@@ -488,23 +477,23 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleWithDetails(moduleX.getId());
+        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP3]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleWithDetails(moduleY.getId());
+        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // verify: that only one entry was created in mongoDB
         assertThat(operations.find(new Query())).hasSize(1);
 
         // [STEP5]: Delete SoftwareModuleX
-        softwareManagement.deleteSoftwareModule(moduleX);
+        softwareManagement.deleteSoftwareModule(moduleX.getId());
 
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModuleX is deleted, and ModuelY still exists
@@ -540,15 +529,15 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleWithDetails(moduleX.getId());
+        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleWithDetails(moduleY.getId());
+        artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // verify: that only one entry was created in mongoDB
@@ -563,10 +552,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         deploymentManagement.assignDistributionSet(disSetY, Lists.newArrayList(target));
 
         // [STEP5]: Delete SoftwareModuleX
-        softwareManagement.deleteSoftwareModule(moduleX);
+        softwareManagement.deleteSoftwareModule(moduleX.getId());
 
         // [STEP6]: Delete SoftwareModuleY
-        softwareManagement.deleteSoftwareModule(moduleY);
+        softwareManagement.deleteSoftwareModule(moduleY.getId());
 
         // [VERIFY EXPECTED RESULT]:
         moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
@@ -597,12 +586,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 new JpaSoftwareModule(type, name, version, "description of artifact " + name, ""));
 
         for (int i = 0; i < numberArtifacts; i++) {
-            artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
+            artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
                     "file" + (i + 1), false);
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
-        softwareModule = softwareManagement.findSoftwareModuleWithDetails(softwareModule.getId());
+        softwareModule = softwareManagement.findSoftwareModuleById(softwareModule.getId());
         assertThat(softwareModuleRepository.findAll()).hasSize((int) countSoftwareModule + 1);
 
         final List<Artifact> artifacts = softwareModule.getArtifacts();
@@ -622,16 +611,16 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(operations.findOne(new Query()
-                    .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
+            assertThat(operations.findOne(
+                    new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
                             .isNotNull();
         }
     }
 
     private void assertArtfiactNull(final Artifact... results) {
         for (final Artifact result : results) {
-            assertThat(operations.findOne(new Query()
-                    .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
+            assertThat(operations.findOne(
+                    new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
                             .isNull();
         }
     }
@@ -664,18 +653,18 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
 
         final DistributionSet set = distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1",
                 "desc", testDsType, Lists.newArrayList(one, two, deleted, four, differentName)));
-        softwareManagement.deleteSoftwareModule(deleted);
+        softwareManagement.deleteSoftwareModule(deleted.getId());
 
         // with filter on name, version and module type
         assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
-                set.getId(), "found", testType).getContent())
+                set.getId(), "found", testType.getId()).getContent())
                         .as("Found modules with given name, given module type and the assigned ones first")
                         .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                                 new AssignedSoftwareModule(unassigned, false));
 
         // with filter on module type only
         assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
-                set.getId(), null, testType).getContent())
+                set.getId(), null, testType.getId()).getContent())
                         .as("Found modules with given module type and the assigned ones first").containsExactly(
                                 new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
                                 new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(unassigned, false));
@@ -715,12 +704,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1", "desc", testDsType,
                 Lists.newArrayList(one, two, deleted, four, differentName)));
-        softwareManagement.deleteSoftwareModule(deleted);
+        softwareManagement.deleteSoftwareModule(deleted.getId());
 
         // test
-        assertThat(softwareManagement.countSoftwareModuleByFilters("found", testType))
+        assertThat(softwareManagement.countSoftwareModuleByFilters("found", testType.getId()))
                 .as("Number of modules with given name or version and type").isEqualTo(3);
-        assertThat(softwareManagement.countSoftwareModuleByFilters(null, testType))
+        assertThat(softwareManagement.countSoftwareModuleByFilters(null, testType.getId()))
                 .as("Number of modules with given type").isEqualTo(4);
         assertThat(softwareManagement.countSoftwareModuleByFilters(null, null)).as("Number of modules overall")
                 .isEqualTo(5);
@@ -742,7 +731,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         distributionSetManagement.createDistributionSet(
                 new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(deleted, four)));
-        softwareManagement.deleteSoftwareModule(deleted);
+        softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Number of undeleted modules").isEqualTo(1);
         assertThat(softwareModuleRepository.count()).as("Number of all modules").isEqualTo(2);
@@ -829,7 +818,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         final DistributionSet set = distributionSetManagement.createDistributionSet(
                 new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(one, deleted)));
-        softwareManagement.deleteSoftwareModule(deleted);
+        softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set).getContent())
                 .as("Found this number of modules").hasSize(2);
@@ -946,13 +935,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
                 .getSoftwareModule();
 
-        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata())
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
                 .as("Contains the created metadata element")
                 .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
-        softwareManagement.deleteSoftwareModuleMetadata(ah, knownKey1);
-        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata()).as("Metadata elemenets are")
-                .isEmpty();
+        softwareManagement.deleteSoftwareModuleMetadata(ah.getId(), knownKey1);
+        assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
+                .as("Metadata elemenets are").isEmpty();
     }
 
     @Test
@@ -968,7 +957,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
                 .getSoftwareModule();
 
         try {
-            softwareManagement.findSoftwareModuleMetadata(ah, "doesnotexist");
+            softwareManagement.findSoftwareModuleMetadata(ah.getId(), "doesnotexist");
             fail("should not have worked as module metadata with that key does not exist");
         } catch (final EntityNotFoundException e) {
 

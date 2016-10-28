@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
@@ -191,8 +191,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
-            final List<LocalArtifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(fileName,
-                    baseSwId);
+            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
             if (!artifactList.isEmpty()) {
                 warningIconLabel.setVisible(true);
                 if (isErrorIcon(warningIconLabel)) {
@@ -434,7 +433,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
             final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
-            final List<LocalArtifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
+            final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
             errorLabel.setDescription(i18n.get(ALREADY_EXISTS_MSG));
@@ -591,7 +590,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                             customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
                     if (customFile.getFileName().equals(fileName)
                             && baseSwModuleNameVersion.equals(baseSoftwareModuleNameVersion)) {
-                        createLocalArtifact(itemId, customFile.getFilePath(), artifactManagement, bSoftwareModule);
+                        createArtifact(itemId, customFile.getFilePath(), artifactManagement, bSoftwareModule);
                     }
                 }
                 refreshArtifactDetailsLayout = checkIfArtifactDetailsDisplayed(bSoftwareModule.getId());
@@ -619,8 +618,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         currentUploadResultWindow = null;
     }
 
-    private void createLocalArtifact(final String itemId, final String filePath,
-            final ArtifactManagement artifactManagement, final SoftwareModule baseSw) {
+    private void createArtifact(final String itemId, final String filePath, final ArtifactManagement artifactManagement,
+            final SoftwareModule baseSw) {
 
         final File newFile = new File(filePath);
         final Item item = tabelContainer.getItem(itemId);
@@ -633,7 +632,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.createLocalArtifact(fis, baseSw.getId(), providedFileName,
+            artifactManagement.createArtifact(fis, baseSw.getId(), providedFileName,
                     HawkbitCommonUtil.trimAndNullIfEmpty(md5Checksum),
                     HawkbitCommonUtil.trimAndNullIfEmpty(sha1Checksum), true, customFile.getMimeType());
             saveUploadStatus(providedFileName, swModuleNameVersion, SUCCESS, "");

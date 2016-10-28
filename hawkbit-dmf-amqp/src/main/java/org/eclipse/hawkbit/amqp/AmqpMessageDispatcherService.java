@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -183,12 +182,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSoftwareModule.setModuleType(softwareModule.getType().getKey());
         amqpSoftwareModule.setModuleVersion(softwareModule.getVersion());
 
-        final List<Artifact> artifacts = convertArtifacts(target, softwareModule.getLocalArtifacts());
+        final List<Artifact> artifacts = convertArtifacts(target, softwareModule.getArtifacts());
         amqpSoftwareModule.setArtifacts(artifacts);
         return amqpSoftwareModule;
     }
 
-    private List<Artifact> convertArtifacts(final Target target, final List<LocalArtifact> localArtifacts) {
+    private List<Artifact> convertArtifacts(final Target target,
+            final List<org.eclipse.hawkbit.repository.model.Artifact> localArtifacts) {
         if (localArtifacts.isEmpty()) {
             return Collections.emptyList();
         }
@@ -197,7 +197,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .collect(Collectors.toList());
     }
 
-    private Artifact convertArtifact(final Target target, final LocalArtifact localArtifact) {
+    private Artifact convertArtifact(final Target target,
+            final org.eclipse.hawkbit.repository.model.Artifact localArtifact) {
         final Artifact artifact = new Artifact();
 
         artifact.setUrls(artifactUrlHandler
