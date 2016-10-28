@@ -179,7 +179,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         deleteAllTargetsFromThirdGroup(createdRollout);
 
-        checkStatusOfRolloutAndRolloutGroupsAfterDeletingTargets(createdRollout);
+        verifyRolloutAndAllGroupsAreFinished(createdRollout);
 
     }
 
@@ -208,7 +208,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Step("Check the status of the rollout groups, second group should be in running status")
     private void checkSecondGroupStatusIsRunning(final Rollout createdRollout) {
         rolloutManagement.checkRunningRollouts(0);
-        // validate that the second group is in running state
         final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
                 createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
         assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
@@ -229,7 +228,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Step("Delete all targets of the rollout group")
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
-        // delete all targets of the third group
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
                 Status.SCHEDULED);
         targetManagement.deleteTargets(runningActions.get(0).getTarget().getId(),
@@ -238,7 +236,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Step("Check the status of the rollout groups and the rollout")
-    private void checkStatusOfRolloutAndRolloutGroupsAfterDeletingTargets(final Rollout createdRollout) {
+    private void verifyRolloutAndAllGroupsAreFinished(final Rollout createdRollout) {
         rolloutManagement.checkRunningRollouts(0);
         final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
                 createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
