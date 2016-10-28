@@ -206,14 +206,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Long countTargetsOfRolloutsGroup(@NotNull final RolloutGroup rolloutGroup) {
+    public Long countTargetsOfRolloutsGroup(@NotNull final Long rolloutGroupId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.from(RolloutTargetGroup.class);
-        countQuery.select(cb.count(countQueryFrom))
-                .where(cb.equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
+        countQuery.select(cb.count(countQueryFrom)).where(cb
+                .equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), rolloutGroupId));
         return entityManager.createQuery(countQuery).getSingleResult();
-
     }
 
 }

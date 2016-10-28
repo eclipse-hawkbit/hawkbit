@@ -464,7 +464,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
 
-            checkIfTargetsOfRolloutGroupDeleted(rolloutGroup);
+            checkIfTargetsWhereDeleted(rolloutGroup);
 
             // error state check, do we need to stop the whole
             // rollout because of error?
@@ -486,23 +486,27 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private void checkIfTargetsOfRolloutGroupDeleted(final JpaRolloutGroup rolloutGroup) {
+    private void checkIfTargetsWhereDeleted(final JpaRolloutGroup rolloutGroup) {
 
-        final long countTargetsOfRolloutGroup = rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup);
-        if (rolloutGroup.getTotalTargets() != countTargetsOfRolloutGroup) {
-            // targets have been deleted and we have to update the
-            // total target count in the rollout and the rollout group
-            final JpaRollout jpaRollout = (JpaRollout) rolloutGroup.getRollout();
-            final long updatedTargetCount = jpaRollout.getTotalTargets()
-                    - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
-            jpaRollout.setTotalTargets(updatedTargetCount);
-            final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
-            jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
-
-            rolloutRepository.save(jpaRollout);
-            rolloutGroupRepository.save(jpaRolloutGroup);
+        final long countTargetsOfRolloutGroup = rolloutGroupManagement
+                .countTargetsOfRolloutsGroup(rolloutGroup.getId());
+        if (rolloutGroup.getTotalTargets() == countTargetsOfRolloutGroup) {
+            return;
         }
+        // else targets have been deleted and we have to update the
+        // total target count in the rollout and the rollout group
+        updateTargetCount(rolloutGroup, countTargetsOfRolloutGroup);
+    }
 
+    private void updateTargetCount(final JpaRolloutGroup rolloutGroup, final long countTargetsOfRolloutGroup) {
+        final JpaRollout jpaRollout = (JpaRollout) rolloutGroup.getRollout();
+        final long updatedTargetCount = jpaRollout.getTotalTargets()
+                - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
+        jpaRollout.setTotalTargets(updatedTargetCount);
+        final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
+        jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
+        rolloutRepository.save(jpaRollout);
+        rolloutGroupRepository.save(jpaRolloutGroup);
     }
 
     private void executeLatestRolloutGroup(final JpaRollout rollout) {
