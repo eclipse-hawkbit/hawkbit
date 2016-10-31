@@ -8,30 +8,22 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
 
 /**
  * A software provisioning user principal definition stored in the
  * {@link SecurityContext} which contains the user specific attributes.
  * 
- *
- *
- *
  */
-public class UserPrincipal implements UserDetails, Serializable {
+public class UserPrincipal extends User {
 
-    /**
-    * 
-    */
     private static final long serialVersionUID = 1L;
 
-    private final String username;
     private final String firstname;
     private final String lastname;
     private final String loginname;
@@ -53,8 +45,35 @@ public class UserPrincipal implements UserDetails, Serializable {
      *            address of the user
      */
     public UserPrincipal(final String username, final String firstname, final String lastname, final String loginname,
-            final String tenant, final String email) {
-        this.username = username;
+            final String email, final String tenant) {
+        this(username, "***", lastname, firstname, loginname, email, tenant, Collections.emptyList());
+    }
+
+    /**
+     * @param username
+     *            the user name of the user
+     * @param password
+     *            the password of the user
+     * @param firstname
+     *            the first name of the user
+     * @param lastname
+     *            the last name of the user
+     * @param loginname
+     *            the login name of user
+     * @param tenant
+     *            the tenant of the user
+     * @param email
+     *            address of the user
+     * @param authorities
+     *            the authorities which the user has
+     */
+    // too many parameters, builder pattern wouldn't work easy due the super
+    // constructor.
+    @SuppressWarnings("squid:S00107")
+    public UserPrincipal(final String username, final String password, final String firstname, final String lastname,
+            final String loginname, final String email, final String tenant,
+            final Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, authorities);
         this.firstname = firstname;
         this.lastname = lastname;
         this.loginname = loginname;
@@ -62,38 +81,18 @@ public class UserPrincipal implements UserDetails, Serializable {
         this.email = email;
     }
 
-    /**
-     * @return the username
-     */
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * @return the firstname
-     */
     public String getFirstname() {
         return firstname;
     }
 
-    /**
-     * @return the lastname
-     */
     public String getLastname() {
         return lastname;
     }
 
-    /**
-     * @return the loginname
-     */
     public String getLoginname() {
         return loginname;
     }
 
-    /**
-     * @return the tenant
-     */
     public String getTenant() {
         return tenant;
     }
@@ -103,23 +102,13 @@ public class UserPrincipal implements UserDetails, Serializable {
     }
 
     @Override
-    public Collection<SimpleGrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
