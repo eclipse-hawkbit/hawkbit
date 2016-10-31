@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -53,7 +53,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
-public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoDB {
+public class DdiRootControllerTest extends AbstractRestIntegrationTest {
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;

@@ -45,8 +45,6 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -57,7 +55,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Software Management")
-public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
+public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Try to update non updatable fields results in repository doing nothing.")
@@ -387,7 +385,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     @Test
-    @Description("Deletes an artifact, which is assigned to a Distribution Set")
+    @Description("Deletes an artifact, which is assigned to a DistributionSet")
     public void softDeleteOfAssignedArtifact() {
 
         // Init DistributionSet
@@ -464,11 +462,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     }
 
     @Test
-    @Description("Delete an softwaremodule with an artifact, which is also used by another softwaremodule.")
+    @Description("Delete an softwaremodule with an artifact, which is alsoused by another softwaremodule.")
     public void deleteSoftwareModulesWithSharedArtifact() throws IOException {
-
-        // Precondition: Make sure MongoDB is Empty
-        assertThat(operations.find(new Query())).hasSize(0);
 
         // Init artifact binary data, target and DistributionSets
         final byte[] source = RandomUtils.nextBytes(1024);
@@ -488,9 +483,6 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
         moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
-
-        // verify: that only one entry was created in mongoDB
-        assertThat(operations.find(new Query())).hasSize(1);
 
         // [STEP5]: Delete SoftwareModuleX
         softwareManagement.deleteSoftwareModule(moduleX.getId());
@@ -515,9 +507,6 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
     @Description("Delete two assigned softwaremodules which share an artifact.")
     public void deleteMultipleSoftwareModulesWhichShareAnArtifact() throws IOException {
 
-        // Precondition: Make sure MongoDB is Empty
-        assertThat(operations.find(new Query())).hasSize(0);
-
         // Init artifact binary data, target and DistributionSets
         final byte[] source = RandomUtils.nextBytes(1024);
         final Target target = targetManagement.createTarget(new JpaTarget("test123"));
@@ -539,9 +528,6 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
         moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
-
-        // verify: that only one entry was created in mongoDB
-        assertThat(operations.find(new Query())).hasSize(1);
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
         distributionSetManagement.assignSoftwareModules(disSetX, Sets.newHashSet(moduleX));
@@ -611,17 +597,14 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(operations.findOne(
-                    new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                            .isNotNull();
+            assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName()))
+                    .isNotNull();
         }
     }
 
     private void assertArtfiactNull(final Artifact... results) {
         for (final Artifact result : results) {
-            assertThat(operations.findOne(
-                    new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                            .isNull();
+            assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
         }
     }
 

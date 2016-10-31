@@ -28,7 +28,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("System Management")
-public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
+public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")

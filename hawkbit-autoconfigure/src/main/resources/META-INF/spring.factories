@@ -11,4 +11,5 @@ org.eclipse.hawkbit.autoconfigure.event.EventPublisherAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.amqp.AmqpAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementConfiguration
+org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementConfiguration,\
+org.eclipse.hawkbit.autoconfigure.repository.ArtifactStoreAutoConfiguration
