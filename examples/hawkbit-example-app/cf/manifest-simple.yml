@@ -13,7 +13,7 @@ applications:
   memory: 1024M
   instances: 1
   buildpack: https://github.com/cloudfoundry/java-buildpack
-  path: ${project.build.finalName}.jar
+  path: @project.build.finalName@.jar
   env:
     SPRING_PROFILES_ACTIVE: cloudsandbox
     CF_STAGING_TIMEOUT: 15

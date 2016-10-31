@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -156,28 +155,20 @@ public final class MgmtSoftwareModuleMapper {
      * @return
      */
     static MgmtArtifact toResponse(final Artifact artifact) {
-        final MgmtArtifact.ArtifactType type = artifact instanceof LocalArtifact ? MgmtArtifact.ArtifactType.LOCAL
-                : MgmtArtifact.ArtifactType.EXTERNAL;
-
         final MgmtArtifact artifactRest = new MgmtArtifact();
-        artifactRest.setType(type);
         artifactRest.setArtifactId(artifact.getId());
         artifactRest.setSize(artifact.getSize());
         artifactRest.setHashes(new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
 
-        if (artifact instanceof LocalArtifact) {
-            artifactRest.setProvidedFilename(((LocalArtifact) artifact).getFilename());
-        }
+        artifactRest.setProvidedFilename(artifact.getFilename());
 
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
                 .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("self"));
 
-        if (artifact instanceof LocalArtifact) {
-            artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
-                    .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));
-        }
+        artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
+                .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));
 
         return artifactRest;
     }

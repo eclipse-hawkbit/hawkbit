@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -36,8 +38,6 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.

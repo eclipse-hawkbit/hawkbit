@@ -18,7 +18,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -41,8 +40,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -150,7 +149,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final String controllerId, final LocalArtifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final String controllerId, final Artifact localArtifact) {
         final Target target = targetRepository.findByControllerId(controllerId);
         if (target == null) {
             return false;
@@ -159,7 +158,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final LocalArtifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final Long targetId, final Artifact localArtifact) {
         final Target target = targetRepository.findOne(targetId);
         if (target == null) {
             return false;
@@ -235,7 +234,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addCancelActionStatus(final ActionStatus actionStatus) {
         final JpaAction action = (JpaAction) actionStatus.getAction();
 
@@ -274,26 +273,27 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
-        final JpaAction action = (JpaAction) actionStatus.getAction();
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Action addUpdateActionStatus(final ActionStatus actionStatus) {
+        final Action action = actionStatus.getAction();
+        final Long actionId = action.getId();
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
         // action status feedback channel order from the device cannot be
         // guaranteed. However, if an action is closed we do not accept further
         // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action)) {
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getId(), action.getId());
+                    actionStatus.getStatus(), actionId);
             return action;
         }
-        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
+        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, actionId);
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
-            final JpaAction action) {
-        return !action.isActive() && (repositoryProperties.isRejectActionStatusForClosedAction()
+            final boolean actionActive) {
+        return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
                 || (Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus())));
     }
 
@@ -304,22 +304,22 @@ public class JpaControllerManagement implements ControllerManagement {
      * @param action
      * @return
      */
-    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        LOG.debug("addUpdateActionStatus for action {}", action.getId());
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long actionId) {
+        LOG.debug("addUpdateActionStatus for action {}", actionId);
 
-        final JpaAction mergedAction = entityManager.merge(action);
-        JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
+        final JpaAction action = actionRepository.findById(actionId);
+        JpaTarget target = (JpaTarget) action.getTarget();
         // check for a potential DOS attack
         checkForToManyStatusEntries(action);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            mergedTarget = DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.ERROR, false,
-                    targetInfoRepository, entityManager);
-            handleErrorOnAction(mergedAction, mergedTarget);
+            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false, targetInfoRepository,
+                    entityManager);
+            handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(mergedTarget, mergedAction);
+            handleFinishedAndStoreInTargetStatus(target, action);
             break;
         case CANCELED:
         case WARNING:
@@ -330,9 +330,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
+        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
 
-        return actionRepository.save(mergedAction);
+        return actionRepository.save(action);
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {

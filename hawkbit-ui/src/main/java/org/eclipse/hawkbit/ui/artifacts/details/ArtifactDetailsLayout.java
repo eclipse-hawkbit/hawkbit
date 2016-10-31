@@ -278,7 +278,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                     if (ok) {
                         final ArtifactManagement artifactManagement = SpringContextHelper
                                 .getBean(ArtifactManagement.class);
-                        artifactManagement.deleteLocalArtifact(id);
+                        artifactManagement.deleteArtifact(id);
                         uINotification.displaySuccess(i18n.get("message.artifact.deleted", fileName));
                         if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
                             populateArtifactDetails(artifactUploadState.getSelectedBaseSwModuleId().get(),

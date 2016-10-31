@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -37,8 +38,8 @@ import com.google.common.base.Strings;
 public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
     private transient SoftwareManagement softwareManagementService;
-    private SoftwareModuleType type;
-    private String searchText = null;
+    private Long type;
+    private String searchText;
     private final Sort sort = new Sort(Direction.ASC, "name", "version");
 
     /**
@@ -57,7 +58,8 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
             final Object[] sortIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortIds, sortStates);
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
-            type = (SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE);
+            type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
+                    .map(t -> t.getId()).orElse(null);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
@@ -73,7 +75,6 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     @Override
     protected List<ProxyBaseSoftwareModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<SoftwareModule> swModuleBeans;
-        final List<ProxyBaseSoftwareModuleItem> proxyBeans = new ArrayList<>();
 
         if (type == null && Strings.isNullOrEmpty(searchText)) {
             swModuleBeans = getSoftwareManagementService()
@@ -84,11 +85,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
                     .findSoftwareModuleByFilters(new OffsetBasedPageRequest(startIndex, count, sort), searchText, type);
         }
 
-        for (final SoftwareModule swModule : swModuleBeans) {
-            proxyBeans.add(getProxyBean(swModule));
-        }
-
-        return proxyBeans;
+        return swModuleBeans.getContent().stream().map(this::getProxyBean).collect(Collectors.toList());
     }
 
     private ProxyBaseSoftwareModuleItem getProxyBean(final SoftwareModule bean) {

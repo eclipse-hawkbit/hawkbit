@@ -10,18 +10,18 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.List;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.ValoTheme;
-import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 /**
  *

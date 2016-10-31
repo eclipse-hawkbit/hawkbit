@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;

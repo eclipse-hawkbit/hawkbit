@@ -136,14 +136,14 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
     }
 
     private void createDeletedTestArtifact(final byte[] random) {
         final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
         ds.getModules().stream().forEach(module -> {
-            artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), module.getId(), "file1", false);
-            softwareManagement.deleteSoftwareModule(module);
+            artifactManagement.createArtifact(new ByteArrayInputStream(random), module.getId(), "file1", false);
+            softwareManagement.deleteSoftwareModule(module.getId());
         });
     }
 

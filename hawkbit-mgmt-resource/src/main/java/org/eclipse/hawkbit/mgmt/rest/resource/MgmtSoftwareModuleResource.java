@@ -86,9 +86,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         try {
-            final Artifact result = artifactManagement.createLocalArtifact(file.getInputStream(), softwareModuleId,
-                    fileName, md5Sum == null ? null : md5Sum.toLowerCase(),
-                    sha1Sum == null ? null : sha1Sum.toLowerCase(), false, file.getContentType());
+            final Artifact result = artifactManagement.createArtifact(file.getInputStream(), softwareModuleId, fileName,
+                    md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
+                    file.getContentType());
             return ResponseEntity.status(CREATED).body(toResponse(result));
         } catch (final IOException e) {
             LOG.error("Failed to store artifact", e);
@@ -116,7 +116,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        return ResponseEntity.ok(toResponse(module.getLocalArtifact(artifactId).get()));
+        return ResponseEntity.ok(toResponse(module.getArtifact(artifactId).get()));
     }
 
     @Override
@@ -125,7 +125,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("artifactId") final Long artifactId) {
 
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
-        artifactManagement.deleteLocalArtifact(artifactId);
+        artifactManagement.deleteArtifact(artifactId);
 
         return ResponseEntity.ok().build();
     }
@@ -200,7 +200,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId) {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        softwareManagement.deleteSoftwareModule(module);
+        softwareManagement.deleteSoftwareModule(module.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -239,7 +239,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
 
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(sw, metadataKey);
+        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(sw.getId(), metadataKey);
 
         return ResponseEntity.ok(toResponseSwMetadata(findOne));
     }
@@ -260,7 +260,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
 
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        softwareManagement.deleteSoftwareModuleMetadata(sw, metadataKey);
+        softwareManagement.deleteSoftwareModuleMetadata(sw.getId(), metadataKey);
 
         return ResponseEntity.ok().build();
     }
@@ -284,7 +284,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         if (module == null) {
             throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");
         }
-        if (artifactId != null && !module.getLocalArtifact(artifactId).isPresent()) {
+        if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
             throw new EntityNotFoundException("Artifact with Id {" + artifactId + "} does not exist");
         }
 

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.artifact.repository;
 
 import java.io.InputStream;
-import java.util.List;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
@@ -61,14 +60,6 @@ public interface ArtifactRepository {
     DbArtifact store(final InputStream content, final String filename, final String contentType, DbArtifactHash hash);
 
     /**
-     * Deletes an artifact by its ID.
-     * 
-     * @param artifactId
-     *            the ID of the artifact to delete
-     */
-    void deleteById(final String artifactId);
-
-    /**
      * Deletes an artifact by its SHA1 hash.
      * 
      * @param sha1Hash
@@ -84,26 +75,4 @@ public interface ArtifactRepository {
      * @return The artifact file object or {@code null} if no file exists.
      */
     DbArtifact getArtifactBySha1(String sha1);
-
-    /**
-     * Retrieves a {@link DbArtifact} from the store by it's ID.
-     * 
-     * @param id
-     *            the ID of the artifact to retrieve
-     * @return The artifact file object or {@code null} if no file exists.
-     */
-    DbArtifact getArtifactById(final String id);
-
-    /**
-     * Retrieves a list of {@link GridFSDBFile} from the store by all SHA1
-     * hashes.
-     * 
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
-     * @param sha1Hashes
-     *            the sha1-hashes of the files to lookup.
-     * @return list of artfiacts
-     */
-    List<DbArtifact> getArtifactsBySha1(final List<String> sha1Hashes);
-
 }

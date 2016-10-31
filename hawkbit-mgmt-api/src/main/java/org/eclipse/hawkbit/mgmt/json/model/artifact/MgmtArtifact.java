@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * A json annotated rest model for Artifact to RESTful API representation.
@@ -23,9 +22,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtArtifact extends MgmtBaseEntity {
-
-    @JsonProperty(required = true)
-    private ArtifactType type;
 
     @JsonProperty("id")
     private Long artifactId;
@@ -40,16 +36,7 @@ public class MgmtArtifact extends MgmtBaseEntity {
     private Long size;
 
     public MgmtArtifact() {
-        super();
         // need for json encoder
-    }
-
-    /**
-     * @param type
-     *            the type to set
-     */
-    public void setType(final ArtifactType type) {
-        this.type = type;
     }
 
     /**
@@ -68,13 +55,6 @@ public class MgmtArtifact extends MgmtBaseEntity {
     @JsonIgnore
     public void setArtifactId(final Long artifactId) {
         this.artifactId = artifactId;
-    }
-
-    /**
-     * @return the type
-     */
-    public ArtifactType getType() {
-        return type;
     }
 
     /**
@@ -105,27 +85,6 @@ public class MgmtArtifact extends MgmtBaseEntity {
     @JsonIgnore
     public void setProvidedFilename(final String providedFilename) {
         this.providedFilename = providedFilename;
-    }
-
-    /**
-     * Type maps to either local artifact} or external artifact.
-     */
-    public enum ArtifactType {
-        LOCAL("local"), EXTERNAL("external");
-
-        private final String name;
-
-        private ArtifactType(final String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the name
-         */
-        @JsonValue
-        public String getName() {
-            return name;
-        }
     }
 
     /**

@@ -42,11 +42,11 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrat
         mongodExecutable.stop();
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
         SoftwareModule sm = entityFactory.generateSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"),
                 "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
-        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -64,10 +64,11 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrat
         assertThat(exceptionInfo.getMessage()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED.getMessage());
 
         // ensure that the JPA transaction was rolled back
-        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
+        assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
     }
 
+    @Override
     @After
     public void cleanCurrentCollection() {
         // not needed, mongodb is stopped already

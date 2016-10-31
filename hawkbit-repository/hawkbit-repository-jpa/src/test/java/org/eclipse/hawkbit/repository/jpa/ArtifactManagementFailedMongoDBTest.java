@@ -40,22 +40,21 @@ public class ArtifactManagementFailedMongoDBTest extends AbstractJpaIntegrationT
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        final Artifact result = artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024),
-                sm.getId(), "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
+                "file1", false);
 
         assertThat(artifactRepository.findAll()).hasSize(1);
 
         mongodExecutable.stop();
         try {
-            artifactManagement.deleteLocalArtifact(result.getId());
+            artifactManagement.deleteArtifact(result.getId());
             fail("deletion should have failed");
         } catch (final ArtifactDeleteFailedException e) {
 
         }
 
         try {
-            artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2",
-                    false);
+            artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
             fail("Should not have worked with MongoDb down.");
         } catch (final ArtifactUploadFailedException e) {
 
