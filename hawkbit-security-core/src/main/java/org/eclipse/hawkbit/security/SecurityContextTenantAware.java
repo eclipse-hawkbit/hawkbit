@@ -38,10 +38,10 @@ public class SecurityContextTenantAware implements TenantAware {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
             final Object principal = context.getAuthentication().getPrincipal();
-            if (principal instanceof UserPrincipal) {
-                return ((UserPrincipal) principal).getTenant();
-            } else if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
+            if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
                 return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
+            }else if (principal instanceof UserPrincipal) {
+                return ((UserPrincipal) principal).getTenant();
             }
         }
         return null;
@@ -80,10 +80,13 @@ public class SecurityContextTenantAware implements TenantAware {
 
         private final UserPrincipal systemPrincipal;
 
+        private TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+
         private AuthenticationDelegate(final Authentication delegate, final String tenant) {
             this.delegate = delegate;
             this.systemPrincipal = new UserPrincipal(SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER,
                     null, tenant, SYSTEM_AUTHORITIES);
+            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 
         @Override
@@ -123,7 +126,7 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public Object getDetails() {
-            return (delegate != null) ? delegate.getDetails() : null;
+            return tenantAwareAuthenticationDetails;
         }
 
         @Override
