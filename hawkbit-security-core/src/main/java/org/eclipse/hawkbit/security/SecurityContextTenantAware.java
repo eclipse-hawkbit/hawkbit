@@ -40,6 +40,8 @@ public class SecurityContextTenantAware implements TenantAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (principal instanceof UserPrincipal) {
                 return ((UserPrincipal) principal).getTenant();
+            } else if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
+                return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
             }
         }
         return null;
