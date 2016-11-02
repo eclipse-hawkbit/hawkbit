@@ -70,7 +70,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private RolloutGroupManagement rolloutGroupManagement;
 
     @Test
-    @Description("Verfiying that the rollout is created correctly, executing the filter and split up the targets in the correct group size.")
+    @Description("Verifying that the rollout is created correctly, executing the filter and split up the targets in the correct group size.")
     public void creatingRolloutIsCorrectPersisted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -89,7 +89,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfiying that when the rollout is started the actions for all targets in the rollout is created and the state of the first group is running as well as the corresponding actions")
+    @Description("Verifying that when the rollout is started the actions for all targets in the rollout is created and the state of the first group is running as well as the corresponding actions")
     public void startRolloutSetFirstGroupAndActionsInRunningStateAndOthersInScheduleState() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -120,7 +120,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfiying that a finish condition of a group is hit the next group of the rollout is also started")
+    @Description("Verifying that a finish condition of a group is hit the next group of the rollout is also started")
     public void checkRunningRolloutsDoesNotStartNextGroupIfFinishConditionIsNotHit() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
