@@ -17,8 +17,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -26,10 +24,11 @@ import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.RolloutVerificationException;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -133,16 +132,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
     @Qualifier("asyncExecutor")
     private Executor executor;
-
-    /*
-     * set which stores the rollouts which are asynchronously creating. This is
-     * necessary to verify rollouts which maybe stuck during creationg e.g.
-     * because of database interruption, failures or even application crash.
-     * !This is not cluster aware!
-     */
-    private static final Set<String> creatingRollouts = ConcurrentHashMap.newKeySet();
 
     /*
      * set which stores the rollouts which are asynchronously starting. This is
@@ -251,6 +245,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
 
             lastSavedGroup = rolloutGroupRepository.save(group);
+            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup);
 
         }
 
@@ -300,18 +295,17 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setErrorAction(srcGroup.getErrorAction());
             group.setErrorActionExp(srcGroup.getErrorActionExp());
 
-            try {
-                lastSavedGroup = rolloutGroupRepository.save(group);
-            } catch (ConstraintViolationException e) {
-                for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
-                    LOGGER.error("Violation: " + violation.getPropertyPath() + " " + violation.getMessage());
-                }
-                throw e;
-            }
+            lastSavedGroup = rolloutGroupRepository.save(group);
+            publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup);
         }
 
         savedRollout.setRolloutGroupsCreated(groups.size());
         return rolloutRepository.save(savedRollout);
+    }
+
+    private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group) {
+        afterCommit
+                .afterCommit(() -> eventPublisher.publishEvent(new RolloutGroupCreatedEvent(group, context.getId())));
     }
 
     @Override
@@ -577,7 +571,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkRunningRollouts(final long delayBetweenChecks) {
-        verifyStuckedRollouts();
         final long lastCheck = System.currentTimeMillis();
         final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.RUNNING);
 
@@ -616,36 +609,6 @@ public class JpaRolloutManagement implements RolloutManagement {
                 rolloutRepository.save(rollout);
             }
         }
-    }
-
-    /**
-     * Verifies and handles stucked rollouts in asynchronous creation or
-     * starting state. If rollouts are created or started asynchronously it
-     * might be that they keep in state {@link RolloutStatus#CREATING} or
-     * {@link RolloutStatus#STARTING} due database or application interruption.
-     * In case this happens, set the rollout to error state.
-     */
-    private void verifyStuckedRollouts() {
-        final List<JpaRollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
-        rolloutsInCreatingState.stream().filter(rollout -> !creatingRollouts.contains(rollout.getName()))
-                .forEach(rollout -> {
-                    LOGGER.warn(
-                            "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
-                            rollout, RolloutStatus.ERROR_CREATING);
-                    rollout.setStatus(RolloutStatus.ERROR_CREATING);
-                    rolloutRepository.save(rollout);
-                });
-
-        final List<JpaRollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
-        rolloutsInStartingState.stream().filter(rollout -> !startingRollouts.contains(rollout.getName()))
-                .forEach(rollout -> {
-                    LOGGER.warn(
-                            "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
-                            rollout, RolloutStatus.ERROR_STARTING);
-                    rollout.setStatus(RolloutStatus.ERROR_STARTING);
-                    rolloutRepository.save(rollout);
-                });
-
     }
 
     private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
