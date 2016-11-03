@@ -77,5 +77,15 @@
          <artifactId>spring-boot-configuration-processor</artifactId>
          <optional>true</optional>
       </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-core</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-runtime</artifactId>
+         <optional>true</optional>
+      </dependency>
    </dependencies>
 </project>

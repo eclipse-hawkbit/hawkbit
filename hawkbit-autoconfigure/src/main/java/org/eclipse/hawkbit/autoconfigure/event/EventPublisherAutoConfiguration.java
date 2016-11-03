@@ -29,6 +29,9 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.converter.MessageConverter;
 
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
+
 /**
  * Auto configuration for the event bus.
  *
@@ -111,15 +114,18 @@ public class EventPublisherAutoConfiguration {
 
     }
 
-    /**
-     * 
-     * @return the protostuff io message converter
-     */
-    @Bean
     @ConditionalOnBusEnabled
-    @ConditionalOnClass(name = { "io.protostuff.Schema", "io.protostuff.ProtostuffIOUtil" })
-    public MessageConverter busProtoBufConverter() {
-        return new BusProtoStuffMessageConverter();
+    @ConditionalOnClass({ Schema.class, ProtostuffIOUtil.class })
+    protected static class BusProtoStuffAutoConfiguration {
+        /**
+         * 
+         * @return the protostuff io message converter
+         */
+        @Bean
+        public MessageConverter busProtoBufConverter() {
+            return new BusProtoStuffMessageConverter();
+        }
+
     }
 
 }
