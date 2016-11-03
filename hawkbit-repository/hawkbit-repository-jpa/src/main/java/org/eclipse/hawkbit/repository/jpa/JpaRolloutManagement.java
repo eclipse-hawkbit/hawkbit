@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutFields;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -100,6 +101,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private RolloutTargetGroupRepository rolloutTargetGroupRepository;
+
+    @Autowired
+    private RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -398,18 +402,19 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         for (final JpaRollout rollout : rolloutsToCheck) {
             LOGGER.debug("Checking rollout {}", rollout);
-            final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+
+            final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
                     RolloutGroupStatus.RUNNING);
 
-            if (rolloutGroups.isEmpty()) {
+            if (rolloutGroupsRunning.isEmpty()) {
                 // no running rollouts, probably there was an error
                 // somewhere at the latest group. And the latest group has
                 // been switched from running into error state. So we need
                 // to find the latest group which
                 executeLatestRolloutGroup(rollout);
             } else {
-                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroups.size());
-                executeRolloutGroups(rollout, rolloutGroups);
+                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
+                executeRolloutGroups(rollout, rolloutGroupsRunning);
             }
 
             if (isRolloutComplete(rollout)) {
@@ -452,10 +457,15 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
+
+            final long targetCount = countTargetsFrom(rolloutGroup);
+            if (rolloutGroup.getTotalTargets() != targetCount) {
+                updateTotalTargetCount(rolloutGroup, targetCount);
+            }
+
             // error state check, do we need to stop the whole
             // rollout because of error?
-            final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
-            final boolean isError = checkErrorState(rollout, rolloutGroup, errorCondition);
+            final boolean isError = checkErrorState(rollout, rolloutGroup);
             if (isError) {
                 LOGGER.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
                 callErrorAction(rollout, rolloutGroup);
@@ -470,6 +480,21 @@ public class JpaRolloutManagement implements RolloutManagement {
                 }
             }
         }
+    }
+
+    private void updateTotalTargetCount(final JpaRolloutGroup rolloutGroup, final long countTargetsOfRolloutGroup) {
+        final JpaRollout jpaRollout = (JpaRollout) rolloutGroup.getRollout();
+        final long updatedTargetCount = jpaRollout.getTotalTargets()
+                - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
+        jpaRollout.setTotalTargets(updatedTargetCount);
+        final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
+        jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
+        rolloutRepository.save(jpaRollout);
+        rolloutGroupRepository.save(jpaRolloutGroup);
+    }
+
+    private long countTargetsFrom(final JpaRolloutGroup rolloutGroup) {
+        return rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId());
     }
 
     private void executeLatestRolloutGroup(final JpaRollout rollout) {
@@ -504,8 +529,10 @@ public class JpaRolloutManagement implements RolloutManagement {
         return actionsLeftForRollout == 0;
     }
 
-    private boolean checkErrorState(final Rollout rollout, final RolloutGroup rolloutGroup,
-            final RolloutGroupErrorCondition errorCondition) {
+    private boolean checkErrorState(final Rollout rollout, final RolloutGroup rolloutGroup) {
+
+        final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
+
         if (errorCondition == null) {
             // there is no error condition, so return false, don't have error.
             return false;
@@ -650,7 +677,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
-        final int totalGroup = rolloutGroup.getTotalTargets();
+        final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);
         if (totalGroup == 0) {

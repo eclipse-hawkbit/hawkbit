@@ -42,6 +42,7 @@
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-test-report</module>
       <module>examples</module>
+      <module>extensions</module>
    </modules>
 
    <scm>

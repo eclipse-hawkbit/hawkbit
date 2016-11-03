@@ -52,7 +52,9 @@ import org.springframework.data.domain.Sort.Direction;
 import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
+import ru.yandex.qatools.allure.annotations.Title;
 
 /**
  * Junit tests for RolloutManagment.
@@ -68,7 +70,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private RolloutGroupManagement rolloutGroupManagement;
 
     @Test
-    @Description("Verfiying that the rollout is created correctly, executing the filter and split up the targets in the correct group size.")
+    @Description("Verifying that the rollout is created correctly, executing the filter and split up the targets in the correct group size.")
     public void creatingRolloutIsCorrectPersisted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -87,18 +89,15 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfiying that when the rollout is started the actions for all targets in the rollout is created and the state of the first group is running as well as the corresponding actions")
+    @Description("Verifying that when the rollout is started the actions for all targets in the rollout is created and the state of the first group is running as well as the corresponding actions")
     public void startRolloutSetFirstGroupAndActionsInRunningStateAndOthersInScheduleState() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
-
-        // start the rollout
-        rolloutManagement.startRollout(createdRollout);
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
         // verify first group is running
         final RolloutGroup firstGroup = rolloutGroupManagement.findRolloutGroupsByRolloutId(createdRollout.getId(),
@@ -121,17 +120,16 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfiying that a finish condition of a group is hit the next group of the rollout is also started")
+    @Description("Verifying that a finish condition of a group is hit the next group of the rollout is also started")
     public void checkRunningRolloutsDoesNotStartNextGroupIfFinishConditionIsNotHit() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(createdRollout);
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
                 Status.RUNNING);
         // finish one action should be sufficient due the finish condition is at
@@ -161,6 +159,103 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Title("Deleting targets of a rollout")
+    @Description("Verfiying that next group is started when targets of the group have been deleted.")
+    public void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
+
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 3;
+        final String successCondition = "100";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
+        finishActionAndDeleteTargetsOfFirstRunningGroup(createdRollout);
+
+        checkSecondGroupStatusIsRunning(createdRollout);
+
+        finishActionAndDeleteTargetsOfSecondRunningGroup(createdRollout);
+
+        deleteAllTargetsFromThirdGroup(createdRollout);
+
+        verifyRolloutAndAllGroupsAreFinished(createdRollout);
+
+    }
+
+    @Step("Create a rollout by the given parameter and start it.")
+    private Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
+            final int amountGroups, final String successCondition, final String errorCondition) {
+
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        rolloutManagement.startRollout(createdRollout);
+        return createdRollout;
+    }
+
+    @Step("Finish three actions of the rollout group and delete two targets")
+    private void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
+        // finish group one by finishing targets and deleting targets
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.RUNNING);
+        finishAction(runningActions.get(0));
+        finishAction(runningActions.get(1));
+        finishAction(runningActions.get(2));
+        targetManagement.deleteTargets(runningActions.get(3).getTarget().getId(),
+                runningActions.get(4).getTarget().getId());
+    }
+
+    @Step("Check the status of the rollout groups, second group should be in running status")
+    private void checkSecondGroupStatusIsRunning(final Rollout createdRollout) {
+        rolloutManagement.checkRunningRollouts(0);
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
+                createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+    }
+
+    @Step("Finish one action of the rollout group and delete four targets")
+    private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.RUNNING);
+        finishAction(runningActions.get(0));
+        targetManagement.deleteTargets(runningActions.get(1).getTarget().getId(),
+                runningActions.get(2).getTarget().getId(), runningActions.get(3).getTarget().getId(),
+                runningActions.get(4).getTarget().getId());
+
+    }
+
+    @Step("Delete all targets of the rollout group")
+    private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.SCHEDULED);
+        targetManagement.deleteTargets(runningActions.get(0).getTarget().getId(),
+                runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId());
+    }
+
+    @Step("Check the status of the rollout groups and the rollout")
+    private void verifyRolloutAndAllGroupsAreFinished(final Rollout createdRollout) {
+        rolloutManagement.checkRunningRollouts(0);
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
+                createdRollout.getId(), new OffsetBasedPageRequest(0, 10, new Sort(Direction.ASC, "id"))).getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(rolloutManagement.findRolloutById(createdRollout.getId()).getStatus())
+                .isEqualTo(RolloutStatus.FINISHED);
+
+    }
+
+    private void finishAction(final Action action) {
+        final JpaAction jpaAction = (JpaAction) action;
+        action.setStatus(Status.FINISHED);
+        controllerManagament
+                .addUpdateActionStatus(new JpaActionStatus(jpaAction, Status.FINISHED, System.currentTimeMillis(), ""));
+    }
+
+    @Test
     @Description("Verfiying that the error handling action of a group is executed to pause the current rollout")
     public void checkErrorHitOfGroupCallsErrorActionToPauseTheRollout() {
         final int amountTargetsForRollout = 10;
@@ -168,10 +263,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(createdRollout);
         // set both actions in error state so error condition is hit and error
         // action is executed
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
@@ -212,9 +306,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
-        rolloutManagement.startRollout(createdRollout);
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
         // set both actions in error state so error condition is hit and error
         // action is executed
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
@@ -264,9 +358,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
-        rolloutManagement.startRollout(createdRollout);
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
         // finish running actions, 2 actions should be finished
         assertThat(changeStatusForAllRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
 
@@ -396,10 +490,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 4;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(createdRollout);
         changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
@@ -428,11 +521,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
         final DistributionSet ds = createdRollout.getDistributionSet();
 
-        rolloutManagement.startRollout(createdRollout);
         createdRollout = rolloutManagement.findRolloutById(createdRollout.getId());
         // 5 targets are running
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
@@ -473,9 +565,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 3;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
-        rolloutManagement.startRollout(rolloutOne);
+        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
 
         final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsForRolloutTwo");
@@ -510,10 +602,10 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 3;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
         final DistributionSet distributionSet = rolloutOne.getDistributionSet();
-        rolloutManagement.startRollout(rolloutOne);
+
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
         changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
@@ -565,10 +657,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
         changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
@@ -590,10 +681,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "80";
         final String errorCondition = "90";
-        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
         changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
@@ -616,10 +706,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "20";
-        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
 
-        rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
         changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
@@ -703,7 +792,6 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     public void rightCountForAllRollouts() {
 
         final int amountTargetsForRollout = 6;
-        ;
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
