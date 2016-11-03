@@ -104,10 +104,11 @@
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
-      <spring-amqp.version>1.6.2.RELEASE</spring-amqp.version>
+      <spring-amqp.version>1.6.3.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
-      <spring-core.version>4.3.2.RELEASE</spring-core.version>
-       <spring-data-releasetrain.version>Hopper-SR4</spring-data-releasetrain.version>
+      <spring.version>4.3.3.RELEASE</spring.version>
+      <spring-integration.version>4.3.2.RELEASE</spring-integration.version>
+      <spring-data-releasetrain.version>Hopper-SR4</spring-data-releasetrain.version>
       <!-- Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->
@@ -147,8 +148,9 @@
       <commons-collections4.version>4.1</commons-collections4.version>
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
-      <spring-cloud-bus.version>1.2.0.RELEASE</spring-cloud-bus.version>
-      <com.jayway.awaitility.version>1.7.0</com.jayway.awaitility.version>
+      <spring.cloud.version>Camden.SR1</spring.cloud.version>
+      <feign.extension.version>9.3.1</feign.extension.version>
+      <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
       <io-protostuff.version>1.3.5</io-protostuff.version>
      
       <!-- Misc libraries versions - END -->
@@ -462,13 +464,14 @@
 
    <dependencyManagement>
       <dependencies>
-         <!-- Logging -->
-         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-         </dependency>
          <!-- Vaadin -->
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-bom</artifactId>
+            <version>${vaadin.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>         
          <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot</artifactId>
@@ -483,26 +486,6 @@
             <groupId>org.vaadin.spring.extensions</groupId>
             <artifactId>vaadin-spring-ext-security</artifactId>
             <version>${vaadin.spring.addon.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-server</artifactId>
-            <version>${vaadin.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-push</artifactId>
-            <version>${vaadin.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-client</artifactId>
-            <version>${vaadin.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-themes</artifactId>
-            <version>${vaadin.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
@@ -552,6 +535,13 @@
             <version>${jlorem.version}</version>
          </dependency>
          <!-- Spring -->
+         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring.cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -608,19 +598,21 @@
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
          </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-bus-parent</artifactId>
-            <version>${spring-cloud-bus.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-        <!-- Remove after Upgrade to SpringBoot 1.4.0 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring-core.version}</version>
-        </dependency>
+         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jackson</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jaxrs</artifactId>
+            <version>${feign.extension.version}</version>
+         </dependency>
         
         <!-- Protostuff Io -->
       <dependency>
@@ -732,7 +724,7 @@
          <dependency>
             <groupId>com.jayway.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>${com.jayway.awaitility.version}</version>
+            <version>${jayway.awaitility.version}</version>
          </dependency>
       </dependencies>
    </dependencyManagement>

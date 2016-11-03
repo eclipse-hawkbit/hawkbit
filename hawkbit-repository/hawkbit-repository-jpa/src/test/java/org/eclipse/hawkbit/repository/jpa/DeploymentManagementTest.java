@@ -833,7 +833,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
-        final List<Target> targs = new ArrayList<Target>();
+        final List<Target> targs = new ArrayList<>();
         targs.add(targ);
         final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedEntity();
         targ = savedTargs.iterator().next();
@@ -953,14 +953,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     assertThat(event.getActionId()).as("Action id in database and event do not match")
                             .isEqualTo(activeActionsByTarget.get(0).getId());
 
-                    final List<SoftwareModule> modules = controllerManagament
-                            .findSoftwareModulesByDistributionSetId(event.getDistributionSetId());
                     assertThat(distributionSetManagement.findDistributionSetById(event.getDistributionSetId())
                             .getModules()).as("softwaremodule size is not correct")
                                     .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
-
-                    assertThat(modules).as("softwaremodule size is not correct")
-                            .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
                 }
             }
             assertThat(found).as("No event found for controller " + myt.getControllerId()).isTrue();
@@ -972,13 +967,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      *
      */
     private class DeploymentResult {
-        final List<Long> deployedTargetIDs = new ArrayList<Long>();
-        final List<Long> undeployedTargetIDs = new ArrayList<Long>();
-        final List<Long> distributionSetIDs = new ArrayList<Long>();
+        final List<Long> deployedTargetIDs = new ArrayList<>();
+        final List<Long> undeployedTargetIDs = new ArrayList<>();
+        final List<Long> distributionSetIDs = new ArrayList<>();
 
-        private final List<Target> undeployedTargets = new ArrayList<Target>();
-        private final List<Target> deployedTargets = new ArrayList<Target>();
-        private final List<DistributionSet> distributionSets = new ArrayList<DistributionSet>();
+        private final List<Target> undeployedTargets = new ArrayList<>();
+        private final List<Target> deployedTargets = new ArrayList<>();
+        private final List<DistributionSet> distributionSets = new ArrayList<>();
 
         public DeploymentResult(final Iterable<Target> deployedTs, final Iterable<Target> undeployedTs,
                 final Iterable<DistributionSet> dss, final String deployedTargetPrefix,
@@ -1073,7 +1068,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         public List<CancelTargetAssignmentEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
-            final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<CancelTargetAssignmentEvent>(events);
+            final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<>(events);
             assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;

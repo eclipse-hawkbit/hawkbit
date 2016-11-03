@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -115,9 +114,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadata()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement,
-                controllerManagament);
-        amqpMessageDispatcherService.setServiceMatcher(serviceMatcher);
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
 
     }
 

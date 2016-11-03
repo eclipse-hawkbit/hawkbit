@@ -18,26 +18,13 @@ public class CancelTargetAssignmentEvent extends RemoteEntityEvent<Target> {
 
     private static final long serialVersionUID = 1L;
 
-    private final Long actionId;
+    private Long actionId;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param actionId
-     *            the actionId
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-    public CancelTargetAssignmentEvent(final String tenant, final Long entityId, final Long actionId,
-            final String entityClass, final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
-        this.actionId = actionId;
+    public CancelTargetAssignmentEvent() {
+        // for serialization libs like jackson
     }
 
     /**

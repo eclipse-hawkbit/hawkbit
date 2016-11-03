@@ -19,21 +19,10 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
-     * @throws ClassNotFoundException
+     * Default constructor.
      */
-    protected DistributionSetCreatedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public DistributionSetCreatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

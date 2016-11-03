@@ -12,9 +12,9 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 
 import org.junit.Test;
-import org.springframework.messaging.Message;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -26,6 +26,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Entity Id Events")
 public class RemoteIdEventTest extends AbstractRemoteEventTest {
+
+    private static final long ENTITY_ID = 1L;
 
     @Test
     @Description("Verifies that the is ds id correct reloaded")
@@ -53,25 +55,27 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
 
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {
 
-        final Long entityId = 1L;
-
-        final Constructor<?> constructor = eventType.getDeclaredConstructors()[0];
+        final Constructor<?> constructor = Arrays.stream(eventType.getDeclaredConstructors())
+                .filter(con -> con.getParameterCount() == 3).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Given event is not RemoteIdEvent compatible"));
 
         try {
-            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance("tenant", entityId, "Node");
-            assertEntity(entityId, event);
+            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance("tenant", ENTITY_ID, "Node");
+            assertEntity(ENTITY_ID, event);
         } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
         }
     }
 
-    protected RemoteIdEvent assertEntity(final Long id, final RemoteIdEvent event) {
+    protected RemoteIdEvent assertEntity(final long id, final RemoteIdEvent event) {
         assertThat(event.getEntityId()).isSameAs(id);
 
-        final Message<?> message = createMessage(event);
-        final RemoteIdEvent underTestCreatedEvent = (RemoteIdEvent) getAbstractMessageConverter().fromMessage(message,
-                event.getClass());
+        RemoteIdEvent underTestCreatedEvent = (RemoteIdEvent) createProtoStuffEvent(event);
         assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+
+        underTestCreatedEvent = (RemoteIdEvent) createJacksonEvent(event);
+        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+
         return underTestCreatedEvent;
     }
 

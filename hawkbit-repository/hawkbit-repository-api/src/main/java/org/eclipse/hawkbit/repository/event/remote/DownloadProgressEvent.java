@@ -17,7 +17,14 @@ public class DownloadProgressEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private final Long shippedBytesSinceLast;
+    private Long shippedBytesSinceLast;
+
+    /**
+     * Default constructor.
+     */
+    public DownloadProgressEvent() {
+        // for serialization libs like jackson
+    }
 
     /**
      * Constructor.

@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCrea
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
@@ -35,7 +34,7 @@ import com.google.common.collect.Maps;
  */
 public class HawkbitEventProvider implements UIEventProvider {
 
-    private static final Map<Class<? extends TenantAwareEvent>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(16);
+    private static final Map<Class<? extends TenantAwareEvent>, Class<?>> EVENTS = Maps.newHashMapWithExpectedSize(15);
 
     static {
 
@@ -48,7 +47,6 @@ public class HawkbitEventProvider implements UIEventProvider {
         EVENTS.put(DistributionSetTagUpdateEvent.class, DistributionSetTagUpdatedEventContainer.class);
 
         EVENTS.put(TargetCreatedEvent.class, TargetCreatedEventContainer.class);
-        EVENTS.put(TargetInfoUpdateEvent.class, TargetInfoUpdateEventContainer.class);
         EVENTS.put(TargetDeletedEvent.class, TargetDeletedEventContainer.class);
         EVENTS.put(TargetUpdatedEvent.class, TargetUpdatedEventContainer.class);
         EVENTS.put(CancelTargetAssignmentEvent.class, CancelTargetAssignmentEventContainer.class);

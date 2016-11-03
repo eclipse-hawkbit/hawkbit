@@ -19,26 +19,13 @@ public class RolloutGroupCreatedEvent extends RemoteEntityEvent<RolloutGroup> {
 
     private static final long serialVersionUID = 1L;
 
-    private final Long rolloutId;
+    private Long rolloutId;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param rolloutId
-     *            the ID of the rollout has been created
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-    protected RolloutGroupCreatedEvent(final String tenant, final Long rolloutId, final Long entityId,
-            final String entityClass, final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
-        this.rolloutId = rolloutId;
+    public RolloutGroupCreatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

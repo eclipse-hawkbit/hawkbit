@@ -20,6 +20,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -43,7 +44,7 @@ public interface RolloutRepository
      * @return the count of the updated rows. Zero if no row has been updated
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @Query("UPDATE JpaRollout r SET r.lastCheck = :lastCheck WHERE r.lastCheck < (:lastCheck - :delay) AND r.status=:status")
     int updateLastCheck(@Param("lastCheck") final long lastCheck, @Param("delay") final long delay,
             @Param("status") final RolloutStatus status);

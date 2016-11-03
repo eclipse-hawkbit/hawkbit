@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +25,6 @@ import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -36,18 +36,17 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
 
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
  * delegate the messages to a {@link AmqpSenderService}.
- * 
+ *
  * Additionally the dispatcher listener/subscribe for some target events e.g.
  * assignment.
  *
  */
-@Service
 public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private final ArtifactUrlHandler artifactUrlHandler;
@@ -55,12 +54,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
-    private final ControllerManagement controllerManagement;
-    private ServiceMatcher serviceMatcher;
+    private final ServiceMatcher serviceMatcher;
 
     /**
      * Constructor.
-     * 
+     *
      * @param rabbitTemplate
      *            the rabbitTemplate
      * @param amqpSenderService
@@ -71,40 +69,45 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            for execution with system permissions
      * @param systemManagement
      *            the systemManagement
-     * @param controllerManagement
-     *            to access software modules
      * @param targetManagement
-     *            to access targets
+     *            to access target information
+     * @param serviceMatcher
+     *            to check in cluster case if the message is from the same
+     *            cluster node
      */
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate, final AmqpSenderService amqpSenderService,
             final ArtifactUrlHandler artifactUrlHandler, final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement, final TargetManagement targetManagement,
-            final ControllerManagement controllerManagement) {
+            final ServiceMatcher serviceMatcher) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
         this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
-        this.controllerManagement = controllerManagement;
         this.targetManagement = targetManagement;
+        this.serviceMatcher = serviceMatcher;
     }
 
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution
      * set has been assign to a Target.
      *
-     * @param targetAssignDistributionSetEvent
+     * @param assignedEvent
      *            the object to be send.
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
-    public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        if (serviceMatcher == null || !serviceMatcher.isFromSelf(targetAssignDistributionSetEvent)) {
+    public void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
+        if (isFromSelf(assignedEvent)) {
             return;
         }
 
-        final Target target = targetManagement
-                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId());
+        sendUpdateMessageToTarget(assignedEvent.getTenant(),
+                targetManagement.findTargetByControllerID(assignedEvent.getControllerId()), assignedEvent.getActionId(),
+                assignedEvent.getModules());
+    }
 
+    void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
+            final Collection<org.eclipse.hawkbit.repository.model.SoftwareModule> modules) {
         if (target == null) {
             return;
         }
@@ -114,11 +117,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final String controllerId = target.getControllerId();
-        final List<org.eclipse.hawkbit.repository.model.SoftwareModule> modules = controllerManagement
-                .findSoftwareModulesByDistributionSetId(targetAssignDistributionSetEvent.getDistributionSetId());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
-        downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
+        downloadAndUpdateRequest.setActionId(actionId);
 
         final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
@@ -129,8 +129,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessageProperties(targetAssignDistributionSetEvent.getTenant(), controllerId,
-                        EventTopic.DOWNLOAD_AND_INSTALL));
+                createConnectorMessageProperties(tenant, target.getControllerId(), EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
@@ -138,23 +137,29 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * Method to send a message to a RabbitMQ Exchange after the assignment of
      * the Distribution set to a Target has been canceled.
      *
-     * @param cancelTargetAssignmentDistributionSetEvent
+     * @param cancelEvent
      *            the object to be send.
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
-    public void targetCancelAssignmentToDistributionSet(
-            final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
-        if (!serviceMatcher.isFromSelf(cancelTargetAssignmentDistributionSetEvent)) {
+    public void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
+        if (isFromSelf(cancelEvent)) {
             return;
         }
 
-        final String controllerId = cancelTargetAssignmentDistributionSetEvent.getEntity().getControllerId();
-        final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
-        final Message message = getMessageConverter().toMessage(actionId, createConnectorMessageProperties(
-                cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId, EventTopic.CANCEL_DOWNLOAD));
+        sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
+                cancelEvent.getActionId(), cancelEvent.getEntity().getTargetInfo().getAddress());
+    }
 
-        amqpSenderService.sendMessage(message,
-                cancelTargetAssignmentDistributionSetEvent.getEntity().getTargetInfo().getAddress());
+    private boolean isFromSelf(final RemoteApplicationEvent event) {
+        return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
+    }
+
+    void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
+            final URI address) {
+        final Message message = getMessageConverter().toMessage(actionId,
+                createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
+
+        amqpSenderService.sendMessage(message, address);
 
     }
 
@@ -213,10 +218,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
-    }
-
-    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-        this.serviceMatcher = serviceMatcher;
     }
 
 }

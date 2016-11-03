@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -46,10 +45,10 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     public void reloadDownloadProgessByRemoteEvent() {
         final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
 
-        final Message<?> message = createMessage(downloadProgressEvent);
+        DownloadProgressEvent remoteEvent = (DownloadProgressEvent) createProtoStuffEvent(downloadProgressEvent);
+        assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
 
-        final DownloadProgressEvent remoteEvent = (DownloadProgressEvent) getAbstractMessageConverter()
-                .fromMessage(message, DownloadProgressEvent.class);
+        remoteEvent = (DownloadProgressEvent) createJacksonEvent(downloadProgressEvent);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
     }
 
@@ -68,11 +67,16 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(action,
                 serviceMatcher.getServiceId());
 
-        final Message<?> message = createMessage(assignmentEvent);
+        TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) createProtoStuffEvent(
+                assignmentEvent);
+        assertTargetAssignDistributionSetEvent(action, underTest);
 
-        final TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) getAbstractMessageConverter()
-                .fromMessage(message, TargetAssignDistributionSetEvent.class);
+        underTest = (TargetAssignDistributionSetEvent) createJacksonEvent(assignmentEvent);
+        assertTargetAssignDistributionSetEvent(action, underTest);
+    }
 
+    private void assertTargetAssignDistributionSetEvent(final Action action,
+            final TargetAssignDistributionSetEvent underTest) {
         assertThat(underTest.getActionId()).isNotNull();
         assertThat(underTest.getControllerId()).isNotNull();
         assertThat(underTest.getDistributionSetId()).isNotNull();

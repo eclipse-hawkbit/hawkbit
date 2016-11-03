@@ -25,8 +25,6 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -40,7 +38,6 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -66,8 +63,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final EntityFactory entityFactory;
 
-    private final ApplicationContext applicationContext;
-
     /**
      * Constructor.
      * 
@@ -82,13 +77,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
-            final ApplicationContext applicationContext) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
-        this.applicationContext = applicationContext;
     }
 
     /**
@@ -196,14 +189,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target, action.getId(), applicationContext.getId()));
+            amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
+                    action.getId(), target.getTargetInfo().getAddress());
             return;
         }
 
-        amqpMessageDispatcherService
-                .targetAssignDistributionSet(new TargetAssignDistributionSetEvent(action, applicationContext.getId()));
-
+        amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
+                action.getDistributionSet().getModules());
     }
 
     /**

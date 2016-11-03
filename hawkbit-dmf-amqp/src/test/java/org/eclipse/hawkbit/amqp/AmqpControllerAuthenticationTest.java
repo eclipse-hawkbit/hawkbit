@@ -55,7 +55,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -106,9 +105,6 @@ public class AmqpControllerAuthenticationTest {
 
     @Mock
     private ControllerManagement controllerManagementMock;
-
-    @Mock
-    private ApplicationContext applicationContext;
 
     @Mock
     private Target targteMock;
@@ -169,11 +165,8 @@ public class AmqpControllerAuthenticationTest {
         artifact.setHashes(new DbArtifactHash("sha1 test", "md5 test"));
         when(artifactManagementMock.loadArtifactBinary(testArtifact)).thenReturn(artifact);
 
-        when(applicationContext.getId()).thenReturn("node");
-
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
-                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory(),
-                applicationContext);
+                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
 
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,

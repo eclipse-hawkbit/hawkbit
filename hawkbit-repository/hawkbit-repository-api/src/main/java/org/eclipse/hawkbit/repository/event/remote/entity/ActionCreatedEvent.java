@@ -14,24 +14,13 @@ import org.eclipse.hawkbit.repository.model.Action;
  * Defines the remote event of creating a new {@link Action}.
  */
 public class ActionCreatedEvent extends RemoteEntityEvent<Action> {
-    private static final long serialVersionUID = 181780358321768629L;
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-
-    protected ActionCreatedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public ActionCreatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

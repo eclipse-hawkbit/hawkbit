@@ -18,21 +18,15 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
  *
  */
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
-
     private static final long serialVersionUID = 1L;
 
-    private final String tenant;
+    private String tenant;
 
     /**
-     * for serialization libs like jackson
-     * 
-     * @param tenant
-     *            the tenant
-     * @param applicationId
-     *            the applicationId
+     * Default constructor.
      */
-    protected RemoteTenantAwareEvent(final String tenant, final String applicationId) {
-        this(new Object(), tenant, applicationId);
+    protected RemoteTenantAwareEvent() {
+        // for serialization libs like jackson
     }
 
     /**

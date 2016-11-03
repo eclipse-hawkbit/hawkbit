@@ -18,6 +18,13 @@ public class DistributionSetTagDeletedEvent extends RemoteIdEvent {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Default constructor.
+     */
+    public DistributionSetTagDeletedEvent() {
+        // for serialization libs like jackson
+    }
+
+    /**
      * Constructor for json serialization.
      * 
      * @param tenant

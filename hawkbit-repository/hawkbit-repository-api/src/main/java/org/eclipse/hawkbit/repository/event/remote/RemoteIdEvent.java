@@ -16,7 +16,14 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private final Long entityId;
+    private Long entityId;
+
+    /**
+     * Default constructor.
+     */
+    protected RemoteIdEvent() {
+        // for serialization libs like jackson
+    }
 
     /**
      * Constructor for json serialization.

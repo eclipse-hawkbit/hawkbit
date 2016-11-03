@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa.event;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -20,13 +19,11 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.fest.assertions.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,19 +74,6 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that the target info update event is published when a target info has been updated")
-    public void targetInfoUpdateEventIsPublished() throws InterruptedException {
-        final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
-        controllerManagament.updateTargetStatus(createdTarget.getTargetInfo(), TargetUpdateStatus.PENDING,
-                System.currentTimeMillis(), URI.create("http://127.0.0.1"));
-
-        final TargetInfoUpdateEvent targetInfoUpdatedEvent = eventListener.waitForEvent(TargetInfoUpdateEvent.class, 1,
-                TimeUnit.SECONDS);
-        assertThat(targetInfoUpdatedEvent).isNotNull();
-        assertThat(targetInfoUpdatedEvent.getEntityId()).isEqualTo(createdTarget.getId());
-    }
-
-    @Test
     @Description("Verifies that the target deleted event is published when a target has been deleted")
     public void targetDeletedEventIsPublished() throws InterruptedException {
         final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
@@ -111,8 +95,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final DistributionSet createDistributionSet = distributionSetManagement
                 .createDistributionSet(generateDistributionSet);
 
-        final DistributionSetCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionSetCreatedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final DistributionSetCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionSetCreatedEvent.class,
+                1, TimeUnit.SECONDS);
         assertThat(dsCreatedEvent).isNotNull();
         assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(createDistributionSet.getId());
     }
@@ -129,8 +113,8 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         distributionSetManagement.deleteDistributionSet(createDistributionSet);
 
-        final DistributionSetDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionSetDeletedEvent.class, 1,
-                TimeUnit.SECONDS);
+        final DistributionSetDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionSetDeletedEvent.class,
+                1, TimeUnit.SECONDS);
         assertThat(dsDeletedEvent).isNotNull();
         assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());
     }

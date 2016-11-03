@@ -47,7 +47,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -273,18 +272,15 @@ public class AmqpConfiguration {
      *            for target repo access
      * @param entityFactory
      *            to create entities
-     * @param applicationContext
-     *            the applicationContext
      *
      * @return handler service bean
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
-            final ApplicationContext applicationContext) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
         return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory, applicationContext);
+                entityFactory);
     }
 
     /**
@@ -369,19 +365,17 @@ public class AmqpConfiguration {
      * Create the dispatcher bean.
      * 
      * @param rabbitTemplate
-     *            the rabbitTemplate.
+     *            the rabbitTemplate
      * @param amqpSenderService
-     *            to send messages
+     *            to send AMQP message
      * @param artifactUrlHandler
-     *            the artifactUrlHandler
+     *            for generating download URLs
      * @param systemSecurityContext
-     *            the systemSecurityContext
+     *            for execution with system permissions
      * @param systemManagement
      *            the systemManagement
      * @param targetManagement
-     *            the targetManagement
-     * @param controllerManagement
-     *            the controllerManagement
+     *            to access target information
      * @return the bean
      */
     @Bean
@@ -389,12 +383,9 @@ public class AmqpConfiguration {
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ControllerManagement controllerManagement) {
-        final AmqpMessageDispatcherService amqpMessageDispatcherService = new AmqpMessageDispatcherService(
-                rabbitTemplate, amqpSenderService, artifactUrlHandler, systemSecurityContext, systemManagement,
-                targetManagement, controllerManagement);
-        amqpMessageDispatcherService.setServiceMatcher(serviceMatcher);
-        return amqpMessageDispatcherService;
+            final TargetManagement targetManagement) {
+        return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
+                systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

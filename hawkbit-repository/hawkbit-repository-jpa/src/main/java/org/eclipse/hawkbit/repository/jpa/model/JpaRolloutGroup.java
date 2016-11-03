@@ -27,10 +27,10 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**

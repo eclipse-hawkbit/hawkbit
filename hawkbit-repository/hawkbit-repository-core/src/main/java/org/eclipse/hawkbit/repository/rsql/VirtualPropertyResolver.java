@@ -6,19 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.rsql;
+package org.eclipse.hawkbit.repository.rsql;
 
-import java.time.Duration;
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.jpa.TimestampCalculator;
-import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for

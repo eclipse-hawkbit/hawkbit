@@ -14,24 +14,13 @@ import org.eclipse.hawkbit.repository.model.Rollout;
  * Defines the remote event of updated a {@link Rollout}.
  */
 public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> {
-    private static final long serialVersionUID = 1056221355466373514L;
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-
-    protected RolloutUpdatedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public RolloutUpdatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

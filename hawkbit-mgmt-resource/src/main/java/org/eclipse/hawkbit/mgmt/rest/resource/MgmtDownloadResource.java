@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
@@ -28,6 +27,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.google.common.io.ByteStreams;
 
 /**
  * A resource for download artifacts.
@@ -82,7 +83,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             try {
-                IOUtils.copy(artifact.getFileInputStream(),
+                ByteStreams.copy(artifact.getFileInputStream(),
                         requestResponseContextHolder.getHttpServletResponse().getOutputStream());
             } catch (final IOException e) {
                 LOGGER.error("Cannot copy streams", e);

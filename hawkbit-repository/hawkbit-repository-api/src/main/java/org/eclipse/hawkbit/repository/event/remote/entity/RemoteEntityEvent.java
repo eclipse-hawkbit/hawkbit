@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * A base definition class for remote events which contain a tenant aware base
  * entity.
@@ -33,36 +35,34 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
     private transient E entity;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-    protected RemoteEntityEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(entityId, tenant, applicationId);
-        this.entityClass = entityClass;
+    protected RemoteEntityEvent() {
+        // for serialization libs like jackson
     }
 
     /**
      * Constructor.
-     * 
+     *
      * @param baseEntity
      *            the base entity
      * @param applicationId
      *            the origin application id
      */
     protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
-        this(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass().getName(), applicationId);
+        super(baseEntity.getId(), baseEntity.getTenant(), applicationId);
+        this.entityClass = baseEntity.getClass().getName();
         this.entity = baseEntity;
     }
 
+    /**
+     * @return the entityClass
+     */
+    public String getEntityClass() {
+        return entityClass;
+    }
+
+    @JsonIgnore
     public E getEntity() {
         if (entity == null) {
             entity = reloadEntityFromRepository();

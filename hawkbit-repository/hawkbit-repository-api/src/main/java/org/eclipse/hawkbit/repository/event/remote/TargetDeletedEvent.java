@@ -19,6 +19,13 @@ public class TargetDeletedEvent extends RemoteIdEvent {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Default constructor.
+     */
+    public TargetDeletedEvent() {
+        // for serialization libs like jackson
+    }
+
+    /**
      * Constructor for json serialization.
      * 
      * @param tenant

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,9 +86,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TargetInfoRepository targetInfoRepository;
-
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
 
     @Autowired
     private ActionStatusRepository actionStatusRepository;
@@ -184,11 +180,6 @@ public class JpaControllerManagement implements ControllerManagement {
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
-    }
-
-    @Override
-    public List<SoftwareModule> findSoftwareModulesByDistributionSetId(final Long distributionSetId) {
-        return Collections.unmodifiableList(softwareModuleRepository.findByAssignedToId(distributionSetId));
     }
 
     @Override

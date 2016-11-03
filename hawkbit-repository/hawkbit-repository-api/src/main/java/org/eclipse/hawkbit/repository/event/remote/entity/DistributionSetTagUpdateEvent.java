@@ -19,20 +19,10 @@ public class DistributionSetTagUpdateEvent extends RemoteEntityEvent<Distributio
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-    protected DistributionSetTagUpdateEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public DistributionSetTagUpdateEvent() {
+        // for serialization libs like jackson
     }
 
     /**

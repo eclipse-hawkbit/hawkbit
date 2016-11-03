@@ -18,20 +18,10 @@ public class RolloutGroupUpdatedEvent extends RemoteEntityEvent<RolloutGroup> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-    protected RolloutGroupUpdatedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public RolloutGroupUpdatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

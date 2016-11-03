@@ -598,12 +598,10 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId) {
-        return Collections
-                .unmodifiableList(softwareModuleMetadataRepository
-                        .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query,
-                                cb) -> cb.and(cb.equal(
-                                        root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
-                                        softwareModuleId))));
+        return Collections.unmodifiableList(softwareModuleMetadataRepository
+                .findAll((Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb
+                        .and(cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id),
+                                softwareModuleId))));
     }
 
     @Override

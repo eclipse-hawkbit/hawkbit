@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -145,19 +144,6 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty String controllerId, URI address);
-
-    /**
-     * Retrieves all {@link SoftwareModule}s which are assigned to the given
-     * {@link DistributionSet}.
-     *
-     * @param distributionSetId
-     *            the distributionSetId set which should be assigned to the
-     *            returned {@link SoftwareModule}s
-     * @return a list of {@link SoftwareModule}s assigned to given
-     *         {@code distributionSet}
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<SoftwareModule> findSoftwareModulesByDistributionSetId(@NotNull Long distributionSetId);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given

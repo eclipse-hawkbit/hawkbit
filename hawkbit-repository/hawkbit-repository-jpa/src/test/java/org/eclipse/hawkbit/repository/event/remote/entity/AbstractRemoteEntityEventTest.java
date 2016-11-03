@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Constructor;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
-import org.springframework.messaging.Message;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -58,9 +57,10 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
     protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event) {
         assertThat(event.getEntity()).isSameAs(baseEntity);
 
-        final Message<?> message = createMessage(event);
-        final RemoteEntityEvent<?> underTestCreatedEvent = (RemoteEntityEvent<?>) getAbstractMessageConverter()
-                .fromMessage(message, event.getClass());
+        RemoteEntityEvent<?> underTestCreatedEvent = (RemoteEntityEvent<?>) createProtoStuffEvent(event);
+        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+
+        underTestCreatedEvent = (RemoteEntityEvent<?>) createJacksonEvent(event);
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
         return underTestCreatedEvent;
     }

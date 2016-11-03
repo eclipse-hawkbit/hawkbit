@@ -18,21 +18,10 @@ public class TargetCreatedEvent extends RemoteEntityEvent<Target> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity entityClassName
-     * @param applicationId
-     *            the origin application id
+     * Default constructor.
      */
-
-    public TargetCreatedEvent(final String tenant, final Long entityId, final String entityClass,
-            final String applicationId) {
-        super(tenant, entityId, entityClass, applicationId);
+    public TargetCreatedEvent() {
+        // for serialization libs like jackson
     }
 
     /**

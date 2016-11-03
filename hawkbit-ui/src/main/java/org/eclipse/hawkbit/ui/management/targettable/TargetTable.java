@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -57,7 +56,6 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetInfoUpdateEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -162,24 +160,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
-        onTargetUpdateEvents(eventContainer.getEvents().stream()
-                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetInfoUpdateEvents(final TargetInfoUpdateEventContainer eventContainer) {
-        onTargetUpdateEvents(eventContainer.getEvents().stream()
-                .map(targetInfoUpdateEvent -> targetInfoUpdateEvent.getEntity()).collect(Collectors.toList()));
-    }
-
-    /**
-     * EventListener method which is called by the event bus to notify about a
-     * list of {@link TargetInfoUpdateEvent}.
-     *
-     * @param updatedTargets
-     *            list of updated targets
-     */
-    private void onTargetUpdateEvents(final List<Target> updatedTargets) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
@@ -187,7 +167,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            updatedTargets.stream().filter(target -> visibleItemIds.contains(target.getTargetIdName()))
+            eventContainer.getEvents().stream().map(event -> event.getEntity())
+                    .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
             targetContainer.commit();
         }
@@ -196,7 +177,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        reselectTargetIfSelectedInStream(updatedTargets.stream());
+        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
     }
 
     private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
@@ -880,8 +861,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-    private long getTargetsCountWithFilter(final long totalTargetsCount,
-            final Long pinnedDistId, final FilterParams filterParams) {
+    private long getTargetsCountWithFilter(final long totalTargetsCount, final Long pinnedDistId,
+            final FilterParams filterParams) {
         final long size;
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
             size = targetManagement.countTargetByTargetFilterQuery(

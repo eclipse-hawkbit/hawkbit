@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
