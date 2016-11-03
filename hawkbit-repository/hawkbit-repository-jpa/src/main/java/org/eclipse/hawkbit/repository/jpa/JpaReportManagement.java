@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.report.model.SeriesTime;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -81,7 +80,6 @@ public class JpaReportManagement implements ReportManagement {
     private TenantAware tenantAware;
 
     @Override
-    @Cacheable("targetStatus")
     public DataReportSeries<TargetUpdateStatus> targetStatus() {
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -106,7 +104,44 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("distributionUsageAssigned")
+    public DataReportSeries<SeriesTime> targetsLastPoll() {
+
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime beforeHour = now.minusHours(1);
+        final LocalDateTime beforeDay = now.minusDays(1);
+        final LocalDateTime beforeWeek = now.minusWeeks(1);
+        final LocalDateTime beforeMonth = now.minusMonths(1);
+        final LocalDateTime beforeYear = now.minusYears(1);
+
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final List<DataReportSeriesItem<SeriesTime>> resultList = new ArrayList<>();
+
+        // hours
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.HOUR,
+                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, beforeHour, now)).getSingleResult()));
+        // days
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.DAY, entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, beforeDay, beforeHour)).getSingleResult()));
+        // weeks
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.WEEK, entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, beforeWeek, beforeDay)).getSingleResult()));
+        // months
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MONTH, entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, beforeMonth, beforeWeek)).getSingleResult()));
+        // years
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.YEAR, entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, beforeYear, beforeMonth)).getSingleResult()));
+        // years
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MORE_THAN_YEAR,
+                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, beforeYear)).getSingleResult()));
+        // never
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.NEVER,
+                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, null)).getSingleResult()));
+
+        return new DataReportSeries<>("TargetLastPoll", resultList);
+    }
+
+    @Override
     public List<InnerOuterDataReportSeries<String>> distributionUsageAssigned(final int topXEntries) {
 
         // top X entries distribution usage
@@ -132,7 +167,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("distributionUsageInstalled")
     public List<InnerOuterDataReportSeries<String>> distributionUsageInstalled(final int topXEntries) {
         // top X entries distribution usage
         final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
@@ -157,7 +191,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("targetsCreatedOverPeriod")
     public <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType,
             final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
@@ -208,7 +241,6 @@ public class JpaReportManagement implements ReportManagement {
     }
 
     @Override
-    @Cacheable("feedbackReceivedOverTime")
     public <T extends Serializable> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType,
             final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
@@ -223,47 +255,8 @@ public class JpaReportManagement implements ReportManagement {
         return new DataReportSeries<>("FeedbackRecieved", reportItems);
     }
 
-    @Override
-    @Cacheable("targetsLastPoll")
-    public DataReportSeries<SeriesTime> targetsLastPoll() {
-
-        final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime beforeHour = now.minusHours(1);
-        final LocalDateTime beforeDay = now.minusDays(1);
-        final LocalDateTime beforeWeek = now.minusWeeks(1);
-        final LocalDateTime beforeMonth = now.minusMonths(1);
-        final LocalDateTime beforeYear = now.minusYears(1);
-
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final List<DataReportSeriesItem<SeriesTime>> resultList = new ArrayList<>();
-
-        // hours
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.HOUR,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, beforeHour, now)).getSingleResult()));
-        // days
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.DAY, entityManager
-                .createQuery(createCountSelectTargetsLastPoll(cb, beforeDay, beforeHour)).getSingleResult()));
-        // weeks
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.WEEK, entityManager
-                .createQuery(createCountSelectTargetsLastPoll(cb, beforeWeek, beforeDay)).getSingleResult()));
-        // months
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MONTH, entityManager
-                .createQuery(createCountSelectTargetsLastPoll(cb, beforeMonth, beforeWeek)).getSingleResult()));
-        // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.YEAR, entityManager
-                .createQuery(createCountSelectTargetsLastPoll(cb, beforeYear, beforeMonth)).getSingleResult()));
-        // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MORE_THAN_YEAR,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, beforeYear)).getSingleResult()));
-        // never
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.NEVER,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, null)).getSingleResult()));
-
-        return new DataReportSeries<>("TargetLastPoll", resultList);
-    }
-
-    private CriteriaQuery<Long> createCountSelectTargetsLastPoll(final CriteriaBuilder cb, final LocalDateTime from,
-            final LocalDateTime to) {
+    private static CriteriaQuery<Long> createCountSelectTargetsLastPoll(final CriteriaBuilder cb,
+            final LocalDateTime from, final LocalDateTime to) {
 
         Long start = null;
         Long end = null;
@@ -289,8 +282,8 @@ public class JpaReportManagement implements ReportManagement {
         return countSelect;
     }
 
-    private List<InnerOuterDataReportSeries<String>> mapDistirbutionUsageResultToDataReport(final int topXEntries,
-            final List<Object[]> resultListTop) {
+    private static List<InnerOuterDataReportSeries<String>> mapDistirbutionUsageResultToDataReport(
+            final int topXEntries, final List<Object[]> resultListTop) {
         final List<InnerOuterDataReportSeries<String>> innerOuterReport = new ArrayList<>();
         final Map<DSName, InnerOuter> map = new LinkedHashMap<>();
 

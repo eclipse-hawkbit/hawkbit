@@ -247,7 +247,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     }
 
-    protected void onBaseEntityEvent(final BaseEntityEvent<E> event) {
+    protected void onBaseEntityEvent(final BaseUIEntityEvent<E> event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             UI.getCurrent().access(() -> applyMinTableSettings());
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {

@@ -97,7 +97,6 @@
          <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
       </dependency>
-
       <!-- Spring -->
       <dependency>
          <groupId>org.springframework.boot</groupId>

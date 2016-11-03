@@ -8,14 +8,10 @@
  */
 package org.eclipse.hawkbit.app;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.hawkbit.ui.HawkbitUI;
-import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
-import org.eclipse.hawkbit.ui.push.UIEventProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.push.EventPushStrategy;
+import org.vaadin.spring.events.EventBus.SessionEventBus;
 
-import com.google.common.eventbus.EventBus;
 import com.vaadin.annotations.Push;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
@@ -35,12 +31,18 @@ import com.vaadin.spring.annotation.SpringUI;
 // Vaadin.
 @SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class MyUI extends HawkbitUI {
-
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    public MyUI(final ScheduledExecutorService scheduledExecutorService, final EventBus systemEventBus,
-            final org.vaadin.spring.events.EventBus.SessionEventBus eventBus, final UIEventProvider provider) {
-        super(new DelayedEventBusPushStrategy(scheduledExecutorService, eventBus, systemEventBus, provider));
+    /**
+     * Constructor
+     * 
+     * @param pushStrategy
+     *            the push strategy
+     * @param eventBus
+     *            the event bus
+     */
+    public MyUI(final EventPushStrategy pushStrategy, final SessionEventBus eventBus) {
+        super(pushStrategy, eventBus);
     }
+
 }

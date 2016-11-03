@@ -16,9 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -67,9 +65,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
     private transient RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
-    private transient RolloutManagement rolloutManagement;
-
-    @Autowired
     private transient RolloutUIState rolloutUIState;
 
     @Autowired
@@ -90,11 +85,10 @@ public class RolloutGroupListGrid extends AbstractGrid {
      * Handles the RolloutGroupChangeEvent to refresh the item in the grid.
      *
      *
-     * @param rolloutGroupChangeEvent
+     * @param eventContainer
      *            the event which contains the rollout group which has been
      *            change
      */
-    @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
     public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer eventContainer) {
         if (!rolloutUIState.isShowRolloutGroups()) {
@@ -102,11 +96,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
 
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-    }
-
-    private String calculateFinishedPercentage(final RolloutGroup rolloutGroup) {
-        return HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup,
-                rolloutManagement.getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup));
     }
 
     @Override

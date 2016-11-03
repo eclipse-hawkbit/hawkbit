@@ -10,6 +10,8 @@ package org.eclipse.hawkbit;
 
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -26,6 +28,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
+import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
@@ -45,20 +49,19 @@ import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
+import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
+import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -77,7 +80,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.EventBus;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -93,8 +95,6 @@ import com.google.common.eventbus.EventBus;
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
-    @Autowired
-    private EventBus eventBus;
 
     @Bean
     @ConditionalOnMissingBean
@@ -161,14 +161,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public EntityInterceptorHolder entityInterceptorHolder() {
         return EntityInterceptorHolder.getInstance();
-    }
-
-    /**
-     * @return the singleton instance of the {@link CacheManagerHolder}
-     */
-    @Bean
-    public CacheManagerHolder cacheManagerHolder() {
-        return CacheManagerHolder.getInstance();
     }
 
     /**
@@ -273,9 +265,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public TenantStatsManagement tenantStatsManagement() {
-        final TenantStatsManagement mgmt = new JpaTenantStatsManagement();
-        eventBus.register(mgmt);
-        return mgmt;
+        return new JpaTenantStatsManagement();
     }
 
     /**
@@ -401,6 +391,32 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * {@link EventEntityManagerHolder} bean.
+     * 
+     * @return a new {@link EventEntityManagerHolder}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EventEntityManagerHolder eventEntityManagerHolder() {
+        return EventEntityManagerHolder.getInstance();
+    }
+
+    /**
+     * {@link EventEntityManager} bean.
+     * 
+     * @param aware
+     *            the tenant aware
+     * @param entityManager
+     *            the entitymanager
+     * @return a new {@link EventEntityManager}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EventEntityManager eventEntityManager(final TenantAware aware, final EntityManager entityManager) {
+        return new JpaEventEntityManager(aware, entityManager);
+    }
+
+    /**
      * {@link AutoAssignChecker} bean.
      *
      * @param targetFilterQueryManagement
@@ -415,9 +431,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignChecker autoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement,
-            TargetManagement targetManagement, DeploymentManagement deploymentManagement,
-            PlatformTransactionManager transactionManager) {
+    public AutoAssignChecker autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
@@ -437,8 +453,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignScheduler autoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
-            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+    public AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware,
+            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final AutoAssignChecker autoAssignChecker) {
         return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
+
 }

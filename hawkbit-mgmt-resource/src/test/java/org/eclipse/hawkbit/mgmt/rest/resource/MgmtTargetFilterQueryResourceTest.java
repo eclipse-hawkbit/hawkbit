@@ -8,36 +8,29 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.model.*;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -50,8 +43,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Management API")
 @Stories("Target Filter Query Resource")
 public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTest {
-
-    private static final String TARGET_DESCRIPTION_TEST = "created in test";
 
     private static final String JSON_PATH_ROOT = "$";
 
@@ -75,17 +66,16 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
     private static final String JSON_PATH_QUERY = JSON_PATH_ROOT + JSON_PATH_FIELD_QUERY;
     private static final String JSON_PATH_AUTO_ASSIGN_DS = JSON_PATH_ROOT + JSON_PATH_FIELD_AUTO_ASSIGN_DS;
 
-
     @Test
     @Description("Ensures that deletion is executed if permitted.")
     public void deleteTargetFilterQueryReturnsOK() throws Exception {
         final String filterName = "filter_01";
-        TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name=test_01");
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name=test_01");
 
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
 
-        TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId());
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId());
         assertThat(tfq).isNull();
     }
 
@@ -116,7 +106,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         final String body = new JSONObject().put("query", filterQuery2).toString();
 
         // prepare
-        TargetFilterQuery tfq = createSingleTargetFilterQuery(filterName, filterQuery);
+        final TargetFilterQuery tfq = createSingleTargetFilterQuery(filterName, filterQuery);
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -124,7 +114,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
                 .andExpect(jsonPath("$.query", equalTo(filterQuery2)))
                 .andExpect(jsonPath("$.name", equalTo(filterName)));
 
-        TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery2);
         assertThat(tfqCheck.getName()).isEqualTo(filterName);
     }
@@ -149,11 +139,10 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
                 .andExpect(jsonPath("$.query", equalTo(filterQuery)))
                 .andExpect(jsonPath("$.name", equalTo(filterName2)));
 
-        TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
     }
-
 
     @Test
     @Description("Ensures that request returns list of filters in defined format.")
@@ -250,7 +239,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         final String knownQuery = "name=test01";
         final String knownName = "someName";
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        final String hrefPrefix = "http://localhost"+MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING+"/" + tfq.getId();
+        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+                + tfq.getId();
         // test
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -302,13 +292,15 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"+tfq.getId()+"/autoAssignDS")
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet()).isEqualTo(set);
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
+                .isEqualTo(set);
 
-        final String hrefPrefix = "http://localhost"+MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING+"/" + tfq.getId();
+        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+                + tfq.getId();
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -336,19 +328,17 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
                 .isEqualTo(set);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"+tfq.getId()+"/autoAssignDS"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
+                .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"+tfq.getId()+"/autoAssignDS"))
+        mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
         assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
                 .isNull();
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"+tfq.getId()+"/autoAssignDS"))
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
-
 
     }
 

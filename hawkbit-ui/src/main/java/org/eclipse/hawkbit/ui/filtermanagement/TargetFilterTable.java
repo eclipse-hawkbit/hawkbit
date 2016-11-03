@@ -78,9 +78,6 @@ public class TargetFilterTable extends Table {
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
     private DistributionSetSelectWindow dsSelectWindow;
 
     private Container container;

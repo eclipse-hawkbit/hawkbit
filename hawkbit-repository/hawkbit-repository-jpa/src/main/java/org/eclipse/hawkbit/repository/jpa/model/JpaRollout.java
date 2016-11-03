@@ -28,12 +28,9 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -86,12 +83,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "total_targets")
     private long totalTargets;
 
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
-    private int rolloutGroupsTotal;
-
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
+    @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
 
     @Transient
@@ -172,14 +164,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         this.totalTargets = totalTargets;
     }
 
-    public int getRolloutGroupsTotal() {
-        return rolloutGroupsTotal;
-    }
-
-    public void setRolloutGroupsTotal(final int rolloutGroupsTotal) {
-        this.rolloutGroupsTotal = rolloutGroupsTotal;
-    }
-
     @Override
     public int getRolloutGroupsCreated() {
         return rolloutGroupsCreated;
@@ -215,8 +199,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus()
-                .post(new RolloutPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
     }
 

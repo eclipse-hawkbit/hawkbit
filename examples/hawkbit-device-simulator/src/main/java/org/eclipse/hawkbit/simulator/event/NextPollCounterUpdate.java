@@ -13,10 +13,7 @@ import java.util.Collection;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 
 /**
- * Event description which indicates an poll time update.
- * 
- * @author Michael Hirsch
- *
+ * Event description which indicates a poll time update.
  */
 public class NextPollCounterUpdate {
 

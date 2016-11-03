@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.system;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,13 +23,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSystemTenantConfigurationValueRequest {
 
     @JsonProperty(required = true)
-    private Object value;
+    private Serializable value;
 
     /**
      * 
      * @return the value of the MgmtSystemTenantConfigurationValueRequest
      */
-    public Object getValue() {
+    public Serializable getValue() {
         return value;
     }
 
@@ -37,7 +39,10 @@ public class MgmtSystemTenantConfigurationValueRequest {
      * @param value
      */
     public void setValue(final Object value) {
-        this.value = value;
+        if (!(value instanceof Serializable)) {
+            throw new IllegalArgumentException("The value muste be a instance of " + Serializable.class.getName());
+        }
+        this.value = (Serializable) value;
     }
 
 }

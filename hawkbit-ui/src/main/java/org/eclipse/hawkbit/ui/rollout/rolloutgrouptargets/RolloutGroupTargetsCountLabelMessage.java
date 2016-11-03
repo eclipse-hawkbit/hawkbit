@@ -66,7 +66,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
     }
 
     /**
-     * Event Listener to show the message count.
+     * TenantAwareEvent Listener to show the message count.
      * 
      * @param event
      */

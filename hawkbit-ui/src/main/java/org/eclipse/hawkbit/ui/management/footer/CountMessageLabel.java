@@ -80,7 +80,7 @@ public class CountMessageLabel extends Label {
     }
 
     /**
-     * Event Listener to show the message count.
+     * TenantAwareEvent Listener to show the message count.
      *
      * @param event
      */
@@ -102,7 +102,7 @@ public class CountMessageLabel extends Label {
     }
 
     /**
-     * Event Listener for Pinning Distribution.
+     * TenantAwareEvent Listener for Pinning Distribution.
      *
      * @param event
      */

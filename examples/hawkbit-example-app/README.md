@@ -33,3 +33,45 @@ The Management API can be accessed via http://localhost:8080/rest/v1
  - **manifest-simple.yml** for a standalone hawkBit installation with embedded H2.
  - **manifest.yml**  for a standalone hawkBit installation with embedded H2 and RabbitMQ service binding for DMF integration (note: this manifest is used for the sandbox above).
 - Run ```cf push``` against you cloud foundry environment.
+
+# Enable Clustering (experimental)
+
+Clustering in hawkBit is based on _Spring Cloud Bus_. It is not enabled in the example app by default.
+
+Add to your `application.properties` :
+
+```
+spring.cloud.bus.enabled=true
+```
+
+Add to your `pom.xml` :
+
+```
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+</dependency>
+```
+
+Optional as well is the addition of [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
+
+
+Add to your `application.properties` :
+
+```
+spring.cloud.stream.bindings.springCloudBusInput.content-type=application/binary+protostuff
+spring.cloud.stream.bindings.springCloudBusOutput.content-type=application/binary+protostuff
+```
+
+Add to your `pom.xml` :
+
+```
+<dependency>
+	<groupId>io.protostuff</groupId>
+	<artifactId>protostuff-core</artifactId>
+</dependency>
+<dependency>
+	<groupId>io.protostuff</groupId>
+	<artifactId>protostuff-runtime</artifactId>
+</dependency>
+```

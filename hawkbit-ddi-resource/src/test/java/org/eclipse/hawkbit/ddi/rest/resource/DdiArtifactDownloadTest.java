@@ -30,7 +30,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -41,15 +42,15 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HttpHeaders;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -61,6 +62,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
+@SpringApplicationConfiguration(classes = DownloadTestConfiguration.class)
 public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMongoDB {
 
     private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
@@ -69,9 +71,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);
     }
 
-    private volatile int downLoadProgress = 0;
-    private volatile long shippedBytes = 0;
-    private volatile long shippedBytesTotal = 0;
+    private volatile static int downLoadProgress = 0;
+    private volatile static long shippedBytes = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -79,9 +80,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void setup() {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-
-    @Autowired
-    private EventBus eventBus;
 
     @Test
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
@@ -252,8 +250,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
-        eventBus.register(this);
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
@@ -293,7 +289,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -332,8 +328,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameFailsIfNotAuthenticated() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
-        eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -357,7 +351,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .andExpect(status().isNotFound());
 
         assertThat(downLoadProgress).isEqualTo(1);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(0L);
+        assertThat(shippedBytes).isEqualTo(0L);
     }
 
     @Test
@@ -366,8 +360,6 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        shippedBytesTotal = 0;
-        eventBus.register(this);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -414,7 +406,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(shippedBytesTotal).isEqualTo(ARTIFACT_SIZE);
+        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
     }
 
     @Test
@@ -573,11 +565,23 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 .isEqualTo(new String(artifact.getMd5Hash() + "  file1.tar.bz2").getBytes(Charsets.US_ASCII));
     }
 
-    @Subscribe
-    public void listen(final DownloadProgressEvent event) {
-        downLoadProgress++;
-        shippedBytes += event.getShippedBytesSinceLast();
-        shippedBytesTotal = event.getShippedBytesOverall();
+    public static class DownloadTestConfiguration {
+
+        @Bean
+        public Listener cancelEventHandlerStubBean() {
+            return new Listener();
+        }
 
     }
+
+    private static class Listener {
+
+        @EventListener(classes = DownloadProgressEvent.class)
+        public void listen(final DownloadProgressEvent event) {
+            downLoadProgress++;
+            shippedBytes += event.getShippedBytesSinceLast();
+
+        }
+    }
+
 }

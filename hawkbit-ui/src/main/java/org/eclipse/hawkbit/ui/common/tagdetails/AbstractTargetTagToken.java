@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
@@ -42,7 +42,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
-        container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntity().getName()))
+        container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
                 .forEach(this::removeTagFromCombo);
     }
 

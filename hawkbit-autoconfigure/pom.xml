@@ -26,13 +26,7 @@
          <version>${project.version}</version>
          <optional>true</optional>
       </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-cache-redis</artifactId>
-         <version>${project.version}</version>
-         <optional>true</optional>
-      </dependency>
-      <dependency>
+       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-dmf-amqp</artifactId>
          <version>${project.version}</version>
@@ -81,6 +75,16 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-configuration-processor</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-core</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>io.protostuff</groupId>
+         <artifactId>protostuff-runtime</artifactId>
          <optional>true</optional>
       </dependency>
    </dependencies>

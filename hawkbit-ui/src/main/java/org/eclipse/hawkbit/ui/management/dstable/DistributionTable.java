@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -127,8 +127,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shouldRefreshDs = false;
-        for (final DistributionDeletedEvent deletedEvent : eventContainer.getEvents()) {
-            final Long distributionSetId = deletedEvent.getDistributionSetId();
+        for (final DistributionSetDeletedEvent deletedEvent : eventContainer.getEvents()) {
+            final Long distributionSetId = deletedEvent.getEntityId();
             final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
             if (visibleItemIds.contains(targetIdName)) {
                 dsContainer.removeItem(targetIdName);

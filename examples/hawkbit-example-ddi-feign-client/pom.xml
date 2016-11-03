@@ -41,11 +41,11 @@
          <artifactId>guava</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.netflix.feign</groupId>
+         <groupId>io.github.openfeign</groupId>
          <artifactId>feign-core</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.netflix.feign</groupId>
+         <groupId>io.github.openfeign</groupId>
          <artifactId>feign-jackson</artifactId>
       </dependency>
       <dependency>

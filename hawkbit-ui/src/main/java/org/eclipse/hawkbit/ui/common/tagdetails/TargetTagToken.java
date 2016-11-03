@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.push.TargetTagAssigmentResultEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -69,6 +68,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         final Set<String> targetList = new HashSet<>();
         targetList.add(selectedEntity.getControllerId());
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
+        processTargetTagAssigmentResult(result);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
@@ -105,17 +105,17 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEventContainer holder) {
-        holder.getEvents().stream().map(event -> event.getAssigmentResult()).forEach(assignmentResult -> {
-            final TargetTag targetTag = assignmentResult.getTargetTag();
-            if (isAssign(assignmentResult)) {
-                addNewToken(targetTag.getId());
-            } else if (isUnassign(assignmentResult)) {
-                removeTokenItem(targetTag.getId(), targetTag.getName());
-            }
-        });
-
+    /**
+     * 
+     * @param assignmentResult
+     */
+    public void processTargetTagAssigmentResult(final TargetTagAssignmentResult assignmentResult) {
+        final TargetTag targetTag = assignmentResult.getTargetTag();
+        if (isAssign(assignmentResult)) {
+            addNewToken(targetTag.getId());
+        } else if (isUnassign(assignmentResult)) {
+            removeTokenItem(targetTag.getId(), targetTag.getName());
+        }
     }
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {

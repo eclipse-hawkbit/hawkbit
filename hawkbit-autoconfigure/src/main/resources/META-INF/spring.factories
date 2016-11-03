@@ -7,9 +7,8 @@ org.eclipse.hawkbit.autoconfigure.url.PropertyHostnameResolverAutoConfiguration,
 org.eclipse.hawkbit.autoconfigure.web.WebMvcAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.cache.CacheAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.cache.DownloadIdCacheAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.eventbus.EventBusAutoConfiguration,\
+org.eclipse.hawkbit.autoconfigure.event.EventPublisherAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.cache.RedisAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.amqp.AmqpAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementConfiguration

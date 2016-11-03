@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
-import org.eclipse.hawkbit.cache.CacheConstants;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +20,6 @@ import org.springframework.context.annotation.Configuration;
  * A configuration for configuring a cache for the download id's.
  *
  * This is done by providing a named cache.
- *
- *
- *
  */
 @Configuration
 public class DownloadIdCacheAutoConfiguration {
@@ -31,16 +28,18 @@ public class DownloadIdCacheAutoConfiguration {
     private CacheManager cacheManager;
 
     /**
-     * Bean for the download id cache.
+     * Bean for the downloadId cache that returns the DefaultDownloadIdCache.
+     * The DefaultDownloadIdCache cannot be used within a cluster because the
+     * downloadId cache is not shared among notes. This means, a downloadId
+     * which is stored on note A for downloading an artifact can only be used
+     * for downloading the artifact form node A.
      * 
-     * @return the cache
+     * @return the DefaultDownloadIdCache
      */
-    @Bean(name = CacheConstants.DOWNLOAD_ID_CACHE)
-    public Cache downloadIdCache() {
-        if (cacheManager instanceof TenancyCacheManager) {
-            return ((TenancyCacheManager) cacheManager).getDirectCache(CacheConstants.DOWNLOAD_ID_CACHE);
-        }
-        return cacheManager.getCache(CacheConstants.DOWNLOAD_ID_CACHE);
+    @Bean
+    @ConditionalOnMissingBean
+    public DownloadIdCache downloadIdCache() {
+        return new DefaultDownloadIdCache(cacheManager);
     }
 
 }

@@ -12,9 +12,6 @@ import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 
 /**
  * Event description which indicates the initialization of an update.
- * 
- * @author Michael Hirsch
- *
  */
 public class InitUpdate {
 

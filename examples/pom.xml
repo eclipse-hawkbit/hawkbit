@@ -20,7 +20,7 @@
    <artifactId>hawkbit-examples-parent</artifactId>
    <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
-
+   
    <distributionManagement>
       <repository>
          <id>repo.eclipse.org</id>
@@ -42,22 +42,4 @@
       <module>hawkbit-example-mgmt-feign-client</module>
       <module>hawkbit-example-mgmt-simulator</module>
    </modules>
-
-   <dependencyManagement>
-      <dependencies>
-         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-dependencies</artifactId>
-            <version>Brixton.SR5</version>
-            <type>pom</type>
-            <scope>import</scope>
-         </dependency>
-         <dependency>
-            <groupId>com.netflix.feign</groupId>
-            <artifactId>feign-jackson</artifactId>
-            <version>8.16.2</version>
-         </dependency>
-      </dependencies>
-   </dependencyManagement>
-
 </project>

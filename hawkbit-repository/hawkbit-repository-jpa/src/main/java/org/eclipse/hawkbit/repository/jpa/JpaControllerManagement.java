@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +23,10 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -41,7 +40,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -49,10 +47,13 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -87,9 +88,6 @@ public class JpaControllerManagement implements ControllerManagement {
     private TargetInfoRepository targetInfoRepository;
 
     @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
-
-    @Autowired
     private ActionStatusRepository actionStatusRepository;
 
     @Autowired
@@ -105,10 +103,16 @@ public class JpaControllerManagement implements ControllerManagement {
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
-    private CacheWriteNotify cacheWriteNotify;
+    private TenantAware tenantAware;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public String getPollingTime() {
@@ -176,12 +180,6 @@ public class JpaControllerManagement implements ControllerManagement {
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
         return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
-    }
-
-    @Override
-    public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return Collections
-                .unmodifiableList(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
     }
 
     @Override
@@ -480,7 +478,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
-        cacheWriteNotify.downloadProgress(statusId, requestedBytes, shippedBytesSinceLast, shippedBytesOverall);
+        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
+                applicationContext.getId()));
     }
 
     @Override

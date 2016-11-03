@@ -12,9 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,14 +34,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.eventbus.event.AbstractPropertyChangeEvent.PropertyChange;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -52,8 +49,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.eclipse.persistence.queries.UpdateObjectQuery;
+import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
+import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
@@ -347,27 +349,40 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new DistributionCreatedEvent(this));
+        publishEventWithEventPublisher(
+                new DistributionSetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
 
-        final Map<String, PropertyChange> changeSet = EntityPropertyChangeHelper.getChangeSet(descriptorEvent);
-        EventBusHolder.getInstance().getEventBus().post(new DistributionSetUpdateEvent(this));
+        publishEventWithEventPublisher(
+                new DistributionSetUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
-        if (changeSet.containsKey(DELETED_PROPERTY)) {
-            final Boolean newDeleted = (Boolean) changeSet.get(DELETED_PROPERTY).getNewValue();
-            if (newDeleted) {
-                EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
-            }
+        if (isSoftDeleted(descriptorEvent)) {
+            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(),
+                    EventPublisherHolder.getInstance().getApplicationId()));
         }
-
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new DistributionDeletedEvent(getTenant(), getId()));
+        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(),
+                EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    private static void publishEventWithEventPublisher(final ApplicationEvent event) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
+    }
+
+    private static boolean isSoftDeleted(final DescriptorEvent event) {
+        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
+        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
+                .filter(record -> record instanceof DirectToFieldChangeRecord)
+                .map(record -> (DirectToFieldChangeRecord) record).collect(Collectors.toList());
+
+        return changes.stream().filter(record -> DELETED_PROPERTY.equals(record.getAttribute())
+                && Boolean.parseBoolean(record.getNewValue().toString())).count() > 0;
     }
 
 }

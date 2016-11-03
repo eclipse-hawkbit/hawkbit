@@ -24,28 +24,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 public class WebMvcAutoConfiguration extends WebMvcConfigurerAdapter {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
-     * #configurePathMatch
-     * (org.springframework.web.servlet.config.annotation.PathMatchConfigurer)
-     */
     @Override
     public void configurePathMatch(final PathMatchConfigurer configurer) {
         configurer.setUseSuffixPatternMatch(false);
         configurer.setUseRegisteredSuffixPatternMatch(false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.web.servlet.config.annotation.
-     * WebMvcConfigurerAdapter# configureContentNegotiation
-     * (org.springframework.web.servlet.config.annotation.
-     * ContentNegotiationConfigurer)
-     */
     @Override
     public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
         configurer.favorPathExtension(false);

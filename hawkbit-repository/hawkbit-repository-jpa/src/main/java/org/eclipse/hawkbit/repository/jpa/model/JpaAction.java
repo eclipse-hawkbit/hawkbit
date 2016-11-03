@@ -30,16 +30,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EntityPropertyChangeHelper;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
@@ -187,13 +186,14 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus().post(new ActionCreatedEvent(this));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventBusHolder.getInstance().getEventBus()
-                .post(new ActionPropertyChangeEvent(this, EntityPropertyChangeHelper.getChangeSet(descriptorEvent)));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

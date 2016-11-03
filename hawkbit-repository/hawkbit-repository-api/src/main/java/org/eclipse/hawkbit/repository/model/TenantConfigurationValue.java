@@ -8,14 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serializable;
+
 /**
  * represents a tenant configuration value including some meta data
  * 
  * @param <T>
  *            type of the configuration value
  */
-public final class TenantConfigurationValue<T> {
+public final class TenantConfigurationValue<T extends Serializable> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private T value;
     private Long lastModifiedAt;
     private String lastModifiedBy;
@@ -87,7 +90,7 @@ public final class TenantConfigurationValue<T> {
      *            the key type
      * @return the tenant configuration value builder
      */
-    public static <K> TenantConfigurationValueBuilder<K> builder() {
+    public static <K extends Serializable> TenantConfigurationValueBuilder<K> builder() {
 
         return new TenantConfigurationValueBuilder<>();
     }
@@ -98,7 +101,7 @@ public final class TenantConfigurationValue<T> {
      * @param <T>
      *            type of the configuration value
      */
-    public static class TenantConfigurationValueBuilder<T> {
+    public static class TenantConfigurationValueBuilder<T extends Serializable> {
 
         private final TenantConfigurationValue<T> configuration = new TenantConfigurationValue<>();
 

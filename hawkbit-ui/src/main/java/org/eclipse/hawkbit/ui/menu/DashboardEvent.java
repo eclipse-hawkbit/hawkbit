@@ -14,7 +14,7 @@
 package org.eclipse.hawkbit.ui.menu;
 
 /*
- * Event bus events used in Dashboard are listed here as inner classes.
+ * TenantAwareEvent bus events used in Dashboard are listed here as inner classes.
  */
 /**
  * Containing all dashboard events.
@@ -48,7 +48,7 @@ public final class DashboardEvent {
     }
 
     /**
-     * Event to indicate that the current shown view has been changed.
+     * TenantAwareEvent to indicate that the current shown view has been changed.
      * 
      *
      *

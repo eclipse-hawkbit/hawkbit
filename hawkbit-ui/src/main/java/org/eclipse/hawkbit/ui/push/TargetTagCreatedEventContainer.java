@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 
 /**
  * EventHolder for {@link TargetTagCreatedEvent}s.

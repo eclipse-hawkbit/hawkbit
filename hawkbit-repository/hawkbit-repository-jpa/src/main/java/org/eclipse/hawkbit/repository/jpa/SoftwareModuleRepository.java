@@ -89,13 +89,13 @@ public interface SoftwareModuleRepository
     /**
      * 
      * 
-     * @param set
+     * @param setId
      *            to search for
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}
      */
     @EntityGraph(value = "SoftwareModule.artifacts", type = EntityGraphType.LOAD)
-    List<JpaSoftwareModule> findByAssignedTo(JpaDistributionSet set);
+    List<JpaSoftwareModule> findByAssignedToId(Long setId);
 
     /**
      * @param pageable

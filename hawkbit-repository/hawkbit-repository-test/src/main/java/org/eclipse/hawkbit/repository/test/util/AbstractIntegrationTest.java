@@ -44,6 +44,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
@@ -51,6 +53,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
@@ -68,7 +71,7 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 @WebAppConfiguration
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringApplicationConfiguration(classes = { TestConfiguration.class })
+@SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
@@ -79,6 +82,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected static Logger LOG = null;
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
+
+    /**
+     * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
+     * version 4.3.2 @see https://jira.spring.io/browse/SPR-14577
+     */
+    protected static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -161,6 +170,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected MongodExecutable mongodExecutable;
+
+    @Autowired
+    protected ServiceMatcher serviceMatcher;
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();

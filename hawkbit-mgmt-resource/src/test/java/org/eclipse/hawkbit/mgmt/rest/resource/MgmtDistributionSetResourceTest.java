@@ -438,7 +438,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // perform request
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(set.getId().intValue())))
@@ -469,7 +469,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // perform request
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$._links.self.href",
                         equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
                 .andExpect(jsonPath("$.id", equalTo(set.getId().intValue())))
@@ -522,7 +522,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .perform(post("/rest/v1/distributionsets/").content(JsonBuilder.distributionSets(sets))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]name", equalTo(one.getName())))
                 .andExpect(jsonPath("[0]description", equalTo(one.getDescription())))
                 .andExpect(jsonPath("[0]type", equalTo(standardDsType.getKey())))
@@ -757,7 +757,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId())
                 .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
@@ -786,7 +786,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         mvc.perform(put("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey)
                 .contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
         final DistributionSetMetadata assertDS = distributionSetManagement.findOne(testDS, knownKey);

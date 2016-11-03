@@ -120,7 +120,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     }
 
     /**
-     * Event handler for button clicks.
+     * TenantAwareEvent handler for button clicks.
      * 
      * @param event
      *            the click event.

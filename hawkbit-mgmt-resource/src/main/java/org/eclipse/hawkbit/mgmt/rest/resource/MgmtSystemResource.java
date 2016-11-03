@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
@@ -116,11 +117,9 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
 
         final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
 
-        final TenantConfigurationValue<Object> updatedValue = tenantConfigurationManagement
-
+        final TenantConfigurationValue<? extends Serializable> updatedValue = tenantConfigurationManagement
                 .addOrUpdateConfiguration(configKey, configurationValueRest.getValue());
         return new ResponseEntity<>(MgmtSystemMapper.toResponse(keyName, updatedValue), HttpStatus.OK);
     }
 
 }
-

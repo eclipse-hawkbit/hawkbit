@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
-import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleAssignmentDiscardEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -366,22 +365,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final SoftwareModuleAssignmentDiscardEvent softwareModuleAssignmentDiscardEvent) {
-        if (softwareModuleAssignmentDiscardEvent.getDistributionSetIdName() != null) {
-            UI.getCurrent().access(() -> {
-                final DistributionSetIdName distIdName = softwareModuleAssignmentDiscardEvent
-                        .getDistributionSetIdName();
-                if (distIdName.getId().equals(getSelectedBaseEntityId())
-                        && distIdName.getName().equals(getSelectedBaseEntity().getName())) {
-                    setSelectedBaseEntity(
-                            distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
-                    populateModule();
-                }
-            });
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
@@ -420,13 +403,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
-    }
-
-    private boolean isDistributionSetSelected(final DistributionSet ds) {
-        final DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get() : null;
-        return ds != null && lastselectedDistDS != null && lastselectedDistDS.getName().equals(ds.getName())
-                && lastselectedDistDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override

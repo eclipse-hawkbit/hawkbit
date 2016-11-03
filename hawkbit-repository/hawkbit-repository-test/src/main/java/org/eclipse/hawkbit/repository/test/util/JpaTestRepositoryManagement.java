@@ -15,20 +15,34 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JpaTestRepositoryManagement implements TestRepositoryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
-    @Autowired
-    private TenantAwareCacheManager cacheManager;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final TenantAwareCacheManager cacheManager;
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemSecurityContext systemSecurityContext;
+
+    private final SystemManagement systemManagement;
+
+    /**
+     * Constructor.
+     * 
+     * @param cacheManager
+     *            the cachemanager
+     * @param systemSecurityContext
+     *            the systemSecurityContext
+     * @param systemManagement
+     *            the systemManagement
+     */
+    public JpaTestRepositoryManagement(final TenantAwareCacheManager cacheManager,
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {
+        this.cacheManager = cacheManager;
+        this.systemSecurityContext = systemSecurityContext;
+        this.systemManagement = systemManagement;
+    }
 
     @Override
     @Transactional

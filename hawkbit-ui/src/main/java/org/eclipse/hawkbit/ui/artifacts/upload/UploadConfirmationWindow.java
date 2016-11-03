@@ -94,7 +94,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private final I18N i18n;
 
-    private Window uploadConfrimationWindow;
+    private Window window;
 
     private Button uploadBtn;
 
@@ -133,7 +133,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         buildLayout();
     }
 
-    private Boolean checkIfArtifactDetailsDispalyed(final Long bSoftwareModuleId) {
+    private Boolean checkIfArtifactDetailsDisplayed(final Long bSoftwareModuleId) {
         if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()
                 && artifactUploadState.getSelectedBaseSoftwareModule().get().getId().equals(bSoftwareModuleId)) {
             return true;
@@ -503,15 +503,15 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         uploadArtifactDetails.addComponent(footer);
         uploadArtifactDetails.setComponentAlignment(footer, Alignment.MIDDLE_CENTER);
 
-        uploadConfrimationWindow = new Window();
-        uploadConfrimationWindow.setContent(uploadArtifactDetails);
-        uploadConfrimationWindow.setResizable(Boolean.FALSE);
-        uploadConfrimationWindow.setClosable(Boolean.TRUE);
-        uploadConfrimationWindow.setDraggable(Boolean.TRUE);
-        uploadConfrimationWindow.setModal(true);
-        uploadConfrimationWindow.addCloseListener(event -> onPopupClose());
-        uploadConfrimationWindow.setCaption(i18n.get("header.caption.upload.details"));
-        uploadConfrimationWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+        window = new Window();
+        window.setContent(uploadArtifactDetails);
+        window.setResizable(Boolean.FALSE);
+        window.setClosable(Boolean.TRUE);
+        window.setDraggable(Boolean.TRUE);
+        window.setModal(true);
+        window.addCloseListener(event -> onPopupClose());
+        window.setCaption(i18n.get("header.caption.upload.details"));
+        window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
     }
 
     private void onPopupClose() {
@@ -531,16 +531,16 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     public Window getUploadConfrimationWindow() {
-        return uploadConfrimationWindow;
+        return window;
     }
 
     @Override
     public void buttonClick(final ClickEvent event) {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
-            uploadConfrimationWindow.close();
+            window.close();
         } else if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
             uploadLayout.clearUploadedFileDetails();
-            uploadConfrimationWindow.close();
+            window.close();
         } else if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
         } else if (event.getComponent().getId().startsWith(UIComponentIdProvider.UPLOAD_DELETE_ICON)) {
@@ -563,7 +563,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             uploadLayout.getFileSelected().remove(customFile);
             uploadLayout.updateUploadCounts();
             if (uploadDetailsTable.getItemIds().isEmpty()) {
-                uploadConfrimationWindow.close();
+                window.close();
                 uploadLayout.clearUploadedFileDetails();
             }
 
@@ -593,14 +593,14 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                         createArtifact(itemId, customFile.getFilePath(), artifactManagement, bSoftwareModule);
                     }
                 }
-                refreshArtifactDetailsLayout = checkIfArtifactDetailsDispalyed(bSoftwareModule.getId());
+                refreshArtifactDetailsLayout = checkIfArtifactDetailsDisplayed(bSoftwareModule.getId());
             }
 
             if (refreshArtifactDetailsLayout) {
                 uploadLayout.refreshArtifactDetailsLayout(artifactUploadState.getSelectedBaseSoftwareModule().get());
             }
             uploadLayout.clearFileList();
-            uploadConfrimationWindow.close();
+            window.close();
             // call upload result window
             currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n);
             UI.getCurrent().addWindow(currentUploadResultWindow.getUploadResultsWindow());

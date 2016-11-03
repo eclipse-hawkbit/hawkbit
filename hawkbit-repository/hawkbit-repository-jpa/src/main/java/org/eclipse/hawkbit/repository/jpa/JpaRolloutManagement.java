@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -54,6 +54,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -111,13 +112,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     private ApplicationContext context;
 
     @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
     private NoCountPagingRepository criteriaNoCountDao;
 
     @Autowired
     private PlatformTransactionManager txManager;
-
-    @Autowired
-    private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
@@ -249,13 +250,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
         final int groupSize = (int) Math.ceil((double) totalCount / (double) amountOfGroups);
-        // validate if the amount of groups that will be created are the amount
-        // of groups that the client what's to have created.
-        int amountGroupValidated = amountOfGroups;
-        final int amountGroupCreation = (int) (Math.ceil((double) totalCount / (double) groupSize));
-        if (amountGroupCreation == (amountOfGroups - 1)) {
-            amountGroupValidated--;
-        }
         RolloutGroup lastSavedGroup = null;
         while (pageIndex < totalCount) {
             groupIndex++;
@@ -282,11 +276,11 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             targetGroup
                     .forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target)));
-            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
-                    amountGroupValidated, groupIndex);
+            eventPublisher.publishEvent(new RolloutGroupCreatedEvent(group, context.getId()));
             pageIndex += groupSize;
         }
 
+        savedRollout.setRolloutGroupsCreated(groupIndex);
         savedRollout.setStatus(RolloutStatus.READY);
         return rolloutRepository.save(savedRollout);
     }
