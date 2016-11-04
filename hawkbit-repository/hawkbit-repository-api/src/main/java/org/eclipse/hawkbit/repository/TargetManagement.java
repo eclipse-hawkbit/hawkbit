@@ -269,7 +269,7 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
+     * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
@@ -284,7 +284,7 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
+     * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery);
@@ -299,7 +299,7 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param targetFilterQuery
      *            RSQL filter
-     * @return the found {@link TargetIdName}s
+     * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
@@ -313,11 +313,24 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param targetFilterQuery
      *            RSQL filter
-     * @return the found {@link TargetIdName}s
+     * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(List<RolloutGroup> groups,
             @NotNull String targetFilterQuery);
+
+    /**
+     * Finds all targets of the provided {@link RolloutGroup} that have no
+     * Action for the RolloutGroup.
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param group
+     *            the {@link RolloutGroup}
+     * @return the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findAllTargetsInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, @NotNull RolloutGroup group);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet} without

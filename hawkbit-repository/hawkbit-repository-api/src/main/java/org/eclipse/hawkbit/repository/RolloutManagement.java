@@ -78,6 +78,18 @@ public interface RolloutManagement {
     void checkCreatingRollouts(long delayBetweenChecks);
 
     /**
+     * Checking Rollouts that are currently being started with asynchronous
+     * creation of actions to the targets of a group.
+     *
+     * @param delayBetweenChecks
+     *            the time in milliseconds of the delay between the further and
+     *            this check. This check is only applied if the last check is
+     *            less than (lastcheck-delay).
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void checkStartingRollouts(long delayBetweenChecks);
+
+    /**
      * Counts all {@link Rollout}s in the repository.
      *
      * @return number of roll outs

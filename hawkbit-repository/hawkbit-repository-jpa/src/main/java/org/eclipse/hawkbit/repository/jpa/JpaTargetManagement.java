@@ -599,6 +599,14 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Page<Target> findAllTargetsInRolloutGroupWithoutAction(@NotNull final Pageable pageRequest,
+            @NotNull final RolloutGroup group) {
+        return findTargetsBySpec(
+                (root, cq, cb) -> TargetSpecifications.hasNoActionInRolloutGroup(group).toPredicate(root, cq, cb),
+                pageRequest);
+    }
+
+    @Override
     public Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(final List<RolloutGroup> groups,
                                                                         @NotNull final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,

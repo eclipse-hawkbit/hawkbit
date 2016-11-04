@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,12 +30,6 @@ final class RolloutHelper {
         if (conditions.getSuccessAction() == null) {
             throw new RolloutVerificationException("Rollout group is missing success action");
         }
-        if (conditions.getErrorCondition() == null) {
-            throw new RolloutVerificationException("Rollout group is missing error condition");
-        }
-        if (conditions.getErrorAction() == null) {
-            throw new RolloutVerificationException("Rollout group is missing error action");
-        }
     }
 
     static RolloutGroup verifyRolloutGroupHasConditions(final RolloutGroup group) {
@@ -43,12 +38,6 @@ final class RolloutHelper {
         }
         if (group.getSuccessAction() == null) {
             throw new RolloutVerificationException("Rollout group is missing success action");
-        }
-        if (group.getErrorCondition() == null) {
-            throw new RolloutVerificationException("Rollout group is missing error condition");
-        }
-        if (group.getErrorAction() == null) {
-            throw new RolloutVerificationException("Rollout group is missing error action");
         }
         return group;
     }
@@ -112,11 +101,23 @@ final class RolloutHelper {
         }
     }
 
-    static List<RolloutGroup> getGroupsByStatus(final Rollout rollout, final RolloutGroup.RolloutGroupStatus status) {
-        return rollout.getRolloutGroups().stream().filter(g -> g.getStatus().equals(status))
+    static List<RolloutGroup> getGroupsByStatusIncludingGroup(final Rollout rollout,
+            final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
+        return rollout.getRolloutGroups().stream().filter(g -> g.getStatus().equals(status) || g.equals(group))
                 .collect(Collectors.toList());
     }
 
+    static List<RolloutGroup> getOrderedGroups(final Rollout rollout) {
+        return rollout.getRolloutGroups().stream().sorted((o1, o2) -> {
+            if(o1.getId()<o2.getId()) {
+                return -1;
+            }
+            if(o1.getId()>o2.getId()) {
+                return 1;
+            }
+            return 0;
+        }).collect(Collectors.toList());
+    }
 
     /**
      * Creates an RSQL expression that matches all targets in the provided groups.

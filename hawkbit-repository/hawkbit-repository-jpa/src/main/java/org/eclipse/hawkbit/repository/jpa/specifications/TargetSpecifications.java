@@ -262,19 +262,40 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are not in the
-     * given {@link Rollout}
+     * given {@link RolloutGroup}s
      *
      * @param groups
-     *            the {@link Rollout}
+     *            the {@link RolloutGroup}s
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isNotInRolloutGroups(final List<RolloutGroup> groups) {
         return (targetRoot, query, cb) -> {
-            Subquery<RolloutTargetGroup> sq = query.subquery(RolloutTargetGroup.class);
-            Root<RolloutTargetGroup> sqRoot = sq.from(RolloutTargetGroup.class);
-            Predicate inRolloutGroups = sqRoot.get(RolloutTargetGroup_.rolloutGroup).in(groups);
-            sq.where(cb.and(cb.equal(sqRoot.get(RolloutTargetGroup_.target), targetRoot), inRolloutGroups));
-            return cb.not(cb.exists(sq));
+            ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot.join(JpaTarget_.rolloutTargetGroup,
+                    JoinType.LEFT);
+            Predicate inRolloutGroups = rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).in(groups);
+            rolloutTargetJoin.on(inRolloutGroups);
+            return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that have no Action
+     * of the {@link RolloutGroup}.
+     *
+     * @param group
+     *            the {@link RolloutGroup}
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNoActionInRolloutGroup(final RolloutGroup group) {
+        return (targetRoot, query, cb) -> {
+            ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot.join(JpaTarget_.rolloutTargetGroup,
+                    JoinType.INNER);
+            rolloutTargetJoin.on(cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), group));
+
+            final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup), group));
+
+            return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
     }
 
