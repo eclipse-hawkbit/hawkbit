@@ -313,8 +313,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Modifying
     public void fillRolloutGroupsWithTargets(final Rollout rollout) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
+        final JpaRollout jpaRollout = (JpaRollout) rollout;
 
-        List<RolloutGroup> rolloutGroups = rollout.getRolloutGroups();
+        List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(jpaRollout);
         int readyGroups = 0;
         int totalTargets = 0;
         for (RolloutGroup group : rolloutGroups) {
@@ -333,7 +334,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         // When all groups are ready the rollout status can be changed to be ready, too.
         if(readyGroups == rolloutGroups.size()) {
-            final JpaRollout jpaRollout = (JpaRollout) rollout;
             jpaRollout.setStatus(RolloutStatus.READY);
             jpaRollout.setTotalTargets(totalTargets);
             rolloutRepository.save(jpaRollout);
@@ -354,6 +354,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatus(rollout, RolloutGroupStatus.READY);
+        readyGroups.add(group);
 
         final long targetsInGroupFilter = targetManagement
                 .countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter);
@@ -396,6 +397,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         return new TransactionTemplate(txManager, def).execute(status -> {
 
             final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatus(rollout, RolloutGroupStatus.READY);
+            readyGroups.add(group);
 
             Page<Target> targets = targetManagement.findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
                     readyGroups, targetFilter);
