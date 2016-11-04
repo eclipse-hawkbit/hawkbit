@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  {% include headsection.html %}
+  <body>
+    {% include header.html %}
+    <div id="header_wrapper" class="container">
+      <div class="nav-bar col-md-3">
+        <nav class="navmenu navmenu-default"  role="navigation">
+          <ul class="nav navmenu-nav">
+            {% include submenu.html level=site.data.doclinks %}
+          </ul>
+      </nav>
+    </div>
+
+
+    <div id="page" class="col-md-9">
+    	<div class="inner">
+        <div id="maincontainer">
+          <section id="top" class="documentation-section">
+            <div class="row">
+					     <div class="span8 offset3">
+                 {{ content }}
+                </div>
+             </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+    {% include footer.html %}
+  </body>
+
+</html>

@@ -206,6 +206,7 @@
                   <exclude>**/VAADIN/widgetsets/**</exclude>
                   <exclude>.sonar</exclude>
                   <exclude>**/.sonar/**</exclude>
+                  <exclude>docs/src/main/resources/**</exclude>
                </excludes>
                <mapping>
                   <scss>JAVADOC_STYLE</scss>

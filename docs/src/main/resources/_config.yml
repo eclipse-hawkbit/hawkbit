@@ -1,0 +1,10 @@
+# Site settings
+title: Eclipse hawkBit
+email: hawkbit-dev@eclipse.org
+description: Eclipse hawkBit - IoT Software Update
+baseurl: "" # the subpath of your site, e.g. /blog/
+
+# Build settings
+markdown: kramdown
+paginate: 3
+paginate_path: '/blog/page:num/'
