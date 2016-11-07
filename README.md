@@ -1,8 +1,8 @@
 <img src=hawkbit_logo.png width=533 height=246 />
 
-# Eclipse.IoT hawkBit - Update Server
+# Eclipse hawkBit™ - Update Server
 
-[hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
+Eclipse [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit) 
 [![SonarQuality](https://sonar.eu-gb.mybluemix.net/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.eu-gb.mybluemix.net)[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
@@ -63,7 +63,6 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
 * `examples` : hawkBit examples 
 * `hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
 * `hawkbit-autoconfigure` : Spring-boot auto-configuration. 
-* `hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
 * `hawkbit-core` : Core elements for internal interfaces and utility classes.
 * `hawkbit-ddi-api` : The hawkBit DDI API.
 * `hawkbit-ddi-dl-api` : The hawkBit DDI Download API.

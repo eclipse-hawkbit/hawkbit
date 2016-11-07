@@ -23,7 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
-import org.eclipse.hawkbit.cache.CacheConstants;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
@@ -47,12 +47,10 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
-import org.springframework.cache.Cache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -436,8 +434,7 @@ public class SecurityManagedConfiguration {
         private DdiSecurityProperties ddiSecurityConfiguration;
 
         @Autowired
-        @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
-        private Cache downloadIdCache;
+        private DownloadIdCache downloadIdCache;
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {

@@ -27,13 +27,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -44,7 +44,6 @@ import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -136,7 +135,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -155,7 +154,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 get("/{tenant}/controller/v1/4712/deploymentBase/" + uaction.getId(), tenantAware.getCurrentTenant())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
@@ -237,7 +236,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
 
         MvcResult mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
 
         final String urlBeforeSwitch = JsonPath.compile("_links.deploymentBase.href")
                 .read(mvcResult.getResponse().getContentAsString()).toString();
@@ -245,7 +244,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         // Time is not yet over, so we should see the same URL
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
                         .startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -256,7 +255,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
 
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
 
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isNotEqualTo(urlBeforeSwitch);
@@ -301,7 +300,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -320,7 +319,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 get("/{tenant}/controller/v1/4712/deploymentBase/" + uaction.getId(), tenantAware.getCurrentTenant())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("attempt")))
@@ -417,7 +416,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -434,7 +433,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
 
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
                 uaction.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))

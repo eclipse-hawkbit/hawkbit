@@ -29,8 +29,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -62,6 +61,8 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -73,7 +74,6 @@ import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 
 /**
  * JPA implementation of {@link DistributionSetManagement}.
@@ -108,7 +108,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private ActionRepository actionRepository;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -157,17 +160,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             }
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
                     toBeChangedDSs.size(), Collections.emptyList(),
-                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag,
-                    tenantAware.getCurrentTenant());
+                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag);
         } else {
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
                     0, Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)),
-                    Collections.emptyList(), myTag, tenantAware.getCurrentTenant());
+                    Collections.emptyList(), myTag);
         }
-
-        final DistributionSetTagAssignmentResult resultAssignment = result;
-        afterCommit.afterCommit(() -> eventBus
-                .post(new DistributionSetTagAssigmentResultEvent(resultAssignment, tenantAware.getCurrentTenant())));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -270,8 +268,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        Arrays.stream(distributionSetIDs)
-                .forEach(dsId -> eventBus.post(new DistributionDeletedEvent(tenantAware.getCurrentTenant(), dsId)));
+        Arrays.stream(distributionSetIDs).forEach(dsId -> eventPublisher.publishEvent(
+                new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
     }
 
     @Override
@@ -825,16 +823,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         allDs.forEach(ds -> ds.addTag(tag));
 
-        final List<DistributionSet> save = Collections.unmodifiableList(distributionSetRepository.save(allDs));
-
-        afterCommit.afterCommit(() -> {
-
-            final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
-                    save, Collections.emptyList(), tag, tenantAware.getCurrentTenant());
-            eventBus.post(new DistributionSetTagAssigmentResultEvent(result, tenantAware.getCurrentTenant()));
-        });
-
-        return save;
+        return Collections.unmodifiableList(distributionSetRepository.save(allDs));
     }
 
     @Override

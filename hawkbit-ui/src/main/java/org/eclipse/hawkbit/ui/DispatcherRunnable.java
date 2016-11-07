@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.spring.events.EventBus;
@@ -28,7 +28,7 @@ import com.vaadin.util.CurrentInstance;
 public class DispatcherRunnable implements Runnable {
 
     private final SecurityContext userContext;
-    private final Event event;
+    private final TenantAwareEvent event;
     private final VaadinSession session;
     private final EventBus eventBus;
 
@@ -44,7 +44,7 @@ public class DispatcherRunnable implements Runnable {
      *            the event which is distributed to the UI.
      */
     public DispatcherRunnable(final EventBus eventBus, final VaadinSession session, final SecurityContext userContext,
-            final Event event) {
+            final TenantAwareEvent event) {
         this.eventBus = eventBus;
         this.session = session;
         this.userContext = userContext;

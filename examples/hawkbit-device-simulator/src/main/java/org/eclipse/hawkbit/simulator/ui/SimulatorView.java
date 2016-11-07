@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.SimulatedDeviceFactory;
 import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
 import org.eclipse.hawkbit.simulator.amqp.AmqpProperties;
-import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
@@ -58,9 +57,6 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimulatorView extends VerticalLayout implements View {
 
-    /**
-     * 
-     */
     private static final String HTML_SPAN = ";</span>";
 
     private static final String NEXT_POLL_COUNTER_SEC_COL = "nextPollCounterSec";
@@ -82,9 +78,8 @@ public class SimulatorView extends VerticalLayout implements View {
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    private transient SpSenderService spSenderService;
-    @Autowired
     private transient DeviceSimulatorRepository repository;
+
     @Autowired
     private transient SimulatedDeviceFactory deviceFactory;
 

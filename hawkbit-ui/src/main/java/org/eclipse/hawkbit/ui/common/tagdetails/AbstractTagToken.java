@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -19,8 +18,8 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -98,7 +97,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         eventBus.unsubscribe(this);
     }
 
-    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+    protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
         if (BaseEntityEventType.SELECTED_ENTITY != baseEntityEvent.getEventType()) {
             return;
         }
@@ -260,13 +259,10 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tokensAdded.keySet().forEach(previouslyAddedToken -> tokenField.removeToken(previouslyAddedToken));
     }
 
-    protected Long getTagIdByTagName(final String tagName) {
-        final Optional<Map.Entry<Long, TagData>> mapEntry = tagDetails.entrySet().stream()
-                .filter(entry -> entry.getValue().getName().equals(tagName)).findFirst();
-        if (mapEntry.isPresent()) {
-            return mapEntry.get().getKey();
-        }
-        return null;
+    protected Long getTagIdByTagName(final Long tagId) {
+        return tagDetails.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findFirst()
+                .map(entry -> entry.getKey()).orElse(null);
+
     }
 
     protected void removeTokenItem(final Long tokenId, final String name) {

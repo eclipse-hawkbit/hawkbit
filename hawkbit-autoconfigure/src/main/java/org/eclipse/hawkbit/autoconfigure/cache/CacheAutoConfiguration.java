@@ -8,17 +8,21 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
+import static com.google.common.cache.CacheBuilder.newBuilder;
+
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
@@ -26,6 +30,8 @@ import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+
+import com.google.common.cache.CacheBuilder;
 
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific
@@ -37,33 +43,58 @@ import org.springframework.context.annotation.Primary;
  */
 @Configuration
 @EnableCaching
-public class CacheAutoConfiguration extends CachingConfigurerSupport {
+public class CacheAutoConfiguration {
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    @Qualifier("directCacheManager")
+    private CacheManager directCacheManager;
 
     /**
      * @return the default cache manager bean if none other cache manager is
      *         existing.
      */
-    @Override
     @Bean
     @ConditionalOnMissingBean
     @Primary
     public TenancyCacheManager cacheManager() {
-        return new TenantAwareCacheManager(directCacheManager(), tenantAware);
+        return new TenantAwareCacheManager(directCacheManager, tenantAware);
     }
 
     /**
-     * @return the direct cache manager to access without tenant aware check,
-     *         cause in sometimes it's necessary to access the cache directly
-     *         without having the current tenant, e.g. initial creation of
-     *         tenant
+     * A separate configuration of the direct cache manager for the
+     * {@link TenantAwareCacheManager} that it can get overridden by another
+     * configuration.
      */
-    @Bean(name = "directCacheManager")
-    @ConditionalOnMissingBean(name = "directCacheManager")
-    public CacheManager directCacheManager() {
-        return new GuavaCacheManager();
+    @Configuration
+    @EnableConfigurationProperties(CacheProperties.class)
+    static class DirectCacheManagerConfiguration {
+
+        @Autowired
+        private CacheProperties cacheProperties;
+
+        /**
+         * @return the direct cache manager to access without tenant aware
+         *         check, cause in sometimes it's necessary to access the cache
+         *         directly without having the current tenant, e.g. initial
+         *         creation of tenant
+         */
+        @Bean(name = "directCacheManager")
+        @ConditionalOnMissingBean(name = "directCacheManager")
+        public CacheManager directCacheManager() {
+            final GuavaCacheManager cacheManager = new GuavaCacheManager();
+
+            if (cacheProperties.getTtl() > 0) {
+                final CacheBuilder<Object, Object> cacheBuilder = newBuilder()
+                        .expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit());
+                cacheManager.setCacheBuilder(cacheBuilder);
+            }
+
+            return cacheManager;
+        }
+
     }
 
     /**
@@ -196,6 +227,11 @@ public class CacheAutoConfiguration extends CachingConfigurerSupport {
         @Override
         public void clear() {
             delegate.clear();
+        }
+
+        @Override
+        public <T> T get(final Object key, final Callable<T> valueLoader) {
+            return delegate.get(key, valueLoader);
         }
 
     }

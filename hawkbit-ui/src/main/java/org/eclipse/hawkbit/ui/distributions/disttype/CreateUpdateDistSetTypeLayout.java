@@ -13,11 +13,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -40,6 +40,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
@@ -71,9 +72,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
 
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
@@ -121,6 +119,18 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         twinTableLayout.addComponent(distTypeSelectLayout);
 
         mainLayout.addComponent(twinTableLayout, 2, 0);
+    }
+
+    @Override
+    protected Color getColorForColorPicker() {
+        final DistributionSetType existedDistType = distributionSetManagement
+                .findDistributionSetTypeByName(tagNameComboBox.getValue().toString());
+        if (null != existedDistType) {
+            return existedDistType.getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
+                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+        }
+        return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     private HorizontalLayout createTwinColumnLayout() {

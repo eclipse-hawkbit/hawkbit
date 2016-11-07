@@ -96,18 +96,6 @@ public class ArtifactStore implements ArtifactRepository {
         return map(gridFs.findOne(new Query().addCriteria(Criteria.where(MD5).is(md5Hash))));
     }
 
-    /**
-     * Retrieves a {@link GridFSDBFile} from the store by it's object id.
-     * 
-     * @param id
-     *            the id of the file to lookup.
-     * @return The gridfs file object or {@code null} if no file exists.
-     */
-    @Override
-    public DbArtifact getArtifactById(final String id) {
-        return map(gridFs.findOne(new Query().addCriteria(Criteria.where(ID).is(id))));
-    }
-
     @Override
     public DbArtifact store(final InputStream content, final String filename, final String contentType) {
         return store(content, filename, contentType, null);
@@ -131,15 +119,6 @@ public class ArtifactStore implements ArtifactRepository {
             if (tempFile != null && !tempFile.delete()) {
                 LOGGER.error("Could not delete temporary file: {}", tempFile);
             }
-        }
-    }
-
-    @Override
-    public void deleteById(final String artifactId) {
-        try {
-            deleteArtifact(gridFs.findOne(new Query().addCriteria(Criteria.where(ID).is(artifactId))));
-        } catch (final MongoException e) {
-            throw new ArtifactStoreException(e.getMessage(), e);
         }
     }
 
@@ -228,19 +207,6 @@ public class ArtifactStore implements ArtifactRepository {
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
         return dbFiles.stream().map(ArtifactStore::map).collect(Collectors.toList());
-    }
-
-    /**
-     * Retrieves a list of {@link GridFSDBFile} from the store by all SHA1
-     * hashes.
-     * 
-     * @param sha1Hashes
-     *            the sha1-hashes of the files to lookup.
-     * @return list of artifacts
-     */
-    @Override
-    public List<DbArtifact> getArtifactsBySha1(final List<String> sha1Hashes) {
-        return map(gridFs.find(new Query().addCriteria(Criteria.where(SHA1).in(sha1Hashes))));
     }
 
     /**

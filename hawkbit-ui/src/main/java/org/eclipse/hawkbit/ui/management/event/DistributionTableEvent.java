@@ -9,14 +9,14 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
- * Class which contains the Event when selecting all entries of the
+ * Class which contains the TenantAwareEvent when selecting all entries of the
  * distributions table
  */
-public class DistributionTableEvent extends BaseEntityEvent<DistributionSet> {
+public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
 
     /**
      * Constructor.

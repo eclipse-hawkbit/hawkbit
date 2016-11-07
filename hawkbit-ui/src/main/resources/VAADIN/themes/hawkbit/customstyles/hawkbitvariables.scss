@@ -10,6 +10,12 @@
 $hawkbit-primary-color: #551f62;
 $hawkbit-primary-color-light: #551f62;
 
+//Logo image for the top right corner
+$logo-image: url('images/hawkbit_logo.png');
+
+//Logo image postion
+$logo-position: right 8px top 8px;
+
 //Application text font size.All widget text style are computed based on this
 $app-text-font-size: 16px;
 
@@ -76,7 +82,7 @@ $accordion-action-history-title-color: #551f62;
 //Success icon color on valid target filter query
 $success-icon-color: #ff0000;
 
-//Error icon color on invalid target filter query 
+//Error icon color on invalid target filter query
 $error-icon-color: #008000;
 
 
@@ -133,7 +139,7 @@ $twin-table-border-grey:#888;
 
 
 $progress-bar-scheduled-part: $blue-color;
-$progress-bar-running-part: $signal-yellow-color; 
+$progress-bar-running-part: $signal-yellow-color;
 $progress-bar-error-part: $signal-red-color;
 $progress-bar-finished-part: $signal-green-color;
 $progress-bar-cancelled-part: $grey-light;

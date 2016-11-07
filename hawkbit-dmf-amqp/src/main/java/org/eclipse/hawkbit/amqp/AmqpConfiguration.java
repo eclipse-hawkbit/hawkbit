@@ -15,12 +15,13 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.cache.CacheConstants;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -45,7 +46,7 @@ import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.Cache;
+import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -73,6 +74,9 @@ public class AmqpConfiguration {
 
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
+
+    @Autowired(required = false)
+    private ServiceMatcher serviceMatcher;
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
@@ -288,7 +292,7 @@ public class AmqpConfiguration {
      *            for target authentication
      * @param artifactManagement
      *            for artifact URI generation
-     * @param cache
+     * @param downloadIdCache
      *            for download IDs
      * @param hostnameResolver
      *            for resolving the host for downloads
@@ -299,10 +303,10 @@ public class AmqpConfiguration {
     @Bean
     public AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
             final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
-            @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE) final Cache cache, final HostnameResolver hostnameResolver,
+            final DownloadIdCache downloadIdCache, final HostnameResolver hostnameResolver,
             final ControllerManagement controllerManagement) {
-        return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement, cache,
-                hostnameResolver, controllerManagement);
+        return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement,
+                downloadIdCache, hostnameResolver, controllerManagement);
     }
 
     /**
@@ -330,6 +334,23 @@ public class AmqpConfiguration {
         return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
+    /**
+     * create the authentication bean for controller over amqp.
+     * 
+     * @param systemManagement
+     *            the systemManagement
+     * @param controllerManagement
+     *            the controllerManagement
+     * @param tenantConfigurationManagement
+     *            the tenantConfigurationManagement
+     * @param tenantAware
+     *            the tenantAware
+     * @param ddiSecruityProperties
+     *            the ddiSecruityProperties
+     * @param systemSecurityContext
+     *            the systemSecurityContext
+     * @return the bean
+     */
     @Bean
     @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
     public AmqpControllerAuthentication amqpControllerAuthentication(final SystemManagement systemManagement,
@@ -340,13 +361,31 @@ public class AmqpConfiguration {
                 tenantAware, ddiSecruityProperties, systemSecurityContext);
     }
 
+    /**
+     * Create the dispatcher bean.
+     * 
+     * @param rabbitTemplate
+     *            the rabbitTemplate
+     * @param amqpSenderService
+     *            to send AMQP message
+     * @param artifactUrlHandler
+     *            for generating download URLs
+     * @param systemSecurityContext
+     *            for execution with system permissions
+     * @param systemManagement
+     *            the systemManagement
+     * @param targetManagement
+     *            to access target information
+     * @return the bean
+     */
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     public AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {
+            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final TargetManagement targetManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement);
+                systemSecurityContext, systemManagement, targetManagement, serviceMatcher);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

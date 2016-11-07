@@ -21,6 +21,7 @@ import java.net.URL;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
@@ -54,7 +55,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -95,7 +95,7 @@ public class AmqpControllerAuthenticationTest {
     private SystemManagement systemManagement;
 
     @Mock
-    private Cache cacheMock;
+    private DownloadIdCache cacheMock;
 
     @Mock
     private HostnameResolver hostnameResolverMock;

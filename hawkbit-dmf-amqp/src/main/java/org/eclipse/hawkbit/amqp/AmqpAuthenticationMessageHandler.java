@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
@@ -31,7 +32,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.cache.Cache;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -56,7 +56,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
     private final ArtifactManagement artifactManagement;
 
-    private final Cache cache;
+    private final DownloadIdCache cache;
 
     private final HostnameResolver hostnameResolver;
 
@@ -78,7 +78,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      */
     public AmqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
             final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
-            final Cache cache, final HostnameResolver hostnameResolver,
+            final DownloadIdCache cache, final HostnameResolver hostnameResolver,
             final ControllerManagement controllerManagement) {
         super(rabbitTemplate);
         this.authenticationManager = authenticationManager;
@@ -89,7 +89,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
     }
 
     /**
-     * Executed on a authentication request.
+     * Executed on an authentication request.
      * 
      * @param message
      *            the amqp message
@@ -116,19 +116,19 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      * 
      * @param secruityToken
      *            the security token which holds the target ID to check on
-     * @param localArtifact
-     *            the local artifact to verify if the given target is allowed to
-     *            download this artifact
+     * @param artifact
+     *            the artifact to verify if the given target is allowed to
+     *            download it
      */
     private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
-            final org.eclipse.hawkbit.repository.model.Artifact localArtifact) {
+            final org.eclipse.hawkbit.repository.model.Artifact artifact) {
 
         if (secruityToken.getControllerId() != null) {
-            checkByControllerId(localArtifact, secruityToken.getControllerId());
+            checkByControllerId(artifact, secruityToken.getControllerId());
         } else if (secruityToken.getTargetId() != null) {
-            checkByTargetId(localArtifact, secruityToken.getTargetId());
+            checkByTargetId(artifact, secruityToken.getTargetId());
         } else {
-            LOG.info("anonymous download no authentication check for artifact {}", localArtifact);
+            LOG.info("anonymous download no authentication check for artifact {}", artifact);
             return;
         }
 

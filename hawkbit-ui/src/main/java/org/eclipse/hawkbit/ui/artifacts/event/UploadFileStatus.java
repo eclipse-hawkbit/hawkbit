@@ -21,7 +21,7 @@ public class UploadFileStatus implements Serializable {
 
     private static final long serialVersionUID = -3599629192216760811L;
 
-    private String fileName;
+    private final String fileName;
 
     private long contentLength;
 
@@ -30,19 +30,48 @@ public class UploadFileStatus implements Serializable {
     private String failureReason;
 
     private SoftwareModule softwareModule;
-    
-    public UploadFileStatus(String fileName) {
+
+    /**
+     * constructor for UploadFileStatus
+     * 
+     * @param fileName
+     *            name of the file to be uploaded
+     */
+    public UploadFileStatus(final String fileName) {
         this.fileName = fileName;
     }
 
-    public UploadFileStatus(String fileName, long bytesRead, long contentLength,SoftwareModule softwareModule) {
+    /**
+     * constructor for UploadFileStatus
+     * 
+     * @param fileName
+     *            name of the file to be uploaded
+     * @param bytesRead
+     *            number of bytes
+     * @param contentLength
+     *            length of the content (stream)
+     * @param softwareModule
+     *            softwareModule
+     */
+    public UploadFileStatus(final String fileName, final long bytesRead, final long contentLength,
+            final SoftwareModule softwareModule) {
         this.fileName = fileName;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
         this.softwareModule = softwareModule;
     }
 
-    public UploadFileStatus(String fileName, String failureReason,SoftwareModule selectedSw) {
+    /**
+     * constructor for UploadFileStatus
+     * 
+     * @param fileName
+     *            name of the file to be uploaded
+     * @param failureReason
+     *            reason of failure
+     * @param selectedSw
+     *            the selected softwareModule
+     */
+    public UploadFileStatus(final String fileName, final String failureReason, final SoftwareModule selectedSw) {
         this.failureReason = failureReason;
         this.fileName = fileName;
         this.softwareModule = selectedSw;
@@ -63,7 +92,7 @@ public class UploadFileStatus implements Serializable {
     public String getFailureReason() {
         return failureReason;
     }
-    
+
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
     }

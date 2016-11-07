@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -222,7 +223,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     public void requestConfigValueWithWrongType() {
         try {
             tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                    Object.class);
+                    Serializable.class);
             Assert.fail("");
         } catch (final TenantConfigurationValidatorException e) {
 

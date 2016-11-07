@@ -41,9 +41,6 @@ import com.google.common.collect.Maps;
  * {@link Aspect} catches persistence exceptions and wraps them to custom
  * specific exceptions Additionally it checks and prevents access to certain
  * packages. Logging aspect which logs the call stack
- *
- *
- *
  */
 @Aspect
 public class ExceptionMappingAspectHandler implements Ordered {

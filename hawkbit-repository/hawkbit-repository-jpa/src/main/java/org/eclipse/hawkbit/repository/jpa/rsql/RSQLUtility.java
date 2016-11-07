@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;

@@ -14,9 +14,9 @@ import javax.persistence.PrePersist;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;

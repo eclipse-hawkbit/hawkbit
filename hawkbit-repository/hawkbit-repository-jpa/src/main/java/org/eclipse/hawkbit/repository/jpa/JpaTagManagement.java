@@ -20,12 +20,12 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
@@ -37,9 +37,12 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -48,8 +51,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * JP>A implementation of {@link TagManagement}.
@@ -72,13 +73,16 @@ public class JpaTagManagement implements TagManagement {
     private DistributionSetRepository distributionSetRepository;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private TenantAware tenantAware;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
@@ -101,7 +105,8 @@ public class JpaTagManagement implements TagManagement {
 
         final TargetTag save = targetTagRepository.save(targetTag);
 
-        afterCommit.afterCommit(() -> eventBus.post(new TargetTagCreatedEvent(save)));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetTagCreatedEvent(save, applicationContext.getId())));
 
         return save;
     }
@@ -115,7 +120,8 @@ public class JpaTagManagement implements TagManagement {
 
         final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository
                 .save(targetTags.stream().map(JpaTagCreate::buildTargetTag).collect(Collectors.toList())));
-        afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new TargetTagCreatedEvent(tag))));
+        afterCommit.afterCommit(() -> save.forEach(
+                tag -> eventPublisher.publishEvent(new TargetTagCreatedEvent(tag, applicationContext.getId()))));
         return save;
     }
 
@@ -137,7 +143,8 @@ public class JpaTagManagement implements TagManagement {
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
 
-        afterCommit.afterCommit(() -> eventBus.post(new TargetTagDeletedEvent(tag)));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new TargetTagDeletedEvent(tenantAware.getCurrentTenant(), tag.getId(), applicationContext.getId())));
 
     }
 
@@ -181,7 +188,8 @@ public class JpaTagManagement implements TagManagement {
         update.getColour().ifPresent(tag::setColour);
 
         final TargetTag save = targetTagRepository.save(tag);
-        afterCommit.afterCommit(() -> eventBus.post(new TargetTagUpdateEvent(save)));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
         return save;
     }
 
@@ -200,7 +208,8 @@ public class JpaTagManagement implements TagManagement {
         update.getColour().ifPresent(tag::setColour);
 
         final DistributionSetTag save = distributionSetTagRepository.save(tag);
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagUpdateEvent(save)));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                new DistributionSetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
         return save;
     }
 
@@ -223,7 +232,8 @@ public class JpaTagManagement implements TagManagement {
 
         final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
 
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedEvent(save)));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new DistributionSetTagCreatedEvent(save, applicationContext.getId())));
         return save;
     }
 
@@ -237,8 +247,8 @@ public class JpaTagManagement implements TagManagement {
 
         final List<DistributionSetTag> save = Collections.unmodifiableList(distributionSetTagRepository
                 .save(creates.stream().map(JpaTagCreate::buildDistributionSetTag).collect(Collectors.toList())));
-        afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new DistributionSetTagCreatedEvent(tag))));
-
+        afterCommit.afterCommit(() -> save.forEach(tag -> eventPublisher
+                .publishEvent(new DistributionSetTagCreatedEvent(tag, applicationContext.getId()))));
         return save;
     }
 
@@ -259,7 +269,9 @@ public class JpaTagManagement implements TagManagement {
 
         distributionSetTagRepository.deleteByName(tagName);
 
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagDeletedEvent(tag)));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new DistributionSetTagDeletedEvent(tenantAware.getCurrentTenant(),
+                        tag.getId(), applicationContext.getId())));
     }
 
     @Override

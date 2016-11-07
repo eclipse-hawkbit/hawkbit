@@ -18,7 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Threshold to calculate if rollout group success condition is reached and the
+ * next rollout group can get started.
  */
 @Component("thresholdRolloutGroupSuccessCondition")
 public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
@@ -29,20 +30,21 @@ public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupCondit
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
+
         final long totalGroup = rolloutGroup.getTotalTargets();
+        if (totalGroup == 0) {
+            // in case e.g. targets has been deleted we don't have any
+            // actions left for this group, so the group is finished
+            return true;
+        }
+
         final long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.FINISHED);
         try {
             final Integer threshold = Integer.valueOf(expression);
-
-            if (totalGroup == 0) {
-                // in case e.g. targets has been deleted we don't have any
-                // actions
-                // left for this group, so the group is finished
-                return true;
-            }
             // calculate threshold
             return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
+
         } catch (final NumberFormatException e) {
             LOGGER.error("Cannot evaluate condition expression " + expression, e);
             return false;

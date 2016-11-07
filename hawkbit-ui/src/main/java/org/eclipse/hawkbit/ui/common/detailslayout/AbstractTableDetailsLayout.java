@@ -18,15 +18,15 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
@@ -117,7 +117,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * @param baseEntityEvent
      *            the event
      */
-    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+    protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
         final BaseEntityEventType eventType = baseEntityEvent.getEventType();
         if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType) {
             UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));

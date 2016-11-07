@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -34,8 +33,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * Service layer for all operations of the DDI API (with access permissions only
@@ -66,7 +63,7 @@ public interface ControllerManagement {
     Action addCancelActionStatus(@NotNull ActionStatusCreate create);
 
     /**
-     * Sends the download progress and notifies the {@link EventBus} with a
+     * Sends the download progress and notifies the event publisher with a
      * {@link DownloadProgressEvent}.
      * 
      * @param statusId
@@ -152,19 +149,6 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty String controllerId, URI address);
-
-    /**
-     * Retrieves all {@link SoftwareModule}s which are assigned to the given
-     * {@link DistributionSet}.
-     *
-     * @param distributionSet
-     *            the distribution set which should be assigned to the returned
-     *            {@link SoftwareModule}s
-     * @return a list of {@link SoftwareModule}s assigned to given
-     *         {@code distributionSet}
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<SoftwareModule> findSoftwareModulesByDistributionSet(@NotNull DistributionSet distributionSet);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given

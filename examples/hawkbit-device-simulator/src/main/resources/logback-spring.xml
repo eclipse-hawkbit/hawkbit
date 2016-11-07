@@ -12,16 +12,7 @@
 <configuration>
    <include resource="org/springframework/boot/logging/logback/base.xml" />
 
-   <logger name="org.eclipse.hawkbit.eventbus.DeadEventListener" level="WARN" />
-   <Logger name="org.springframework.boot.actuate.audit.listener.AuditListener" level="WARN" />
-
-   <Logger name="org.hibernate.validator.internal.util.Version" level="WARN" />
-
-   <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="WARN" />
-   <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN" />
-   <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
-
-   <Root level="INFO">
+   <Root level="ERROR">
       <appender-ref ref="CONSOLE" />
    </Root>
 

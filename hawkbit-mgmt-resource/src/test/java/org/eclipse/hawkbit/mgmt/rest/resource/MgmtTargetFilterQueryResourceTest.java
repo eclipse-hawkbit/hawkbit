@@ -44,8 +44,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Filter Query Resource")
 public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTest {
 
-    private static final String TARGET_DESCRIPTION_TEST = "created in test";
-
     private static final String JSON_PATH_ROOT = "$";
 
     // fields, attributes

@@ -270,7 +270,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that a deleted tag is removed from the repository as defined.")
-    public void deleteTargetTas() {
+    public void deleteTargetTags() {
 
         // create test data
         final Iterable<JpaTargetTag> tags = createTargetsWithTags();

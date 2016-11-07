@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,11 +25,11 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -44,7 +43,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -52,10 +50,13 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -90,9 +91,6 @@ public class JpaControllerManagement implements ControllerManagement {
     private TargetInfoRepository targetInfoRepository;
 
     @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
-
-    @Autowired
     private ActionStatusRepository actionStatusRepository;
 
     @Autowired
@@ -108,13 +106,19 @@ public class JpaControllerManagement implements ControllerManagement {
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
-    private CacheWriteNotify cacheWriteNotify;
+    private TenantAware tenantAware;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
 
     @Autowired
     private EntityFactory entityFactory;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public String getPollingTime() {
@@ -180,12 +184,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return Collections
-                .unmodifiableList(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
-    }
-
-    @Override
     public Action findActionWithDetails(final Long actionId) {
         return getActionAndThrowExceptionIfNotFound(actionId);
     }
@@ -234,7 +232,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
@@ -276,7 +274,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
@@ -287,7 +285,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // action status feedback channel order from the device cannot be
         // guaranteed. However, if an action is closed we do not accept further
         // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action)) {
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getStatus(), action.getId());
             return action;
@@ -296,8 +294,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
-            final JpaAction action) {
-        return !action.isActive() && (repositoryProperties.isRejectActionStatusForClosedAction()
+            final boolean actionActive) {
+        return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
                 || (Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus())));
     }
 
@@ -311,18 +309,18 @@ public class JpaControllerManagement implements ControllerManagement {
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        JpaTarget mergedTarget = (JpaTarget) action.getTarget();
+        JpaTarget target = (JpaTarget) action.getTarget();
         // check for a potential DOS attack
         checkForToManyStatusEntries(action);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            mergedTarget = DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.ERROR, false,
-                    targetInfoRepository, entityManager);
-            handleErrorOnAction(action, mergedTarget);
+            target = DeploymentHelper.updateTargetInfo(target, TargetUpdateStatus.ERROR, false, targetInfoRepository,
+                    entityManager);
+            handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(mergedTarget, action);
+            handleFinishedAndStoreInTargetStatus(target, action);
             break;
         case CANCELED:
         case WARNING:
@@ -334,7 +332,7 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
 
-        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
+        LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
 
         action.setStatus(actionStatus.getStatus());
 
@@ -500,7 +498,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
-        cacheWriteNotify.downloadProgress(statusId, requestedBytes, shippedBytesSinceLast, shippedBytesOverall);
+        eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
+                applicationContext.getId()));
     }
 
     @Override

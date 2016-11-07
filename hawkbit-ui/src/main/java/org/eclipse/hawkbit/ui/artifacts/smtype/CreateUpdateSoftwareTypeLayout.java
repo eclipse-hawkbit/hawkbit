@@ -11,11 +11,11 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -48,14 +48,11 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<SoftwareModuleType> {
 
-    private static final long serialVersionUID = -5169398523815919367L;
+    private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
 
     private String singleAssignStr;
     private String multiAssignStr;
@@ -91,6 +88,18 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         tagDesc.setNullRepresentation("");
 
         singleMultiOptionGroup();
+    }
+
+    @Override
+    protected Color getColorForColorPicker() {
+
+        final SoftwareModuleType typeSelected = swTypeManagementService
+                .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
+        if (null != typeSelected) {
+            return typeSelected.getColour() != null ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
+                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
+        }
+        return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {

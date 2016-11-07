@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.Event;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 
 /**
  * EventHolder beans contains a list of events that can be process by the UI in
@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.eventbus.event.Event;
  *
  */
 @FunctionalInterface
-public interface EventContainer<T extends Event> {
+public interface EventContainer<T extends TenantAwareEvent> {
 
     /**
      * @return list of contained events

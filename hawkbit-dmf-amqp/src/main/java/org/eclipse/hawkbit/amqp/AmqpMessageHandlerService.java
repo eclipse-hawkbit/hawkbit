@@ -27,14 +27,10 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -176,7 +172,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
-            logAndThrowMessageError(message, "No ReplyTo was set for the createThing Event.");
+            logAndThrowMessageError(message, "No ReplyTo was set for the createThing TenantAwareEvent.");
         }
 
         final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
@@ -187,23 +183,20 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> action = controllerManagement.findOldestActiveActionByTarget(target);
-        if (!action.isPresent()) {
+        final Optional<Action> actionOptional = controllerManagement.findOldestActiveActionByTarget(target);
+        if (!actionOptional.isPresent()) {
             return;
         }
 
-        if (action.get().isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(
-                    new CancelTargetAssignmentEvent(target, action.get().getId()));
+        final Action action = actionOptional.get();
+        if (action.isCancelingOrCanceled()) {
+            amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
+                    action.getId(), target.getTargetInfo().getAddress());
             return;
         }
 
-        final DistributionSet distributionSet = action.get().getDistributionSet();
-        final List<SoftwareModule> softwareModuleList = controllerManagement
-                .findSoftwareModulesByDistributionSet(distributionSet);
-        amqpMessageDispatcherService.targetAssignDistributionSet(new TargetAssignDistributionSetEvent(
-                target.getOptLockRevision(), target.getTenant(), target, action.get().getId(), softwareModuleList));
-
+        amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
+                action.getDistributionSet().getModules());
     }
 
     /**
@@ -327,5 +320,4 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
         return action;
     }
-
 }

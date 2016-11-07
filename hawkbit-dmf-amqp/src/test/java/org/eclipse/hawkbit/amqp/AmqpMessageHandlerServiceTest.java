@@ -21,14 +21,14 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -42,14 +42,13 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -67,7 +66,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.cache.Cache;
 import org.springframework.http.HttpStatus;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -108,7 +106,7 @@ public class AmqpMessageHandlerServiceTest {
     private ArtifactRepository artifactRepositoryMock;
 
     @Mock
-    private Cache cacheMock;
+    private DownloadIdCache downloadIdCache;
 
     @Mock
     private HostnameResolver hostnameResolverMock;
@@ -120,11 +118,13 @@ public class AmqpMessageHandlerServiceTest {
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
+                controllerManagementMock, entityFactoryMock);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
                 controllerManagementMock, entityFactoryMock);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
-                authenticationManagerMock, artifactManagementMock, cacheMock, hostnameResolverMock,
+                authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
                 controllerManagementMock);
     }
 
@@ -367,10 +367,6 @@ public class AmqpMessageHandlerServiceTest {
         // for the test the same action can be used
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 
-        final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
-        when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
-                .thenReturn(softwareModuleList);
-
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.FINISHED, 23L);
@@ -384,20 +380,19 @@ public class AmqpMessageHandlerServiceTest {
         verify(controllerManagementMock).updateTargetStatus(Matchers.any(TargetInfo.class),
                 Matchers.isNull(TargetUpdateStatus.class), Matchers.isNotNull(Long.class), Matchers.isNull(URI.class));
 
-        final ArgumentCaptor<TargetAssignDistributionSetEvent> captorTargetAssignDistributionSetEvent = ArgumentCaptor
-                .forClass(TargetAssignDistributionSetEvent.class);
-        verify(amqpMessageDispatcherServiceMock, times(1))
-                .targetAssignDistributionSet(captorTargetAssignDistributionSetEvent.capture());
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
-                .getValue();
+        final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
+        final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThat(targetAssignDistributionSetEvent.getTarget().getControllerId()).as("event has wrong controller id")
-                .isEqualTo("target1");
-        assertThat(targetAssignDistributionSetEvent.getTarget().getSecurityToken())
-                .as("targetoken not filled correctly").isEqualTo(action.getTarget().getSecurityToken());
-        assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
-        assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
-                .isEqualTo(softwareModuleList);
+        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
+                targetCaptor.capture(), actionIdCaptor.capture(), Matchers.any(Collection.class));
+        final String tenant = tenantCaptor.getValue();
+        final String controllerId = targetCaptor.getValue().getControllerId();
+        final Long actionId = actionIdCaptor.getValue();
+
+        assertThat(tenant).as("event has tenant").isEqualTo("DEFAULT");
+        assertThat(controllerId).as("event has wrong controller id").isEqualTo("target1");
+        assertThat(actionId).as("event has wrong action id").isEqualTo(22L);
 
     }
 
@@ -428,14 +423,6 @@ public class AmqpMessageHandlerServiceTest {
         return messageProperties;
     }
 
-    private List<SoftwareModule> createSoftwareModuleList() {
-        final List<SoftwareModule> softwareModuleList = new ArrayList<>();
-        final JpaSoftwareModule softwareModule = new JpaSoftwareModule();
-        softwareModule.setId(777L);
-        softwareModuleList.add(softwareModule);
-        return softwareModuleList;
-    }
-
     private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
         initalizeSecurityTokenGenerator();
@@ -444,6 +431,10 @@ public class AmqpMessageHandlerServiceTest {
         final Action actionMock = mock(Action.class);
         final Target targetMock = mock(Target.class);
         final TargetInfo targetInfoMock = mock(TargetInfo.class);
+        final DistributionSet distributionSetMock = mock(DistributionSet.class);
+
+        when(distributionSetMock.getId()).thenReturn(1L);
+        when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
         when(actionMock.getId()).thenReturn(targetId);
         when(actionMock.getStatus()).thenReturn(status);
         when(actionMock.getTenant()).thenReturn("DEFAULT");

@@ -37,6 +37,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,7 +108,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Optional<Action> findFirstByTargetAndActive(final Sort sort, final JpaTarget target, boolean active);
 
     /**
-     * Retrieves latest {@link UpdateAction} for given target and
+     * Retrieves latest {@link Action} for given target and
      * {@link SoftwareModule}.
      *
      * @param targetId
@@ -122,7 +123,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
             @Param("module") JpaSoftwareModule module);
 
     /**
-     * Retrieves all {@link UpdateAction}s which are referring the given
+     * Retrieves all {@link Action}s which are referring the given
      * {@link DistributionSet} and {@link Target}.
      *
      * @param pageable
@@ -131,7 +132,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            is the assigned target
      * @param ds
      *            the {@link DistributionSet} on which will be filtered
-     * @return the found {@link UpdateAction}s
+     * @return the found {@link Action}s
      */
     @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds order by a.id")
     Page<JpaAction> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final JpaTarget target,
@@ -146,7 +147,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions according to the searched target
      */
     @Query("Select a from JpaAction a where a.target = :target order by a.id")
-    List<JpaAction> findByTarget(@Param("target") final JpaTarget target);
+    List<JpaAction> findByTarget(@Param("target") JpaTarget target);
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag
@@ -347,8 +348,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
-    List<Action> findByRolloutAndRolloutGroupParentAndStatus(JpaRollout rollout, JpaRolloutGroup rolloutGroupParent,
-            Status actionStatus);
+    List<Identifiable<Long>> findByRolloutAndRolloutGroupParentAndStatus(JpaRollout rollout,
+            JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.

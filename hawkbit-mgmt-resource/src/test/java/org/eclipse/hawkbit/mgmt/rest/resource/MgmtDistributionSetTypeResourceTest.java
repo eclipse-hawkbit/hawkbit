@@ -70,7 +70,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         // generated in this test)
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..name",
                         contains(standardDsType.getName())))
                 .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..description",
@@ -110,7 +110,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         // descending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.content.[0].description", equalTo("Desc1234")))
@@ -124,7 +124,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         // ascending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content.[3].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[3].name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.content.[3].description", equalTo("Desc1234")))
@@ -278,7 +278,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo(osType.getName())))
                 .andExpect(jsonPath("[0].description", equalTo(osType.getDescription())))
                 .andExpect(jsonPath("[0].maxAssignments", equalTo(1))).andExpect(jsonPath("[0].key", equalTo("os")));
@@ -292,7 +292,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo(appType.getName())))
                 .andExpect(jsonPath("[0].description", equalTo(appType.getDescription())))
                 .andExpect(jsonPath("[0].maxAssignments", equalTo(Integer.MAX_VALUE)))
@@ -390,7 +390,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.description", equalTo("Desc1234")))
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))

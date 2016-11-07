@@ -12,7 +12,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -22,7 +21,6 @@ import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -38,9 +36,6 @@ import com.vaadin.ui.UI;
 public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag> {
 
     private static final long serialVersionUID = 444276149954167545L;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
 
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";

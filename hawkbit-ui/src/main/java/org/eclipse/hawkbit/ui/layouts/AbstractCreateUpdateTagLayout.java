@@ -255,40 +255,39 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * Open color picker on click of preview button. Auto select the color based
      * on target tag if already selected.
      */
-    protected void previewButtonClicked() {
+    private void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
-            setColor();
+            final String selectedOption = (String) optiongroup.getValue();
+            if (selectedOption == null) {
+                return;
+            }
+
+            if (tagNameComboBox.getValue() == null) {
+                colorPickerLayout
+                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+            } else {
+                colorPickerLayout.setSelectedColor(getColorForColorPicker());
+            }
         }
 
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
         colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
-    private void setColor() {
-        final String selectedOption = (String) optiongroup.getValue();
-        if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagStr)) {
-            return;
-        }
-
-        if (tagNameComboBox.getValue() == null) {
-            colorPickerLayout
-                    .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-            return;
-        }
-
+    /**
+     * @return the color which should be selected in the color-picker component.
+     */
+    protected Color getColorForColorPicker() {
         final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
-
         if (targetTagSelected == null) {
             final DistributionSetTag distTag = tagManagement
                     .findDistributionSetTag(tagNameComboBox.getValue().toString());
-            colorPickerLayout.setSelectedColor(
-                    distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
-                            : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-        } else {
-            colorPickerLayout.setSelectedColor(targetTagSelected.getColour() != null
-                    ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
-                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+            return distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
+                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
+        return targetTagSelected.getColour() != null
+                ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
+                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     private void tagNameChosen(final ValueChangeEvent event) {

@@ -119,7 +119,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
         final long current = System.currentTimeMillis();
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -151,7 +151,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                    .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                     .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
             return null;
         });
@@ -162,7 +162,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00"))).andReturn().getResponse()
                 .getHeader("ETag");
 
@@ -179,7 +179,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
                 .perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                         .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -212,7 +212,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                 .header("If-None-Match", etagWithFirstUpdate).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -232,8 +232,9 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
+
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())

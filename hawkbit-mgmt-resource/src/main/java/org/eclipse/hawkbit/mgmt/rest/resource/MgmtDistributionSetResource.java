@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -36,6 +35,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -128,8 +128,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
         final Collection<DistributionSet> createdDSets = distributionSetManagement
-                .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, softwareManagement,
-                        distributionSetManagement, entityFactory));
+                .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, entityFactory));
 
         LOG.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(createdDSets),

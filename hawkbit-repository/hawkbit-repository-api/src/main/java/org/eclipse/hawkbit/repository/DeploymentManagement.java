@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -232,6 +233,18 @@ public interface DeploymentManagement {
     Action findAction(@NotNull Long actionId);
 
     /**
+     * Retrieves all actions for a specific rollout and in a specific status.
+     *
+     * @param rollout
+     *            the rollout the actions beglong to
+     * @param actionStatus
+     *            the status of the actions
+     * @return the actions referring a specific rollout an in a specific status
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<Action> findActionsByRolloutAndStatus(@NotNull Rollout rollout, @NotNull Action.Status actionStatus);
+    
+    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
@@ -247,7 +260,7 @@ public interface DeploymentManagement {
      *         rollout group in a specific status
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
+    List<Long> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
             @NotNull RolloutGroup rolloutGroupParent, @NotNull Action.Status actionStatus);
 
     /**
@@ -435,12 +448,12 @@ public interface DeploymentManagement {
      * Starting an action which is scheduled, e.g. in case of roll out a
      * scheduled action must be started now.
      *
-     * @param action
-     *            the action to start now.
+     * @param actionId
+     *            the the ID of the action to start now.
      * @return the action which has been started
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action startScheduledAction(@NotNull Action action);
+    Action startScheduledAction(@NotNull Long actionId);
 
     /**
      * All {@link ActionStatus} entries in the repository.

@@ -24,12 +24,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 
@@ -47,17 +45,12 @@ public final class MgmtDistributionSetMapper {
      *
      * @param sets
      *            to convert
-     * @param softwareManagement
-     *            to use for conversion
      * @return converted list of {@link DistributionSet}s
      */
     static List<DistributionSetCreate> dsFromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final EntityFactory entityFactory) {
 
-        return sets.stream()
-                .map(dsRest -> fromRequest(dsRest, softwareManagement, distributionSetManagement, entityFactory))
-                .collect(Collectors.toList());
+        return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).collect(Collectors.toList());
     }
 
     /**
@@ -65,12 +58,9 @@ public final class MgmtDistributionSetMapper {
      *
      * @param dsRest
      *            to convert
-     * @param softwareManagement
-     *            to use for conversion
      * @return converted {@link DistributionSet}
      */
     static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final EntityFactory entityFactory) {
 
         final List<Long> modules = new ArrayList<>(dsRest.getModules().size());

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.push;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 
 /**
  * EventHolder for {@link RolloutChangeEvent}s.

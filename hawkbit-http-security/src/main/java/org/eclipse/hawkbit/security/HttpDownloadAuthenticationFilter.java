@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
@@ -31,16 +31,16 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
     private static final Logger LOG = LoggerFactory.getLogger(HttpDownloadAuthenticationFilter.class);
 
     private final Pattern pattern;
-    private final Cache cache;
+    private final DownloadIdCache downloadIdCache;
 
     /**
      * Constructor.
      * 
-     * @param cache
+     * @param downloadIdCache
      *            the cache
      */
-    public HttpDownloadAuthenticationFilter(final Cache cache) {
-        this.cache = cache;
+    public HttpDownloadAuthenticationFilter(final DownloadIdCache downloadIdCache) {
+        this.downloadIdCache = downloadIdCache;
         this.pattern = Pattern.compile(REQUEST_ID_REGEX_PATTERN);
 
     }
@@ -56,7 +56,7 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
         if (id == null) {
             return null;
         }
-        return cache.get(id).get();
+        return downloadIdCache.get(id);
     }
 
     @Override

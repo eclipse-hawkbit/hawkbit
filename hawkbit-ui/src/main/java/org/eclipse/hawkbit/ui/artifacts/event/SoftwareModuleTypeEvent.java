@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.event;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
- * Event to represent software module type add, update or delete.
+ * TenantAwareEvent to represent software module type add, update or delete.
  */
 public class SoftwareModuleTypeEvent {
 

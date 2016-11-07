@@ -13,36 +13,44 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
-import org.eclipse.hawkbit.cache.CacheConstants;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
+import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
-import org.eclipse.hawkbit.repository.jpa.rsql.VirtualPropertyResolver;
+import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.Cache;
 import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cloud.bus.ConditionalOnBusEnabled;
+import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.util.AntPathMatcher;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import com.mongodb.MongoClientOptions;
 
 /**
@@ -59,8 +67,9 @@ import com.mongodb.MongoClientOptions;
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
     @Bean
-    public TestRepositoryManagement testRepositoryManagement() {
-        return new JpaTestRepositoryManagement();
+    public TestRepositoryManagement testRepositoryManagement(final SystemSecurityContext systemSecurityContext,
+            final SystemManagement systemManagement) {
+        return new JpaTestRepositoryManagement(cacheManager(), systemSecurityContext, systemManagement);
     }
 
     @Bean
@@ -87,7 +96,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public TenancyCacheManager cacheManager() {
+    public TenantAwareCacheManager cacheManager() {
         return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware());
     }
 
@@ -96,19 +105,21 @@ public class TestConfiguration implements AsyncConfigurer {
      * 
      * @return the cache
      */
-    @Bean(name = CacheConstants.DOWNLOAD_ID_CACHE)
-    public Cache downloadIdCache() {
-        return cacheManager().getDirectCache(CacheConstants.DOWNLOAD_ID_CACHE);
+    @Bean
+    public DownloadIdCache downloadIdCache() {
+        return new DefaultDownloadIdCache(cacheManager());
+    }
+
+    @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+    public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new SimpleApplicationEventMulticaster();
+        simpleApplicationEventMulticaster.setTaskExecutor(asyncExecutor());
+        return simpleApplicationEventMulticaster;
     }
 
     @Bean
-    public EventBus eventBus() {
-        return new AsyncEventBus(asyncExecutor());
-    }
-
-    @Bean
-    public EventBusHolder eventBusHolder() {
-        return EventBusHolder.getInstance();
+    public EventPublisherHolder eventBusHolder() {
+        return EventPublisherHolder.getInstance();
     }
 
     @Bean
@@ -138,6 +149,25 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     public VirtualPropertyReplacer virtualPropertyReplacer() {
         return new VirtualPropertyResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceMatcher serviceMatcher(final ApplicationContext applicationContext) {
+        final ServiceMatcher serviceMatcher = new ServiceMatcher();
+        serviceMatcher.setMatcher(new AntPathMatcher(":"));
+        serviceMatcher.setApplicationContext(applicationContext);
+        return serviceMatcher;
+    }
+
+    /**
+     * 
+     * @return the protostuff io message converter
+     */
+    @Bean
+    @ConditionalOnBusEnabled
+    public MessageConverter busProtoBufConverter() {
+        return new BusProtoStuffMessageConverter();
     }
 
 }

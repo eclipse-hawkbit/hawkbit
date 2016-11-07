@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.event;
 
 /**
- * Event generated in Upload artifact UI.
+ * TenantAwareEvent generated in Upload artifact UI.
  *
  *
  *

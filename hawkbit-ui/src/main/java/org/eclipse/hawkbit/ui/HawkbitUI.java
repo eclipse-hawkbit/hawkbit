@@ -61,6 +61,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     private transient EventPushStrategy pushStrategy;
 
+    protected transient EventBus.SessionEventBus eventBus;
+
     @Autowired
     private SpringViewProvider viewProvider;
 
@@ -78,23 +80,23 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     @Autowired
     private ErrorView errorview;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
-
     /**
      * Default constructor.
      */
-    public HawkbitUI() {
-        // is empty, is ok.
+    @Autowired
+    public HawkbitUI(final EventBus.SessionEventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
     /**
      * Constructor taking the push strategy.
-     * 
+     *
      * @param pushStrategy
      *            the strategy to push events from the backend to the UI
      */
-    public HawkbitUI(final EventPushStrategy pushStrategy) {
+    @Autowired
+    public HawkbitUI(final EventPushStrategy pushStrategy, final EventBus.SessionEventBus eventBus) {
+        this(eventBus);
         this.pushStrategy = pushStrategy;
     }
 

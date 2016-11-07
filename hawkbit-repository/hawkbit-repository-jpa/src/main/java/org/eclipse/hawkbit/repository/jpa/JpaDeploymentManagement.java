@@ -29,11 +29,10 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -49,7 +48,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -60,19 +58,22 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -86,7 +87,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
 
 /**
  * JPA implementation for {@link DeploymentManagement}.
@@ -107,9 +107,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private DistributionSetRepository distributoinSetRepository;
 
     @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
-
-    @Autowired
     private TargetRepository targetRepository;
 
     @Autowired
@@ -125,7 +122,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private AuditorAware<String> auditorProvider;
 
     @Autowired
-    private EventBus eventBus;
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -275,16 +275,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
         // action history.
-        targetIdsToActions.values().forEach(action -> {
-            final JpaActionStatus actionStatus = new JpaActionStatus();
-            actionStatus.setAction(action);
-            actionStatus.setOccurredAt(action.getCreatedAt());
-            actionStatus.setStatus(Status.RUNNING);
-            if (actionMessage != null) {
-                actionStatus.addMessage(actionMessage);
-            }
-            actionStatusRepository.save(actionStatus);
-        });
+        targetIdsToActions.values().forEach(action -> setRunningActionStatus(action, actionMessage));
 
         // flush to get action IDs
         entityManager.flush();
@@ -296,21 +287,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
-        final List<JpaSoftwareModule> softwareModules = softwareModuleRepository.findByAssignedTo(set);
-
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions);
 
         return result;
     }
 
     private void sendDistributionSetAssignmentEvent(final List<JpaTarget> targets, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions, final List<JpaSoftwareModule> softwareModules) {
+            final Map<String, JpaAction> targetIdsToActions) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
-                .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
-                        softwareModules));
+                .forEach(t -> assignDistributionSetEvent(targetIdsToActions.get(t.getControllerId())));
     }
 
     private static JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
@@ -329,17 +317,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionForTarget;
     }
 
-    private void assignDistributionSetEvent(final JpaTarget target, final Long actionId,
-            final List<JpaSoftwareModule> modules) {
-        ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
+    private void assignDistributionSetEvent(final Action action) {
+        ((JpaTargetInfo) action.getTarget().getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<SoftwareModule> softwareModules = (Collection) modules;
-        afterCommit.afterCommit(() -> {
-            eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
-            eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(), target,
-                    actionId, softwareModules));
-        });
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
     }
 
     /**
@@ -351,15 +333,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
-        final Set<Long> cancelledTargetIds = new HashSet<>();
-
         // Figure out if there are potential target/action combinations that
-        // need to be considered
-        // for cancelation
+        // need to be considered for cancellation
         final List<JpaAction> activeActions = actionRepository
                 .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(targetsIds,
                         Action.Status.CANCELING);
-        activeActions.forEach(action -> {
+        final Set<Long> cancelledTargetIds = activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
             // document that the status has been retrieved
 
@@ -368,13 +347,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
-            cancelledTargetIds.add(action.getTarget().getId());
-        });
+            return action.getTarget().getId();
+        }).collect(Collectors.toSet());
 
         actionRepository.save(activeActions);
 
         return cancelledTargetIds;
 
+    }
+
+
+    private DistributionSetAssignmentResult assignDistributionSetByTargetId(@NotNull final JpaDistributionSet set,
+            @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
+
+        return assignDistributionSetToTargets(set, tIDs.stream()
+                .map(t -> new TargetWithActionType(t, actionType, forcedTime)).collect(Collectors.toList()), null, null,
+                null);
     }
 
     @Override
@@ -406,7 +394,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     /**
      * Sends the {@link CancelTargetAssignmentEvent} for a specific target to
-     * the {@link EventBus}.
+     * the eventPublisher.
      *
      * @param target
      *            the Target which has been assigned to a distribution set
@@ -414,7 +402,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventBus.post(new CancelTargetAssignmentEvent(target, actionId)));
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
 
     @Override
@@ -474,53 +463,66 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
-    public Action startScheduledAction(final Action action) {
+    public Action startScheduledAction(final Long actionId) {
 
-        final JpaAction mergedAction = (JpaAction) entityManager.merge(action);
-        final JpaTarget mergedTarget = (JpaTarget) entityManager.merge(action.getTarget());
+        final JpaAction action = actionRepository.findById(actionId);
 
         // check if we need to override running update actions
         final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
 
-        final boolean hasDistributionSetAlreadyAssigned = targetRepository
-                .count(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(
-                        Collections.singletonList(mergedTarget.getControllerId()),
-                        action.getDistributionSet().getId())) == 0;
-        if (hasDistributionSetAlreadyAssigned) {
+        if (action.getTarget().getAssignedDistributionSet() != null && action.getDistributionSet().getId()
+                .equals(action.getTarget().getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
-            // need to start the scheduled action, just finished it.
-            mergedAction.setStatus(Status.FINISHED);
-            mergedAction.setActive(false);
-            return actionRepository.save(mergedAction);
+            // need to start the scheduled action, just finish it.
+            action.setStatus(Status.FINISHED);
+            action.setActive(false);
+            setSkipActionStatus(action);
+            return actionRepository.save(action);
         }
 
-        mergedAction.setActive(true);
-        mergedAction.setStatus(Status.RUNNING);
-        final Action savedAction = actionRepository.save(mergedAction);
+        action.setActive(true);
+        action.setStatus(Status.RUNNING);
+        final JpaAction savedAction = actionRepository.save(action);
 
-        final JpaActionStatus actionStatus = new JpaActionStatus();
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(action.getCreatedAt());
-        actionStatus.setStatus(Status.RUNNING);
-        actionStatusRepository.save(actionStatus);
+        setRunningActionStatus(savedAction, null);
 
-        mergedTarget.setAssignedDistributionSet(action.getDistributionSet());
-        final JpaTargetInfo targetInfo = (JpaTargetInfo) mergedTarget.getTargetInfo();
+        final JpaTarget target = (JpaTarget) savedAction.getTarget();
+
+        target.setAssignedDistributionSet(savedAction.getDistributionSet());
+        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
         targetInfo.setUpdateStatus(TargetUpdateStatus.PENDING);
-        targetRepository.save(mergedTarget);
+        targetRepository.save(target);
         targetInfoRepository.save(targetInfo);
 
         // in case we canceled an action before for this target, then don't fire
         // assignment event
         if (!overrideObsoleteUpdateActions.contains(savedAction.getId())) {
-            final List<JpaSoftwareModule> softwareModules = softwareModuleRepository
-                    .findByAssignedTo((JpaDistributionSet) action.getDistributionSet());
-            // send distribution set assignment event
-
-            assignDistributionSetEvent((JpaTarget) mergedAction.getTarget(), mergedAction.getId(), softwareModules);
+            assignDistributionSetEvent(savedAction);
         }
         return savedAction;
+    }
+
+    private void setRunningActionStatus(final JpaAction action, final String actionMessage) {
+        final JpaActionStatus actionStatus = new JpaActionStatus();
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(action.getCreatedAt());
+        actionStatus.setStatus(Status.RUNNING);
+        if (actionMessage != null) {
+            actionStatus.addMessage(actionMessage);
+        }
+
+        actionStatusRepository.save(actionStatus);
+    }
+
+    private void setSkipActionStatus(final JpaAction action) {
+        final JpaActionStatus actionStatus = new JpaActionStatus();
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(action.getCreatedAt());
+        actionStatus.setStatus(Status.RUNNING);
+        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX
+                + "Distribution Set is already assigned. Skipping this action.");
+        actionStatusRepository.save(actionStatus);
     }
 
     @Override
@@ -632,10 +634,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public List<Action> findActionsByRolloutGroupParentAndStatus(final Rollout rollout,
+    public List<Long> findActionsByRolloutGroupParentAndStatus(final Rollout rollout,
             final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
         return actionRepository.findByRolloutAndRolloutGroupParentAndStatus((JpaRollout) rollout,
-                (JpaRolloutGroup) rolloutGroupParent, actionStatus);
+                (JpaRolloutGroup) rolloutGroupParent, actionStatus).stream().map(ident -> ident.getId())
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
+        return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);
     }
 
     @Override
