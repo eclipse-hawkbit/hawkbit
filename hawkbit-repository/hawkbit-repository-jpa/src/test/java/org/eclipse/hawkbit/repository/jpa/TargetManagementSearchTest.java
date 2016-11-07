@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -51,10 +49,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
             + "That includes both the test itself, as a count operation with the same filters "
             + "and query definitions by RSQL (named and un-named).")
     public void targetSearchWithVariousFilterCombinations() {
-        final TargetTag targTagX = tagManagement.createTargetTag(new JpaTargetTag("TargTag-X"));
-        final TargetTag targTagY = tagManagement.createTargetTag(new JpaTargetTag("TargTag-Y"));
-        final TargetTag targTagZ = tagManagement.createTargetTag(new JpaTargetTag("TargTag-Z"));
-        final TargetTag targTagW = tagManagement.createTargetTag(new JpaTargetTag("TargTag-W"));
+        final TargetTag targTagX = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-X"));
+        final TargetTag targTagY = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Y"));
+        final TargetTag targTagZ = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-Z"));
+        final TargetTag targTagW = tagManagement.createTargetTag(entityFactory.tag().create().name("TargTag-W"));
 
         final DistributionSet setA = testdataFactory.createDistributionSet("");
 
@@ -65,41 +63,27 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long lastTargetNull = null;
 
         final String targetDsAIdPref = "targ-A";
-        List<Target> targAs = new ArrayList<Target>();
-        for (final Target t : testdataFactory.generateTargets(100, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"))) {
-            targAs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryNotOverdue,
-                    t.getTargetInfo().getAddress()));
-        }
+        List<Target> targAs = testdataFactory.createTargets(100, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"), lastTargetQueryNotOverdue);
         targAs = targetManagement.toggleTagAssignment(targAs, targTagX).getAssignedEntity();
 
         final String targetDsBIdPref = "targ-B";
-        List<Target> targBs = new ArrayList<Target>();
-        for (final Target t : testdataFactory.generateTargets(100, targetDsBIdPref,
-                targetDsBIdPref.concat(" description"))) {
-            targBs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryAlwaysOverdue,
-                    t.getTargetInfo().getAddress()));
-        }
+        List<Target> targBs = testdataFactory.createTargets(100, targetDsBIdPref,
+                targetDsBIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
+
         targBs = targetManagement.toggleTagAssignment(targBs, targTagY).getAssignedEntity();
         targBs = targetManagement.toggleTagAssignment(targBs, targTagW).getAssignedEntity();
 
         final String targetDsCIdPref = "targ-C";
-        List<Target> targCs = new ArrayList<Target>();
-        for (final Target t : testdataFactory.generateTargets(100, targetDsCIdPref,
-                targetDsCIdPref.concat(" description"))) {
-            targCs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetQueryAlwaysOverdue,
-                    t.getTargetInfo().getAddress()));
-        }
+        List<Target> targCs = testdataFactory.createTargets(100, targetDsCIdPref,
+                targetDsCIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
+
         targCs = targetManagement.toggleTagAssignment(targCs, targTagZ).getAssignedEntity();
         targCs = targetManagement.toggleTagAssignment(targCs, targTagW).getAssignedEntity();
 
         final String targetDsDIdPref = "targ-D";
-        final List<Target> targDs = new ArrayList<Target>();
-        for (final Target t : testdataFactory.generateTargets(100, targetDsDIdPref,
-                targetDsDIdPref.concat(" description"))) {
-            targDs.add(targetManagement.createTarget(t, TargetUpdateStatus.UNKNOWN, lastTargetNull,
-                    t.getTargetInfo().getAddress()));
-        }
+        final List<Target> targDs = testdataFactory.createTargets(100, targetDsDIdPref,
+                targetDsDIdPref.concat(" description"), lastTargetNull);
 
         final String assignedC = targCs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedC);
@@ -111,9 +95,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getActions().get(0);
 
         // set one installed DS also
-        final Action action = deploymentManagement.findActionWithDetails(actionId);
-        controllerManagament.addUpdateActionStatus(actionId,
-                new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "message"));
+        controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actionId).status(Status.FINISHED).message("message"));
         assignDistributionSet(setA.getId(), installedC);
 
         final List<TargetUpdateStatus> unknown = Lists.newArrayList(TargetUpdateStatus.UNKNOWN);
@@ -122,12 +105,12 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 TargetUpdateStatus.PENDING);
 
         // get final updated version of targets
-        targAs = targetManagement.findTargetByControllerID(
-                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
-        targBs = targetManagement.findTargetByControllerID(
-                targBs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
-        targCs = targetManagement.findTargetByControllerID(
-                targCs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+        targAs = targetManagement
+                .findTargetByControllerID(targAs.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        targBs = targetManagement
+                .findTargetByControllerID(targBs.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        targCs = targetManagement
+                .findTargetByControllerID(targCs.stream().map(Target::getControllerId).collect(Collectors.toList()));
 
         // try to find several targets with different filter settings
         verifyThatRepositoryContains400Targets();
@@ -724,12 +707,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     @Description("Tests the correct order of targets based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
     public void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {
 
-        final List<Target> notAssigned = targetManagement
-                .createTargets(testdataFactory.generateTargets(3, "not", "first description"));
-        List<Target> targAssigned = targetManagement
-                .createTargets(testdataFactory.generateTargets(3, "assigned", "first description"));
-        List<Target> targInstalled = targetManagement
-                .createTargets(testdataFactory.generateTargets(3, "installed", "first description"));
+        final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
+        List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
+        List<Target> targInstalled = testdataFactory.createTargets(3, "installed", "first description");
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
@@ -737,7 +717,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = testdataFactory
                 .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
-                .stream().map(action -> action.getTarget()).collect(Collectors.toList());
+                .stream().map(Action::getTarget).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),
                 new FilterParams(null, null, null, null, Boolean.FALSE, new String[0]));
@@ -768,24 +748,17 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long[] overdueMix = { lastTargetQueryAlwaysOverdue, lastTargetQueryNotOverdue,
                 lastTargetQueryAlwaysOverdue, lastTargetNull, lastTargetQueryAlwaysOverdue };
 
-        final List<Target> notAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "not",
-                "first description");
-        final List<Target> targAssignedToBeCreated = testdataFactory.generateTargets(overdueMix.length, "assigned",
-                "first description");
-        final List<Target> targInstalledToBeCreated = testdataFactory.generateTargets(overdueMix.length, "installed",
-                "first description");
-
-        final List<Target> notAssigned = new ArrayList<>();
-        List<Target> targAssigned = new ArrayList<>();
-        List<Target> targInstalled = new ArrayList<>();
+        final List<Target> notAssigned = Lists.newArrayListWithExpectedSize(overdueMix.length);
+        List<Target> targAssigned = Lists.newArrayListWithExpectedSize(overdueMix.length);
+        List<Target> targInstalled = Lists.newArrayListWithExpectedSize(overdueMix.length);
 
         for (int i = 0; i < overdueMix.length; i++) {
-            notAssigned.add(targetManagement.createTarget(notAssignedToBeCreated.get(i), TargetUpdateStatus.UNKNOWN,
-                    overdueMix[i], notAssignedToBeCreated.get(i).getTargetInfo().getAddress()));
-            targAssigned.add(targetManagement.createTarget(targAssignedToBeCreated.get(i), TargetUpdateStatus.UNKNOWN,
-                    overdueMix[i], targAssignedToBeCreated.get(i).getTargetInfo().getAddress()));
-            targInstalled.add(targetManagement.createTarget(targInstalledToBeCreated.get(i), TargetUpdateStatus.UNKNOWN,
-                    overdueMix[i], targInstalledToBeCreated.get(i).getTargetInfo().getAddress()));
+            notAssigned.add(targetManagement.createTarget(
+                    entityFactory.target().create().controllerId("not" + i).lastTargetQuery(overdueMix[i])));
+            targAssigned.add(targetManagement.createTarget(
+                    entityFactory.target().create().controllerId("assigned" + i).lastTargetQuery(overdueMix[i])));
+            targInstalled.add(targetManagement.createTarget(
+                    entityFactory.target().create().controllerId("installed" + i).lastTargetQuery(overdueMix[i])));
         }
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
@@ -821,8 +794,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that targets with given assigned DS are returned from repository.")
     public void findTargetByAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
-        targetManagement.createTargets(testdataFactory.generateTargets(10, "unassigned"));
-        List<Target> assignedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
+        testdataFactory.createTargets(10, "unassigned", "unassigned");
+        List<Target> assignedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         assignDistributionSet(assignedSet, assignedtargets);
 
@@ -841,11 +814,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     public void findTargetWithoutAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final TargetFilterQuery tfq = targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.generateTargetFilterQuery("tfq", "name==*"));
-        final List<Target> unassignedTargets = targetManagement
-                .createTargets(testdataFactory.generateTargets(12, "unassigned"));
-        final List<Target> assignedTargets = targetManagement
-                .createTargets(testdataFactory.generateTargets(10, "assigned"));
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("tfq").query("name==*"));
+        final List<Target> unassignedTargets = testdataFactory.createTargets(12, "unassigned", "unassigned");
+        final List<Target> assignedTargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         assignDistributionSet(assignedSet, assignedTargets);
 
@@ -861,13 +832,12 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     public void findTargetByInstalledDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
-        targetManagement.createTargets(testdataFactory.generateTargets(10, "unassigned"));
-        List<Target> installedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
+        testdataFactory.createTargets(10, "unassigned", "unassigned");
+        List<Target> installedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getActions()
-                .forEach(actionId -> controllerManagament.addUpdateActionStatus(actionId,
-                        new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "message")));
+        assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets

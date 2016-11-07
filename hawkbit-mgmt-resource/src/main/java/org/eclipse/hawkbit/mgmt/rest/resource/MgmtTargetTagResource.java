@@ -97,7 +97,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
-                .createTargetTags(MgmtTagMapper.mapTargeTagFromRequest(entityFactory, tags));
+                .createTargetTags(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 
@@ -106,8 +106,9 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             @RequestBody final MgmtTagRequestBodyPut restTargetTagRest) {
         LOG.debug("update {} target tag", restTargetTagRest);
 
-        final TargetTag updateTargetTag = tagManagement.updateTargetTag(targetTagId, restTargetTagRest.getName(),
-                restTargetTagRest.getDescription(), restTargetTagRest.getColour());
+        final TargetTag updateTargetTag = tagManagement
+                .updateTargetTag(entityFactory.tag().update(targetTagId).name(restTargetTagRest.getName())
+                        .description(restTargetTagRest.getDescription()).colour(restTargetTagRest.getColour()));
 
         LOG.debug("target tag updated");
 

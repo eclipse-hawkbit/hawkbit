@@ -14,6 +14,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -45,7 +47,7 @@ public interface TagManagement {
     /**
      * Creates a {@link DistributionSet}.
      *
-     * @param distributionSetTag
+     * @param create
      *            to be created.
      * @return the new {@link DistributionSet}
      * @throws EntityAlreadyExistsException
@@ -53,24 +55,24 @@ public interface TagManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    DistributionSetTag createDistributionSetTag(@NotNull DistributionSetTag distributionSetTag);
+    DistributionSetTag createDistributionSetTag(@NotNull TagCreate create);
 
     /**
      * Creates multiple {@link DistributionSetTag}s.
      *
-     * @param distributionSetTags
+     * @param creates
      *            to be created
      * @return the new {@link DistributionSetTag}
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<DistributionSetTag> createDistributionSetTags(@NotNull Collection<DistributionSetTag> distributionSetTags);
+    List<DistributionSetTag> createDistributionSetTags(@NotNull Collection<TagCreate> creates);
 
     /**
      * Creates a new {@link TargetTag}.
      * 
-     * @param targetTag
+     * @param create
      *            to be created
      *
      * @return the new created {@link TargetTag}
@@ -79,12 +81,12 @@ public interface TagManagement {
      *             if given object already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetTag createTargetTag(@NotNull TargetTag targetTag);
+    TargetTag createTargetTag(@NotNull TagCreate create);
 
     /**
      * created multiple {@link TargetTag}s.
      * 
-     * @param targetTags
+     * @param creates
      *            to be created
      * @return the new created {@link TargetTag}s
      *
@@ -92,7 +94,7 @@ public interface TagManagement {
      *             if given object has already an ID.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetTag> createTargetTags(@NotNull Collection<TargetTag> targetTags);
+    List<TargetTag> createTargetTags(@NotNull Collection<TagCreate> creates);
 
     /**
      * Deletes {@link DistributionSetTag} by given
@@ -227,14 +229,8 @@ public interface TagManagement {
     /**
      * Updates an existing {@link DistributionSetTag}.
      *
-     * @param distributionSetTagId
+     * @param update
      *            to be updated
-     * @param name
-     *            to update or <code>null</code>
-     * @param description
-     *            to update or <code>null</code>
-     * @param colour
-     *            to update or <code>null</code>
      * 
      * @return the updated {@link DistributionSet}
      * 
@@ -243,20 +239,13 @@ public interface TagManagement {
      *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetTag updateDistributionSetTag(@NotNull Long distributionSetTagId, String name, String description,
-            String colour);
+    DistributionSetTag updateDistributionSetTag(@NotNull TagUpdate update);
 
     /**
      * updates the {@link TargetTag}.
      *
-     * @param targetTagId
+     * @param update
      *            the {@link TargetTag} with updated values
-     * @param name
-     *            to update or <code>null</code>
-     * @param description
-     *            to update or <code>null</code>
-     * @param colour
-     *            to update or <code>null</code>
      * @return the updated {@link TargetTag}
      * 
      * @throws EntityNotFoundException
@@ -264,6 +253,6 @@ public interface TagManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTag updateTargetTag(@NotNull Long targetTagId, String name, String description, String colour);
+    TargetTag updateTargetTag(@NotNull TagUpdate update);
 
 }

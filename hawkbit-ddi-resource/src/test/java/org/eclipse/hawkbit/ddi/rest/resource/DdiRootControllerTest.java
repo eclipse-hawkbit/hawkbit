@@ -85,7 +85,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
-        targetManagement.createTarget(entityFactory.generateTarget(knownTargetControllerId));
+        testdataFactory.createTarget(knownTargetControllerId);
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
@@ -224,8 +224,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = entityFactory.generateTarget("4711");
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget("4711");
 
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -278,11 +277,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
-
-        // mock
-        final Target target = entityFactory.generateTarget("911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        Target savedTarget = targetManagement.createTarget(target);
+        Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);

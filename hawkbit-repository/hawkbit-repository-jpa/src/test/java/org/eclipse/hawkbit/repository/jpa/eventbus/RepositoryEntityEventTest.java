@@ -56,7 +56,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the target created event is published when a target has been created")
     public void targetCreatedEventIsPublished() throws InterruptedException {
-        final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        final Target createdTarget = testdataFactory.createTarget("12345");
 
         final TargetCreatedEvent targetCreatedEvent = eventListener.waitForEvent(TargetCreatedEvent.class, 1,
                 TimeUnit.SECONDS);
@@ -67,8 +67,9 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the target update event is published when a target has been updated")
     public void targetUpdateEventIsPublished() throws InterruptedException {
-        final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
-        targetManagement.updateTarget(createdTarget.getControllerId(), "updateName", null, null, null);
+        final Target createdTarget = testdataFactory.createTarget("12345");
+        targetManagement
+                .updateTarget(entityFactory.target().update(createdTarget.getControllerId()).name("updateName"));
 
         final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class, 1,
                 TimeUnit.SECONDS);
@@ -79,7 +80,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the target info update event is published when a target info has been updated")
     public void targetInfoUpdateEventIsPublished() throws InterruptedException {
-        final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        final Target createdTarget = testdataFactory.createTarget("12345");
         controllerManagament.updateTargetStatus(createdTarget.getTargetInfo(), TargetUpdateStatus.PENDING,
                 System.currentTimeMillis(), URI.create("http://127.0.0.1"));
 
@@ -92,7 +93,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the target deleted event is published when a target has been deleted")
     public void targetDeletedEventIsPublished() throws InterruptedException {
-        final Target createdTarget = targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        final Target createdTarget = testdataFactory.createTarget("12345");
 
         targetManagement.deleteTargets(createdTarget.getId());
 
@@ -105,32 +106,26 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the distribution set created event is published when a distribution set has been created")
     public void distributionSetCreatedEventIsPublished() throws InterruptedException {
-        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
-                null, null, false);
-        final DistributionSet createDistributionSet = distributionSetManagement
-                .createDistributionSet(generateDistributionSet);
+        final DistributionSet generateDistributionSet = testdataFactory.createDistributionSet();
 
         final DistributionCreatedEvent dsCreatedEvent = eventListener.waitForEvent(DistributionCreatedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(dsCreatedEvent).isNotNull();
-        assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(createDistributionSet.getId());
+        assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(generateDistributionSet.getId());
     }
 
     @Test
     @Description("Verifies that the distribution set deleted event is published when a distribution set has been deleted")
     public void distributionSetDeletedEventIsPublished() throws InterruptedException {
 
-        final DistributionSet generateDistributionSet = entityFactory.generateDistributionSet("dsEventTest", "1", null,
-                null, null, false);
-        final DistributionSet createDistributionSet = distributionSetManagement
-                .createDistributionSet(generateDistributionSet);
+        final DistributionSet generateDistributionSet = testdataFactory.createDistributionSet();
 
-        distributionSetManagement.deleteDistributionSet(createDistributionSet);
+        distributionSetManagement.deleteDistributionSet(generateDistributionSet);
 
         final DistributionDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionDeletedEvent.class, 1,
                 TimeUnit.SECONDS);
         assertThat(dsDeletedEvent).isNotNull();
-        assertThat(dsDeletedEvent.getDistributionSetId()).isEqualTo(createDistributionSet.getId());
+        assertThat(dsDeletedEvent.getDistributionSetId()).isEqualTo(generateDistributionSet.getId());
     }
 
     private class MyEventListener {

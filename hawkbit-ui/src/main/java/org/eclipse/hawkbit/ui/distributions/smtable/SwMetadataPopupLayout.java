@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
@@ -28,7 +30,7 @@ import com.vaadin.spring.annotation.ViewScope;
  */
 @SpringComponent
 @ViewScope
-public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, SoftwareModuleMetadata> {
+public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, MetaData> {
 
     private static final long serialVersionUID = -1252090014161012563L;
 
@@ -54,7 +56,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         final SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entity.getId(),
                 entityFactory.generateMetadata(key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
-        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata));
+        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata, entity));
         return swMetadata;
     }
 
@@ -70,8 +72,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     }
 
     @Override
-    protected List<SoftwareModuleMetadata> getMetadataList() {
-        return softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(getSelectedEntity().getId());
+    protected List<MetaData> getMetadataList() {
+        return Collections.unmodifiableList(
+                softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(getSelectedEntity().getId()));
     }
 
     /**
@@ -81,7 +84,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     protected void deleteMetadata(final SoftwareModule entity, final String key, final String value) {
         softwareManagement.deleteSoftwareModuleMetadata(entity.getId(), key);
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA,
-                entityFactory.generateMetadata(key, value)));
+                entityFactory.generateMetadata(key, value), entity));
     }
 
     @Override

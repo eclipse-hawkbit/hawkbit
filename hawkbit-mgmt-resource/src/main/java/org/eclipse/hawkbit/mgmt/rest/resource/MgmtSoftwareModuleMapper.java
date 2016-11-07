@@ -25,14 +25,11 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -44,26 +41,10 @@ public final class MgmtSoftwareModuleMapper {
         // Utility class
     }
 
-    private static SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type,
-            final SoftwareManagement softwareManagement) {
-        if (type == null) {
-            throw new ConstraintViolationException("type cannot be null");
-        }
-
-        final SoftwareModuleType smType = softwareManagement.findSoftwareModuleTypeByKey(type.trim());
-
-        if (smType == null) {
-            throw new EntityNotFoundException(type.trim());
-        }
-
-        return smType;
-    }
-
-    static SoftwareModule fromRequest(final EntityFactory entityFactory,
-            final MgmtSoftwareModuleRequestBodyPost smsRest, final SoftwareManagement softwareManagement) {
-        return entityFactory.generateSoftwareModule(
-                getSoftwareModuleTypeFromKeyString(smsRest.getType(), softwareManagement), smsRest.getName(),
-                smsRest.getVersion(), smsRest.getDescription(), smsRest.getVendor());
+    static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
+            final MgmtSoftwareModuleRequestBodyPost smsRest) {
+        return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
+                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor());
     }
 
     static List<MetaData> fromRequestSwMetadata(final EntityFactory entityFactory,
@@ -77,14 +58,13 @@ public final class MgmtSoftwareModuleMapper {
                 .collect(Collectors.toList());
     }
 
-    static List<SoftwareModule> smFromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest, final SoftwareManagement softwareManagement) {
+    static List<SoftwareModuleCreate> smFromRequest(final EntityFactory entityFactory,
+            final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
         if (smsRest == null) {
             return Collections.emptyList();
         }
 
-        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest, softwareManagement))
-                .collect(Collectors.toList());
+        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
     /**

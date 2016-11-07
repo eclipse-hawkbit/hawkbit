@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,10 +32,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.builder.TargetCreate;
+import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -184,27 +187,19 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Target updateTarget(final String controllerID, final String name, final String description,
-            final String address, final String securityToken) {
-        final JpaTarget target = Optional.ofNullable(targetRepository.findByControllerId(controllerID))
-                .orElseThrow(() -> new EntityNotFoundException("Target with ID " + controllerID + " not found."));
+    public Target updateTarget(final TargetUpdate u) {
+        final JpaTargetUpdate update = (JpaTargetUpdate) u;
+
+        final JpaTarget target = Optional.ofNullable(targetRepository.findByControllerId(update.getControllerId()))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Target with ID " + update.getControllerId() + " not found."));
 
         target.setNew(false);
 
-        if (name != null) {
-            target.setName(name);
-        }
-
-        if (description != null) {
-            target.setDescription(description);
-        }
-
-        if (address != null) {
-            target.getTargetInfo().setAddress(address);
-        }
-        if (securityToken != null) {
-            target.setSecurityToken(securityToken);
-        }
+        update.getName().ifPresent(target::setName);
+        update.getDescription().ifPresent(target::setDescription);
+        update.getAddress().ifPresent(address -> ((JpaTargetInfo) target.getTargetInfo()).setAddress(address));
+        update.getSecurityToken().ifPresent(target::setSecurityToken);
 
         return targetRepository.save(target);
     }
@@ -619,51 +614,30 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
-    public Target createTarget(final Target t, final TargetUpdateStatus status, final Long lastTargetQuery,
-            final URI address) {
-        final JpaTarget target = (JpaTarget) t;
+    public Target createTarget(final TargetCreate c) {
+        final JpaTargetCreate create = (JpaTargetCreate) c;
+
+        final JpaTarget target = create.build();
 
         if (targetRepository.findByControllerId(target.getControllerId()) != null) {
-            throw new EntityAlreadyExistsException(target.getControllerId());
+            throw new EntityAlreadyExistsException();
         }
 
         target.setNew(true);
         final JpaTarget savedTarget = targetRepository.save(target);
         final JpaTargetInfo targetInfo = (JpaTargetInfo) savedTarget.getTargetInfo();
-        targetInfo.setUpdateStatus(status);
-        if (lastTargetQuery != null) {
-            targetInfo.setLastTargetQuery(lastTargetQuery);
-        }
-        if (address != null) {
-            targetInfo.setAddress(address.toString());
-        }
+
         targetInfo.setNew(true);
         final Target targetToReturn = targetInfoRepository.save(targetInfo).getTarget();
         targetInfo.setNew(false);
         return targetToReturn;
-
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
-    public Target createTarget(final Target target) {
-        return createTarget(target, TargetUpdateStatus.UNKNOWN, null, null);
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> createTargets(final Collection<Target> targets) {
-        if (!targets.isEmpty() && targetRepository.countByControllerIdIn(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
-            throw new EntityAlreadyExistsException();
-        }
-
-        return targets.stream()
-                .map(t -> createTarget(t, TargetUpdateStatus.UNKNOWN, null, t.getTargetInfo().getAddress()))
-                .collect(Collectors.toList());
+    public List<Target> createTargets(final Collection<TargetCreate> targets) {
+        return targets.stream().map(this::createTarget).collect(Collectors.toList());
     }
 
     @Override

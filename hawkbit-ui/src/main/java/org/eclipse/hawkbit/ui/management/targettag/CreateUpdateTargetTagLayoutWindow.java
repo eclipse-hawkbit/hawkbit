@@ -126,8 +126,8 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                 colour = getColorPicked();
             }
 
-            TargetTag newTargetTag = entityFactory.generateTargetTag(getTagNameValue(), getTagDescValue(), colour);
-            newTargetTag = tagManagement.createTargetTag(newTargetTag);
+            final TargetTag newTargetTag = tagManagement.createTargetTag(
+                    entityFactory.tag().create().name(getTagNameValue()).description(getTagDescValue()).colour(colour));
             displaySuccess(newTargetTag.getName());
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));

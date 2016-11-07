@@ -101,7 +101,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
-                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(entityFactory, tags));
+                .createDistributionSetTags(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
@@ -112,8 +112,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @RequestBody final MgmtTagRequestBodyPut restDSTagRest) {
 
         return new ResponseEntity<>(
-                MgmtTagMapper.toResponse(tagManagement.updateDistributionSetTag(distributionsetTagId,
-                        restDSTagRest.getName(), restDSTagRest.getDescription(), restDSTagRest.getColour())),
+                MgmtTagMapper.toResponse(tagManagement.updateDistributionSetTag(
+                        entityFactory.tag().update(distributionsetTagId).name(restDSTagRest.getName())
+                                .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()))),
                 HttpStatus.OK);
     }
 

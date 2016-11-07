@@ -425,8 +425,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit.getId(), rolloutName.getValue(),
-                description.getValue());
+        final Rollout updatedRollout = rolloutManagement.updateRollout(entityFactory.rollout()
+                .update(rolloutForEdit.getId()).name(rolloutName.getValue()).description(description.getValue()));
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
         eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
     }
@@ -471,11 +471,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
 
-        final Rollout rolloutToCreate = entityFactory.generateRollout(rolloutName.getValue(), description.getValue(),
-                distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()),
-                getTargetFilterQuery(), getActionType(), getForcedTimeStamp());
-
-        return rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
+        return rolloutManagement.createRolloutAsync(entityFactory.rollout().create().name(rolloutName.getValue())
+                .description(description.getValue()).set(distributionSetIdName.getId())
+                .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp()),
+                amountGroup, conditions);
     }
 
     private String getTargetFilterQuery() {

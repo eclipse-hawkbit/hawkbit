@@ -149,8 +149,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
             message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI();
         }
 
-        return controllerManagement.addInformationalActionStatus(action.getId(),
-                entityFactory.generateActionStatus(Status.DOWNLOAD, System.currentTimeMillis(), message));
+        return controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(action.getId()).status(Status.DOWNLOAD).message(message));
     }
 
 }

@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.tenancy;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
@@ -139,16 +136,12 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     @Description(value = "Ensures that multiple distribution sets with same name and version can be created for different tenants.")
     public void createMultipleDistributionSetsWithSameNameForDifferentTenants() throws Exception {
 
-        // known ds name for overall tenants same
-        final String knownDistributionSetName = "dsName";
-        final String knownDistributionSetVersion = "0.0.0";
-
         // known tenant names
         final String tenant = "aTenant";
         final String anotherTenant = "anotherTenant";
         // create distribution sets
-        createDistributionSetForTenant(knownDistributionSetName, knownDistributionSetVersion, tenant);
-        createDistributionSetForTenant(knownDistributionSetName, knownDistributionSetVersion, anotherTenant);
+        createDistributionSetForTenant(tenant);
+        createDistributionSetForTenant(anotherTenant);
 
         // ensure both tenants see their distribution sets
         final Page<DistributionSet> findDistributionSetsForTenant = findDistributionSetForTenant(tenant);
@@ -164,7 +157,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     private Target createTargetForTenant(final String controllerId, final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> targetManagement.createTarget(new JpaTarget(controllerId)));
+                () -> testdataFactory.createTarget(controllerId));
     }
 
     private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
@@ -179,22 +172,14 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         });
     }
 
-    private DistributionSet createDistributionSetForTenant(final String name, final String version, final String tenant)
-            throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), () -> {
-            final JpaDistributionSet ds = new JpaDistributionSet();
-            ds.setName(name);
-            ds.setTenant(tenant);
-            ds.setVersion(version);
-            ds.setType(distributionSetManagement
-                    .createDistributionSetType(new JpaDistributionSetType("typetest", "test", "foobar")));
-            return distributionSetManagement.createDistributionSet(ds);
-        });
+    private DistributionSet createDistributionSetForTenant(final String tenant) throws Exception {
+        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
+                () -> testdataFactory.createDistributionSet());
     }
 
     private Page<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, false));
+                () -> distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true));
     }
 
 }

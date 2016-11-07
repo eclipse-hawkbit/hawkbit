@@ -121,7 +121,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     public String toString() {
-        return "BaseEntity [id=" + id + "]";
+        return this.getClass().getSimpleName() + " [id=" + id + "]";
     }
 
     public void setId(final Long id) {

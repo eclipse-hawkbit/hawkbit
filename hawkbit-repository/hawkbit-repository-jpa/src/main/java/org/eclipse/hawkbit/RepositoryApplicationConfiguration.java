@@ -26,6 +26,10 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
+import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
@@ -44,6 +48,10 @@ import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
@@ -100,6 +108,27 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     public RsqlValidationOracle rsqlValidationOracle() {
         return new RsqlParserValidationOracle();
+    }
+
+    @Bean
+    public DistributionSetBuilder distributionSetBuilder(final DistributionSetManagement distributionSetManagement,
+            final SoftwareManagement softwareManagement) {
+        return new JpaDistributionSetBuilder(distributionSetManagement, softwareManagement);
+    }
+
+    @Bean
+    public DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareManagement softwareManagement) {
+        return new JpaDistributionSetTypeBuilder(softwareManagement);
+    }
+
+    @Bean
+    public SoftwareModuleBuilder softwareModuleBuilder(final SoftwareManagement softwareManagement) {
+        return new JpaSoftwareModuleBuilder(softwareManagement);
+    }
+
+    @Bean
+    public RolloutBuilder rolloutBuilder(final DistributionSetManagement distributionSetManagement) {
+        return new JpaRolloutBuilder(distributionSetManagement);
     }
 
     /**
@@ -415,9 +444,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignChecker autoAssignChecker(TargetFilterQueryManagement targetFilterQueryManagement,
-            TargetManagement targetManagement, DeploymentManagement deploymentManagement,
-            PlatformTransactionManager transactionManager) {
+    public AutoAssignChecker autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
@@ -437,8 +466,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AutoAssignScheduler autoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
-            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+    public AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware,
+            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final AutoAssignChecker autoAssignChecker) {
         return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
 }

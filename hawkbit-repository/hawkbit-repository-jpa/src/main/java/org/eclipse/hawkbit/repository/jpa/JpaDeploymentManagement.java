@@ -214,13 +214,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     "Distribution set of type " + set.getType().getKey() + " is incomplete: " + set.getId());
         }
 
-        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getTargetId)
+        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .collect(Collectors.toList());
 
         LOG.debug("assignDistribution({}) to {} targets", set, controllerIDs.size());
 
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
-                .collect(Collectors.toMap(TargetWithActionType::getTargetId, Function.identity()));
+                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
         // split tIDs length into max entries in-statement because many database
         // have constraint of max entries in in-statements e.g. Oracle with

@@ -14,6 +14,10 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -68,25 +72,25 @@ public interface SoftwareManagement {
     /**
      * Create {@link SoftwareModule}s in the repository.
      *
-     * @param swModules
+     * @param creates
      *            {@link SoftwareModule}s to create
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModule> swModules);
+    List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModuleCreate> creates);
 
     /**
      *
-     * @param swModule
+     * @param create
      *            SoftwareModule to create
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    SoftwareModule createSoftwareModule(@NotNull SoftwareModule swModule);
+    SoftwareModule createSoftwareModule(@NotNull SoftwareModuleCreate create);
 
     /**
      * creates a list of software module meta data entries.
@@ -122,22 +126,22 @@ public interface SoftwareManagement {
     /**
      * Creates multiple {@link SoftwareModuleType}s.
      *
-     * @param types
+     * @param creates
      *            to create
      * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleType> types);
+    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleTypeCreate> creates);
 
     /**
      * Creates new {@link SoftwareModuleType}.
      *
-     * @param type
+     * @param create
      *            to create
      * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleType type);
+    SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleTypeCreate create);
 
     /**
      * Deletes the given {@link SoftwareModule} Entity.
@@ -442,7 +446,7 @@ public interface SoftwareManagement {
      * @return the saved Entity.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModule updateSoftwareModule(@NotNull Long moduleId, String description, String vendor);
+    SoftwareModule updateSoftwareModule(@NotNull SoftwareModuleUpdate update);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
@@ -464,12 +468,8 @@ public interface SoftwareManagement {
     /**
      * Updates existing {@link SoftwareModuleType}.
      *
-     * @param smTypeid
+     * @param update
      *            to update
-     * @param description
-     *            to update or <code>null</code>
-     * @param colour
-     *            to update or <code>null</code>
      * 
      * @return updated Entity
      * 
@@ -478,7 +478,7 @@ public interface SoftwareManagement {
      *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleType updateSoftwareModuleType(@NotNull Long smTypeid, String description, String colour);
+    SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleTypeUpdate update);
 
     /**
      * Finds all meta data by the given software module id.

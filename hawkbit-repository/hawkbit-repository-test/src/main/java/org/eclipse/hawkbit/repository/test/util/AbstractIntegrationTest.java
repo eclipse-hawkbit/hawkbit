@@ -32,11 +32,19 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -194,7 +202,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
             final List<Target> targets) {
         return deploymentManagement.assignDistributionSet(pset.getId(), ActionType.FORCED,
-                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
+                RepositoryModelConstants.NO_FORCE_TIME,
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
     }
 
@@ -206,6 +214,38 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         return ds.findFirstModuleByType(osType).getId();
     }
 
+    protected Action prepareFinishedUpdate() {
+        return prepareFinishedUpdate(TestdataFactory.DEFAULT_CONTROLLER_ID, "", false);
+    }
+
+    protected Action prepareFinishedUpdate(final String controllerId, final String distributionSet,
+            final boolean isRequiredMigrationStep) {
+        final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
+        Target savedTarget = testdataFactory.createTarget(controllerId);
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+
+        savedAction = controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
+
+        return controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+    }
+
+    protected Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition) {
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+        return rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
+                .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
+                conditions);
+    }
+
     @Before
     public void before() throws Exception {
         mvc = createMvcWebAppContext().build();
@@ -213,18 +253,18 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule
-                .runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(osType.getId(), description, null));
+        osType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule
-                .runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(appType.getId(), description, null));
+        appType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = securityRule.runAsPrivileged(
-                () -> softwareManagement.updateSoftwareModuleType(runtimeType.getId(), description, null));
+        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }

@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -47,9 +46,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Autowired
     private TargetFilterQueryManagement filterManagement;
-
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
 
     @Autowired
     private EntityFactory entityFactory;
@@ -106,8 +102,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filterId,
-                targetFilterRest.getName(), targetFilterRest.getQuery());
+        final TargetFilterQuery updateFilter = filterManagement
+                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(filterId)
+                        .name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
@@ -124,7 +121,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") final Long filterId, @RequestBody final MgmtId dsId) {
 
-        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQuery(filterId, dsId.getId());
+        final TargetFilterQuery updateFilter = filterManagement.updateTargetFilterQueryAutoAssignDS(filterId,
+                dsId.getId());
 
         return new ResponseEntity<>(MgmtTargetFilterQueryMapper.toResponse(updateFilter), HttpStatus.OK);
     }
@@ -141,7 +139,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
-        filterManagement.updateTargetFilterQuery(filterId, null);
+        filterManagement.updateTargetFilterQueryAutoAssignDS(filterId, null);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

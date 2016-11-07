@@ -41,7 +41,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
@@ -176,25 +175,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
         }
     }
 
-    /**
-     * @param address
-     *            the target address to set
-     *
-     * @throws IllegalArgumentException
-     *             If the given string violates RFC&nbsp;2396
-     */
-    @Override
     public void setAddress(final String address) {
-        // check if this is a real URI
-        if (address != null) {
-            try {
-                URI.create(address);
-            } catch (final IllegalArgumentException e) {
-                throw new InvalidTargetAddressException(
-                        "The given address " + address + " violates the RFC-2396 specification", e);
-            }
-        }
-
         this.address = address;
     }
 

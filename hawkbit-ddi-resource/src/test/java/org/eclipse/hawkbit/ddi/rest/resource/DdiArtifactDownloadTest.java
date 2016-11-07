@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Before;
@@ -48,6 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HttpHeaders;
@@ -65,6 +66,9 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
 
     private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
 
+    @Autowired
+    private EventBus eventBus;
+
     public DdiArtifactDownloadTest() {
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);
     }
@@ -80,17 +84,12 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    @Autowired
-    private EventBus eventBus;
-
     @Test
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
     public void invalidRequestsOnArtifactResource() throws Exception {
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -168,14 +167,12 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     }
 
     @Test
-    @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
     public void invalidRequestsOnArtifactResourceByName() throws Exception {
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -258,10 +255,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<Target>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -300,8 +295,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.")
     public void downloadMd5sumThroughControllerApi() throws Exception {
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget();
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -338,10 +332,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -360,7 +352,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     }
 
     @Test
-    @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Ensures that an authenticated and named controller is permitted to download.")
     public void downloadArtifactByNameByNamedController() throws Exception {
         downLoadProgress = 1;
@@ -371,10 +363,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -417,14 +407,12 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     }
 
     @Test
-    @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Test various HTTP range requests for artifact download, e.g. chunk download or download resume.")
     public void rangeDownloadArtifactByName() throws Exception {
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -527,10 +515,8 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget();
+        final List<Target> targets = Lists.newArrayList(target);
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -549,8 +535,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Downloads an MD5SUM file by the related artifacts filename.")
     public void downloadMd5sumFileByName() throws Exception {
         // create target
-        Target target = entityFactory.generateTarget("4712");
-        target = targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget();
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");

@@ -85,7 +85,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            targetManagement.createTarget(new JpaTarget("t" + month));
+            testdataFactory.createTarget("t" + month);
         }
 
         final LocalDateTime to = LocalDateTime.now();
@@ -107,7 +107,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         // check cache evict
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            targetManagement.createTarget(new JpaTarget("t2" + month));
+            testdataFactory.createTarget("t2" + month);
         }
         targetsCreatedOverPeriod = reportManagement.targetsCreatedOverPeriod(DateTypes.perMonth(), from, to);
         for (final DataReportSeriesItem<LocalDate> reportItem : targetsCreatedOverPeriod.getData()) {
@@ -136,7 +136,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            final Target createTarget = targetManagement.createTarget(new JpaTarget("t" + month));
+            final Target createTarget = testdataFactory.createTarget("t" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
@@ -158,7 +158,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         // check cache evict
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            final Target createTarget = targetManagement.createTarget(new JpaTarget("t2" + month));
+            final Target createTarget = testdataFactory.createTarget("t2" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
@@ -175,24 +175,24 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests correct statistics calculation including a correct cache evict.")
     public void distributionUsageInstalled() {
-        final Target knownTarget1 = targetManagement.createTarget(new JpaTarget("t1"));
-        final Target knownTarget2 = targetManagement.createTarget(new JpaTarget("t2"));
-        final Target knownTarget3 = targetManagement.createTarget(new JpaTarget("t3"));
-        final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
-        final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
+        final Target knownTarget1 = testdataFactory.createTarget("t1");
+        final Target knownTarget2 = testdataFactory.createTarget("t2");
+        final Target knownTarget3 = testdataFactory.createTarget("t3");
+        final Target knownTarget4 = testdataFactory.createTarget("t4");
+        final Target knownTarget5 = testdataFactory.createTarget("t5");
 
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
-        final DistributionSet distributionSet1 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds1", "0.0.0", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet11 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds1", "0.0.1", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet2 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds2", "0.0.2", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet3 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet1 = testdataFactory.createDistributionSet("ds1", "0.0.0", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet11 = testdataFactory.createDistributionSet("ds1", "0.0.1", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("ds2", "0.0.2", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet3 = testdataFactory.createDistributionSet("ds3", "0.0.3", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
@@ -245,7 +245,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // Test cache evict
-        final Target knownTarget6 = targetManagement.createTarget(new JpaTarget("t6"));
+        final Target knownTarget6 = testdataFactory.createTarget("t6");
         assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
         testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(knownTarget6), Status.FINISHED,
                 Collections.singletonList(TEST_MESSAGE));
@@ -343,24 +343,23 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests correct statistics calculation including a correct cache evict.")
     public void topXDistributionUsage() {
-
-        final Target knownTarget1 = targetManagement.createTarget(new JpaTarget("t1"));
-        final Target knownTarget2 = targetManagement.createTarget(new JpaTarget("t2"));
-        final Target knownTarget3 = targetManagement.createTarget(new JpaTarget("t3"));
-        final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
+        final Target knownTarget1 = testdataFactory.createTarget("t1");
+        final Target knownTarget2 = testdataFactory.createTarget("t2");
+        final Target knownTarget3 = testdataFactory.createTarget("t3");
+        final Target knownTarget4 = testdataFactory.createTarget("t4");
 
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
-        final DistributionSet distributionSet1 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds1", "0.0.0", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet11 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds1", "0.0.1", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet2 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds2", "0.0.2", standardDsType, Lists.newArrayList(os, jvm, ah)));
-        final DistributionSet distributionSet3 = distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet1 = testdataFactory.createDistributionSet("ds1", "0.0.0", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet11 = testdataFactory.createDistributionSet("ds1", "0.0.1", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("ds2", "0.0.2", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
+        final DistributionSet distributionSet3 = testdataFactory.createDistributionSet("ds3", "0.0.3", standardDsType,
+                Lists.newArrayList(os, jvm, ah));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
@@ -411,7 +410,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // test cache evict
-        final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
+        final Target knownTarget5 = testdataFactory.createTarget("t5");
         assignDistributionSet(distributionSet1.getId(), knownTarget5.getControllerId());
         distributionUsage = reportManagement.distributionUsageAssigned(100);
         for (final InnerOuterDataReportSeries<String> innerOuterDataReportSeries : distributionUsage) {
@@ -482,7 +481,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
         // create targets for another tenant
         securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"), () -> {
             for (int index = 0; index < targetCreateAmount; index++) {
-                targetManagement.createTarget(new JpaTarget("t" + index));
+                testdataFactory.createTarget("t" + index);
             }
             return null;
         });
@@ -505,8 +504,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
     private void createTargets(final String prefix, final int amount, final LocalDateTime lastTargetQuery) {
         for (int index = 0; index < amount; index++) {
-            final Target target = new JpaTarget(prefix + index);
-            final JpaTarget createTarget = (JpaTarget) targetManagement.createTarget(target);
+            final JpaTarget createTarget = (JpaTarget) testdataFactory.createTarget(prefix + index);
             if (lastTargetQuery != null) {
                 final JpaTargetInfo targetInfo = (JpaTargetInfo) createTarget.getTargetInfo();
                 targetInfo.setNew(false);

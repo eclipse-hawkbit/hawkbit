@@ -398,8 +398,8 @@ public class BulkUploadHandler extends CustomComponent
                 final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
                 /* create new target entity */
-                final Target newTarget = entityFactory.generateTarget(newControllerId, newName, newDesc, null);
-                targetManagement.createTarget(newTarget);
+                targetManagement.createTarget(entityFactory.target().create().controllerId(newControllerId)
+                        .name(newName).description(newDesc));
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
                 successfullTargetCount++;
             }

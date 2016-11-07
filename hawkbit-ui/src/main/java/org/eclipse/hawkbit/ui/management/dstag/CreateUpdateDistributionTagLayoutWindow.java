@@ -109,9 +109,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 colour = getColorPicked();
             }
 
-            DistributionSetTag newDistTag = entityFactory.generateDistributionSetTag(tagNameValue, tagDescValue,
-                    colour);
-            newDistTag = tagManagement.createDistributionSetTag(newDistTag);
+            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(
+                    entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
         } else {

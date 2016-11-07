@@ -43,9 +43,7 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrat
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
-        SoftwareModule sm = entityFactory.generateSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"),
-                "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
         // create test file

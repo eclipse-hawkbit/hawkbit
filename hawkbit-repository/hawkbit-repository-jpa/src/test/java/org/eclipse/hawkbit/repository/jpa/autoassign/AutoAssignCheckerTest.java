@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -52,12 +50,12 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches all targets
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(new JpaTargetFilterQuery("filterA", "name==*"));
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery.getId(), setA.getId());
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), setA.getId());
 
         final String targetDsAIdPref = "targ";
-        final List<Target> targets = targetManagement.createTargets(
-                testdataFactory.generateTargets(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
+        final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
         final int targetsCount = targets.size();
 
         // assign set A to first 10 targets
@@ -93,9 +91,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     public void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
-        final DistributionSet setF = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet("dsA", "1", "incomplete ds",
-                        testdataFactory.findOrCreateDefaultTestDsType(), null, false));
+        final DistributionSet setF = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .create().name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
@@ -104,18 +101,22 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        targetFilterQueryManagement.createTargetFilterQuery(
-                new JpaTargetFilterQuery("filterA", "id==" + targetDsFIdPref + "*", (JpaDistributionSet) setF));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
+                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+                        .name("filterA").query("id==" + targetDsFIdPref + "*")).getId(),
+                setF.getId());
 
         // target filter query that matches failed bunch of targets
-        targetFilterQueryManagement.createTargetFilterQuery(
-                new JpaTargetFilterQuery("filterB", "id==" + targetDsAIdPref + "*", (JpaDistributionSet) setA));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
+                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+                        .name("filterB").query("id==" + targetDsAIdPref + "*")).getId(),
+                setA.getId());
 
-        final List<Target> targetsF = targetManagement.createTargets(
-                testdataFactory.generateTargets(10, targetDsFIdPref, targetDsFIdPref.concat(" description")));
+        final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
+                targetDsFIdPref.concat(" description"));
 
-        final List<Target> targetsA = targetManagement.createTargets(
-                testdataFactory.generateTargets(10, targetDsAIdPref, targetDsAIdPref.concat(" description")));
+        final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
 
         final int targetsCount = targetsA.size() + targetsF.size();
 

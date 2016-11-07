@@ -99,8 +99,9 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
             @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
 
-        final SoftwareModuleType updatedSoftwareModuleType = softwareManagement.updateSoftwareModuleType(
-                softwareModuleTypeId, restSoftwareModuleType.getDescription(), restSoftwareModuleType.getColour());
+        final SoftwareModuleType updatedSoftwareModuleType = softwareManagement.updateSoftwareModuleType(entityFactory
+                .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
+                .colour(restSoftwareModuleType.getColour()));
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toResponse(updatedSoftwareModuleType), HttpStatus.OK);
     }

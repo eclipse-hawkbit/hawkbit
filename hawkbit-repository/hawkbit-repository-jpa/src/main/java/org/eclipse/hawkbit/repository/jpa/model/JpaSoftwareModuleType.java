@@ -84,7 +84,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
      */
     public JpaSoftwareModuleType(final String key, final String name, final String description,
             final int maxAssignments, final String colour) {
-        super();
         this.key = key;
         this.maxAssignments = maxAssignments;
         setDescription(description);

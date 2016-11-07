@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -171,7 +172,7 @@ public final class MgmtTargetMapper {
         return targetRest;
     }
 
-    static List<Target> fromRequest(final EntityFactory entityFactory,
+    static List<TargetCreate> fromRequest(final EntityFactory entityFactory,
             final Collection<MgmtTargetRequestBody> targetsRest) {
         if (targetsRest == null) {
             return Collections.emptyList();
@@ -181,12 +182,10 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    static Target fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        final Target target = entityFactory.generateTarget(targetRest.getControllerId(), targetRest.getName(),
-                targetRest.getDescription(), targetRest.getSecurityToken());
-        target.getTargetInfo().setAddress(targetRest.getAddress());
-
-        return target;
+    static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+        return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
+                .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
+                .address(targetRest.getAddress());
     }
 
     static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus) {

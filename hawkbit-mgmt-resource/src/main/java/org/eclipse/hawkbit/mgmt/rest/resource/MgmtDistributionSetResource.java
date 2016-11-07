@@ -151,8 +151,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
 
         return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponse(distributionSetManagement.updateDistributionSet(distributionSetId,
-                        toUpdate.getName(), toUpdate.getDescription(), toUpdate.getVersion(), null, null)),
+                MgmtDistributionSetMapper.toResponse(distributionSetManagement.updateDistributionSet(
+                        entityFactory.distributionSet().update(distributionSetId).name(toUpdate.getName())
+                                .description(toUpdate.getDescription()).version(toUpdate.getVersion()))),
                 HttpStatus.OK);
     }
 

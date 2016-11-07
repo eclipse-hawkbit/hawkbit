@@ -11,10 +11,14 @@ package org.eclipse.hawkbit.repository;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -95,7 +99,7 @@ public interface RolloutManagement {
      * {@link RolloutGroupStatus#READY} so they can be started
      * {@link #startRollout(Rollout)}.
      *
-     * @param rollout
+     * @param create
      *            the rollout entity to create
      * @param amountGroup
      *            the amount of groups to split the rollout into
@@ -106,9 +110,11 @@ public interface RolloutManagement {
      *
      * @throws IllegalArgumentException
      *             in case the given groupSize is zero or lower.
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(@NotNull Rollout rollout, int amountGroup, @NotNull RolloutGroupConditions conditions);
+    Rollout createRollout(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
      * Persists a new rollout entity. The filter within the
@@ -143,9 +149,13 @@ public interface RolloutManagement {
      *            applied for each {@link RolloutGroup}
      * @return the created rollout entity in state
      *         {@link RolloutStatus#CREATING}
+     * 
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRolloutAsync(@NotNull Rollout rollout, int amountGroup, @NotNull RolloutGroupConditions conditions);
+    Rollout createRolloutAsync(@NotNull RolloutCreate create, int amountGroup,
+            @NotNull RolloutGroupConditions conditions);
 
     /**
      * Retrieves all rollouts.
@@ -328,7 +338,7 @@ public interface RolloutManagement {
     /**
      * Update rollout details.
      *
-     * @param rollout
+     * @param update
      *            rollout to be updated
      * @param name
      *            to update or <code>null</code>
@@ -338,6 +348,6 @@ public interface RolloutManagement {
      * @return Rollout updated rollout
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout updateRollout(@NotNull Long rollout, String name, String description);
+    Rollout updateRollout(@NotNull RolloutUpdate update);
 
 }

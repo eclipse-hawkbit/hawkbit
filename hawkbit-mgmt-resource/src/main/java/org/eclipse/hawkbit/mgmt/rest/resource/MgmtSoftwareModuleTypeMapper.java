@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -34,7 +35,7 @@ final class MgmtSoftwareModuleTypeMapper {
 
     }
 
-    static List<SoftwareModuleType> smFromRequest(final EntityFactory entityFactory,
+    static List<SoftwareModuleTypeCreate> smFromRequest(final EntityFactory entityFactory,
             final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
@@ -43,10 +44,11 @@ final class MgmtSoftwareModuleTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    static SoftwareModuleType fromRequest(final EntityFactory entityFactory,
+    static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        return entityFactory.generateSoftwareModuleType(smsRest.getKey(), smsRest.getName(), smsRest.getDescription(),
-                smsRest.getColour(), smsRest.getMaxAssignments());
+        return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
+                .description(smsRest.getDescription()).colour(smsRest.getColour())
+                .maxAssignments(smsRest.getMaxAssignments());
     }
 
     static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {

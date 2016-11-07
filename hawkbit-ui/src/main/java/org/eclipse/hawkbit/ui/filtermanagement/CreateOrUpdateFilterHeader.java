@@ -396,9 +396,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = entityFactory.generateTargetFilterQuery(nameTextField.getValue(),
-                queryTextField.getValue());
-        targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(entityFactory
+                .targetFilterQuery().create().name(nameTextField.getValue()).query(queryTextField.getValue()));
         notification.displaySuccess(
                 i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
@@ -410,8 +409,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             return;
         }
         final TargetFilterQuery targetFilterQuery = tfQuery.get();
-        final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement.updateTargetFilterQuery(
-                targetFilterQuery.getId(), nameTextField.getValue(), queryTextField.getValue());
+        final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement
+                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(targetFilterQuery.getId())
+                        .name(nameTextField.getValue()).query(queryTextField.getValue()));
         filterManagementUIState.setTfQuery(updatedTargetFilter);
         oldFilterName = nameTextField.getValue();
         oldFilterQuery = queryTextField.getValue();

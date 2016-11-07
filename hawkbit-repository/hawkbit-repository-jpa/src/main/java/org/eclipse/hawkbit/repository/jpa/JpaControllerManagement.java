@@ -20,13 +20,16 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -110,6 +113,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private SystemSecurityContext systemSecurityContext;
 
+    @Autowired
+    private EntityFactory entityFactory;
+
     @Override
     public String getPollingTime() {
         final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
@@ -191,14 +197,13 @@ public class JpaControllerManagement implements ControllerManagement {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        JpaTarget target = targetRepository.findOne(spec);
+        final JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            target = new JpaTarget(controllerId);
-            target.setDescription("Plug and Play target: " + controllerId);
-            target.setName(controllerId);
-            return targetManagement.createTarget(target, TargetUpdateStatus.REGISTERED, System.currentTimeMillis(),
-                    address);
+            return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
+                    .description("Plug and Play target: " + controllerId).name(controllerId)
+                    .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
         }
 
         return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
@@ -230,9 +235,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addCancelActionStatus(final Long actionId, final ActionStatus actionS) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
-        final JpaActionStatus actionStatus = (JpaActionStatus) actionS;
+    public Action addCancelActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus actionStatus = create.build();
 
         checkForToManyStatusEntries(action);
         action.setStatus(actionStatus.getStatus());
@@ -270,8 +277,10 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action addUpdateActionStatus(final Long actionId, final ActionStatus actionStatus) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+    public Action addUpdateActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus actionStatus = create.build();
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
@@ -280,10 +289,10 @@ public class JpaControllerManagement implements ControllerManagement {
         // close messages.
         if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action)) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getId(), action.getId());
+                    actionStatus.getStatus(), action.getId());
             return action;
         }
-        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
+        return handleAddUpdateActionStatus(actionStatus, action);
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
@@ -465,13 +474,15 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public ActionStatus addInformationalActionStatus(final Long actionId, final ActionStatus statusMessage) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
-        ((JpaActionStatus) statusMessage).setAction(action);
+    public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus statusMessage = create.build();
+        statusMessage.setAction(action);
 
         checkForToManyStatusEntries(action);
 
-        return actionStatusRepository.save((JpaActionStatus) statusMessage);
+        return actionStatusRepository.save(statusMessage);
     }
 
     private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {

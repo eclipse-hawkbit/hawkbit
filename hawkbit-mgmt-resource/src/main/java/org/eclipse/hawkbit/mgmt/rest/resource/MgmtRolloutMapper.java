@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponse
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -86,10 +87,12 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static Rollout fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBody restRequest,
+    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBody restRequest,
             final DistributionSet distributionSet, final String filterQuery) {
-        return entityFactory.generateRollout(restRequest.getName(), restRequest.getDescription(), distributionSet,
-                filterQuery, MgmtRestModelMapper.convertActionType(restRequest.getType()), restRequest.getForcetime());
+        return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
+                .set(distributionSet).targetFilterQuery(filterQuery)
+                .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
+                .forcedTime(restRequest.getForcetime());
     }
 
     static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts) {

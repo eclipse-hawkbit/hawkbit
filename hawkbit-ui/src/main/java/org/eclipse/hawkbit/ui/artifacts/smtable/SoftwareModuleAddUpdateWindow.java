@@ -166,8 +166,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private void populateTypeNameCombo() {
-        typeComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
+        typeComboBox.setContainerDataSource(
+                HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
         typeComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
     }
 
@@ -246,9 +246,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * updates a softwareModule
      */
     private void updateSwModule() {
-        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        final String newVendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(baseSwModuleId, newDesc, newVendor);
+        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
+                .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
         if (newSWModule != null) {
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
                     new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));

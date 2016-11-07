@@ -112,8 +112,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
 
-        return ResponseEntity.ok(toResponse(distributionSetManagement.updateDistributionSetType(distributionSetTypeId,
-                restDistributionSetType.getDescription(), restDistributionSetType.getColour())));
+        return ResponseEntity.ok(toResponse(distributionSetManagement.updateDistributionSetType(entityFactory
+                .distributionSetType().update(distributionSetTypeId)
+                .description(restDistributionSetType.getDescription()).colour(restDistributionSetType.getColour()))));
     }
 
     @Override
@@ -121,7 +122,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
         final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(
-                MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, softwareManagement, distributionSetTypes));
+                MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
         return ResponseEntity.status(CREATED).body(toTypesResponse(createdSoftwareModules));
     }

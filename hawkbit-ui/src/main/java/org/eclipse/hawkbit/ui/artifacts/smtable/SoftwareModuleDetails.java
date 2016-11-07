@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
@@ -76,14 +76,13 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
         UI.getCurrent().access(() -> {
-            final SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
-            if (softwareModuleMetadata != null
-                    && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
+            final MetaData softwareModuleMetadata = event.getMetaData();
+            if (softwareModuleMetadata != null && isSoftwareModuleSelected(event.getModule())) {
                 if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
-                    swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
+                    swmMetadataTable.createMetadata(event.getMetaData().getKey());
                 } else if (event
                         .getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
-                    swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
+                    swmMetadataTable.deleteMetadata(event.getMetaData().getKey());
                 }
             }
         });

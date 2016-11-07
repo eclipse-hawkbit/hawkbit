@@ -229,9 +229,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
-                    typeDescValue, colorPicked, assignNumber);
-            newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
+            final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
+                    entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
+                            .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
             eventBus.publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
@@ -241,10 +241,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-
-        swTypeManagementService.updateSoftwareModuleType(existingType.getId(), typeDescValue,
-                ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
+        swTypeManagementService.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(existingType.getId()).description(tagDesc.getValue())
+                        .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
         eventBus.publish(this,
                 new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
@@ -268,8 +267,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
 
     @Override
     protected void populateTagNameCombo() {
-        tagNameComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
+        tagNameComboBox.setContainerDataSource(
+                HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
         tagNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
     }
 

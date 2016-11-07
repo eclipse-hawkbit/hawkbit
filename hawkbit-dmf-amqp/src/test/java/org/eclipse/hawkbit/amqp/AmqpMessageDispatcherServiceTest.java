@@ -85,8 +85,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Override
     public void before() throws Exception {
         super.before();
-        testTarget = entityFactory.generateTarget(CONTROLLER_ID, null, null, TEST_TOKEN);
-        testTarget.getTargetInfo().setAddress(AMQP_URI.toString());
+        testTarget = entityFactory.target().create().controllerId(CONTROLLER_ID).securityToken(TEST_TOKEN)
+                .address(AMQP_URI.toString()).build();
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
@@ -157,12 +157,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Test
     @Description("Verfies that download and install event with software moduls and artifacts works")
     public void testSendDownloadRequest() {
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final SoftwareModule module = dsA.getModules().iterator().next();
+        DistributionSet dsA = testdataFactory.createDistributionSet("");
+        SoftwareModule module = dsA.getModules().iterator().next();
         final List<DbArtifact> receivedList = new ArrayList<>();
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new DbArtifact());
         }
+        module = softwareManagement.findSoftwareModuleById(module.getId());
+        dsA = distributionSetManagement.findDistributionSetById(dsA.getId());
 
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 

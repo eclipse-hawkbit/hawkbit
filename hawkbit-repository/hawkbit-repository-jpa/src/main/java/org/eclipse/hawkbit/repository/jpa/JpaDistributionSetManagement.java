@@ -23,11 +23,19 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -173,30 +181,23 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet updateDistributionSet(final Long setId, final String name, final String description,
-            final String version, final Boolean requiredMigrationStep, final Long typeId) {
+    public DistributionSet updateDistributionSet(final DistributionSetUpdate u) {
+        final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
-        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(update.getId());
 
-        if (name != null) {
-            set.setName(name);
-        }
+        update.getName().ifPresent(set::setName);
+        update.getDescription().ifPresent(set::setDescription);
+        update.getVersion().ifPresent(set::setVersion);
 
-        if (description != null) {
-            set.setDescription(description);
-        }
-
-        if (version != null) {
-            set.setVersion(version);
-        }
-
-        if (requiredMigrationStep != null && !requiredMigrationStep.equals(set.isRequiredMigrationStep())) {
+        if (update.isRequiredMigrationStep() != null
+                && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
             checkDistributionSetIsAllowedToModify(set);
-            set.setRequiredMigrationStep(requiredMigrationStep);
+            set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
-        if (typeId != null) {
-            final DistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(typeId);
+        if (update.getType() != null) {
+            final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(update.getType());
             if (type.getId().equals(set.getType().getId())) {
                 checkDistributionSetIsAllowedToModify(set);
                 set.setType(type);
@@ -204,6 +205,16 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         return distributionSetRepository.save(set);
+    }
+
+    private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
+
+        final DistributionSetType module = findDistributionSetTypeByKey(distributionSetTypekey);
+        if (module == null) {
+            throw new EntityNotFoundException(
+                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
+        }
+        return module;
     }
 
     private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final Long setId) {
@@ -266,40 +277,26 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet createDistributionSet(final DistributionSet dSet) {
-        prepareDsSave(dSet);
-        if (dSet.getType() == null) {
-            ((JpaDistributionSet) dSet).setType(systemManagement.getTenantMetadata().getDefaultDsType());
+    public DistributionSet createDistributionSet(final DistributionSetCreate c) {
+        final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
+        if (create.getType() == null) {
+            create.type(systemManagement.getTenantMetadata().getDefaultDsType().getKey());
         }
-        return distributionSetRepository.save((JpaDistributionSet) dSet);
-    }
 
-    private void prepareDsSave(final DistributionSet dSet) {
-        if (dSet.getId() != null) {
-            throw new EntityAlreadyExistsException("Parameter seems to be an existing, already persisted entity");
-        }
+        final JpaDistributionSet dSet = create.build();
 
         if (distributionSetRepository.countByNameAndVersion(dSet.getName(), dSet.getVersion()) > 0) {
             throw new EntityAlreadyExistsException("DistributionSet with that name and version already exists.");
         }
 
+        return distributionSetRepository.save(dSet);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSet> createDistributionSets(final Collection<DistributionSet> distributionSets) {
-        for (final DistributionSet ds : distributionSets) {
-            prepareDsSave(ds);
-            if (ds.getType() == null) {
-                ((JpaDistributionSet) ds).setType(systemManagement.getTenantMetadata().getDefaultDsType());
-            }
-        }
-
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaDistributionSet> toSave = (Collection) distributionSets;
-
-        return Collections.unmodifiableList(distributionSetRepository.save(toSave));
+    public List<DistributionSet> createDistributionSets(final Collection<DistributionSetCreate> creates) {
+        return creates.stream().map(this::createDistributionSet).collect(Collectors.toList());
     }
 
     @Override
@@ -337,20 +334,23 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetType updateDistributionSetType(final Long dsTypeId, final String description,
-            final String colour) {
+    public DistributionSetType updateDistributionSetType(final DistributionSetTypeUpdate u) {
+        final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
 
-        final JpaDistributionSetType persisted = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getId());
 
-        if (description != null) {
-            persisted.setDescription(description);
+        update.getDescription().ifPresent(type::setDescription);
+        update.getColour().ifPresent(type::setColour);
+
+        if (!update.getOptional().isEmpty() || !update.getMandatory().isEmpty()) {
+            checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+
+            type.clearModuleTypes();
+            softwareModuleTypeRepository.findByIdIn(update.getMandatory()).forEach(type::addMandatoryModuleType);
+            softwareModuleTypeRepository.findByIdIn(update.getOptional()).forEach(type::addOptionalModuleType);
         }
 
-        if (colour != null) {
-            persisted.setColour(colour);
-        }
-
-        return distributionSetTypeRepository.save(persisted);
+        return distributionSetTypeRepository.save(type);
     }
 
     @Override
@@ -584,12 +584,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetType createDistributionSetType(final DistributionSetType type) {
-        if (type.getId() != null) {
-            throw new EntityAlreadyExistsException("Given type contains an Id!");
-        }
+    public DistributionSetType createDistributionSetType(final DistributionSetTypeCreate c) {
+        final JpaDistributionSetTypeCreate create = (JpaDistributionSetTypeCreate) c;
 
-        return distributionSetTypeRepository.save((JpaDistributionSetType) type);
+        return distributionSetTypeRepository.save(create.build());
     }
 
     @Override
@@ -868,7 +866,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetType> types) {
+    public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetTypeCreate> types) {
+
         return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
     }
 
@@ -891,4 +890,5 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Long countDistributionSetsByType(final DistributionSetType type) {
         return distributionSetRepository.countByType((JpaDistributionSetType) type);
     }
+
 }

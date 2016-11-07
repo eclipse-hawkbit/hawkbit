@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -188,8 +189,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI();
         }
 
-        return controllerManagement.addInformationalActionStatus(action.getId(),
-                entityFactory.generateActionStatus(Status.DOWNLOAD, System.currentTimeMillis(), message));
+        return controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(action.getId()).status(Status.DOWNLOAD).message(message));
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
@@ -290,14 +291,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(actionId,
-                generateUpdateStatus(feedback, controllerId, feedback.getId()));
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId()));
 
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
-    private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
+    private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
             final Long actionid) {
 
         final List<String> messages = new ArrayList<>();
@@ -327,7 +327,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return entityFactory.generateActionStatus(status, System.currentTimeMillis(), messages);
+        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
     }
 
     private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
@@ -420,12 +420,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        controllerManagement.addCancelActionStatus(action.getId(),
-                generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
+        controllerManagement
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private static ActionStatus generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
+    private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
             final Long actionid, final EntityFactory entityFactory) {
 
         final List<String> messages = new ArrayList<>();
@@ -452,7 +452,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return entityFactory.generateActionStatus(status, System.currentTimeMillis(), messages);
+        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
 
     }
 

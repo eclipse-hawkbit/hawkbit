@@ -13,9 +13,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
@@ -24,6 +28,7 @@ import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -85,16 +90,16 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetTag createTargetTag(final TargetTag targetTag) {
-        if (null != targetTag.getId()) {
-            throw new EntityAlreadyExistsException();
-        }
+    public TargetTag createTargetTag(final TagCreate c) {
+        final JpaTagCreate create = (JpaTagCreate) c;
+
+        final JpaTargetTag targetTag = create.buildTargetTag();
 
         if (findTargetTag(targetTag.getName()) != null) {
             throw new EntityAlreadyExistsException();
         }
 
-        final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
+        final TargetTag save = targetTagRepository.save(targetTag);
 
         afterCommit.afterCommit(() -> eventBus.post(new TargetTagCreatedEvent(save)));
 
@@ -104,17 +109,12 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<TargetTag> createTargetTags(final Collection<TargetTag> tt) {
+    public List<TargetTag> createTargetTags(final Collection<TagCreate> tt) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTargetTag> targetTags = (Collection) tt;
+        final Collection<JpaTagCreate> targetTags = (Collection) tt;
 
-        targetTags.forEach(tag -> {
-            if (tag.getId() != null) {
-                throw new EntityAlreadyExistsException();
-            }
-        });
-
-        final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository.save(targetTags));
+        final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository
+                .save(targetTags.stream().map(JpaTagCreate::buildTargetTag).collect(Collectors.toList())));
         afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new TargetTagCreatedEvent(tag))));
         return save;
     }
@@ -170,22 +170,15 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetTag updateTargetTag(final Long targetTagId, final String name, final String description,
-            final String colour) {
-        final JpaTargetTag tag = Optional.ofNullable(targetTagRepository.findOne(targetTagId))
-                .orElseThrow(() -> new EntityNotFoundException("Target tag with ID " + targetTagId + " not found"));
+    public TargetTag updateTargetTag(final TagUpdate u) {
+        final GenericTagUpdate update = (GenericTagUpdate) u;
 
-        if (description != null) {
-            tag.setDescription(description);
-        }
+        final JpaTargetTag tag = Optional.ofNullable(targetTagRepository.findOne(update.getId()))
+                .orElseThrow(() -> new EntityNotFoundException("Target tag with ID " + update.getId() + " not found"));
 
-        if (colour != null) {
-            tag.setColour(colour);
-        }
-
-        if (name != null) {
-            tag.setName(name);
-        }
+        update.getName().ifPresent(tag::setName);
+        update.getDescription().ifPresent(tag::setDescription);
+        update.getColour().ifPresent(tag::setColour);
 
         final TargetTag save = targetTagRepository.save(tag);
         afterCommit.afterCommit(() -> eventBus.post(new TargetTagUpdateEvent(save)));
@@ -195,28 +188,19 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetTag updateDistributionSetTag(final Long distributionSetTagId, final String name,
-            final String description, final String colour) {
-        final JpaDistributionSetTag tag = Optional
-                .ofNullable(distributionSetTagRepository.findOne(distributionSetTagId))
+    public DistributionSetTag updateDistributionSetTag(final TagUpdate u) {
+        final GenericTagUpdate update = (GenericTagUpdate) u;
+
+        final JpaDistributionSetTag tag = Optional.ofNullable(distributionSetTagRepository.findOne(update.getId()))
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Distribution set tag with ID " + distributionSetTagId + " not found"));
+                        "Distribution set tag with ID " + update.getId() + " not found"));
 
-        if (description != null) {
-            tag.setDescription(description);
-        }
-
-        if (colour != null) {
-            tag.setColour(colour);
-        }
-
-        if (name != null) {
-            tag.setName(name);
-        }
+        update.getName().ifPresent(tag::setName);
+        update.getDescription().ifPresent(tag::setDescription);
+        update.getColour().ifPresent(tag::setColour);
 
         final DistributionSetTag save = distributionSetTagRepository.save(tag);
         afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagUpdateEvent(save)));
-
         return save;
     }
 
@@ -228,16 +212,16 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetTag createDistributionSetTag(final DistributionSetTag distributionSetTag) {
-        if (null != distributionSetTag.getId()) {
-            throw new EntityAlreadyExistsException();
-        }
+    public DistributionSetTag createDistributionSetTag(final TagCreate c) {
+        final JpaTagCreate create = (JpaTagCreate) c;
+
+        final JpaDistributionSetTag distributionSetTag = create.buildDistributionSetTag();
 
         if (distributionSetTagRepository.findByNameEquals(distributionSetTag.getName()) != null) {
             throw new EntityAlreadyExistsException();
         }
 
-        final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
+        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
 
         afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedEvent(save)));
         return save;
@@ -246,18 +230,13 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSetTag> createDistributionSetTags(final Collection<DistributionSetTag> dst) {
+    public List<DistributionSetTag> createDistributionSetTags(final Collection<TagCreate> dst) {
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        final Collection<JpaDistributionSetTag> distributionSetTags = (Collection) dst;
+        final Collection<JpaTagCreate> creates = (Collection) dst;
 
-        for (final DistributionSetTag dsTag : distributionSetTags) {
-            if (dsTag.getId() != null) {
-                throw new EntityAlreadyExistsException();
-            }
-        }
-        final List<DistributionSetTag> save = Collections
-                .unmodifiableList(distributionSetTagRepository.save(distributionSetTags));
+        final List<DistributionSetTag> save = Collections.unmodifiableList(distributionSetTagRepository
+                .save(creates.stream().map(JpaTagCreate::buildDistributionSetTag).collect(Collectors.toList())));
         afterCommit.afterCommit(() -> save.forEach(tag -> eventBus.post(new DistributionSetTagCreatedEvent(tag))));
 
         return save;

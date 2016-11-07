@@ -16,7 +16,6 @@ import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.Constants;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
@@ -113,9 +112,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Autowired
     private PlatformTransactionManager txManager;
 
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
-
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
@@ -208,7 +204,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public List<String> findTenants() {
-        return tenantMetaDataRepository.findAll().stream().map(md -> md.getTenant()).collect(Collectors.toList());
+        return tenantMetaDataRepository.findAll().stream().map(TenantMetaData::getTenant).collect(Collectors.toList());
     }
 
     @Override
@@ -276,7 +272,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
-        data.setDefaultDsType(distributionSetManagement.findDistributionSetTypeById(defaultDsType));
+        data.setDefaultDsType(distributionSetTypeRepository.findOne(defaultDsType));
 
         return tenantMetaDataRepository.save(data);
     }

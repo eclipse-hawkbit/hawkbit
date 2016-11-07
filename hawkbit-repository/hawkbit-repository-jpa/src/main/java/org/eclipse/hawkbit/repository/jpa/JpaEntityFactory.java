@@ -8,34 +8,24 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
+import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
+import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
+import org.eclipse.hawkbit.repository.builder.TagBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaMetaData;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -45,154 +35,66 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaEntityFactory implements EntityFactory {
 
+    @Autowired
+    private DistributionSetBuilder distributionSetBuilder;
+
+    @Autowired
+    private DistributionSetTypeBuilder distributionSetTypeBuilder;
+
+    @Autowired
+    private SoftwareModuleBuilder softwareModuleBuilder;
+
+    @Autowired
+    private RolloutBuilder rolloutBuilder;
+
     @Override
     public MetaData generateMetadata(final String key, final String value) {
         return new JpaMetaData(key, value);
     }
 
     @Override
-    public DistributionSetType generateDistributionSetType(final String key, final String name,
-            final String description) {
-        return new JpaDistributionSetType(key, name, description);
+    public DistributionSetTypeBuilder distributionSetType() {
+        return distributionSetTypeBuilder;
     }
 
     @Override
-    public DistributionSet generateDistributionSet(final String name, final String version, final String description,
-            final DistributionSetType type, final Collection<SoftwareModule> moduleList,
-            final boolean requiredMigrationstep) {
-        return new JpaDistributionSet(name, version, description, type, moduleList, requiredMigrationstep);
+    public DistributionSetBuilder distributionSet() {
+        return distributionSetBuilder;
     }
 
     @Override
-    public Target generateTarget(final String controllerId, final String name, final String description,
-            final String securityToken) {
-        JpaTarget target;
-
-        if (StringUtils.isEmpty(securityToken)) {
-            target = new JpaTarget(controllerId);
-        } else {
-            target = new JpaTarget(controllerId, securityToken);
-        }
-
-        if (!StringUtils.isEmpty(name)) {
-            target.setName(name);
-        }
-
-        target.setDescription(description);
-
-        return target;
+    public TargetBuilder target() {
+        return new JpaTargetBuilder();
     }
 
     @Override
-    public Target generateTarget(final String controllerID) {
-        return generateTarget(controllerID, null, null, null);
+    public TagBuilder tag() {
+        return new JpaTagBuilder();
     }
 
     @Override
-    public TargetTag generateTargetTag(final String name, final String description, final String colour) {
-        return new JpaTargetTag(name, description, colour);
+    public TargetFilterQueryBuilder targetFilterQuery() {
+        return new JpaTargetFilterQueryBuilder();
     }
 
     @Override
-    public DistributionSetTag generateDistributionSetTag(final String name, final String description,
-            final String colour) {
-        return new JpaDistributionSetTag(name, description, colour);
+    public SoftwareModuleBuilder softwareModule() {
+        return softwareModuleBuilder;
     }
 
     @Override
-    public TargetTag generateTargetTag(final String name) {
-        return new JpaTargetTag(name);
+    public SoftwareModuleTypeBuilder softwareModuleType() {
+        return new JpaSoftwareModuleTypeBuilder();
     }
 
     @Override
-    public DistributionSetTag generateDistributionSetTag(final String name) {
-        return new JpaDistributionSetTag(name);
+    public ActionStatusBuilder actionStatus() {
+        return new JpaActionStatusBuilder();
     }
 
     @Override
-    public TargetFilterQuery generateTargetFilterQuery(final String name, final String query) {
-        return new JpaTargetFilterQuery(name, query);
-    }
-
-    @Override
-    public TargetFilterQuery generateTargetFilterQuery(final String name, final String query,
-            final DistributionSet autoAssignDS) {
-        return new JpaTargetFilterQuery(name, query, (JpaDistributionSet) autoAssignDS);
-    }
-
-    @Override
-    public SoftwareModule generateSoftwareModule(final SoftwareModuleType type, final String name, final String version,
-            final String description, final String vendor) {
-
-        return new JpaSoftwareModule(type, name, version, description, vendor);
-    }
-
-    @Override
-    public SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
-            final String colour, final int maxAssignments) {
-        return new JpaSoftwareModuleType(key, name, description, maxAssignments, colour);
-    }
-
-    @Override
-    public ActionStatus generateActionStatus(final Status status, final Long occurredAt, final String message) {
-        return new JpaActionStatus(status, occurredAt, message);
-    }
-
-    @Override
-    public ActionStatus generateActionStatus(final Status status, final Long occurredAt,
-            final Collection<String> messages) {
-
-        final JpaActionStatus result = new JpaActionStatus(status, occurredAt, null);
-        messages.forEach(result::addMessage);
-
-        return result;
-    }
-
-    @Override
-    public ActionStatus generateActionStatus(final Status status, final Long occurredAt) {
-        return new JpaActionStatus(status, occurredAt);
-    }
-
-    @Override
-    public DistributionSetType generateDistributionSetType(final String key, final String name,
-            final String description, final Collection<SoftwareModuleType> mandatory,
-            final Collection<SoftwareModuleType> optional) {
-        final JpaDistributionSetType result = (JpaDistributionSetType) generateDistributionSetType(key, name,
-                description);
-        mandatory.forEach(result::addMandatoryModuleType);
-        optional.forEach(result::addOptionalModuleType);
-
-        return result;
-    }
-
-    @Override
-    public Rollout generateRollout(final String name, final String description, final DistributionSet set,
-            final String filterQuery, final ActionType actionType, final long forcedTime) {
-
-        final JpaRollout rollout = new JpaRollout();
-
-        rollout.setName(name);
-        rollout.setDescription(description);
-        rollout.setDistributionSet(set);
-        rollout.setTargetFilterQuery(filterQuery);
-        rollout.setActionType(actionType);
-        rollout.setForcedTime(forcedTime);
-
-        return rollout;
-    }
-
-    @Override
-    public Rollout generateRollout(final String name, final String description, final DistributionSet set,
-            final String filterQuery) {
-
-        final JpaRollout rollout = new JpaRollout();
-
-        rollout.setName(name);
-        rollout.setDescription(description);
-        rollout.setDistributionSet(set);
-        rollout.setTargetFilterQuery(filterQuery);
-
-        return rollout;
+    public RolloutBuilder rollout() {
+        return rolloutBuilder;
     }
 
 }

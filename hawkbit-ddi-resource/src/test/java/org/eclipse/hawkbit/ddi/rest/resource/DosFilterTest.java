@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
@@ -27,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -147,9 +147,8 @@ public class DosFilterTest extends AbstractRestIntegrationTest {
 
     private Long prepareDeploymentBase() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test");
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4711"));
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(target);
+        final Target target = testdataFactory.createTarget("4711");
+        final List<Target> toAssign = Lists.newArrayList(target);
 
         final Iterable<Target> saved = assignDistributionSet(ds, toAssign).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(target)).hasSize(1);

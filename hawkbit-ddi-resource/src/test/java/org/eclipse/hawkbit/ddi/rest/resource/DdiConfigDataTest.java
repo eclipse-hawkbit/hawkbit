@@ -46,8 +46,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "are requested only once from the device.")
     public void requestConfigDataIfEmpty() throws Exception {
-        final Target target = entityFactory.generateTarget("4712");
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
@@ -84,7 +83,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "can be uploaded correctly by the controller.")
     public void putConfigData() throws Exception {
-        targetManagement.createTarget(entityFactory.generateTarget("4717"));
+        testdataFactory.createTarget("4717");
 
         // initial
         final Map<String, String> attributes = new HashMap<>();
@@ -127,7 +126,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "upload limitation is inplace which is meant to protect the server from malicious attempts.")
     public void putToMuchConfigData() throws Exception {
-        targetManagement.createTarget(entityFactory.generateTarget("4717"));
+        testdataFactory.createTarget("4717");
 
         // initial
         Map<String, String> attributes = new HashMap<>();
@@ -150,8 +149,7 @@ public class DdiConfigDataTest extends AbstractRestIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "resource behaves as exptected in cae of invalid request attempts.")
     public void badConfigData() throws Exception {
-        final Target target = entityFactory.generateTarget("4712");
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         // not allowed methods
         mvc.perform(post("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant()))

@@ -168,7 +168,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRollout() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -190,7 +190,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -212,7 +212,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void pausingRolloutSwitchesIntoPausedState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -238,7 +238,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -268,7 +268,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -289,7 +289,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -306,7 +306,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -331,7 +331,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveSingleRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -354,7 +354,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -376,8 +376,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
-        final List<Target> targets = targetManagement
-                .createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -401,7 +400,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -425,7 +424,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
 
         final int amountTargets = 1000;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -437,8 +436,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(status().isOk());
 
         // check if running
-        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 60_000, 100))
-                .isNotNull();
+        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), this::success, 60_000, 100)).isNotNull();
     }
 
     @Test
@@ -449,10 +447,10 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final int amountTargetsRollout2 = 25;
         final int amountTargetsRollout3 = 25;
         final int amountTargetsOther = 25;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout1, "rollout1", "rollout1"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout2, "rollout2", "rollout2"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout3, "rollout3", "rollout3"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsOther, "other1", "other1"));
+        testdataFactory.createTargets(amountTargetsRollout1, "rollout1", "rollout1");
+        testdataFactory.createTargets(amountTargetsRollout2, "rollout2", "rollout2");
+        testdataFactory.createTargets(amountTargetsRollout3, "rollout3", "rollout3");
+        testdataFactory.createTargets(amountTargetsOther, "other1", "other1");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         createRollout("rollout1", 5, dsA.getId(), "controllerId==rollout1*");
@@ -483,7 +481,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -556,10 +554,10 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = entityFactory.generateRollout(name, null,
-                distributionSetManagement.findDistributionSetById(distributionSetId), targetFilterQuery);
-        return rolloutManagement.createRollout(rollout, amountGroups, new RolloutGroupConditionBuilder()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+        return rolloutManagement.createRollout(
+                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
+                amountGroups, new RolloutGroupConditionBuilder()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
 
     protected boolean success(final Rollout result) {

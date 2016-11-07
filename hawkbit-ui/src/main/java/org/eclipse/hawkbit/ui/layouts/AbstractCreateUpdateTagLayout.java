@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.ui.layouts;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -76,6 +78,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     @Autowired
     protected transient TagManagement tagManagement;
+
+    @Autowired
+    protected transient EntityFactory entityFactory;
 
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
@@ -551,16 +556,13 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * update tag.
      */
     protected void updateExistingTag(final Tag targetObj) {
-        final String tagNameUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        final String descUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-        final String colorPickedUpdateValue = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
-
+        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
+                .description(tagDesc.getValue())
+                .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
         if (targetObj instanceof TargetTag) {
-            tagManagement.updateTargetTag(targetObj.getId(), tagNameUpdateValue, descUpdateValue,
-                    colorPickedUpdateValue);
+            tagManagement.updateTargetTag(update);
         } else if (targetObj instanceof DistributionSetTag) {
-            tagManagement.updateDistributionSetTag(targetObj.getId(), tagNameUpdateValue, descUpdateValue,
-                    colorPickedUpdateValue);
+            tagManagement.updateDistributionSetTag(update);
         }
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
 

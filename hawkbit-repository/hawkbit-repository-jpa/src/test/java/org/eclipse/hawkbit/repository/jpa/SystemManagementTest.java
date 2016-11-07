@@ -127,8 +127,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
     }
 
     private List<Target> createTestTargets(final int targets) {
-        return targetManagement
-                .createTargets(testdataFactory.generateTargets(targets, "testTargetOfTenant", "testTargetOfTenant"));
+        return testdataFactory.createTargets(targets, "testTargetOfTenant", "testTargetOfTenant");
     }
 
     private void createTestArtifact(final byte[] random) {

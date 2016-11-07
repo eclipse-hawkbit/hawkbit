@@ -12,18 +12,15 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,35 +34,35 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("RSQL filter target")
 public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
-    private static final long LAST_TARGET_QUERY = 10000;
-    private static final long LAST_TARGET_QUERY_SMALLER = 1000;
+
+    private Target target;
+    private Target target2;
 
     @Before
-    public void seuptBeforeTest() {
+    public void seuptBeforeTest() throws InterruptedException {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final Target target = entityFactory.generateTarget("targetId123", "targetName123", "targetDesc123", null);
-        final TargetInfo targetInfo = target.getTargetInfo();
-        targetInfo.getControllerAttributes().put("revision", "1.1");
-        ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
-        ((JpaTargetInfo) target.getTargetInfo()).setLastTargetQuery(LAST_TARGET_QUERY);
-        targetManagement.createTarget(target);
+        final Map<String, String> attributes = new HashMap<>();
 
-        final JpaTarget target2 = new JpaTarget("targetId1234");
-        target2.setDescription("targetId1234");
-        final TargetInfo targetInfo2 = target2.getTargetInfo();
-        targetInfo2.getControllerAttributes().put("revision", "1.2");
-        ((JpaTargetInfo) target2.getTargetInfo()).setLastTargetQuery(LAST_TARGET_QUERY_SMALLER);
-        targetManagement.createTarget(target2);
+        target = targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123")
+                .name("targetName123").description("targetDesc123"));
+        attributes.put("revision", "1.1");
+        target = controllerManagament.updateControllerAttributes(target.getControllerId(), attributes);
 
-        targetManagement.createTarget(new JpaTarget("targetId1235"));
-        targetManagement.createTarget(new JpaTarget("targetId1236"));
+        target2 = targetManagement
+                .createTarget(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
+        attributes.put("revision", "1.2");
+        Thread.sleep(1);
+        target2 = controllerManagament.updateControllerAttributes(target2.getControllerId(), attributes);
 
-        final TargetTag targetTag = tagManagement.createTargetTag(new JpaTargetTag("Tag1"));
-        tagManagement.createTargetTag(new JpaTargetTag("Tag2"));
-        tagManagement.createTargetTag(new JpaTargetTag("Tag3"));
-        tagManagement.createTargetTag(new JpaTargetTag("Tag4"));
+        testdataFactory.createTarget("targetId1235");
+        testdataFactory.createTarget("targetId1236");
+
+        final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
+        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag2"));
+        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag3"));
+        tagManagement.createTargetTag(entityFactory.tag().create().name("Tag4"));
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag);
 
@@ -171,13 +168,19 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by lastTargetQuery")
-    public void testFilterByLastTargetQuery() {
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + LAST_TARGET_QUERY, 1);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + LAST_TARGET_QUERY, 1);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + LAST_TARGET_QUERY, 1);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + LAST_TARGET_QUERY_SMALLER, 0);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + LAST_TARGET_QUERY_SMALLER, 1);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + LAST_TARGET_QUERY, 0);
+    public void testFilterByLastTargetQuery() throws InterruptedException {
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + target.getTargetInfo().getLastTargetQuery(), 1);
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getTargetInfo().getLastTargetQuery(), 1);
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target.getTargetInfo().getLastTargetQuery(), 0);
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target2.getTargetInfo().getLastTargetQuery(), 1);
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target.getTargetInfo().getLastTargetQuery(), 1);
+        assertRSQLQuery(
+                TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target2.getTargetInfo().getLastTargetQuery(), 0);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {

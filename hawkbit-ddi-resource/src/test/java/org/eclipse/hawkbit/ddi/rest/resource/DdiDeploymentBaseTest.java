@@ -102,7 +102,6 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Forced deployment to a controller. Checks if the resource reponse payload for a given deployment is as expected.")
     public void deplomentForceAction() throws Exception {
         // Prepare test data
-        final Target target = entityFactory.generateTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
@@ -112,7 +111,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
@@ -227,7 +226,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Checks that the deployementBase URL changes when the action is switched from soft to forced in TIMEFORCED case.")
     public void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
         // Prepare test data
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
         final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(ds.getId(),
@@ -267,7 +266,6 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Attempt/soft deployment to a controller. Checks if the resource reponse payload  for a given deployment is as expected.")
     public void deplomentAttemptAction() throws Exception {
         // Prepare test data
-        final Target target = entityFactory.generateTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
@@ -277,7 +275,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
@@ -385,7 +383,6 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource reponse payload  for a given deployment is as expected.")
     public void deplomentAutoForceAction() throws Exception {
         // Prepare test data
-        final Target target = entityFactory.generateTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
@@ -395,7 +392,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Artifact artifactSignature = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 getOsModule(ds), "test1.signature", false);
 
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
@@ -508,7 +505,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Test various invalid access attempts to the deployment resource und the expected behaviour of the server.")
     public void badDeploymentAction() throws Exception {
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final Target target = testdataFactory.createTarget("4712");
 
         // not allowed methods
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/1", tenantAware.getCurrentTenant()))
@@ -548,11 +545,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("The server protects itself against to many feedback upload attempts. The test verfies that "
             + "it is not possible to exceed the configured maximum number of feedback uplods.")
     public void toMuchDeplomentActionFeedback() throws Exception {
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(target);
 
         assignDistributionSet(ds.getId(), "4712");
         final Action action = deploymentManagement.findActionsByTarget(target).get(0);
@@ -575,12 +569,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Multiple uploads of deployment status feedback to the server.")
     public void multipleDeplomentActionFeedback() throws Exception {
-        final Target target1 = entityFactory.generateTarget("4712");
-        final Target target2 = entityFactory.generateTarget("4713");
-        final Target target3 = entityFactory.generateTarget("4714");
-        final Target savedTarget1 = targetManagement.createTarget(target1);
-        targetManagement.createTarget(target2);
-        targetManagement.createTarget(target3);
+        final Target savedTarget1 = testdataFactory.createTarget("4712");
+        testdataFactory.createTarget("4713");
+        testdataFactory.createTarget("4714");
 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -677,10 +668,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Verfies that an update action is correctly set to error if the controller provides error feedback.")
     public void rootRsSingleDeplomentActionWithErrorFeedback() throws Exception {
-        final Target target = entityFactory.generateTarget("4712");
         DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
         List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
@@ -754,13 +743,11 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Verfies that the controller can provided as much feedback entries as necessry as long as it is in the configured limites.")
     public void rootRsSingleDeplomentActionFeedback() throws Exception {
-        final Target target = entityFactory.generateTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        final Target savedTarget = targetManagement.createTarget(target);
+        final Target savedTarget = testdataFactory.createTarget("4712");
 
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
+        final List<Target> toAssign = Lists.newArrayList(savedTarget);
 
         Target myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -911,8 +898,6 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Various forbidden request appempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.")
     public void badDeplomentActionFeedback() throws Exception {
-        final Target target = entityFactory.generateTarget("4712");
-        final Target target2 = entityFactory.generateTarget("4713");
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
         final DistributionSet savedSet2 = testdataFactory.createDistributionSet("1");
 
@@ -922,8 +907,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        Target savedTarget = targetManagement.createTarget(target);
-        final Target savedTarget2 = targetManagement.createTarget(target2);
+        Target savedTarget = testdataFactory.createTarget("4712");
+        final Target savedTarget2 = testdataFactory.createTarget("4713");
 
         // Action does not exists
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/1234/feedback", tenantAware.getCurrentTenant())

@@ -10,10 +10,12 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -34,7 +36,6 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 
-import com.google.common.collect.Lists;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
@@ -59,7 +60,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<DistributionSetType> {
 
-    private static final long serialVersionUID = -5169398523815877767L;
+    private static final long serialVersionUID = 1L;
     private static final String DIST_TYPE_NAME = "name";
     private static final String DIST_TYPE_DESCRIPTION = "description";
     private static final String DIST_TYPE_MANDATORY = "mandatory";
@@ -348,24 +349,32 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
-            DistributionSetType newDistType = entityFactory.generateDistributionSetType(typeKeyValue, typeNameValue,
-                    typeDescValue);
-            for (final Long id : itemIds) {
-                final Item item = selectedTable.getItem(id);
-                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
-                final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
-                final Boolean isMandatory = mandatoryCheckBox.getValue();
-                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
-                checkMandatoryAndAddMandatoryModuleType(newDistType, isMandatory, swModuleType);
-            }
-            newDistType.setColour(colorPicked);
-            newDistType = distributionSetManagement.createDistributionSetType(newDistType);
+
+            final List<Long> mandatory = itemIds.stream()
+                    .filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
+                    .collect(Collectors.toList());
+
+            final List<Long> optional = itemIds.stream()
+                    .filter(itemId -> isOptionalModuleType(selectedTable.getItem(itemId))).collect(Collectors.toList());
+
+            final DistributionSetType newDistType = distributionSetManagement.createDistributionSetType(
+                    entityFactory.distributionSetType().create().key(typeKeyValue).name(typeNameValue)
+                            .description(typeDescValue).colour(colorPicked).mandatory(mandatory).optional(optional));
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
             eventBus.publish(this,
                     new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
         }
+    }
+
+    private static boolean isMandatoryModuleType(final Item item) {
+        final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
+        return mandatoryCheckBox.getValue();
+    }
+
+    private static boolean isOptionalModuleType(final Item item) {
+        return !isMandatoryModuleType(item);
     }
 
     /**
@@ -377,52 +386,24 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
 
+        final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
+                .description(typeDescValue)
+                .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
         if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
                 && !itemIds.isEmpty()) {
-            for (final Long id : itemIds) {
-                final Item item = selectedTable.getItem(id);
-                final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
-                final Boolean isMandatory = mandatoryCheckBox.getValue();
-                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
-                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
-                checkMandatoryAndAddMandatoryModuleType(existingType, isMandatory, swModuleType);
-            }
+
+            update.mandatory(itemIds.stream().filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
+                    .collect(Collectors.toList()))
+                    .optional(itemIds.stream().filter(itemId -> isOptionalModuleType(selectedTable.getItem(itemId)))
+                            .collect(Collectors.toList()));
         }
-        final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(
-                existingType.getId(), typeDescValue,
-                ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
+
+        final DistributionSetType updateDistSetType = distributionSetManagement.updateDistributionSetType(update);
+
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
         eventBus.publish(this,
                 new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 
-    }
-
-    private void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType existingType,
-            final Boolean isMandatory, final SoftwareModuleType swModuleType) {
-
-        if (isMandatory) {
-            distributionSetManagement.assignMandatorySoftwareModuleTypes(existingType.getId(),
-                    Lists.newArrayList(swModuleType.getId()));
-        } else {
-            distributionSetManagement.assignOptionalSoftwareModuleTypes(existingType.getId(),
-                    Lists.newArrayList(swModuleType.getId()));
-        }
-    }
-
-    private DistributionSetType removeSWModuleTypesFromDistSetType(final String selectedDistSetType) {
-
-        final DistributionSetType distSetType = fetchDistributionSetType(selectedDistSetType);
-        if (!distSetType.getMandatoryModuleTypes().isEmpty()) {
-            for (final SoftwareModuleType smType : distSetType.getMandatoryModuleTypes()) {
-                distSetType.removeModuleType(smType.getId());
-            }
-        }
-        if (!distSetType.getOptionalModuleTypes().isEmpty()) {
-            for (final SoftwareModuleType smType : distSetType.getOptionalModuleTypes()) {
-                distSetType.removeModuleType(smType.getId());
-            }
-        }
-        return distSetType;
     }
 
     /**
@@ -477,8 +458,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      */
     private static LazyQueryContainer getDistSetTypeLazyQueryContainer() {
 
-        final LazyQueryContainer disttypeContainer = HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));
+        final LazyQueryContainer disttypeContainer = HawkbitCommonUtil
+                .createLazyQueryContainer(new BeanQueryFactory<>(DistributionSetTypeBeanQuery.class));
         disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
 
         return disttypeContainer;

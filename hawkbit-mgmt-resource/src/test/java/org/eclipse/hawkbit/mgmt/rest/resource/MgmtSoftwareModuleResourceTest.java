@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,6 +35,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -90,16 +90,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        softwareManagement.createSoftwareModule(
-                entityFactory.generateSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "poky", "3.0.2", null, ""));
-
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, knownSWName, knownSWVersion,
-                knownSWDescription, knownSWVendor);
-        sm = softwareManagement.createSoftwareModule(sm);
+        SoftwareModule sm = softwareManagement.createSoftwareModule(entityFactory.softwareModule().create().type(osType)
+                .name(knownSWName).version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
@@ -119,13 +111,18 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("$.description", equalTo(updateDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownSWName))).andReturn();
 
+        sm = softwareManagement.findSoftwareModuleById(sm.getId());
+        assertThat(sm.getName()).isEqualTo(knownSWName);
+        assertThat(sm.getVendor()).isEqualTo(updateVendor);
+        assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(sm.getDescription()).isEqualTo(updateDescription);
+
     }
 
     @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -188,8 +185,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, new byte[0]);
 
@@ -201,8 +197,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
     public void duplicateUploadArtifact() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final String md5sum = HashGeneratorUtils.generateMD5(random);
@@ -223,8 +218,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
     public void uploadArtifactWithCustomName() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
         // create test file
@@ -250,8 +244,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
     public void uploadArtifactWithHashCheck() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(0);
 
         // create test file
@@ -294,8 +287,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
     public void downloadArtifact() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -329,8 +321,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and download links.")
     public void getArtifact() throws Exception {
         // prepare data for test
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(),
@@ -355,8 +346,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
     public void getArtifacts() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -396,8 +386,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         // no artifact available
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/1234567/download", sm.getId()))
@@ -429,8 +418,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
     public void invalidRequestsOnSoftwaremodulesResource() throws Exception {
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final List<SoftwareModule> modules = Lists.newArrayList(sm);
 
@@ -455,8 +443,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModule toLongName = entityFactory.generateSoftwareModule(osType,
-                RandomStringUtils.randomAscii(80), "version 1", null, null);
+        final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
+                .name(RandomStringUtils.randomAscii(80)).build();
         mvc.perform(
                 post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Lists.newArrayList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -522,25 +510,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Test retrieval of all software modules the user has access to.")
     public void getSoftwareModules() throws Exception {
-        SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
-                "vendor1");
-        os = softwareManagement.createSoftwareModule(os);
-
-        SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
-                "vendor1");
-        jvm = softwareManagement.createSoftwareModule(jvm);
-
-        SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name1", "version1", "description1",
-                "vendor1");
-        ah = softwareManagement.createSoftwareModule(ah);
+        final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule app = testdataFactory.createSoftwareModuleApp();
 
         mvc.perform(get("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].name", contains("name1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].version", contains("version1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].name", contains(os.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].version", contains(os.getVersion())))
+                .andExpect(
+                        jsonPath("$.content.[?(@.id==" + os.getId() + ")].description", contains(os.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].vendor", contains(os.getVendor())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].type", contains("os")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].createdAt", contains(os.getCreatedAt())))
@@ -553,121 +533,83 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")]._links.metadata.href",
                         contains("http://localhost/rest/v1/softwaremodules/" + os.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].name", contains("name1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].version", contains("version1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].vendor", contains("vendor1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].type", contains("runtime")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].createdBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")].createdAt", contains(jvm.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.type.href",
-                        contains("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.self.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.artifacts.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm.getId() + ")]._links.metadata.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].name", contains(app.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].version", contains(app.getVersion())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].description",
+                        contains(app.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].vendor", contains(app.getVendor())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].type", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")].createdAt", contains(app.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.artifacts.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + app.getId() + "/artifacts")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.metadata.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + app.getId()
                                 + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].name", contains("name1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].version", contains("version1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].vendor", contains("vendor1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].type", contains("application")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].createdBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")].createdAt", contains(ah.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.artifacts.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.metadata.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId()
-                                + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.type.href",
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.type.href",
                         contains("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah.getId() + ")]._links.self.href",
-                        contains("http://localhost/rest/v1/softwaremodules/" + ah.getId())));
+                .andExpect(jsonPath("$.content.[?(@.id==" + app.getId() + ")]._links.self.href",
+                        contains("http://localhost/rest/v1/softwaremodules/" + app.getId())));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(2);
     }
 
     @Test
     @Description("Test the various filter parameters, e.g. filter by name or type of the module.")
     public void getSoftwareModulesWithFilterParameters() throws Exception {
-        SoftwareModule os1 = entityFactory.generateSoftwareModule(osType, "osName1", "1.0.0", "description1",
-                "vendor1");
-        os1 = softwareManagement.createSoftwareModule(os1);
+        final SoftwareModule os1 = testdataFactory.createSoftwareModuleOs("1");
+        final SoftwareModule app1 = testdataFactory.createSoftwareModuleApp("1");
+        testdataFactory.createSoftwareModuleOs("2");
+        final SoftwareModule app2 = testdataFactory.createSoftwareModuleApp("2");
 
-        SoftwareModule jvm1 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName1", "2.0.0", "description1",
-                "vendor1");
-        jvm1 = softwareManagement.createSoftwareModule(jvm1);
-
-        SoftwareModule ah1 = entityFactory.generateSoftwareModule(appType, "appName1", "3.0.0", "description1",
-                "vendor1");
-        ah1 = softwareManagement.createSoftwareModule(ah1);
-
-        SoftwareModule os2 = entityFactory.generateSoftwareModule(osType, "osName2", "1.0.1", "description2",
-                "vendor2");
-        os2 = softwareManagement.createSoftwareModule(os2);
-
-        SoftwareModule jvm2 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName2", "2.0.1", "description2",
-                "vendor2");
-        jvm2 = softwareManagement.createSoftwareModule(jvm2);
-
-        SoftwareModule ah2 = entityFactory.generateSoftwareModule(appType, "appName2", "3.0.1", "description2",
-                "vendor2");
-        ah2 = softwareManagement.createSoftwareModule(ah2);
-
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(6);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(4);
 
         // only by name, only one exists per name
-        mvc.perform(get("/rest/v1/softwaremodules?q=name==osName1").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/rest/v1/softwaremodules?q=name==" + os1.getName()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].name", contains("osName1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].version", contains("1.0.0")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].name", contains(os1.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].version", contains(os1.getVersion())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].description",
+                        contains(os1.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].vendor", contains(os1.getVendor())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].type", contains("os")))
                 .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
 
         // by type, 2 software modules per type exists
-        mvc.perform(get("/rest/v1/softwaremodules?q=type==application").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/softwaremodules?q=type==" + Constants.SMT_DEFAULT_APP_KEY)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].name", contains("appName1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].version", contains("3.0.0")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].vendor", contains("vendor1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah1.getId() + ")].type", contains("application")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].name", contains("appName2")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].version", contains("3.0.1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].description", contains("description2")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].vendor", contains("vendor2")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + ah2.getId() + ")].type", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].name", contains(app1.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].version", contains(app1.getVersion())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].description",
+                        contains(app1.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].vendor", contains(app1.getVendor())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].type",
+                        contains(Constants.SMT_DEFAULT_APP_KEY)))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app2.getId() + ")].name", contains(app2.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app2.getId() + ")].version", contains(app2.getVersion())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app2.getId() + ")].description",
+                        contains(app2.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app2.getId() + ")].vendor", contains(app2.getVendor())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app2.getId() + ")].type",
+                        contains(Constants.SMT_DEFAULT_APP_KEY)))
                 .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
 
         // by type and version=2.0.0 -> only one result
-        mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version==2.0.0").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(
+                "/rest/v1/softwaremodules?q=type==" + Constants.SMT_DEFAULT_APP_KEY + ";version==" + app1.getVersion())
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].name", contains("runtimeName1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].version", contains("2.0.0")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].vendor", contains("vendor1")))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].name", contains(app1.getName())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].version", contains(app1.getVersion())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].description",
+                        contains(app1.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].vendor", contains(app1.getVendor())))
+                .andExpect(jsonPath("$.content.[?(@.id==" + app1.getId() + ")].type",
+                        contains(Constants.SMT_DEFAULT_APP_KEY)))
                 .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)));
-
-        // by type and version range >=2.0.0 -> 2 result
-        mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version=ge=2.0.0").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].name", contains("runtimeName1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].version", contains("2.0.0")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].description", contains("description1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm1.getId() + ")].vendor", contains("vendor1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].name", contains("runtimeName2")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].version", contains("2.0.1")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].description", contains("description2")))
-                .andExpect(jsonPath("$.content.[?(@.id==" + jvm2.getId() + ")].vendor", contains("vendor2")))
-                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)));
     }
 
     @Test
@@ -689,17 +631,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Tests GET request on /rest/v1/softwaremodules/{smId}.")
-    public void getSoftareModule() throws Exception {
-        SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
-                "vendor1");
-        os = softwareManagement.createSoftwareModule(os);
+    public void getSoftwareModule() throws Exception {
+        final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", os.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
-                .andExpect(jsonPath("$.description", equalTo("description1")))
-                .andExpect(jsonPath("$.vendor", equalTo("vendor1"))).andExpect(jsonPath("$.type", equalTo("os")))
+                .andExpect(jsonPath("$.name", equalTo(os.getName())))
+                .andExpect(jsonPath("$.version", equalTo(os.getVersion())))
+                .andExpect(jsonPath("$.description", equalTo(os.getDescription())))
+                .andExpect(jsonPath("$.vendor", equalTo(os.getVendor())))
+                .andExpect(jsonPath("$.type", equalTo(os.getType().getKey())))
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(os.getCreatedAt())))
                 .andExpect(jsonPath("$._links.metadata.href",
@@ -710,65 +652,19 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("$._links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")));
 
-        SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
-                "vendor1");
-        jvm = softwareManagement.createSoftwareModule(jvm);
-
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}", jvm.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
-                .andExpect(jsonPath("$.description", equalTo("description1")))
-                .andExpect(jsonPath("$.vendor", equalTo("vendor1"))).andExpect(jsonPath("$.type", equalTo("runtime")))
-                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$.createdAt", equalTo(jvm.getCreatedAt())))
-                .andExpect(jsonPath("$._links.metadata.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
-                                + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$._links.type.href",
-                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
-                .andExpect(jsonPath("$._links.artifacts.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")));
-
-        SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name1", "version1", "description1",
-                "vendor1");
-        ah = softwareManagement.createSoftwareModule(ah);
-
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}", ah.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name", equalTo("name1"))).andExpect(jsonPath("$.version", equalTo("version1")))
-                .andExpect(jsonPath("$.description", equalTo("description1")))
-                .andExpect(jsonPath("$.vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("$.type", equalTo("application")))
-                .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$.createdAt", equalTo(ah.getCreatedAt())))
-                .andExpect(jsonPath("$._links.metadata.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId()
-                                + "/metadata?offset=0&limit=50")))
-                .andExpect(jsonPath("$._links.type.href",
-                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
-                .andExpect(jsonPath("$._links.artifacts.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")));
-
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(1);
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
     public void createSoftwareModules() throws JSONException, Exception {
-        final SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
-                "vendor1");
-        final SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name2", "version1",
-                "description1", "vendor1");
-        final SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name3", "version1", "description1",
-                "vendor1");
+        final SoftwareModule os = entityFactory.softwareModule().create().name("name1").type(osType).version("version1")
+                .vendor("vendor1").description("description1").build();
+        final SoftwareModule ah = entityFactory.softwareModule().create().name("name3").type(appType)
+                .version("version3").vendor("vendor3").description("description3").build();
 
-        final List<SoftwareModule> modules = new ArrayList<>();
-        modules.add(os);
-        modules.add(jvm);
-        modules.add(ah);
+        final List<SoftwareModule> modules = Lists.newArrayList(os, ah);
 
         final long current = System.currentTimeMillis();
 
@@ -782,25 +678,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("[0].description", equalTo("description1")))
                 .andExpect(jsonPath("[0].vendor", equalTo("vendor1"))).andExpect(jsonPath("[0].type", equalTo("os")))
                 .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[1].name", equalTo("name2")))
-                .andExpect(jsonPath("[1].version", equalTo("version1")))
-                .andExpect(jsonPath("[1].description", equalTo("description1")))
-                .andExpect(jsonPath("[1].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("[1].type", equalTo("runtime")))
+                .andExpect(jsonPath("[1].name", equalTo("name3")))
+                .andExpect(jsonPath("[1].version", equalTo("version3")))
+                .andExpect(jsonPath("[1].description", equalTo("description3")))
+                .andExpect(jsonPath("[1].vendor", equalTo("vendor3")))
+                .andExpect(jsonPath("[1].type", equalTo("application")))
                 .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].name", equalTo("name3")))
-                .andExpect(jsonPath("[2].version", equalTo("version1")))
-                .andExpect(jsonPath("[2].description", equalTo("description1")))
-                .andExpect(jsonPath("[2].vendor", equalTo("vendor1")))
-                .andExpect(jsonPath("[2].type", equalTo("application")))
-                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
+                .andExpect(jsonPath("[1].createdAt", not(equalTo(0)))).andReturn();
 
         final SoftwareModule osCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name1", "version1",
                 osType);
-        final SoftwareModule jvmCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name2", "version1",
-                runtimeType);
-        final SoftwareModule ahCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name3", "version1",
+        final SoftwareModule appCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name3", "version3",
                 appType);
 
         assertThat(
@@ -813,29 +701,19 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
 
         assertThat(
                 JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("Response contains invalid self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId());
-        assertThat(JsonPath.compile("[1]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Response contains invalid artfacts href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId() + "/artifacts");
-
-        assertThat(
-                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                         .as("Response contains links self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId());
-        assertThat(JsonPath.compile("[2]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
+        assertThat(JsonPath.compile("[1]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).as("Response contains invalid artifacts href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId() + "/artifacts");
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId() + "/artifacts");
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Wrong softwaremodule size").hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Wrong softwaremodule size").hasSize(2);
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0).getName())
                 .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0)
                 .getCreatedBy()).as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent().get(0)
                 .getCreatedAt()).as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, runtimeType.getId()).getContent().get(0)
-                .getName()).as("Softwaremoudle name is wrong").isEqualTo(jvm.getName());
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, appType.getId()).getContent().get(0).getName())
                 .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
@@ -844,8 +722,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Description("Verifies successfull deletion of software modules that are not in use, i.e. assigned to a DS.")
     public void deleteUnassignedSoftwareModule() throws Exception {
 
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -892,8 +769,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Description("Tests the deletion of an artifact including verfication that the artifact is actually erased in the repository and removed from the software module.")
     public void deleteArtifact() throws Exception {
         // Create 1 SM
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -930,8 +806,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownKey2 = "knownKey1";
         final String knownValue2 = "knownValue1";
 
-        final SoftwareModule sm = softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final JSONArray jsonArray = new JSONArray();
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
@@ -959,8 +834,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownValue = "knownValue";
         final String updateValue = "valueForUpdate";
 
-        final SoftwareModule sm = softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         softwareManagement.createSoftwareModuleMetadata(sm.getId(),
                 entityFactory.generateMetadata(knownKey, knownValue));
 
@@ -983,8 +857,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
 
-        final SoftwareModule sm = softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         softwareManagement.createSoftwareModuleMetadata(sm.getId(),
                 entityFactory.generateMetadata(knownKey, knownValue));
 
@@ -1005,8 +878,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final int totalMetadata = 10;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final SoftwareModule sm = softwareManagement
-                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < totalMetadata; index++) {
             softwareManagement.createSoftwareModuleMetadata(sm.getId(),
@@ -1025,9 +897,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = entityFactory.generateSoftwareModule(osType, str, str, str, str);
-
-            softwareManagement.createSoftwareModule(softwareModule);
+            softwareManagement.createSoftwareModule(entityFactory.softwareModule().create().type(osType).name(str)
+                    .description(str).vendor(str).version(str));
             character++;
         }
     }

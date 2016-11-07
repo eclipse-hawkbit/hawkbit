@@ -366,10 +366,9 @@ public final class HawkbitCommonUtil {
     public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
             final String bsversion, final String bsvendor, final SoftwareModuleType bstype, final String description) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        SoftwareModule newSWModule = entityFactory.generateSoftwareModule(bstype, bsname, bsversion, description,
-                bsvendor);
-        newSWModule = swMgmtService.createSoftwareModule(newSWModule);
-        return newSWModule;
+
+        return swMgmtService.createSoftwareModule(entityFactory.softwareModule().create().type(bstype).name(bsname)
+                .version(bsversion).description(description).vendor(bsvendor));
     }
 
     /**

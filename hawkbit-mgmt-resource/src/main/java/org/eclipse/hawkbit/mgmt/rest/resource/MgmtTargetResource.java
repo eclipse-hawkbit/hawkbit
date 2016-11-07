@@ -105,7 +105,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new PagedList<MgmtTarget>(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
@@ -121,8 +121,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
-        final Target updateTarget = this.targetManagement.updateTarget(controllerId, targetRest.getName(),
-                targetRest.getDescription(), targetRest.getAddress(), targetRest.getSecurityToken());
+        final Target updateTarget = this.targetManagement.updateTarget(entityFactory.target().update(controllerId)
+                .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
+                .securityToken(targetRest.getSecurityToken()));
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }

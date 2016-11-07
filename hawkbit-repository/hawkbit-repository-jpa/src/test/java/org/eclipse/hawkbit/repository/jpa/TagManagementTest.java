@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -67,11 +66,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> dsBCs = testdataFactory.createDistributionSets("DS-BC", 13);
         final Collection<DistributionSet> dsABCs = testdataFactory.createDistributionSets("DS-ABC", 9);
 
-        final DistributionSetTag tagA = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
-        final DistributionSetTag tagB = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
-        final DistributionSetTag tagC = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("C"));
-        final DistributionSetTag tagX = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("X"));
-        final DistributionSetTag tagY = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Y"));
+        final DistributionSetTag tagA = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("A"));
+        final DistributionSetTag tagB = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("B"));
+        final DistributionSetTag tagC = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("C"));
+        final DistributionSetTag tagX = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("X"));
+        final DistributionSetTag tagY = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Y"));
 
         distributionSetManagement.toggleTagAssignment(dsAs, tagA);
         distributionSetManagement.toggleTagAssignment(dsBs, tagB);
@@ -166,7 +165,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
 
         final DistributionSetTag tag = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("tag1", "tagdesc1", ""));
+                .createDistributionSetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
         DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(groupA, tag);
@@ -204,10 +203,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies the toogle mechanism by means on assigning tag if at least on target in the list does not have"
             + "the tag yet. Unassign if all of them have the tag already.")
     public void assignAndUnassignTargetTags() {
-        final List<Target> groupA = targetManagement.createTargets(testdataFactory.generateTargets(20, ""));
-        final List<Target> groupB = targetManagement.createTargets(testdataFactory.generateTargets(20, "groupb"));
+        final List<Target> groupA = testdataFactory.createTargets(20);
+        final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
 
-        final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("tag1", "tagdesc1", ""));
+        final TargetTag tag = tagManagement
+                .createTargetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
         TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
@@ -260,7 +260,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createTargetTag() {
-        final Tag tag = tagManagement.createTargetTag(new JpaTargetTag("kai1", "kai2", "colour"));
+        final Tag tag = tagManagement
+                .createTargetTag(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
         assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
         assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
@@ -301,7 +302,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag savedAssigned = tags.iterator().next();
 
         // persist
-        tagManagement.updateTargetTag(savedAssigned.getId(), "test123", null, null);
+        tagManagement.updateTargetTag(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
@@ -314,7 +315,8 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createDistributionSetTag() {
-        final Tag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("kai1", "kai2", "colour"));
+        final Tag tag = tagManagement.createDistributionSetTag(
+                entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
         assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
@@ -358,10 +360,10 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
-        tagManagement.createTargetTag(new JpaTargetTag("A"));
+        tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
 
         try {
-            tagManagement.createTargetTag(new JpaTargetTag("A"));
+            tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -371,11 +373,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
-        tagManagement.createTargetTag(new JpaTargetTag("A"));
-        final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("B"));
+        tagManagement.createTargetTag(entityFactory.tag().create().name("A"));
+        final TargetTag tag = tagManagement.createTargetTag(entityFactory.tag().create().name("B"));
 
         try {
-            tagManagement.updateTargetTag(tag.getId(), "A", null, null);
+            tagManagement.updateTargetTag(entityFactory.tag().update(tag.getId()).name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -385,9 +387,9 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameException() {
-        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("A"));
         try {
-            tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
+            tagManagement.createDistributionSetTag(entityFactory.tag().create().name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -397,11 +399,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
-        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
-        final DistributionSetTag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("A"));
+        final DistributionSetTag tag = tagManagement.createDistributionSetTag(entityFactory.tag().create().name("B"));
 
         try {
-            tagManagement.updateDistributionSetTag(tag.getId(), "A", null, null);
+            tagManagement.updateDistributionSetTag(entityFactory.tag().update(tag.getId()).name("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -419,7 +421,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag savedAssigned = tags.iterator().next();
 
         // persist
-        tagManagement.updateDistributionSetTag(savedAssigned.getId(), "test123", null, null);
+        tagManagement.updateDistributionSetTag(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of ds tags").hasSize(tags.size());
@@ -439,7 +441,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
     private List<JpaTargetTag> createTargetsWithTags() {
         final List<Target> targets = testdataFactory.createTargets(20);
-        final Iterable<TargetTag> tags = tagManagement.createTargetTags(testdataFactory.generateTargetTags(20));
+        final Iterable<TargetTag> tags = testdataFactory.createTargetTags(20, "");
 
         tags.forEach(tag -> targetManagement.toggleTagAssignment(targets, tag));
 

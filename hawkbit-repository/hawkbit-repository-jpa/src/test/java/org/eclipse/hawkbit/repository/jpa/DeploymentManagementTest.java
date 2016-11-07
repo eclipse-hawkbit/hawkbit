@@ -31,14 +31,10 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -120,7 +116,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
         // not exists
         assignDS.add(Long.valueOf(100));
-        final DistributionSetTag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag1"));
+        final DistributionSetTag tag = tagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
 
         final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag);
         assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
@@ -178,34 +175,31 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             + "actions after canceling the second active action the first one is still running as it is not touched by the cancelation. After canceling the first one "
             + "also the target goes back to IN_SYNC as no open action is left.")
     public void manualCancelWithMultipleAssignmentsCancelLastOneFirst() {
-        JpaTarget target = new JpaTarget("4712");
+        final Action action = prepareFinishedUpdate("4712", "installed", true);
+        final Target target = action.getTarget();
         final DistributionSet dsFirst = testdataFactory.createDistributionSet("", true);
         final DistributionSet dsSecond = testdataFactory.createDistributionSet("2", true);
-        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
-
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
-        target = (JpaTarget) targetManagement.createTarget(target);
+        final DistributionSet dsInstalled = action.getDistributionSet();
 
         // check initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .as("target has update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("target has update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // assign the two sets in a row
         JpaAction firstAction = assignSet(target, dsFirst);
         JpaAction secondAction = assignSet(target, dsSecond);
 
-        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(2);
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(2);
+        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(3);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(5);
 
         // we cancel second -> back to first
         deploymentManagement.cancelAction(secondAction,
                 targetManagement.findTargetByControllerID(target.getControllerId()));
         secondAction = (JpaAction) deploymentManagement.findActionWithDetails(secondAction.getId());
         // confirm cancellation
-        secondAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(secondAction.getId(),
-                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
-        assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(4);
+        controllerManagement.addCancelActionStatus(
+                entityFactory.actionStatus().create(secondAction.getId()).status(Status.CANCELED));
+        assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(7);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).as("wrong ds")
                 .isEqualTo(dsFirst);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
@@ -216,10 +210,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 targetManagement.findTargetByControllerID(target.getControllerId()));
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId());
         // confirm cancellation
-        firstAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(firstAction.getId(),
-                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(6);
+        controllerManagement.addCancelActionStatus(
+                entityFactory.actionStatus().create(firstAction.getId()).status(Status.CANCELED));
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(9);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsInstalled);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
@@ -231,34 +224,31 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             + "actions after canceling the first active action the system switched to second one. After canceling this one "
             + "also the target goes back to IN_SYNC as no open action is left.")
     public void manualCancelWithMultipleAssignmentsCancelMiddleOneFirst() {
-        JpaTarget target = new JpaTarget("4712");
+        final Action action = prepareFinishedUpdate("4712", "installed", true);
+        final Target target = action.getTarget();
         final DistributionSet dsFirst = testdataFactory.createDistributionSet("", true);
         final DistributionSet dsSecond = testdataFactory.createDistributionSet("2", true);
-        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
-
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
-        target = (JpaTarget) targetManagement.createTarget(target);
+        final DistributionSet dsInstalled = action.getDistributionSet();
 
         // check initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // assign the two sets in a row
         JpaAction firstAction = assignSet(target, dsFirst);
         JpaAction secondAction = assignSet(target, dsSecond);
 
-        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(2);
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(2);
+        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(3);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(5);
 
         // we cancel first -> second is left
         deploymentManagement.cancelAction(firstAction,
                 targetManagement.findTargetByControllerID(target.getControllerId()));
         // confirm cancellation
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId());
-        firstAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(firstAction.getId(),
-                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
+        controllerManagement.addCancelActionStatus(
+                entityFactory.actionStatus().create(firstAction.getId()).status(Status.CANCELED));
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(7);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsSecond);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
@@ -268,13 +258,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         deploymentManagement.cancelAction(secondAction,
                 targetManagement.findTargetByControllerID(target.getControllerId()));
         secondAction = (JpaAction) deploymentManagement.findActionWithDetails(secondAction.getId());
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(5);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(8);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsSecond);
         // confirm cancellation
-        secondAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(secondAction.getId(),
-                new JpaActionStatus(Status.CANCELED, System.currentTimeMillis()));
+        controllerManagement.addCancelActionStatus(
+                entityFactory.actionStatus().create(secondAction.getId()).status(Status.CANCELED));
         // cancelled success -> back to dsInstalled
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong installed ds").isEqualTo(dsInstalled);
@@ -285,25 +274,23 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Force Quit an Assignment. Expected behaviour is that the action is canceled and is marked as deleted. The assigned Software module")
     public void forceQuitSetActionToInactive() throws InterruptedException {
-
-        JpaTarget target = new JpaTarget("4712");
-        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
-        target = (JpaTarget) targetManagement.createTarget(target);
+        final Action action = prepareFinishedUpdate("4712", "installed", true);
+        Target target = action.getTarget();
+        final DistributionSet dsInstalled = action.getDistributionSet();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
 
         // verify initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .as("wrong target info update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         Action assigningAction = assignSet(target, ds);
 
         // verify assignment
-        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(1);
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(1);
+        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(2);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
 
-        target = (JpaTarget) targetManagement.findTargetByControllerID(target.getControllerId());
+        target = targetManagement.findTargetByControllerID(target.getControllerId());
 
         // force quit assignment
         deploymentManagement.cancelAction(assigningAction, target);
@@ -324,23 +311,20 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Force Quit an not canceled Assignment. Expected behaviour is that the action can not be force quit and there is thrown an exception.")
     public void forceQuitNotAllowedThrowsException() {
-
-        Target target = new JpaTarget("4712");
-        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
-        target = targetManagement.createTarget(target);
+        final Action action = prepareFinishedUpdate("4712", "installed", true);
+        final Target target = action.getTarget();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
 
         // verify initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         final Action assigningAction = assignSet(target, ds);
 
         // verify assignment
-        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(1);
-        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(1);
+        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(2);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
 
         // force quit assignment
         try {
@@ -379,12 +363,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         eventBus.register(eventHandlerMock);
 
         final String myCtrlIDPref = "myCtrlID";
-        final Iterable<Target> savedNakedTargets = targetManagement
-                .createTargets(testdataFactory.generateTargets(10, myCtrlIDPref, "first description"));
+        final Iterable<Target> savedNakedTargets = testdataFactory.createTargets(10, myCtrlIDPref, "first description");
 
         final String myDeployedCtrlIDPref = "myDeployedCtrlID";
-        List<Target> savedDeployedTargets = targetManagement
-                .createTargets(testdataFactory.generateTargets(20, myDeployedCtrlIDPref, "first description"));
+        List<Target> savedDeployedTargets = testdataFactory.createTargets(20, myDeployedCtrlIDPref,
+                "first description");
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -435,15 +418,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targets = testdataFactory.createTargets(10);
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
-        final DistributionSet incomplete = distributionSetManagement.createDistributionSet(
-                new JpaDistributionSet("incomplete", "v1", "", standardDsType, Lists.newArrayList(ah, jvm), false));
+        final DistributionSet incomplete = distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("incomplete").version("v1")
+                        .type(standardDsType).modules(Lists.newArrayList(ah.getId())));
 
         try {
             assignDistributionSet(incomplete, targets);
@@ -725,14 +705,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("a");
         final DistributionSet dsB = testdataFactory.createDistributionSet("b");
-        Target targ = targetManagement.createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
-
-        List<Target> targs = new ArrayList<>();
-        targs.add(targ);
+        List<Target> targs = Lists.newArrayList(testdataFactory.createTarget("target-id-A"));
 
         // doing the assignment
         targs = assignDistributionSet(dsA, targs).getAssignedEntity();
-        targ = targetManagement.findTargetByControllerID(targs.iterator().next().getControllerId());
+        Target targ = targetManagement.findTargetByControllerID(targs.iterator().next().getControllerId());
 
         // checking the revisions of the created entities
         // verifying that the revision of the object and the revision within the
@@ -753,10 +730,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("Installed distribution set of action should be null").isNotNull();
 
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, (JpaDistributionSet) dsA);
-        final JpaAction action = (JpaAction) updAct.getContent().get(0);
-        action.setStatus(Status.FINISHED);
-        final ActionStatus statusMessage = new JpaActionStatus(Status.FINISHED, System.currentTimeMillis(), "");
-        controllerManagament.addUpdateActionStatus(action.getId(), statusMessage);
+        controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(updAct.getContent().get(0).getId()).status(Status.FINISHED));
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 
@@ -790,15 +765,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void checkThatDsRevisionsIsNotChangedWithTargetAssignment() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("a");
         testdataFactory.createDistributionSet("b");
-        Target targ = targetManagement.createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
+        final Target targ = testdataFactory.createTarget("target-id-A");
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
-        final List<Target> targs = new ArrayList<>();
-        targs.add(targ);
-        final Iterable<Target> savedTargs = assignDistributionSet(dsA, targs).getAssignedEntity();
-        targ = savedTargs.iterator().next();
+        assignDistributionSet(dsA, Lists.newArrayList(targ));
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
@@ -808,7 +780,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Tests the switch from a soft to hard update by API")
     public void forceSoftAction() {
         // prepare
-        final Target target = targetManagement.createTarget(new JpaTarget("knownControllerId"));
+        final Target target = testdataFactory.createTarget("knownControllerId");
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
@@ -832,7 +804,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Tests the switch from a hard to hard update by API, e.g. which in fact should not change anything.")
     public void forceAlreadyForcedActionNothingChanges() {
         // prepare
-        final Target target = targetManagement.createTarget(new JpaTarget("knownControllerId"));
+        final Target target = testdataFactory.createTarget("knownControllerId");
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
@@ -880,11 +852,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private DeploymentResult prepareComplexRepo(final String undeployedTargetPrefix, final int noOfUndeployedTargets,
             final String deployedTargetPrefix, final int noOfDeployedTargets, final int noOfDistributionSets,
             final String distributionSetPrefix) {
-        final Iterable<Target> nakedTargets = targetManagement.createTargets(
-                testdataFactory.generateTargets(noOfUndeployedTargets, undeployedTargetPrefix, "first description"));
+        final Iterable<Target> nakedTargets = testdataFactory.createTargets(noOfUndeployedTargets,
+                undeployedTargetPrefix, "first description");
 
-        List<Target> deployedTargets = targetManagement.createTargets(
-                testdataFactory.generateTargets(noOfDeployedTargets, deployedTargetPrefix, "first description"));
+        List<Target> deployedTargets = testdataFactory.createTargets(noOfDeployedTargets, deployedTargetPrefix,
+                "first description");
 
         // creating 10 DistributionSets
         final Collection<DistributionSet> dsList = testdataFactory.createDistributionSets(distributionSetPrefix,
@@ -923,13 +895,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    /**
-     *
-     *
-     */
-    private class DeploymentResult
-
-    {
+    private class DeploymentResult {
         final List<Long> deployedTargetIDs = new ArrayList<>();
         final List<Long> undeployedTargetIDs = new ArrayList<>();
         final List<Long> distributionSetIDs = new ArrayList<>();

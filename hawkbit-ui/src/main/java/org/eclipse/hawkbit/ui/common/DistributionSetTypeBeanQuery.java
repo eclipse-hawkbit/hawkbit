@@ -58,7 +58,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     @Override
     protected DistributionSetType constructBean() {
-        return getEntityFactory().generateDistributionSetType("", "", "");
+        return null;
     }
 
     @Override

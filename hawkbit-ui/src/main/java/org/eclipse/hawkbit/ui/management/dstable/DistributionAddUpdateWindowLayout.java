@@ -200,14 +200,14 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         if (isDuplicate()) {
             return;
         }
-        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
-        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
-        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final boolean isMigStepReq = reqMigStepCheckbox.getValue();
         final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
 
-        final DistributionSet currentDS = distributionSetManagement.updateDistributionSet(editDistId, name, desc,
-                version, isMigStepReq, distSetTypeId);
+        final DistributionSet currentDS = distributionSetManagement
+                .updateDistributionSet(entityFactory.distributionSet().update(editDistId)
+                        .name(distNameTextField.getValue()).description(descTextArea.getValue())
+                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq)
+                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId)));
         notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                 new Object[] { currentDS.getName(), currentDS.getVersion() }));
         // update table row+details layout
@@ -227,10 +227,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-        DistributionSet newDist = entityFactory.generateDistributionSet(name, version, desc,
-                distributionSetManagement.findDistributionSetTypeById(distSetTypeId), null, isMigStepReq);
-
-        newDist = distributionSetManagement.createDistributionSet(newDist);
+        final DistributionSet newDist = distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
+                        .description(desc).type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId))
+                        .requiredMigrationStep(isMigStepReq));
 
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));

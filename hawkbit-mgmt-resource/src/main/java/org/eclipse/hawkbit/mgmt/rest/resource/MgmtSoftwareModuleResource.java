@@ -170,8 +170,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
 
         LOG.debug("creating {} softwareModules", softwareModules.size());
-        final Collection<SoftwareModule> createdSoftwareModules = softwareManagement.createSoftwareModule(
-                MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules, softwareManagement));
+        final Collection<SoftwareModule> createdSoftwareModules = softwareManagement
+                .createSoftwareModule(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
         return ResponseEntity.status(CREATED).body(toResponse(createdSoftwareModules));
@@ -182,8 +182,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
 
-        return ResponseEntity.ok(toResponse(softwareManagement.updateSoftwareModule(softwareModuleId,
-                restSoftwareModule.getDescription(), restSoftwareModule.getVendor())));
+        return ResponseEntity.ok(toResponse(
+                softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(softwareModuleId)
+                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()))));
     }
 
     @Override

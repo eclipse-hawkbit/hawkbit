@@ -26,13 +26,13 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -240,10 +240,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         updateLastPollTime(action.getTarget());
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus(
-                mapStatus(message, actionUpdateStatus, action), System.currentTimeMillis(), messages);
+        final Status status = mapStatus(message, actionUpdateStatus, action);
+        final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
+                .messages(messages);
 
-        final Action addUpdateActionStatus = getUpdateActionStatus(actionUpdateStatus.getActionId(), actionStatus);
+        final Action addUpdateActionStatus = getUpdateActionStatus(status, actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
@@ -275,7 +276,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             status = Status.WARNING;
             break;
         case CANCEL_REJECTED:
-            status = hanldeCancelRejectedState(message, action, status);
+            status = hanldeCancelRejectedState(message, action);
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");
@@ -284,14 +285,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status hanldeCancelRejectedState(final Message message, final Action action, Status status) {
+    private Status hanldeCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
-            status = Status.WARNING;
+            return Status.WARNING;
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
+            return null;
         }
-        return status;
     }
 
     private void updateLastPollTime(final Target target) {
@@ -302,11 +303,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return new String(message.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8);
     }
 
-    private Action getUpdateActionStatus(final Long actionId, final ActionStatus actionStatus) {
-        if (actionStatus.getStatus().equals(Status.CANCELED)) {
-            return controllerManagement.addCancelActionStatus(actionId, actionStatus);
+    private Action getUpdateActionStatus(final Status status, final ActionStatusCreate actionStatus) {
+        if (Status.CANCELED.equals(status)) {
+            return controllerManagement.addCancelActionStatus(actionStatus);
         }
-        return controllerManagement.addUpdateActionStatus(actionId, actionStatus);
+        return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {

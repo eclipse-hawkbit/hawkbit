@@ -25,7 +25,11 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutCreate;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -171,18 +175,21 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public Rollout createRollout(final Rollout rollout, final int amountGroup,
+    public Rollout createRollout(final RolloutCreate c, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        final JpaRollout savedRollout = createRollout((JpaRollout) rollout, amountGroup);
+        final JpaRolloutCreate create = (JpaRolloutCreate) c;
+
+        final JpaRollout savedRollout = createRollout(create.build(), amountGroup);
         return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
+    public Rollout createRolloutAsync(final RolloutCreate c, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        final JpaRollout savedRollout = createRollout((JpaRollout) rollout, amountGroup);
+        final JpaRolloutCreate create = (JpaRolloutCreate) c;
+        final JpaRollout savedRollout = createRollout(create.build(), amountGroup);
         creatingRollouts.add(savedRollout.getName());
         // need to flush the entity manager here to get the ID of the rollout,
         // because entity manager is set to FlushMode#Auto, entitymanager will
@@ -589,17 +596,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public Rollout updateRollout(final Long rolloutId, final String name, final String description) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+    public Rollout updateRollout(final RolloutUpdate u) {
+        final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
+        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(update.getId()))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + update.getId() + " not found."));
 
-        if (name != null) {
-            rollout.setName(name);
-        }
-
-        if (description != null) {
-            rollout.setDescription(description);
-        }
+        update.getName().ifPresent(rollout::setName);
+        update.getDescription().ifPresent(rollout::setDescription);
 
         return rolloutRepository.save(rollout);
     }

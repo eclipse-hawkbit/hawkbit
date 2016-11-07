@@ -90,13 +90,13 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
      *            of the type
      * @param description
      *            of the type
-     * @param color
+     * @param colour
      *            of the type. It will be null by default
      */
-    public JpaDistributionSetType(final String key, final String name, final String description, final String color) {
+    public JpaDistributionSetType(final String key, final String name, final String description, final String colour) {
         super(name, description);
         this.key = key;
-        colour = color;
+        this.colour = colour;
     }
 
     @Override
@@ -136,7 +136,11 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return true;
         }
 
-        return new HashSet<DistributionSetTypeElement>(((JpaDistributionSetType) dsType).elements).equals(elements);
+        return new HashSet<>(((JpaDistributionSetType) dsType).elements).equals(elements);
+    }
+
+    public void clearModuleTypes() {
+        elements.clear();
     }
 
     private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
