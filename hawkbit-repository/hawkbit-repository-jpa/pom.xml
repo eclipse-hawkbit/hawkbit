@@ -133,6 +133,12 @@
          <artifactId>powermock-api-mockito</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert-core</artifactId>
+         <scope>test</scope>
+         
+      </dependency>
    </dependencies>
 
    <build>
