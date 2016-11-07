@@ -29,6 +29,7 @@ import javax.persistence.Query;
 import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -36,6 +37,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.utils.EventVerifier;
+import org.eclipse.hawkbit.repository.jpa.utils.ExpectEvent;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -45,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 
@@ -57,6 +61,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
+
+    @Rule
+    public EventVerifier eventVerifier = new EventVerifier();
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
@@ -120,6 +127,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
+    @ExpectEvent(type = TargetCreatedEvent.class, count = 4)
     public void assignAndUnassignTargetsToTag() {
         final List<String> assignTarget = new ArrayList<String>();
         assignTarget.add(targetManagement.createTarget(new JpaTarget("targetId123")).getControllerId());
