@@ -9,9 +9,13 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+
+import com.google.common.collect.Lists;
 
 /**
  * Builder to create a new {@link DistributionSetType} entry. Defines all fields
@@ -57,11 +61,47 @@ public interface DistributionSetTypeCreate {
     DistributionSetTypeCreate mandatory(Collection<Long> mandatory);
 
     /**
+     * @param mandatory
+     *            for {@link DistributionSetType#getMandatoryModuleTypes()}
+     * @return updated builder instance
+     */
+    default DistributionSetTypeCreate mandatory(final Long mandatory) {
+        return mandatory(Lists.newArrayList(mandatory));
+    }
+
+    /**
+     * @param mandatory
+     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @return updated builder instance
+     */
+    default DistributionSetTypeCreate mandatory(final SoftwareModuleType mandatory) {
+        return mandatory(Optional.ofNullable(mandatory).map(SoftwareModuleType::getId).orElse(null));
+    }
+
+    /**
      * @param optional
      *            for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate optional(Collection<Long> optional);
+
+    /**
+     * @param optional
+     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @return updated builder instance
+     */
+    default DistributionSetTypeCreate optional(final Long optional) {
+        return optional(Lists.newArrayList(optional));
+    }
+
+    /**
+     * @param optional
+     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @return updated builder instance
+     */
+    default DistributionSetTypeCreate optional(final SoftwareModuleType optional) {
+        return optional(Optional.ofNullable(optional).map(SoftwareModuleType::getId).orElse(null));
+    }
 
     /**
      * @return peek on current state of {@link DistributionSetType} in the

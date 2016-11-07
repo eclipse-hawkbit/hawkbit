@@ -96,7 +96,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Retrieves the oldest {@link Action} that is active and referring to the
      * given {@link Target}.
-     *
+     * 
+     * @param sort
+     *            order
      * @param target
      *            the target to find assigned actions
      * @param active
@@ -147,7 +149,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions according to the searched target
      */
     @Query("Select a from JpaAction a where a.target = :target order by a.id")
-    List<JpaAction> findByTarget(@Param("target") JpaTarget target);
+    List<JpaAction> findByTarget(@Param("target") Target target);
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag

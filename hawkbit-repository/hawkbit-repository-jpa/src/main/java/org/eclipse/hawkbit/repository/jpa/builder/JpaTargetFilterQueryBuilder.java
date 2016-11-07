@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
@@ -19,6 +20,11 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  *
  */
 public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
+    private final DistributionSetManagement distributionSetManagement;
+
+    public JpaTargetFilterQueryBuilder(final DistributionSetManagement distributionSetManagement) {
+        this.distributionSetManagement = distributionSetManagement;
+    }
 
     @Override
     public TargetFilterQueryUpdate update(final Long id) {
@@ -27,7 +33,7 @@ public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
 
     @Override
     public TargetFilterQueryCreate create() {
-        return new JpaTargetFilterQueryCreate();
+        return new JpaTargetFilterQueryCreate(distributionSetManagement);
     }
 
 }

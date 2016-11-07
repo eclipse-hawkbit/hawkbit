@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
@@ -213,9 +212,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
             final List<Target> targets) {
-        return deploymentManagement.assignDistributionSet(pset.getId(), ActionType.FORCED,
-                RepositoryModelConstants.NO_FORCE_TIME,
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+        return deploymentManagement.assignDistributionSet(pset.getId(),
+                targets.stream().map(Target::getTargetWithActionType).collect(Collectors.toList()));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
+        return assignDistributionSet(pset, Lists.newArrayList(target));
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {

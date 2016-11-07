@@ -34,9 +34,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -93,8 +91,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Override
     public void before() throws Exception {
         super.before();
-        testTarget = entityFactory.target().create().controllerId(CONTROLLER_ID).securityToken(TEST_TOKEN)
-                .address(AMQP_URI.toString()).build();
+        testTarget = targetManagement.createTarget(entityFactory.target().create().controllerId(CONTROLLER_ID)
+                .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
@@ -120,15 +118,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Test
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
-        final Action action = createAction(
-                testdataFactory.createDistributionSetWithNoSoftwareModules(UUID.randomUUID().toString(), "1.0"));
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                action, serviceMatcher.getServiceId());
+                "DEFAULT", 1L, 1L, CONTROLLER_ID, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
 
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, action);
+        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, 1L);
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
@@ -141,13 +137,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         return sendMessage;
     }
 
-    private JpaAction createAction(final DistributionSet testDs) {
-        final JpaAction action = new JpaAction();
-        action.setDistributionSet(testDs);
-        action.setTarget(testTarget);
-        action.setActionType(ActionType.FORCED);
-
-        return actionRepository.save(action);
+    private Action createAction(final DistributionSet testDs) {
+        return deploymentManagement.findAction(assignDistributionSet(testDs, testTarget).getActions().get(0));
     }
 
     @Test
@@ -161,7 +152,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, action);
+        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
+                action.getId());
         assertThat(createDistributionSet.getModules()).hasSameSizeAs(downloadAndUpdateRequest.getSoftwareModules());
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
@@ -202,7 +194,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, action);
+        final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
+                action.getId());
 
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
@@ -250,11 +243,11 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
-    private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Action action) {
+    private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
         assertEventMessage(sendMessage);
         final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
                 DownloadAndUpdateRequest.class);
-        assertEquals(downloadAndUpdateRequest.getActionId(), action.getId());
+        assertEquals(downloadAndUpdateRequest.getActionId(), action);
         assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
         assertEquals("Security token of target", downloadAndUpdateRequest.getTargetSecurityToken(), TEST_TOKEN);

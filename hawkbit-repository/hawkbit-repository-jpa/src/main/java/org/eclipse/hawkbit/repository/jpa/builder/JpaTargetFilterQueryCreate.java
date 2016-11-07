@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetFilterQueryUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Create/build implementation.
@@ -19,13 +22,26 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateCreate<TargetFilterQueryCreate>
         implements TargetFilterQueryCreate {
 
-    JpaTargetFilterQueryCreate() {
+    private final DistributionSetManagement distributionSetManagement;
 
+    JpaTargetFilterQueryCreate(final DistributionSetManagement distributionSetManagement) {
+        this.distributionSetManagement = distributionSetManagement;
     }
 
     @Override
     public JpaTargetFilterQuery build() {
-        return new JpaTargetFilterQuery(name, query);
+
+        return new JpaTargetFilterQuery(name, query,
+                getSet().map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null));
+    }
+
+    private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
+        final DistributionSet set = distributionSetManagement.findDistributionSetById(setId);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Distribution set cannot be set as it does not exixt" + setId);
+        }
+        return set;
     }
 
 }

@@ -768,6 +768,19 @@ public class TestdataFactory {
      *
      * @param numberOfTargets
      *            number of targets to create
+     * @param prefix
+     *            prefix used for the controller ID and description
+     * @return set of {@link Target}
+     */
+    public List<Target> createTargets(final int numberOfTargets, final String prefix) {
+        return createTargets(numberOfTargets, prefix, prefix);
+    }
+
+    /**
+     * builds a set of {@link Target} fixtures from the given parameters.
+     *
+     * @param numberOfTargets
+     *            number of targets to create
      * @param controllerIdPrefix
      *            prefix used for the controller ID
      * @param descriptionPrefix
@@ -849,6 +862,24 @@ public class TestdataFactory {
 
         return controllerManagament.addUpdateActionStatus(
                 entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
+    }
+
+    /**
+     * Append {@link ActionStatus} to all {@link Action}s of given
+     * {@link Target}s.
+     * 
+     * @param targets
+     *            to add {@link ActionStatus}
+     * @param status
+     *            to add
+     * @param message
+     *            to add
+     * 
+     * @return updated {@link Action}.
+     */
+    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
+            final String message) {
+        return sendUpdateActionStatusToTargets(targets, status, Lists.newArrayList(message));
     }
 
     /**

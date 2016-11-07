@@ -19,15 +19,15 @@ import java.util.Optional;
 public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractBaseEntityBuilder {
     protected String name;
     protected String query;
-    protected Long autoAssignDS;
+    protected Long set;
 
-    public T autoAssignDS(final Long autoAssignDS) {
-        this.autoAssignDS = autoAssignDS;
+    public T set(final Long set) {
+        this.set = set;
         return (T) this;
     }
 
-    public Long getAutoAssignDS() {
-        return autoAssignDS;
+    public Optional<Long> getSet() {
+        return Optional.ofNullable(set);
     }
 
     public T name(final String name) {

@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
@@ -31,6 +34,22 @@ public interface TargetFilterQueryCreate {
      * @return updated builder instance
      */
     TargetFilterQueryCreate query(String query);
+
+    /**
+     * @param set
+     *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
+     * @return updated builder instance
+     */
+    default TargetFilterQueryCreate set(final DistributionSet set) {
+        return set(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
+    }
+
+    /**
+     * @param setId
+     *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
+     * @return updated builder instance
+     */
+    TargetFilterQueryCreate set(Long setId);
 
     /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder

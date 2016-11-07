@@ -58,4 +58,11 @@ public interface Target extends NamedEntity {
      */
     String getSecurityToken();
 
+    /**
+     * @return {@link TargetWithActionType} with default settings
+     */
+    default TargetWithActionType getTargetWithActionType() {
+        return new TargetWithActionType(getControllerId());
+    }
+
 }

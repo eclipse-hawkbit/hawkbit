@@ -198,7 +198,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
                 .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo("TestName1")))
                 .andExpect(jsonPath("[0].key", equalTo("testKey1")))
                 .andExpect(jsonPath("[0].description", equalTo("Desc1")))

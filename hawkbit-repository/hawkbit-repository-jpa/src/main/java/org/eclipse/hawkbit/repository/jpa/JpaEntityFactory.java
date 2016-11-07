@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaMetaData;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,9 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Autowired
     private RolloutBuilder rolloutBuilder;
+
+    @Autowired
+    private TargetFilterQueryBuilder targetFilterQueryBuilder;
 
     @Override
     public MetaData generateMetadata(final String key, final String value) {
@@ -74,7 +76,7 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Override
     public TargetFilterQueryBuilder targetFilterQuery() {
-        return new JpaTargetFilterQueryBuilder();
+        return targetFilterQueryBuilder;
     }
 
     @Override

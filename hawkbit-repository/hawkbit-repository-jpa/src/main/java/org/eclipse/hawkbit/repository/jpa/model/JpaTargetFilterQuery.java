@@ -80,10 +80,10 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
      *            of the {@link TargetFilterQuery}.
      */
     public JpaTargetFilterQuery(final String name, final String query,
-            final JpaDistributionSet autoAssignDistributionSet) {
+            final DistributionSet autoAssignDistributionSet) {
         this.name = name;
         this.query = query;
-        this.autoAssignDistributionSet = autoAssignDistributionSet;
+        this.autoAssignDistributionSet = (JpaDistributionSet) autoAssignDistributionSet;
     }
 
     @Override
