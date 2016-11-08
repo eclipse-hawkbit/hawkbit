@@ -68,7 +68,7 @@ public class EventVerifier implements TestRule {
         final ConcurrentMap<Class<?>, AtomicInteger> eventCounterMap = eventCounterListener.getEventCounterMap();
 
         for (final ExpectEvent e : expectEvent) {
-            eventCounterMap.putIfAbsent(e.type(), new AtomicInteger(0));
+            eventCounterMap.putIfAbsent(e.type(), new AtomicInteger());
             final AtomicInteger atomicInteger = eventCounterMap.get(e.type());
             assertThat(atomicInteger.get()).as("Did not receive the expected amount of events form " + e.type())
                     .isEqualTo(e.count());

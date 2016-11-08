@@ -27,10 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -175,11 +171,6 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that etag check results in not modified response if provided etag by client is identical to entity in repository.")
-    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
-            @ExpectEvent(type = TargetUpdatedEvent.class, count = 9),
-            @ExpectEvent(type = TargetAssignDistributionSetEvent.class, count = 2),
-            @ExpectEvent(type = ActionUpdatedEvent.class, count = 2),
-            @ExpectEvent(type = DistributionSetCreatedEvent.class, count = 2) })
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -303,12 +294,6 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
-    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
-            @ExpectEvent(type = ActionCreatedEvent.class, count = 1),
-            @ExpectEvent(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @ExpectEvent(type = ActionUpdatedEvent.class, count = 2),
-            @ExpectEvent(type = TargetUpdatedEvent.class, count = 5),
-            @ExpectEvent(type = DistributionSetCreatedEvent.class, count = 1) })
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
 
         // mock
@@ -319,6 +304,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         toAssign.add(savedTarget);
         savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))

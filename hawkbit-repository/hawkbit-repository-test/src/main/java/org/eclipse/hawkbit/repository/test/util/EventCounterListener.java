@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationListener;
  */
 public class EventCounterListener implements ApplicationListener<RemoteApplicationEvent> {
 
-    final ConcurrentMap<Class<?>, AtomicInteger> map;
+    private final ConcurrentMap<Class<?>, AtomicInteger> map;
 
     public EventCounterListener() {
         map = new ConcurrentHashMap<Class<?>, AtomicInteger>();
@@ -32,7 +32,10 @@ public class EventCounterListener implements ApplicationListener<RemoteApplicati
 
     @Override
     public void onApplicationEvent(final RemoteApplicationEvent event) {
-        map.putIfAbsent(event.getClass(), new AtomicInteger(0));
+
+        System.err.println("Event received " + event);
+
+        map.putIfAbsent(event.getClass(), new AtomicInteger());
         map.get(event.getClass()).incrementAndGet();
     }
 
