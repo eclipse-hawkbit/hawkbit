@@ -27,10 +27,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.util.EventCounter;
+import org.eclipse.hawkbit.repository.test.util.ExpectEvent;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
@@ -41,7 +49,6 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -62,6 +69,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
             SYSTEM_ROLE }, autoCreateTenant = false)
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1) })
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
@@ -84,6 +92,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that target poll request does not change audit data on the entity.")
     @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
             SpPermission.CREATE_TARGET }, allSpPermissions = false)
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
+            @ExpectEvent(type = TargetUpdatedEvent.class, count = 1) })
     public void targetPollDoesNotModifyAuditData() throws Exception {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
@@ -112,12 +122,14 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that server returns a not found response in case of empty controlloer ID.")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 0) })
     public void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/")).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
     @Test
     @Description("Ensures that the system creates a new target in plug and play manner, i.e. target is authenticated but does not exist yet.")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsPlugAndPlay() throws Exception {
 
         final long current = System.currentTimeMillis();
@@ -144,6 +156,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
     @WithUser(principal = "knownpricipal", allSpPermissions = false)
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1) })
     public void pollWithModifiedGloablPollingTime() throws Exception {
         securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
@@ -162,6 +175,11 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that etag check results in not modified response if provided etag by client is identical to entity in repository.")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
+            @ExpectEvent(type = TargetUpdatedEvent.class, count = 9),
+            @ExpectEvent(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @ExpectEvent(type = ActionUpdatedEvent.class, count = 2),
+            @ExpectEvent(type = DistributionSetCreatedEvent.class, count = 2) })
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -226,6 +244,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
+            @ExpectEvent(type = TargetUpdatedEvent.class, count = 1) })
     public void rootRsPrecommissioned() throws Exception {
         final Target target = entityFactory.generateTarget("4711");
         targetManagement.createTarget(target);
@@ -250,6 +270,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that the source IP address of the polling target is correctly stored in repository")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsPlugAndPlayIpAddress() throws Exception {
         // test
         final String knownControllerId1 = "0815";
@@ -264,6 +285,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that the source IP address of the polling target is not stored in repository if disabled")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsIpAddressNotStoredIfDisabled() throws Exception {
         securityProperties.getClients().setTrackRemoteIp(false);
 
@@ -281,6 +303,12 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
+    @EventCounter(expectEvent = { @ExpectEvent(type = TargetCreatedEvent.class, count = 1),
+            @ExpectEvent(type = ActionCreatedEvent.class, count = 1),
+            @ExpectEvent(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @ExpectEvent(type = ActionUpdatedEvent.class, count = 2),
+            @ExpectEvent(type = TargetUpdatedEvent.class, count = 5),
+            @ExpectEvent(type = DistributionSetCreatedEvent.class, count = 1) })
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
 
         // mock

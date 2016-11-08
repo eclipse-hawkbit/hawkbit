@@ -66,6 +66,7 @@ public class EventVerifier implements TestRule {
 
     private void verifyEventCounts(final ExpectEvent[] expectEvent) {
         final ConcurrentMap<Class<?>, AtomicInteger> eventCounterMap = eventCounterListener.getEventCounterMap();
+
         for (final ExpectEvent e : expectEvent) {
             eventCounterMap.putIfAbsent(e.type(), new AtomicInteger(0));
             final AtomicInteger atomicInteger = eventCounterMap.get(e.type());

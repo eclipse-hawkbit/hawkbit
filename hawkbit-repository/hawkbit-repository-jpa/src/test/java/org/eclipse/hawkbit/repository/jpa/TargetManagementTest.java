@@ -50,11 +50,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.util.EventCounter;
-import org.eclipse.hawkbit.repository.test.util.EventVerifier;
 import org.eclipse.hawkbit.repository.test.util.ExpectEvent;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 
@@ -67,9 +65,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
-
-    @Rule
-    public EventVerifier eventVerifier = new EventVerifier();
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")

@@ -177,6 +177,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
 
+    @Rule
+    public EventVerifier eventVerifier = new EventVerifier();
+
     protected Environment environment = null;
 
     @Override
