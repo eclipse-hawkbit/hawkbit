@@ -141,10 +141,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return new HashSet<>(((JpaDistributionSetType) dsType).elements).equals(elements);
     }
 
-    public void clearModuleTypes() {
-        elements.clear();
-    }
-
     private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
         return (!CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)
                 && CollectionUtils.isEmpty(elements))
@@ -157,21 +153,29 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
     }
 
     public JpaDistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
-        if (elements == null) {
-            elements = new HashSet<>();
-        }
-
-        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, false));
-
-        return this;
+        return setModuleType(smType, false);
     }
 
     public JpaDistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
+        return setModuleType(smType, true);
+    }
+
+    private JpaDistributionSetType setModuleType(final SoftwareModuleType smType, final boolean mandatory) {
         if (elements == null) {
             elements = new HashSet<>();
+            elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, mandatory));
+            return this;
         }
 
-        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, true));
+        // check if this was in the list before before
+        final Optional<DistributionSetTypeElement> existing = elements.stream()
+                .filter(element -> element.getSmType().getId().equals(smType.getId())).findFirst();
+
+        if (existing.isPresent()) {
+            existing.get().setMandatory(mandatory);
+        } else {
+            elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, mandatory));
+        }
 
         return this;
     }
@@ -182,12 +186,8 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         }
 
         // we search by id (standard equals compares also revison)
-        final Optional<DistributionSetTypeElement> found = elements.stream()
-                .filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst();
-
-        if (found.isPresent()) {
-            elements.remove(found.get());
-        }
+        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst()
+                .ifPresent(elements::remove);
 
         return this;
     }

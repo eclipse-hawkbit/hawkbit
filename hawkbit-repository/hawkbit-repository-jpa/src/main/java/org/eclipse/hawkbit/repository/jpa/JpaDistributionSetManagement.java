@@ -196,7 +196,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.getType() != null) {
             final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(update.getType());
-            if (type.getId().equals(set.getType().getId())) {
+            if (!type.getId().equals(set.getType().getId())) {
                 checkDistributionSetIsAllowedToModify(set);
                 set.setType(type);
             }
@@ -343,7 +343,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!update.getOptional().isEmpty() || !update.getMandatory().isEmpty()) {
             checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
 
-            type.clearModuleTypes();
             softwareModuleTypeRepository.findByIdIn(update.getMandatory()).forEach(type::addMandatoryModuleType);
             softwareModuleTypeRepository.findByIdIn(update.getOptional()).forEach(type::addOptionalModuleType);
         }

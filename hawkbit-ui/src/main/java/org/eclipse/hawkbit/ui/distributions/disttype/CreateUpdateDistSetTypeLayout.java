@@ -394,10 +394,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private void updateDistributionSetType(final DistributionSetType existingType) {
 
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
 
         final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
-                .description(typeDescValue)
+                .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
         if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
                 && !itemIds.isEmpty()) {
