@@ -63,7 +63,7 @@ public final class MgmtDistributionSetMapper {
     static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
             final EntityFactory entityFactory) {
 
-        final List<Long> modules = new ArrayList<>(dsRest.getModules().size());
+        final List<Long> modules = new ArrayList<>();
 
         if (dsRest.getOs() != null) {
             modules.add(dsRest.getOs().getId());

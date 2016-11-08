@@ -105,7 +105,7 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
     /**
      * @return the requiredMigrationStep
      */
-    public boolean isRequiredMigrationStep() {
+    public Boolean isRequiredMigrationStep() {
         return requiredMigrationStep;
     }
 
@@ -115,7 +115,7 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
      *
      * @return updated body
      */
-    public MgmtDistributionSetRequestBodyPost setRequiredMigrationStep(final boolean requiredMigrationStep) {
+    public MgmtDistributionSetRequestBodyPost setRequiredMigrationStep(final Boolean requiredMigrationStep) {
         this.requiredMigrationStep = requiredMigrationStep;
 
         return this;
