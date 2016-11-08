@@ -297,6 +297,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distsetTypeNameComboBox.addItem(distSet.getType().getId());
         }
         distsetTypeNameComboBox.setValue(distSet.getType().getId());
+
         reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
         if (distSet.getDescription() != null) {
             descTextArea.setValue(distSet.getDescription());

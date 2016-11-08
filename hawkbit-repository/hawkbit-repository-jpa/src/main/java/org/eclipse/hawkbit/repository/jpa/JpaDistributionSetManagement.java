@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -190,14 +191,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
-            checkDistributionSetIsAllowedToModify(set);
+            checkDistributionSetIsAssignedToTargets(set);
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
         if (update.getType() != null) {
             final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(update.getType());
             if (!type.getId().equals(set.getType().getId())) {
-                checkDistributionSetIsAllowedToModify(set);
+                checkDistributionSetIsAssignedToTargets(set);
+
                 set.setType(type);
             }
         }
@@ -308,7 +310,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException("Not all given software modules where found.");
         }
 
-        checkDistributionSetIsAllowedToModify(set);
+        checkDistributionSetIsAssignedToTargets(set);
 
         modules.forEach(set::addModule);
 
@@ -322,7 +324,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetIsAllowedToModify(set);
+        checkDistributionSetIsAssignedToTargets(set);
 
         set.removeModule(module);
 
@@ -761,7 +763,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetIsAllowedToModify(final JpaDistributionSet distributionSet) {
+    private void checkDistributionSetIsAssignedToTargets(final JpaDistributionSet distributionSet) {
         if (actionRepository.countByDistributionSet(distributionSet) > 0) {
             throw new EntityReadOnlyException(
                     String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
@@ -770,17 +772,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private static Boolean isDSWithNoTagSelected(final DistributionSetFilter distributionSetFilter) {
-        if (distributionSetFilter.getSelectDSWithNoTag() != null && distributionSetFilter.getSelectDSWithNoTag()) {
-            return true;
-        }
-        return false;
+        return distributionSetFilter.getSelectDSWithNoTag() != null && distributionSetFilter.getSelectDSWithNoTag();
     }
 
     private static Boolean isTagsSelected(final DistributionSetFilter distributionSetFilter) {
-        if (distributionSetFilter.getTagNames() != null && !distributionSetFilter.getTagNames().isEmpty()) {
-            return true;
-        }
-        return false;
+        return !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
     }
 
     /**
