@@ -27,7 +27,7 @@ public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
     }
 
     @Override
-    public TargetFilterQueryUpdate update(final Long id) {
+    public TargetFilterQueryUpdate update(final long id) {
         return new GenericTargetFilterQueryUpdate(id);
     }
 

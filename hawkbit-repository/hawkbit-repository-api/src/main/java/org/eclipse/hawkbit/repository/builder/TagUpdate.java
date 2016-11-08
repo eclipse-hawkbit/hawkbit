@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link Tag} entry. Defines all fields that can
@@ -21,7 +22,7 @@ public interface TagUpdate {
      *            for {@link Tag#getName()}
      * @return updated builder instance
      */
-    TagUpdate name(String name);
+    TagUpdate name(@NotEmpty String name);
 
     /**
      * @param description

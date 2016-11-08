@@ -14,10 +14,10 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Type of a software modules.
@@ -37,7 +37,7 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
 
     @Column(name = "type_key", nullable = false, length = 64)
     @Size(max = 64)
-    @NotNull
+    @NotEmpty
     private String key;
 
     @Column(name = "max_ds_assignments", nullable = false)

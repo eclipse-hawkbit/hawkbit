@@ -21,7 +21,7 @@ public interface RolloutBuilder {
      *            of the updatable entity
      * @return builder instance
      */
-    RolloutUpdate update(Long id);
+    RolloutUpdate update(long id);
 
     /**
      * @return builder instance

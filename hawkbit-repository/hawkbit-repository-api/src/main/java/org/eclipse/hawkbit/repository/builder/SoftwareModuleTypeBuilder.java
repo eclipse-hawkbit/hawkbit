@@ -21,7 +21,7 @@ public interface SoftwareModuleTypeBuilder {
      *            of the updatable entity
      * @return builder instance
      */
-    SoftwareModuleTypeUpdate update(Long id);
+    SoftwareModuleTypeUpdate update(long id);
 
     /**
      * @return builder instance

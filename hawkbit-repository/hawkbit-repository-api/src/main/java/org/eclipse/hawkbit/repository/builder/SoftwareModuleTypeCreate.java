@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link SoftwareModuleType} entry. Defines all fields
@@ -23,14 +24,14 @@ public interface SoftwareModuleTypeCreate {
      *            for {@link SoftwareModuleType#getKey()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate key(String key);
+    SoftwareModuleTypeCreate key(@NotEmpty String key);
 
     /**
      * @param name
      *            for {@link SoftwareModuleType#getName()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate name(String name);
+    SoftwareModuleTypeCreate name(@NotEmpty String name);
 
     /**
      * @param description

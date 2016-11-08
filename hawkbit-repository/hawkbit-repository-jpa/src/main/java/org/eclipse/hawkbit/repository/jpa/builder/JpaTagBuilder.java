@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.builder.TagUpdate;
 public class JpaTagBuilder implements TagBuilder {
 
     @Override
-    public TagUpdate update(final Long id) {
+    public TagUpdate update(final long id) {
         return new GenericTagUpdate(id);
     }
 

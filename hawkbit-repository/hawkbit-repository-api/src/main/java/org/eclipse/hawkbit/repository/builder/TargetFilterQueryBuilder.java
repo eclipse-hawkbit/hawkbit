@@ -20,7 +20,7 @@ public interface TargetFilterQueryBuilder {
      *            of the updatable entity
      * @return builder instance
      */
-    TargetFilterQueryUpdate update(Long id);
+    TargetFilterQueryUpdate update(long id);
 
     /**
      * @return builder instance

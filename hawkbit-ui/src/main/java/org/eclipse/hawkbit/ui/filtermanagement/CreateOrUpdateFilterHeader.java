@@ -93,8 +93,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     private AutoCompleteTextFieldComponent queryTextField;
 
-    private HorizontalLayout breadcrumbLayout;
-
     private Button breadcrumbButton;
 
     private Label breadcrumbName;
@@ -273,7 +271,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         titleFilterIconsLayout.addComponents(headerCaption, captionLayout);
         titleFilterIconsLayout.setSpacing(true);
 
-        breadcrumbLayout = new HorizontalLayout();
+        final HorizontalLayout breadcrumbLayout = new HorizontalLayout();
         breadcrumbLayout.addComponent(breadcrumbButton);
         breadcrumbLayout.addComponent(new Label(">"));
         breadcrumbName = new LabelBuilder().buildCaptionLabel();
@@ -332,10 +330,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private static boolean isNameAndQueryEmpty(final String name, final String query) {
-        if (Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(query)) {
-            return true;
-        }
-        return false;
+        return Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(query);
     }
 
     private SPUIButton createSearchResetIcon() {

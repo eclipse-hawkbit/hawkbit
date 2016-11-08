@@ -32,7 +32,7 @@ public class JpaDistributionSetBuilder implements DistributionSetBuilder {
     }
 
     @Override
-    public DistributionSetUpdate update(final Long id) {
+    public DistributionSetUpdate update(final long id) {
         return new GenericDistributionSetUpdate(id);
     }
 

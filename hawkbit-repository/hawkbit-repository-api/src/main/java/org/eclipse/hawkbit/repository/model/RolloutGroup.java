@@ -138,7 +138,7 @@ public interface RolloutGroup extends NamedEntity {
 
         private final String beanName;
 
-        private RolloutGroupSuccessCondition(final String beanName) {
+        RolloutGroupSuccessCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -158,7 +158,7 @@ public interface RolloutGroup extends NamedEntity {
 
         private final String beanName;
 
-        private RolloutGroupErrorCondition(final String beanName) {
+        RolloutGroupErrorCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -178,7 +178,7 @@ public interface RolloutGroup extends NamedEntity {
 
         private final String beanName;
 
-        private RolloutGroupErrorAction(final String beanName) {
+        RolloutGroupErrorAction(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -199,7 +199,7 @@ public interface RolloutGroup extends NamedEntity {
 
         private final String beanName;
 
-        private RolloutGroupSuccessAction(final String beanName) {
+        RolloutGroupSuccessAction(final String beanName) {
             this.beanName = beanName;
         }
 

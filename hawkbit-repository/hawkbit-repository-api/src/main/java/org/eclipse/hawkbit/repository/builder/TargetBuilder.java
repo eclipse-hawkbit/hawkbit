@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.Target;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder for {@link Target}.
@@ -17,11 +18,11 @@ import org.eclipse.hawkbit.repository.model.Target;
 public interface TargetBuilder {
 
     /**
-     * @param id
+     * @param controllerId
      *            of the updatable entity
      * @return builder instance
      */
-    TargetUpdate update(String controllerId);
+    TargetUpdate update(@NotEmpty String controllerId);
 
     /**
      * @return builder instance

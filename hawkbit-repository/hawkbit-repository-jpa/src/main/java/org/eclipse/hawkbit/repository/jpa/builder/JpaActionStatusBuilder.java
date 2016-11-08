@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 public class JpaActionStatusBuilder implements ActionStatusBuilder {
 
     @Override
-    public ActionStatusCreate create(final Long actionId) {
+    public ActionStatusCreate create(final long actionId) {
         return new JpaActionStatusCreate(actionId);
     }
 

@@ -50,8 +50,9 @@ import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
- * A utility class which is able to parse RSQL strings into an spring data {@link Specification} which then can be
- * enhanced sql queries to filter entities. RSQL parser library: https://github.com/jirutka/rsql-parser
+ * A utility class which is able to parse RSQL strings into an spring data
+ * {@link Specification} which then can be enhanced sql queries to filter
+ * entities. RSQL parser library: https://github.com/jirutka/rsql-parser
  *
  * <ul>
  * <li>Equal to : ==</li>
@@ -71,13 +72,15 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
  * </ul>
  * <p>
- * There is also a mechanism that allows to refer to known macros that can resolved by an optional {@link StrLookup}
- * (cp. {@link VirtualPropertyResolver}).<br>
- * An example that queries for all overdue targets using the ${OVERDUE_TS} placeholder introduced by
- * {@link VirtualPropertyResolver} looks like this:<br>
+ * There is also a mechanism that allows to refer to known macros that can
+ * resolved by an optional {@link StrLookup} (cp.
+ * {@link VirtualPropertyResolver}).<br>
+ * An example that queries for all overdue targets using the ${OVERDUE_TS}
+ * placeholder introduced by {@link VirtualPropertyResolver} looks like
+ * this:<br>
  * <em>lastControllerRequestAt=le=${OVERDUE_TS}</em><br>
- * It is possible to escape a macro expression by using a second '$': $${OVERDUE_TS} would prevent the ${OVERDUE_TS}
- * token from being expanded.
+ * It is possible to escape a macro expression by using a second '$':
+ * $${OVERDUE_TS} would prevent the ${OVERDUE_TS} token from being expanded.
  *
  */
 public final class RSQLUtility {
@@ -111,7 +114,7 @@ public final class RSQLUtility {
      *             if the RSQL syntax is wrong
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
-            final Class<A> fieldNameProvider, VirtualPropertyReplacer virtualPropertyReplacer) {
+            final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer) {
         return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer);
     }
 
@@ -146,7 +149,7 @@ public final class RSQLUtility {
         private final VirtualPropertyReplacer virtualPropertyReplacer;
 
         private RSQLSpecification(final String rsql, final Class<A> enumType,
-                VirtualPropertyReplacer virtualPropertyReplacer) {
+                final VirtualPropertyReplacer virtualPropertyReplacer) {
             this.rsql = rsql;
             this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -193,7 +196,7 @@ public final class RSQLUtility {
         private final SimpleTypeConverter simpleTypeConverter;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-                VirtualPropertyReplacer virtualPropertyReplacer) {
+                final VirtualPropertyReplacer virtualPropertyReplacer) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
@@ -225,7 +228,7 @@ public final class RSQLUtility {
 
         private String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
 
-            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = node.getSelector().split("\\" + SUB_ATTRIBUTE_SEPERATOR);
 
             validateMapParamter(propertyEnum, node, graph);
 
@@ -281,7 +284,7 @@ public final class RSQLUtility {
 
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
-            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] split = finalProperty.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
             if (split.length == 0) {
                 return root.get(split[0]);
             }
@@ -336,7 +339,7 @@ public final class RSQLUtility {
                         final String enumFieldName = enumField.name().toLowerCase();
 
                         if (enumField.isMap()) {
-                            return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + "keyName";
+                            return enumFieldName + SUB_ATTRIBUTE_SEPERATOR + "keyName";
                         }
 
                         return enumFieldName;
@@ -345,8 +348,7 @@ public final class RSQLUtility {
             final List<String> expectedSubFieldList = Arrays.stream(enumType.getEnumConstants())
                     .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                         final List<String> subEntity = enumField.getSubEntityAttributes().stream()
-                                .map(fieldName -> enumField.name().toLowerCase()
-                                        + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
+                                .map(fieldName -> enumField.name().toLowerCase() + SUB_ATTRIBUTE_SEPERATOR + fieldName)
                                 .collect(Collectors.toList());
 
                         return subEntity.stream();
@@ -357,7 +359,7 @@ public final class RSQLUtility {
 
         private A getFieldEnumByName(final ComparisonNode node) {
             String enumName = node.getSelector();
-            final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = enumName.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
             if (graph.length != 0) {
                 enumName = graph[0];
             }
@@ -536,7 +538,7 @@ public final class RSQLUtility {
             if (!enumField.isMap()) {
                 return null;
             }
-            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = node.getSelector().split("\\" + SUB_ATTRIBUTE_SEPERATOR);
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
                 // Currently we support only string key .So below cast is safe.

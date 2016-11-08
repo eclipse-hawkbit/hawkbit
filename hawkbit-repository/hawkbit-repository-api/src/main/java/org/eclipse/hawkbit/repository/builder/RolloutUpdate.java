@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link Rollout} entry. Defines all fields that
@@ -21,7 +22,7 @@ public interface RolloutUpdate {
      *            for {@link Rollout#getName()}
      * @return updated builder instance
      */
-    RolloutUpdate name(String name);
+    RolloutUpdate name(@NotEmpty String name);
 
     /**
      * @param description

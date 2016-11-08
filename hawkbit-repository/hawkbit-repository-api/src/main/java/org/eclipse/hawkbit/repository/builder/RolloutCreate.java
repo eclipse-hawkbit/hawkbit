@@ -10,10 +10,13 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link Rollout} entry. Defines all fields that can be
@@ -27,7 +30,7 @@ public interface RolloutCreate {
      *            for {@link Rollout#getName()}
      * @return updated builder instance
      */
-    RolloutCreate name(String name);
+    RolloutCreate name(@NotEmpty String name);
 
     /**
      * @param description
@@ -50,21 +53,21 @@ public interface RolloutCreate {
      *            for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
      */
-    RolloutCreate set(Long setId);
+    RolloutCreate set(long setId);
 
     /**
      * @param targetFilterQuery
      *            for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
      */
-    RolloutCreate targetFilterQuery(String targetFilterQuery);
+    RolloutCreate targetFilterQuery(@NotEmpty String targetFilterQuery);
 
     /**
      * @param actionType
      *            for {@link Rollout#getActionType()}
      * @return updated builder instance
      */
-    RolloutCreate actionType(ActionType actionType);
+    RolloutCreate actionType(@NotNull ActionType actionType);
 
     /**
      * @param forcedTime

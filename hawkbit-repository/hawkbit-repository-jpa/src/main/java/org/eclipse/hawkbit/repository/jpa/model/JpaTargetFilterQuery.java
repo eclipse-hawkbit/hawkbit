@@ -18,11 +18,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Stored target filter.
@@ -40,12 +40,12 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
 
     @Column(name = "name", length = 64, nullable = false)
     @Size(max = 64)
-    @NotNull
+    @NotEmpty
     private String name;
 
     @Column(name = "query", length = 1024, nullable = false)
     @Size(max = 1024)
-    @NotNull
+    @NotEmpty
     private String query;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)

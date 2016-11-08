@@ -29,6 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * A distribution set type defines which software module types can or have to be
@@ -54,6 +55,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Column(name = "type_key", nullable = false, length = 64)
     @Size(max = 64)
+    @NotEmpty
     private String key;
 
     @Column(name = "colour", nullable = true, length = 16)

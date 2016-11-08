@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link TargetFilterQuery} entry. Defines all fields
@@ -26,14 +27,14 @@ public interface TargetFilterQueryCreate {
      *            of {@link TargetFilterQuery#getName()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate name(String name);
+    TargetFilterQueryCreate name(@NotEmpty String name);
 
     /**
      * @param query
      *            of {@link TargetFilterQuery#getQuery()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate query(String query);
+    TargetFilterQueryCreate query(@NotEmpty String query);
 
     /**
      * @param set
@@ -49,7 +50,7 @@ public interface TargetFilterQueryCreate {
      *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate set(Long setId);
+    TargetFilterQueryCreate set(long setId);
 
     /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder

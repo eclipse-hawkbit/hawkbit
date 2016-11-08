@@ -27,7 +27,7 @@ public class JpaRolloutBuilder implements RolloutBuilder {
     }
 
     @Override
-    public RolloutUpdate update(final Long id) {
+    public RolloutUpdate update(final long id) {
         return new GenericRolloutUpdate(id);
     }
 

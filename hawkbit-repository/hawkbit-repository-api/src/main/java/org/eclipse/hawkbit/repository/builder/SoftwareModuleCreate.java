@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link SoftwareModule} entry. Defines all fields that
@@ -26,14 +27,14 @@ public interface SoftwareModuleCreate {
      *            for {@link SoftwareModule#getName()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate name(String name);
+    SoftwareModuleCreate name(@NotEmpty String name);
 
     /**
      * @param version
      *            for {@link SoftwareModule#getVersion()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate version(String version);
+    SoftwareModuleCreate version(@NotEmpty String version);
 
     /**
      * @param description
@@ -54,7 +55,7 @@ public interface SoftwareModuleCreate {
      *            for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate type(String typeKey);
+    SoftwareModuleCreate type(@NotEmpty String typeKey);
 
     /**
      * @param type

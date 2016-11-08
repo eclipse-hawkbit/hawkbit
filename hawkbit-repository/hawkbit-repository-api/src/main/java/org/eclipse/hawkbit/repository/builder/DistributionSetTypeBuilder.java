@@ -21,7 +21,7 @@ public interface DistributionSetTypeBuilder {
      *            of the updatable entity
      * @return builder instance
      */
-    DistributionSetTypeUpdate update(Long id);
+    DistributionSetTypeUpdate update(long id);
 
     /**
      * @return builder instance

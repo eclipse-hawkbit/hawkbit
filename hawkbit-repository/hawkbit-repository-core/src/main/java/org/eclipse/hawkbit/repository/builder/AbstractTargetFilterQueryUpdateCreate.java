@@ -21,7 +21,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     protected String query;
     protected Long set;
 
-    public T set(final Long set) {
+    public T set(final long set) {
         this.set = set;
         return (T) this;
     }

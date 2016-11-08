@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.builder;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link Target} entry. Defines all fields that
@@ -24,7 +25,7 @@ public interface TargetUpdate {
      *            for {@link Target#getName()}
      * @return updated builder instance
      */
-    TargetUpdate name(String name);
+    TargetUpdate name(@NotEmpty String name);
 
     /**
      * @param description
@@ -38,7 +39,7 @@ public interface TargetUpdate {
      *            for {@link Target#getSecurityToken()}
      * @return updated builder instance
      */
-    TargetUpdate securityToken(String securityToken);
+    TargetUpdate securityToken(@NotEmpty String securityToken);
 
     /**
      * @param address

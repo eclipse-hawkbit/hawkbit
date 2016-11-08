@@ -21,7 +21,7 @@ public interface TagBuilder {
      *            of the updatable entity
      * @return builder instance
      */
-    TagUpdate update(Long id);
+    TagUpdate update(long id);
 
     /**
      * @return builder instance

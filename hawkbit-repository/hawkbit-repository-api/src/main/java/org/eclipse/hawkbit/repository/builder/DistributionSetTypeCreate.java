@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 
@@ -30,14 +31,14 @@ public interface DistributionSetTypeCreate {
      *            for {@link DistributionSetType#getKey()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate key(String key);
+    DistributionSetTypeCreate key(@NotEmpty String key);
 
     /**
      * @param name
      *            for {@link DistributionSetType#getName()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate name(String name);
+    DistributionSetTypeCreate name(@NotEmpty String name);
 
     /**
      * @param description

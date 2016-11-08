@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link DistributionSet} entry. Defines all
@@ -24,14 +25,14 @@ public interface DistributionSetUpdate {
      *            for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
-    DistributionSetUpdate name(String name);
+    DistributionSetUpdate name(@NotEmpty String name);
 
     /**
      * @param version
      *            for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
-    DistributionSetUpdate version(String version);
+    DistributionSetUpdate version(@NotEmpty String version);
 
     /**
      * @param description
@@ -45,7 +46,7 @@ public interface DistributionSetUpdate {
      *            for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetUpdate type(String typeKey);
+    DistributionSetUpdate type(@NotEmpty String typeKey);
 
     /**
      * @param type

@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link Target} entry. Defines all fields that can be
@@ -26,14 +27,14 @@ public interface TargetCreate {
      *            for {@link Target#getControllerId()}
      * @return updated builder instance
      */
-    TargetCreate controllerId(String controllerId);
+    TargetCreate controllerId(@NotEmpty String controllerId);
 
     /**
      * @param name
      *            for {@link Target#getName()}
      * @return updated builder instance
      */
-    TargetCreate name(String name);
+    TargetCreate name(@NotEmpty String name);
 
     /**
      * @param description

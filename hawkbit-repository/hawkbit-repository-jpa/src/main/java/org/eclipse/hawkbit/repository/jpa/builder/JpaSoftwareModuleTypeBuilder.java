@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 public class JpaSoftwareModuleTypeBuilder implements SoftwareModuleTypeBuilder {
 
     @Override
-    public SoftwareModuleTypeUpdate update(final Long id) {
+    public SoftwareModuleTypeUpdate update(final long id) {
         return new GenericSoftwareModuleTypeUpdate(id);
     }
 

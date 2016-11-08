@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link Tag} entry. Defines all fields that can be set
@@ -23,7 +24,7 @@ public interface TagCreate {
      *            for {@link Tag#getName()}
      * @return updated builder instance
      */
-    TagCreate name(String name);
+    TagCreate name(@NotEmpty String name);
 
     /**
      * @param description

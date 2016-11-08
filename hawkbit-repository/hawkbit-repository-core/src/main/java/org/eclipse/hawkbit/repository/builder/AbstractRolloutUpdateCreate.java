@@ -22,7 +22,7 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     protected ActionType actionType;
     protected Long forcedTime;
 
-    public T set(final Long set) {
+    public T set(final long set) {
         this.set = set;
         return (T) this;
     }

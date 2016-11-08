@@ -28,7 +28,7 @@ public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
     }
 
     @Override
-    public SoftwareModuleUpdate update(final Long id) {
+    public SoftwareModuleUpdate update(final long id) {
         return new GenericSoftwareModuleUpdate(id);
     }
 

@@ -172,10 +172,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         } else if (!id.equals(other.id)) {
             return false;
         }
-        if (optLockRevision != other.optLockRevision) {
-            return false;
-        }
-        return true;
+        return optLockRevision == other.optLockRevision;
     }
 
 }

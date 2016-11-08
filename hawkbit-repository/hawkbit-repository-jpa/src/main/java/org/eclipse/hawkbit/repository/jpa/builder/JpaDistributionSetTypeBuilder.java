@@ -28,7 +28,7 @@ public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder
     }
 
     @Override
-    public DistributionSetTypeUpdate update(final Long id) {
+    public DistributionSetTypeUpdate update(final long id) {
         return new GenericDistributionSetTypeUpdate(id);
     }
 

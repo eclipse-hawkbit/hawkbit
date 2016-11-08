@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to update an existing {@link TargetFilterQuery} entry. Defines all
@@ -21,13 +22,13 @@ public interface TargetFilterQueryUpdate {
      *            of {@link TargetFilterQuery#getName()}
      * @return updated builder instance
      */
-    TargetFilterQueryUpdate name(String name);
+    TargetFilterQueryUpdate name(@NotEmpty String name);
 
     /**
      * @param query
      *            of {@link TargetFilterQuery#getQuery()}
      * @return updated builder instance
      */
-    TargetFilterQueryUpdate query(String query);
+    TargetFilterQueryUpdate query(@NotEmpty String query);
 
 }

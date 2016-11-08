@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -58,7 +59,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Column(name = "target_filter", length = 1024, nullable = false)
     @Size(max = 1024)
-    @NotNull
+    @NotEmpty
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY)

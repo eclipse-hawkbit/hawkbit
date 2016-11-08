@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
  * Builder for {@link ActionStatus}.
  *
  */
+@FunctionalInterface
 public interface ActionStatusBuilder {
 
     /**
@@ -21,6 +22,6 @@ public interface ActionStatusBuilder {
      *            the status is for
      * @return create builder
      */
-    ActionStatusCreate create(Long actionId);
+    ActionStatusCreate create(long actionId);
 
 }

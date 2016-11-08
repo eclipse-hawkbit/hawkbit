@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Builder to create a new {@link DistributionSet} entry. Defines all fields
@@ -28,14 +29,14 @@ public interface DistributionSetCreate {
      *            for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
-    DistributionSetCreate name(String name);
+    DistributionSetCreate name(@NotEmpty String name);
 
     /**
      * @param version
      *            for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
-    DistributionSetCreate version(String version);
+    DistributionSetCreate version(@NotEmpty String version);
 
     /**
      * @param description
@@ -49,7 +50,7 @@ public interface DistributionSetCreate {
      *            for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetCreate type(String typeKey);
+    DistributionSetCreate type(@NotEmpty String typeKey);
 
     /**
      * @param type
