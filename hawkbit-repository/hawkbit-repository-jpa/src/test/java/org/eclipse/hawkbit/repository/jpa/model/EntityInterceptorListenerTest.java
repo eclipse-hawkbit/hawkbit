@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.model.EntityInterceptor;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.junit.After;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -28,10 +29,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Entity Listener Interceptor")
 public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
-    @Override
-    public void after() {
+    @After
+    public void tearDown() {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().clear();
-        super.after();
     }
 
     @Test

@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
-import org.eclipse.hawkbit.repository.test.util.TestApplicationContextProvider;
+import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -173,12 +173,12 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * {@link TestApplicationContextProvider} bean.
+     * {@link TestContextProvider} bean.
      *
-     * @return a new {@link TestApplicationContextProvider}
+     * @return a new {@link TestContextProvider}
      */
     @Bean
     public ApplicationContextAware applicationContextProvider() {
-        return new TestApplicationContextProvider();
+        return new TestContextProvider();
     }
 }

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.test.util;
+package org.eclipse.hawkbit.repository.test.matcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,19 +14,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Interface to add annotations for counting events by type and count.
+ * Interface to annotate methods when event count is required.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface ExpectEvent {
+public @interface Count {
 
     /**
-     * @return the type of the event
+     * @return a list of {@link Expect}
      */
-    Class<?> type();
+    public Expect[] events();
 
-    /**
-     * @return the count of the events
-     */
-    int count() default 0;
 }
