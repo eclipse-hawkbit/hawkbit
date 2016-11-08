@@ -28,6 +28,7 @@ import javax.validation.constraints.Size;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -116,8 +117,8 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return Collections.emptySet();
         }
 
-        return elements.stream().filter(element -> element.isMandatory()).map(element -> element.getSmType())
-                .collect(Collectors.toSet());
+        return elements.stream().filter(DistributionSetTypeElement::isMandatory)
+                .map(DistributionSetTypeElement::getSmType).collect(Collectors.toSet());
     }
 
     @Override
@@ -126,7 +127,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return Collections.emptySet();
         }
 
-        return elements.stream().filter(element -> !element.isMandatory()).map(element -> element.getSmType())
+        return elements.stream().filter(element -> !element.isMandatory()).map(DistributionSetTypeElement::getSmType)
                 .collect(Collectors.toSet());
     }
 
@@ -203,7 +204,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().map(module -> module.getType()).collect(Collectors.toList())
+        return distributionSet.getModules().stream().map(SoftwareModule::getType).collect(Collectors.toList())
                 .containsAll(getMandatoryModuleTypes());
     }
 
