@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -47,9 +46,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Tag Management")
 public class TagManagementTest extends AbstractJpaIntegrationTest {
-    public TagManagementTest() {
-        LOG = LoggerFactory.getLogger(TagManagementTest.class);
-    }
 
     @Before
     public void setup() {
