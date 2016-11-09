@@ -59,7 +59,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
         super(definition, queryConfig, sortIds, sortStates);
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
             type = Optional.ofNullable((SoftwareModuleType) queryConfig.get(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE))
-                    .map(t -> t.getId()).orElse(null);
+                    .map(SoftwareModuleType::getId).orElse(null);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);

@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.filtermanagement.AutoCompleteTextFieldComponent.FilterQueryChangeListener;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -37,10 +36,8 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
-import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -226,37 +223,21 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createListeners() {
-        nameTextFieldBlusListner = new BlurListener() {
-            private static final long serialVersionUID = -2300955622205082213L;
-
-            @Override
-            public void blur(final BlurEvent event) {
-                if (!Strings.isNullOrEmpty(nameTextField.getValue())) {
-                    captionLayout.removeComponent(nameTextField);
-                    captionLayout.addComponent(nameLabel);
-                }
+        nameTextFieldBlusListner = event -> {
+            if (!Strings.isNullOrEmpty(nameTextField.getValue())) {
+                captionLayout.removeComponent(nameTextField);
+                captionLayout.addComponent(nameLabel);
             }
         };
-        nameLayoutClickListner = new LayoutClickListener() {
-            private static final long serialVersionUID = 6188308537393130004L;
-
-            @Override
-            public void layoutClick(final LayoutClickEvent event) {
-                if (event.getClickedComponent() instanceof Label) {
-                    captionLayout.removeComponent(nameLabel);
-                    captionLayout.addComponent(nameTextField);
-                    nameTextField.focus();
-                }
+        nameLayoutClickListner = event -> {
+            if (event.getClickedComponent() instanceof Label) {
+                captionLayout.removeComponent(nameLabel);
+                captionLayout.addComponent(nameTextField);
+                nameTextField.focus();
             }
         };
 
-        queryTextField.addTextChangeListener(new FilterQueryChangeListener() {
-            @Override
-            public void queryChanged(final boolean valid, final String query) {
-                enableDisableSaveButton(!valid, query);
-            }
-        });
-
+        queryTextField.addTextChangeListener((valid, query) -> enableDisableSaveButton(!valid, query));
     }
 
     private void onFilterNameChange(final TextChangeEvent event) {
