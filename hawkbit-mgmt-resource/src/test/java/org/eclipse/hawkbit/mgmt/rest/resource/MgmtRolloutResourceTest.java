@@ -236,7 +236,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
-    @Description("Testing that starting the rollout switches the state to running")
+    @Description("Testing that starting the rollout switches the state to starting and then to running")
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
@@ -249,6 +249,15 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // check rollout is in starting state
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("status", equalTo("starting")));
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // check rollout is in running state
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -271,6 +280,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -297,6 +309,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -327,6 +342,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // starting rollout - already started should lead into bad request
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -365,6 +383,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // retrieve rollout groups from created rollout - 2 groups exists
         // (amountTargets / groupSize = 2)
@@ -459,6 +480,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
         rolloutManagement.startRollout(rollout);
 
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
+
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
@@ -482,9 +506,11 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
         // starting rollout
-        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())
-                .param(MgmtRestConstants.REQUEST_PARAMETER_ASYNC, "true")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // check if running
         assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 60_000, 100))

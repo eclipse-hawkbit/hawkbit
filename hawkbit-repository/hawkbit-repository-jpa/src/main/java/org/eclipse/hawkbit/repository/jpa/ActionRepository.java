@@ -352,6 +352,22 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
             JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
     /**
+     * Retrieving all actions referring to a given rollout group with a specific
+     * a specific status.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroupParent
+     *            the parent rollout group the actions should reference
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions referring a specific rollout group and a specific
+     *         status
+     */
+    List<Identifiable<Long>> findByRolloutAndRolloutGroupAndStatus(JpaRollout rollout,
+            JpaRolloutGroup rolloutGroupParent, Status actionStatus);
+
+    /**
      * Retrieves all actions for a specific rollout and in a specific status.
      *
      * @param rollout

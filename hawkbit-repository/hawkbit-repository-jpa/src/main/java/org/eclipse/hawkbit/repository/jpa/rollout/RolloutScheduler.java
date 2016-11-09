@@ -75,6 +75,7 @@ public class RolloutScheduler {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getScheduler().getFixedDelay();
                     rolloutManagement.checkCreatingRollouts(fixedDelay);
+                    rolloutManagement.checkStartingRollouts(fixedDelay);
                     rolloutManagement.checkRunningRollouts(fixedDelay);
                     return null;
                 });

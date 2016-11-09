@@ -82,6 +82,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -670,6 +671,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
         return actionRepository.findByRolloutAndRolloutGroupParentAndStatus((JpaRollout) rollout,
                 (JpaRolloutGroup) rolloutGroupParent, actionStatus).stream().map(ident -> ident.getId())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> findActionsByRolloutGroupAndStatus(final Rollout rollout,
+                                                               final RolloutGroup rolloutGroup, final Action.Status actionStatus) {
+        return actionRepository.findByRolloutAndRolloutGroupAndStatus((JpaRollout) rollout,
+                (JpaRolloutGroup) rolloutGroup, actionStatus).stream().map(Identifiable::getId)
                 .collect(Collectors.toList());
     }
 

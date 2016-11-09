@@ -81,8 +81,7 @@ final class MgmtRolloutMapper {
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withRel("self"));
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId(), false)).withRel("start"));
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId(), true)).withRel("startAsync"));
+        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),

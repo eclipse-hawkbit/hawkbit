@@ -324,12 +324,10 @@ public interface RolloutManagement {
 
     /**
      * Starts a rollout which has been created. The rollout must be in
-     * {@link RolloutStatus#READY} state. The according actions will be created
-     * for each affected target in the rollout. The actions of the first group
-     * will be started immediately {@link RolloutGroupStatus#RUNNING} as the
-     * other groups will be {@link RolloutGroupStatus#SCHEDULED} state.
-     *
-     * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
+     * {@link RolloutStatus#READY} state. The Rollout will be set into the
+     * {@link RolloutStatus#STARTING} state. The RolloutScheduler will ensure
+     * all actions are created and the first group is started. The rollout
+     * itself will be then also in {@link RolloutStatus#RUNNING}.
      *
      * @param rollout
      *            the rollout to be started
@@ -342,28 +340,6 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout startRollout(@NotNull Rollout rollout);
-
-    /**
-     * Starts a rollout asynchronously which has been created. The rollout must
-     * be in {@link RolloutStatus#READY} state. The according actions will be
-     * created asynchronously for each affected target in the rollout. The
-     * actions of the first group will be started immediately
-     * {@link RolloutGroupStatus#RUNNING} as the other groups will be
-     * {@link RolloutGroupStatus#SCHEDULED} state.
-     *
-     * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
-     *
-     * @param rollout
-     *            the rollout to be started
-     *
-     * @return the started rollout
-     *
-     * @throws RolloutIllegalStateException
-     *             if given rollout is not in {@link RolloutStatus#READY}. Only
-     *             ready rollouts can be started.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRolloutAsync(@NotNull Rollout rollout);
 
     /**
      * Update rollout details.

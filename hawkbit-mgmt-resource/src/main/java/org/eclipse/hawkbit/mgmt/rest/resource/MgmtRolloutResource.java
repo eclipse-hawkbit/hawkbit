@@ -166,14 +166,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_ASYNC, defaultValue = "false") final boolean startAsync) {
+    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        if (startAsync) {
-            this.rolloutManagement.startRolloutAsync(rollout);
-        } else {
-            this.rolloutManagement.startRollout(rollout);
-        }
+        this.rolloutManagement.startRollout(rollout);
         return ResponseEntity.ok().build();
     }
 

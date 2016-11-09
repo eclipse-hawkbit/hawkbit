@@ -190,7 +190,7 @@ public class ConfigurableScenario {
                 .getBody();
 
         // start the created Rollout
-        rolloutResource.start(rolloutResponseBody.getRolloutId(), true);
+        rolloutResource.start(rolloutResponseBody.getRolloutId());
 
         // wait until rollout is complete
         do {

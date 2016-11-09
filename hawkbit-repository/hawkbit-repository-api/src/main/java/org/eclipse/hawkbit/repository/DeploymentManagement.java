@@ -296,6 +296,23 @@ public interface DeploymentManagement {
             @NotNull RolloutGroup rolloutGroupParent, @NotNull Action.Status actionStatus);
 
     /**
+     * Retrieving all actions referring to a given rollout group and a specific
+     * status.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroup
+     *            the parent rollout group the actions should reference
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions referring a specific rollout and a specific rollout
+     *         group in a specific status
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<Long> findActionsByRolloutGroupAndStatus(@NotNull Rollout rollout, @NotNull RolloutGroup rolloutGroup,
+            @NotNull Action.Status actionStatus);
+
+    /**
      * Retrieves all {@link Action}s of a specific target.
      *
      * @param pageable
