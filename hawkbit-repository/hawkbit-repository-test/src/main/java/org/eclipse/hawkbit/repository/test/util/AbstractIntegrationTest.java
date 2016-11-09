@@ -40,8 +40,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -79,7 +82,7 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
-    protected static Logger LOG = null;
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
 
@@ -178,6 +181,25 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
+
+    @Rule
+    public TestWatcher testLifecycleLoggerRule = new TestWatcher() {
+
+        @Override
+        protected void starting(final Description description) {
+            LOG.info("Starting Test {}...", description.getMethodName());
+        };
+
+        @Override
+        protected void succeeded(final Description description) {
+            LOG.info("Test {} succeeded.", description.getMethodName());
+        };
+
+        @Override
+        protected void failed(final Throwable e, final Description description) {
+            LOG.error("Test {} failed with {}.", description.getMethodName(), e);
+        }
+    };
 
     protected Environment environment = null;
 
