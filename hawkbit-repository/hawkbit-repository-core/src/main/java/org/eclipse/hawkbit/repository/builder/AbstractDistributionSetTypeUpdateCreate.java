@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -34,20 +33,12 @@ public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends Abstrac
         return (T) this;
     }
 
-    public Collection<Long> getMandatory() {
-        if (mandatory == null) {
-            return Collections.emptyList();
-        }
-
-        return mandatory;
+    public Optional<Collection<Long>> getMandatory() {
+        return Optional.ofNullable(mandatory);
     }
 
-    public Collection<Long> getOptional() {
-        if (optional == null) {
-            return Collections.emptyList();
-        }
-
-        return optional;
+    public Optional<Collection<Long>> getOptional() {
+        return Optional.ofNullable(optional);
     }
 
     public T colour(final String colour) {

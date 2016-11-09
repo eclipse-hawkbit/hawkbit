@@ -342,14 +342,20 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         update.getDescription().ifPresent(type::setDescription);
         update.getColour().ifPresent(type::setColour);
 
-        if (!update.getOptional().isEmpty() || !update.getMandatory().isEmpty()) {
+        if (hasModules(update)) {
             checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
 
-            softwareModuleTypeRepository.findByIdIn(update.getMandatory()).forEach(type::addMandatoryModuleType);
-            softwareModuleTypeRepository.findByIdIn(update.getOptional()).forEach(type::addOptionalModuleType);
+            update.getMandatory().ifPresent(
+                    mand -> softwareModuleTypeRepository.findByIdIn(mand).forEach(type::addMandatoryModuleType));
+            update.getOptional().ifPresent(
+                    opt -> softwareModuleTypeRepository.findByIdIn(opt).forEach(type::addOptionalModuleType));
         }
 
         return distributionSetTypeRepository.save(type);
+    }
+
+    private static boolean hasModules(final GenericDistributionSetTypeUpdate update) {
+        return update.getOptional().isPresent() || update.getMandatory().isPresent();
     }
 
     @Override
@@ -723,7 +729,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(7);
+        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(7);
 
         Specification<JpaDistributionSet> spec;
 
@@ -806,10 +812,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
     }
 
-    private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
-        throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
-    }
-
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
@@ -867,7 +869,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
-        return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
+        return toggleTagAssignment(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()),
+                tag.getName());
     }
 
     @Override

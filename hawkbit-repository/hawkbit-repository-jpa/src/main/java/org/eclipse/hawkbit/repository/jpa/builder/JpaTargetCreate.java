@@ -44,7 +44,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
         targetInfo.setAddress(address);
         targetInfo.setUpdateStatus(getStatus().orElse(TargetUpdateStatus.UNKNOWN));
-        getLastTargetQuery().ifPresent(query -> targetInfo.setLastTargetQuery(query));
+        getLastTargetQuery().ifPresent(targetInfo::setLastTargetQuery);
 
         return target;
     }
