@@ -28,9 +28,10 @@ import com.vaadin.shared.ui.Connect;
  * {@link TextFieldSuggestionBoxServerRpc} call.
  *
  */
-@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod" })
+@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod", "squid:S1604" })
 // need to use VOverlay because otherwise it's not in the correct theme
 // widget @see com.vaadin.client.ui.VOverlay.getOverlayContainer()
+// GWT 2.7 does not support Java 8
 @Connect(TextFieldSuggestionBox.class)
 public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
 
@@ -47,20 +48,25 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
     protected void init() {
         super.init();
 
-        registerRpc(TextFieldSuggestionBoxClientRpc.class, suggestContext -> {
-            select.clearItems();
-            if (suggestContext == null) {
+        registerRpc(TextFieldSuggestionBoxClientRpc.class, new TextFieldSuggestionBoxClientRpc() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void showSuggestions(final SuggestionContextDto suggestContext) {
+                select.clearItems();
+                if (suggestContext == null) {
+                    panel.hide();
+                    return;
+                }
+                final List<SuggestTokenDto> suggestions = suggestContext.getSuggestions();
+                if (suggestions != null && !suggestions.isEmpty()) {
+                    select.addItems(suggestions, textFieldWidget, panel, rpc);
+                    panel.showRelativeTo(textFieldWidget);
+                    select.moveSelectionDown();
+                    return;
+                }
                 panel.hide();
-                return;
             }
-            final List<SuggestTokenDto> suggestions = suggestContext.getSuggestions();
-            if (suggestions != null && !suggestions.isEmpty()) {
-                select.addItems(suggestions, textFieldWidget, panel, rpc);
-                panel.showRelativeTo(textFieldWidget);
-                select.moveSelectionDown();
-                return;
-            }
-            panel.hide();
         });
     }
 

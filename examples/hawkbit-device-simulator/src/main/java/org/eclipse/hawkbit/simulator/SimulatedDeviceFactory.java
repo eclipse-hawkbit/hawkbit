@@ -22,7 +22,7 @@ import feign.Logger;
 
 /**
  * The simulated device factory to create either {@link DMFSimulatedDevice} or
- * {@link DDISimulatedDevice#}.
+ * {@link DDISimulatedDevice}.
  */
 @Service
 public class SimulatedDeviceFactory {

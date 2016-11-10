@@ -22,6 +22,8 @@ import com.vaadin.client.ui.VTextField;
 /**
  * The suggestion list within the suggestion pop-up panel.
  */
+// Exception squid:S1604 - GWT 2.7 does not support Java 8
+@SuppressWarnings("squid:S1604")
 public class SuggestionsSelectList extends MenuBar {
 
     public static final String CLASSNAME = "autocomplete";
