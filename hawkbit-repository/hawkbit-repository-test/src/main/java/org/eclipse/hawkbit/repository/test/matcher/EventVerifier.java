@@ -6,6 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.eclipse.hawkbit.repository.test.matcher;
 
 import static java.util.Optional.ofNullable;
@@ -59,7 +60,7 @@ public class EventVerifier implements TestRule {
     }
 
     private Optional<Expect[]> getExpectationsFrom(final Description description) {
-        return ofNullable(description.getAnnotation(CountEvents.class)).map(CountEvents::events);
+        return ofNullable(description.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
     }
 
     private void beforeTest() {

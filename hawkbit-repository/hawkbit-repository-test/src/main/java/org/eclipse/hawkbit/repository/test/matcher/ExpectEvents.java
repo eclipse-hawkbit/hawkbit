@@ -6,6 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.eclipse.hawkbit.repository.test.matcher;
 
 import java.lang.annotation.ElementType;
@@ -18,11 +19,11 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface CountEvents {
+public @interface ExpectEvents {
 
     /**
      * @return a list of {@link Expect}
      */
-    public Expect[] events() default {};
+    Expect[] value() default {};
 
 }
