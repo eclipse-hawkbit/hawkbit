@@ -93,7 +93,7 @@
       <dependency>
          <groupId>org.easytesting</groupId>
          <artifactId>fest-assert-core</artifactId>
-         <scope>compile</scope>
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>com.jayway.awaitility</groupId>

@@ -364,7 +364,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target).as("Target compared with saved target").isEqualTo(savedTarget);
 
         savedTarget.setDescription("changed description");
-
+        Thread.sleep(1);
         savedTarget = targetManagement.updateTarget(savedTarget);
         assertNotNull("The lastModifiedAt attribute of the target should not be null", savedTarget.getLastModifiedAt());
         assertThat(createdAt).as("CreatedAt compared with saved modifiedAt")
