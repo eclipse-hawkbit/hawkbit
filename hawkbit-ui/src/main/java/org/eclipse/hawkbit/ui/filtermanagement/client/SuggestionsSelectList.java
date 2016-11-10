@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.aria.client.Roles;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -55,16 +56,19 @@ public class SuggestionsSelectList extends MenuBar {
             final PopupPanel popupPanel, final TextFieldSuggestionBoxServerRpc suggestionServerRpc) {
         for (int index = 0; index < suggestions.size(); index++) {
             final SuggestTokenDto suggestToken = suggestions.get(index);
-            final MenuItem mi = new MenuItem(suggestToken.getSuggestion(), true, () -> {
-                final String tmpSuggestion = suggestToken.getSuggestion();
-                final TokenStartEnd tokenStartEnd = tokenMap.get(tmpSuggestion);
-                final String text = textFieldWidget.getValue();
-                final StringBuilder builder = new StringBuilder(text);
-                builder.replace(tokenStartEnd.getStart(), tokenStartEnd.getEnd() + 1, tmpSuggestion);
-                textFieldWidget.setValue(builder.toString(), true);
-                popupPanel.hide();
-                textFieldWidget.setFocus(true);
-                suggestionServerRpc.suggest(builder.toString(), textFieldWidget.getCursorPos());
+            final MenuItem mi = new MenuItem(suggestToken.getSuggestion(), true, new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    final String tmpSuggestion = suggestToken.getSuggestion();
+                    final TokenStartEnd tokenStartEnd = tokenMap.get(tmpSuggestion);
+                    final String text = textFieldWidget.getValue();
+                    final StringBuilder builder = new StringBuilder(text);
+                    builder.replace(tokenStartEnd.getStart(), tokenStartEnd.getEnd() + 1, tmpSuggestion);
+                    textFieldWidget.setValue(builder.toString(), true);
+                    popupPanel.hide();
+                    textFieldWidget.setFocus(true);
+                    suggestionServerRpc.suggest(builder.toString(), textFieldWidget.getCursorPos());
+                }
             });
             tokenMap.put(suggestToken.getSuggestion(),
                     new TokenStartEnd(suggestToken.getStart(), suggestToken.getEnd()));

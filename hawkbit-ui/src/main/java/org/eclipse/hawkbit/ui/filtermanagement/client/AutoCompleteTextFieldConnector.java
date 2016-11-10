@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.TextFieldSuggestionBox;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
@@ -79,13 +80,16 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
         panel.setStyleName("suggestion-popup");
         panel.setOwner(textFieldWidget);
 
-        textFieldWidget.addKeyUpHandler(event -> {
-            if (panel.isAttached()) {
-                handlePanelEventDelegation(event);
-            } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                rpc.executeQuery(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
-            } else {
-                doAskForSuggestion();
+        textFieldWidget.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(final KeyUpEvent event) {
+                if (panel.isAttached()) {
+                    handlePanelEventDelegation(event);
+                } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    rpc.executeQuery(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
+                } else {
+                    doAskForSuggestion();
+                }
             }
         });
     }
@@ -136,3 +140,4 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
         rpc.suggest(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
     }
 }
+
