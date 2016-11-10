@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
 
 /**
  * Distribution bar helper to render distribution bar in grid.
- * 
+ *
  */
 public final class DistributionBarHelper {
     private static final String HTML_DIV_END = "</div>";
@@ -33,10 +34,10 @@ public final class DistributionBarHelper {
 
     /**
      * Returns a string with details of status and count .
-     * 
+     *
      * @param statusTotalCountMap
      *            map with status and count
-     * 
+     *
      * @return string of format "status1:count,status2:count"
      */
     public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap) {
@@ -61,7 +62,7 @@ public final class DistributionBarHelper {
 
     /**
      * Returns the map with status having non zero values.
-     * 
+     *
      * @param statusTotalCountMap
      *            map with status and count
      * @return map with non zero values
@@ -73,7 +74,7 @@ public final class DistributionBarHelper {
 
     /**
      * Returns tool tip for progress bar.
-     * 
+     *
      * @param statusCountMap
      *            map with status and count details
      * @return tool tip
@@ -114,7 +115,9 @@ public final class DistributionBarHelper {
         final double minTotalSize = MINIMUM_PART_SIZE * noOfParts;
         final double availableSize = PARENT_SIZE_IN_PCT - minTotalSize;
         final double val = MINIMUM_PART_SIZE + (double) value / totalValue * availableSize;
-        return String.format("%.3f", val) + "%";
+        // necessary due the format must contain a dot and other locals might
+        // use a comma
+        return String.format(Locale.ENGLISH, "%.3f", val) + "%";
     }
 
     private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,
