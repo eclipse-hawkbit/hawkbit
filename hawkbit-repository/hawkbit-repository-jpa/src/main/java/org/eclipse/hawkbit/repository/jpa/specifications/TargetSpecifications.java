@@ -19,7 +19,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
-import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -35,7 +34,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;

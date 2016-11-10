@@ -305,16 +305,17 @@ public class JpaRolloutManagement implements RolloutManagement {
                 continue;
             }
 
-            group = fillRolloutGroupWithTargets(rollout, group);
-            if(group.getStatus() == RolloutGroupStatus.READY) {
+            final RolloutGroup filledGroup = fillRolloutGroupWithTargets(rollout, group);
+            if(filledGroup.getStatus() == RolloutGroupStatus.READY) {
                 readyGroups++;
-                totalTargets += group.getTotalTargets();
+                totalTargets += filledGroup.getTotalTargets();
             }
         }
 
         // When all groups are ready the rollout status can be changed to be ready, too.
         if(readyGroups == rolloutGroups.size()) {
             jpaRollout.setStatus(RolloutStatus.READY);
+            jpaRollout.setLastCheck(0);
             jpaRollout.setTotalTargets(totalTargets);
             rolloutRepository.save(jpaRollout);
         }
@@ -478,6 +479,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         rolloutGroupRepository.save(rolloutGroup);
 
         jpaRollout.setStatus(RolloutStatus.RUNNING);
+        jpaRollout.setLastCheck(0);
         rolloutRepository.save(jpaRollout);
 
     }
