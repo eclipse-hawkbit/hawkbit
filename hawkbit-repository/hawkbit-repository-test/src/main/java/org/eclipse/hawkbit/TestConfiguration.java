@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
+import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -38,6 +39,7 @@ import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -102,7 +104,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     /**
      * Bean for the download id cache.
-     * 
+     *
      * @return the cache
      */
     @Bean
@@ -161,7 +163,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * 
+     *
      * @return the protostuff io message converter
      */
     @Bean
@@ -170,4 +172,13 @@ public class TestConfiguration implements AsyncConfigurer {
         return new BusProtoStuffMessageConverter();
     }
 
+    /**
+     * {@link TestContextProvider} bean.
+     *
+     * @return a new {@link TestContextProvider}
+     */
+    @Bean
+    public ApplicationContextAware applicationContextProvider() {
+        return new TestContextProvider();
+    }
 }

@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -46,9 +45,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
 public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
-    public ArtifactManagementTest() {
-        LOG = LoggerFactory.getLogger(ArtifactManagementTest.class);
-    }
 
     /**
      * Test method for
