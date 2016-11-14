@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.junit.rules.RuleChain.outerRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -44,11 +46,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.rules.MethodRule;
-import org.junit.rules.TestWatchman;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -80,7 +83,7 @@ import org.springframework.web.context.WebApplicationContext;
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
-    protected static Logger LOG = null;
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
 
@@ -153,9 +156,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected SystemSecurityContext systemSecurityContext;
 
     @Autowired
-    protected TestRepositoryManagement testRepositoryManagement;
-
-    @Autowired
     private ArtifactFilesystemProperties artifactFilesystemProperties;
 
     @Autowired
@@ -179,7 +179,31 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected ServiceMatcher serviceMatcher;
 
     @Rule
+    // Cleaning repository will fire "delete" events. We won't count them to the
+    // test execution. So there is order between both rules:
+    public RuleChain ruleChain = outerRule(new CleanRepositoryRule()).around(new EventVerifier());
+
+    @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
+
+    @Rule
+    public TestWatcher testLifecycleLoggerRule = new TestWatcher() {
+
+        @Override
+        protected void starting(final Description description) {
+            LOG.info("Starting Test {}...", description.getMethodName());
+        };
+
+        @Override
+        protected void succeeded(final Description description) {
+            LOG.info("Test {} succeeded.", description.getMethodName());
+        };
+
+        @Override
+        protected void failed(final Throwable e, final Description description) {
+            LOG.error("Test {} failed with {}.", description.getMethodName(), e);
+        }
+    };
 
     protected Environment environment = null;
 
@@ -212,11 +236,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     @After
-    public void after() {
-        testRepositoryManagement.clearTestRepository();
-    }
-
-    @After
     public void cleanCurrentCollection() throws IOException {
         FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
     }
@@ -228,30 +247,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 .addFilter(new ExcludePathAwareShallowETagFilter(
                         "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"));
     }
-
-    @Rule
-    public MethodRule watchman = new TestWatchman() {
-        @Override
-        public void starting(final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.info("Starting Test {}...", method.getName());
-            }
-        }
-
-        @Override
-        public void succeeded(final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.info("Test {} succeeded.", method.getName());
-            }
-        }
-
-        @Override
-        public void failed(final Throwable e, final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.error("Test {} failed with {}.", method.getName(), e);
-            }
-        }
-    };
 
     private static CIMySqlTestDatabase tesdatabase;
 

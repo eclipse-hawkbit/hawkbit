@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -45,9 +44,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
-    public ArtifactManagementTest() {
-        LOG = LoggerFactory.getLogger(ArtifactManagementTest.class);
-    }
 
     /**
      * Test method for
