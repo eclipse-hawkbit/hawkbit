@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  {% include headhomepagesection.html %}
+
+  <body>
+    {% include homepageheader.html %}
+    <!-- Additional Header homepage -->
+    <header class="header">
+        <div class="tagline">
+            <div class="container">
+                <h1><span id="describe" class="wow bounceInDown">IoT.</span><span id="share" class="wow bounceInDown" data-wow-delay="1s"> Update.</span><span id="integrate"  class="wow bounceInDown" data-wow-delay="0.3s"> Device.</span></h1>
+            </div>
+        </div>
+    </header>
+
+      <!-- Content -->
+      <div class="container">
+         {% include homepagetop.html %}
+         {% include homepagemiddle.html %}
+         {% include homepagebottom.html %}
+        <!--{% include homepagecontributors.html %} -->
+    </div>
+
+       <!-- /.container -->
+       {% include footer.html %}
+  </body>
+</html>

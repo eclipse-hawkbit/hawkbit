@@ -1,0 +1,21 @@
+{% include base.html %}
+{% for menu in include.level %}
+  {% if menu.sub != null %}
+    <li>
+      {{ menu.title }}
+      <ul class="nav navmenu-nav">
+        <!-- 2nd level -->
+        {% include submenu.html level=menu.sub %}
+      </ul>
+    </li>
+  {% else %}
+    <li  >
+      {% if menu.href contains 'https://' or menu.href contains 'http://' %}
+        <a target="_blank" href="{{ menu.href }}">{{ menu.title }}</a>
+      {% else %}
+        <a href="{{base}}{{ menu.href }}">{{ menu.title }}</a>
+      {% endif %}
+
+    </li>
+  {% endif %}
+{% endfor %}
