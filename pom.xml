@@ -38,7 +38,7 @@
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
       <module>hawkbit-ui</module>
-      <module>hawkbit-artifact-repository-mongo</module>
+      <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-test-report</module>
       <module>examples</module>
@@ -669,11 +669,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${json.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>${embedded-mongo.version}</version>
          </dependency>
          <dependency>
             <groupId>org.easytesting</groupId>

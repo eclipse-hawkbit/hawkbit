@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
 
 @SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
@@ -61,9 +60,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TargetInfoRepository targetInfoRepository;
-
-    @Autowired
-    protected GridFsOperations operations;
 
     @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;

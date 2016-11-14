@@ -12,8 +12,15 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 import static org.junit.rules.RuleChain.outerRule;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.TestConfiguration;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -54,21 +61,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import de.flapdoodle.embed.mongo.MongodExecutable;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -80,7 +82,6 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 // refreshed we e.g. get two instances of CacheManager which leads to very
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -154,6 +155,15 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Autowired
     protected SystemSecurityContext systemSecurityContext;
 
+    @Autowired
+    private ArtifactFilesystemProperties artifactFilesystemProperties;
+
+    @Autowired
+    protected ArtifactRepository binaryArtifactRepository;
+
+    @Autowired
+    protected TenantAwareCacheManager cacheManager;
+
     protected MockMvc mvc;
 
     protected SoftwareModuleType osType;
@@ -164,12 +174,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected TestdataFactory testdataFactory;
-
-    @Autowired
-    protected GridFsOperations operations;
-
-    @Autowired
-    protected MongodExecutable mongodExecutable;
 
     @Autowired
     protected ServiceMatcher serviceMatcher;
@@ -232,8 +236,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     @After
-    public void cleanCurrentCollection() {
-        operations.delete(new Query());
+    public void cleanCurrentCollection() throws IOException {
+        FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {

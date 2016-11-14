@@ -13,6 +13,9 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -53,7 +56,6 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.util.AntPathMatcher;
 
-import com.mongodb.MongoClientOptions;
 
 /**
  * Spring context configuration required for Dev.Environment.
@@ -64,10 +66,16 @@ import com.mongodb.MongoClientOptions;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
-        ArtifactUrlHandlerProperties.class })
+        ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Bean
+    public ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
+        return new ArtifactFilesystemRepository(artifactFilesystemProperties);
+    }
+
     @Bean
     public TestRepositoryManagement testRepositoryManagement(final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement) {
@@ -83,13 +91,6 @@ public class TestConfiguration implements AsyncConfigurer {
     public PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
             final ArtifactUrlHandlerProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
-    }
-
-    @Bean
-    public MongoClientOptions options() {
-        return MongoClientOptions.builder().connectTimeout(500).maxWaitTime(500).connectionsPerHost(2)
-                .serverSelectionTimeout(500).build();
-
     }
 
     @Bean
