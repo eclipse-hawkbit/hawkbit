@@ -160,6 +160,47 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
+    @Description("Testing that no rollout with groups that have illegal percentages can be created")
+    public void createRolloutWithIllegalPercentages() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
+
+        final int amountTargets = 10;
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "ro-target", "rollout"));
+
+        List<RolloutGroup> rolloutGroups = new ArrayList<>(2);
+
+        RolloutGroup group1 = entityFactory.generateRolloutGroup();
+        group1.setName("Group1");
+        group1.setDescription("Group1desc");
+        group1.setTargetPercentage(0);
+        rolloutGroups.add(group1);
+
+        RolloutGroup group2 = entityFactory.generateRolloutGroup();
+        group2.setName("Group2");
+        group2.setDescription("Group2desc");
+        group2.setTargetPercentage(100);
+        rolloutGroups.add(group2);
+
+        RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().build();
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+
+        group1.setTargetPercentage(101);
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+
+    }
+
+    @Test
     @Description("Testing the empty list is returned if no rollout exists")
     public void noRolloutReturnsEmptyList() throws Exception {
         mvc.perform(get("/rest/v1/rollouts")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())

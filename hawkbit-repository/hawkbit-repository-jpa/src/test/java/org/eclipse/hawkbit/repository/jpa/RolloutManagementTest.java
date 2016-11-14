@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -995,7 +996,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    @Test(expected = RolloutVerificationException.class)
+    @Test
     @Description("Verify the creation of a Rollout without targets throws an Exception.")
     public void createRolloutNotMatchingTargets() {
         final int amountGroups = 5;
@@ -1004,12 +1005,18 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String rolloutName = "rolloutTest3";
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
-        createRolloutByVariables(rolloutName, "desc", amountGroups, "id==notExisting", distributionSet,
-                successCondition, errorCondition);
+
+        try {
+            createRolloutByVariables(rolloutName, "desc", amountGroups, "id==notExisting", distributionSet,
+                    successCondition, errorCondition);
+            fail("Was able to create a Rollout without targets.");
+        } catch(RolloutVerificationException e) {
+            // OK
+        }
 
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Verify the creation of a Rollout with the same name throws an Exception.")
     public void createDuplicateRollout() {
         final int amountGroups = 5;
@@ -1024,8 +1031,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         createRolloutByVariables(rolloutName, "desc", amountGroups, "id==dup-ro-*", distributionSet,
                 successCondition, errorCondition);
 
-        createRolloutByVariables(rolloutName, "desc", amountGroups, "id==dup-ro-*", distributionSet,
-                successCondition, errorCondition);
+        try {
+            createRolloutByVariables(rolloutName, "desc", amountGroups, "id==dup-ro-*", distributionSet,
+                    successCondition, errorCondition);
+            fail("Was able to create a duplicate Rollout.");
+        } catch(EntityAlreadyExistsException e) {
+            // OK
+        }
 
     }
 
@@ -1173,7 +1185,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    @Test(expected = RolloutVerificationException.class)
+    @Test
     @Description("Verify Exception when a Rollout with Group definition is created that does not address all targets")
     public void createRolloutWithGroupsNotMatchingTargets() throws Exception {
         final String rolloutName = "rolloutTest4";
@@ -1188,11 +1200,16 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(0, percentTargetsInGroup1, null));
         rolloutGroups.add(generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
+        try {
+            rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
+            fail("Was able to create a Rollout with groups that are not addressing all targets");
+        } catch(RolloutVerificationException e) {
+            // OK
+        }
 
     }
 
-    @Test(expected = RolloutVerificationException.class)
+    @Test
     @Description("Verify Exception when a Rollout with Group definition is created that contains an illegal percentage")
     public void createRolloutWithIllegalPercentage() throws Exception {
         final String rolloutName = "rolloutTest6";
@@ -1207,11 +1224,16 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(0, percentTargetsInGroup1, null));
         rolloutGroups.add(generateRolloutGroup(1, percentTargetsInGroup2, null));
 
-        rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
+        try {
+            rolloutManagement.createRollout(myRollout, rolloutGroups, conditions);
+            fail("Was able to create a Rollout with groups that have illegal percentages");
+        } catch(RolloutVerificationException e) {
+            // OK
+        }
 
     }
 
-    @Test(expected = RolloutVerificationException.class)
+    @Test
     @Description("Verify Exception when a Rollout is created with too much groups")
     public void createRolloutWithIllegalAmountOfGroups() throws Exception {
         final String rolloutName = "rolloutTest5";
@@ -1221,11 +1243,16 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().build();
         Rollout myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
 
-        rolloutManagement.createRollout(myRollout, illegalGroupAmount, conditions);
+        try {
+            rolloutManagement.createRollout(myRollout, illegalGroupAmount, conditions);
+            fail("Was able to create a Rollout with too many groups");
+        } catch(RolloutVerificationException e) {
+            // OK
+        }
 
     }
 
-    @Test(expected = RolloutIllegalStateException.class)
+    @Test
     @Description("Verify the start of a Rollout does not work during creation phase.")
     public void createAndStartRolloutDuringCreationFails() throws Exception {
         final int amountTargetsForRollout = 3;
@@ -1253,7 +1280,12 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
 
-        rolloutManagement.startRollout(myRollout);
+        try {
+            rolloutManagement.startRollout(myRollout);
+            fail("Was able to start a Rollout in CREATING status");
+        } catch(RolloutIllegalStateException e) {
+            // OK
+        }
 
     }
 

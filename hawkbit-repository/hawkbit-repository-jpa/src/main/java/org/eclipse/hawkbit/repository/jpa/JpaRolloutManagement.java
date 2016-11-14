@@ -172,10 +172,10 @@ public class JpaRolloutManagement implements RolloutManagement {
                                  final List<RolloutGroup> groups,
                                  final RolloutGroupConditions conditions) {
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout);
-        if(groups != null) {
-            return createRolloutGroups(groups, conditions, rollout);
-        } else {
+        if (groups == null) {
             return savedRollout;
+        } else {
+            return createRolloutGroups(groups, conditions, savedRollout);
         }
     }
 
@@ -328,10 +328,10 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(rollout);
         final String groupTargetFilter;
-        if (StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
-        } else {
+        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             groupTargetFilter = baseFilter;
+        } else {
+            groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
         final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
@@ -427,11 +427,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private long countTargetsOfGroup(final String baseFilter, final long baseFilterCount, final RolloutGroup group) {
-        if (StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
+        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
+            return baseFilterCount;
+        } else {
             return targetManagement
                     .countTargetByTargetFilterQuery(baseFilter + ";" + group.getTargetFilterQuery());
-        } else {
-            return baseFilterCount;
         }
     }
 
@@ -443,10 +443,10 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
         String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(previousGroups, group);
-        if (StringUtils.isNotEmpty(overlappingTargetsFilter)) {
-            overlappingTargetsFilter = baseFilter + ";" + overlappingTargetsFilter;
-        } else {
+        if (StringUtils.isEmpty(overlappingTargetsFilter)) {
             overlappingTargetsFilter = baseFilter;
+        } else {
+            overlappingTargetsFilter = baseFilter + ";" + overlappingTargetsFilter;
         }
         return targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
     }

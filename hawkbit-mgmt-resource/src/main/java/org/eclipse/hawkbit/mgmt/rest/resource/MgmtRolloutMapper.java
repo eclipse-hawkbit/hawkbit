@@ -114,32 +114,32 @@ final class MgmtRolloutMapper {
         group.setName(restRequest.getName());
         group.setDescription(restRequest.getDescription());
 
-        if(restRequest.getTargetFilterQuery() != null) {
+        if (restRequest.getTargetFilterQuery() != null) {
             group.setTargetFilterQuery(restRequest.getTargetFilterQuery());
         }
 
         final Float targetPercentage = restRequest.getTargetPercentage();
-        if(targetPercentage == null) {
+        if (targetPercentage == null) {
             group.setTargetPercentage(100);
-        } else if(targetPercentage < 0 || targetPercentage >100) {
-            throw new ConstraintViolationException("Target percentage out of Range 0 - 100.");
+        } else if (targetPercentage <= 0 || targetPercentage > 100) {
+            throw new ConstraintViolationException("Target percentage out of Range >0 - 100.");
         } else {
             group.setTargetPercentage(restRequest.getTargetPercentage());
         }
 
-        if(restRequest.getSuccessCondition() != null) {
+        if (restRequest.getSuccessCondition() != null) {
             group.setSuccessCondition(mapFinishCondition(restRequest.getSuccessCondition().getCondition()));
             group.setSuccessConditionExp(restRequest.getSuccessCondition().getExpression());
         }
-        if(restRequest.getSuccessAction() != null) {
+        if (restRequest.getSuccessAction() != null) {
             group.setSuccessAction(map(restRequest.getSuccessAction().getAction()));
             group.setSuccessActionExp(restRequest.getSuccessAction().getExpression());
         }
-        if(restRequest.getErrorCondition() != null) {
+        if (restRequest.getErrorCondition() != null) {
             group.setErrorCondition(mapErrorCondition(restRequest.getErrorCondition().getCondition()));
             group.setErrorConditionExp(restRequest.getErrorCondition().getExpression());
         }
-        if(restRequest.getErrorAction() != null) {
+        if (restRequest.getErrorAction() != null) {
             group.setErrorAction(map(restRequest.getErrorAction().getAction()));
             group.setErrorActionExp(restRequest.getErrorAction().getExpression());
         }

@@ -18,10 +18,19 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A collection of static helper methods for the {@link JpaRolloutManagement}
+ */
 final class RolloutHelper {
     private RolloutHelper() {
     }
 
+    /**
+     * Verifies that the required success condition and action are actually set.
+     * 
+     * @param conditions
+     *            input conditions and actions
+     */
     static void verifyRolloutGroupConditions(final RolloutGroupConditions conditions) {
         if (conditions.getSuccessCondition() == null) {
             throw new RolloutVerificationException("Rollout group is missing success condition");
@@ -31,6 +40,13 @@ final class RolloutHelper {
         }
     }
 
+    /**
+     * Verifies that the group has the required success condition and action.
+     * 
+     * @param group
+     *            the input group
+     * @return the verified group
+     */
     static RolloutGroup verifyRolloutGroupHasConditions(final RolloutGroup group) {
         if (group.getSuccessCondition() == null) {
             throw new RolloutVerificationException("Rollout group is missing success condition");
@@ -41,8 +57,18 @@ final class RolloutHelper {
         return group;
     }
 
+    /**
+     * In case the given group is missing conditions or actions, they will be
+     * set from the supplied default conditions.
+     * 
+     * @param group
+     *            group to check
+     * @param conditions
+     *            default conditions and actions
+     * @return group with all conditions and actions
+     */
     static RolloutGroup prepareRolloutGroupWithDefaultConditions(final RolloutGroup group,
-                                                                 final RolloutGroupConditions conditions) {
+            final RolloutGroupConditions conditions) {
         if (group.getSuccessCondition() == null) {
             group.setSuccessCondition(conditions.getSuccessCondition());
         }
@@ -71,6 +97,12 @@ final class RolloutHelper {
         return group;
     }
 
+    /**
+     * Verify if the supplied amount of groups is in range
+     * 
+     * @param amountGroup
+     *            amount of groups
+     */
     static void verifyRolloutGroupParameter(final int amountGroup) {
         if (amountGroup <= 0) {
             throw new RolloutVerificationException("the amountGroup must be greater than zero");
@@ -79,6 +111,12 @@ final class RolloutHelper {
         }
     }
 
+    /**
+     * Verify that the supplied percentage is in range
+     * 
+     * @param percentage
+     *            the percentage
+     */
     static void verifyRolloutGroupTargetPercentage(final float percentage) {
         if (percentage <= 0) {
             throw new RolloutVerificationException("the percentage must be greater than zero");
@@ -87,6 +125,14 @@ final class RolloutHelper {
         }
     }
 
+    /**
+     * Modifies the target filter query to only match targets that were created
+     * after the Rollout.
+     * 
+     * @param rollout
+     *            Rollout to derive the filter from
+     * @return resulting target filter query
+     */
     static String getTargetFilterQuery(final Rollout rollout) {
         if (rollout.getCreatedAt() != null) {
             return rollout.getTargetFilterQuery() + ";createdat=le=" + rollout.getCreatedAt().toString();
@@ -94,24 +140,52 @@ final class RolloutHelper {
         return rollout.getTargetFilterQuery();
     }
 
+    /**
+     * Verifies that the Rollout is in the required status.
+     * 
+     * @param rollout
+     *            the Rollout
+     * @param status
+     *            the Status
+     */
     static void verifyRolloutInStatus(final Rollout rollout, final Rollout.RolloutStatus status) {
         if (!rollout.getStatus().equals(status)) {
             throw new RolloutIllegalStateException("Rollout is not in status " + status.toString());
         }
     }
 
+    /**
+     * Filters the groups of a Rollout to match a specific status and adds a
+     * group to the result.
+     * 
+     * @param rollout
+     *            the rollout
+     * @param status
+     *            the required status for the groups
+     * @param group
+     *            the group to add
+     * @return list of groups
+     */
     static List<RolloutGroup> getGroupsByStatusIncludingGroup(final Rollout rollout,
             final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
-        return rollout.getRolloutGroups().stream().filter(g -> g.getStatus().equals(status) || g.equals(group))
+        return rollout.getRolloutGroups().stream()
+                .filter(innerGroup -> innerGroup.getStatus().equals(status) || innerGroup.equals(group))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the groups of a rollout by their Ids order
+     * 
+     * @param rollout
+     *            the rollout
+     * @return ordered list of groups
+     */
     static List<RolloutGroup> getOrderedGroups(final Rollout rollout) {
-        return rollout.getRolloutGroups().stream().sorted((o1, o2) -> {
-            if(o1.getId()<o2.getId()) {
+        return rollout.getRolloutGroups().stream().sorted((group1, group2) -> {
+            if (group1.getId() < group2.getId()) {
                 return -1;
             }
-            if(o1.getId()>o2.getId()) {
+            if (group1.getId() > group2.getId()) {
                 return 1;
             }
             return 0;
@@ -126,7 +200,7 @@ final class RolloutHelper {
      * @return RSQL string without base filter of the Rollout. Can be an empty string.
      */
     static String getAllGroupsTargetFilter(final List<RolloutGroup> groups) {
-        if (groups.stream().anyMatch(g -> StringUtils.isEmpty(g.getTargetFilterQuery()))) {
+        if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
             return "";
         }
         return groups.stream().map(RolloutGroup::getTargetFilterQuery).collect(Collectors.joining(","));
@@ -153,6 +227,12 @@ final class RolloutHelper {
         }
     }
 
+    /**
+     * Verifies that no targets are left
+     * 
+     * @param targetCount
+     *            the count of left targets
+     */
     static void verifyRemainingTargets(final long targetCount) {
         if (targetCount > 0) {
             throw new RolloutVerificationException(

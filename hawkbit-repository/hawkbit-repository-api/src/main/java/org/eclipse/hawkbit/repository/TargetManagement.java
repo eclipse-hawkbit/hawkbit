@@ -269,7 +269,7 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link Target}s
+     * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
@@ -284,7 +284,7 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link Target}s
+     * @return the count of found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery);
@@ -299,7 +299,7 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param targetFilterQuery
      *            RSQL filter
-     * @return the found {@link Target}s
+     * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
@@ -313,7 +313,7 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param targetFilterQuery
      *            RSQL filter
-     * @return the found {@link Target}s
+     * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(List<RolloutGroup> groups,

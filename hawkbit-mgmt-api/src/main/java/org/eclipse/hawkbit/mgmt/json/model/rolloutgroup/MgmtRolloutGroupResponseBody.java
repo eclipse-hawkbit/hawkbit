@@ -32,7 +32,6 @@ public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
     private int totalTargets;
 
-    @JsonProperty(required = true)
     private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
 
     /**

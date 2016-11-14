@@ -20,8 +20,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractMgmtRolloutConditionsEntity extends MgmtNamedEntity {
 
-    private MgmtRolloutCondition successCondition = new MgmtRolloutCondition();
-    private MgmtRolloutSuccessAction successAction = new MgmtRolloutSuccessAction();
+    private MgmtRolloutCondition successCondition;
+    private MgmtRolloutSuccessAction successAction;
     private MgmtRolloutCondition errorCondition;
     private MgmtRolloutErrorAction errorAction;
 
