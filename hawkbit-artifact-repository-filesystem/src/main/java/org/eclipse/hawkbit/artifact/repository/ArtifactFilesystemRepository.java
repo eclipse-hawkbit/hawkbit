@@ -146,7 +146,7 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
             return artifact;
         }
         if (hash.getSha1() != null && !artifact.getHashes().getSha1().equals(hash.getSha1())) {
-            throw new HashNotMatchException("The given sh1 hash " + hash.getSha1()
+            throw new HashNotMatchException("The given sha1 hash " + hash.getSha1()
                     + " does not match with the calcualted sha1 hash " + artifact.getHashes().getSha1(),
                     HashNotMatchException.SHA1);
         }
