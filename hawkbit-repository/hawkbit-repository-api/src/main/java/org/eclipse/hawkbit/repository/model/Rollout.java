@@ -148,6 +148,7 @@ public interface Rollout extends NamedEntity {
          * problem during asynchronous creating.
          * @deprecated legacy status is not used anymore
          */
+        @Deprecated
         ERROR_CREATING,
 
         /**
@@ -155,6 +156,7 @@ public interface Rollout extends NamedEntity {
          * during asynchronous starting.
          * @deprecated legacy status is not used anymore
          */
+        @Deprecated
         ERROR_STARTING;
     }
 

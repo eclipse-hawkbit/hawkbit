@@ -13,7 +13,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
@@ -57,14 +56,11 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
         // retrieve all actions according to the parent group of the finished
         // rolloutGroup, so retrieve all child-group actions which need to be
         // started.
-        final List<Long> rolloutGroupActions = deploymentManagement.findActionsByRolloutGroupParentAndStatus(rollout,
-                rolloutGroup, Action.Status.SCHEDULED);
-        logger.debug("{} Next actions to start for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
+        final long countOfStartedActions = deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout,
                 rolloutGroup);
-        rolloutGroupActions.forEach(deploymentManagement::startScheduledAction);
-        logger.debug("{} actions started for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
+        logger.debug("{} Next actions started for rollout {} and parent group {}", countOfStartedActions, rollout,
                 rolloutGroup);
-        if (!rolloutGroupActions.isEmpty()) {
+        if (countOfStartedActions > 0) {
             // get all next scheduled groups and set them in state running
             rolloutGroupRepository.setStatusForCildren(RolloutGroupStatus.RUNNING, rolloutGroup);
         } else {

@@ -67,6 +67,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -171,12 +172,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout createRollout(final Rollout rollout,
                                  final List<RolloutGroup> groups,
                                  final RolloutGroupConditions conditions) {
+        RolloutHelper.verifyRolloutGroupParameter(groups.size());
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout);
-        if (groups == null) {
-            return savedRollout;
-        } else {
-            return createRolloutGroups(groups, conditions, savedRollout);
-        }
+        return createRolloutGroups(groups, conditions, savedRollout);
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
@@ -369,24 +367,31 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
+    private Long runInNewCountingTransaction(final String transactionName, TransactionCallback<Long> action) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName(transactionName);
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(action);
+    }
+
     private long assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
-        final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("assignTargetsToRolloutGroup");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(status -> {
 
+        return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
+            final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
             final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
                     RolloutGroupStatus.READY, group);
-
             Page<Target> targets = targetManagement.findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
                     readyGroups, targetFilter);
 
-            targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
+            createAssignmentOfTargetsToGroup(targets, group);
 
             return targets.getTotalElements();
         });
+    }
+
+    private void createAssignmentOfTargetsToGroup(final Page<Target> targets, final RolloutGroup group) {
+        targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
 
     private void verifyRolloutGroupTargetCounts(final List<RolloutGroup> groups, final JpaRollout rollout) {
@@ -471,9 +476,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("First Group is not the first group.");
         }
 
-        final List<Long> rolloutGroupActions = deploymentManagement.findActionsByRolloutGroupAndStatus(rollout,
-                rolloutGroup, Action.Status.SCHEDULED);
-        rolloutGroupActions.forEach(deploymentManagement::startScheduledAction);
+        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
 
         rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
         rolloutGroupRepository.save(rolloutGroup);
@@ -488,29 +491,39 @@ public class JpaRolloutManagement implements RolloutManagement {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.STARTING);
         final JpaRollout jpaRollout = (JpaRollout) rollout;
 
-        final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(jpaRollout);
-        long scheduledGroups = 0;
-        for (final JpaRolloutGroup group : rolloutGroups) {
-            if (group.getStatus() != RolloutGroupStatus.READY) {
-                scheduledGroups++;
-                continue;
-            }
+        final List<JpaRolloutGroup> groupsToBeScheduled = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+                RolloutGroupStatus.READY);
+        final long scheduledGroups = groupsToBeScheduled.stream()
+                .filter(group -> scheduleRolloutGroup(jpaRollout, group)).count();
 
-            final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
-            final long countOfActions = actionRepository.countByRolloutAndRolloutGroup(jpaRollout, group);
-            long actionsLeft = targetsInGroup - countOfActions;
-            if (actionsLeft > 0) {
-                actionsLeft -= createActionsForRolloutGroup(rollout, group);
-            }
+        return scheduledGroups == groupsToBeScheduled.size();
+    }
 
-            if (actionsLeft <= 0) {
-                group.setStatus(RolloutGroupStatus.SCHEDULED);
-                rolloutGroupRepository.save(group);
-                scheduledGroups++;
-            }
+    /**
+     * Schedules a group of the rollout. Scheduled Actions are created to
+     * achieve this. The creation of those Actions is allowed to fail.
+     *
+     * @param rollout
+     *            the Rollout
+     * @param group
+     *            the RolloutGroup
+     * @return whether the complete group was scheduled
+     */
+    private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
+        final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
+        final long countOfActions = actionRepository.countByRolloutAndRolloutGroup(rollout, group);
+
+        long actionsLeft = targetsInGroup - countOfActions;
+        if (actionsLeft > 0) {
+            actionsLeft -= createActionsForRolloutGroup(rollout, group);
         }
 
-        return scheduledGroups == rolloutGroups.size();
+        if (actionsLeft <= 0) {
+            group.setStatus(RolloutGroupStatus.SCHEDULED);
+            rolloutGroupRepository.save(group);
+            return true;
+        }
+        return false;
     }
 
     private long createActionsForRolloutGroup(final Rollout rollout, final RolloutGroup group) {
@@ -531,11 +544,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final long limit) {
-        final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("createActionsForTargets");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(status -> {
+        return runInNewCountingTransaction("createActionsForTargets", status -> {
+            final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
             final Rollout rollout = rolloutRepository.findOne(rolloutId);
             final RolloutGroup group = rolloutGroupRepository.findOne(groupId);
 

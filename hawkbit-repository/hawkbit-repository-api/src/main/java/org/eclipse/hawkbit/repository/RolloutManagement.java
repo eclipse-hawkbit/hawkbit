@@ -168,7 +168,7 @@ public interface RolloutManagement {
      *             in case the given groupSize is zero or lower.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(Rollout rollout, List<RolloutGroup> groups, RolloutGroupConditions conditions);
+    Rollout createRollout(@NotNull Rollout rollout, @NotNull List<RolloutGroup> groups, RolloutGroupConditions conditions);
 
     /**
      * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
