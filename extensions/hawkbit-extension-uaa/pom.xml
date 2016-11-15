@@ -13,7 +13,7 @@
 
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
-      <artifactId>hawkbit-parent</artifactId>
+      <artifactId>hawkbit-extensions-parent</artifactId>
       <version>0.2.0-SNAPSHOT</version>
    </parent>
 
