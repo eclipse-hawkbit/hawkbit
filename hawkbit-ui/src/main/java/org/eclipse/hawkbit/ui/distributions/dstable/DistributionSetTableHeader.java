@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -41,7 +40,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
     private ManageDistUIState manageDistUIstate;
 
     @Autowired
-    private DistributionAddUpdateWindowLayout addUpdateWindowLayout;
+    private DistributionSetAddUpdateWindowLayout addUpdateWindowLayout;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionsUIEvent event) {

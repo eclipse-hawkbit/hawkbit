@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,10 +19,15 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.push.EventContainer;
+import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
+import org.eclipse.hawkbit.ui.push.event.RemoveNotificationEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -29,6 +35,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 
 import com.google.common.collect.Iterables;
@@ -69,6 +76,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     @Autowired
     protected UINotification notification;
+
+    private final Set<Long> lastAddedOrDeletedEntities = new HashSet<>();
 
     /**
      * Initialize the components.
@@ -218,13 +227,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         selectRow();
     }
 
-    /**
-     * Add new software module to table.
-     *
-     * @param baseEntity
-     *            new software module
-     */
-    protected Item addEntity(final E baseEntity) {
+    protected Item addItem(final E baseEntity) {
         final Object addItem = addItem();
         final Item item = getItem(addItem);
         updateEntity(baseEntity, item);
@@ -253,7 +256,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(() -> applyMaxTableSettings());
         } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
-            UI.getCurrent().access(() -> addEntity(event.getEntity()));
+            UI.getCurrent().access(() -> addItem(event.getEntity()));
         }
     }
 
@@ -454,6 +457,47 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         }
         return true;
     }
+
+    public void refreshContainer() {
+        final Container container = getContainerDataSource();
+        if (!(container instanceof LazyQueryContainer)) {
+            return;
+        }
+        final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
+        tableContainer.refresh();
+        eventBus.publish(this, new RemoveNotificationEvent(this));
+        lastAddedOrDeletedEntities.clear();
+    }
+
+    protected void sendUnreadNotificationMessage(final EventContainer<? extends RemoteIdEvent> eventContainer,
+            final String message, final EventType type) {
+        final long size = eventContainer.getEvents().stream()
+                .filter(event -> !lastAddedOrDeletedEntities.contains(event.getEntityId())).count();
+        if (size <= 0) {
+            return;
+        }
+
+        eventBus.publish(this,
+                new NotificationEntityChangeEvent(this, type, message, eventContainer.getEvents().size()));
+
+    }
+
+    public E addEntity(final E entity) {
+        final E newEntity = createEntity(entity);
+        refreshContainer();
+        lastAddedOrDeletedEntities.add(newEntity.getId());
+        return newEntity;
+    }
+
+    public void removeEntities(final Collection<Long> entities) {
+        deleteEntities(entities);
+        refreshContainer();
+        lastAddedOrDeletedEntities.addAll(entities);
+    }
+
+    protected abstract E createEntity(final E entity);
+
+    protected abstract void deleteEntities(final Collection<Long> entities);
 
     protected abstract boolean hasDropPermission();
 

@@ -65,6 +65,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private transient SoftwareManagement softwareManagement;
 
     @Autowired
+    private transient SoftwareModuleTable softwareModuleTable;
+
+    @Autowired
     private transient EntityFactory entityFactory;
 
     private TextField nameTextField;
@@ -215,13 +218,20 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name, version,
-                vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-        if (newBaseSoftwareModule != null) {
+        final SoftwareModule softwareModule = entityFactory.generateSoftwareModule();
+        softwareModule.setName(name);
+        softwareModule.setVersion(version);
+        softwareModule.setType(softwareManagement.findSoftwareModuleTypeByName(type));
+        softwareModule.setVendor(vendor);
+        softwareModule.setDescription(description);
+
+        final SoftwareModule newSoftwareModule = softwareModuleTable.addEntity(softwareModule);
+
+        if (newSoftwareModule != null) {
             /* display success message */
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
+                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newSoftwareModule));
         }
     }
 

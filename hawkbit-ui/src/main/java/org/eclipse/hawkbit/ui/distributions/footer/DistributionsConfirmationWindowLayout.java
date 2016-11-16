@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
+import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTable;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
@@ -87,6 +88,9 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     @Autowired
     private ManageDistUIState manageDistUIState;
+
+    @Autowired
+    private SoftwareModuleTable softwareModuleTable;
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
@@ -157,7 +161,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             removeAssignedSoftwareModules();
         }
 
-        softwareManagement.deleteSoftwareModules(swmoduleIds);
+        softwareModuleTable.removeEntities(swmoduleIds);
+
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.swModule.deleted", swmoduleIds.size()));
         manageDistUIState.getDeleteSofwareModulesList().clear();

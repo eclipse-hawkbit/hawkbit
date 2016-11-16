@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -152,30 +153,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
-        refreshDistributions();
+        sendUnreadNotificationMessage(eventContainer, "Distribution Set created", EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
-        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shouldRefreshDs = false;
-        for (final DistributionSetDeletedEvent deletedEvent : eventContainer.getEvents()) {
-            final Long distributionSetId = deletedEvent.getEntityId();
-            final DistributionSetIdName targetIdName = new DistributionSetIdName(distributionSetId, null, null);
-            if (visibleItemIds.contains(targetIdName)) {
-                dsContainer.removeItem(targetIdName);
-            } else {
-                shouldRefreshDs = true;
-            }
-        }
-
-        if (shouldRefreshDs) {
-            refreshOnDelete();
-        } else {
-            dsContainer.commit();
-        }
-        reSelectItemsAfterDeletionEvent();
+        sendUnreadNotificationMessage(eventContainer, "Distribution Set deleted", EventType.ENTITY_DELETED);
     }
 
     @Override
@@ -502,8 +485,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected Item addEntity(final DistributionSet baseEntity) {
-        final Item item = super.addEntity(baseEntity);
+    protected Item addItem(final DistributionSet baseEntity) {
+        final Item item = super.addItem(baseEntity);
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
             manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
         }
@@ -571,51 +554,19 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return name + "." + version;
     }
 
-    private void refreshDistributions() {
-        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
-        final int size = dsContainer.size();
-        if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
-            refreshTablecontainer();
-        }
-        if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
-        }
-    }
-
-    private void refreshTablecontainer() {
-        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
-        dsContainer.refresh();
-        selectRow();
-    }
-
     private void updateDistributionInTable(final DistributionSet editedDs) {
         final Item item = getContainerDataSource()
                 .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
         updateEntity(editedDs, item);
     }
 
-    private void refreshOnDelete() {
-        final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
-        final int size = dsContainer.size();
-        refreshTablecontainer();
-        if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
-        }
+    @Override
+    protected DistributionSet createEntity(final DistributionSet entity) {
+        return distributionSetManagement.createDistributionSet(entity);
     }
 
-    private void reSelectItemsAfterDeletionEvent() {
-        Set<Object> values = new HashSet<>();
-        if (isMultiSelect()) {
-            values = new HashSet<>((Set<?>) getValue());
-        } else {
-            values.add(getValue());
-        }
-        setValue(null);
-
-        for (final Object value : values) {
-            if (getVisibleItemIds().contains(value)) {
-                select(value);
-            }
-        }
+    @Override
+    protected void deleteEntities(final Collection<Long> entities) {
+        distributionSetManagement.deleteDistributionSet(entities.toArray(new Long[entities.size()]));
     }
 }

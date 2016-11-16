@@ -8,13 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -27,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +59,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient EntityFactory entityFactory;
+
+    @Autowired
+    private TargetTable targetTable;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -152,18 +150,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-        /* create new target entity */
-        Target newTarget = entityFactory.generateTarget(newControlllerId);
-        /* set values to the new target entity */
+        final Target newTarget = entityFactory.generateTarget(newControlllerId);
         setTargetValues(newTarget, newName, newDesc);
-        /* save new target */
-        newTarget = targetManagement.createTarget(newTarget);
-        final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
-        final Set<TargetIdName> s = new HashSet<>();
-        s.add(newTarget.getTargetIdName());
-        targetTable.setValue(s);
-
-        /* display success msg */
+        targetTable.addEntity(newTarget);
         uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 
@@ -203,7 +192,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         editTarget = Boolean.FALSE;
     }
 
-    private void setTargetValues(final Target target, final String name, final String description) {
+    private static void setTargetValues(final Target target, final String name, final String description) {
         target.setName(name == null ? target.getControllerId() : name);
         target.setDescription(description);
     }

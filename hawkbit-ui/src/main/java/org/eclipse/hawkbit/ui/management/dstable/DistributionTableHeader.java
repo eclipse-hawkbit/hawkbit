@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -24,8 +23,6 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  * Distribution table header.
@@ -39,9 +36,6 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Autowired
     private ManagementUIState managementUIState;
-
-    @Autowired
-    private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final ManagementUIEvent event) {
@@ -154,11 +148,6 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(null);
-        newDistWindow.setCaption(i18n.get("caption.add.new.dist"));
-        UI.getCurrent().addWindow(newDistWindow);
-        newDistWindow.setVisible(Boolean.TRUE);
-        eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
     }
 
     @Override

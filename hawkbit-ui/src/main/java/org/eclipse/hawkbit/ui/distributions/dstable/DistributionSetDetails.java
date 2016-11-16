@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -70,7 +69,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private ManageDistUIState manageDistUIState;
 
     @Autowired
-    private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private DistributionSetAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
     @Autowired
     private DistributionTagToken distributionTagToken;

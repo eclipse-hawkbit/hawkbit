@@ -905,6 +905,8 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
 
+    public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
+
     /**
      * /* Private Constructor.
      */

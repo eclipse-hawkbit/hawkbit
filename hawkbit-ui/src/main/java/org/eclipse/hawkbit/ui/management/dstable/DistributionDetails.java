@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
@@ -47,7 +46,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private ManagementUIState managementUIState;
 
     @Autowired
-    private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private DistributionUpdateWindowLayout distributionUpdateWindowLayout;
 
     @Autowired
     private DistributionTagToken distributionTagToken;
@@ -99,7 +98,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
+        final Window newDistWindow = distributionUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
@@ -191,13 +190,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
-    }
-
-    private boolean isDistributionSetSelected(final DistributionSet ds) {
-        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent()
-                ? managementUIState.getLastSelectedDistribution().get() : null;
-        return ds != null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
-                && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override

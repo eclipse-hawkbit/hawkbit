@@ -19,7 +19,6 @@ import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_F
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -57,6 +55,7 @@ import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -76,7 +75,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -128,25 +126,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shouldRefreshTargets = false;
-        for (final TargetDeletedEvent deletedEvent : eventContainer.getEvents()) {
-            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getEntityId(), null, null);
-            if (visibleItemIds.contains(targetIdName)) {
-                targetContainer.removeItem(targetIdName);
-            } else {
-                shouldRefreshTargets = true;
-                break;
-            }
-        }
-        if (shouldRefreshTargets) {
-            refreshOnDelete();
-        } else {
-            targetContainer.commit();
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
-        }
-        reSelectItemsAfterDeletionEvent();
+        sendUnreadNotificationMessage(eventContainer, "Target deleted", EventType.ENTITY_DELETED);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetCreatedEvents(final TargetCreatedEventContainer eventContainer) {
+        sendUnreadNotificationMessage(eventContainer, "Target created", EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -160,34 +145,22 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
 
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
+            // TODO auf ID umstellen
+            // net für alle getEntity aufrufen
             eventContainer.getEvents().stream().map(event -> event.getEntity())
                     .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
-            targetContainer.commit();
         }
-
-        // workaround until push is available for action
-        // history, re-select
-        // the updated target so the action history gets
-        // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
     }
 
     private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
         targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
                 target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetCreatedEvents(final TargetCreatedEventContainer holder) {
-        refreshTargets();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -243,14 +216,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
-            refreshTablecontainer();
+            refreshContainer();
         }
-    }
-
-    private void refreshTablecontainer() {
-        final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
-        tableContainer.refresh();
-        selectRow();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -341,33 +308,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
         return managementViewAcceptCriteria;
-    }
-
-    private void reSelectItemsAfterDeletionEvent() {
-        Set<Object> values;
-        if (isMultiSelect()) {
-            values = new HashSet<>((Set<?>) getValue());
-        } else {
-            values = Sets.newHashSetWithExpectedSize(1);
-            values.add(getValue());
-        }
-        unSelectAll();
-
-        for (final Object value : values) {
-            if (getVisibleItemIds().contains(value)) {
-                select(value);
-            }
-        }
-    }
-
-    private void refreshOnDelete() {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final int size = targetContainer.size();
-        refreshTablecontainer();
-        if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
-        }
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
@@ -757,7 +697,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final int size = targetContainer.size();
         if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
-            refreshTablecontainer();
+            super.refreshContainer();
         } else {
             // If table is not refreshed , explicitly target total count and
             // truncated count has to be updated
@@ -767,7 +707,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (size != 0) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
         }
-
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
@@ -805,13 +744,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // As Vaadin Table only returns the current ItemIds which are visible
         // you don't need to search explicit for them.
         setValue(getItemIds());
-    }
-
-    /**
-     * Clear all selections in the table.
-     */
-    private void unSelectAll() {
-        setValue(null);
     }
 
     @Override
@@ -905,5 +837,15 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
+    }
+
+    @Override
+    protected Target createEntity(final Target entity) {
+        return targetManagement.createTarget(entity);
+    }
+
+    @Override
+    protected void deleteEntities(final Collection<Long> entities) {
+        targetManagement.deleteTargets(entities);
     }
 }

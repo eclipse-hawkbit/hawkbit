@@ -19,8 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -28,10 +26,12 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -73,13 +73,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private ManagementUIState managementUIState;
 
     @Autowired
-    private transient TargetManagement targetManagement;
+    private TargetTable targetTable;
+
+    @Autowired
+    private DistributionSetTable distributionTable;
 
     @Autowired
     private transient DeploymentManagement deploymentManagement;
-
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
     private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
@@ -376,7 +376,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void deleteAllDistributions(final ConfirmationTab tab) {
         final Set<Long> deletedIds = new HashSet<>();
         managementUIState.getDeletedDistributionList().forEach(distIdName -> deletedIds.add(distIdName.getId()));
-        distributionSetManagement.deleteDistributionSet(deletedIds.toArray(new Long[deletedIds.size()]));
+
+        distributionTable.removeEntities(deletedIds);
+
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.dist.deleted", managementUIState.getDeletedDistributionList().size()));
 
@@ -468,7 +470,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final Set<TargetIdName> itemIds = managementUIState.getDeletedTargetList();
         final List<Long> targetIds = itemIds.stream().map(t -> t.getTargetId()).collect(Collectors.toList());
 
-        targetManagement.deleteTargets(targetIds.toArray(new Long[targetIds.size()]));
+        targetTable.removeEntities(targetIds);
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.deleted", targetIds.size()));
         removeCurrentTab(tab);
