@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroupId;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -22,4 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface RolloutTargetGroupRepository
         extends CrudRepository<RolloutTargetGroup, RolloutTargetGroupId>, JpaSpecificationExecutor<RolloutTargetGroup> {
+
+    /**
+     * Counts all entries that have the specified rolloutGroup
+     * 
+     * @param rolloutGroup
+     *            the group to filter for
+     * @return count of targets in the group
+     */
+    Long countByRolloutGroup(final JpaRolloutGroup rolloutGroup);
 }

@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -268,7 +269,7 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
+     * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findAllTargetsByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, Long distributionSetId,
@@ -283,10 +284,53 @@ public interface TargetManagement {
      *            id of the {@link DistributionSet}
      * @param targetFilterQuery
      *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
+     * @return the count of found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetsByTargetFilterQueryAndNonDS(Long distributionSetId, @NotNull TargetFilterQuery targetFilterQuery);
+
+    /**
+     * Finds all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param targetFilterQuery
+     *            RSQL filter
+     * @return a page of the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
+            List<RolloutGroup> groups, @NotNull String targetFilterQuery);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s
+     *
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param targetFilterQuery
+     *            RSQL filter
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(List<RolloutGroup> groups,
+            @NotNull String targetFilterQuery);
+
+    /**
+     * Finds all targets of the provided {@link RolloutGroup} that have no
+     * Action for the RolloutGroup.
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param group
+     *            the {@link RolloutGroup}
+     * @return the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findAllTargetsInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, @NotNull RolloutGroup group);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet} without

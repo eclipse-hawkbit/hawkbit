@@ -277,25 +277,6 @@ public interface DeploymentManagement {
     List<Action> findActionsByRolloutAndStatus(@NotNull Rollout rollout, @NotNull Action.Status actionStatus);
 
     /**
-     * Retrieving all actions referring to a given rollout with a specific
-     * action as parent reference and a specific status.
-     *
-     * Finding all actions of a specific rolloutgroup parent relation.
-     *
-     * @param rollout
-     *            the rollout the actions belong to
-     * @param rolloutGroupParent
-     *            the parent rollout group the actions should reference
-     * @param actionStatus
-     *            the status the actions have
-     * @return the actions referring a specific rollout and a specific parent
-     *         rollout group in a specific status
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Long> findActionsByRolloutGroupParentAndStatus(@NotNull Rollout rollout,
-            @NotNull RolloutGroup rolloutGroupParent, @NotNull Action.Status actionStatus);
-
-    /**
      * Retrieves all {@link Action}s of a specific target.
      *
      * @param pageable
@@ -512,6 +493,19 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Action startScheduledAction(@NotNull Long actionId);
+
+    /**
+     * Starts all scheduled actions of an RolloutGroup parent.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroupParent
+     *            the parent rollout group the actions should reference. null
+     *            references the first group
+     * @return the amount of started actions
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long startScheduledActionsByRolloutGroupParent(@NotNull Rollout rollout, RolloutGroup rolloutGroupParent);
 
     /**
      * All {@link ActionStatus} entries in the repository.

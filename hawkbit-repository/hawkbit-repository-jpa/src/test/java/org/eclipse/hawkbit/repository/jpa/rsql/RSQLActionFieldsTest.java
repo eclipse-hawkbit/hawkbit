@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -36,17 +37,20 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void setupBeforeTest() {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
         target = new JpaTarget("targetId123");
         target.setDescription("targetId123");
         targetManagement.createTarget(target);
         action = new JpaAction();
         action.setActionType(ActionType.SOFT);
+        action.setDistributionSet(dsA);
         target.addAction(action);
         action.setTarget(target);
         actionRepository.save(action);
         for (int i = 0; i < 10; i++) {
             final JpaAction newAction = new JpaAction();
             newAction.setActionType(ActionType.SOFT);
+            newAction.setDistributionSet(dsA);
             newAction.setActive(i % 2 == 0);
             newAction.setTarget(target);
             actionRepository.save(newAction);
