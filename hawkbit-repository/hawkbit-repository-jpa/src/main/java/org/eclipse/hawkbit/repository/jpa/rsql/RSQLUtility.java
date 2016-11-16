@@ -20,10 +20,14 @@ import java.util.stream.Collectors;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
@@ -285,9 +289,6 @@ public final class RSQLUtility {
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
             final String[] split = finalProperty.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
-            if (split.length == 0) {
-                return root.get(split[0]);
-            }
 
             for (int i = 0; i < split.length; i++) {
                 final boolean isMapKeyField = enumField.isMap() && i == (split.length - 1);
@@ -297,6 +298,12 @@ public final class RSQLUtility {
 
                 final String fieldNameSplit = split[i];
                 fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
+                if (fieldPath instanceof SetJoin) {
+                    final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
+                    final From<?, Object> joinParent = join.getParent();
+                    joinParent.getJoins().remove(join);
+                    fieldPath = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                }
             }
             return fieldPath;
         }

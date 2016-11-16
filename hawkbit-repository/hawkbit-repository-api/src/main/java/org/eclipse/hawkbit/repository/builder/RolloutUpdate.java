@@ -8,8 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 /**
  * Builder to update an existing {@link Rollout} entry. Defines all fields that
@@ -30,4 +35,35 @@ public interface RolloutUpdate {
      * @return updated builder instance
      */
     RolloutUpdate description(String description);
+
+    /**
+     * @param set
+     *            for {@link Rollout#getDistributionSet()}
+     * @return updated builder instance
+     */
+    default RolloutUpdate set(final DistributionSet set) {
+        return set(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
+    }
+
+    /**
+     * @param setId
+     *            for {@link Rollout#getDistributionSet()}
+     * @return updated builder instance
+     */
+    RolloutUpdate set(long setId);
+
+    /**
+     * @param actionType
+     *            for {@link Rollout#getActionType()}
+     * @return updated builder instance
+     */
+    RolloutUpdate actionType(@NotNull Action.ActionType actionType);
+
+    /**
+     * @param forcedTime
+     *            for {@link Rollout#getForcedTime()}
+     * @return updated builder instance
+     */
+    RolloutUpdate forcedTime(Long forcedTime);
+
 }

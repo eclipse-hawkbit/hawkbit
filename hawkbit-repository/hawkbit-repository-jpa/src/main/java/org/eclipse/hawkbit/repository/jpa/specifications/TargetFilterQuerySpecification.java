@@ -26,6 +26,19 @@ public final class TargetFilterQuerySpecification {
 
     /**
      * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
+     * on is {@link JpaTargetFilterQuery#getQuery()}.
+     *
+     * @param queryValue
+     *            the query of the filter
+     * @return the {@link JpaTargetFilterQuery} {@link Specification}
+     */
+    public static Specification<JpaTargetFilterQuery> equalsQuery(final String queryValue) {
+        return (targetFilterQueryRoot, query, cb) -> cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.query),
+                queryValue);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
      * on is {@link JpaTargetFilterQuery#getName()}.
      * 
      * @param searchText

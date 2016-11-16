@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Iterables;
@@ -717,6 +718,23 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             assertThat(findTargetByControllerID.getTargetInfo().getPollStatus()).isNotNull();
             return null;
         });
+
+    }
+
+    @Test
+    @Description("Test that RSQL filter finds targets with tags or specific ids.")
+    public void findTargetsWithTagOrId() {
+        final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
+        final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
+        final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
+        targetManagement.toggleTagAssignment(targAs, targTagA);
+
+        testdataFactory.createTargets(25, "target-id-B", "first description");
+
+        Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
+
+        assertThat(targetManagement.findAllTargetIds().size()).as("Total targets").isEqualTo(50);
+        assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
 
     }
 }

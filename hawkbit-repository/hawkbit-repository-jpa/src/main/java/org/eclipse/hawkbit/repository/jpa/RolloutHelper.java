@@ -69,7 +69,7 @@ final class RolloutHelper {
      * In case the given group is missing conditions or actions, they will be
      * set from the supplied default conditions.
      * 
-     * @param group
+     * @param create
      *            group to check
      * @param conditions
      *            default conditions and actions
@@ -144,10 +144,22 @@ final class RolloutHelper {
      * @return resulting target filter query
      */
     static String getTargetFilterQuery(final Rollout rollout) {
-        if (rollout.getCreatedAt() != null) {
-            return rollout.getTargetFilterQuery() + ";createdat=le=" + rollout.getCreatedAt().toString();
+        return getTargetFilterQuery(rollout.getTargetFilterQuery(), rollout.getCreatedAt());
+    }
+
+    /**
+     * @param targetFilter
+     *            the target filter tp be extended
+     * @param createdAt
+     *            timestamp
+     * @return a target filter query that only matches targets that were created
+     *         after the provided timestamp.
+     */
+    static String getTargetFilterQuery(final String targetFilter, final Long createdAt) {
+        if (createdAt != null) {
+            return targetFilter + ";createdat=le=" + createdAt.toString();
         }
-        return rollout.getTargetFilterQuery();
+        return targetFilter;
     }
 
     /**
@@ -215,7 +227,7 @@ final class RolloutHelper {
         if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
             return "";
         }
-        return groups.stream().map(RolloutGroup::getTargetFilterQuery).collect(Collectors.joining(","));
+        return "(" + groups.stream().map(RolloutGroup::getTargetFilterQuery).collect(Collectors.joining("),(")) + ")";
     }
 
     /**
@@ -232,11 +244,11 @@ final class RolloutHelper {
     static String getOverlappingWithGroupsTargetFilter(final List<RolloutGroup> groups, final RolloutGroup group) {
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
         if (StringUtils.isNotEmpty(previousGroupFilters) && StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return group.getTargetFilterQuery() + ";(" + previousGroupFilters + ")";
+            return "(" + group.getTargetFilterQuery() + ");(" + previousGroupFilters + ")";
         } else if (StringUtils.isNotEmpty(previousGroupFilters)) {
             return "(" + previousGroupFilters + ")";
         } else if (StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return group.getTargetFilterQuery();
+            return "(" + group.getTargetFilterQuery() + ")";
         } else {
             return "";
         }

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -247,7 +249,8 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .collect(Collectors.toList());
         groups.forEach(RolloutHelper::verifyRolloutGroupHasConditions);
 
-        verifyRolloutGroupTargetCounts(groups, savedRollout);
+        RolloutHelper.verifyRemainingTargets(
+                calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt()));
 
         // Persisting the groups
         RolloutGroup lastSavedGroup = null;
@@ -402,14 +405,36 @@ public class JpaRolloutManagement implements RolloutManagement {
         targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
 
-    private void verifyRolloutGroupTargetCounts(final List<RolloutGroup> groups, final JpaRollout rollout) {
-        final String baseFilter = RolloutHelper.getTargetFilterQuery(rollout);
+    private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
+            final Long createdAt) {
+        final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
         final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        long targetCount = totalTargets;
+        RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
+
+        return totalTargets - validation.getTargetsInGroups();
+    }
+
+    @Override
+    public RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String targetFilter,
+                                                           final Long createdAt) {
+
+        final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
+        final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
+        if (totalTargets == 0) {
+            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
+        }
+
+        return validateTargetsInGroups(groups, baseFilter, totalTargets);
+    }
+
+    private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
+                                                            final long totalTargets) {
+        final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
+
         long unusedTargetsCount = 0;
 
         for (int i = 0; i < groups.size(); i++) {
@@ -431,13 +456,12 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             final long reducedTargetsInGroup = Math
                     .round(group.getTargetPercentage() / 100 * (double) realTargetsInGroup);
-            targetCount -= reducedTargetsInGroup;
+            groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
 
         }
 
-        RolloutHelper.verifyRemainingTargets(targetCount);
-
+        return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
     }
 
     private long countTargetsOfGroup(final String baseFilter, final long baseFilterCount, final RolloutGroup group) {
@@ -459,7 +483,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (StringUtils.isEmpty(overlappingTargetsFilter)) {
             overlappingTargetsFilter = baseFilter;
         } else {
-            overlappingTargetsFilter = baseFilter + ";" + overlappingTargetsFilter;
+            overlappingTargetsFilter = "(" + baseFilter + ");" + overlappingTargetsFilter;
         }
         return targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
     }

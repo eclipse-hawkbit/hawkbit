@@ -87,6 +87,8 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String UPDATE_OPTION = "Update";
 
+    private static final String COPY_OPTION = "Copy";
+
     private static final String PAUSE_OPTION = "Pause";
 
     private static final String RUN_OPTION = "Run";
@@ -137,7 +139,7 @@ public class RolloutListGrid extends AbstractGrid {
     /**
      * Handles the RolloutChangeEvent to refresh the item in the grid.
      *
-     * @param rolloutChangeEvent
+     * @param eventContainer
      *            the event which contains the rollout which has been changed
      */
     @SuppressWarnings("unchecked")
@@ -207,6 +209,10 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
         }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
+                    false);
+        }
     }
 
     @Override
@@ -237,6 +243,10 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
             getColumn(UPDATE_OPTION).setMaximumWidth(25);
         }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION).setMinimumWidth(25);
+            getColumn(COPY_OPTION).setMaximumWidth(25);
+        }
 
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
 
@@ -266,8 +276,11 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
         }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
+        }
 
-        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
+        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION);
         join.setText(i18n.get("header.action"));
     }
 
@@ -294,6 +307,9 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            columnList.add(COPY_OPTION);
         }
 
         columnList.add(VAR_CREATED_DATE);
@@ -349,6 +365,10 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())));
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION)
+                    .setRenderer(new HtmlButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())));
         }
 
     }
@@ -421,8 +441,15 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void updateRollout(final Long rolloutId) {
-        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId);
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, false);
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
+        UI.getCurrent().addWindow(addTargetWindow);
+        addTargetWindow.setVisible(Boolean.TRUE);
+    }
+
+    private void copyRollout(final Long rolloutId) {
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, true);
+        addTargetWindow.setCaption(i18n.get("caption.create.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }

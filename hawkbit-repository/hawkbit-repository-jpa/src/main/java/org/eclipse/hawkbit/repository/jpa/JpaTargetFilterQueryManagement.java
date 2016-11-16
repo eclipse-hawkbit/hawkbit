@@ -120,6 +120,15 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
+    public Page<TargetFilterQuery> findTargetFilterQueryByQuery(final Pageable pageable, final String query) {
+        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
+        if (!Strings.isNullOrEmpty(query)) {
+            specList = Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query));
+        }
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    @Override
     public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull final Pageable pageable,
             final DistributionSet distributionSet) {
         return findTargetFilterQueryByAutoAssignDS(pageable, distributionSet, null);
