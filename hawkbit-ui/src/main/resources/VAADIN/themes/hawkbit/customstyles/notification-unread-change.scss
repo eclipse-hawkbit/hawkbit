@@ -9,18 +9,26 @@
 @mixin notification-unread-change {
 
    .notifications-unread{
-    padding-right: 20px;
+    width: 37px !important;
+    height: 37px !important;
+    margin: 0px !important;
    }
 
-   .notifications-unread.change-counter .v-button-caption{
+  .change-counter {
+    @include valo-badge-style;
+    pointer-events: none;
     display: block;
     top: round($v-unit-size / -5);
     right: round($v-unit-size / -5);
-    display: block;
     z-index: 1;
+    border-radius: $v-border-radius;
+    color: $widget-bg;
+    position: absolute;
   }
+ 
+  
 
-  .notifications-unread.v-window {
+  .notifications-unread-popup.v-window {
     overflow: visible !important;
     // top: 3 * $v-unit-size !important;
     right: $view-padding;
@@ -78,7 +86,7 @@
 
   // Need to use normal media queries because Responsive doesn't work for overlay elements just yet
   @media screen and (max-width: 480px) {
-    .notifications-unread.v-window {
+    .notifications-unread-popup.v-window {
       right: round($view-padding / 2);
     }
   }

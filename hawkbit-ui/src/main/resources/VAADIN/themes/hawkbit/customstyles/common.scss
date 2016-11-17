@@ -13,14 +13,20 @@
   }
 }
 @mixin dashboard-common {
-  .v-ui {
 
     //View caption style
-    .header-content {
+    .v-caption-header-content {
       padding-left: 20px;
       color: $widget-caption-color;
       font: $view-caption-font-style;
     }
+    
+    .view-header-layout{
+       width: 100%;
+       padding-right: 20px;
+    }
+    
+  .v-ui {
 
     //Menu style
     .valo-menu {

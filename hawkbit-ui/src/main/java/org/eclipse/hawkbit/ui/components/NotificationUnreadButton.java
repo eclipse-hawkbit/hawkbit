@@ -41,6 +41,7 @@ public class NotificationUnreadButton extends Button {
 
     private static final long serialVersionUID = 1L;
     private static final String STYLE = "notifications-unread";
+    private static final String STYLE_POPUP = "notifications-unread-popup";
     private static final String STYLE_UNREAD_COUNTER = "change-counter";
     private final Map<AbstractTable<?, ?>, Set<NotificationEntityChangeEvent>> notificationChangeEvents = new ConcurrentHashMap<>();
 
@@ -55,6 +56,7 @@ public class NotificationUnreadButton extends Button {
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
         addStyleName(STYLE);
         addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+        setCaptionAsHtml(true);
     }
 
     @PostConstruct
@@ -69,14 +71,13 @@ public class NotificationUnreadButton extends Button {
     }
 
     private void updateUnreadNotificationLabel() {
-        setCaption(String.valueOf(unreadNotficationCounter));
 
         String description = "Notifications";
         if (unreadNotficationCounter > 0) {
-            addStyleName(STYLE_UNREAD_COUNTER);
+            setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotficationCounter + "</div>");
             description += " (" + unreadNotficationCounter + " unread)";
         } else {
-            removeStyleName(STYLE_UNREAD_COUNTER);
+            setCaption(null);
         }
         setDescription(description);
     }
@@ -135,7 +136,7 @@ public class NotificationUnreadButton extends Button {
         }
         notificationsWindow = new Window();
         notificationsWindow.setWidth(300.0F, Unit.PIXELS);
-        notificationsWindow.addStyleName(STYLE);
+        notificationsWindow.addStyleName(STYLE_POPUP);
         notificationsWindow.setClosable(false);
         notificationsWindow.setResizable(false);
         notificationsWindow.setDraggable(false);
