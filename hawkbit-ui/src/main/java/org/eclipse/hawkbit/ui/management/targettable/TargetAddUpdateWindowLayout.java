@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -88,7 +89,25 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         @Override
         public boolean canWindowSaveOrUpdate() {
-            return editTarget || !isDuplicate();
+            return editTarget || isValid();
+        }
+
+        private boolean isValid() {
+            final String newControlllerId = controllerIDTextField.getValue().trim();
+            if (StringUtils.isEmpty(newControlllerId)) {
+                uINotification.displayValidationError(i18n.get("message.target.name.not.valid"));
+                return false;
+            }
+
+            final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId);
+            if (existingTarget != null) {
+                uINotification.displayValidationError(
+                        i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
+                return false;
+            } else {
+                return true;
+            }
+
         }
 
     }
@@ -206,19 +225,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private void setTargetValues(final Target target, final String name, final String description) {
         target.setName(name == null ? target.getControllerId() : name);
         target.setDescription(description);
-    }
-
-    private boolean isDuplicate() {
-        final String newControlllerId = controllerIDTextField.getValue();
-        final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
-        if (existingTarget != null) {
-            uINotification.displayValidationError(
-                    i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
-            return true;
-        } else {
-            return false;
-        }
-
     }
 
     /**
