@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
@@ -46,7 +46,9 @@ import com.vaadin.ui.UI;
 @ViewScope
 public class DistributionTagButtons extends AbstractFilterButtons {
 
-    private static final long serialVersionUID = -8151483237450892057L;
+    private static final String NO_TAG = "NO TAG";
+
+    private static final long serialVersionUID = 1L;
 
     @Autowired
     private DistributionTagDropEvent spDistTagDropEvent;
@@ -60,7 +62,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
-        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -102,8 +104,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
         final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<>(DistributionTagBeanQuery.class);
         tagQF.setQueryConfiguration(Collections.emptyMap());
-        return HawkbitCommonUtil.createDSLazyQueryContainer(
-                new BeanQueryFactory<DistributionTagBeanQuery>(DistributionTagBeanQuery.class));
+        return HawkbitCommonUtil.createDSLazyQueryContainer(new BeanQueryFactory<>(DistributionTagBeanQuery.class));
 
     }
 
@@ -141,11 +142,11 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private void refreshTagTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
         addColumn();
     }
 
-    private void addNewTag(final DistributionSetTag daTag) {
+    private void addNewTag(final Tag daTag) {
         final LazyQueryContainer targetTagContainer = (LazyQueryContainer) getContainerDataSource();
         final Object addItem = targetTagContainer.addItem();
         final Item item = targetTagContainer.getItem(addItem);

@@ -118,7 +118,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
                 rolloutGroupIds);
 
-        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+        for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()));
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
@@ -129,7 +129,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public RolloutGroup findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = findRolloutGroupById(rolloutGroupId);
+        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) findRolloutGroupById(rolloutGroupId);
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 

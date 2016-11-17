@@ -13,8 +13,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -63,18 +61,6 @@ public interface RolloutRepository
     List<JpaRollout> findByLastCheckAndStatus(long lastCheck, RolloutStatus status);
 
     /**
-     * Retrieves all {@link Rollout} for a specific {@code name}.
-     * 
-     * @param pageable
-     *            for paging information
-     * 
-     * @param name
-     *            the rollout name
-     * @return {@link Rollout} for specific name
-     */
-    Page<JpaRollout> findByName(final Pageable pageable, String name);
-
-    /**
      * Retrieves all {@link Rollout} for a specific {@code name}
      * 
      * @param name
@@ -82,13 +68,4 @@ public interface RolloutRepository
      * @return {@link Rollout} for specific name
      */
     JpaRollout findByName(String name);
-
-    /**
-     * Retrieves all {@link Rollout} for a specific status.
-     * 
-     * @param status
-     *            the status of the rollouts to retrieve
-     * @return a list of {@link Rollout} having the given status
-     */
-    List<JpaRollout> findByStatus(final RolloutStatus status);
 }

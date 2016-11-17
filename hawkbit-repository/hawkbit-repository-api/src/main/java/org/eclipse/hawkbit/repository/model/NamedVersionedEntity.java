@@ -13,16 +13,8 @@ package org.eclipse.hawkbit.repository.model;
  *
  */
 public interface NamedVersionedEntity extends NamedEntity {
-
     /**
      * @return the version of entity.
      */
     String getVersion();
-
-    /**
-     * @param version
-     *            of the entity.
-     */
-    void setVersion(String version);
-
 }

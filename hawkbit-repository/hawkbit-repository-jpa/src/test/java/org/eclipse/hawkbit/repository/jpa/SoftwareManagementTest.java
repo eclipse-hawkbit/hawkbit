@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -22,12 +21,11 @@ import java.util.List;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -58,26 +56,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Try to update non updatable fields results in repository doing nothing.")
-    public void updateTypeNonUpdateableFieldsFails() {
-        final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
-
-        created.setName("a new name");
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entitity to be equal to created version")
-                .isEqualTo(created.getOptLockRevision());
-    }
-
-    @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepositoryForType() {
-        final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
+        final SoftwareModuleType created = softwareManagement.createSoftwareModuleType(
+                entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+        final SoftwareModuleType updated = softwareManagement
+                .updateSoftwareModuleType(entityFactory.softwareModuleType().update(created.getId()));
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity to be equal to created version")
@@ -87,13 +72,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Calling update for changed fields results in change in the repository.")
     public void updateSoftareModuleTypeFieldsToNewValue() {
-        final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
+        final SoftwareModuleType created = softwareManagement.createSoftwareModuleType(
+                entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
-        created.setDescription("changed");
-        created.setColour("changed");
-
-        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(created.getId()).description("changed").colour("changed"));
 
         assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
                 .isEqualTo(created.getOptLockRevision() + 1);
@@ -102,26 +85,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Try to update non updatable fields results in repository doing nothing.")
-    public void updateNonUpdateableFieldsFails() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-
-        ah.setName("a new name");
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entitity to be equal to created version")
-                .isEqualTo(ah.getOptLockRevision());
-    }
-
-    @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepository() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+        final SoftwareModule updated = softwareManagement
+                .updateSoftwareModule(entityFactory.softwareModule().update(ah.getId()));
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity to be equal to created version")
@@ -131,12 +100,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Calling update for changed fields results in change in the repository.")
     public void updateSoftareModuleFieldsToNewValue() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
-        ah.setDescription("changed");
-        ah.setVendor("changed");
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(
+                entityFactory.softwareModule().update(ah.getId()).description("changed").vendor("changed"));
 
         assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
                 .isEqualTo(ah.getOptLockRevision() + 1);
@@ -147,38 +114,9 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Create Software Module call fails when called for existing entity.")
     public void createModuleCallFailsForExistingModule() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+        testdataFactory.createSoftwareModuleOs();
         try {
-            softwareManagement.createSoftwareModule(ah);
-            fail("Should not have worked as module already exists.");
-        } catch (final EntityAlreadyExistsException e) {
-
-        }
-    }
-
-    @Test
-    @Description("Create Software Modules call fails when called for existing entities.")
-    public void createModulesCallFailsForExistingModule() {
-        final List<SoftwareModule> modules = softwareManagement.createSoftwareModule(
-                Lists.newArrayList(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"),
-                        new JpaSoftwareModule(appType, "agent-hub", "1.0.2", "test desc", "test vendor")));
-        try {
-            softwareManagement.createSoftwareModule(modules);
-            fail("Should not have worked as module already exists.");
-        } catch (final EntityAlreadyExistsException e) {
-
-        }
-    }
-
-    @Test
-    @Description("Create Software Module Type call fails when called for existing entity.")
-    public void createModuleTypeCallFailsForExistingType() {
-        final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
-
-        try {
-            softwareManagement.createSoftwareModuleType(created);
+            testdataFactory.createSoftwareModuleOs();
             fail("Should not have worked as module already exists.");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -188,10 +126,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Create Software Module Types call fails when called for existing entities.")
     public void createModuleTypesCallFailsForExistingTypes() {
-        final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(new JpaSoftwareModuleType("test-key-bumlux", "test-name", "test-desc", 1),
-                        new JpaSoftwareModuleType("test-key-bumlux2", "test-name2", "test-desc", 1)));
+        final List<SoftwareModuleTypeCreate> created = Lists.newArrayList(
+                entityFactory.softwareModuleType().create().key("test-key").name("test-name"),
+                entityFactory.softwareModuleType().create().key("test-key2").name("test-name2"));
 
+        softwareManagement.createSoftwareModuleType(created);
         try {
             softwareManagement.createSoftwareModuleType(created);
             fail("Should not have worked as module already exists.");
@@ -201,37 +140,22 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Calling update for changing fields to null results in change in the repository.")
-    public void eraseSoftareModuleFields() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
-
-        ah.setDescription(null);
-        ah.setVendor(null);
-        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
-
-        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
-                .isEqualTo(ah.getOptLockRevision() + 1);
-        assertThat(updated.getDescription()).as("Updated description is").isNull();
-        assertThat(updated.getVendor()).as("Updated vendor is").isNull();
-    }
-
-    @Test
     @Description("searched for software modules based on the various filter options, e.g. name,desc,type, version.")
     public void findSoftwareModuleByFilters() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
+        final SoftwareModule ah = softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.1"));
+        final SoftwareModule jvm = softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(runtimeType).name("oracle-jre").version("1.7.2"));
+        final SoftwareModule os = softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2"));
 
-        final SoftwareModule ah2 = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.2", null, ""));
-        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement.createDistributionSet(testdataFactory
-                .generateDistributionSet("ds-1", "1.0.1", standardDsType, Lists.newArrayList(os, jvm, ah2)));
+        final SoftwareModule ah2 = softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.2"));
+        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("ds-1").version("1.0.1")
+                        .type(standardDsType).modules(Lists.newArrayList(os.getId(), jvm.getId(), ah2.getId())));
 
-        final JpaTarget target = (JpaTarget) targetManagement.createTarget(new JpaTarget("test123"));
+        final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
 
         // standard searches
@@ -262,7 +186,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
-        deploymentManagement.assignDistributionSet(ds.getId(), new String[] { target.getControllerId() });
+        assignDistributionSet(ds.getId(), target.getControllerId());
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
                         .isEqualTo(TargetUpdateStatus.PENDING);
@@ -277,13 +201,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Searches for software modules based on a list of IDs.")
     public void findSoftwareModulesById() {
 
-        final List<Long> modules = new ArrayList<>();
-
-        modules.add(softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky-una", "3.0.2", null, "")).getId());
-        modules.add(softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky-u2na", "3.0.3", null, "")).getId());
-        modules.add(624355263L);
+        final List<Long> modules = Lists.newArrayList(testdataFactory.createSoftwareModuleOs().getId(),
+                testdataFactory.createSoftwareModuleApp().getId(), 624355263L);
 
         assertThat(softwareManagement.findSoftwareModulesById(modules)).hasSize(2);
     }
@@ -292,14 +211,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Searches for software modules by type.")
     public void findSoftwareModulesByType() {
         // found in test
-        final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
-        final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "two", "two", null, ""));
+        final SoftwareModule one = testdataFactory.createSoftwareModuleOs("one");
+        final SoftwareModule two = testdataFactory.createSoftwareModuleOs("two");
         // ignored
-        softwareManagement.deleteSoftwareModule(softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")).getId());
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "three", "3.0.2", null, ""));
+        softwareManagement.deleteSoftwareModule(testdataFactory.createSoftwareModuleOs("deleted").getId());
+        testdataFactory.createSoftwareModuleApp();
 
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType.getId()).getContent())
                 .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
@@ -310,11 +226,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Counts all software modules in the repsitory that are not marked as deleted.")
     public void countSoftwareModulesAll() {
         // found in test
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "two", "two", null, ""));
+        final SoftwareModule one = testdataFactory.createSoftwareModuleOs("one");
+        final SoftwareModule two = testdataFactory.createSoftwareModuleOs("two");
+        final SoftwareModule deleted = testdataFactory.createSoftwareModuleOs("deleted");
         // ignored
-        softwareManagement.deleteSoftwareModule(softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")).getId());
+        softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Expected to find the following number of modules:")
                 .isEqualTo(2);
@@ -327,7 +243,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 appType);
 
         SoftwareModuleType type = softwareManagement.createSoftwareModuleType(
-                new JpaSoftwareModuleType("bundle", "OSGi Bundle", "fancy stuff", Integer.MAX_VALUE));
+                entityFactory.softwareModuleType().create().key("bundle").name("OSGi Bundle"));
 
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
@@ -340,13 +256,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType);
 
         type = softwareManagement.createSoftwareModuleType(
-                new JpaSoftwareModuleType("bundle2", "OSGi Bundle2", "fancy stuff", Integer.MAX_VALUE));
+                entityFactory.softwareModuleType().create().key("bundle2").name("OSGi Bundle2"));
 
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
 
-        softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(type, "Test SM", "1.0", "cool module", "from meeee"));
+        softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(type).name("Test SM").version("1.0"));
 
         // delete assigned
         softwareManagement.deleteSoftwareModuleType(type);
@@ -388,15 +304,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Deletes an artifact, which is assigned to a DistributionSet")
     public void softDeleteOfAssignedArtifact() {
 
-        // Init DistributionSet
-        final DistributionSet disSet = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
-
         // [STEP1]: Create SoftwareModuleX with ArtifactX
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        distributionSetManagement.assignSoftwareModules(disSet, Sets.newHashSet(assignedModule));
+        testdataFactory.createDistributionSet(Sets.newHashSet(assignedModule));
 
         // [STEP3]: Delete the assigned SoftwareModule
         softwareManagement.deleteSoftwareModule(assignedModule.getId());
@@ -423,19 +335,17 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Delete an artifact, which has been assigned to a rolled out DistributionSet in the past")
     public void softDeleteOfHistoricalAssignedArtifact() {
 
-        // Init target and DistributionSet
-        final Target target = targetManagement.createTarget(new JpaTarget("test123"));
-        final DistributionSet disSet = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
+        // Init target
+        final Target target = testdataFactory.createTarget();
 
         // [STEP1]: Create SoftwareModuleX and include the new ArtifactX
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        distributionSetManagement.assignSoftwareModules(disSet, Sets.newHashSet(assignedModule));
+        final DistributionSet disSet = testdataFactory.createDistributionSet(Sets.newHashSet(assignedModule));
 
         // [STEP3]: Assign DistributionSet to a Device
-        deploymentManagement.assignDistributionSet(disSet, Lists.newArrayList(target));
+        assignDistributionSet(disSet, Lists.newArrayList(target));
 
         // [STEP4]: Delete the DistributionSet
         distributionSetManagement.deleteDistributionSet(disSet);
@@ -509,11 +419,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // Init artifact binary data, target and DistributionSets
         final byte[] source = RandomUtils.nextBytes(1024);
-        final Target target = targetManagement.createTarget(new JpaTarget("test123"));
-        final DistributionSet disSetX = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("dsX", "v1.0", "test dsX", standardDsType, null));
-        final DistributionSet disSetY = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("dsY", "v1.0", "test dsY", standardDsType, null));
+        final Target target = testdataFactory.createTarget();
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
@@ -530,12 +436,12 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
-        distributionSetManagement.assignSoftwareModules(disSetX, Sets.newHashSet(moduleX));
-        deploymentManagement.assignDistributionSet(disSetX, Lists.newArrayList(target));
+        final DistributionSet disSetX = testdataFactory.createDistributionSet(Sets.newHashSet(moduleX), "X");
+        assignDistributionSet(disSetX, Lists.newArrayList(target));
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
-        distributionSetManagement.assignSoftwareModules(disSetY, Sets.newHashSet(moduleY));
-        deploymentManagement.assignDistributionSet(disSetY, Lists.newArrayList(target));
+        final DistributionSet disSetY = testdataFactory.createDistributionSet(Sets.newHashSet(moduleY), "Y");
+        assignDistributionSet(disSetY, Lists.newArrayList(target));
 
         // [STEP5]: Delete SoftwareModuleX
         softwareManagement.deleteSoftwareModule(moduleX.getId());
@@ -568,8 +474,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final long countSoftwareModule = softwareModuleRepository.count();
 
         // create SoftwareModule
-        SoftwareModule softwareModule = softwareManagement.createSoftwareModule(
-                new JpaSoftwareModule(type, name, version, "description of artifact " + name, ""));
+        SoftwareModule softwareModule = softwareManagement.createSoftwareModule(entityFactory.softwareModule().create()
+                .type(type).name(name).version(version).description("description of artifact " + name));
 
         for (int i = 0; i < numberArtifacts; i++) {
             artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
@@ -587,9 +493,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
             assertArtfiactNotNull(artifacts.toArray(new Artifact[artifacts.size()]));
         }
 
-        artifacts.forEach(artifact -> {
-            assertThat(artifactRepository.findOne(artifact.getId())).isNotNull();
-        });
+        artifacts.forEach(artifact -> assertThat(artifactRepository.findOne(artifact.getId())).isNotNull());
         return softwareModule;
     }
 
@@ -612,35 +516,34 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test verfies that results are returned based on given filter parameters and in the specified order.")
     public void findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc() {
         // test meta data
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.softwareModuleType().create().key("thetype").name("thename").maxAssignments(100));
+        DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("key").name("name"));
+
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
 
         // found in test
-        final SoftwareModule unassigned = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
-        final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
-        final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
-        final SoftwareModule differentName = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "differentname", "d", null, ""));
+        final SoftwareModule unassigned = testdataFactory.createSoftwareModule("thetype", "unassignedfound");
+        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound");
+        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound");
+        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "a");
 
         // ignored
-        final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
-        final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "sdfjhsdj", "e", null, ""));
+        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted");
+        final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
 
-        final DistributionSet set = distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1",
-                "desc", testDsType, Lists.newArrayList(one, two, deleted, four, differentName)));
+        final DistributionSet set = distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(Lists
+                        .newArrayList(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         // with filter on name, version and module type
         assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
-                set.getId(), "found", testType.getId()).getContent())
+                set.getId(), "%found%", testType.getId()).getContent())
                         .as("Found modules with given name, given module type and the assigned ones first")
                         .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                                 new AssignedSoftwareModule(unassigned, false));
@@ -663,34 +566,34 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Checks that number of modules is returned as expected based on given filters.")
     public void countSoftwareModuleByFilters() {
-
         // test meta data
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.softwareModuleType().create().key("thetype").name("thename").maxAssignments(100));
+        DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("key").name("name"));
 
-        // test modules
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
-        final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
-        final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
-        final SoftwareModule differentName = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "differentname", "d", null, ""));
-        final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "found", "3.0.2", null, ""));
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(osType.getId()));
+        testDsType = distributionSetManagement.assignOptionalSoftwareModuleTypes(testDsType.getId(),
+                Lists.newArrayList(testType.getId()));
 
-        // one soft deleted
-        final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
-        distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1", "desc", testDsType,
-                Lists.newArrayList(one, two, deleted, four, differentName)));
+        // found in test
+        testdataFactory.createSoftwareModule("thetype", "unassignedfound");
+        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound");
+        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound");
+        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "d");
+
+        // ignored
+        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted");
+        final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
+
+        distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(Lists
+                        .newArrayList(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         // test
-        assertThat(softwareManagement.countSoftwareModuleByFilters("found", testType.getId()))
+        assertThat(softwareManagement.countSoftwareModuleByFilters("%found%", testType.getId()))
                 .as("Number of modules with given name or version and type").isEqualTo(3);
         assertThat(softwareManagement.countSoftwareModuleByFilters(null, testType.getId()))
                 .as("Number of modules with given type").isEqualTo(4);
@@ -701,19 +604,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verfies that all undeleted software modules are found in the repository.")
     public void countSoftwareModuleTypesAll() {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
-        final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "found", "3.0.2", null, ""));
+        testdataFactory.createSoftwareModuleOs();
 
         // one soft deleted
-        final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
-        distributionSetManagement.createDistributionSet(
-                new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(deleted, four)));
+        final SoftwareModule deleted = testdataFactory.createSoftwareModuleApp();
+        testdataFactory.createDistributionSet(Lists.newArrayList(deleted));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Number of undeleted modules").isEqualTo(1);
@@ -723,9 +618,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Checks that software module typeis found based on given name.")
     public void findSoftwareModuleTypeByName() {
+        testdataFactory.createSoftwareModuleOs();
         final SoftwareModuleType found = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        softwareManagement.createSoftwareModuleType(new JpaSoftwareModuleType("thetype2", "anothername", "desc", 100));
+                .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
+        softwareManagement.createSoftwareModuleType(
+                entityFactory.softwareModuleType().create().key("thetype2").name("anothername"));
 
         assertThat(softwareManagement.findSoftwareModuleTypeByName("thename")).as("Type with given name")
                 .isEqualTo(found);
@@ -735,9 +632,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that it is not possible to create a type that alrady exists.")
     public void createSoftwareModuleTypeFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
-            softwareManagement.createSoftwareModuleType(created);
+            softwareManagement.createSoftwareModuleType(
+                    entityFactory.softwareModuleType().create().key("thetype").name("thename"));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -749,10 +647,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
             softwareManagement.createSoftwareModuleType(
-                    Lists.newArrayList(created, new JpaSoftwareModuleType("anothertype", "anothername", "desc", 100)));
+                    Lists.newArrayList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+                            entityFactory.softwareModuleType().create().key("anothertype").name("anothername")));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -763,7 +662,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that the creation of a softwareModuleType is failing because of invalid max assignment")
     public void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
         try {
-            softwareManagement.createSoftwareModuleType(new JpaSoftwareModuleType("type", "name", "desc", 0));
+            softwareManagement.createSoftwareModuleType(
+                    entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0));
             fail("should not have worked as max assignment is invalid. Should be greater than 0.");
         } catch (final ConstraintViolationException e) {
 
@@ -774,8 +674,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verfies that multiple types are created as requested.")
     public void createMultipleSoftwareModuleTypes() {
         final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(new JpaSoftwareModuleType("thetype", "thename", "desc", 100),
-                        new JpaSoftwareModuleType("thetype2", "thename2", "desc2", 100)));
+                Lists.newArrayList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+                        entityFactory.softwareModuleType().create().key("thetype2").name("thename2")));
 
         assertThat(created.size()).as("Number of created types").isEqualTo(2);
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).as("Number of types in repository").isEqualTo(5);
@@ -784,23 +684,14 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verfies that software modules are resturned that are assigned to given DS.")
     public void findSoftwareModuleByAssignedTo() {
-        // test meta data
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
-        final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
-
         // test modules
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
-        final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
+        final SoftwareModule one = testdataFactory.createSoftwareModuleOs();
+        testdataFactory.createSoftwareModuleOs("notassigned");
 
         // one soft deleted
-        final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
-        final DistributionSet set = distributionSetManagement.createDistributionSet(
-                new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(one, deleted)));
+        final SoftwareModule deleted = testdataFactory.createSoftwareModuleApp();
+        final DistributionSet set = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .create().name("set").version("1").modules(Lists.newArrayList(one.getId(), deleted.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
         assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set).getContent())
@@ -817,8 +708,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey2 = "myKnownKey2";
         final String knownValue2 = "myKnownValue2";
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
         assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
@@ -827,7 +717,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModuleMetadata swMetadata2 = new JpaSoftwareModuleMetadata(knownKey2, ah, knownValue2);
 
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement
-                .createSoftwareModuleMetadata(Lists.newArrayList(swMetadata1, swMetadata2));
+                .createSoftwareModuleMetadata(ah.getId(), Lists.newArrayList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
@@ -847,13 +737,14 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final String knownValue1 = "myKnownValue1";
         final String knownValue2 = "myKnownValue2";
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
+        softwareManagement.createSoftwareModuleMetadata(ah.getId(),
+                entityFactory.generateMetadata(knownKey1, knownValue1));
 
         try {
-            softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue2));
+            softwareManagement.createSoftwareModuleMetadata(ah.getId(),
+                    entityFactory.generateMetadata(knownKey1, knownValue2));
             fail("should not have worked as module metadata already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -869,14 +760,13 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final String knownUpdateValue = "myNewUpdatedValue";
 
         // create a base software module
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
         // initial opt lock revision must be 1
         assertThat(ah.getOptLockRevision()).isEqualTo(1);
 
         // create an software module meta data entry
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement.createSoftwareModuleMetadata(
-                Collections.singleton(new JpaSoftwareModuleMetadata(knownKey, ah, knownValue)));
+                ah.getId(), Collections.singleton(entityFactory.generateMetadata(knownKey, knownValue)));
         assertThat(softwareModuleMetadata).hasSize(1);
         // base software module should have now the opt lock revision one
         // because we are modifying the
@@ -884,15 +774,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
-        // modifying the meta data value
-        softwareModuleMetadata.get(0).setValue(knownUpdateValue);
-        softwareModuleMetadata.get(0).setSoftwareModule(softwareManagement.findSoftwareModuleById(ah.getId()));
-        softwareModuleMetadata.get(0).setKey(knownKey);
-
         // update the software module metadata
         Thread.sleep(100);
-        final SoftwareModuleMetadata updated = softwareManagement
-                .updateSoftwareModuleMetadata(softwareModuleMetadata.get(0));
+        final SoftwareModuleMetadata updated = softwareManagement.updateSoftwareModuleMetadata(ah.getId(),
+                entityFactory.generateMetadata(knownKey, knownUpdateValue));
         // we are updating the sw meta data so also modiying the base software
         // module so opt lock
         // revision must be two
@@ -912,10 +797,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
-        SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement
+                .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
         assertThat(softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(ah.getId()))
@@ -933,10 +818,10 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
-        SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement
+                .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
         try {
@@ -951,22 +836,18 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllSoftwareModuleMetadataBySwId() {
 
-        SoftwareModule sw1 = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
 
-        SoftwareModule sw2 = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "os", "1.0.1", null, ""));
+        SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < 10; index++) {
-            sw1 = softwareManagement
-                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw1, "value" + index))
-                    .getSoftwareModule();
+            sw1 = softwareManagement.createSoftwareModuleMetadata(sw1.getId(),
+                    entityFactory.generateMetadata("key" + index, "value" + index)).getSoftwareModule();
         }
 
         for (int index = 0; index < 20; index++) {
-            sw2 = softwareManagement
-                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index))
-                    .getSoftwareModule();
+            sw2 = softwareManagement.createSoftwareModuleMetadata(sw2.getId(),
+                    new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index)).getSoftwareModule();
         }
 
         final Page<SoftwareModuleMetadata> metadataOfSw1 = softwareManagement

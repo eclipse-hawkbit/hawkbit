@@ -28,7 +28,9 @@ import javax.validation.constraints.Size;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * A distribution set type defines which software module types can or have to be
@@ -54,6 +56,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Column(name = "type_key", nullable = false, length = 64)
     @Size(max = 64)
+    @NotEmpty
     private String key;
 
     @Column(name = "colour", nullable = true, length = 16)
@@ -90,13 +93,13 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
      *            of the type
      * @param description
      *            of the type
-     * @param color
+     * @param colour
      *            of the type. It will be null by default
      */
-    public JpaDistributionSetType(final String key, final String name, final String description, final String color) {
+    public JpaDistributionSetType(final String key, final String name, final String description, final String colour) {
         super(name, description);
         this.key = key;
-        colour = color;
+        this.colour = colour;
     }
 
     @Override
@@ -114,8 +117,8 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return Collections.emptySet();
         }
 
-        return elements.stream().filter(element -> element.isMandatory()).map(element -> element.getSmType())
-                .collect(Collectors.toSet());
+        return elements.stream().filter(DistributionSetTypeElement::isMandatory)
+                .map(DistributionSetTypeElement::getSmType).collect(Collectors.toSet());
     }
 
     @Override
@@ -124,7 +127,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return Collections.emptySet();
         }
 
-        return elements.stream().filter(element -> !element.isMandatory()).map(element -> element.getSmType())
+        return elements.stream().filter(element -> !element.isMandatory()).map(DistributionSetTypeElement::getSmType)
                 .collect(Collectors.toSet());
     }
 
@@ -136,7 +139,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return true;
         }
 
-        return new HashSet<DistributionSetTypeElement>(((JpaDistributionSetType) dsType).elements).equals(elements);
+        return new HashSet<>(((JpaDistributionSetType) dsType).elements).equals(elements);
     }
 
     private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
@@ -150,41 +153,42 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements);
     }
 
-    @Override
-    public DistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
+    public JpaDistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
+        return setModuleType(smType, false);
+    }
+
+    public JpaDistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
+        return setModuleType(smType, true);
+    }
+
+    private JpaDistributionSetType setModuleType(final SoftwareModuleType smType, final boolean mandatory) {
         if (elements == null) {
             elements = new HashSet<>();
+            elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, mandatory));
+            return this;
         }
 
-        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, false));
+        // check if this was in the list before before
+        final Optional<DistributionSetTypeElement> existing = elements.stream()
+                .filter(element -> element.getSmType().getKey().equals(smType.getKey())).findFirst();
+
+        if (existing.isPresent()) {
+            existing.get().setMandatory(mandatory);
+        } else {
+            elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, mandatory));
+        }
 
         return this;
     }
 
-    @Override
-    public DistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
-        if (elements == null) {
-            elements = new HashSet<>();
-        }
-
-        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, true));
-
-        return this;
-    }
-
-    @Override
-    public DistributionSetType removeModuleType(final Long smTypeId) {
+    public JpaDistributionSetType removeModuleType(final Long smTypeId) {
         if (elements == null) {
             return this;
         }
 
         // we search by id (standard equals compares also revison)
-        final Optional<DistributionSetTypeElement> found = elements.stream()
-                .filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst();
-
-        if (found.isPresent()) {
-            elements.remove(found.get());
-        }
+        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst()
+                .ifPresent(elements::remove);
 
         return this;
     }
@@ -194,14 +198,13 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
 
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().map(module -> module.getType()).collect(Collectors.toList())
+        return distributionSet.getModules().stream().map(SoftwareModule::getType).collect(Collectors.toList())
                 .containsAll(getMandatoryModuleTypes());
     }
 
@@ -210,7 +213,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }

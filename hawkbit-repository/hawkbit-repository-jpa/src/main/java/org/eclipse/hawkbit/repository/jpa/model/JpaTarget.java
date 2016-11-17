@@ -33,7 +33,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -51,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -76,7 +76,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Column(name = "controller_id", length = 64)
     @Size(min = 1, max = 64)
-    @NotNull
+    @NotEmpty
     private String controllerId;
 
     @Transient
@@ -110,7 +110,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      */
     @Column(name = "sec_token", insertable = true, updatable = true, nullable = false, length = 128)
     @Size(max = 64)
-    @NotNull
+    @NotEmpty
     private String securityToken;
 
     @CascadeOnDelete
@@ -174,7 +174,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
-    @Override
     public boolean addTag(final TargetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -183,7 +182,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
         return tags.add(tag);
     }
 
-    @Override
     public boolean removeTag(final TargetTag tag) {
         if (tags == null) {
             return false;
@@ -266,7 +264,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
      * @param securityToken
      *            the securityToken to set
      */
-    @Override
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
     }
@@ -290,7 +287,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

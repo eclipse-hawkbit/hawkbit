@@ -14,6 +14,9 @@ import static org.junit.rules.RuleChain.outerRule;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
@@ -35,8 +38,22 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -71,6 +88,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.google.common.collect.Lists;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -212,6 +231,67 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         this.environment = environment;
     }
 
+    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Lists.newArrayList(new TargetWithActionType(controllerId, ActionType.FORCED,
+                        org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME)));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
+            final List<Target> targets) {
+        return deploymentManagement.assignDistributionSet(pset.getId(),
+                targets.stream().map(Target::getTargetWithActionType).collect(Collectors.toList()));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
+        return assignDistributionSet(pset, Lists.newArrayList(target));
+    }
+
+    protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
+        return distributionSetManagement.createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
+    }
+
+    protected Long getOsModule(final DistributionSet ds) {
+        return ds.findFirstModuleByType(osType).getId();
+    }
+
+    protected Action prepareFinishedUpdate() {
+        return prepareFinishedUpdate(TestdataFactory.DEFAULT_CONTROLLER_ID, "", false);
+    }
+
+    protected Action prepareFinishedUpdate(final String controllerId, final String distributionSet,
+            final boolean isRequiredMigrationStep) {
+        final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
+        Target savedTarget = testdataFactory.createTarget(controllerId);
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+
+        savedAction = controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
+
+        return controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+    }
+
+    protected Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition) {
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+        final Rollout rollout = rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
+                .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
+                conditions);
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+
+        return rolloutManagement.findRolloutById(rollout.getId());
+    }
+
     @Before
     public void before() throws Exception {
         mvc = createMvcWebAppContext().build();
@@ -219,18 +299,18 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
         osType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType.setDescription(description);
-        osType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(osType));
+        osType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
         appType = securityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType.setDescription(description);
-        appType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(appType));
+        appType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = securityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType.setDescription(description);
-        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(runtimeType));
+        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(
+                entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
         standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
     }

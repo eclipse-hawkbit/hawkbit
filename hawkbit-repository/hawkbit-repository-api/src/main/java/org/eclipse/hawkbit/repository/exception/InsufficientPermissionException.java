@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception which is thrown in case the current security context object does

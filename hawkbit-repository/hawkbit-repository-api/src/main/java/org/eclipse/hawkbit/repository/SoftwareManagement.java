@@ -14,12 +14,17 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -67,29 +72,31 @@ public interface SoftwareManagement {
     /**
      * Create {@link SoftwareModule}s in the repository.
      *
-     * @param swModules
+     * @param creates
      *            {@link SoftwareModule}s to create
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModule> swModules);
+    List<SoftwareModule> createSoftwareModule(@NotNull Collection<SoftwareModuleCreate> creates);
 
     /**
      *
-     * @param swModule
+     * @param create
      *            SoftwareModule to create
      * @return SoftwareModule
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    SoftwareModule createSoftwareModule(@NotNull SoftwareModule swModule);
+    SoftwareModule createSoftwareModule(@NotNull SoftwareModuleCreate create);
 
     /**
      * creates a list of software module meta data entries.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created software module meta data entries
@@ -98,11 +105,14 @@ public interface SoftwareManagement {
      *             specific key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<SoftwareModuleMetadata> createSoftwareModuleMetadata(@NotNull Collection<SoftwareModuleMetadata> metadata);
+    List<SoftwareModuleMetadata> createSoftwareModuleMetadata(@NotNull Long moduleId,
+            @NotNull Collection<MetaData> metadata);
 
     /**
      * creates or updates a single software module meta data entry.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entry to create or update
      * @return the updated or created software module meta data entry
@@ -111,27 +121,27 @@ public interface SoftwareManagement {
      *             key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull SoftwareModuleMetadata metadata);
+    SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
 
     /**
      * Creates multiple {@link SoftwareModuleType}s.
      *
-     * @param types
+     * @param creates
      *            to create
      * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleType> types);
+    List<SoftwareModuleType> createSoftwareModuleType(@NotNull Collection<SoftwareModuleTypeCreate> creates);
 
     /**
      * Creates new {@link SoftwareModuleType}.
      *
-     * @param type
+     * @param create
      *            to create
      * @return created Entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleType type);
+    SoftwareModuleType createSoftwareModuleType(@NotNull SoftwareModuleTypeCreate create);
 
     /**
      * Deletes the given {@link SoftwareModule} Entity.
@@ -197,6 +207,17 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull Pageable pageable, String searchText, Long typeId);
+
+    /**
+     * Finds {@link SoftwareModuleType} by given id.
+     *
+     * @param ids
+     *            to search for
+     * @return the found {@link SoftwareModuleType}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
+    List<SoftwareModuleType> findSoftwareModuleTypesById(@NotEmpty Collection<Long> ids);
 
     /**
      * Finds {@link SoftwareModule} by given id.
@@ -412,46 +433,57 @@ public interface SoftwareManagement {
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
      *
-     * @param sm
+     * @param moduleId
      *            to update
+     * @param description
+     *            to update or <code>null</code>
+     * @param vendor
+     *            to update or <code>null</code>
+     * 
+     * @throws EntityNotFoundException
+     *             if given module does not exist
      *
      * @return the saved Entity.
-     *
-     * @throws NullPointerException
-     *             of {@link SoftwareModule#getId()} is <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModule updateSoftwareModule(@NotNull SoftwareModule sm);
+    SoftwareModule updateSoftwareModule(@NotNull SoftwareModuleUpdate update);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
-     *
+     * 
+     * @param moduleId
+     *            the metadata belongs to
      * @param metadata
      *            the meta data entry to be updated
+     * 
+     * 
      * @return the updated meta data entry
      * @throws EntityNotFoundException
      *             in case the meta data entry does not exists and cannot be
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull SoftwareModuleMetadata metadata);
+    SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull Long moduleId, @NotNull MetaData metadata);
 
     /**
-     * Updates existing {@link SoftwareModuleType}. Update-able value is
-     * {@link SoftwareModuleType#getDescription()} and
-     * {@link SoftwareModuleType#getColour()}.
+     * Updates existing {@link SoftwareModuleType}.
      *
-     * @param sm
+     * @param update
      *            to update
+     * 
      * @return updated Entity
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link SoftwareModuleType} does not exists and
+     *             cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
+    SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleTypeUpdate update);
 
     /**
      * Finds all meta data by the given software module id.
      *
-     * @param softwareModuleId
+     * @param moduleId
      *            the software module id to retrieve the meta data from
      * 
      * 

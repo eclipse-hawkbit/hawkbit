@@ -126,10 +126,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
     @Override
     public void save() {
         if (!currentDefaultDisSetType.equals(selectedDefaultDisSetType) && selectedDefaultDisSetType != null) {
-            final DistributionSetType defaultDistributionSetType = distributionSetManagement
-                    .findDistributionSetTypeById(selectedDefaultDisSetType);
-            tenantMetaData.setDefaultDsType(defaultDistributionSetType);
-            tenantMetaData = systemManagement.updateTenantMetadata(tenantMetaData);
+            tenantMetaData = systemManagement.updateTenantMetadata(selectedDefaultDisSetType);
             currentDefaultDisSetType = selectedDefaultDisSetType;
         }
         changeIcon.setVisible(false);

@@ -91,8 +91,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     private AutoCompleteTextFieldComponent queryTextField;
 
-    private HorizontalLayout breadcrumbLayout;
-
     private Button breadcrumbButton;
 
     private Label breadcrumbName;
@@ -238,6 +236,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         };
 
         queryTextField.addTextChangeListener((valid, query) -> enableDisableSaveButton(!valid, query));
+
     }
 
     private void onFilterNameChange(final TextChangeEvent event) {
@@ -260,7 +259,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         titleFilterIconsLayout.addComponents(headerCaption, captionLayout);
         titleFilterIconsLayout.setSpacing(true);
 
-        breadcrumbLayout = new HorizontalLayout();
+        final HorizontalLayout breadcrumbLayout = new HorizontalLayout();
         breadcrumbLayout.addComponent(breadcrumbButton);
         breadcrumbLayout.addComponent(new Label(">"));
         breadcrumbName = new LabelBuilder().buildCaptionLabel();
@@ -319,10 +318,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private static boolean isNameAndQueryEmpty(final String name, final String query) {
-        if (Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(query)) {
-            return true;
-        }
-        return false;
+        return Strings.isNullOrEmpty(name) && Strings.isNullOrEmpty(query);
     }
 
     private SPUIButton createSearchResetIcon() {
@@ -383,10 +379,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = entityFactory.generateTargetFilterQuery();
-        targetFilterQuery.setName(nameTextField.getValue());
-        targetFilterQuery.setQuery(queryTextField.getValue());
-        targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.createTargetFilterQuery(entityFactory
+                .targetFilterQuery().create().name(nameTextField.getValue()).query(queryTextField.getValue()));
         notification.displaySuccess(
                 i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
@@ -398,10 +392,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             return;
         }
         final TargetFilterQuery targetFilterQuery = tfQuery.get();
-        targetFilterQuery.setName(nameTextField.getValue());
-        targetFilterQuery.setQuery(queryTextField.getValue());
         final TargetFilterQuery updatedTargetFilter = targetFilterQueryManagement
-                .updateTargetFilterQuery(targetFilterQuery);
+                .updateTargetFilterQuery(entityFactory.targetFilterQuery().update(targetFilterQuery.getId())
+                        .name(nameTextField.getValue()).query(queryTextField.getValue()));
         filterManagementUIState.setTfQuery(updatedTargetFilter);
         oldFilterName = nameTextField.getValue();
         oldFilterQuery = queryTextField.getValue();

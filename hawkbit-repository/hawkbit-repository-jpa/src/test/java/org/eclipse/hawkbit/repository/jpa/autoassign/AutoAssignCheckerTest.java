@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -44,32 +42,34 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     @Description("Test auto assignment of a DS to filtered targets")
     public void checkAutoAssign() {
 
-        final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will be auto assigned
+        final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will
+                                                                                   // be
+                                                                                   // auto
+                                                                                   // assigned
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(new JpaTargetFilterQuery("filterA", "name==*"));
-        targetFilterQuery.setAutoAssignDistributionSet(setA);
-        targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
-
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQuery.getId(), setA.getId());
 
         final String targetDsAIdPref = "targ";
-        List<Target> targets = targetManagement.createTargets(
-                testdataFactory.generateTargets(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
-        int targetsCount = targets.size();
+        final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
+        final int targetsCount = targets.size();
 
         // assign set A to first 10 targets
-        deploymentManagement.assignDistributionSet(setA, targets.subList(0, 10));
+        assignDistributionSet(setA, targets.subList(0, 10));
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(0, 10), targetsCount);
 
         // assign set B to first 5 targets
-        // they have now 2 DS in their action history and should not get updated with dsA
-        deploymentManagement.assignDistributionSet(setB, targets.subList(0, 5));
+        // they have now 2 DS in their action history and should not get updated
+        // with dsA
+        assignDistributionSet(setB, targets.subList(0, 5));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
         // assign set B to next 10 targets
-        deploymentManagement.assignDistributionSet(setB, targets.subList(10, 20));
+        assignDistributionSet(setB, targets.subList(10, 20));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
@@ -91,9 +91,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     public void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
-        final DistributionSet setF = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet("dsA", "1", "incomplete ds",
-                        testdataFactory.findOrCreateDefaultTestDsType(), null));
+        final DistributionSet setF = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .create().name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
@@ -102,23 +101,27 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        targetFilterQueryManagement.createTargetFilterQuery(
-                new JpaTargetFilterQuery("filterA", "id==" + targetDsFIdPref + "*", (JpaDistributionSet) setF));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
+                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+                        .name("filterA").query("id==" + targetDsFIdPref + "*")).getId(),
+                setF.getId());
 
         // target filter query that matches failed bunch of targets
-        targetFilterQueryManagement.createTargetFilterQuery(
-                new JpaTargetFilterQuery("filterB", "id==" + targetDsAIdPref + "*", (JpaDistributionSet) setA));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
+                targetFilterQueryManagement.createTargetFilterQuery(entityFactory.targetFilterQuery().create()
+                        .name("filterB").query("id==" + targetDsAIdPref + "*")).getId(),
+                setA.getId());
 
-        List<Target> targetsF = targetManagement.createTargets(
-                testdataFactory.generateTargets(10, targetDsFIdPref, targetDsFIdPref.concat(" description")));
+        final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
+                targetDsFIdPref.concat(" description"));
 
-        List<Target> targetsA = targetManagement.createTargets(
-                testdataFactory.generateTargets(10, targetDsAIdPref, targetDsAIdPref.concat(" description")));
+        final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
 
-        int targetsCount = targetsA.size() + targetsF.size();
+        final int targetsCount = targetsA.size() + targetsF.size();
 
         // assign set B to first 5 targets of fail group
-        deploymentManagement.assignDistributionSet(setB, targetsF.subList(0, 5));
+        assignDistributionSet(setB, targetsF.subList(0, 5));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
@@ -133,18 +136,21 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * @param set the expected distribution set
-     * @param targets the targets that should have it
+     * @param set
+     *            the expected distribution set
+     * @param targets
+     *            the targets that should have it
      */
     @Step
-    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, List<Target> targets, int count) {
-        List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets,
+            final int count) {
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        Slice<Target> targetsAll = targetManagement.findTargetsAll(new PageRequest(0, 1000));
+        final Slice<Target> targetsAll = targetManagement.findTargetsAll(new PageRequest(0, 1000));
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
-        for (Target target : targetsAll) {
-            if(targetIds.contains(target.getId())) {
+        for (final Target target : targetsAll) {
+            if (targetIds.contains(target.getId())) {
                 assertThat(target.getAssignedDistributionSet()).as("assigned DS").isEqualTo(set);
             }
         }

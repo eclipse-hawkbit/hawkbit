@@ -20,13 +20,6 @@ public interface TenantMetaData extends BaseEntity {
     DistributionSetType getDefaultDsType();
 
     /**
-     * @param defaultDsType
-     *            that is used of none is selected for a new
-     *            {@link DistributionSet}.
-     */
-    void setDefaultDsType(DistributionSetType defaultDsType);
-
-    /**
      * @return tenant name
      */
     String getTenant();

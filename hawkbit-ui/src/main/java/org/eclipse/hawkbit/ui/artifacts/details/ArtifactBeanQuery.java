@@ -73,7 +73,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
 
     @Override
     protected Artifact constructBean() {
-        return getEntityFactory().generateArtifact();
+        return null;
     }
 
     @Override

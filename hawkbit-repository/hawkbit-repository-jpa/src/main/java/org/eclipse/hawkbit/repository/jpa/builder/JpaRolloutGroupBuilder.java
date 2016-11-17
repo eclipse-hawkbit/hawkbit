@@ -1,0 +1,25 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.repository.jpa.builder;
+
+import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+
+/**
+ * Builder implementation for {@link RolloutGroup}.
+ *
+ */
+public class JpaRolloutGroupBuilder implements RolloutGroupBuilder {
+    @Override
+    public RolloutGroupCreate create() {
+        return new JpaRolloutGroupCreate();
+    }
+
+}

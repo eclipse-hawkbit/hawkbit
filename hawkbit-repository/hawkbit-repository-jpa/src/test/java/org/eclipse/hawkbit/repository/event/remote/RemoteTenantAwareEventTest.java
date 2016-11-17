@@ -56,10 +56,9 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     @Description("Verifies that target assignment event works")
     public void testTargetAssignDistributionSetEvent() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final JpaAction generateAction = (JpaAction) entityFactory.generateAction();
+        final JpaAction generateAction = new JpaAction();
         generateAction.setActionType(ActionType.FORCED);
-        final Target generateTarget = entityFactory.generateTarget("Test");
-        final Target target = targetManagement.createTarget(generateTarget);
+        final Target target = testdataFactory.createTarget("Test");
         generateAction.setTarget(target);
         generateAction.setDistributionSet(dsA);
         final Action action = actionRepository.save(generateAction);

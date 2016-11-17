@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +31,11 @@ import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -46,6 +50,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Features;
@@ -72,8 +77,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Eris", "560a");
         final List<Long> smIDs = new ArrayList<>();
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "Dysnomia ", "15,772", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         smIDs.add(sm.getId());
         final JSONArray smList = new JSONArray();
         for (final Long smID : smIDs) {
@@ -88,10 +92,10 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(entityFactory.generateTarget(targetId));
+            testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
-        deploymentManagement.assignDistributionSet(disSet.getId(), knownTargetIds[0]);
+        assignDistributionSet(disSet.getId(), knownTargetIds[0]);
         mvc.perform(
                 post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedTargets")
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
@@ -104,8 +108,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // to the target.
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM/"
                 + smIDs.get(0)).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isLocked())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entitiylocked")));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entityreadonly")));
     }
 
     @Test
@@ -115,8 +119,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Mars", "686,980");
         final List<Long> smIDs = new ArrayList<>();
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "Phobos", "0,3189", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         smIDs.add(sm.getId());
         final JSONArray smList = new JSONArray();
         for (final Long smID : smIDs) {
@@ -131,11 +134,11 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(entityFactory.generateTarget(targetId));
+            testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         // assign DisSet to target and test assignment
-        deploymentManagement.assignDistributionSet(disSet.getId(), knownTargetIds[0]);
+        assignDistributionSet(disSet.getId(), knownTargetIds[0]);
         mvc.perform(
                 post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedTargets")
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
@@ -145,19 +148,14 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
         // Create another SM and post assignment
-        final List<Long> smID2s = new ArrayList<>();
-        SoftwareModule sm2 = entityFactory.generateSoftwareModule(appType, "Deimos", "1,262", null, null);
-        sm2 = softwareManagement.createSoftwareModule(sm2);
-        smID2s.add(sm2.getId());
+        final SoftwareModule sm2 = testdataFactory.createSoftwareModuleApp();
         final JSONArray smList2 = new JSONArray();
-        for (final Long smID : smID2s) {
-            smList2.put(new JSONObject().put("id", Long.valueOf(smID)));
-        }
+        smList2.put(new JSONObject().put("id", sm2.getId()));
 
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                 .contentType(MediaType.APPLICATION_JSON).content(smList2.toString()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isLocked())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entitiylocked")));
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entityreadonly")));
     }
 
     @Test
@@ -171,16 +169,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(disSet.getModules().size())));
         // create Software Modules
-        final List<Long> smIDs = new ArrayList<>();
-        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "Europa", "3,551", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-        smIDs.add(sm.getId());
-        SoftwareModule sm2 = entityFactory.generateSoftwareModule(appType, "Ganymed", "7,155", null, null);
-        sm2 = softwareManagement.createSoftwareModule(sm2);
-        smIDs.add(sm2.getId());
-        SoftwareModule sm3 = entityFactory.generateSoftwareModule(runtimeType, "Kallisto", "16,689", null, null);
-        sm3 = softwareManagement.createSoftwareModule(sm3);
-        smIDs.add(sm3.getId());
+        final List<Long> smIDs = Lists.newArrayList(testdataFactory.createSoftwareModuleOs().getId(),
+                testdataFactory.createSoftwareModuleApp().getId());
         final JSONArray list = new JSONArray();
         for (final Long smID : smIDs) {
             list.put(new JSONObject().put("id", Long.valueOf(smID)));
@@ -227,11 +217,11 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(entityFactory.generateTarget(targetId));
+            testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         // assign already one target to DS
-        deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
         mvc.perform(post(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
@@ -251,8 +241,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownTargetId = "knownTargetId1";
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
-        targetManagement.createTarget(entityFactory.generateTarget(knownTargetId));
-        deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetId);
+        testdataFactory.createTarget(knownTargetId);
+        assignDistributionSet(createdDs.getId(), knownTargetId);
 
         mvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets"))
@@ -278,15 +268,15 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownTargetId = "knownTargetId1";
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
-        final Target createTarget = targetManagement.createTarget(entityFactory.generateTarget(knownTargetId));
+        final Target createTarget = testdataFactory.createTarget(knownTargetId);
         // create some dummy targets which are not assigned or installed
-        targetManagement.createTarget(entityFactory.generateTarget("dummy1"));
-        targetManagement.createTarget(entityFactory.generateTarget("dummy2"));
+        testdataFactory.createTarget("dummy1");
+        testdataFactory.createTarget("dummy2");
         // assign knownTargetId to distribution set
-        deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetId);
+        assignDistributionSet(createdDs.getId(), knownTargetId);
         // make it in install state
         testdataFactory.sendUpdateActionStatusToTargets(Lists.newArrayList(createTarget), Status.FINISHED,
-                "some message");
+                Collections.singletonList("some message"));
 
         mvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/installedTargets"))
@@ -302,11 +292,16 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
 
-        targetFilterQueryManagement
-                .createTargetFilterQuery(entityFactory.generateTargetFilterQuery(knownFilterName, "x==y", createdDs));
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(
+                targetFilterQueryManagement.createTargetFilterQuery(
+                        entityFactory.targetFilterQuery().create().name(knownFilterName).query("x==y")).getId(),
+                createdDs.getId());
+
         // create some dummy target filter queries
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+        targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("b").query("x==y"));
+        targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name("c").query("x==y"));
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters")).andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
@@ -334,14 +329,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
         final String query = "name==" + filterNamePrefix + "*";
 
-        // create target filter queries that should be found
-        targetFilterQueryManagement.createTargetFilterQuery(
-                entityFactory.generateTargetFilterQuery(filterNamePrefix + "1", "x==y", createdDs));
-        targetFilterQueryManagement.createTargetFilterQuery(
-                entityFactory.generateTargetFilterQuery(filterNamePrefix + "2", "x==z", createdDs));
-        // create some dummy target filter queries
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+        prepareTestFilters(filterNamePrefix, createdDs);
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
@@ -358,18 +346,30 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
         final String query = "name==doesNotExist";
 
-        // create target filter queries that should be found
-        targetFilterQueryManagement.createTargetFilterQuery(
-                entityFactory.generateTargetFilterQuery(filterNamePrefix + "1", "x==y", createdDs));
-        targetFilterQueryManagement.createTargetFilterQuery(
-                entityFactory.generateTargetFilterQuery(filterNamePrefix + "2", "x==z", createdDs));
-        // create some dummy target filter queries
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("b", "x==y"));
-        targetFilterQueryManagement.createTargetFilterQuery(entityFactory.generateTargetFilterQuery("c", "x==y"));
+        prepareTestFilters(filterNamePrefix, createdDs);
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(0)));
+    }
+
+    private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
+        // create target filter queries that should be found
+        targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQueryManagement
+                        .createTargetFilterQuery(
+                                entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("x==y"))
+                        .getId(), createdDs.getId());
+        targetFilterQueryManagement
+                .updateTargetFilterQueryAutoAssignDS(targetFilterQueryManagement
+                        .createTargetFilterQuery(
+                                entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("x==y"))
+                        .getId(), createdDs.getId());
+        // create some dummy target filter queries
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("x==y"));
+        targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("x==y"));
     }
 
     @Test
@@ -423,11 +423,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .hasSize(0);
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
-        set.setRequiredMigrationStep(set.isRequiredMigrationStep());
-        set = distributionSetManagement.updateDistributionSet(set);
-
-        set.setVersion("anotherVersion");
-        set = distributionSetManagement.updateDistributionSet(set);
+        set = distributionSetManagement.updateDistributionSet(entityFactory.distributionSet().update(set.getId())
+                .version("anotherVersion").requiredMigrationStep(true));
 
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
@@ -443,7 +440,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                         equalTo("http://localhost/rest/v1/distributionsets/" + set.getId())))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(set.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo(set.getName())))
-                .andExpect(jsonPath("$.content.[0].requiredMigrationStep", equalTo(set.isRequiredMigrationStep())))
+                .andExpect(jsonPath("$.content.[0].requiredMigrationStep", equalTo(Boolean.TRUE)))
                 .andExpect(jsonPath("$.content.[0].description", equalTo(set.getDescription())))
                 .andExpect(jsonPath("$.content.[0].type", equalTo(set.getType().getKey())))
                 .andExpect(jsonPath("$.content.[0].createdBy", equalTo(set.getCreatedBy())))
@@ -457,7 +454,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + appType.getKey() + ")].id",
                         contains(set.findFirstModuleByType(appType).getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(osType).getId().intValue())));
+                        contains(getOsModule(set).intValue())));
     }
 
     @Test
@@ -488,7 +485,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
                         contains(set.findFirstModuleByType(appType).getId().intValue())))
                 .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id",
-                        contains(set.findFirstModuleByType(osType).getId().intValue())));
+                        contains(getOsModule(set).intValue())));
 
     }
 
@@ -508,13 +505,9 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         DistributionSet two = testdataFactory.generateDistributionSet("two", "two", standardDsType,
                 Lists.newArrayList(os, jvm, ah));
         DistributionSet three = testdataFactory.generateDistributionSet("three", "three", standardDsType,
-                Lists.newArrayList(os, jvm, ah));
-        three.setRequiredMigrationStep(true);
+                Lists.newArrayList(os, jvm, ah), true);
 
-        final List<DistributionSet> sets = new ArrayList<>();
-        sets.add(one);
-        sets.add(two);
-        sets.add(three);
+        final List<DistributionSet> sets = Lists.newArrayList(one, two, three);
 
         final long current = System.currentTimeMillis();
 
@@ -640,8 +633,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
-        targetManagement.createTarget(entityFactory.generateTarget("test"));
-        deploymentManagement.assignDistributionSet(set.getId(), "test");
+        testdataFactory.createTarget("test");
+        assignDistributionSet(set.getId(), "test");
 
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(1);
@@ -670,12 +663,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(1);
 
-        final DistributionSet update = entityFactory.generateDistributionSet();
-        update.setVersion("anotherVersion");
-        update.setName(null);
-        update.setType(standardDsType);
-
-        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(JsonBuilder.distributionSet(update))
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content("{\"version\":\"anotherVersion\"}")
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -709,8 +697,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSet missingName = testdataFactory.generateDistributionSet("missingName");
-        missingName.setName(null);
+        final DistributionSet missingName = entityFactory.distributionSet().create().build();
         mvc.perform(
                 post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Lists.newArrayList(missingName)))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -762,8 +749,10 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement.findOne(testDS, knownKey1);
-        final DistributionSetMetadata metaKey2 = distributionSetManagement.findOne(testDS, knownKey2);
+        final DistributionSetMetadata metaKey1 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey1);
+        final DistributionSetMetadata metaKey2 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey2);
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -778,8 +767,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String updateValue = "valueForUpdate";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -789,7 +777,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final DistributionSetMetadata assertDS = distributionSetManagement.findOne(testDS, knownKey);
+        final DistributionSetMetadata assertDS = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
+                knownKey);
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -802,14 +791,13 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValue = "knownValue";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         try {
-            distributionSetManagement.findOne(testDS, knownKey);
+            distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey);
             fail("expected EntityNotFoundException but didn't throw");
         } catch (final EntityNotFoundException e) {
             // ok as expected
@@ -823,8 +811,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        distributionSetManagement.createDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(testDS, knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -842,9 +829,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownKeyPrefix + index,
-                    knownValuePrefix + index));
+            createDistributionSetMetadata(testDS.getId(),
+                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
@@ -878,8 +864,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     public void filterDistributionSetComplete() throws Exception {
         final int amount = 10;
         testdataFactory.createDistributionSets(amount);
-        distributionSetManagement.createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2",
-                "incomplete", distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+        distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name("incomplete").version("2").type("os"));
 
         final String rsqlFindLikeDs1OrDs2 = "complete==" + Boolean.TRUE;
 
@@ -895,21 +881,18 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
         // prepare targets
-        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(entityFactory.generateTarget(targetId));
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
-        }
+        final Collection<String> knownTargetIds = Lists.newArrayList("1", "2", "3", "4", "5");
+
+        knownTargetIds.forEach(controllerId -> targetManagement
+                .createTarget(entityFactory.target().create().controllerId(controllerId)));
 
         // assign already one target to DS
-        deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+        assignDistributionSet(createdDs.getId(), knownTargetIds.iterator().next());
 
         final String rsqlFindTargetId1 = "controllerId==1";
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
-                + "/assignedTargets?q=" + rsqlFindTargetId1).contentType(MediaType.APPLICATION_JSON)
-                        .content(list.toString()))
+                + "/assignedTargets?q=" + rsqlFindTargetId1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content[0].controllerId", equalTo("1")));
     }
@@ -922,9 +905,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownKeyPrefix + index,
-                    knownValuePrefix + index));
+            createDistributionSetMetadata(testDS.getId(),
+                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";
@@ -937,7 +919,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
 
     private Set<DistributionSet> createDistributionSetsAlphabetical(final int amount) {
         char character = 'a';
-        final Set<DistributionSet> created = new HashSet<>();
+        final Set<DistributionSet> created = Sets.newHashSetWithExpectedSize(amount);
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             created.add(testdataFactory.createDistributionSet(str));

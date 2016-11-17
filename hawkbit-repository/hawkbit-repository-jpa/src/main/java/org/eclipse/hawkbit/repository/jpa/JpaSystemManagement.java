@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -205,7 +204,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public List<String> findTenants() {
-        return tenantMetaDataRepository.findAll().stream().map(md -> md.getTenant()).collect(Collectors.toList());
+        return tenantMetaDataRepository.findAll().stream().map(TenantMetaData::getTenant).collect(Collectors.toList());
     }
 
     @Override
@@ -270,12 +269,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public TenantMetaData updateTenantMetadata(final TenantMetaData metaData) {
-        if (!tenantMetaDataRepository.exists(metaData.getId())) {
-            throw new EntityNotFoundException("Metadata does not exist: " + metaData.getId());
-        }
+    public TenantMetaData updateTenantMetadata(final Long defaultDsType) {
+        final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
-        return tenantMetaDataRepository.save((JpaTenantMetaData) metaData);
+        data.setDefaultDsType(distributionSetTypeRepository.findOne(defaultDsType));
+
+        return tenantMetaDataRepository.save(data);
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
@@ -285,15 +284,15 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final SoftwareModuleType os = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
                 Constants.SMT_DEFAULT_OS_KEY, Constants.SMT_DEFAULT_OS_NAME, "Core firmware or operationg system", 1));
 
-        distributionSetTypeRepository
-                .save((JpaDistributionSetType) new JpaDistributionSetType(Constants.DST_DEFAULT_OS_ONLY_KEY,
-                        Constants.DST_DEFAULT_OS_ONLY_NAME, "Default type with Firmware/OS only.")
-                                .addMandatoryModuleType(os));
+        // make sure the module types get their IDs
+        entityManager.flush();
 
-        return distributionSetTypeRepository
-                .save((JpaDistributionSetType) new JpaDistributionSetType(Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
-                        Constants.DST_DEFAULT_OS_WITH_APPS_NAME, "Default type with Firmware/OS and optional app(s).")
-                                .addMandatoryModuleType(os).addOptionalModuleType(app));
+        distributionSetTypeRepository.save(new JpaDistributionSetType(Constants.DST_DEFAULT_OS_ONLY_KEY,
+                Constants.DST_DEFAULT_OS_ONLY_NAME, "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+
+        return distributionSetTypeRepository.save(new JpaDistributionSetType(Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
+                Constants.DST_DEFAULT_OS_WITH_APPS_NAME, "Default type with Firmware/OS and optional app(s).")
+                        .addMandatoryModuleType(os).addOptionalModuleType(app));
     }
 
     @Override

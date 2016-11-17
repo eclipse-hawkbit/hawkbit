@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.junit.Test;
 
@@ -38,8 +36,8 @@ public class DistributionSetEventTest extends AbstractRemoteEntityEventTest<Dist
 
     @Override
     protected DistributionSet createEntity() {
-        return distributionSetManagement.createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2",
-                "incomplete", distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+        return distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create()
+                .name("incomplete").version("2").description("incomplete").type("os"));
     }
 
 }

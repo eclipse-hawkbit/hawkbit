@@ -8,12 +8,20 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -24,8 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.List;
 
 /**
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming
@@ -123,7 +129,7 @@ public interface RolloutManagement {
      * to {@link RolloutStatus#READY} so it can be started with
      * {@link #startRollout(Rollout)}.
      *
-     * @param rollout
+     * @param create
      *            the rollout entity to create
      * @param amountGroup
      *            the amount of groups to split the rollout into
@@ -132,11 +138,13 @@ public interface RolloutManagement {
      *            applied for each {@link RolloutGroup}
      * @return the persisted rollout.
      *
-     * @throws IllegalArgumentException
-     *             in case the given groupSize is zero or lower.
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
+     * @throws ConstraintViolationException
+     *             if rollout or group parameters are invalid
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(@NotNull Rollout rollout, int amountGroup, @NotNull RolloutGroupConditions conditions);
+    Rollout createRollout(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
      * Persists a new rollout entity. The filter within the
@@ -164,11 +172,14 @@ public interface RolloutManagement {
      *            RolloutGroup itself
      * @return the persisted rollout.
      *
-     * @throws IllegalArgumentException
-     *             in case the given groupSize is zero or lower.
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
+     * @throws ConstraintViolationException
+     *             if rollout or group parameters are invalid
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRollout(@NotNull Rollout rollout, @NotNull List<RolloutGroup> groups, RolloutGroupConditions conditions);
+    Rollout createRollout(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
+            RolloutGroupConditions conditions);
 
     /**
      * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
@@ -184,8 +195,8 @@ public interface RolloutManagement {
      * @param rollout
      *            the rollout
      */
-    void fillRolloutGroupsWithTargets(final Rollout rollout);
-
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void fillRolloutGroupsWithTargets(@NotNull Long rollout);
 
     /**
      * Retrieves all rollouts.
@@ -344,12 +355,16 @@ public interface RolloutManagement {
     /**
      * Update rollout details.
      *
-     * @param rollout
+     * @param update
      *            rollout to be updated
+     * @param name
+     *            to update or <code>null</code>
+     * @param description
+     *            to update or <code>null</code>
      *
      * @return Rollout updated rollout
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout updateRollout(@NotNull Rollout rollout);
+    Rollout updateRollout(@NotNull RolloutUpdate update);
 
 }

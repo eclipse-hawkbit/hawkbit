@@ -170,8 +170,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
 
         LOG.debug("creating {} softwareModules", softwareModules.size());
-        final Collection<SoftwareModule> createdSoftwareModules = softwareManagement.createSoftwareModule(
-                MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules, softwareManagement));
+        final Collection<SoftwareModule> createdSoftwareModules = softwareManagement
+                .createSoftwareModule(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
         return ResponseEntity.status(CREATED).body(toResponse(createdSoftwareModules));
@@ -182,18 +182,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
 
-        final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-
-        // only description and vendor can be modified
-        if (restSoftwareModule.getDescription() != null) {
-            module.setDescription(restSoftwareModule.getDescription());
-        }
-        if (restSoftwareModule.getVendor() != null) {
-            module.setVendor(restSoftwareModule.getVendor());
-        }
-
-        final SoftwareModule updateSoftwareModule = softwareManagement.updateSoftwareModule(module);
-        return ResponseEntity.ok(toResponse(updateSoftwareModule));
+        return ResponseEntity.ok(toResponse(
+                softwareManagement.updateSoftwareModule(entityFactory.softwareModule().update(softwareModuleId)
+                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()))));
     }
 
     @Override
@@ -238,8 +229,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
 
-        final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(sw.getId(), metadataKey);
+        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(softwareModuleId,
+                metadataKey);
 
         return ResponseEntity.ok(toResponseSwMetadata(findOne));
     }
@@ -247,10 +238,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
-
-        final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata updated = softwareManagement.updateSoftwareModuleMetadata(
-                entityFactory.generateSoftwareModuleMetadata(sw, metadataKey, metadata.getValue()));
+        final SoftwareModuleMetadata updated = softwareManagement.updateSoftwareModuleMetadata(softwareModuleId,
+                entityFactory.generateMetadata(metadataKey, metadata.getValue()));
 
         return ResponseEntity.ok(toResponseSwMetadata(updated));
     }
@@ -258,9 +247,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
-
-        final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        softwareManagement.deleteSoftwareModuleMetadata(sw.getId(), metadataKey);
+        softwareManagement.deleteSoftwareModuleMetadata(softwareModuleId, metadataKey);
 
         return ResponseEntity.ok().build();
     }
@@ -270,9 +257,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final List<MgmtMetadata> metadataRest) {
 
-        final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final List<SoftwareModuleMetadata> created = softwareManagement.createSoftwareModuleMetadata(
-                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, sw, metadataRest));
+        final List<SoftwareModuleMetadata> created = softwareManagement.createSoftwareModuleMetadata(softwareModuleId,
+                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, metadataRest));
 
         return ResponseEntity.status(CREATED).body(toResponseSwMetadata(created));
     }

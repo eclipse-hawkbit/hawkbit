@@ -217,12 +217,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected boolean hasUnsavedActions() {
-        if (!managementUIState.getDeletedDistributionList().isEmpty()
+        return !managementUIState.getDeletedDistributionList().isEmpty()
                 || !managementUIState.getDeletedTargetList().isEmpty()
-                || !managementUIState.getAssignedList().isEmpty()) {
-            return true;
-        }
-        return false;
+                || !managementUIState.getAssignedList().isEmpty();
     }
 
     @Override

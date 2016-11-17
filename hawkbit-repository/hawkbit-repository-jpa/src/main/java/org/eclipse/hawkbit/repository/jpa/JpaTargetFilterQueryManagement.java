@@ -11,20 +11,28 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,7 +42,6 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
@@ -53,15 +60,21 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
+    @Autowired
+    private DistributionSetManagement distributionSetManagement;
+
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetFilterQuery createTargetFilterQuery(final TargetFilterQuery customTargetFilter) {
+    public TargetFilterQuery createTargetFilterQuery(final TargetFilterQueryCreate c) {
+        final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
 
-        if (targetFilterQueryRepository.findByName(customTargetFilter.getName()) != null) {
-            throw new EntityAlreadyExistsException(customTargetFilter.getName());
+        final JpaTargetFilterQuery query = create.build();
+
+        if (targetFilterQueryRepository.findByName(query.getName()) != null) {
+            throw new EntityAlreadyExistsException(query.getName());
         }
-        return targetFilterQueryRepository.save((JpaTargetFilterQuery) customTargetFilter);
+        return targetFilterQueryRepository.save(query);
     }
 
     @Override
@@ -96,7 +109,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, String rsqlFilter) {
+    public Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull final Pageable pageable,
+            final String rsqlFilter) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!Strings.isNullOrEmpty(rsqlFilter)) {
             specList = Collections.singletonList(
@@ -106,14 +120,14 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
-            DistributionSet distributionSet) {
+    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull final Pageable pageable,
+            final DistributionSet distributionSet) {
         return findTargetFilterQueryByAutoAssignDS(pageable, distributionSet, null);
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull Pageable pageable,
-            DistributionSet distributionSet, String rsqlFilter) {
+    public Page<TargetFilterQuery> findTargetFilterQueryByAutoAssignDS(@NotNull final Pageable pageable,
+            final DistributionSet distributionSet, final String rsqlFilter) {
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         if (distributionSet != null) {
             specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
@@ -125,7 +139,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull Pageable pageable) {
+    public Page<TargetFilterQuery> findTargetFilterQueryWithAutoAssignDS(@NotNull final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = Collections
                 .singletonList(TargetFilterQuerySpecification.withAutoAssignDS());
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
@@ -154,9 +168,42 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
-        Assert.notNull(targetFilterQuery.getId());
-        return targetFilterQueryRepository.save((JpaTargetFilterQuery) targetFilterQuery);
+    public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQueryUpdate u) {
+        final GenericTargetFilterQueryUpdate update = (GenericTargetFilterQueryUpdate) u;
+
+        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getId());
+
+        update.getName().ifPresent(targetFilterQuery::setName);
+        update.getQuery().ifPresent(targetFilterQuery::setQuery);
+
+        return targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public TargetFilterQuery updateTargetFilterQueryAutoAssignDS(final Long queryId, final Long dsId) {
+        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
+
+        targetFilterQuery.setAutoAssignDistributionSet(
+                Optional.ofNullable(dsId).map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null));
+
+        return targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
+        final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement
+                .findDistributionSetByIdWithDetails(setId);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId);
+        }
+        return set;
+    }
+
+    private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {
+        return Optional.ofNullable(targetFilterQueryRepository.findOne(queryId)).orElseThrow(
+                () -> new EntityNotFoundException("TargetFilterQuery with given ID " + queryId + " not found!"));
     }
 
     @Override

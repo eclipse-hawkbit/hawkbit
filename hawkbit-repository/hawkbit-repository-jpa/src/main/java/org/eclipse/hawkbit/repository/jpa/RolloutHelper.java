@@ -8,15 +8,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
-import org.eclipse.hawkbit.repository.exception.RolloutVerificationException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A collection of static helper methods for the {@link JpaRolloutManagement}
@@ -33,26 +36,31 @@ final class RolloutHelper {
      */
     static void verifyRolloutGroupConditions(final RolloutGroupConditions conditions) {
         if (conditions.getSuccessCondition() == null) {
-            throw new RolloutVerificationException("Rollout group is missing success condition");
+            throw new ConstraintViolationException("Rollout group is missing success condition");
         }
         if (conditions.getSuccessAction() == null) {
-            throw new RolloutVerificationException("Rollout group is missing success action");
+            throw new ConstraintViolationException("Rollout group is missing success action");
         }
     }
 
     /**
-     * Verifies that the group has the required success condition and action.
+     * Verifies that the group has the required success condition and action and
+     * a falid target percentage.
      * 
      * @param group
      *            the input group
      * @return the verified group
      */
     static RolloutGroup verifyRolloutGroupHasConditions(final RolloutGroup group) {
+        if (group.getTargetPercentage() < 1F || group.getTargetPercentage() > 100F) {
+            throw new ConstraintViolationException("Target percentage has to be between 1 and 100");
+        }
+
         if (group.getSuccessCondition() == null) {
-            throw new RolloutVerificationException("Rollout group is missing success condition");
+            throw new ConstraintViolationException("Rollout group is missing success condition");
         }
         if (group.getSuccessAction() == null) {
-            throw new RolloutVerificationException("Rollout group is missing success action");
+            throw new ConstraintViolationException("Rollout group is missing success action");
         }
         return group;
     }
@@ -65,10 +73,11 @@ final class RolloutHelper {
      *            group to check
      * @param conditions
      *            default conditions and actions
-     * @return group with all conditions and actions
      */
-    static RolloutGroup prepareRolloutGroupWithDefaultConditions(final RolloutGroup group,
+    static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(final RolloutGroupCreate create,
             final RolloutGroupConditions conditions) {
+        final JpaRolloutGroup group = ((JpaRolloutGroupCreate) create).build();
+
         if (group.getSuccessCondition() == null) {
             group.setSuccessCondition(conditions.getSuccessCondition());
         }
@@ -94,6 +103,7 @@ final class RolloutHelper {
         if (group.getErrorActionExp() == null) {
             group.setErrorActionExp(conditions.getErrorActionExp());
         }
+
         return group;
     }
 
@@ -105,9 +115,9 @@ final class RolloutHelper {
      */
     static void verifyRolloutGroupParameter(final int amountGroup) {
         if (amountGroup <= 0) {
-            throw new RolloutVerificationException("the amountGroup must be greater than zero");
+            throw new ConstraintViolationException("the amountGroup must be greater than zero");
         } else if (amountGroup > 500) {
-            throw new RolloutVerificationException("the amountGroup must not be greater than 500");
+            throw new ConstraintViolationException("the amountGroup must not be greater than 500");
         }
     }
 
@@ -119,9 +129,9 @@ final class RolloutHelper {
      */
     static void verifyRolloutGroupTargetPercentage(final float percentage) {
         if (percentage <= 0) {
-            throw new RolloutVerificationException("the percentage must be greater than zero");
+            throw new ConstraintViolationException("the percentage must be greater than zero");
         } else if (percentage > 100) {
-            throw new RolloutVerificationException("the percentage must not be greater than 100");
+            throw new ConstraintViolationException("the percentage must not be greater than 100");
         }
     }
 
@@ -193,11 +203,13 @@ final class RolloutHelper {
     }
 
     /**
-     * Creates an RSQL expression that matches all targets in the provided groups.
-     * Links all target filter queries with OR.
+     * Creates an RSQL expression that matches all targets in the provided
+     * groups. Links all target filter queries with OR.
      *
-     * @param groups the rollout groups
-     * @return RSQL string without base filter of the Rollout. Can be an empty string.
+     * @param groups
+     *            the rollout groups
+     * @return RSQL string without base filter of the Rollout. Can be an empty
+     *         string.
      */
     static String getAllGroupsTargetFilter(final List<RolloutGroup> groups) {
         if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
@@ -207,12 +219,15 @@ final class RolloutHelper {
     }
 
     /**
-     * Creates an RSQL Filter that matches all targets that are in the provided group and
-     * in the provided groups.
+     * Creates an RSQL Filter that matches all targets that are in the provided
+     * group and in the provided groups.
      *
-     * @param groups the rollout groups
-     * @param group   the group
-     * @return RSQL string without base filter of the Rollout. Can be an empty string.
+     * @param groups
+     *            the rollout groups
+     * @param group
+     *            the group
+     * @return RSQL string without base filter of the Rollout. Can be an empty
+     *         string.
      */
     static String getOverlappingWithGroupsTargetFilter(final List<RolloutGroup> groups, final RolloutGroup group) {
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
@@ -235,11 +250,11 @@ final class RolloutHelper {
      */
     static void verifyRemainingTargets(final long targetCount) {
         if (targetCount > 0) {
-            throw new RolloutVerificationException(
+            throw new ConstraintViolationException(
                     "Rollout groups don't match all targets that are targeted by the rollout");
         }
         if (targetCount != 0) {
-            throw new RolloutVerificationException("Rollout groups target count verification failed");
+            throw new ConstraintViolationException("Rollout groups target count verification failed");
         }
     }
 

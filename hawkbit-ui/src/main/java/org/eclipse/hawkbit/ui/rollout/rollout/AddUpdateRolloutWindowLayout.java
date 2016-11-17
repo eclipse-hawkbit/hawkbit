@@ -12,14 +12,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
@@ -91,9 +89,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     @Autowired
     private transient RolloutManagement rolloutManagement;
-
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -191,11 +186,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     public CommonDialogWindow getWindow() {
         resetComponents();
-        final CommonDialogWindow commonDialogWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.get("caption.configure.rollout")).content(this).layout(this).i18n(i18n)
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.configure.rollout"))
+                .content(this).layout(this).i18n(i18n)
                 .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
-        return commonDialogWindow;
     }
 
     /**
@@ -424,21 +418,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         if (rolloutForEdit == null) {
             return;
         }
-        rolloutForEdit.setName(rolloutName.getValue());
-        rolloutForEdit.setDescription(description.getValue());
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
-        rolloutForEdit
-                .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
-        rolloutForEdit.setActionType(getActionType());
-        rolloutForEdit.setForcedTime(getForcedTimeStamp());
-        final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-        final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
-        for (final RolloutGroup rolloutGroup : rolloutForEdit.getRolloutGroups()) {
-            rolloutGroup.setErrorConditionExp(triggerThreshold.getValue());
-            rolloutGroup.setSuccessConditionExp(String.valueOf(errorThresoldPercent));
-        }
-        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
+        final Rollout updatedRollout = rolloutManagement.updateRollout(entityFactory.rollout()
+                .update(rolloutForEdit.getId()).name(rolloutName.getValue()).description(description.getValue()));
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
         eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
     }
@@ -471,28 +453,22 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private Rollout saveRollout() {
-        Rollout rolloutToCreate = entityFactory.generateRollout();
+
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
-        final String targetFilter = getTargetFilterQuery();
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresoldPercent))
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
-        rolloutToCreate.setName(rolloutName.getValue());
-        rolloutToCreate.setDescription(description.getValue());
-        rolloutToCreate.setTargetFilterQuery(targetFilter);
-        rolloutToCreate
-                .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
-        rolloutToCreate.setActionType(getActionType());
-        rolloutToCreate.setForcedTime(getForcedTimeStamp());
 
-        rolloutToCreate = rolloutManagement.createRollout(rolloutToCreate, amountGroup, conditions);
-        return rolloutToCreate;
+        return rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName.getValue())
+                .description(description.getValue()).set(distributionSetIdName.getId())
+                .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp()),
+                amountGroup, conditions);
     }
 
     private String getTargetFilterQuery() {
@@ -676,11 +652,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final List<RolloutGroup> rolloutGroups = rolloutForEdit.getRolloutGroups();
         setThresholdValues(rolloutGroups);
         setActionType(rolloutForEdit);
-        if (rolloutForEdit.getStatus() != RolloutStatus.READY) {
-            disableRequiredFieldsOnEdit();
-        }
-
-        noOfGroups.setEnabled(false);
+        disableRequiredFieldsOnEdit();
         targetFilterQuery.setValue(rolloutForEdit.getTargetFilterQuery());
         removeComponent(1, 2);
         targetFilterQueryCombo.removeValidator(nullValidator);
@@ -695,6 +667,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void disableRequiredFieldsOnEdit() {
+        noOfGroups.setEnabled(false);
         distributionSet.setEnabled(false);
         errorThreshold.setEnabled(false);
         triggerThreshold.setEnabled(false);
@@ -747,7 +720,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         String value;
 
-        private SAVESTARTOPTIONS(final String val) {
+        SAVESTARTOPTIONS(final String val) {
             this.value = val;
         }
 
@@ -764,7 +737,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         String value;
 
-        private ERRORTHRESOLDOPTIONS(final String val) {
+        ERRORTHRESOLDOPTIONS(final String val) {
             this.value = val;
         }
 

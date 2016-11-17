@@ -49,7 +49,7 @@ public class TargetEventTest extends AbstractRemoteEntityEventTest<Target> {
 
     @Override
     protected Target createEntity() {
-        return targetManagement.createTarget(entityFactory.generateTarget("12345"));
+        return testdataFactory.createTarget("12345");
     }
 
 }

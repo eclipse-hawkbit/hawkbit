@@ -18,24 +18,22 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  */
 public class TargetWithActionType {
 
-    private final String targetId;
+    private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
 
-    /**
-     * @param targetId
-     * @param actionType
-     * @param forceTime
-     */
-    public TargetWithActionType(final String targetId, final ActionType actionType, final long forceTime) {
-        this.targetId = targetId;
+    public TargetWithActionType(final String controllerId) {
+        this.controllerId = controllerId;
+        this.actionType = ActionType.FORCED;
+        this.forceTime = 0;
+    }
+
+    public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
+        this.controllerId = controllerId;
         this.actionType = actionType;
         this.forceTime = forceTime;
     }
 
-    /**
-     * @return the actionType
-     */
     public ActionType getActionType() {
         if (actionType != null) {
             return actionType;
@@ -44,9 +42,6 @@ public class TargetWithActionType {
         return ActionType.FORCED;
     }
 
-    /**
-     * @return the forceTime
-     */
     public long getForceTime() {
         if (actionType == ActionType.TIMEFORCED) {
             return forceTime;
@@ -54,10 +49,7 @@ public class TargetWithActionType {
         return RepositoryModelConstants.NO_FORCE_TIME;
     }
 
-    /**
-     * @return the targetId
-     */
-    public String getTargetId() {
-        return targetId;
+    public String getControllerId() {
+        return controllerId;
     }
 }

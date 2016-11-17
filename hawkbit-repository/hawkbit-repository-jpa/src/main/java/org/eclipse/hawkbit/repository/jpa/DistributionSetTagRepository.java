@@ -53,7 +53,4 @@ public interface DistributionSetTagRepository
      */
     @Override
     List<JpaDistributionSetTag> findAll();
-
-    @Override
-    <S extends JpaDistributionSetTag> List<S> save(Iterable<S> entities);
 }

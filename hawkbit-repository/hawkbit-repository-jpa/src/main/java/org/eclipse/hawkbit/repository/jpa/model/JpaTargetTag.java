@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 @Table(name = "sp_target_tag", indexes = {
         @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_targ_tag"))
-public class JpaTargetTag extends AbstractJpaTag implements TargetTag {
+public class JpaTargetTag extends JpaTag implements TargetTag {
     private static final long serialVersionUID = 1L;
 
     @ManyToMany(mappedBy = "tags", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)

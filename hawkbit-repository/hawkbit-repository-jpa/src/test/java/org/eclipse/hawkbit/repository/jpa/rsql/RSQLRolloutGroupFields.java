@@ -12,7 +12,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -37,7 +36,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Before
     public void seuptBeforeTest() {
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
         rollout = rolloutManagement.findRolloutById(rollout.getId());
@@ -83,11 +82,11 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = new JpaRollout();
-        rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
-        rollout.setName(name);
-        rollout.setTargetFilterQuery(targetFilterQuery);
-        return rolloutManagement.createRollout(rollout, amountGroups, new RolloutGroupConditionBuilder()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+        return rolloutManagement.createRollout(
+                entityFactory.rollout().create()
+                        .set(distributionSetManagement.findDistributionSetById(distributionSetId)).name(name)
+                        .targetFilterQuery(targetFilterQuery),
+                amountGroups, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
 }

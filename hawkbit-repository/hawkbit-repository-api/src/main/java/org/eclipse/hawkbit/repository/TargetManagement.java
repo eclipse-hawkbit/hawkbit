@@ -8,14 +8,16 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.TargetCreate;
+import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -136,37 +138,14 @@ public interface TargetManagement {
     /**
      * creating a new {@link Target}.
      *
-     * @param target
+     * @param create
      *            to be created
      * @return the created {@link Target}
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Target createTarget(@NotNull Target target);
-
-    /**
-     * creating new {@link Target}s including poll status data. useful
-     * especially in plug and play scenarios.
-     *
-     * @param target
-     *            to be created *
-     * @param status
-     *            of the target
-     * @param lastTargetQuery
-     *            if a plug and play case
-     * @param address
-     *            if a plug and play case
-     *
-     * @throws EntityAlreadyExistsException
-     *             if {@link Target} with given {@link Target#getControllerId()}
-     *             already exists.
-     *
-     * @return created {@link Target}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    Target createTarget(@NotNull Target target, @NotNull TargetUpdateStatus status, Long lastTargetQuery, URI address);
+    Target createTarget(@NotNull TargetCreate create);
 
     /**
      * creates multiple {@link Target}s. If some of the given {@link Target}s
@@ -174,7 +153,7 @@ public interface TargetManagement {
      * thrown. {@link Target}s contain all objects of the parameter targets,
      * including duplicates.
      *
-     * @param targets
+     * @param creates
      *            to be created.
      * @return the created {@link Target}s
      *
@@ -182,7 +161,7 @@ public interface TargetManagement {
      *             of one of the given targets already exist.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<Target> createTargets(@NotNull Collection<Target> targets);
+    List<Target> createTargets(@NotNull Collection<TargetCreate> creates);
 
     /**
      * Deletes all targets with the given IDs.
@@ -439,8 +418,8 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetByFilters(@NotNull Pageable pageable, Collection<TargetUpdateStatus> status,
-            Boolean overdueState, String searchText, Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
-            String... tagNames);
+            Boolean overdueState, String searchText, Long installedOrAssignedDistributionSetId,
+            Boolean selectTargetWithNoTag, String... tagNames);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}without
@@ -651,23 +630,16 @@ public interface TargetManagement {
     /**
      * updates the {@link Target}.
      *
-     * @param target
+     * @param update
      *            to be updated
+     * 
      * @return the updated {@link Target}
+     * 
+     * @throws EntityNotFoundException
+     *             if given target does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Target updateTarget(@NotNull Target target);
-
-    /**
-     * updates multiple {@link Target}s.
-     *
-     * @param targets
-     *            to be updated
-     * @return the updated {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    List<Target> updateTargets(@NotNull Collection<Target> targets);
+    Target updateTarget(TargetUpdate update);
 
 }

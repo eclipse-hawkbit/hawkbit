@@ -99,7 +99,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return distributionSet;
     }
 
-    @Override
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
@@ -113,7 +112,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return status;
     }
 
-    @Override
     public void setStatus(final Status status) {
         this.status = status;
     }
@@ -141,7 +139,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return Collections.unmodifiableList(actionStatus);
     }
 
-    @Override
     public void setTarget(final Target target) {
         this.target = (JpaTarget) target;
     }

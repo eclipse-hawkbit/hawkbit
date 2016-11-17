@@ -28,7 +28,7 @@ public interface TargetTagRepository
     /**
      * deletes the {@link TargetTag}s with the given tag names.
      *
-     * @param tagNames
+     * @param tagName
      *            to be deleted
      * @return 1 if tag was deleted
      */
@@ -52,7 +52,4 @@ public interface TargetTagRepository
      */
     @Override
     List<JpaTargetTag> findAll();
-
-    @Override
-    <S extends JpaTargetTag> List<S> save(Iterable<S> entities);
 }

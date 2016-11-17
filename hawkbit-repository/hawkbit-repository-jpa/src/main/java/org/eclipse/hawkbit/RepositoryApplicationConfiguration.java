@@ -28,6 +28,11 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
+import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
@@ -48,6 +53,11 @@ import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
@@ -56,6 +66,11 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
@@ -100,6 +115,63 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     public RsqlValidationOracle rsqlValidationOracle() {
         return new RsqlParserValidationOracle();
+    }
+
+    /**
+     * @param distributionSetManagement
+     *            to loading the {@link DistributionSetType}
+     * @param softwareManagement
+     *            for loading {@link DistributionSet#getModules()}
+     * @return DistributionSetBuilder bean
+     */
+    @Bean
+    public DistributionSetBuilder distributionSetBuilder(final DistributionSetManagement distributionSetManagement,
+            final SoftwareManagement softwareManagement) {
+        return new JpaDistributionSetBuilder(distributionSetManagement, softwareManagement);
+    }
+
+    /**
+     * @param softwareManagement
+     *            for loading
+     *            {@link DistributionSetType#getMandatoryModuleTypes()} and
+     *            {@link DistributionSetType#getOptionalModuleTypes()}
+     * @return DistributionSetTypeBuilder bean
+     */
+    @Bean
+    public DistributionSetTypeBuilder distributionSetTypeBuilder(final SoftwareManagement softwareManagement) {
+        return new JpaDistributionSetTypeBuilder(softwareManagement);
+    }
+
+    /**
+     * @param softwareManagement
+     *            for loading {@link SoftwareModule#getType()}
+     * @return SoftwareModuleBuilder bean
+     */
+    @Bean
+    public SoftwareModuleBuilder softwareModuleBuilder(final SoftwareManagement softwareManagement) {
+        return new JpaSoftwareModuleBuilder(softwareManagement);
+    }
+
+    /**
+     * @param distributionSetManagement
+     *            for loading {@link Rollout#getDistributionSet()}
+     * @return RolloutBuilder bean
+     */
+    @Bean
+    public RolloutBuilder rolloutBuilder(final DistributionSetManagement distributionSetManagement) {
+        return new JpaRolloutBuilder(distributionSetManagement);
+    }
+
+    /**
+     * @param distributionSetManagement
+     *            for loading
+     *            {@link TargetFilterQuery#getAutoAssignDistributionSet()}
+     * @return TargetFilterQueryBuilder bean
+     */
+    @Bean
+    public TargetFilterQueryBuilder targetFilterQueryBuilder(
+            final DistributionSetManagement distributionSetManagement) {
+        return new JpaTargetFilterQueryBuilder(distributionSetManagement);
     }
 
     /**

@@ -101,7 +101,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
-                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(entityFactory, tags));
+                .createDistributionSetTags(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
@@ -110,16 +110,12 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<MgmtTag> updateDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final MgmtTagRequestBodyPut restDSTagRest) {
-        LOG.debug("update {} ds tag", restDSTagRest);
 
-        final DistributionSetTag distributionSetTag = findDistributionTagById(distributionsetTagId);
-        MgmtTagMapper.updateTag(restDSTagRest, distributionSetTag);
-        final DistributionSetTag updateDistributionSetTag = this.tagManagement
-                .updateDistributionSetTag(distributionSetTag);
-
-        LOG.debug("ds tag updated");
-
-        return new ResponseEntity<>(MgmtTagMapper.toResponse(updateDistributionSetTag), HttpStatus.OK);
+        return new ResponseEntity<>(
+                MgmtTagMapper.toResponse(tagManagement.updateDistributionSetTag(
+                        entityFactory.tag().update(distributionsetTagId).name(restDSTagRest.getName())
+                                .description(restDSTagRest.getDescription()).colour(restDSTagRest.getColour()))),
+                HttpStatus.OK);
     }
 
     @Override
@@ -213,7 +209,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         return tag;
     }
 
-    private List<Long> findDistributionSetIds(
+    private static List<Long> findDistributionSetIds(
             final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
         return assignedDistributionSetRequestBodies.stream().map(request -> request.getDistributionSetId())
                 .collect(Collectors.toList());

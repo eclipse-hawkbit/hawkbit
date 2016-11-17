@@ -18,14 +18,14 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
  * easily built.
  */
 public class RolloutGroupConditions {
-    private RolloutGroupSuccessCondition successCondition = RolloutGroupSuccessCondition.THRESHOLD;
-    private String successConditionExp = "50";
-    private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
-    private String successActionExp = "";
-    private RolloutGroupErrorCondition errorCondition = RolloutGroupErrorCondition.THRESHOLD;
-    private String errorConditionExp = "50";
-    private RolloutGroupErrorAction errorAction = RolloutGroupErrorAction.PAUSE;
-    private String errorActionExp = "";
+    private RolloutGroupSuccessCondition successCondition;
+    private String successConditionExp;
+    private RolloutGroupSuccessAction successAction;
+    private String successActionExp;
+    private RolloutGroupErrorCondition errorCondition;
+    private String errorConditionExp;
+    private RolloutGroupErrorAction errorAction;
+    private String errorActionExp;
 
     public RolloutGroupSuccessCondition getSuccessCondition() {
         return successCondition;

@@ -168,9 +168,9 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
         registered = SPUIComponentProvider.getButton(UIComponentIdProvider.REGISTERED_STATUS_ICON,
                 TargetUpdateStatus.REGISTERED.toString(), i18n.get("tooltip.status.registered"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        overdue = SPUIComponentProvider.getButton(UIComponentIdProvider.OVERDUE_STATUS_ICON,
-                OVERDUE_CAPTION, i18n.get("tooltip.status.overdue"),
-                SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
+        overdue = SPUIComponentProvider.getButton(UIComponentIdProvider.OVERDUE_STATUS_ICON, OVERDUE_CAPTION,
+                i18n.get("tooltip.status.overdue"), SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false,
+                FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
         applyStatusBtnStyle();
         unknown.setData("filterStatusOne");
         inSync.setData("filterStatusTwo");
@@ -320,24 +320,15 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
      * @return
      */
     private boolean isStatusFilterApplied() {
-        if (isPendingOrUnknownBtnClicked() || isErrorOrRegisteredBtnClicked() || inSyncBtnClicked) {
-            return true;
-        }
-        return false;
+        return isPendingOrUnknownBtnClicked() || isErrorOrRegisteredBtnClicked() || inSyncBtnClicked;
     }
 
     private boolean isPendingOrUnknownBtnClicked() {
-        if (unknownBtnClicked || pendingBtnClicked) {
-            return true;
-        }
-        return false;
+        return unknownBtnClicked || pendingBtnClicked;
     }
 
     private boolean isErrorOrRegisteredBtnClicked() {
-        if (errorBtnClicked || registeredBtnClicked) {
-            return true;
-        }
-        return false;
+        return errorBtnClicked || registeredBtnClicked;
     }
 
     @PreDestroy
