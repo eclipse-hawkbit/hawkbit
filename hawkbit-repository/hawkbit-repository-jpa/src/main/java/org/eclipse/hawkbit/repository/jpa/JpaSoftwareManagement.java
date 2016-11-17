@@ -210,7 +210,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
-        return distributionSetRepository.findByModules(bsmMerged).isEmpty();
+        return distributionSetRepository.countByModules(bsmMerged) <= 0;
     }
 
     private Slice<JpaSoftwareModule> findSwModuleByCriteriaAPI(final Pageable pageable,

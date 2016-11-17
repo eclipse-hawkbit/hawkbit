@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,9 +29,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -131,14 +128,10 @@ public class JpaTagManagement implements TagManagement {
     public void deleteTargetTag(final String targetTagName) {
         final JpaTargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
 
-        final List<JpaTarget> changed = new LinkedList<>();
-        for (final JpaTarget target : targetRepository.findByTag(tag)) {
-            target.removeTag(tag);
-            changed.add(target);
-        }
-
-        // save association delete
-        targetRepository.save(changed);
+        targetRepository.findByTag(tag).forEach(set -> {
+            set.removeTag(tag);
+            targetRepository.save(set);
+        });
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
@@ -259,14 +252,10 @@ public class JpaTagManagement implements TagManagement {
     public void deleteDistributionSetTag(final String tagName) {
         final JpaDistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
 
-        final List<JpaDistributionSet> changed = new LinkedList<>();
-        for (final JpaDistributionSet set : distributionSetRepository.findByTag(tag)) {
+        distributionSetRepository.findByTag(tag).forEach(set -> {
             set.removeTag(tag);
-            changed.add(set);
-        }
-
-        // save association delete
-        distributionSetRepository.save(changed);
+            distributionSetRepository.save(set);
+        });
 
         distributionSetTagRepository.deleteByName(tagName);
 

@@ -345,21 +345,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<JpaAction> activeActions = actionRepository
                 .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(targetsIds,
                         Action.Status.CANCELING);
-        final Set<Long> cancelledTargetIds = activeActions.stream().map(action -> {
+
+        return activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
             // document that the status has been retrieved
 
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     "manual cancelation requested"));
+            actionRepository.save(action);
 
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
             return action.getTarget().getId();
         }).collect(Collectors.toSet());
-
-        actionRepository.save(activeActions);
-
-        return cancelledTargetIds;
 
     }
 

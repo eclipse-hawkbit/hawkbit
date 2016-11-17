@@ -109,7 +109,7 @@
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
       <spring.version>4.3.3.RELEASE</spring.version>
       <spring-integration.version>4.3.2.RELEASE</spring-integration.version>
-      <spring-data-releasetrain.version>Hopper-SR4</spring-data-releasetrain.version>
+      <spring-data-releasetrain.version>Hopper-SR5</spring-data-releasetrain.version>
       <!-- Support for MongoDB 3 -->
       <mongodb.version>3.2.2</mongodb.version>
       <!-- Spring boot version overrides - END -->

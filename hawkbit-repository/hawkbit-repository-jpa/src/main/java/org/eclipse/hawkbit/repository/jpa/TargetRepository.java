@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -132,7 +133,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
 
     /**
      * Counts number of targets with given
-     * {@link TargetStatus#getInstalledDistributionSet()}.
+     * {@link TargetInfo#getInstalledDistributionSet()}.
      *
      * @param distId
      *            to search for
@@ -172,8 +173,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
     void setAssignedDistributionSet(@Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
-
-    List<Target> findByRolloutTargetGroupRolloutGroup(final JpaRolloutGroup rolloutGroup);
 
     /**
      * 

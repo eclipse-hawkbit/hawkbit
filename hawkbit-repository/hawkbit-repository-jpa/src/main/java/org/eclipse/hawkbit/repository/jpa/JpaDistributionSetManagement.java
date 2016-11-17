@@ -624,9 +624,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final JpaDistributionSet set = touch(dsId);
 
-        return new ArrayList<>((Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository
-                .save(md.stream().map(meta -> new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue()))
-                        .collect(Collectors.toList())));
+        return Collections.unmodifiableList(md.stream()
+                .map(meta -> distributionSetMetadataRepository
+                        .save(new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue())))
+                .collect(Collectors.toList()));
     }
 
     @Override

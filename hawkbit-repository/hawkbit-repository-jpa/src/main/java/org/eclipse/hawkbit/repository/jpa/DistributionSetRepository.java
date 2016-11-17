@@ -57,9 +57,6 @@ public interface DistributionSetRepository
     @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
 
-    @Override
-    List<JpaDistributionSet> findAll(Iterable<Long> ids);
-
     /**
      * deletes {@link DistributionSet}s by the given IDs.
      *
@@ -81,7 +78,7 @@ public interface DistributionSetRepository
      *            to search for
      * @return {@link List} of found {@link DistributionSet}s
      */
-    List<DistributionSet> findByModules(JpaSoftwareModule module);
+    Long countByModules(JpaSoftwareModule module);
 
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to
