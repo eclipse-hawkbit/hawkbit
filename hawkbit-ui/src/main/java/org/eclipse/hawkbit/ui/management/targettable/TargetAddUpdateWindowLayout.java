@@ -93,23 +93,22 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         }
 
         private boolean isValid() {
-            final String newControlllerId = controllerIDTextField.getValue().trim();
-            if (StringUtils.isEmpty(newControlllerId)) {
+
+            controllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
+            if (StringUtils.isEmpty(controllerId)) {
                 uINotification.displayValidationError(i18n.get("message.target.name.not.valid"));
                 return false;
             }
 
-            final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId);
+            final Target existingTarget = targetManagement.findTargetByControllerID(controllerId);
             if (existingTarget != null) {
                 uINotification.displayValidationError(
-                        i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
+                        i18n.get("message.target.duplicate.check", new Object[] { controllerId }));
                 return false;
             } else {
                 return true;
             }
-
         }
-
     }
 
     /**
@@ -167,12 +166,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void addNewTarget() {
-        final String newControlllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
+
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
         /* create new target entity */
-        Target newTarget = entityFactory.generateTarget(newControlllerId);
+        Target newTarget = entityFactory.generateTarget(controllerId);
         /* set values to the new target entity */
         setTargetValues(newTarget, newName, newDesc);
         /* save new target */
