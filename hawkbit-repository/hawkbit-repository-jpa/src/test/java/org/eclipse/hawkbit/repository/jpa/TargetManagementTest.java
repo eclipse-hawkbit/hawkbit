@@ -13,23 +13,16 @@ import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Query;
 import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -44,7 +37,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -445,115 +437,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 
         assertThat(targetsLeft).as("Not all undeleted found").doesNotContain(deletedTargets);
-    }
-
-    @Test
-    @Description("Stores target attributes and verfies existence in the repository.")
-    public void savingTargetControllerAttributes() {
-        Iterable<Target> ts = testdataFactory.createTargets(100, "myCtrlID", "first description");
-
-        final Map<String, String> attribs = new HashMap<>();
-        attribs.put("a.b.c", "abc");
-        attribs.put("x.y.z", "");
-        attribs.put("1.2.3", "123");
-        attribs.put("1.2.3.4", "1234");
-        attribs.put("1.2.3.4.5", "12345");
-        final Set<String> attribs2Del = new HashSet<>();
-        attribs2Del.add("x.y.z");
-        attribs2Del.add("1.2.3");
-
-        for (final Target t : ts) {
-            JpaTargetInfo targetInfo = (JpaTargetInfo) t.getTargetInfo();
-            targetInfo.setNew(false);
-            for (final Entry<String, String> attrib : attribs.entrySet()) {
-                final String key = attrib.getKey();
-                final String value = String.format("%s-%s", attrib.getValue(), t.getControllerId());
-                targetInfo.getControllerAttributes().put(key, value);
-            }
-            targetInfo = targetInfoRepository.save(targetInfo);
-        }
-        final Query qry = entityManager.createNativeQuery("select * from sp_target_attributes ta");
-        final List<?> result = qry.getResultList();
-
-        assertThat(attribs.size() * ts.spliterator().getExactSizeIfKnown()).as("Amount of all target attributes")
-                .isEqualTo(result.size());
-
-        for (final Target myT : ts) {
-            final Target t = targetManagement.findTargetByControllerIDWithDetails(myT.getControllerId());
-            assertThat(attribs.size()).as("Amount of target attributes per target")
-                    .isEqualTo(t.getTargetInfo().getControllerAttributes().size());
-
-            for (final Entry<String, String> ca : t.getTargetInfo().getControllerAttributes().entrySet()) {
-                assertTrue("Attributes list does not contain target attribute key", attribs.containsKey(ca.getKey()));
-                // has the same value: see string concatenation above
-                // assertThat(String.format("%s-%s",
-                // attribs.get(ca.getKey()))).as("Value of string
-                // concatenation")
-                // .isEqualTo(ca.getValue());
-
-                assertEquals("The value of the string concatenation is not equal to the value of the target attributes",
-                        String.format("%s-%s", attribs.get(ca.getKey()), t.getControllerId()), ca.getValue());
-
-            }
-        }
-
-        ts = targetManagement.findTargetsAll(new PageRequest(0, 100)).getContent();
-        final Iterator<Target> tsIt = ts.iterator();
-        // all attributs of the target are deleted
-        final Target[] ts2DelAllAttribs = new Target[] { tsIt.next(), tsIt.next(), tsIt.next() };
-        // a few attributs are deleted
-        final Target[] ts2DelAttribs = new Target[] { tsIt.next(), tsIt.next() };
-
-        // perform the deletion operations accordingly
-        for (final Target ta : ts2DelAllAttribs) {
-            final Target t = targetManagement.findTargetByControllerIDWithDetails(ta.getControllerId());
-
-            final JpaTargetInfo targetStatus = (JpaTargetInfo) t.getTargetInfo();
-            targetStatus.getControllerAttributes().clear();
-            targetInfoRepository.save(targetStatus);
-        }
-
-        for (final Target ta : ts2DelAttribs) {
-            final Target t = targetManagement.findTargetByControllerIDWithDetails(ta.getControllerId());
-
-            final JpaTargetInfo targetStatus = (JpaTargetInfo) t.getTargetInfo();
-            for (final String attribKey : attribs2Del) {
-                targetStatus.getControllerAttributes().remove(attribKey);
-            }
-            targetInfoRepository.save(targetStatus);
-        }
-
-        // only the number of the remaining targets and controller attributes
-        // are checked
-        final Iterable<JpaTarget> restTS = targetRepository.findAll();
-
-        restTarget_: for (final Target targetl : restTS) {
-            final Target target = targetManagement.findTargetByControllerIDWithDetails(targetl.getControllerId());
-
-            // verify that all members of the list ts2DelAllAttribs don't have
-            // any attributes
-            for (final Target tNoAttribl : ts2DelAllAttribs) {
-                final Target tNoAttrib = targetManagement.findTargetByControllerID(tNoAttribl.getControllerId());
-
-                if (tNoAttrib.getControllerId().equals(target.getControllerId())) {
-                    assertThat(target.getTargetInfo().getControllerAttributes())
-                            .as("Controller attributes should be empty").isEmpty();
-                    continue restTarget_;
-                }
-            }
-            // verify that that the attribute list of all members of the list
-            // ts2DelAttribs don't have
-            // attributes which have been deleted
-            for (final Target tNoAttribl : ts2DelAttribs) {
-                final Target tNoAttrib = targetManagement.findTargetByControllerID(tNoAttribl.getControllerId());
-
-                if (tNoAttrib.getControllerId().equals(target.getControllerId())) {
-                    assertThat(target.getTargetInfo().getControllerAttributes().keySet().toArray())
-                            .as("Controller attributes are wrong").doesNotContain(attribs2Del.toArray());
-                    continue restTarget_;
-                }
-            }
-        }
     }
 
     @Test

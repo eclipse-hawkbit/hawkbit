@@ -96,9 +96,9 @@ public class RolloutGroupConditionBuilder {
      */
     public RolloutGroupConditionBuilder withDefaults() {
         successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50");
-        successAction(RolloutGroupSuccessAction.NEXTGROUP, null);
+        successAction(RolloutGroupSuccessAction.NEXTGROUP, "");
         errorCondition(RolloutGroupErrorCondition.THRESHOLD, "50");
-        errorAction(RolloutGroupErrorAction.PAUSE, null);
+        errorAction(RolloutGroupErrorAction.PAUSE, "");
         return this;
     }
 }

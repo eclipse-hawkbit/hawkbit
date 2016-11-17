@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -327,6 +328,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void assignDistributionSetEvent(final Action action) {
         ((JpaTargetInfo) action.getTarget().getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
+        afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetUpdatedEvent(action.getTarget(), applicationContext.getId())));
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
     }

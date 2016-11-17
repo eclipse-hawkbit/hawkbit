@@ -26,10 +26,12 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -119,6 +121,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     @Override
     public String getPollingTime() {
@@ -380,6 +385,10 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         targetInfoRepository.save(targetInfo);
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
+
         entityManager.detach(ds);
     }
 
@@ -406,7 +415,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         targetInfo.setLastTargetQuery(System.currentTimeMillis());
         targetInfo.setRequestControllerAttributes(false);
-        return targetRepository.save(target);
+
+        return targetInfoRepository.save(targetInfo).getTarget();
     }
 
     @Override

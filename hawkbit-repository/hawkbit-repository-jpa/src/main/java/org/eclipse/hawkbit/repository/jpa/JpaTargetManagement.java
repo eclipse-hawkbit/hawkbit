@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -108,9 +107,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private TenantAware tenantAware;
-
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
