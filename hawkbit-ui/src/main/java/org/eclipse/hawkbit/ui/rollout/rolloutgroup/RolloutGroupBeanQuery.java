@@ -42,7 +42,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     private static final long serialVersionUID = 5342450502894318589L;
 
-    private Sort sort = new Sort(Direction.ASC, "createdAt");
+    private Sort sort = new Sort(Direction.ASC, "id");
 
     private transient Page<RolloutGroup> firstPageRolloutGroupSets = null;
 
