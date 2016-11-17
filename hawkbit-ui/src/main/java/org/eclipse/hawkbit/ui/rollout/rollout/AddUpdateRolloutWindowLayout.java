@@ -457,7 +457,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresoldPercent))
@@ -465,7 +465,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
 
-        return rolloutManagement.createRolloutAsync(entityFactory.rollout().create().name(rolloutName.getValue())
+        return rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName.getValue())
                 .description(description.getValue()).set(distributionSetIdName.getId())
                 .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp()),
                 amountGroup, conditions);

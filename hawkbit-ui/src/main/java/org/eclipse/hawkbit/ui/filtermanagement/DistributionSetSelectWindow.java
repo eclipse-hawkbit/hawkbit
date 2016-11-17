@@ -72,7 +72,6 @@ public class DistributionSetSelectWindow
 
     private CommonDialogWindow window;
     private CheckBox checkBox;
-    private VerticalLayout verticalLayout;
     private Long tfqId;
 
     private void init() {
@@ -83,7 +82,7 @@ public class DistributionSetSelectWindow
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
 
-        verticalLayout = new VerticalLayout();
+        final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
         verticalLayout.addComponent(dsTable);
@@ -220,7 +219,6 @@ public class DistributionSetSelectWindow
         private final Long distributionSetId;
 
         private Button okButton;
-        private Button cancelButton;
 
         private final ConfirmCallback callback;
 
@@ -273,7 +271,7 @@ public class DistributionSetSelectWindow
             buttonsLayout.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
             buttonsLayout.setExpandRatio(okButton, 1.0F);
 
-            cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
+            final Button cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
                     i18n.get("button.cancel"), "", "", true, FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
             cancelButton.setSizeUndefined();
             cancelButton.addStyleName("default-color");

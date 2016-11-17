@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -69,6 +72,30 @@ public interface RolloutManagement {
     void checkRunningRollouts(long delayBetweenChecks);
 
     /**
+     * Checking Rollouts that are currently being created with asynchronous
+     * assignment of targets to the Rollout Groups.
+     *
+     * @param delayBetweenChecks
+     *            the time in milliseconds of the delay between the further and
+     *            this check. This check is only applied if the last check is
+     *            less than (lastcheck-delay).
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void checkCreatingRollouts(long delayBetweenChecks);
+
+    /**
+     * Checking Rollouts that are currently being started with asynchronous
+     * creation of actions to the targets of a group.
+     *
+     * @param delayBetweenChecks
+     *            the time in milliseconds of the delay between the further and
+     *            this check. This check is only applied if the last check is
+     *            less than (lastcheck-delay).
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void checkStartingRollouts(long delayBetweenChecks);
+
+    /**
      * Counts all {@link Rollout}s in the repository.
      *
      * @return number of roll outs
@@ -89,14 +116,17 @@ public interface RolloutManagement {
     /**
      * Persists a new rollout entity. The filter within the
      * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets
-     * which are effected by this rollout to create. The targets will then be
-     * split up into groups. The size of the groups can be defined in the
-     * {@code groupSize} parameter.
+     * which are effected by this rollout to create. The amount of groups will
+     * be defined as equally sized.
      *
      * The rollout is not started. Only the preparation of the rollout is done,
-     * persisting and creating all the necessary groups. The Rollout and the
-     * groups are persisted in {@link RolloutStatus#READY} and
-     * {@link RolloutGroupStatus#READY} so they can be started
+     * creating and persisting all the necessary groups. The Rollout and the
+     * groups are persisted in {@link RolloutStatus#CREATING} and
+     * {@link RolloutGroupStatus#CREATING}.
+     *
+     * The RolloutScheduler will start to assign targets to the groups. Once all
+     * targets have been assigned to the groups, the rollout status is changed
+     * to {@link RolloutStatus#READY} so it can be started with
      * {@link #startRollout(Rollout)}.
      *
      * @param create
@@ -108,54 +138,65 @@ public interface RolloutManagement {
      *            applied for each {@link RolloutGroup}
      * @return the persisted rollout.
      *
-     * @throws IllegalArgumentException
-     *             in case the given groupSize is zero or lower.
      * @throws EntityNotFoundException
      *             if given {@link DistributionSet} does not exist
+     * @throws ConstraintViolationException
+     *             if rollout or group parameters are invalid
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout createRollout(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
      * Persists a new rollout entity. The filter within the
-     * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets
-     * which are effected by this rollout to create. The creation of the rollout
-     * will be done synchronously and will be returned. The targets will then be
-     * split up into groups. The size of the groups can be defined in the
-     * {@code groupSize} parameter.
-     *
-     * The creation of the rollout groups is executed asynchronously due it
-     * might take some time to split up the targets into groups. The creation of
-     * the {@link RolloutGroup} is published as event
-     * {@link RolloutGroupCreatedEvent}.
-     *
-     * The rollout is in status {@link RolloutStatus#CREATING} until all rollout
-     * groups has been created and the targets are split up, then the rollout
-     * will change the status to {@link RolloutStatus#READY}.
+     * {@link Rollout#getTargetFilterQuery()} is used to filter the targets
+     * which are affected by this rollout. The given groups will be used to
+     * create the groups.
      *
      * The rollout is not started. Only the preparation of the rollout is done,
-     * persisting and creating all the necessary groups. The Rollout and the
-     * groups are persisted in {@link RolloutStatus#READY} and
-     * {@link RolloutGroupStatus#READY} so they can be started
+     * creating and persisting all the necessary groups. The Rollout and the
+     * groups are persisted in {@link RolloutStatus#CREATING} and
+     * {@link RolloutGroupStatus#CREATING}.
+     *
+     * The RolloutScheduler will start to assign targets to the groups. Once all
+     * targets have been assigned to the groups, the rollout status is changed
+     * to {@link RolloutStatus#READY} so it can be started with
      * {@link #startRollout(Rollout)}.
      *
      * @param rollout
-     *            the rollout to be created
-     * @param amountGroup
-     *            the number of groups should be created for the rollout and
-     *            split up the targets
+     *            the rollout entity to create
+     * @param groups
+     *            optional definition of groups
      * @param conditions
-     *            the rolloutgroup conditions and actions which should be
-     *            applied for each {@link RolloutGroup}
-     * @return the created rollout entity in state
-     *         {@link RolloutStatus#CREATING}
-     * 
+     *            the rollout group conditions and actions which should be
+     *            applied for each {@link RolloutGroup} if not defined by the
+     *            RolloutGroup itself
+     * @return the persisted rollout.
+     *
      * @throws EntityNotFoundException
      *             if given {@link DistributionSet} does not exist
+     * @throws ConstraintViolationException
+     *             if rollout or group parameters are invalid
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout createRolloutAsync(@NotNull RolloutCreate create, int amountGroup,
-            @NotNull RolloutGroupConditions conditions);
+    Rollout createRollout(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
+            RolloutGroupConditions conditions);
+
+    /**
+     * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
+     * automatically fill it with targets.
+     *
+     * Works through all Rollout groups in {@link RolloutGroupStatus#CREATING}
+     * and fills them with remaining targets until the supposed amount of
+     * targets for the group is reached. Targets are added to a group when they
+     * match the overall {@link Rollout#getTargetFilterQuery()} and the
+     * {@link RolloutGroup#getTargetFilterQuery()} and not more than
+     * {@link RolloutGroup#getTargetPercentage()} are assigned to the group.
+     *
+     * @param rollout
+     *            the rollout
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void fillRolloutGroupsWithTargets(@NotNull Long rollout);
 
     /**
      * Retrieves all rollouts.
@@ -294,12 +335,10 @@ public interface RolloutManagement {
 
     /**
      * Starts a rollout which has been created. The rollout must be in
-     * {@link RolloutStatus#READY} state. The according actions will be created
-     * for each affected target in the rollout. The actions of the first group
-     * will be started immediately {@link RolloutGroupStatus#RUNNING} as the
-     * other groups will be {@link RolloutGroupStatus#SCHEDULED} state.
-     *
-     * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
+     * {@link RolloutStatus#READY} state. The Rollout will be set into the
+     * {@link RolloutStatus#STARTING} state. The RolloutScheduler will ensure
+     * all actions are created and the first group is started. The rollout
+     * itself will be then also in {@link RolloutStatus#RUNNING}.
      *
      * @param rollout
      *            the rollout to be started
@@ -312,28 +351,6 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout startRollout(@NotNull Rollout rollout);
-
-    /**
-     * Starts a rollout asynchronously which has been created. The rollout must
-     * be in {@link RolloutStatus#READY} state. The according actions will be
-     * created asynchronously for each affected target in the rollout. The
-     * actions of the first group will be started immediately
-     * {@link RolloutGroupStatus#RUNNING} as the other groups will be
-     * {@link RolloutGroupStatus#SCHEDULED} state.
-     *
-     * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
-     *
-     * @param rollout
-     *            the rollout to be started
-     *
-     * @return the started rollout
-     *
-     * @throws RolloutIllegalStateException
-     *             if given rollout is not in {@link RolloutStatus#READY}. Only
-     *             ready rollouts can be started.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRolloutAsync(@NotNull Rollout rollout);
 
     /**
      * Update rollout details.

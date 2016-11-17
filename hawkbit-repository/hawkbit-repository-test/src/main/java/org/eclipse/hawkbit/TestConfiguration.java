@@ -13,6 +13,9 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -22,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.JpaTestRepositoryManagement;
+import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -38,6 +42,7 @@ import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +56,6 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.util.AntPathMatcher;
 
-import com.mongodb.MongoClientOptions;
 
 /**
  * Spring context configuration required for Dev.Environment.
@@ -62,10 +66,16 @@ import com.mongodb.MongoClientOptions;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
-        ArtifactUrlHandlerProperties.class })
+        ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Bean
+    public ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
+        return new ArtifactFilesystemRepository(artifactFilesystemProperties);
+    }
+
     @Bean
     public TestRepositoryManagement testRepositoryManagement(final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement) {
@@ -84,13 +94,6 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public MongoClientOptions options() {
-        return MongoClientOptions.builder().connectTimeout(500).maxWaitTime(500).connectionsPerHost(2)
-                .serverSelectionTimeout(500).build();
-
-    }
-
-    @Bean
     public TenantAware tenantAware() {
         return new SecurityContextTenantAware();
     }
@@ -102,7 +105,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     /**
      * Bean for the download id cache.
-     * 
+     *
      * @return the cache
      */
     @Bean
@@ -161,7 +164,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * 
+     *
      * @return the protostuff io message converter
      */
     @Bean
@@ -170,4 +173,13 @@ public class TestConfiguration implements AsyncConfigurer {
         return new BusProtoStuffMessageConverter();
     }
 
+    /**
+     * {@link TestContextProvider} bean.
+     *
+     * @return a new {@link TestContextProvider}
+     */
+    @Bean
+    public ApplicationContextAware applicationContextProvider() {
+        return new TestContextProvider();
+    }
 }

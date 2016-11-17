@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -82,8 +83,8 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                         artifactCache.getId(), artifactCache.getDownloadType());
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            try {
-                ByteStreams.copy(artifact.getFileInputStream(),
+            try (InputStream inputstream = artifact.getFileInputStream()) {
+                ByteStreams.copy(inputstream,
                         requestResponseContextHolder.getHttpServletResponse().getOutputStream());
             } catch (final IOException e) {
                 LOGGER.error("Cannot copy streams", e);

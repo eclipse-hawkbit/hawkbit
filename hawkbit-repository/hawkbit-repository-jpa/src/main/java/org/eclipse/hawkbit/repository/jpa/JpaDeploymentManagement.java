@@ -77,13 +77,18 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -96,6 +101,11 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDeploymentManagement implements DeploymentManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
+
+    /**
+     * Maximum amount of Actions that are started at once.
+     */
+    private static final int ACTION_PAGE_LIMIT = 1000;
 
     @Autowired
     private EntityManager entityManager;
@@ -132,6 +142,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     @Override
     @Modifying
@@ -462,11 +475,58 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public long startScheduledActionsByRolloutGroupParent(@NotNull final Rollout rollout,
+            final RolloutGroup rolloutGroupParent) {
+        long totalActionsCount = 0L;
+        long lastStartedActionsCount;
+        do {
+            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rollout,
+                    rolloutGroupParent, ACTION_PAGE_LIMIT);
+            totalActionsCount += lastStartedActionsCount;
+        } while (lastStartedActionsCount > 0);
+
+        return totalActionsCount;
+    }
+
+    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Rollout rollout,
+            final RolloutGroup rolloutGroupParent, final int limit) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("startScheduledActions");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(status -> {
+            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,
+                    rolloutGroupParent, limit);
+
+            rolloutGroupActions.map(action -> (JpaAction) action).forEach(this::startScheduledAction);
+
+            return rolloutGroupActions.getTotalElements();
+        });
+    }
+
+    private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Rollout rollout,
+            final RolloutGroup rolloutGroupParent, final int limit) {
+        JpaRollout jpaRollout = (JpaRollout) rollout;
+        JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupParent;
+        PageRequest pageRequest = new PageRequest(0, limit);
+        if (rolloutGroupParent == null) {
+            return actionRepository.findByRolloutAndRolloutGroupParentIsNullAndStatus(pageRequest, jpaRollout,
+                    Action.Status.SCHEDULED);
+        } else {
+            return actionRepository.findByRolloutAndRolloutGroupParentAndStatus(pageRequest, jpaRollout,
+                    jpaRolloutGroup, Action.Status.SCHEDULED);
+        }
+    }
+
+    @Override
+    @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public Action startScheduledAction(final Long actionId) {
-
         final JpaAction action = actionRepository.findById(actionId);
+        return startScheduledAction(action);
+    }
 
+    private Action startScheduledAction(final JpaAction action) {
         // check if we need to override running update actions
         final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
@@ -631,14 +691,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Action action) {
         return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
-    }
-
-    @Override
-    public List<Long> findActionsByRolloutGroupParentAndStatus(final Rollout rollout,
-            final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutAndRolloutGroupParentAndStatus((JpaRollout) rollout,
-                (JpaRolloutGroup) rolloutGroupParent, actionStatus).stream().map(ident -> ident.getId())
-                .collect(Collectors.toList());
     }
     
     @Override

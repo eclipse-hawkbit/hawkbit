@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.fest.assertions.core.Condition;
@@ -59,7 +59,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Deployment Action Resource")
-public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoDB {
+public class DdiDeploymentBaseTest extends AbstractRestIntegrationTest {
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
 

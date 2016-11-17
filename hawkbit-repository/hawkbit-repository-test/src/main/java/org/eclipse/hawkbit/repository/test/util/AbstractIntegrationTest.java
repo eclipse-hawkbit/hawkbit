@@ -10,13 +10,20 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.junit.rules.RuleChain.outerRule;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.TestConfiguration;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -47,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -55,11 +63,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.rules.MethodRule;
-import org.junit.rules.TestWatchman;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -69,13 +78,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,8 +90,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.collect.Lists;
-
-import de.flapdoodle.embed.mongo.MongodExecutable;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -97,9 +101,8 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 // refreshed we e.g. get two instances of CacheManager which leads to very
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@TestPropertySource(properties = { "spring.data.mongodb.port=0", "spring.mongodb.embedded.version=3.2.7" })
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
-    protected static Logger LOG = null;
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
 
@@ -172,7 +175,13 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected SystemSecurityContext systemSecurityContext;
 
     @Autowired
-    protected TestRepositoryManagement testRepositoryManagement;
+    private ArtifactFilesystemProperties artifactFilesystemProperties;
+
+    @Autowired
+    protected ArtifactRepository binaryArtifactRepository;
+
+    @Autowired
+    protected TenantAwareCacheManager cacheManager;
 
     protected MockMvc mvc;
 
@@ -186,16 +195,34 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected TestdataFactory testdataFactory;
 
     @Autowired
-    protected GridFsOperations operations;
-
-    @Autowired
-    protected MongodExecutable mongodExecutable;
-
-    @Autowired
     protected ServiceMatcher serviceMatcher;
 
     @Rule
+    // Cleaning repository will fire "delete" events. We won't count them to the
+    // test execution. So there is order between both rules:
+    public RuleChain ruleChain = outerRule(new CleanRepositoryRule()).around(new EventVerifier());
+
+    @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
+
+    @Rule
+    public TestWatcher testLifecycleLoggerRule = new TestWatcher() {
+
+        @Override
+        protected void starting(final Description description) {
+            LOG.info("Starting Test {}...", description.getMethodName());
+        };
+
+        @Override
+        protected void succeeded(final Description description) {
+            LOG.info("Test {} succeeded.", description.getMethodName());
+        };
+
+        @Override
+        protected void failed(final Throwable e, final Description description) {
+            LOG.error("Test {} failed with {}.", description.getMethodName(), e);
+        }
+    };
 
     protected Environment environment = null;
 
@@ -250,14 +277,19 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        return rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
+        final Rollout rollout = rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName)
                 .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
                 conditions);
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+
+        return rolloutManagement.findRolloutById(rollout.getId());
     }
 
     @Before
@@ -284,13 +316,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     }
 
     @After
-    public void after() {
-        testRepositoryManagement.clearTestRepository();
-    }
-
-    @After
-    public void cleanCurrentCollection() {
-        operations.delete(new Query());
+    public void cleanCurrentCollection() throws IOException {
+        FileUtils.deleteDirectory(new File(artifactFilesystemProperties.getPath()));
     }
 
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
@@ -300,30 +327,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 .addFilter(new ExcludePathAwareShallowETagFilter(
                         "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"));
     }
-
-    @Rule
-    public MethodRule watchman = new TestWatchman() {
-        @Override
-        public void starting(final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.info("Starting Test {}...", method.getName());
-            }
-        }
-
-        @Override
-        public void succeeded(final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.info("Test {} succeeded.", method.getName());
-            }
-        }
-
-        @Override
-        public void failed(final Throwable e, final FrameworkMethod method) {
-            if (LOG != null) {
-                LOG.error("Test {} failed with {}.", method.getName(), e);
-            }
-        }
-    };
 
     private static CIMySqlTestDatabase tesdatabase;
 

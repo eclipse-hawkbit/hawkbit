@@ -790,9 +790,10 @@ public class TestdataFactory {
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
             final String descriptionPrefix) {
 
-        return targetManagement.createTargets(IntStream
-                .range(0, numberOfTargets).mapToObj(i -> entityFactory.target().create()
-                        .controllerId(controllerIdPrefix + i).description(descriptionPrefix + i))
+        return targetManagement.createTargets(IntStream.range(0, numberOfTargets)
+                .mapToObj(i -> entityFactory.target().create()
+                        .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
+                        .description(descriptionPrefix + i))
                 .collect(Collectors.toList()));
     }
 

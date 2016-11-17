@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -42,6 +43,8 @@ import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -117,8 +120,87 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that rollout can be created")
     public void createRollout() throws Exception {
+        testdataFactory.createTargets(20, "target", "rollout");
+
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        postRollout("rollout1", 10, dsA.getId(), "name==target1");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*");
+    }
+
+    @Test
+    @Description("Testing that rollout can be created with groups")
+    public void createRolloutWithGroupsDefinitions() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
+
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
+
+        final float percentTargetsInGroup1 = 20;
+        final float percentTargetsInGroup2 = 100;
+
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc")
+                        .targetPercentage(percentTargetsInGroup1).build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc")
+                        .targetPercentage(percentTargetsInGroup2).build());
+
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout2", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
+
+    }
+
+    @Test
+    @Description("Testing that no rollout with groups that have illegal percentages can be created")
+    public void createRolloutWithToLowlPercentage() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
+
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
+
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
+                        .build());
+
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+
+    }
+
+    @Test
+    @Description("Testing that no rollout with groups that have illegal percentages can be created")
+    public void createRolloutWithToHighPercentage() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
+
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
+
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)
+                        .build());
+
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+
     }
 
     @Test
@@ -133,20 +215,26 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Description("Testing that rollout paged list contains rollouts")
     public void rolloutPagedListContainsAllRollouts() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        testdataFactory.createTargets(20, "target", "rollout");
+
         // setup - create 2 rollouts
-        postRollout("rollout1", 10, dsA.getId(), "name==target1");
-        postRollout("rollout2", 5, dsA.getId(), "name==target2");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*");
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*");
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.checkCreatingRollouts(0);
 
         mvc.perform(get("/rest/v1/rollouts")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
                 .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
                 .andExpect(jsonPath("content[0].status", equalTo("ready")))
-                .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==target1")))
+                .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("id==target*")))
                 .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
                 .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
                 .andExpect(jsonPath("content[1].status", equalTo("ready")))
-                .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("name==target2")))
+                .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
                 .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())));
     }
 
@@ -154,9 +242,15 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Description("Testing that rollout paged list is limited by the query param limit")
     public void rolloutPagedListIsLimitedToQueryParam() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        testdataFactory.createTargets(20, "target", "rollout");
+
         // setup - create 2 rollouts
-        postRollout("rollout1", 10, dsA.getId(), "name==target1");
-        postRollout("rollout2", 5, dsA.getId(), "name==target2");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*");
+        postRollout("rollout2", 5, dsA.getId(), "id==target*");
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.checkCreatingRollouts(0);
 
         mvc.perform(get("/rest/v1/rollouts?limit=1")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -186,7 +280,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
-    @Description("Testing that starting the rollout switches the state to running")
+    @Description("Testing that starting the rollout switches the state to starting and then to running")
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
@@ -199,6 +293,15 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // check rollout is in starting state
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("status", equalTo("starting")));
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // check rollout is in running state
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -221,6 +324,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -247,6 +353,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -277,6 +386,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // starting rollout - already started should lead into bad request
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -315,6 +427,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // retrieve rollout groups from created rollout - 2 groups exists
         // (amountTargets / groupSize = 2)
@@ -408,6 +523,9 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
         rolloutManagement.startRollout(rollout);
 
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
+
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
@@ -431,9 +549,11 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
         // starting rollout
-        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())
-                .param(MgmtRestConstants.REQUEST_PARAMETER_ASYNC, "true")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
 
         // check if running
         assertThat(doWithTimeout(() -> getRollout(rollout.getId()), this::success, 60_000, 100)).isNotNull();
@@ -547,17 +667,23 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     private void postRollout(final String name, final int groupSize, final long distributionSetId,
             final String targetFilterQuery) throws Exception {
         mvc.perform(post("/rest/v1/rollouts")
-                .content(JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery, null))
+                .content(JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        return rolloutManagement.createRollout(
+        final Rollout rollout = rolloutManagement.createRollout(
                 entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
-                amountGroups, new RolloutGroupConditionBuilder()
+                amountGroups, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+
+        return rolloutManagement.findRolloutById(rollout.getId());
     }
 
     protected boolean success(final Rollout result) {

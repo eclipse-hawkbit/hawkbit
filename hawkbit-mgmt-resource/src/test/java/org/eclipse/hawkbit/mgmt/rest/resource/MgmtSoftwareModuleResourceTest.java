@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +44,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -70,7 +71,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Software Module Resource")
-public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestWithMongoDB {
+public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTest {
 
     @Before
     public void assertPreparationOfRepo() {
@@ -162,10 +163,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         assertThat(artifactManagement.countArtifactsAll()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
-        assertTrue("Wrong artifact content", IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement
-                        .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
-                        .getFileInputStream()));
+        try (InputStream fileInputStream = artifactManagement
+                .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
+                .getFileInputStream()) {
+            assertTrue("Wrong artifact content",
+                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
+        }
 
         // hashes
         assertThat(artifactManagement.findArtifactByFilename("origFilename").get(0).getSha1Hash()).as("Wrong sha1 hash")

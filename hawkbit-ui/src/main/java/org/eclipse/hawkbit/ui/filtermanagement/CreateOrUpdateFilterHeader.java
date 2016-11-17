@@ -36,10 +36,8 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
-import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -223,27 +221,17 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createListeners() {
-        nameTextFieldBlusListner = new BlurListener() {
-            private static final long serialVersionUID = -2300955622205082213L;
-
-            @Override
-            public void blur(final BlurEvent event) {
-                if (!Strings.isNullOrEmpty(nameTextField.getValue())) {
-                    captionLayout.removeComponent(nameTextField);
-                    captionLayout.addComponent(nameLabel);
-                }
+        nameTextFieldBlusListner = event -> {
+            if (!Strings.isNullOrEmpty(nameTextField.getValue())) {
+                captionLayout.removeComponent(nameTextField);
+                captionLayout.addComponent(nameLabel);
             }
         };
-        nameLayoutClickListner = new LayoutClickListener() {
-            private static final long serialVersionUID = 6188308537393130004L;
-
-            @Override
-            public void layoutClick(final LayoutClickEvent event) {
-                if (event.getClickedComponent() instanceof Label) {
-                    captionLayout.removeComponent(nameLabel);
-                    captionLayout.addComponent(nameTextField);
-                    nameTextField.focus();
-                }
+        nameLayoutClickListner = event -> {
+            if (event.getClickedComponent() instanceof Label) {
+                captionLayout.removeComponent(nameLabel);
+                captionLayout.addComponent(nameTextField);
+                nameTextField.focus();
             }
         };
 

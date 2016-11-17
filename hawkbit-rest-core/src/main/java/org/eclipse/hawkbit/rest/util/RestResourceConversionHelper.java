@@ -180,9 +180,9 @@ public final class RestResourceConversionHelper {
         response.setHeader(CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
         response.setHeader(CONTENT_LENGTH, String.valueOf(r.getLength()));
 
-        try {
-            copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
-                    r.getStart(), r.getLength());
+        try (InputStream inputStream = file.getFileInputStream()) {
+            copyStreams(inputStream, response.getOutputStream(), controllerManagement, statusId, r.getStart(),
+                    r.getLength());
         } catch (final IOException e) {
             LOG.error("fullfileRequest of file ({}) failed!", artifact.getFilename(), e);
             throw new FileSteamingFailedException(artifact.getFilename());
@@ -246,8 +246,9 @@ public final class RestResourceConversionHelper {
         response.setContentType("multipart/byteranges; boundary=" + MULTIPART_BOUNDARY);
         response.setStatus(SC_PARTIAL_CONTENT);
 
-        try {
-            for (final ByteRange r : ranges) {
+        for (final ByteRange r : ranges) {
+            try (InputStream inputStream = file.getFileInputStream()) {
+
                 // Add multipart boundary and header fields for every range.
                 response.getOutputStream().println();
                 response.getOutputStream().println("--" + MULTIPART_BOUNDARY);
@@ -255,17 +256,24 @@ public final class RestResourceConversionHelper {
                         .println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
 
                 // Copy single part range of multi part range.
-                copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
-                        r.getStart(), r.getLength());
+                copyStreams(inputStream, response.getOutputStream(), controllerManagement, statusId, r.getStart(),
+                        r.getLength());
+            } catch (final IOException e) {
+                throwFileStreamingFailedException(artifact, e);
             }
-
+        }
+        try {
             // End with final multipart boundary.
             response.getOutputStream().println();
             response.getOutputStream().print("--" + MULTIPART_BOUNDARY + "--");
         } catch (final IOException e) {
-            LOG.error("multipartRangeRequest of file ({}) failed!", artifact.getFilename(), e);
-            throw new FileSteamingFailedException(artifact.getFilename());
+            throwFileStreamingFailedException(artifact, e);
         }
+    }
+
+    private static void throwFileStreamingFailedException(final Artifact artifact, final IOException e) {
+        LOG.error("multipartRangeRequest of file ({}) failed!", artifact.getFilename(), e);
+        throw new FileSteamingFailedException(artifact.getFilename());
     }
 
     private static void handleStandardRangeRequest(final Artifact artifact, final HttpServletResponse response,
@@ -276,9 +284,9 @@ public final class RestResourceConversionHelper {
         response.setHeader(CONTENT_LENGTH, String.valueOf(r.getLength()));
         response.setStatus(SC_PARTIAL_CONTENT);
 
-        try {
-            copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
-                    r.getStart(), r.getLength());
+        try (InputStream inputStream = file.getFileInputStream()) {
+            copyStreams(inputStream, response.getOutputStream(), controllerManagement, statusId, r.getStart(),
+                    r.getLength());
         } catch (final IOException e) {
             LOG.error("standardRangeRequest of file ({}) failed!", artifact.getFilename(), e);
             throw new FileSteamingFailedException(artifact.getFilename());

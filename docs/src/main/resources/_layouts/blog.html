@@ -1,0 +1,78 @@
+---
+layout: default
+---
+{% include base.html %}
+<div class="container content">
+  <div class="row">
+    <div class="span12">
+    <div class="page-header pull-left">
+        <h3>
+          <a href="{{$base}}/blog/index.html">Go Back</a>
+      </h3>
+    </div>
+    <div class="page-header pull-right">
+        <a href="https://github.com/eclipse/hawkbit/tree/development/docs/blog" target="_blank"><h4>Add a new blog post!</h4></a>
+    </div>
+       </div>
+  </div>
+
+
+    <h2>{{page.title}}</h2>
+    <div class="postmetadata">
+      <ul>
+        {% if page.eclipseid %}
+        
+          <li>
+            <i class="icon-user"></i>
+            <a href="http://projects.eclipse.org/users/{{page.eclipseid}}">{{ page.author }}</a>
+          </li>
+          {% elsif page.githubid %}
+           <li>
+            <i class="icon-user"></i>
+            <a href="https://github.com/{{page.githubid}}">{{ page.author }}</a>
+          </li>
+
+           {% else %}
+          <li>
+            <i class="icon-user"></i>{{ page.author }}
+          </li>
+        {% endif %}
+        <li>
+          <i class="icon-calendar"></i> {{ page.date | date: "%b %-d, %Y" }}
+        </li>
+    </ul>
+    </div>
+    <section>
+	  {{ content }}
+
+     {% if page.videourl %}
+          <div class="{{ page.style }}">
+             <a title="{{page.imgtitle}}" data-rel="prettyPhoto" href="{{page.videourl}}" rel="prettyPhoto" >
+              <img src="{{ $base}}/img/blogpics/{{page.imagename}}"  class="box-img img-responsive zoom1">
+               <i class="fa fa-play-circle fa-5 play-icon"></i>
+             </a>
+          </div>
+      
+       {% endif %}
+
+
+</div>
+
+<!-- Pagination -->
+{% if paginator.total_pages > 1 %}
+<div class="pagination">
+  <ul>
+{% if paginator.previous_page %}
+    <li class="prev"><a href="/blog/{% if paginator.previous_page != 1 %}page{{ paginator.previous_page }}{% endif %}">Previous</a></li>
+{% endif %}
+    <li><a {% if paginator.page == 1 %}class="active" {% endif %}href="/blog/">1</a></li>
+{% for count in (2..paginator.total_pages) %}
+    <li><a {% if paginator.page == count %}class="active" {% endif %}href="/blog/page{{ count }}">{{ count }}</a></li>
+{% endfor %}
+{% if paginator.next_page %}
+    <li class="next"><a href="/blog/page{{ paginator.next_page }}">Next</a></li>
+{% endif %}
+  </ul>
+</div>
+{% endif %}
+</div>

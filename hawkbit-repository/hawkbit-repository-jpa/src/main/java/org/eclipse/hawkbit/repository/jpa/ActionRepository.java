@@ -37,7 +37,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -341,6 +340,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *
      * Finding all actions of a specific rolloutgroup parent relation.
      *
+     * @param pageable
+     *            page parameters
      * @param rollout
      *            the rollout the actions belong to
      * @param rolloutGroupParent
@@ -350,7 +351,38 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
-    List<Identifiable<Long>> findByRolloutAndRolloutGroupParentAndStatus(JpaRollout rollout,
+    Page<Action> findByRolloutAndRolloutGroupParentAndStatus(Pageable pageable, JpaRollout rollout,
+            JpaRolloutGroup rolloutGroupParent, Status actionStatus);
+
+    /**
+     * Retrieving all actions referring to the first group of a rollout.
+     *
+     * @param pageable
+     *            page parameters
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions referring a specific rollout and a specific parent
+     *         rolloutgroup in a specific status
+     */
+    Page<Action> findByRolloutAndRolloutGroupParentIsNullAndStatus(Pageable pageable, JpaRollout rollout,
+            Status actionStatus);
+
+    /**
+     * Retrieving all actions referring to a given rollout group with a specific
+     * a specific status.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroupParent
+     *            the parent rollout group the actions should reference
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions ids referring a specific rollout group and a specific
+     *         status
+     */
+    List<Long> findByRolloutAndRolloutGroupAndStatus(JpaRollout rollout,
             JpaRolloutGroup rolloutGroupParent, Status actionStatus);
 
     /**

@@ -1,0 +1,31 @@
+---
+layout: default
+---
+{% include base.html %}
+
+<div class="container content">
+  <div class="row">
+    <div class="span12">
+   <div class="page-header pull-left">
+        <h3>
+          <a href="{{base}}/news/index.html">Go Back</a>
+      </h3>
+    </div>
+    </div>
+  </div>
+
+
+
+    <h2>{{page.title}}</h2>
+     <div class="postmetadata">
+      <ul>
+        <li>
+          <i class="icon-calendar"></i> {{ page.date | date: "%b %-d, %Y" }}
+        </li>
+    </ul>
+    </div>
+    
+    <section>
+   		 {{ content }}   
+    </section>
+</div>

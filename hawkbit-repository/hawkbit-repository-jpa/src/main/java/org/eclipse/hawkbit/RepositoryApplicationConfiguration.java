@@ -464,7 +464,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link EventEntityManagerHolder} bean.
-     * 
+     *
      * @return a new {@link EventEntityManagerHolder}
      */
     @Bean
@@ -475,7 +475,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link EventEntityManager} bean.
-     * 
+     *
      * @param aware
      *            the tenant aware
      * @param entityManager
@@ -530,5 +530,4 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final AutoAssignChecker autoAssignChecker) {
         return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
     }
-
 }

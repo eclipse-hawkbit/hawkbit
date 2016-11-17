@@ -1,0 +1,36 @@
+<!-- Middle Content -->
+
+<div class="box">
+  
+{% for main in site.pages  %}
+<!--   {% if main.series == 'homepagemiddle' %}-->
+     <div class="container-fluid wow {{main.animatestyle}} {{main.style}}">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2 class="ex">Devices</h2>
+          <p class="ex">Easy to connect devices to either the direct device protocol using HTTP or integrate with any protocol your device is talking and build an device to hawkBit-DMF adapter.</p>
+                 
+        </div>
+        <div class="col-md-4 text-center">
+          <h2 class="ex">User Interface</h2>
+          <p class="ex">The user interface allows to manage and monitor your software update process for either a small group of devices till monitor a large software rollout.</p>
+        
+       </div>
+        <div class="col-md-4 text-center">
+          <h2 class="ex">Cloud Ready</h2>
+          <p class="ex">hawkBit is based on the spring-boot project and allows you to adapt and deploy it to any cloud-platform</p>
+          
+              
+        </div>
+
+      </div>
+    
+    </div> 
+    <!-- /container -->
+  <!-- {% endif %}-->
+   
+ {% endfor %}
+
+ </div>
+ <hr>

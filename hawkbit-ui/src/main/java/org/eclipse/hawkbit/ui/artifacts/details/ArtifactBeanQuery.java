@@ -34,12 +34,12 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  * beans.
  */
 public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
-    private static final long serialVersionUID = -333786310371208962L;
+    private static final long serialVersionUID = 1L;
     private Sort sort = new Sort(Direction.DESC, "filename");
-    private transient ArtifactManagement artifactManagement = null;
+    private transient ArtifactManagement artifactManagement;
     private transient EntityFactory entityFactory;
-    private transient Page<Artifact> firstPagetArtifacts = null;
-    private Long baseSwModuleId = null;
+    private transient Page<Artifact> firstPagetArtifacts;
+    private Long baseSwModuleId;
 
     /**
      * Parametric Constructor.

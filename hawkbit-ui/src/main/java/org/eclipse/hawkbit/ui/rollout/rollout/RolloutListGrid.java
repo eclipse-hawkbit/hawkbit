@@ -408,7 +408,7 @@ public class RolloutListGrid extends AbstractGrid {
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
         if (RolloutStatus.READY.equals(rolloutStatus)) {
-            rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
+            rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
             return;
         }

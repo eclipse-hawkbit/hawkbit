@@ -22,7 +22,7 @@ import feign.Logger;
 
 /**
  * The simulated device factory to create either {@link DMFSimulatedDevice} or
- * {@link DDISimulatedDevice#}.
+ * {@link DDISimulatedDevice}.
  */
 @Service
 public class SimulatedDeviceFactory {
@@ -61,20 +61,30 @@ public class SimulatedDeviceFactory {
             final int pollDelaySec, final URL baseEndpoint, final String gatewayToken, final boolean pollImmediatly) {
         switch (protocol) {
         case DMF_AMQP:
-            final AbstractSimulatedDevice device = new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
-            device.setNextPollCounterSec(pollDelaySec);
-            if (pollImmediatly) {
-                spSenderService.createOrUpdateThing(tenant, id);
-            }
-            return device;
+            return createDmfDevice(id, tenant, pollDelaySec, pollImmediatly);
         case DDI_HTTP:
-            final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())
-                    .requestInterceptor(new GatewayTokenInterceptor(gatewayToken)).logLevel(Logger.Level.BASIC)
-                    .target(ControllerResource.class, baseEndpoint.toString());
-            return new DDISimulatedDevice(id, tenant, pollDelaySec, controllerResource, deviceUpdater);
+            return createDdiDevice(id, tenant, pollDelaySec, baseEndpoint, gatewayToken);
         default:
             throw new IllegalArgumentException("Protocol " + protocol + " unknown");
         }
+    }
+
+    private AbstractSimulatedDevice createDdiDevice(final String id, final String tenant, final int pollDelaySec,
+            final URL baseEndpoint, final String gatewayToken) {
+        final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())
+                .requestInterceptor(new GatewayTokenInterceptor(gatewayToken)).logLevel(Logger.Level.BASIC)
+                .target(ControllerResource.class, baseEndpoint.toString());
+        return new DDISimulatedDevice(id, tenant, pollDelaySec, controllerResource, deviceUpdater);
+    }
+
+    private AbstractSimulatedDevice createDmfDevice(final String id, final String tenant, final int pollDelaySec,
+            final boolean pollImmediatly) {
+        final AbstractSimulatedDevice device = new DMFSimulatedDevice(id, tenant, spSenderService, pollDelaySec);
+        device.setNextPollCounterSec(pollDelaySec);
+        if (pollImmediatly) {
+            spSenderService.createOrUpdateThing(tenant, id);
+        }
+        return device;
     }
 
     /**

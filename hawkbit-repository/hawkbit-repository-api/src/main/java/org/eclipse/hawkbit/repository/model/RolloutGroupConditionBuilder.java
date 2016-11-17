@@ -88,4 +88,17 @@ public class RolloutGroupConditionBuilder {
         conditions.setErrorActionExp(expression);
         return this;
     }
+
+    /**
+     * Sets condition defaults.
+     * 
+     * @return the builder itself
+     */
+    public RolloutGroupConditionBuilder withDefaults() {
+        successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50");
+        successAction(RolloutGroupSuccessAction.NEXTGROUP, null);
+        errorCondition(RolloutGroupErrorCondition.THRESHOLD, "50");
+        errorAction(RolloutGroupErrorAction.PAUSE, null);
+        return this;
+    }
 }

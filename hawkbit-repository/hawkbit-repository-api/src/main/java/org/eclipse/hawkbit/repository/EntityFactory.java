@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
@@ -56,6 +57,11 @@ public interface EntityFactory {
      * @return {@link TagBuilder} object
      */
     TagBuilder tag();
+
+    /**
+     * @return {@link RolloutGroupBuilder} object
+     */
+    RolloutGroupBuilder rolloutGroup();
 
     /**
      * @return {@link DistributionSetTypeBuilder} object

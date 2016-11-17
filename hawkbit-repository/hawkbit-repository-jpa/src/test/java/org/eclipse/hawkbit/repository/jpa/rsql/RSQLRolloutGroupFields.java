@@ -86,7 +86,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
                 entityFactory.rollout().create()
                         .set(distributionSetManagement.findDistributionSetById(distributionSetId)).name(name)
                         .targetFilterQuery(targetFilterQuery),
-                amountGroups, new RolloutGroupConditionBuilder()
+                amountGroups, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
 }

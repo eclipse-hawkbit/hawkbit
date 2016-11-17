@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.io.IOUtils;
@@ -28,9 +29,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -45,10 +43,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
-public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
-    public ArtifactManagementTest() {
-        LOG = LoggerFactory.getLogger(ArtifactManagementTest.class);
-    }
+public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Test method for
@@ -155,25 +150,17 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getGridFsFileName())
                 .isNotEqualTo(((JpaArtifact) result2).getGridFsFileName());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNotNull();
+
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNotNull();
+
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
     }
@@ -202,18 +189,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
 
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
     }
 
     @Test
@@ -233,8 +214,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        assertTrue("The stored binary matches the given binary", IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement.loadArtifactBinary(result).getFileInputStream()));
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result).getFileInputStream()) {
+            assertTrue("The stored binary matches the given binary",
+                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
+        }
     }
 
     @Test

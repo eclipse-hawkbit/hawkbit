@@ -1,0 +1,82 @@
+---
+layout: default
+---
+{% include base.html %}
+
+<div class="container content">
+	<div class="row">
+		<div class="span12">
+		<div class="page-header">
+				<h2>
+				Downloads
+			</h2>
+		</div>
+		</div>
+	</div>
+
+    {% for download in site.pages   %}
+  	  {% if download.section == 'downloadsA' %}
+  			
+  		<!--	<div class="box box-dl">
+  			<div class="col-md-1"><i class="{{download.imagename}}"></i></div>
+  					<div href="#" class="col-md-11">
+  						<h3>
+  							<b>{{download.title}}</b>
+  						</h3>
+  						{{download.content}}
+  					</div>
+  				
+  			</div>
+  			<hr class="separator">-->
+
+
+<div class="box">
+<div class="row">
+  
+<div class="col-md-5">
+<table class="pricing">
+<tfoot>
+<tr>
+<td></td>
+</tr>
+</tfoot>
+<tbody>
+<tr>
+<td class="focus">
+hawkBit
+<span>Download hawkBit through these sources</span>
+</td>
+
+</tbody>
+</table>
+</div>
+<div class="col-md-1"></div>
+<div class="col-md-4">
+<table class="pricing">
+<tfoot>
+<tr>
+<td></td>
+</tr>
+</tfoot>
+<tbody>
+<tr>
+<td class="focus">
+</td>
+</tr>
+<tr>
+<tr>
+</tbody>
+</table>
+</div>
+
+</div>
+
+<hr>
+<div class="container clearfix">
+<h1>Source code</h1>
+<p>The source code for Eclipse hawkBit is available on <a href="http://github.com/eclipse/hawkBit" target="_blank"><b>Github</b></a></p>
+</div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
