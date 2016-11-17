@@ -230,6 +230,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetUpdatedEvent(mtargetInfo.getTarget(), applicationContext.getId())));
         }
 
         return targetInfoRepository.save(mtargetInfo);
