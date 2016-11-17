@@ -45,10 +45,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Controller adds a new action status.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     public void controllerAddsActionStatus() {
         final DistributionSet ds = testdataFactory.createDistributionSet("");

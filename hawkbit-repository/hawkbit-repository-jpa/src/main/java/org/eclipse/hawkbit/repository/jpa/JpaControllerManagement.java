@@ -418,7 +418,12 @@ public class JpaControllerManagement implements ControllerManagement {
         targetInfo.setLastTargetQuery(System.currentTimeMillis());
         targetInfo.setRequestControllerAttributes(false);
 
-        return targetInfoRepository.save(targetInfo).getTarget();
+        final Target result = targetInfoRepository.save(targetInfo).getTarget();
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(result, applicationContext.getId())));
+
+        return result;
     }
 
     @Override
