@@ -142,16 +142,17 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s by
-     * "like controllerId or like description or like ip address".
+     * "like controllerId or like name or like description".
      *
      * @param searchText
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> likeNameOrDescriptionOrIp(final String searchText) {
+    public static Specification<JpaTarget> likeIdOrNameOrDescription(final String searchText) {
         return (targetRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower),
+            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
+                    cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower),
                     cb.like(cb.lower(targetRoot.get(JpaTarget_.description)), searchTextToLower));
         };
     }
