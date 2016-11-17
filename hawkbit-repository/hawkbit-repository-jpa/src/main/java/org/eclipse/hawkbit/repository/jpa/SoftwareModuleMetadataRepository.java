@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -28,17 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface SoftwareModuleMetadataRepository
         extends PagingAndSortingRepository<JpaSoftwareModuleMetadata, SwMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaSoftwareModuleMetadata> {
-
-    /**
-     * Saves all given entities.
-     *
-     * @param entities
-     * @return the saved entities
-     * @throws IllegalArgumentException
-     *             in case the given entity is (@literal null}.
-     */
-    @Override
-    <S extends JpaSoftwareModuleMetadata> List<S> save(Iterable<S> entities);
 
     /**
      * finds all software module meta data of the given software module id.

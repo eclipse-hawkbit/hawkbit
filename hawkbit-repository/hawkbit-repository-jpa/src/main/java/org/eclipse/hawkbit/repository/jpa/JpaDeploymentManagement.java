@@ -71,7 +71,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
@@ -149,7 +148,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
@@ -162,7 +160,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
         return assignDistributionSet(dsID, targets, null);
@@ -171,7 +168,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
@@ -186,7 +182,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
@@ -279,10 +274,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
                 currentUser, tIds));
         targetIds.forEach(tIds -> targetInfoRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
-        final Map<String, JpaAction> targetIdsToActions = actionRepository
-                .save(targets.stream().map(t -> createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup))
-                        .collect(Collectors.toList()))
-                .stream().collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
+        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
+                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+                .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
@@ -294,7 +288,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         entityManager.flush();
         // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(),
                 targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
 
@@ -368,7 +362,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return cancelledTargetIds;
 
     }
-
 
     private DistributionSetAssignmentResult assignDistributionSetByTargetId(@NotNull final JpaDistributionSet set,
             @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
@@ -506,9 +499,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Rollout rollout,
             final RolloutGroup rolloutGroupParent, final int limit) {
-        JpaRollout jpaRollout = (JpaRollout) rollout;
-        JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupParent;
-        PageRequest pageRequest = new PageRequest(0, limit);
+        final JpaRollout jpaRollout = (JpaRollout) rollout;
+        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupParent;
+        final PageRequest pageRequest = new PageRequest(0, limit);
         if (rolloutGroupParent == null) {
             return actionRepository.findByRolloutAndRolloutGroupParentIsNullAndStatus(pageRequest, jpaRollout,
                     Action.Status.SCHEDULED);
@@ -602,7 +595,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActionsByTarget(final Target target) {
-        return Collections.unmodifiableList(actionRepository.findByTarget((JpaTarget) target));
+        return Collections.unmodifiableList(actionRepository.findByTarget(target));
     }
 
     @Override
@@ -692,7 +685,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Action action) {
         return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
     }
-    
+
     @Override
     public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
         return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);

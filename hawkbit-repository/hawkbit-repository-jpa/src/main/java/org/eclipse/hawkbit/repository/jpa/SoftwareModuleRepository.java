@@ -18,8 +18,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -87,17 +85,6 @@ public interface SoftwareModuleRepository
     Page<SoftwareModule> findByAssignedTo(Pageable pageable, JpaDistributionSet set);
 
     /**
-     * 
-     * 
-     * @param setId
-     *            to search for
-     * @return all {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet}
-     */
-    @EntityGraph(value = "SoftwareModule.artifacts", type = EntityGraphType.LOAD)
-    List<JpaSoftwareModule> findByAssignedToId(Long setId);
-
-    /**
      * @param pageable
      *            the page request to page the result set
      * @param set
@@ -108,23 +95,6 @@ public interface SoftwareModuleRepository
      *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
      */
     Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, SoftwareModuleType type);
-
-    /**
-     * retrieves all software modules with a given {@link SoftwareModuleType}
-     * and {@link SoftwareModule#getId()}.
-     *
-     * @param ids
-     *            to search for
-     * @param type
-     *            to search for
-     * @return {@link List} of found {@link SoftwareModule}s
-     */
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm FROM JpaSoftwareModule sm WHERE sm.id IN ?1 and sm.type = ?2")
-    List<SoftwareModule> findByIdInAndType(Iterable<Long> ids, JpaSoftwareModuleType type);
-
-    @Override
-    <S extends JpaSoftwareModule> List<S> save(Iterable<S> entities);
 
     /**
      * retrieves all software modules with a given

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,18 +37,6 @@ public interface ActionStatusRepository
      * @return number of actions in repository
      */
     Long countByAction(JpaAction action);
-
-    /**
-     * Counts {@link ActionStatus} entries of given {@link Action} with given
-     * {@link Status} in repository.
-     * 
-     * @param action
-     *            to count status entries
-     * @param status
-     *            to filter for
-     * @return number of actions in repository
-     */
-    Long countByActionAndStatus(JpaAction action, Status status);
 
     /**
      * Retrieves all {@link ActionStatus} entries from repository of given

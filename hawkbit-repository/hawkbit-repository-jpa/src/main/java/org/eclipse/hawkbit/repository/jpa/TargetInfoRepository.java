@@ -52,5 +52,7 @@ public interface TargetInfoRepository {
      *
      * @return persisted or updated {@link Entity}
      */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     <S extends JpaTargetInfo> S save(S entity);
 }

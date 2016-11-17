@@ -32,16 +32,6 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Jpa
      */
     TenantMetaData findByTenantIgnoreCase(String tenant);
 
-    /**
-     * Counts the tenant by the tenant field which is either a count of one or a
-     * count of zero, this is mostly to check if the tenant exists.
-     * 
-     * @param tenant
-     *            the name of the tenant to check if it is exists
-     * @return the count of the tenant by name which is either one or zero
-     */
-    Long countByTenantIgnoreCase(String tenant);
-
     @Override
     List<JpaTenantMetaData> findAll();
 

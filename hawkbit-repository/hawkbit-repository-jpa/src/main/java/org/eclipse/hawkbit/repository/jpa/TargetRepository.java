@@ -19,8 +19,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -50,15 +48,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     JpaTarget findByControllerId(String controllerID);
 
     /**
-     * Finds targets by given list of {@link Target#getControllerId()}s.
-     *
-     * @param controllerIDs
-     *            to serach for
-     * @return list of found {@link Target}s
-     */
-    List<Target> findByControllerIdIn(String... controllerIDs);
-
-    /**
      * Deletes the {@link Target}s with the given target IDs.
      *
      * @param targetIDs
@@ -68,7 +57,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
-    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     void deleteByIdIn(final Collection<Long> targetIDs);
 
     /**
@@ -108,18 +96,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByTargetInfoUpdateStatus(final Pageable pageable, final TargetUpdateStatus status);
 
     /**
-     * Finds all targets that have defined {@link DistributionSet} installed.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param set
-     *            is the {@link DistributionSet} to filter for.
-     *
-     * @return found targets
-     */
-    Page<Target> findByTargetInfoInstalledDistributionSet(final Pageable pageable, final JpaDistributionSet set);
-
-    /**
      * retrieves the {@link Target}s which has the {@link DistributionSet}
      * installed with the given ID.
      * 
@@ -130,48 +106,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return the found {@link Target}s
      */
     Page<Target> findByTargetInfoInstalledDistributionSetId(final Pageable pageable, final Long setID);
-
-    /**
-     * Finds all targets that have defined {@link DistributionSet} assigned.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param set
-     *            is the {@link DistributionSet} to filter for.
-     *
-     * @return found targets
-     */
-    Page<Target> findByAssignedDistributionSet(final Pageable pageable, final JpaDistributionSet set);
-
-    /**
-     * Saves all given {@link Target}s.
-     *
-     * @param entities
-     * @return the saved entities
-     * @throws IllegalArgumentException
-     *             in case the given entity is (@literal null}.
-     *
-     * @see org.springframework.data.repository.CrudRepository#save(java.lang.Iterable)
-     */
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    <S extends JpaTarget> List<S> save(Iterable<S> entities);
-
-    /**
-     * Saves a given entity. Use the returned instance for further operations as
-     * the save operation might have changed the entity instance completely.
-     *
-     * @param entity
-     *            the target to save
-     * @return the saved entity
-     */
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    <S extends JpaTarget> S save(S entity);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
@@ -197,15 +131,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Long countByAssignedDistributionSetId(final Long distId);
 
     /**
-     * @param ids
-     *            of count in DB
-     * @return number of found {@link Target}s with given
-     *         {@link Target#getControllerId()}s
-     */
-    @Query("SELECT COUNT(t) FROM JpaTarget t WHERE t.controllerId IN ?1")
-    Long countByControllerIdIn(final Collection<String> ids);
-
-    /**
      * Counts number of targets with given
      * {@link TargetStatus#getInstalledDistributionSet()}.
      *
@@ -214,41 +139,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return number of found {@link Target}s.
      */
     Long countByTargetInfoInstalledDistributionSetId(final Long distId);
-
-    /**
-     * Finds all targets that have defined {@link DistributionSet} assigned or
-     * installed.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param assigned
-     *            {@link DistributionSet} filter for; please note: must not be
-     *            null
-     * @param installed
-     *            {@link DistributionSet} filter for; please note: must not be
-     *            null
-     *
-     * @return found targets
-     */
-    Page<Target> findByAssignedDistributionSetOrTargetInfoInstalledDistributionSet(final Pageable pageable,
-            final JpaDistributionSet assigned, final JpaDistributionSet installed);
-
-    /**
-     * Finds all targets that have defined {@link DistributionSet} assigned or
-     * installed.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param assigned
-     *            {@link DistributionSet} filter for; please note: must not be
-     *            null
-     * @param installed
-     *            {@link DistributionSet} filter for; please note: must not be
-     *            null
-     * @return found targets
-     */
-    Page<Target> findByAssignedDistributionSetIdOrTargetInfoInstalledDistributionSetId(final Pageable pageable,
-            final Long assigned, final Long installed);
 
     /**
      * Finds all {@link Target}s in the repository.
@@ -308,17 +198,4 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return a page of all targets related to a rollout group
      */
     Page<Target> findByActionsRolloutGroup(JpaRolloutGroup rolloutGroup, Pageable page);
-
-    /**
-     * Find all targets with action status for a specific group.
-     * 
-     * @param pageable
-     *            the page request parameter
-     * @param rolloutGroupId
-     *            the ID of the rollout group
-     * @return targets with action status
-     */
-    @Query("select DISTINCT NEW org.eclipse.hawkbit.repository.model.TargetWithActionStatus(a.target,a.status) from JpaAction a inner join fetch a.target t where  a.rolloutGroup.id = :rolloutGroupId")
-    Page<TargetWithActionStatus> findTargetsWithActionStatusByRolloutGroupId(final Pageable pageable,
-            @Param("rolloutGroupId") Long rolloutGroupId);
 }

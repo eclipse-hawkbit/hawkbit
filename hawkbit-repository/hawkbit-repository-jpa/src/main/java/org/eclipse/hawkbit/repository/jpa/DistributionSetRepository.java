@@ -106,19 +106,6 @@ public interface DistributionSetRepository
     List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Long... ids);
 
     /**
-     * Saves all given {@link DistributionSet}s.
-     *
-     * @param entities
-     * @return the saved entities
-     * @throws IllegalArgumentException
-     *             in case the given entity is (@literal null}.
-     *
-     * @see org.springframework.data.repository.CrudRepository#save(java.lang.Iterable)
-     */
-    @Override
-    <S extends JpaDistributionSet> List<S> save(Iterable<S> entities);
-
-    /**
      * Finds the distribution set for a specific action.
      * 
      * @param action

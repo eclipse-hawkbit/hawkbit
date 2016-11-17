@@ -161,10 +161,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             }
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
                     toBeChangedDSs.size(), Collections.emptyList(),
-                    Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)), myTag);
+                    Collections.unmodifiableList(
+                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                    myTag);
         } else {
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0, Collections.unmodifiableList(distributionSetRepository.save(toBeChangedDSs)),
+                    0,
+                    Collections.unmodifiableList(
+                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
                     Collections.emptyList(), myTag);
         }
 
@@ -820,7 +824,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         allDs.forEach(ds -> ds.addTag(tag));
 
-        return Collections.unmodifiableList(distributionSetRepository.save(allDs));
+        return Collections
+                .unmodifiableList(allDs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
     }
 
     @Override
@@ -846,7 +851,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private List<JpaDistributionSet> unAssignTag(final Collection<JpaDistributionSet> distributionSets,
             final DistributionSetTag tag) {
         distributionSets.forEach(ds -> ds.removeTag(tag));
-        return distributionSetRepository.save(distributionSets);
+        return Collections.unmodifiableList(
+                distributionSets.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
     }
 
     @Override

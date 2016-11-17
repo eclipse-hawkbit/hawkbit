@@ -536,9 +536,10 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
         final JpaSoftwareModule module = touch(moduleId);
 
-        return new ArrayList<>(softwareModuleMetadataRepository
-                .save(md.stream().map(meta -> new JpaSoftwareModuleMetadata(meta.getKey(), module, meta.getValue()))
-                        .collect(Collectors.toList())));
+        return Collections.unmodifiableList(md.stream()
+                .map(meta -> softwareModuleMetadataRepository
+                        .save(new JpaSoftwareModuleMetadata(meta.getKey(), module, meta.getValue())))
+                .collect(Collectors.toList()));
     }
 
     @Override

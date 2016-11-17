@@ -118,8 +118,8 @@ public class JpaTagManagement implements TagManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTagCreate> targetTags = (Collection) tt;
 
-        final List<TargetTag> save = Collections.unmodifiableList(targetTagRepository
-                .save(targetTags.stream().map(JpaTagCreate::buildTargetTag).collect(Collectors.toList())));
+        final List<TargetTag> save = Collections.unmodifiableList(targetTags.stream()
+                .map(ttc -> targetTagRepository.save(ttc.buildTargetTag())).collect(Collectors.toList()));
         afterCommit.afterCommit(() -> save.forEach(
                 tag -> eventPublisher.publishEvent(new TargetTagCreatedEvent(tag, applicationContext.getId()))));
         return save;
@@ -245,8 +245,9 @@ public class JpaTagManagement implements TagManagement {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final Collection<JpaTagCreate> creates = (Collection) dst;
 
-        final List<DistributionSetTag> save = Collections.unmodifiableList(distributionSetTagRepository
-                .save(creates.stream().map(JpaTagCreate::buildDistributionSetTag).collect(Collectors.toList())));
+        final List<DistributionSetTag> save = Collections.unmodifiableList(
+                creates.stream().map(create -> distributionSetTagRepository.save(create.buildDistributionSetTag()))
+                        .collect(Collectors.toList()));
         afterCommit.afterCommit(() -> save.forEach(tag -> eventPublisher
                 .publishEvent(new DistributionSetTagCreatedEvent(tag, applicationContext.getId()))));
         return save;

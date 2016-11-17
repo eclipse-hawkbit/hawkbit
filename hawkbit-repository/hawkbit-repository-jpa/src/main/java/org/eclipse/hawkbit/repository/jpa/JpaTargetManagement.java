@@ -60,7 +60,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -376,7 +375,9 @@ public class JpaTargetManagement implements TargetManagement {
         // some or none are assigned -> assign
         allTargets.forEach(target -> target.addTag(tag));
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                allTargets.size(), 0, Collections.unmodifiableList(targetRepository.save(allTargets)),
+                allTargets.size(), 0,
+                Collections
+                        .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
                 Collections.emptyList(), tag);
 
         // no reason to persist the tag
@@ -392,7 +393,8 @@ public class JpaTargetManagement implements TargetManagement {
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(controllerIds));
 
         allTargets.forEach(target -> target.addTag(tag));
-        return Collections.unmodifiableList(targetRepository.save(allTargets));
+        return Collections
+                .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
     }
 
     private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
@@ -401,7 +403,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         toUnassign.forEach(target -> target.removeTag(tag));
 
-        return Collections.unmodifiableList(targetRepository.save(toUnassign));
+        return Collections
+                .unmodifiableList(toUnassign.stream().map(targetRepository::save).collect(Collectors.toList()));
     }
 
     @Override
@@ -581,7 +584,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotNull final Pageable pageRequest,
-                                                                               final List<RolloutGroup> groups, @NotNull final String targetFilterQuery) {
+            final List<RolloutGroup> groups, @NotNull final String targetFilterQuery) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer);
@@ -601,7 +604,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(final List<RolloutGroup> groups,
-                                                                        @NotNull final String targetFilterQuery) {
+            @NotNull final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer);
         final List<Specification<JpaTarget>> specList = new ArrayList<>(2);
@@ -626,7 +629,6 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
     public Target createTarget(final TargetCreate c) {
         final JpaTargetCreate create = (JpaTargetCreate) c;
 
