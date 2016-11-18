@@ -22,18 +22,8 @@ public interface MetaData extends Serializable {
     String getKey();
 
     /**
-     * @param key
-     */
-    void setKey(String key);
-
-    /**
      * @return the value
      */
     String getValue();
-
-    /**
-     * @param value
-     */
-    void setValue(String value);
 
 }

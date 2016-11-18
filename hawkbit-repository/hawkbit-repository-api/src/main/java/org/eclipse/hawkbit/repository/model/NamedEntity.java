@@ -23,17 +23,4 @@ public interface NamedEntity extends TenantAwareBaseEntity {
      * @return the name of the entity.
      */
     String getName();
-
-    /**
-     * @param description
-     *            of the entity.
-     */
-    void setDescription(String description);
-
-    /**
-     * @param name
-     *            of the entity.
-     */
-    void setName(String name);
-
 }

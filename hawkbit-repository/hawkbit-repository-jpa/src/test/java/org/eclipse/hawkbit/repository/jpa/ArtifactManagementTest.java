@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.io.IOUtils;
@@ -28,9 +29,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -45,10 +43,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
-public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
-    public ArtifactManagementTest() {
-        LOG = LoggerFactory.getLogger(ArtifactManagementTest.class);
-    }
+public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Test method for
@@ -155,25 +150,17 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getGridFsFileName())
                 .isNotEqualTo(((JpaArtifact) result2).getGridFsFileName());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNotNull();
+
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNotNull();
+
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result2).getGridFsFileName()))))
-                        .isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
     }
@@ -202,63 +189,35 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
         assertThat(result2.getId()).isNotNull();
         assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
 
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((JpaArtifact) result).getGridFsFileName()))))
-                        .isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findArtifact(java.lang.Long)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
     @Test
     @Description("Loads an local artifact based on given ID.")
     public void findArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
-        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
-                "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
+                testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
         assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#loadArtifactBinary(java.lang.Long)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
     @Test
     @Description("Loads an artifact binary based on given ID.")
     public void loadStreamOfArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
+        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+                testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        assertTrue("The stored binary matches the given binary", IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement.loadArtifactBinary(result).getFileInputStream()));
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result).getFileInputStream()) {
+            assertTrue("The stored binary matches the given binary",
+                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
+        }
     }
 
     @Test
@@ -276,11 +235,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
     @Test
     @Description("Searches an artifact through the relations of a software module.")
     public void findArtifactBySoftwareModule() {
-        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
-        SoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
-        sm2 = softwareManagement.createSoftwareModule(sm2);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
 
@@ -293,8 +248,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTestWithMongoD
     @Test
     @Description("Searches an artifact through the relations of a software module and the filename.")
     public void findByFilenameAndSoftwareModule() {
-        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
 

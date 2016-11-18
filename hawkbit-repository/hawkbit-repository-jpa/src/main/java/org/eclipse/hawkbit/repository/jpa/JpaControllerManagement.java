@@ -19,14 +19,19 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -109,10 +114,16 @@ public class JpaControllerManagement implements ControllerManagement {
     private SystemSecurityContext systemSecurityContext;
 
     @Autowired
+    private EntityFactory entityFactory;
+
+    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     @Override
     public String getPollingTime() {
@@ -171,11 +182,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public List<Action> findActiveActionByTarget(final Target target) {
-        return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
-    }
-
-    @Override
     public Optional<Action> findOldestActiveActionByTarget(final Target target) {
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
@@ -184,7 +190,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Action findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+        return getActionAndThrowExceptionIfNotFound(actionId);
     }
 
     @Override
@@ -194,14 +200,13 @@ public class JpaControllerManagement implements ControllerManagement {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        JpaTarget target = targetRepository.findOne(spec);
+        final JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            target = new JpaTarget(controllerId);
-            target.setDescription("Plug and Play target: " + controllerId);
-            target.setName(controllerId);
-            return targetManagement.createTarget(target, TargetUpdateStatus.REGISTERED, System.currentTimeMillis(),
-                    address);
+            return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
+                    .description("Plug and Play target: " + controllerId).name(controllerId)
+                    .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
         }
 
         return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
@@ -225,6 +230,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetUpdatedEvent(mtargetInfo.getTarget(), applicationContext.getId())));
         }
 
         return targetInfoRepository.save(mtargetInfo);
@@ -233,8 +240,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action addCancelActionStatus(final ActionStatus actionStatus) {
-        final JpaAction action = (JpaAction) actionStatus.getAction();
+    public Action addCancelActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus actionStatus = create.build();
 
         checkForToManyStatusEntries(action);
         action.setStatus(actionStatus.getStatus());
@@ -254,27 +264,28 @@ public class JpaControllerManagement implements ControllerManagement {
         default:
             // do nothing
         }
-        actionRepository.save(action);
-        actionStatusRepository.save((JpaActionStatus) actionStatus);
+        actionStatus.setAction(actionRepository.save(action));
+        actionStatusRepository.save(actionStatus);
 
         return action;
     }
 
-    private void handleFinishedCancelation(final ActionStatus actionStatus, final JpaAction action) {
+    private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
         // in case of successful cancellation we also report the success at
         // the canceled action itself.
         actionStatus.addMessage(
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
-        DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, targetInfoRepository,
                 entityManager);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action addUpdateActionStatus(final ActionStatus actionStatus) {
-        final Action action = actionStatus.getAction();
-        final Long actionId = action.getId();
+    public Action addUpdateActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus actionStatus = create.build();
 
         // if action is already closed we accept further status updates if
         // permitted so by configuration. This is especially useful if the
@@ -283,10 +294,10 @@ public class JpaControllerManagement implements ControllerManagement {
         // close messages.
         if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getStatus(), actionId);
+                    actionStatus.getStatus(), action.getId());
             return action;
         }
-        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, actionId);
+        return handleAddUpdateActionStatus(actionStatus, action);
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
@@ -302,10 +313,9 @@ public class JpaControllerManagement implements ControllerManagement {
      * @param action
      * @return
      */
-    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final Long actionId) {
-        LOG.debug("addUpdateActionStatus for action {}", actionId);
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
+        LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        final JpaAction action = actionRepository.findById(actionId);
         JpaTarget target = (JpaTarget) action.getTarget();
         // check for a potential DOS attack
         checkForToManyStatusEntries(action);
@@ -326,9 +336,12 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         }
 
+        actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
 
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
+
+        action.setStatus(actionStatus.getStatus());
 
         return actionRepository.save(action);
     }
@@ -337,7 +350,9 @@ public class JpaControllerManagement implements ControllerManagement {
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
-        targetManagement.updateTarget(mergedTarget);
+
+        mergedTarget.setNew(false);
+        targetRepository.save(mergedTarget);
     }
 
     private void checkForToManyStatusEntries(final JpaAction action) {
@@ -372,6 +387,10 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         targetInfoRepository.save(targetInfo);
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId())));
+
         entityManager.detach(ds);
     }
 
@@ -398,7 +417,13 @@ public class JpaControllerManagement implements ControllerManagement {
 
         targetInfo.setLastTargetQuery(System.currentTimeMillis());
         targetInfo.setRequestControllerAttributes(false);
-        return targetRepository.save(target);
+
+        final Target result = targetInfoRepository.save(targetInfo).getTarget();
+
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new TargetUpdatedEvent(result, applicationContext.getId())));
+
+        return result;
     }
 
     @Override
@@ -464,8 +489,20 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public ActionStatus addInformationalActionStatus(final ActionStatus statusMessage) {
-        return actionStatusRepository.save((JpaActionStatus) statusMessage);
+    public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
+        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaActionStatus statusMessage = create.build();
+        statusMessage.setAction(action);
+
+        checkForToManyStatusEntries(action);
+
+        return actionStatusRepository.save(statusMessage);
+    }
+
+    private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
+        return Optional.ofNullable(actionRepository.findById(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with ID " + actionId + " not found!"));
     }
 
     @Override

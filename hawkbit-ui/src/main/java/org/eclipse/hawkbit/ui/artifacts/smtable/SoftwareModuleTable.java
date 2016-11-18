@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -166,17 +165,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         }
     }
 
-    @Override
-    protected Item addItem(final SoftwareModule baseEntity) {
-        final Item item = super.addItem(baseEntity);
-        if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
-            artifactUploadState.getSelectedSoftwareModules().stream().forEach(this::unselect);
-        }
-        select(baseEntity.getId());
-        return item;
-
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
@@ -251,13 +239,4 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 
-    @Override
-    protected SoftwareModule createEntity(final SoftwareModule entity) {
-        return softwareManagement.createSoftwareModule(entity);
-    }
-
-    @Override
-    protected void deleteEntities(final Collection<Long> entities) {
-        softwareManagement.deleteSoftwareModules(entities);
-    }
 }

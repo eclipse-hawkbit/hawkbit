@@ -227,13 +227,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         selectRow();
     }
 
-    protected Item addItem(final E baseEntity) {
-        final Object addItem = addItem();
-        final Item item = getItem(addItem);
-        updateEntity(baseEntity, item);
-        return item;
-    }
-
     @SuppressWarnings("unchecked")
     protected void updateEntity(final E baseEntity, final Item item) {
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(baseEntity.getName());
@@ -255,8 +248,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
             UI.getCurrent().access(() -> applyMinTableSettings());
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(() -> applyMaxTableSettings());
-        } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
-            UI.getCurrent().access(() -> addItem(event.getEntity()));
+        } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()) {
+            UI.getCurrent().access(() -> addEntity(event.getEntity()));
+        } else if (BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
+            UI.getCurrent().access(() -> removeEntities(event.getEntityIds()));
         }
     }
 
@@ -458,6 +453,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         return true;
     }
 
+    /**
+     * Refresh the container and clear all notfication.
+     */
     public void refreshContainer() {
         final Container container = getContainerDataSource();
         if (!(container instanceof LazyQueryContainer)) {
@@ -482,22 +480,15 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     }
 
-    public E addEntity(final E entity) {
-        final E newEntity = createEntity(entity);
+    private void addEntity(final E entity) {
         refreshContainer();
-        lastAddedOrDeletedEntities.add(newEntity.getId());
-        return newEntity;
+        lastAddedOrDeletedEntities.add(entity.getId());
     }
 
-    public void removeEntities(final Collection<Long> entities) {
-        deleteEntities(entities);
+    private void removeEntities(final Collection<Long> entities) {
         refreshContainer();
         lastAddedOrDeletedEntities.addAll(entities);
     }
-
-    protected abstract E createEntity(final E entity);
-
-    protected abstract void deleteEntities(final Collection<Long> entities);
 
     protected abstract boolean hasDropPermission();
 

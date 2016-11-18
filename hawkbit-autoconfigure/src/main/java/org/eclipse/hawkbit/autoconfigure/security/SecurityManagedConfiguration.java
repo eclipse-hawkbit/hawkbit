@@ -335,7 +335,7 @@ public class SecurityManagedConfiguration {
         private VaadinSecurityContext vaadinSecurityContext;
 
         @Autowired
-        private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+        private SecurityProperties springSecurityProperties;
 
         /**
          * post construct for setting the authentication success handler for the

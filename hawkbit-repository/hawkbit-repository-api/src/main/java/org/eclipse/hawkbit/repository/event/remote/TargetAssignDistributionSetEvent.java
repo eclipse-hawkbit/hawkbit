@@ -12,7 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -54,7 +56,20 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     }
 
-    private TargetAssignDistributionSetEvent(final String tenant, final Long actionId, final Long distributionSetId,
+    /**
+     * Constructor.
+     * 
+     * @param tenant
+     *            the event belongs to
+     * @param actionId
+     *            to the action
+     * @param distributionSetId
+     *            of the assigned {@link DistributionSet}
+     * @param controllerId
+     *            of the assignment {@link Target}
+     * @param applicationId
+     */
+    public TargetAssignDistributionSetEvent(final String tenant, final Long actionId, final Long distributionSetId,
             final String controllerId, final String applicationId) {
         super(actionId, tenant, applicationId);
         this.actionId = actionId;

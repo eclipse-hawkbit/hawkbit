@@ -18,13 +18,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Request Body for DistributionSetType POST.
  *
  */
-public class MgmtDistributionSetTypeRequestBodyPost {
+public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
     private String name;
-
-    @JsonProperty
-    private String description;
 
     @JsonProperty
     private String key;
@@ -34,6 +31,18 @@ public class MgmtDistributionSetTypeRequestBodyPost {
 
     @JsonProperty
     private List<MgmtSoftwareModuleTypeAssigment> optionalmodules;
+
+    @Override
+    public MgmtDistributionSetTypeRequestBodyPost setDescription(final String description) {
+        super.setDescription(description);
+        return this;
+    }
+
+    @Override
+    public MgmtDistributionSetTypeRequestBodyPost setColour(final String colour) {
+        super.setColour(colour);
+        return this;
+    }
 
     /**
      * @return the name
@@ -50,24 +59,6 @@ public class MgmtDistributionSetTypeRequestBodyPost {
      */
     public MgmtDistributionSetTypeRequestBodyPost setName(final String name) {
         this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetTypeRequestBodyPost setDescription(final String description) {
-        this.description = description;
         return this;
     }
 

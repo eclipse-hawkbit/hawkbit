@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -38,6 +40,16 @@ public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
      */
     public SoftwareModuleEvent(final BaseEntityEventType entityEventType, final SoftwareModule softwareModule) {
         super(entityEventType, softwareModule);
+    }
+
+    /**
+     * Delete software modules
+     * 
+     * @param entityIds
+     *            software modules which will be deleted
+     */
+    public SoftwareModuleEvent(final Collection<Long> entityIds) {
+        super(entityIds);
     }
 
     /**

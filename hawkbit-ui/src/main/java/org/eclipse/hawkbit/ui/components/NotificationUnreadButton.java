@@ -55,7 +55,6 @@ public class NotificationUnreadButton extends Button {
         setIcon(FontAwesome.BELL);
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
         addStyleName(STYLE);
-        addStyleName(ValoTheme.BUTTON_ICON_ONLY);
         setCaptionAsHtml(true);
     }
 
@@ -74,6 +73,7 @@ public class NotificationUnreadButton extends Button {
 
         String description = "Notifications";
         if (unreadNotficationCounter > 0) {
+            setVisible(true);
             setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotficationCounter + "</div>");
             description += " (" + unreadNotficationCounter + " unread)";
         } else {

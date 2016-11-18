@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -751,13 +750,4 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
-    @Override
-    protected DistributionSet createEntity(final DistributionSet entity) {
-        throw new UnsupportedOperationException("Readonly table");
-    }
-
-    @Override
-    protected void deleteEntities(final Collection<Long> entities) {
-        throw new UnsupportedOperationException("Readonly table");
-    }
 }

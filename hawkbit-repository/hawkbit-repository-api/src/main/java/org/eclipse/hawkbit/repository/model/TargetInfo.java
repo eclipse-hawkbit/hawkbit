@@ -21,15 +21,6 @@ public interface TargetInfo extends Serializable {
     URI getAddress();
 
     /**
-     * @param address
-     *            the target address to set
-     *
-     * @throws IllegalArgumentException
-     *             If the given string violates RFC&nbsp;2396
-     */
-    void setAddress(String address);
-
-    /**
      * @return {@link Target} this info element belongs to.
      */
     Target getTarget();

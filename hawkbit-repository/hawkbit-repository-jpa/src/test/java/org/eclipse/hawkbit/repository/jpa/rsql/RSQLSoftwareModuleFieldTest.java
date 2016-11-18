@@ -13,9 +13,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,19 +31,21 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void setupBeforeTest() {
-        final JpaSoftwareModule ah = (JpaSoftwareModule) softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "agent-hub", ""));
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", "aa", ""));
-        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", "aa", ""));
+        final SoftwareModule ah = softwareManagement.createSoftwareModule(entityFactory.softwareModule().create()
+                .type(appType).name("agent-hub").version("1.0.1").description("agent-hub"));
+        softwareManagement.createSoftwareModule(entityFactory.softwareModule().create().type(runtimeType)
+                .name("oracle-jre").version("1.7.2").description("aa"));
+        softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2").description("aa"));
 
-        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub2", "1.0.1", "agent-hub2", ""));
+        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareManagement.createSoftwareModule(entityFactory
+                .softwareModule().create().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2"));
 
-        final SoftwareModuleMetadata softwareModuleMetadata = new JpaSoftwareModuleMetadata("metaKey", ah, "metaValue");
-        softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata);
+        final MetaData softwareModuleMetadata = entityFactory.generateMetadata("metaKey", "metaValue");
+        softwareManagement.createSoftwareModuleMetadata(ah.getId(), softwareModuleMetadata);
 
-        final SoftwareModuleMetadata softwareModuleMetadata2 = new JpaSoftwareModuleMetadata("metaKey", ah2, "value");
-        softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata2);
+        final MetaData softwareModuleMetadata2 = entityFactory.generateMetadata("metaKey", "value");
+        softwareManagement.createSoftwareModuleMetadata(ah2.getId(), softwareModuleMetadata2);
     }
 
     @Test

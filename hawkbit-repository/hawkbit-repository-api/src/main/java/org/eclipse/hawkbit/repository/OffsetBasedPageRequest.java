@@ -83,10 +83,7 @@ public final class OffsetBasedPageRequest extends PageRequest {
             return false;
         }
         final OffsetBasedPageRequest other = (OffsetBasedPageRequest) obj;
-        if (offset != other.offset) {
-            return false;
-        }
-        return true;
+        return offset == other.offset;
     }
 
 }

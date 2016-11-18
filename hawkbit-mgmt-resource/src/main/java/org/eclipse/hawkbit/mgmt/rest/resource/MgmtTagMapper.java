@@ -12,13 +12,16 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -96,43 +99,17 @@ final class MgmtTagMapper {
         return response;
     }
 
-    static List<TargetTag> mapTargeTagFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtTagRequestBodyPut> tags) {
-        final List<TargetTag> mappedList = new ArrayList<>();
-        for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(entityFactory.generateTargetTag(targetTagRest.getName(), targetTagRest.getDescription(),
-                    targetTagRest.getColour()));
-        }
-        return mappedList;
-    }
-
-    static List<DistributionSetTag> mapDistributionSetTagFromRequest(final EntityFactory entityFactory,
-            final Iterable<MgmtTagRequestBodyPut> tags) {
-        final List<DistributionSetTag> mappedList = new ArrayList<>();
-        for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(entityFactory.generateDistributionSetTag(targetTagRest.getName(),
-                    targetTagRest.getDescription(), targetTagRest.getColour()));
-        }
-        return mappedList;
+    static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory,
+            final Collection<MgmtTagRequestBodyPut> tags) {
+        return tags.stream()
+                .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
+                        .description(tagRest.getDescription()).colour(tagRest.getColour()))
+                .collect(Collectors.toList());
     }
 
     private static void mapTag(final MgmtTag response, final Tag tag) {
         MgmtRestModelMapper.mapNamedToNamed(response, tag);
         response.setTagId(tag.getId());
         response.setColour(tag.getColour());
-    }
-
-    static void updateTag(final MgmtTagRequestBodyPut response, final Tag tag) {
-        if (response.getDescription() != null) {
-            tag.setDescription(response.getDescription());
-        }
-
-        if (response.getColour() != null) {
-            tag.setColour(response.getColour());
-        }
-
-        if (response.getName() != null) {
-            tag.setName(response.getName());
-        }
     }
 }

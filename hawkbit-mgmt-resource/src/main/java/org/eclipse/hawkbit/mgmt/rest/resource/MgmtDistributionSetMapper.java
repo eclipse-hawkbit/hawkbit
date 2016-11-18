@@ -24,15 +24,12 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.MetaData;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -43,45 +40,17 @@ public final class MgmtDistributionSetMapper {
         // Utility class
     }
 
-    private static SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
-            final SoftwareManagement softwareManagement) {
-        final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
-        if (module == null) {
-            throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");
-        }
-
-        return module;
-    }
-
-    private static DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(
-            final String distributionSetTypekey, final DistributionSetManagement distributionSetManagement) {
-
-        final DistributionSetType module = distributionSetManagement
-                .findDistributionSetTypeByKey(distributionSetTypekey);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
-        }
-        return module;
-    }
-
     /**
      * {@link MgmtDistributionSetRequestBodyPost}s to {@link DistributionSet}s.
      *
      * @param sets
      *            to convert
-     * @param softwareManagement
-     *            to use for conversion
      * @return converted list of {@link DistributionSet}s
      */
-    static List<DistributionSet> dsFromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+    static List<DistributionSetCreate> dsFromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets,
             final EntityFactory entityFactory) {
 
-        return sets.stream()
-                .map(dsRest -> fromRequest(dsRest, softwareManagement, distributionSetManagement, entityFactory))
-                .collect(Collectors.toList());
-
+        return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).collect(Collectors.toList());
     }
 
     /**
@@ -89,59 +58,42 @@ public final class MgmtDistributionSetMapper {
      *
      * @param dsRest
      *            to convert
-     * @param softwareManagement
-     *            to use for conversion
      * @return converted {@link DistributionSet}
      */
-    static DistributionSet fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+    static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
             final EntityFactory entityFactory) {
 
-        final DistributionSet result = entityFactory.generateDistributionSet();
-        result.setDescription(dsRest.getDescription());
-        result.setName(dsRest.getName());
-        result.setType(findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement));
-
-        result.setRequiredMigrationStep(dsRest.isRequiredMigrationStep());
-        result.setVersion(dsRest.getVersion());
+        final List<Long> modules = new ArrayList<>();
 
         if (dsRest.getOs() != null) {
-            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getOs().getId(), softwareManagement));
+            modules.add(dsRest.getOs().getId());
         }
 
         if (dsRest.getApplication() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(), softwareManagement));
+            modules.add(dsRest.getApplication().getId());
         }
 
         if (dsRest.getRuntime() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
+            modules.add(dsRest.getRuntime().getId());
         }
 
         if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(module -> result
-                    .addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
+            dsRest.getModules().forEach(module -> modules.add(module.getId()));
         }
 
-        return result;
+        return entityFactory.distributionSet().create().name(dsRest.getName()).version(dsRest.getVersion())
+                .description(dsRest.getDescription()).type(dsRest.getType()).modules(modules)
+                .requiredMigrationStep(dsRest.isRequiredMigrationStep());
     }
 
-    /**
-     * From {@link MgmtMetadata} to {@link DistributionSetMetadata}.
-     *
-     * @param ds
-     * @param metadata
-     * @return
-     */
-    static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
-            final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
+    static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
         if (metadata == null) {
             return Collections.emptyList();
         }
 
-        return metadata.stream().map(metadataRest -> entityFactory.generateDistributionSetMetadata(ds,
-                metadataRest.getKey(), metadataRest.getValue())).collect(Collectors.toList());
+        return metadata.stream()
+                .map(metadataRest -> entityFactory.generateMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**

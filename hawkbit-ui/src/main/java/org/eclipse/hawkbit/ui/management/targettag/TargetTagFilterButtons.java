@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
@@ -59,8 +59,9 @@ import com.vaadin.ui.UI;
 @SpringComponent
 @ViewScope
 public class TargetTagFilterButtons extends AbstractFilterButtons {
+    private static final String NO_TAG = "NO TAG";
 
-    private static final long serialVersionUID = 5049554600376508073L;
+    private static final long serialVersionUID = 1L;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -95,7 +96,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     public void init(final TargetTagFilterButtonClick filterButtonClickBehaviour) {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
-        addNewTargetTag(entityFactory.generateTargetTag("NO TAG"));
+        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -120,8 +121,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        return HawkbitCommonUtil
-                .createDSLazyQueryContainer(new BeanQueryFactory<TargetTagBeanQuery>(TargetTagBeanQuery.class));
+        return HawkbitCommonUtil.createDSLazyQueryContainer(new BeanQueryFactory<>(TargetTagBeanQuery.class));
 
     }
 
@@ -307,7 +307,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private void refreshContainer() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-        addNewTargetTag(entityFactory.generateTargetTag("NO TAG"));
+        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
         addColumn();
     }
 
@@ -320,7 +320,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @SuppressWarnings("unchecked")
-    private void addNewTargetTag(final TargetTag newTargetTag) {
+    private void addNewTargetTag(final Tag newTargetTag) {
         final LazyQueryContainer targetTagContainer = (LazyQueryContainer) getContainerDataSource();
         final Object addItem = targetTagContainer.addItem();
         final Item item = targetTagContainer.getItem(addItem);

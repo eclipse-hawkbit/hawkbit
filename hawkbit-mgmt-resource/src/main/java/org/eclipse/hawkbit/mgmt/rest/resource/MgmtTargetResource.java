@@ -52,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
+
 /**
  * REST Resource handling target CRUD operations.
  */
@@ -103,7 +105,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new PagedList<MgmtTarget>(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
@@ -118,22 +120,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
-        final Target existingTarget = findTargetWithExceptionIfNotFound(controllerId);
-        LOG.debug("updating target {}", existingTarget.getId());
-        if (targetRest.getDescription() != null) {
-            existingTarget.setDescription(targetRest.getDescription());
-        }
-        if (targetRest.getName() != null) {
-            existingTarget.setName(targetRest.getName());
-        }
-        if (targetRest.getAddress() != null) {
-            existingTarget.getTargetInfo().setAddress(targetRest.getAddress());
-        }
-        if (targetRest.getSecurityToken() != null) {
-            existingTarget.setSecurityToken(targetRest.getSecurityToken());
-        }
 
-        final Target updateTarget = this.targetManagement.updateTarget(existingTarget);
+        final Target updateTarget = this.targetManagement.updateTarget(entityFactory.target().update(controllerId)
+                .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
+                .securityToken(targetRest.getSecurityToken()));
 
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }
@@ -291,8 +281,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
                 : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), controllerId).getAssignedEntity()
-                .iterator();
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), Lists.newArrayList(controllerId))
+                .getAssignedEntity().iterator();
         if (changed.hasNext()) {
             return new ResponseEntity<>(HttpStatus.OK);
         }

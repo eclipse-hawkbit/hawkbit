@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -63,9 +64,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
-
-    @Autowired
-    private transient SoftwareModuleTable softwareModuleTable;
 
     @Autowired
     private transient EntityFactory entityFactory;
@@ -169,8 +167,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     }
 
     private void populateTypeNameCombo() {
-        typeComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
+        typeComboBox.setContainerDataSource(
+                HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
         typeComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
     }
 
@@ -218,20 +216,16 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        final SoftwareModule softwareModule = entityFactory.generateSoftwareModule();
-        softwareModule.setName(name);
-        softwareModule.setVersion(version);
-        softwareModule.setType(softwareManagement.findSoftwareModuleTypeByName(type));
-        softwareModule.setVendor(vendor);
-        softwareModule.setDescription(description);
+        final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
+                .type(softwareManagement.findSoftwareModuleTypeByName(type)).name(name).version(version)
+                .description(description).vendor(vendor);
 
-        final SoftwareModule newSoftwareModule = softwareModuleTable.addEntity(softwareModule);
+        final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
 
         if (newSoftwareModule != null) {
-            /* display success message */
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
                     new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newSoftwareModule));
         }
     }
 
@@ -256,12 +250,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
      * updates a softwareModule
      */
     private void updateSwModule() {
-        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        final String newVendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
-        SoftwareModule newSWModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
-        newSWModule.setVendor(newVendor);
-        newSWModule.setDescription(newDesc);
-        newSWModule = softwareManagement.updateSoftwareModule(newSWModule);
+        final SoftwareModule newSWModule = softwareManagement.updateSoftwareModule(entityFactory.softwareModule()
+                .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
         if (newSWModule != null) {
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
                     new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));

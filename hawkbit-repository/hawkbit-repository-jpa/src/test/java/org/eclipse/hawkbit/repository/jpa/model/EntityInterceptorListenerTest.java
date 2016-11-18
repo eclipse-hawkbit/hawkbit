@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.model.EntityInterceptor;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.junit.After;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -28,10 +29,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Entity Listener Interceptor")
 public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
-    @Override
-    public void after() {
+    @After
+    public void tearDown() {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().clear();
-        super.after();
     }
 
     @Test
@@ -52,9 +52,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
         final PostLoadEntityListener postLoadEntityListener = new PostLoadEntityListener();
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(postLoadEntityListener);
 
-        final Target targetToBeCreated = entityFactory.generateTarget("targetToBeCreated");
-
-        targetManagement.createTarget(targetToBeCreated);
+        final Target targetToBeCreated = testdataFactory.createTarget("targetToBeCreated");
 
         final Target loadedTarget = targetManagement.findTargetByControllerID(targetToBeCreated.getControllerId());
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
@@ -86,19 +84,17 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private void executePersistAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
-        final Target targetToBeCreated = entityFactory.generateTarget("targetToBeCreated");
-        addListenerAndCreateTarget(entityInterceptor, targetToBeCreated);
+        final Target targetToBeCreated = addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated");
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(targetToBeCreated);
     }
 
     private void executeUpdateAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
-        Target updateTarget = addListenerAndCreateTarget(entityInterceptor,
-                entityFactory.generateTarget("targetToBeCreated"));
-        updateTarget.setDescription("New");
+        Target updateTarget = addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated");
 
-        updateTarget = targetManagement.updateTarget(updateTarget);
+        updateTarget = targetManagement
+                .updateTarget(entityFactory.target().update(updateTarget.getControllerId()).name("New"));
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);
@@ -107,7 +103,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     private void executeDeleteAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
         final SoftwareModuleType type = softwareManagement
-                .createSoftwareModuleType(entityFactory.generateSoftwareModuleType("test", "test", "test", 1));
+                .createSoftwareModuleType(entityFactory.softwareModuleType().create().name("test").key("test"));
 
         softwareManagement.deleteSoftwareModuleType(type);
         assertThat(entityInterceptor.getEntity()).isNotNull();
@@ -115,12 +111,12 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private Target addListenerAndCreateTarget(final AbstractEntityListener entityInterceptor,
-            final Target targetToBeCreated) {
+            final String targetToBeCreated) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
-        return targetManagement.createTarget(targetToBeCreated);
+        return testdataFactory.createTarget(targetToBeCreated);
     }
 
-    private static abstract class AbstractEntityListener implements EntityInterceptor {
+    private abstract static class AbstractEntityListener implements EntityInterceptor {
 
         private Object entity;
 

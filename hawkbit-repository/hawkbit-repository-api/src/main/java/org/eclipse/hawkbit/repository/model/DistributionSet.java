@@ -31,21 +31,6 @@ public interface DistributionSet extends NamedVersionedEntity {
     Set<DistributionSetTag> getTags();
 
     /**
-     * @param tag
-     *            to add
-     * @return <code>true</code> if tag could be added sucessfully (i.e. was not
-     *         already in the list).
-     */
-    boolean addTag(final DistributionSetTag tag);
-
-    /**
-     * @param tag
-     *            to remove
-     * @return <code>true</code> if tag was in the list and removed
-     */
-    boolean removeTag(final DistributionSetTag tag);
-
-    /**
      * @return <code>true</code> if the set is deleted and only kept for history
      *         purposes.
      */
@@ -63,25 +48,6 @@ public interface DistributionSet extends NamedVersionedEntity {
      *         and not automatically canceled if overridden by a newer update.
      */
     boolean isRequiredMigrationStep();
-
-    /**
-     * @param deleted
-     *            to <code>true</code> if {@link DistributionSet} is no longer
-     *            be usage but kept for history purposes.
-     * @return updated {@link DistributionSet}
-     */
-    DistributionSet setDeleted(boolean deleted);
-
-    /**
-     * @param isRequiredMigrationStep
-     *            to <code>true</code> if {@link DistributionSet} contains a
-     *            mandatory migration step, i.e. unfinished {@link Action}s will
-     *            kept active and not automatically canceled if overridden by a
-     *            newer update.
-     * 
-     * @return updated {@link DistributionSet}
-     */
-    DistributionSet setRequiredMigrationStep(boolean isRequiredMigrationStep);
 
     /**
      * @return the assignedTargets
@@ -105,42 +71,20 @@ public interface DistributionSet extends NamedVersionedEntity {
     Set<SoftwareModule> getModules();
 
     /**
-     * @param softwareModule
-     * @return <code>true</code> if the module was added and <code>false</code>
-     *         if it already existed in the set
-     *
-     */
-    boolean addModule(SoftwareModule softwareModule);
-
-    /**
-     * Removed given {@link SoftwareModule} from this DS instance.
-     *
-     * @param softwareModule
-     *            to remove
-     * @return <code>true</code> if element was found and removed
-     */
-    boolean removeModule(SoftwareModule softwareModule);
-
-    /**
      * Searches through modules for the given type.
      *
      * @param type
      *            to search for
-     * @return SoftwareModule of given type or <code>null</code> if not in the
-     *         list.
+     * @return SoftwareModule of given type or <code>null</code> if not found.
      */
-    SoftwareModule findFirstModuleByType(SoftwareModuleType type);
+    default SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
+        return getModules().stream().filter(module -> module.getType().equals(type)).findFirst().orElse(null);
+    }
 
     /**
      * @return type of the {@link DistributionSet}.
      */
     DistributionSetType getType();
-
-    /**
-     * @param type
-     *            of the {@link DistributionSet}.
-     */
-    void setType(DistributionSetType type);
 
     /**
      * @return <code>true</code> if all defined

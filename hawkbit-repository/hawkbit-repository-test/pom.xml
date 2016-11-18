@@ -31,7 +31,7 @@
       </dependency>
        <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-artifact-repository-mongo</artifactId>
+         <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -43,8 +43,8 @@
          <artifactId>spring-context-support</artifactId>
       </dependency>
       <dependency>
-         <groupId>de.flapdoodle.embed</groupId>
-         <artifactId>de.flapdoodle.embed.mongo</artifactId>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-tx</artifactId>
       </dependency>
        <dependency>
          <groupId>net._01001111</groupId>
@@ -89,6 +89,15 @@
       <dependency>
          <groupId>io.protostuff</groupId>
          <artifactId>protostuff-runtime</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.jayway.awaitility</groupId>
+         <artifactId>awaitility</artifactId>
       </dependency>
   </dependencies>
 </project>

@@ -6,10 +6,14 @@ package org.eclipse.hawkbit.ui.push.event;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 
 /**
- *
+ * A event which fire is firen when a new notification is available.
  */
 public class NotificationEntityChangeEvent {
 
+    /**
+     * 
+     * The different event types.
+     */
     public enum EventType {
         ENITY_ADDED, ENTITY_DELETED;
     }
@@ -19,6 +23,18 @@ public class NotificationEntityChangeEvent {
     private final String message;
     private int unreadNotificationSize;
 
+    /**
+     * Constructor.
+     * 
+     * @param sender
+     *            the table which send the event
+     * @param type
+     *            the event type
+     * @param message
+     *            the message
+     * @param unreadNotificationSize
+     *            how many different notifications
+     */
     public NotificationEntityChangeEvent(final AbstractTable<?, ?> sender, final EventType type, final String message,
             final int unreadNotificationSize) {
         this.sender = sender;
@@ -31,9 +47,6 @@ public class NotificationEntityChangeEvent {
         return sender;
     }
 
-    /**
-     * @return the type
-     */
     public EventType getType() {
         return type;
     }

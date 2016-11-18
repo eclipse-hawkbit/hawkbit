@@ -164,7 +164,12 @@ public enum SpServerError {
     /**
      * 
      */
-    SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate", "The rollout is currently in the wrong state for the current operation");
+    SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate", "The rollout is in the wrong state for the requested operation"),
+
+    /**
+     *
+     */
+    SP_ROLLOUT_VERIFICATION_FAILED("hawkbit.server.error.rollout.verificationFailed", "The rollout configuration could not be verified successfully");
 
     private final String key;
     private final String message;
@@ -172,7 +177,7 @@ public enum SpServerError {
     /*
      * Repository side Error codes
      */
-    private SpServerError(final String errorKey, final String message) {
+    SpServerError(final String errorKey, final String message) {
         key = errorKey;
         this.message = message;
     }

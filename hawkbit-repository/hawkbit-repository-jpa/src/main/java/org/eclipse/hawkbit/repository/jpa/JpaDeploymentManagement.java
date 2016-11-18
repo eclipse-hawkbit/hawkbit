@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,6 +33,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -72,19 +72,23 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -97,6 +101,11 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDeploymentManagement implements DeploymentManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
+
+    /**
+     * Maximum amount of Actions that are started at once.
+     */
+    private static final int ACTION_PAGE_LIMIT = 1000;
 
     @Autowired
     private EntityManager entityManager;
@@ -134,45 +143,24 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Modifying
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
-    public DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
-            final List<Target> targets) {
-
-        return assignDistributionSetByTargetId((JpaDistributionSet) pset,
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()),
-                ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME);
-
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
-        return assignDistributionSet(dsID, ActionType.FORCED,
-                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, targetIDs);
-    }
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     // Exception squid:S2095: see
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final ActionType actionType,
-            final long forcedTimestamp, final String... targetIDs) {
-        return assignDistributionSet(dsID, Arrays.stream(targetIDs)
+            final long forcedTimestamp, final Collection<String> targetIDs) {
+        return assignDistributionSet(dsID, targetIDs.stream()
                 .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()));
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets) {
         return assignDistributionSet(dsID, targets, null);
@@ -181,7 +169,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
@@ -196,7 +183,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
             final Collection<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
         final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
@@ -237,13 +223,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     "Distribution set of type " + set.getType().getKey() + " is incomplete: " + set.getId());
         }
 
-        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getTargetId)
+        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .collect(Collectors.toList());
 
         LOG.debug("assignDistribution({}) to {} targets", set, controllerIDs.size());
 
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
-                .collect(Collectors.toMap(TargetWithActionType::getTargetId, Function.identity()));
+                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
         // split tIDs length into max entries in-statement because many database
         // have constraint of max entries in in-statements e.g. Oracle with
@@ -289,10 +275,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
                 currentUser, tIds));
         targetIds.forEach(tIds -> targetInfoRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
-        final Map<String, JpaAction> targetIdsToActions = actionRepository
-                .save(targets.stream().map(t -> createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup))
-                        .collect(Collectors.toList()))
-                .stream().collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
+        final Map<String, JpaAction> targetIdsToActions = targets.stream().map(
+                t -> actionRepository.save(createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup)))
+                .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
@@ -304,7 +289,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         entityManager.flush();
         // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(),
                 targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
 
@@ -344,6 +329,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         ((JpaTargetInfo) action.getTarget().getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
         afterCommit.afterCommit(() -> eventPublisher
+                .publishEvent(new TargetUpdatedEvent(action.getTarget(), applicationContext.getId())));
+        afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new TargetAssignDistributionSetEvent(action, applicationContext.getId())));
     }
 
@@ -361,21 +348,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<JpaAction> activeActions = actionRepository
                 .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(targetsIds,
                         Action.Status.CANCELING);
-        final Set<Long> cancelledTargetIds = activeActions.stream().map(action -> {
+
+        return activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
             // document that the status has been retrieved
 
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     "manual cancelation requested"));
+            actionRepository.save(action);
 
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
             return action.getTarget().getId();
         }).collect(Collectors.toSet());
-
-        actionRepository.save(activeActions);
-
-        return cancelledTargetIds;
 
     }
 
@@ -450,7 +435,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         actionStatusRepository.save(new JpaActionStatus(mergedAction, Status.CANCELED, System.currentTimeMillis(),
                 "A force quit has been performed."));
 
-        DeploymentHelper.successCancellation(mergedAction, actionRepository, targetManagement, targetInfoRepository,
+        DeploymentHelper.successCancellation(mergedAction, actionRepository, targetRepository, targetInfoRepository,
                 entityManager);
 
         return actionRepository.save(mergedAction);
@@ -484,11 +469,58 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public long startScheduledActionsByRolloutGroupParent(@NotNull final Rollout rollout,
+            final RolloutGroup rolloutGroupParent) {
+        long totalActionsCount = 0L;
+        long lastStartedActionsCount;
+        do {
+            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rollout,
+                    rolloutGroupParent, ACTION_PAGE_LIMIT);
+            totalActionsCount += lastStartedActionsCount;
+        } while (lastStartedActionsCount > 0);
+
+        return totalActionsCount;
+    }
+
+    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Rollout rollout,
+            final RolloutGroup rolloutGroupParent, final int limit) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("startScheduledActions");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(status -> {
+            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rollout,
+                    rolloutGroupParent, limit);
+
+            rolloutGroupActions.map(action -> (JpaAction) action).forEach(this::startScheduledAction);
+
+            return rolloutGroupActions.getTotalElements();
+        });
+    }
+
+    private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Rollout rollout,
+            final RolloutGroup rolloutGroupParent, final int limit) {
+        final JpaRollout jpaRollout = (JpaRollout) rollout;
+        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupParent;
+        final PageRequest pageRequest = new PageRequest(0, limit);
+        if (rolloutGroupParent == null) {
+            return actionRepository.findByRolloutAndRolloutGroupParentIsNullAndStatus(pageRequest, jpaRollout,
+                    Action.Status.SCHEDULED);
+        } else {
+            return actionRepository.findByRolloutAndRolloutGroupParentAndStatus(pageRequest, jpaRollout,
+                    jpaRolloutGroup, Action.Status.SCHEDULED);
+        }
+    }
+
+    @Override
+    @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public Action startScheduledAction(final Long actionId) {
-
         final JpaAction action = actionRepository.findById(actionId);
+        return startScheduledAction(action);
+    }
 
+    private Action startScheduledAction(final JpaAction action) {
         // check if we need to override running update actions
         final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(
                 Collections.singletonList(action.getTarget().getId()));
@@ -564,7 +596,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public List<Action> findActionsByTarget(final Target target) {
-        return actionRepository.findByTarget((JpaTarget) target);
+        return Collections.unmodifiableList(actionRepository.findByTarget(target));
     }
 
     @Override
@@ -614,11 +646,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final Target target) {
-        return actionRepository.findByActiveAndTarget(pageable, (JpaTarget) target, true);
-    }
-
-    @Override
     public List<Action> findActiveActionsByTarget(final Target target) {
         return actionRepository.findByActiveAndTarget((JpaTarget) target, true);
     }
@@ -626,11 +653,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public List<Action> findInActiveActionsByTarget(final Target target) {
         return actionRepository.findByActiveAndTarget((JpaTarget) target, false);
-    }
-
-    @Override
-    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final Target target) {
-        return actionRepository.findByActiveAndTarget(pageable, (JpaTarget) target, false);
     }
 
     @Override
@@ -663,14 +685,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Action action) {
         return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
-    }
-
-    @Override
-    public List<Long> findActionsByRolloutGroupParentAndStatus(final Rollout rollout,
-            final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutAndRolloutGroupParentAndStatus((JpaRollout) rollout,
-                (JpaRolloutGroup) rolloutGroupParent, actionStatus).stream().map(ident -> ident.getId())
-                .collect(Collectors.toList());
     }
 
     @Override

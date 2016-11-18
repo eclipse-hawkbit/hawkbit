@@ -88,8 +88,7 @@ public interface MgmtRolloutRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/start", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_ASYNC, defaultValue = "false") final boolean startAsync);
+    ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId);
 
     /**
      * Handles the POST request for pausing a rollout.

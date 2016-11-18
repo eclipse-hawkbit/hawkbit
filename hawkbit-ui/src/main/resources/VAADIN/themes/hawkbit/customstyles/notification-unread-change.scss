@@ -13,16 +13,16 @@
     height: 37px !important;
     margin: 0px !important;
    }
-
+   
   .change-counter {
     @include valo-badge-style;
     pointer-events: none;
-    display: block;
     top: round($v-unit-size / -5);
     right: round($v-unit-size / -5);
     z-index: 1;
     border-radius: $v-border-radius;
     color: $widget-bg;
+    display: block;
     position: absolute;
   }
  

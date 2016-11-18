@@ -123,8 +123,7 @@ public class AmqpControllerAuthenticationTest {
 
         final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
         final Rp rp = mock(Rp.class);
-        final org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication ddiAuthentication = mock(
-                org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.class);
+        final DdiSecurityProperties.Authentication ddiAuthentication = mock(DdiSecurityProperties.Authentication.class);
         final Anonymous anonymous = mock(Anonymous.class);
         when(secruityProperties.getRp()).thenReturn(rp);
         when(rp.getSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");

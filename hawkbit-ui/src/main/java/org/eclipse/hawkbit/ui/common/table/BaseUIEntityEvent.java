@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
@@ -18,7 +20,9 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     private final BaseEntityEventType eventType;
 
-    private final T entity;
+    private T entity;
+
+    private Collection<Long> entityIds;
 
     /**
      * Base entity event
@@ -31,6 +35,21 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     public BaseUIEntityEvent(final BaseEntityEventType eventType, final T entity) {
         this.eventType = eventType;
         this.entity = entity;
+    }
+
+    /**
+     * Delete entity event.
+     * 
+     * @param entityIds
+     *            entities which will be deleted
+     */
+    public BaseUIEntityEvent(final Collection<Long> entityIds) {
+        this.eventType = BaseEntityEventType.REMOVE_ENTITIES;
+        this.entityIds = entityIds;
+    }
+
+    public Collection<Long> getEntityIds() {
+        return entityIds;
     }
 
     public T getEntity() {

@@ -112,44 +112,9 @@ public interface DistributionSetType extends NamedEntity {
     boolean areModuleEntriesIdentical(DistributionSetType dsType);
 
     /**
-     * Adds {@link SoftwareModuleType} that is optional for the
-     * {@link DistributionSet}.
-     *
-     * @param smType
-     *            to add
-     * @return updated instance
-     */
-    DistributionSetType addOptionalModuleType(SoftwareModuleType smType);
-
-    /**
-     * Adds {@link SoftwareModuleType} that is mandatory for the
-     * {@link DistributionSet}.
-     *
-     * @param smType
-     *            to add
-     * @return updated instance
-     */
-    DistributionSetType addMandatoryModuleType(SoftwareModuleType smType);
-
-    /**
-     * Removes {@link SoftwareModuleType} from the list.
-     *
-     * @param smTypeId
-     *            to remove
-     * @return updated instance
-     */
-    DistributionSetType removeModuleType(Long smTypeId);
-
-    /**
      * @return business key of this {@link DistributionSetType}.
      */
     String getKey();
-
-    /**
-     * @param key
-     *            of this {@link DistributionSetType}.
-     */
-    void setKey(String key);
 
     /**
      * @param distributionSet
@@ -163,11 +128,5 @@ public interface DistributionSetType extends NamedEntity {
      * @return get color code to by used in management UI views.
      */
     String getColour();
-
-    /**
-     * @param colour
-     *            code to by used in management UI views.
-     */
-    void setColour(final String colour);
 
 }

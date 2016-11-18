@@ -102,7 +102,7 @@ public class CreateStartedRolloutExample {
                 .getBody();
 
         // start the created Rollout
-        rolloutResource.start(rolloutResponseBody.getRolloutId(), false);
+        rolloutResource.start(rolloutResponseBody.getRolloutId());
     }
 
 }

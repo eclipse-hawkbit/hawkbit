@@ -13,14 +13,34 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * 
+ * An action that runs when the error condition is met
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutErrorAction {
 
     private ErrorAction action = ErrorAction.PAUSE;
-    private String expression = null;
+    private String expression;
+
+    /**
+     * Creates a rollout error action
+     * 
+     * @param action
+     *            the action to run when th error condition is met
+     * @param expression
+     *            the expression for the action
+     */
+    public MgmtRolloutErrorAction(ErrorAction action, String expression) {
+        this.action = action;
+        this.expression = expression;
+    }
+
+    /**
+     * Default constructor
+     */
+    public MgmtRolloutErrorAction() {
+        // Instantiate default error action
+    }
 
     /**
      * @return the action
@@ -52,6 +72,9 @@ public class MgmtRolloutErrorAction {
         this.expression = expression;
     }
 
+    /**
+     * Possible actions
+     */
     public enum ErrorAction {
         PAUSE;
     }

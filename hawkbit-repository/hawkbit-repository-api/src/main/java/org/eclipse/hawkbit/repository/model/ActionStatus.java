@@ -29,21 +29,6 @@ public interface ActionStatus extends TenantAwareBaseEntity {
     Long getOccurredAt();
 
     /**
-     * @param occurredAt
-     *            time in {@link TimeUnit#MILLISECONDS} when the status was
-     *            reported.
-     */
-    void setOccurredAt(Long occurredAt);
-
-    /**
-     * Adds message including splitting in case it exceeds 512 length.
-     *
-     * @param message
-     *            to add
-     */
-    void addMessage(String message);
-
-    /**
      * @return immutable list of message entries that in the
      *         {@link ActionStatus}.
      */
@@ -55,24 +40,10 @@ public interface ActionStatus extends TenantAwareBaseEntity {
     Action getAction();
 
     /**
-     * @param action
-     *            this {@link ActionStatus} belongs to.
-     */
-    void setAction(Action action);
-
-    /**
      * @return the {@link Status} of this {@link ActionStatus}. Caused
      *         potentially a transition change of the {@link #getAction()} if
      *         different from the previous {@link ActionStatus#getStatus()}.
      */
     Status getStatus();
-
-    /**
-     * @param status
-     *            of this {@link ActionStatus}. May cause a transition change of
-     *            the {@link #getAction()} if different from the previous
-     *            {@link ActionStatus#getStatus()}.
-     */
-    void setStatus(Status status);
 
 }

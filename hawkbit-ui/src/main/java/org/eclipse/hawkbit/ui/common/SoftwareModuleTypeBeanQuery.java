@@ -49,7 +49,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     protected SoftwareModuleType constructBean() {
-        return getEntityFactory().generateSoftwareModuleType();
+        return null;
     }
 
     private EntityFactory getEntityFactory() {

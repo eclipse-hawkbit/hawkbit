@@ -28,7 +28,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("System Management")
-public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
+public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")
@@ -114,7 +114,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
                                     final DistributionSet ds = testdataFactory
                                             .createDistributionSet("to be deployed" + x, true);
 
-                                    deploymentManagement.assignDistributionSet(ds, createdTargets);
+                                    assignDistributionSet(ds, createdTargets);
                                 }
                             }
                         }
@@ -127,8 +127,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB 
     }
 
     private List<Target> createTestTargets(final int targets) {
-        return targetManagement
-                .createTargets(testdataFactory.generateTargets(targets, "testTargetOfTenant", "testTargetOfTenant"));
+        return testdataFactory.createTargets(targets, "testTargetOfTenant", "testTargetOfTenant");
     }
 
     private void createTestArtifact(final byte[] random) {

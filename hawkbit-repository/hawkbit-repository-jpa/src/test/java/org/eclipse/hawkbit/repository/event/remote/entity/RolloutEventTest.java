@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -35,21 +33,14 @@ public class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
 
     @Override
     protected Rollout createEntity() {
-        targetManagement.createTarget(entityFactory.generateTarget("12345"));
-        final DistributionSet ds = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2", "incomplete",
-                        distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+        testdataFactory.createTarget("12345");
+        final DistributionSet ds = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .create().name("incomplete").version("2").description("incomplete").type("os"));
 
-        final Rollout rollout = entityFactory.generateRollout();
-        rollout.setName("exampleRollout");
-        rollout.setTargetFilterQuery("controllerId==*");
-        rollout.setDistributionSet(ds);
-
-        final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
-                new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")
-                        .build());
-
-        return entity;
+        return rolloutManagement.createRollout(
+                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),
+                10, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
     }
 
 }

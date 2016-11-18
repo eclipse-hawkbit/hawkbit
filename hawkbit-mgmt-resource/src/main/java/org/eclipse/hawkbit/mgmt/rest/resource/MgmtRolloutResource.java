@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
@@ -23,15 +24,13 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,58 +107,32 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         targetFilterQueryManagement.verifyTargetFilterQuerySyntax(rolloutRequestBody.getTargetFilterQuery());
 
         final DistributionSet distributionSet = findDistributionSetOrThrowException(rolloutRequestBody);
+        final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
 
-        // success condition
-        RolloutGroupSuccessCondition successCondition = null;
-        String successConditionExpr = null;
-        // success action
-        RolloutGroupSuccessAction successAction = null;
-        String successActionExpr = null;
-        // error condition
-        RolloutGroupErrorCondition errorCondition = null;
-        // error action
-        String errorConditionExpr = null;
-        RolloutGroupErrorAction errorAction = null;
-        String errorActionExpr = null;
-        if (rolloutRequestBody.getSuccessCondition() != null) {
-            successCondition = MgmtRolloutMapper
-                    .mapFinishCondition(rolloutRequestBody.getSuccessCondition().getCondition());
-            successConditionExpr = rolloutRequestBody.getSuccessCondition().getExpression();
-        }
-        if (rolloutRequestBody.getSuccessAction() != null) {
-            successAction = MgmtRolloutMapper.map(rolloutRequestBody.getSuccessAction().getAction());
-            successActionExpr = rolloutRequestBody.getSuccessAction().getExpression();
-        }
-        if (rolloutRequestBody.getErrorCondition() != null) {
-            errorCondition = MgmtRolloutMapper.mapErrorCondition(rolloutRequestBody.getErrorCondition().getCondition());
-            errorConditionExpr = rolloutRequestBody.getErrorCondition().getExpression();
-        }
-        if (rolloutRequestBody.getErrorAction() != null) {
-            errorAction = MgmtRolloutMapper.map(rolloutRequestBody.getErrorAction().getAction());
-            errorActionExpr = rolloutRequestBody.getErrorAction().getExpression();
-        }
+        final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
 
-        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder()
-                .successCondition(successCondition, successConditionExpr)
-                .successAction(successAction, successActionExpr).errorCondition(errorCondition, errorConditionExpr)
-                .errorAction(errorAction, errorActionExpr).build();
-        final Rollout rollout = this.rolloutManagement.createRollout(
-                MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet,
-                        rolloutRequestBody.getTargetFilterQuery()),
-                rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
+        Rollout rollout;
+        if (rolloutRequestBody.getGroups() != null) {
+            final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
+                    .map(mgmtRolloutGroup -> MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup))
+                    .collect(Collectors.toList());
+            rollout = rolloutManagement.createRollout(create, rolloutGroups, rolloutGroupConditions);
+
+        } else if (rolloutRequestBody.getAmountGroups() != null) {
+            rollout = rolloutManagement.createRollout(create, rolloutRequestBody.getAmountGroups(),
+                    rolloutGroupConditions);
+
+        } else {
+            throw new ConstraintViolationException("Either 'amountGroups' or 'groups' must be defined in the request");
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout));
     }
 
     @Override
-    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_ASYNC, defaultValue = "false") final boolean startAsync) {
+    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        if (startAsync) {
-            this.rolloutManagement.startRolloutAsync(rollout);
-        } else {
-            this.rolloutManagement.startRollout(rollout);
-        }
+        this.rolloutManagement.startRollout(rollout);
         return ResponseEntity.ok().build();
     }
 
@@ -238,8 +211,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rolloutGroupTargets = pageTargets;
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
-        return new ResponseEntity<>(new PagedList<MgmtTarget>(rest, rolloutGroupTargets.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
     }
 
     private Rollout findRolloutOrThrowException(final Long rolloutId) {

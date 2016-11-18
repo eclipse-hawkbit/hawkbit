@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
- * Class which contains the TenantAwareEvent when selecting all entries of the target table
+ * Class which contains the TenantAwareEvent when selecting all entries of the
+ * target table
  */
 public class TargetTableEvent extends BaseUIEntityEvent<Target> {
 
@@ -37,6 +40,16 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
      */
     public TargetTableEvent(final BaseEntityEventType eventType, final Target entity) {
         super(eventType, entity);
+    }
+
+    /**
+     * Delete targets.
+     * 
+     * @param entityIds
+     *            targets which will be deleted
+     */
+    public TargetTableEvent(final List<Long> entityIds) {
+        super(entityIds);
     }
 
     /**

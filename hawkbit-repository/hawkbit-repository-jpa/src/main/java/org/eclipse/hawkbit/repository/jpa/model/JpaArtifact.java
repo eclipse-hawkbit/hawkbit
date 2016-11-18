@@ -20,11 +20,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-
-import com.mongodb.gridfs.GridFS;
-import com.mongodb.gridfs.GridFSFile;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * JPA implementation of {@link LocalArtifact}.
@@ -39,14 +38,14 @@ import com.mongodb.gridfs.GridFSFile;
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 
-    @NotNull
     @Column(name = "gridfs_file_name", length = 40)
     @Size(max = 40)
+    @NotEmpty
     private String gridFsFileName;
 
-    @NotNull
     @Column(name = "provided_file_name", length = 256)
     @Size(max = 256)
+    @NotEmpty
     private String filename;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
@@ -73,9 +72,9 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
      * Constructs artifact.
      *
      * @param gridFsFileName
-     *            that is the link to the {@link GridFS} entity.
+     *            that is the link to the {@link DbArtifact} entity.
      * @param filename
-     *            that is used by {@link GridFSFile} store.
+     *            that is used by {@link DbArtifact} store.
      * @param softwareModule
      *            of this artifact
      */

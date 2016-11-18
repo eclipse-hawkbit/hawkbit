@@ -105,6 +105,35 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     }
 
     /**
+     * Creates a new {@link ActionStatus} object.
+     *
+     * @param status
+     *            the status for this action status
+     * @param occurredAt
+     *            the occurred timestamp
+     */
+    public JpaActionStatus(final Status status, final long occurredAt) {
+        this.status = status;
+        this.occurredAt = occurredAt;
+    }
+
+    /**
+     * Creates a new {@link ActionStatus} object.
+     *
+     * @param status
+     *            the status for this action status
+     * @param occurredAt
+     *            the occurred timestamp
+     * @param message
+     *            the message which should be added to this action status
+     */
+    public JpaActionStatus(final Status status, final Long occurredAt, final String message) {
+        this.status = status;
+        this.occurredAt = occurredAt;
+        addMessage(message);
+    }
+
+    /**
      * JPA default constructor.
      */
     public JpaActionStatus() {
@@ -116,12 +145,10 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return occurredAt;
     }
 
-    @Override
     public void setOccurredAt(final Long occurredAt) {
         this.occurredAt = occurredAt;
     }
 
-    @Override
     public final void addMessage(final String message) {
         if (message != null) {
             if (messages == null) {
@@ -145,7 +172,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return action;
     }
 
-    @Override
     public void setAction(final Action action) {
         this.action = (JpaAction) action;
     }
@@ -155,7 +181,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         return status;
     }
 
-    @Override
     public void setStatus(final Status status) {
         this.status = status;
     }

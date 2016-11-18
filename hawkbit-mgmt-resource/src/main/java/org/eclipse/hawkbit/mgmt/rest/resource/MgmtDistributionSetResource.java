@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
@@ -102,10 +100,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<DistributionSet> findDsPage;
         if (rsqlParam != null) {
-            findDsPage = this.distributionSetManagement.findDistributionSetsAll(rsqlParam, pageable, false);
+            findDsPage = distributionSetManagement.findDistributionSetsAll(rsqlParam, pageable, false);
         } else {
-            findDsPage = this.distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageable, false,
-                    null);
+            findDsPage = distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageable, false, null);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
@@ -127,12 +124,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         LOG.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
         final String defaultDsKey = systemSecurityContext
-                .runAsSystem(() -> this.systemManagement.getTenantMetadata().getDefaultDsType().getKey());
+                .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
-        final Collection<DistributionSet> createdDSets = this.distributionSetManagement
-                .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement,
-                        this.distributionSetManagement, entityFactory));
+        final Collection<DistributionSet> createdDSets = distributionSetManagement
+                .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, entityFactory));
 
         LOG.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(createdDSets),
@@ -143,7 +139,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
         final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        this.distributionSetManagement.deleteDistributionSet(set);
+        distributionSetManagement.deleteDistributionSet(set);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -152,21 +148,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
-        final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        if (toUpdate.getDescription() != null) {
-            set.setDescription(toUpdate.getDescription());
-        }
-
-        if (toUpdate.getName() != null) {
-            set.setName(toUpdate.getName());
-        }
-
-        if (toUpdate.getVersion() != null) {
-            set.setVersion(toUpdate.getVersion());
-        }
         return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponse(this.distributionSetManagement.updateDistributionSet(set)),
+                MgmtDistributionSetMapper.toResponse(distributionSetManagement.updateDistributionSet(
+                        entityFactory.distributionSet().update(distributionSetId).name(toUpdate.getName())
+                                .description(toUpdate.getDescription()).version(toUpdate.getVersion()))),
                 HttpStatus.OK);
     }
 
@@ -224,20 +210,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     pageable);
         }
 
-        return new ResponseEntity<>(
-                new PagedList<MgmtTarget>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
-                        targetsInstalledDS.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
+                targetsInstalledDS.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
-            @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam) {
-        DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+        final DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -294,11 +278,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Page<DistributionSetMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = this.distributionSetManagement
-                    .findDistributionSetMetadataByDistributionSetId(distributionSetId, rsqlParam, pageable);
+            metaDataPage = distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
+                    rsqlParam, pageable);
         } else {
-            metaDataPage = this.distributionSetManagement
-                    .findDistributionSetMetadataByDistributionSetId(distributionSetId, pageable);
+            metaDataPage = distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
+                    pageable);
         }
 
         return new ResponseEntity<>(
@@ -314,8 +298,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        final DistributionSetMetadata findOne = this.distributionSetManagement.findOne(ds, metadataKey);
+        final DistributionSetMetadata findOne = distributionSetManagement.findDistributionSetMetadata(distributionSetId,
+                metadataKey);
         return ResponseEntity.<MgmtMetadata> ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
     }
 
@@ -324,9 +308,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        final DistributionSetMetadata updated = this.distributionSetManagement.updateDistributionSetMetadata(
-                entityFactory.generateDistributionSetMetadata(ds, metadataKey, metadata.getValue()));
+        final DistributionSetMetadata updated = distributionSetManagement.updateDistributionSetMetadata(
+                distributionSetId, entityFactory.generateMetadata(metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(updated));
     }
 
@@ -335,8 +318,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        this.distributionSetManagement.deleteDistributionSetMetadata(ds, metadataKey);
+        distributionSetManagement.deleteDistributionSetMetadata(distributionSetId, metadataKey);
         return ResponseEntity.ok().build();
     }
 
@@ -346,10 +328,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestBody final List<MgmtMetadata> metadataRest) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
-        final List<DistributionSetMetadata> created = this.distributionSetManagement.createDistributionSetMetadata(
-                MgmtDistributionSetMapper.fromRequestDsMetadata(ds, metadataRest, entityFactory));
+        final List<DistributionSetMetadata> created = distributionSetManagement.createDistributionSetMetadata(
+                distributionSetId, MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest, entityFactory));
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDsMetadata(created), HttpStatus.CREATED);
 
     }
@@ -357,21 +337,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        final Set<SoftwareModule> softwareModuleToBeAssigned = new HashSet<>();
-        for (final MgmtSoftwareModuleAssigment sm : softwareModuleIDs) {
-            final SoftwareModule softwareModule = this.softwareManagement.findSoftwareModuleById(sm.getId());
-            if (softwareModule != null) {
-                softwareModuleToBeAssigned.add(softwareModule);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        }
-        // Add Softwaremodules to DisSet only if all of them were found
-        this.distributionSetManagement.assignSoftwareModules(ds, softwareModuleToBeAssigned);
+        distributionSetManagement.assignSoftwareModules(distributionSetId,
+                softwareModuleIDs.stream().map(module -> module.getId()).collect(Collectors.toList()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -379,11 +347,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<Void> deleteAssignSoftwareModules(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
-        // check if distribution set and software module exist otherwise throw
-        // exception immediately
-        final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        final SoftwareModule sm = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId);
-        this.distributionSetManagement.unassignSoftwareModule(ds, sm);
+        distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
         return ResponseEntity.ok().build();
     }
 
@@ -400,26 +364,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<SoftwareModule> softwaremodules = this.softwareManagement.findSoftwareModuleByAssignedTo(pageable,
+        final Page<SoftwareModule> softwaremodules = softwareManagement.findSoftwareModuleByAssignedTo(pageable,
                 foundDs);
         return new ResponseEntity<>(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()), HttpStatus.OK);
     }
 
     private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {
-        final DistributionSet set = this.distributionSetManagement.findDistributionSetById(distributionSetId);
+        final DistributionSet set = distributionSetManagement.findDistributionSetById(distributionSetId);
         if (set == null) {
             throw new EntityNotFoundException("DistributionSet with Id {" + distributionSetId + "} does not exist");
         }
 
         return set;
-    }
-
-    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId) {
-        final SoftwareModule sm = this.softwareManagement.findSoftwareModuleById(softwareModuleId);
-        if (sm == null) {
-            throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");
-        }
-        return sm;
     }
 }

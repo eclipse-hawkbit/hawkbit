@@ -120,7 +120,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     public String toString() {
-        return "BaseEntity [id=" + id + "]";
+        return this.getClass().getSimpleName() + " [id=" + id + "]";
     }
 
     public void setId(final Long id) {
@@ -172,10 +172,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         } else if (!id.equals(other.id)) {
             return false;
         }
-        if (optLockRevision != other.optLockRevision) {
-            return false;
-        }
-        return true;
+        return optLockRevision == other.optLockRevision;
     }
 
 }

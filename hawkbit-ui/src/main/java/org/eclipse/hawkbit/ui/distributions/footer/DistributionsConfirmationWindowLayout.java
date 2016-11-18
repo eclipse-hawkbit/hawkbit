@@ -17,9 +17,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTable;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
@@ -161,7 +160,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             removeAssignedSoftwareModules();
         }
 
-        softwareModuleTable.removeEntities(swmoduleIds);
+        softwareManagement.deleteSoftwareModules(swmoduleIds);
+        eventBus.publish(this, new SoftwareModuleEvent(swmoduleIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.swModule.deleted", swmoduleIds.size()));
@@ -581,18 +581,12 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void saveAllAssignments(final ConfirmationTab tab) {
         manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
-
-            final DistributionSet ds = dsManagement.findDistributionSetByIdWithDetails(distIdName.getId());
-
             final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
                     .collect(Collectors.toList());
-
-            final List<SoftwareModule> softwareModules = softwareManagement.findSoftwareModulesById(softIds);
-
-            softwareModules.forEach(ds::addModule);
-            dsManagement.updateDistributionSet(ds);
+            dsManagement.assignSoftwareModules(distIdName.getId(), softIds);
 
         });
+
         int count = 0;
         for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
                 .getAssignedList().entrySet()) {

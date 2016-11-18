@@ -32,12 +32,6 @@ public interface Rollout extends NamedEntity {
     DistributionSet getDistributionSet();
 
     /**
-     * @param distributionSet
-     *            that is rolled out
-     */
-    void setDistributionSet(DistributionSet distributionSet);
-
-    /**
      * @return immutable list of deployment groups of the rollout.
      */
     List<RolloutGroup> getRolloutGroups();
@@ -47,12 +41,6 @@ public interface Rollout extends NamedEntity {
      *         rollout.
      */
     String getTargetFilterQuery();
-
-    /**
-     * @param targetFilterQuery
-     *            that identifies the targets that are part of this rollout.
-     */
-    void setTargetFilterQuery(String targetFilterQuery);
 
     /**
      * @return status of the rollout
@@ -65,25 +53,11 @@ public interface Rollout extends NamedEntity {
     ActionType getActionType();
 
     /**
-     * @param actionType
-     *            of the rollout.
-     */
-    void setActionType(ActionType actionType);
-
-    /**
      * @return time in {@link TimeUnit#MILLISECONDS} after which
      *         {@link #isForced()} switches to <code>true</code> in case of
      *         {@link ActionType#TIMEFORCED}.
      */
     long getForcedTime();
-
-    /**
-     * @param forcedTime
-     *            in {@link TimeUnit#MILLISECONDS} after which
-     *            {@link #isForced()} switches to <code>true</code> in case of
-     *            {@link ActionType#TIMEFORCED}.
-     */
-    void setForcedTime(long forcedTime);
 
     /**
      * @return number of {@link Target}s in this rollout.
@@ -146,13 +120,17 @@ public interface Rollout extends NamedEntity {
         /**
          * Rollout could not be created due to errors, might be a database
          * problem during asynchronous creating.
+         * @deprecated legacy status is not used anymore
          */
+        @Deprecated
         ERROR_CREATING,
 
         /**
          * Rollout could not be started due to errors, might be database problem
          * during asynchronous starting.
+         * @deprecated legacy status is not used anymore
          */
+        @Deprecated
         ERROR_STARTING;
     }
 

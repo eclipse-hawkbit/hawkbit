@@ -15,9 +15,9 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -38,12 +38,12 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("DS");
         distributionSetId = distributionSet.getId();
 
-        final List<DistributionSetMetadata> metadata = new ArrayList<>();
+        final List<MetaData> metadata = new ArrayList<>(5);
         for (int i = 0; i < 5; i++) {
-            metadata.add(new JpaDistributionSetMetadata("" + i, distributionSet, "" + i));
+            metadata.add(entityFactory.generateMetadata("" + i, "" + i));
         }
 
-        distributionSetManagement.createDistributionSetMetadata(metadata);
+        distributionSetManagement.createDistributionSetMetadata(distributionSetId, metadata);
     }
 
     @Test

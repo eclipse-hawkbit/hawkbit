@@ -23,17 +23,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -41,7 +47,6 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -53,7 +58,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
-public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoDB {
+public class DdiRootControllerTest extends AbstractRestIntegrationTest {
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
@@ -62,6 +67,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
             SYSTEM_ROLE }, autoCreateTenant = false)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetDeletedEvent.class, count = 1) })
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
@@ -73,7 +80,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{}/controller/v1/aControllerId", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        // delete tenant again
+        // delete tenant again, will also deleted target aControllerId
         systemManagement.deleteTenant("tenantDoesNotExists");
 
         mvc.perform(get("/{}/controller/v1/aControllerId", tenantAware.getCurrentTenant()))
@@ -84,11 +91,13 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that target poll request does not change audit data on the entity.")
     @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
             SpPermission.CREATE_TARGET }, allSpPermissions = false)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void targetPollDoesNotModifyAuditData() throws Exception {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
-        targetManagement.createTarget(entityFactory.generateTarget(knownTargetControllerId));
+        testdataFactory.createTarget(knownTargetControllerId);
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
@@ -112,12 +121,14 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that server returns a not found response in case of empty controlloer ID.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/")).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
     @Test
     @Description("Ensures that the system creates a new target in plug and play manner, i.e. target is authenticated but does not exist yet.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsPlugAndPlay() throws Exception {
 
         final long current = System.currentTimeMillis();
@@ -144,6 +155,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
     @WithUser(principal = "knownpricipal", allSpPermissions = false)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void pollWithModifiedGloablPollingTime() throws Exception {
         securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
@@ -175,7 +187,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final Target target = targetManagement.findTargetByControllerID("4711");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4711" });
+        assignDistributionSet(ds.getId(), "4711");
 
         final Action updateAction = deploymentManagement.findActiveActionsByTarget(target).get(0);
         final String etagWithFirstUpdate = mvc
@@ -208,7 +220,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         // Now another deployment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
-        deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4711" });
+        assignDistributionSet(ds2.getId(), "4711");
 
         final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target).get(0);
 
@@ -226,9 +238,10 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = entityFactory.generateTarget("4711");
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget("4711");
 
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -250,6 +263,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that the source IP address of the polling target is correctly stored in repository")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsPlugAndPlayIpAddress() throws Exception {
         // test
         final String knownControllerId1 = "0815";
@@ -264,6 +278,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Ensures that the source IP address of the polling target is not stored in repository if disabled")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void rootRsIpAddressNotStoredIfDisabled() throws Exception {
         securityProperties.getClients().setTrackRemoteIp(false);
 
@@ -281,15 +296,16 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
-
-        // mock
-        final Target target = entityFactory.generateTarget("911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
+        Target savedTarget = testdataFactory.createTarget("911");
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())

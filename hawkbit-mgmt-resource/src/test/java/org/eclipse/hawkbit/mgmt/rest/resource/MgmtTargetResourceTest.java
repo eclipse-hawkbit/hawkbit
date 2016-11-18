@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -25,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,8 +37,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -111,9 +107,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final int limitSize = 2;
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-        actions.get(0).setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(entityFactory.generateActionStatus(actions.get(0), Status.FINISHED,
-                System.currentTimeMillis(), "testmessage"));
+        controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.FINISHED).message("test"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
         final ActionStatus status = deploymentManagement
@@ -142,7 +137,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     public void securityTokenIsNotInResponseIfMissingPermission() throws Exception {
 
         final String knownControllerId = "knownControllerId";
-        targetManagement.createTarget(entityFactory.generateTarget(knownControllerId));
+        testdataFactory.createTarget(knownControllerId);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownControllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("securityToken").doesNotExist());
@@ -155,7 +150,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     public void securityTokenIsInResponseWithCorrectPermission() throws Exception {
 
         final String knownControllerId = "knownControllerId";
-        final Target createTarget = targetManagement.createTarget(entityFactory.generateTarget(knownControllerId));
+        final Target createTarget = testdataFactory.createTarget(knownControllerId);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownControllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("securityToken", equalTo(createTarget.getSecurityToken())));
@@ -186,11 +181,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     private void createTarget(final String controllerId) {
-        final JpaTarget target = (JpaTarget) entityFactory.generateTarget(controllerId);
-        final JpaTargetInfo targetInfo = new JpaTargetInfo(target);
-        targetInfo.setAddress(IpUtil.createHttpUri("127.0.0.1").toString());
-        target.setTargetInfo(targetInfo);
-        targetManagement.createTarget(target);
+        targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
+                .address(IpUtil.createHttpUri("127.0.0.1").toString()));
     }
 
     @Test
@@ -199,9 +191,9 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final Target createTarget = targetManagement.createTarget(entityFactory.generateTarget("knownTargetId"));
+        final Target createTarget = testdataFactory.createTarget("knownTargetId");
 
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(createTarget));
+        assignDistributionSet(dsA, Lists.newArrayList(createTarget));
 
         final String rsqlPendingStatus = "status==pending";
         final String rsqlFinishedStatus = "status==finished";
@@ -279,8 +271,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         deploymentManagement.cancelAction(tA.getActions().get(0), tA);
 
         // find the current active action
-        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA)
-                .getContent().stream().filter(action -> action.isCancelingOrCanceled()).collect(Collectors.toList());
+        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(pageReq, tA).getContent().stream()
+                .filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
         assertThat(cancelActions).hasSize(1);
         assertThat(cancelActions.get(0).isCancelingOrCanceled()).isTrue();
 
@@ -306,7 +298,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Description("Ensures that deletion is executed if permitted.")
     public void deleteTargetReturnsOK() throws Exception {
         final String knownControllerId = "knownControllerIdDelete";
-        targetManagement.createTarget(entityFactory.generateTarget(knownControllerId));
+        testdataFactory.createTarget(knownControllerId);
 
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
                 .andExpect(status().isOk());
@@ -342,10 +334,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setDescription("old description");
-        t.setName(knownNameNotModiy);
-        targetManagement.createTarget(t);
+        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
+                .name(knownNameNotModiy).description("old description"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -367,9 +357,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("securityToken", knownNewToken).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setName(knownNameNotModiy);
-        targetManagement.createTarget(t);
+        targetManagement
+                .createTarget(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModiy));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -391,9 +380,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String body = new JSONObject().put("address", knownNewAddress).toString();
 
         // prepare
-        final Target t = entityFactory.generateTarget(knownControllerId);
-        t.setName(knownNameNotModiy);
-        targetManagement.createTarget(t);
+        targetManagement.createTarget(entityFactory.target().create().controllerId(knownControllerId)
+                .name(knownNameNotModiy).address(knownNewAddress));
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -578,7 +566,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String knownName = "someName";
         createSingleTarget(knownControllerId, knownName);
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        deploymentManagement.assignDistributionSet(ds.getId(), knownControllerId);
+        assignDistributionSet(ds.getId(), knownControllerId);
 
         // test
 
@@ -674,12 +662,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Verfies that a mandatory properties of new targets are validated as not null.")
     public void createTargetWithMissingMandatoryPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setName(null);
-
         final MvcResult mvcResult = mvc
-                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
+                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content("[{\"name\":\"id1\"}]")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
@@ -695,13 +679,11 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setName(RandomStringUtils.randomAscii(80));
+        final Target test1 = entityFactory.target().create().controllerId("id1").name(RandomStringUtils.randomAscii(80))
+                .build();
 
-        final MvcResult mvcResult = mvc
-                .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.targets(Lists.newArrayList(test1), true))
-                        .contentType(MediaType.APPLICATION_JSON))
+        final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
+                .content(JsonBuilder.targets(Lists.newArrayList(test1), true)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
         assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
@@ -715,21 +697,14 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
 
     @Test
     public void createTargetsListReturnsSuccessful() throws Exception {
-        final Target test1 = entityFactory.generateTarget("id1", "token");
-        test1.setDescription("testid1");
-        test1.setName("testname1");
-        test1.getTargetInfo().setAddress("amqp://test123/foobar");
-        final Target test2 = entityFactory.generateTarget("id2");
-        test2.setDescription("testid2");
-        test2.setName("testname2");
-        final Target test3 = entityFactory.generateTarget("id3");
-        test3.setName("testname3");
-        test3.setDescription("testid3");
+        final Target test1 = entityFactory.target().create().controllerId("id1").name("testname1")
+                .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
+        final Target test2 = entityFactory.target().create().controllerId("id2").name("testname2")
+                .description("testid2").build();
+        final Target test3 = entityFactory.target().create().controllerId("id3").name("testname3")
+                .description("testid3").build();
 
-        final List<Target> targets = new ArrayList<>();
-        targets.add(test1);
-        targets.add(test2);
-        targets.add(test3);
+        final List<Target> targets = Lists.newArrayList(test1, test2, test3);
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
@@ -850,8 +825,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     public void getActionWithEmptyResult() throws Exception {
         final String knownTargetId = "targetId";
-        final Target target = entityFactory.generateTarget(knownTargetId);
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget(knownTargetId);
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -1063,22 +1037,19 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
             throws InterruptedException {
 
-        Target target = entityFactory.generateTarget(knownTargetId);
-        target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList<>();
-        targets.add(target);
+        final Target target = testdataFactory.createTarget(knownTargetId);
+        final List<Target> targets = Lists.newArrayList(target);
 
         final Iterator<DistributionSet> sets = testdataFactory.createDistributionSets(2).iterator();
         final DistributionSet one = sets.next();
         final DistributionSet two = sets.next();
 
         // Update
-        final List<Target> updatedTargets = deploymentManagement.assignDistributionSet(one, targets)
-                .getAssignedEntity();
+        final List<Target> updatedTargets = assignDistributionSet(one, targets).getAssignedEntity();
         // 2nd update
         // sleep 10ms to ensure that we can sort by reportedAt
         Thread.sleep(10);
-        deploymentManagement.assignDistributionSet(two, updatedTargets);
+        assignDistributionSet(two, updatedTargets);
 
         // two updates, one cancellation
         final List<Action> actions = deploymentManagement.findActionsByTarget(target);
@@ -1108,7 +1079,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     public void assignDistributionSetToTarget() throws Exception {
 
-        targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
+        testdataFactory.createTarget("fsdfsd");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
@@ -1121,7 +1092,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     @Test
     public void assignDistributionSetToTargetWithActionTimeForcedAndTime() throws Exception {
 
-        final Target target = targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
+        final Target target = testdataFactory.createTarget("fsdfsd");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final long forceTime = System.currentTimeMillis();
@@ -1148,7 +1119,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
-        targetManagement.createTarget(entityFactory.generateTarget("fsdfsd"));
+        testdataFactory.createTarget("fsdfsd");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
@@ -1238,8 +1209,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final Map<String, String> knownControllerAttrs = new HashMap<>();
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
-        final Target target = entityFactory.generateTarget(knownTargetId);
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget(knownTargetId);
         controllerManagament.updateControllerAttributes(knownTargetId, knownControllerAttrs);
 
         // test query target over rest resource
@@ -1252,8 +1222,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     public void getControllerEmptyAttributesReturnsNoContent() throws Exception {
         // create target with attributes
         final String knownTargetId = "targetIdWithAttributes";
-        final Target target = entityFactory.generateTarget(knownTargetId);
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget(knownTargetId);
 
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))
@@ -1286,10 +1255,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     }
 
     private Target createSingleTarget(final String controllerId, final String name) {
-        final Target target = entityFactory.generateTarget(controllerId);
-        target.setName(name);
-        target.setDescription(TARGET_DESCRIPTION_TEST);
-        targetManagement.createTarget(target);
+        targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId).name(name)
+                .description(TARGET_DESCRIPTION_TEST));
         return controllerManagament.updateLastTargetQuery(controllerId, null);
     }
 
@@ -1304,10 +1271,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final Target target = entityFactory.generateTarget(str);
-            target.setName(str);
-            target.setDescription(str);
-            targetManagement.createTarget(target);
+            targetManagement.createTarget(entityFactory.target().create().controllerId(str).name(str).description(str));
             controllerManagament.updateLastTargetQuery(str, null);
             character++;
         }
@@ -1318,10 +1282,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
      *
      */
     private void feedbackToByInSync(final Long actionId) {
-        final Action action = deploymentManagement.findAction(actionId);
-
-        final ActionStatus actionStatus = entityFactory.generateActionStatus(action, Status.FINISHED, 0L);
-        controllerManagement.addUpdateActionStatus(actionStatus);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
     }
 
     /**
@@ -1332,10 +1294,9 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
     private Target createTargetAndStartAction() {
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final Target tA = targetManagement
-                .createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
+        final Target tA = testdataFactory.createTarget("target-id-A");
         // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, newArrayList(tA));
+        assignDistributionSet(dsA, Lists.newArrayList(tA));
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
         assertThat(actionsByTarget.getContent()).hasSize(1);

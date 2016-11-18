@@ -1,0 +1,113 @@
+---
+layout: default
+---
+{% include base.html %}
+<div class="container content">
+  <div class="row">
+    <div class="col-md-9 page-header pull-left">
+      <h3>
+          Blogs
+      </h3>
+    
+  </div>
+  <div class="col-md-3 page-header pull-right">
+     
+      <a href="https://github.com/eclipse/hawkbit/tree/development/docs/blog" target="_blank"><h3>Add a new blog post!</h3></a>                          
+    
+       </div>
+  </div>
+<!--{% assign sorted_pages = (site.pages | sort: 'page.sequence') %}-->
+<div class="row">
+ 
+          <div class="col-md-9">
+
+{% for blog in site.pages reversed %}
+  {% if blog.section == 'blog' %}
+
+    <h2><a href="{{base}}{{ blog.url}}">{{blog.title}}</a></h2>
+    <div class="postmetadata">
+      <ul>
+        {% if blog.eclipseid %}
+          <li>
+            <i class="icon-user"></i>
+            <a href="http://projects.eclipse.org/user/{{blog.eclipseid}}">{{ blog.author }}</a>
+          </li>
+          {% elsif blog.githubid %}
+           <li>
+            <i class="icon-user"></i>
+            <a href="https://github.com/{{blog.githubid}}">{{ blog.author }}</a>
+          </li>
+            {% else %}
+          <li>
+            <i class="icon-user"></i>{{ blog.author }}
+          </li>
+        {% endif %}
+        <li>
+          <i class="icon-calendar"></i> {{ blog.date | date: "%b %-d, %Y" }}
+        </li>
+    </ul>
+    </div>
+    <section>
+    {% if blog.content contains '<!--more-->' %}
+          {{ blog.content | split:'<!--more-->' | first }}
+          <a href="{{base}}{{ blog.url}}">Read More...</a>
+        {% else %}
+        {{ blog.content }}
+    {% endif %}
+    </section>
+    {% endif %}
+         {% endfor %}
+  
+
+</div>
+<div class="col-md-3 pull-right">
+   
+        <div class="well"> 
+          <center><h3>Blogs Overview</h3></center>
+                <ul class="nav nav-stacked" id="sidebar">
+                  {% for blog in site.pages reversed %}
+                  {% if blog.section == 'blog' %}
+                  <li><a href="{{base}}{{ blog.url}}">{{blog.title}}<br></a></li>
+                  
+                
+                  <ul>
+                      {% if blog.eclipseid %}
+                 <li type="square">by <a href="http://projects.eclipse.org/user/{{blog.eclipseid}}"><em>{{ blog.author }}</em></a></li>
+                {% elsif blog.githubid %}
+                 <li type="square">by <a href="https://github.com/{{blog.githubid}}"><em>{{ blog.author }}</em></a></li>
+            {% else %}
+                    <li type="square">by <em>{{ blog.author }}</em></li>
+                    {% endif %}
+                  </ul>
+                  
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+          </div>
+                  
+
+          </div> 
+ 
+
+</div>
+</div>
+
+<!-- Pagination -->
+{% if paginator.total_pages > 1 %}
+
+<div class="pagination">
+  <ul>
+{% if paginator.previous_page %}
+    <li class="prev"><a href="/blog/{% if paginator.previous_page != 1 %}page{{ paginator.previous_page }}{% endif %}">Previous</a></li>
+{% endif %}
+    <li><a {% if paginator.page == 1 %}class="active" {% endif %}href="/blog/">1</a></li>
+{% for count in (2..paginator.total_pages) %}
+    <li><a {% if paginator.page == count %}class="active" {% endif %}href="/blog/page{{ count }}">{{ count }}</a></li>
+{% endfor %}
+{% if paginator.next_page %}
+    <li class="next"><a href="/blog/page{{ paginator.next_page }}">Next</a></li>
+  
+{% endif %}
+  </ul>
+</div>
+{% endif %}

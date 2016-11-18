@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.util.CollectionUtils;
@@ -55,7 +56,7 @@ public final class MgmtTargetFilterQueryMapper {
      *            the target
      * @return the response
      */
-    public static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter) {
+    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
@@ -67,7 +68,7 @@ public final class MgmtTargetFilterQueryMapper {
         targetRest.setCreatedAt(filter.getCreatedAt());
         targetRest.setLastModifiedAt(filter.getLastModifiedAt());
 
-        DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
+        final DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
         }
@@ -80,13 +81,10 @@ public final class MgmtTargetFilterQueryMapper {
         return targetRest;
     }
 
-    static TargetFilterQuery fromRequest(final EntityFactory entityFactory,
+    static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory,
             final MgmtTargetFilterQueryRequestBody filterRest) {
-        final TargetFilterQuery filter = entityFactory.generateTargetFilterQuery();
-        filter.setName(filterRest.getName());
-        filter.setQuery(filterRest.getQuery());
 
-        return filter;
+        return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
     }
 
 }

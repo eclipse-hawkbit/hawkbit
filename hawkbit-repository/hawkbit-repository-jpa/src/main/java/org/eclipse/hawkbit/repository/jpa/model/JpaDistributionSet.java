@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -143,11 +142,15 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
      *            of the {@link DistributionSet}
      * @param moduleList
      *            {@link SoftwareModule}s of the {@link DistributionSet}
+     * @param requiredMigrationStep
+     *            of the {@link DistributionSet}
      */
     public JpaDistributionSet(final String name, final String version, final String description,
-            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
+            final DistributionSetType type, final Collection<SoftwareModule> moduleList,
+            final boolean requiredMigrationStep) {
         super(name, version, description);
 
+        this.requiredMigrationStep = requiredMigrationStep;
         this.type = type;
         if (moduleList != null) {
             moduleList.forEach(this::addModule);
@@ -155,6 +158,25 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         if (this.type != null) {
             complete = this.type.checkComplete(this);
         }
+    }
+
+    /**
+     * Parameterized constructor.
+     *
+     * @param name
+     *            of the {@link DistributionSet}
+     * @param version
+     *            of the {@link DistributionSet}
+     * @param description
+     *            of the {@link DistributionSet}
+     * @param type
+     *            of the {@link DistributionSet}
+     * @param moduleList
+     *            {@link SoftwareModule}s of the {@link DistributionSet}
+     */
+    public JpaDistributionSet(final String name, final String version, final String description,
+            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
+        this(name, version, description, type, moduleList, false);
     }
 
     @Override
@@ -166,7 +188,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return Collections.unmodifiableSet(tags);
     }
 
-    @Override
     public boolean addTag(final DistributionSetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -175,7 +196,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return tags.add(tag);
     }
 
-    @Override
     public boolean removeTag(final DistributionSetTag tag) {
         if (tags == null) {
             return false;
@@ -211,13 +231,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return requiredMigrationStep;
     }
 
-    @Override
     public DistributionSet setDeleted(final boolean deleted) {
         this.deleted = deleted;
         return this;
     }
 
-    @Override
     public DistributionSet setRequiredMigrationStep(final boolean isRequiredMigrationStep) {
         requiredMigrationStep = isRequiredMigrationStep;
         return this;
@@ -261,7 +279,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return Collections.unmodifiableSet(modules);
     }
 
-    @Override
     public boolean addModule(final SoftwareModule softwareModule) {
         if (modules == null) {
             modules = new HashSet<>();
@@ -304,7 +321,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
     }
 
-    @Override
     public boolean removeModule(final SoftwareModule softwareModule) {
         if (modules == null) {
             return false;
@@ -324,20 +340,10 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     @Override
-    public SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
-        if (modules == null) {
-            return null;
-        }
-
-        return modules.stream().filter(module -> module.getType().equals(type)).findFirst().orElse(null);
-    }
-
-    @Override
     public DistributionSetType getType() {
         return type;
     }
 
-    @Override
     public void setType(final DistributionSetType type) {
         this.type = type;
     }

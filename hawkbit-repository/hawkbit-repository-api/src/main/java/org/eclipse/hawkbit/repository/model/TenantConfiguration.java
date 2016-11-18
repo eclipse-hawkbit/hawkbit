@@ -21,20 +21,8 @@ public interface TenantConfiguration extends TenantAwareBaseEntity {
     String getKey();
 
     /**
-     * @param key
-     *            of the entry
-     */
-    void setKey(String key);
-
-    /**
      * @return value of the entry
      */
     String getValue();
-
-    /**
-     * @param value
-     *            of the entry
-     */
-    void setValue(String value);
 
 }

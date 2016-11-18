@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.distributions.dstable.AbstractDistributionSetUpdateWindowLayout;
@@ -26,6 +27,8 @@ import com.vaadin.spring.annotation.ViewScope;
 @SpringComponent
 @ViewScope
 public class DistributionUpdateWindowLayout extends AbstractDistributionSetUpdateWindowLayout {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Save or update distribution set.
@@ -48,17 +51,26 @@ public class DistributionUpdateWindowLayout extends AbstractDistributionSetUpdat
     }
 
     /**
+     * Constructor.
+     * 
      * @param i18n
+     *            the i18n
      * @param notificationMessage
+     *            the notification message
      * @param eventBus
+     *            the event bus
      * @param distributionSetManagement
+     *            the distributionSetManagement
      * @param systemManagement
+     *            the systemManagement
+     * @param entityFactory
+     *            the entityFactory
      */
     @Autowired
     public DistributionUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
             final SessionEventBus eventBus, final DistributionSetManagement distributionSetManagement,
-            final SystemManagement systemManagement) {
-        super(i18n, notificationMessage, eventBus, distributionSetManagement, systemManagement);
+            final SystemManagement systemManagement, final EntityFactory entityFactory) {
+        super(i18n, notificationMessage, eventBus, distributionSetManagement, systemManagement, entityFactory);
     }
 
     @Override

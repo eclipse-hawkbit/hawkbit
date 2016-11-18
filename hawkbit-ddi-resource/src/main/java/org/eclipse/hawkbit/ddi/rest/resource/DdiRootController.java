@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -179,20 +181,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
         final String range = request.getHeader("Range");
 
-        final ActionStatus statusMessage = entityFactory.generateActionStatus();
-        statusMessage.setAction(action);
-        statusMessage.setOccurredAt(System.currentTimeMillis());
-        statusMessage.setStatus(Status.DOWNLOAD);
-
+        String message;
         if (range != null) {
-            statusMessage.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
-                    + " of: " + request.getRequestURI());
+            message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
+                    + request.getRequestURI();
         } else {
-            statusMessage.addMessage(
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
+            message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI();
         }
 
-        return controllerManagement.addInformationalActionStatus(statusMessage);
+        return controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(action.getId()).status(Status.DOWNLOAD).message(message));
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
@@ -293,73 +291,69 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement
-                .addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId(), action));
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId()));
 
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
-    private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
-            final Long actionid, final Action action) {
+    private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
+            final Long actionid) {
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
-
+        final List<String> messages = new ArrayList<>();
+        Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
             LOG.debug("Controller confirmed cancel (actionid: {}, controllerId: {}) as we got {} report.", actionid,
                     controllerId, feedback.getStatus().getExecution());
-            actionStatus.setStatus(Status.CANCELED);
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
+            status = Status.CANCELED;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
             break;
         case REJECTED:
             LOG.info("Controller reported internal error (actionid: {}, controllerId: {}) as we got {} report.",
                     actionid, controllerId, feedback.getStatus().getExecution());
-            actionStatus.setStatus(Status.WARNING);
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target REJECTED update.");
+            status = Status.WARNING;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target REJECTED update.");
             break;
         case CLOSED:
-            handleClosedUpdateStatus(feedback, controllerId, actionid, actionStatus);
+            status = handleClosedCase(feedback, controllerId, actionid, messages);
             break;
         default:
-            handleDefaultUpdateStatus(feedback, controllerId, actionid, actionStatus);
+            status = handleDefaultCase(feedback, controllerId, actionid, messages);
             break;
         }
 
-        action.setStatus(actionStatus.getStatus());
-
-        if (feedback.getStatus().getDetails() != null && !feedback.getStatus().getDetails().isEmpty()) {
-            final List<String> details = feedback.getStatus().getDetails();
-            for (final String detailMsg : details) {
-                actionStatus.addMessage(detailMsg);
-            }
+        if (feedback.getStatus().getDetails() != null) {
+            messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return actionStatus;
+        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
     }
 
-    private static void handleDefaultUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
-            final Long actionid, final ActionStatus actionStatus) {
+    private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
+            final List<String> messages) {
+        Status status;
         LOG.debug("Controller reported intermediate status (actionid: {}, controllerId: {}) as we got {} report.",
                 actionid, controllerId, feedback.getStatus().getExecution());
-        actionStatus.setStatus(Status.RUNNING);
-        actionStatus.addMessage(
+        status = Status.RUNNING;
+        messages.add(
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
+        return status;
     }
 
-    private static void handleClosedUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
-            final Long actionid, final ActionStatus actionStatus) {
+    private Status handleClosedCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
+            final List<String> messages) {
+        Status status;
         LOG.debug("Controller reported closed (actionid: {}, controllerId: {}) as we got {} report.", actionid,
                 controllerId, feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
-            actionStatus.setStatus(Status.ERROR);
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with ERROR!");
+            status = Status.ERROR;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with ERROR!");
         } else {
-            actionStatus.setStatus(Status.FINISHED);
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with OK!");
+            status = Status.FINISHED;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with OK!");
         }
+        return status;
     }
 
     @Override
@@ -426,57 +420,64 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        controllerManagement.addCancelActionStatus(
-                generateActionCancelStatus(feedback, target, feedback.getId(), action, entityFactory));
+        controllerManagement
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private static ActionStatus generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
-            final Long actionid, final Action action, final EntityFactory entityFactory) {
+    private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
+            final Long actionid, final EntityFactory entityFactory) {
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
-
+        final List<String> messages = new ArrayList<>();
+        Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
-            LOG.error(
-                    "Controller reported cancel for a cancel which is not supported by the server (actionid: {}, controllerId: {}) as we got {} report.",
-                    actionid, target.getControllerId(), feedback.getStatus().getExecution());
-            actionStatus.setStatus(Status.WARNING);
+            status = handleCaseCancelCanceled(feedback, target, actionid, messages);
             break;
         case REJECTED:
-            LOG.info("Controller rejected the cancelation request (too late) (actionid: {}, controllerId: {}).",
-                    actionid, target.getControllerId());
-            actionStatus.setStatus(Status.WARNING);
+            LOG.info("Target rejected the cancelation request (actionid: {}, controllerId: {}).", actionid,
+                    target.getControllerId());
+            status = Status.WARNING;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected the cancelation request.");
             break;
         case CLOSED:
-            handleClosedCancelStatus(feedback, actionStatus);
+            status = handleCancelClosedCase(feedback, messages);
             break;
         default:
-            actionStatus.setStatus(Status.RUNNING);
+            status = Status.RUNNING;
             break;
         }
 
-        action.setStatus(actionStatus.getStatus());
-
-        if (feedback.getStatus().getDetails() != null && !feedback.getStatus().getDetails().isEmpty()) {
-            final List<String> details = feedback.getStatus().getDetails();
-            for (final String detailMsg : details) {
-                actionStatus.addMessage(detailMsg);
-            }
+        if (feedback.getStatus().getDetails() != null) {
+            messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return actionStatus;
+        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
 
     }
 
-    private static void handleClosedCancelStatus(final DdiActionFeedback feedback, final ActionStatus actionStatus) {
+    private static Status handleCancelClosedCase(final DdiActionFeedback feedback, final List<String> messages) {
+        Status status;
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
-            actionStatus.setStatus(Status.ERROR);
+            status = Status.ERROR;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target was not able to complete cancelation.");
         } else {
-            actionStatus.setStatus(Status.CANCELED);
+            status = Status.CANCELED;
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancelation confirmed.");
         }
+        return status;
+    }
+
+    private static Status handleCaseCancelCanceled(final DdiActionFeedback feedback, final Target target,
+            final Long actionid, final List<String> messages) {
+        Status status;
+        LOG.error(
+                "Target reported cancel for a cancel which is not supported by the server (actionid: {}, controllerId: {}) as we got {} report.",
+                actionid, target.getControllerId(), feedback.getStatus().getExecution());
+        status = Status.WARNING;
+        messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX
+                + "Target reported cancel for a cancel which is not supported by the server.");
+        return status;
     }
 
     private Action findActionWithExceptionIfNotFound(final Long actionId) {

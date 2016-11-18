@@ -22,21 +22,9 @@ public interface RolloutGroup extends NamedEntity {
     Rollout getRollout();
 
     /**
-     * @param rollout
-     *            sets the {@link Rollout} for this group
-     */
-    void setRollout(Rollout rollout);
-
-    /**
      * @return the current {@link RolloutGroupStatus} for this group
      */
     RolloutGroupStatus getStatus();
-
-    /**
-     * @param status
-     *            the {@link RolloutGroupStatus} to set for this group
-     */
-    void setStatus(RolloutGroupStatus status);
 
     /**
      * @return the parent group of this group, in case the group is the root
@@ -51,14 +39,6 @@ public interface RolloutGroup extends NamedEntity {
     RolloutGroupSuccessCondition getSuccessCondition();
 
     /**
-     * @param successCondition
-     *            the {@link RolloutGroupSuccessCondition} to be set for this
-     *            group to indicate when a group is successfully and a next
-     *            group might be started
-     */
-    void setSuccessCondition(RolloutGroupSuccessCondition successCondition);
-
-    /**
      * @return a String representation of the expression to be evaluated by the
      *         {@link RolloutGroupSuccessCondition} to indicate if the condition
      *         is true, might be {@code null} if no expression must be set for
@@ -67,29 +47,10 @@ public interface RolloutGroup extends NamedEntity {
     String getSuccessConditionExp();
 
     /**
-     * @param successConditionExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupSuccessCondition}, might be {@code null} if
-     *            the set {@link RolloutGroupSuccessCondition} can handle
-     *            {@code null} value
-     */
-    void setSuccessConditionExp(String successConditionExp);
-
-    /**
      * @return the {@link RolloutGroupErrorCondition} for this group to indicate
      *         when a group should marked as failed
      */
     RolloutGroupErrorCondition getErrorCondition();
-
-    /**
-     * 
-     * @param errorCondition
-     *            the {@link RolloutGroupErrorCondition} to be set for this
-     *            group to indicate when a group is marked as failed and the
-     *            corresponding {@link RolloutGroupErrorAction} should be
-     *            executed
-     */
-    void setErrorCondition(RolloutGroupErrorCondition errorCondition);
 
     /**
      * @return a String representation of the expression to be evaluated by the
@@ -100,15 +61,6 @@ public interface RolloutGroup extends NamedEntity {
     String getErrorConditionExp();
 
     /**
-     * @param errorExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupErrorCondition}, might be {@code null} if
-     *            the set {@link RolloutGroupErrorCondition} can handle
-     *            {@code null} value
-     */
-    void setErrorConditionExp(String errorExp);
-
-    /**
      * @return a {@link RolloutGroupErrorAction} which is executed when the
      *         given {@link RolloutGroupErrorCondition} is met, might be
      *         {@code null} if no error action is set
@@ -116,28 +68,11 @@ public interface RolloutGroup extends NamedEntity {
     RolloutGroupErrorAction getErrorAction();
 
     /**
-     * @param errorAction
-     *            the {@link RolloutGroupErrorAction} to be set which should be
-     *            executed if the {@link RolloutGroupErrorCondition} is met,
-     *            might be {@code null} if no error action should be executed
-     */
-    void setErrorAction(RolloutGroupErrorAction errorAction);
-
-    /**
      * @return a String representation of the expression to be evaluated by the
      *         {@link RolloutGroupErrorAction} might be {@code null} if no
      *         expression must be set for the {@link RolloutGroupErrorAction}
      */
     String getErrorActionExp();
-
-    /**
-     * @param errorActionExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupErrorAction}, might be {@code null} if the
-     *            set {@link RolloutGroupErrorAction} can handle {@code null}
-     *            value
-     */
-    void setErrorActionExp(String errorActionExp);
 
     /**
      * @return the {@link RolloutGroupSuccessAction} which is executed if the
@@ -163,16 +98,27 @@ public interface RolloutGroup extends NamedEntity {
     TotalTargetCountStatus getTotalTargetCountStatus();
 
     /**
-     * @param totalTargetCountStatus
-     *            the totalTargetCountStatus to set
+     * @return the target filter query, that is used to assign Targets to this
+     *         Group
      */
-    void setTotalTargetCountStatus(TotalTargetCountStatus totalTargetCountStatus);
+    String getTargetFilterQuery();
 
     /**
-     * Rollout goup state machine.
+     * @return the percentage of matching Targets that should be assigned to
+     *         this Group
+     */
+    float getTargetPercentage();
+
+    /**
+     * Rollout group state machine.
      *
      */
-    public enum RolloutGroupStatus {
+    enum RolloutGroupStatus {
+
+        /**
+         * Group has been defined, but not all targets have been assigned yet.
+         */
+        CREATING,
 
         /**
          * Ready to start the group.
@@ -198,18 +144,18 @@ public interface RolloutGroup extends NamedEntity {
         /**
          * Group is running.
          */
-        RUNNING;
+        RUNNING
     }
 
     /**
      * The condition to evaluate if an group is success state.
      */
-    public enum RolloutGroupSuccessCondition {
+    enum RolloutGroupSuccessCondition {
         THRESHOLD("thresholdRolloutGroupSuccessCondition");
 
         private final String beanName;
 
-        private RolloutGroupSuccessCondition(final String beanName) {
+        RolloutGroupSuccessCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -224,12 +170,12 @@ public interface RolloutGroup extends NamedEntity {
     /**
      * The condition to evaluate if an group is in error state.
      */
-    public enum RolloutGroupErrorCondition {
+    enum RolloutGroupErrorCondition {
         THRESHOLD("thresholdRolloutGroupErrorCondition");
 
         private final String beanName;
 
-        private RolloutGroupErrorCondition(final String beanName) {
+        RolloutGroupErrorCondition(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -242,14 +188,15 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#errorCondition} is hit.
+     * The actions executed when the {@link RolloutGroup#getErrorCondition()} is
+     * hit.
      */
-    public enum RolloutGroupErrorAction {
+    enum RolloutGroupErrorAction {
         PAUSE("pauseRolloutGroupAction");
 
         private final String beanName;
 
-        private RolloutGroupErrorAction(final String beanName) {
+        RolloutGroupErrorAction(final String beanName) {
             this.beanName = beanName;
         }
 
@@ -262,15 +209,15 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#successCondition} is
-     * hit.
+     * The actions executed when the {@link RolloutGroup#getSuccessCondition()}
+     * is hit.
      */
-    public enum RolloutGroupSuccessAction {
+    enum RolloutGroupSuccessAction {
         NEXTGROUP("startNextRolloutGroupAction");
 
         private final String beanName;
 
-        private RolloutGroupSuccessAction(final String beanName) {
+        RolloutGroupSuccessAction(final String beanName) {
             this.beanName = beanName;
         }
 

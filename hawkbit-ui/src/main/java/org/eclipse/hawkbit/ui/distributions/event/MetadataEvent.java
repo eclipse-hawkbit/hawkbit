@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.distributions.event;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * 
@@ -24,30 +24,26 @@ public class MetadataEvent {
 
     private final MetadataUIEvent metadataUIEvent;
 
-    private DistributionSetMetadata distributionSetMetadata;
+    private final MetaData metadata;
 
-    private SoftwareModuleMetadata softwareModuleMetadata;
+    private final SoftwareModule module;
 
-    public MetadataEvent(final MetadataUIEvent metadataUIEvent, final DistributionSetMetadata distributionSetMetadata) {
+    public MetadataEvent(final MetadataUIEvent metadataUIEvent, final MetaData metadata, final SoftwareModule module) {
         this.metadataUIEvent = metadataUIEvent;
-        this.distributionSetMetadata = distributionSetMetadata;
-    }
-
-    public MetadataEvent(final MetadataUIEvent metadataUIEvent, final SoftwareModuleMetadata softwareModuleMetadata) {
-        this.metadataUIEvent = metadataUIEvent;
-        this.softwareModuleMetadata = softwareModuleMetadata;
+        this.metadata = metadata;
+        this.module = module;
     }
 
     public MetadataUIEvent getMetadataUIEvent() {
         return metadataUIEvent;
     }
 
-    public DistributionSetMetadata getDistributionSetMetadata() {
-        return distributionSetMetadata;
+    public MetaData getMetaData() {
+        return metadata;
     }
 
-    public SoftwareModuleMetadata getSoftwareModuleMetadata() {
-        return softwareModuleMetadata;
+    public SoftwareModule getModule() {
+        return module;
     }
 
 }

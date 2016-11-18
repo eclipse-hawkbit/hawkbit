@@ -43,7 +43,9 @@ public abstract class MockMvcResultPrinter {
                 }
 
                 @Override
-                public void printValue(final String label, Object value) {
+                public void printValue(final String label, final Object v) {
+                    Object value = v;
+
                     if (value != null && value.getClass().isArray()) {
                         value = CollectionUtils.arrayToList(value);
                     }

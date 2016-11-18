@@ -40,7 +40,7 @@ import com.google.common.base.Strings;
 public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     private static final long serialVersionUID = 5176481314404662215L;
-    private Sort sort = new Sort(Direction.ASC, "createdAt");
+    private Sort sort = new Sort(Direction.ASC, "id");
     private String searchText;
     private transient DistributionSetManagement distributionSetManagement;
     private transient Page<DistributionSet> firstPageDistributionSets;
@@ -68,8 +68,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                 distributionSetType = (DistributionSetType) queryConfig
                         .get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE);
             }
-            if(queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE) != null) {
-                dsComplete = (Boolean)queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
+            if (queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE) != null) {
+                dsComplete = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
             }
         }
 
@@ -101,8 +101,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                     new OffsetBasedPageRequest(startIndex, count, sort), false, dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
-                    .setIsComplete(dsComplete)
-                    .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
+                    .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
+                    .setType(distributionSetType).build();
             distBeans = getDistributionSetManagement().findDistributionSetsByFilters(
                     new PageRequest(startIndex / count, count, sort), distributionSetFilter);
         }
@@ -127,8 +127,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
-                    .setIsComplete(dsComplete)
-                    .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
+                    .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
+                    .setType(distributionSetType).build();
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByFilters(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         }

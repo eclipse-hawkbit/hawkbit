@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -28,6 +30,16 @@ public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
      */
     public DistributionTableEvent(final BaseEntityEventType eventType, final DistributionSet entity) {
         super(eventType, entity);
+    }
+
+    /**
+     * Delete distribution sets.
+     * 
+     * @param entityIds
+     *            distribution sets which will be deleted
+     */
+    public DistributionTableEvent(final Collection<Long> entityIds) {
+        super(entityIds);
     }
 
 }

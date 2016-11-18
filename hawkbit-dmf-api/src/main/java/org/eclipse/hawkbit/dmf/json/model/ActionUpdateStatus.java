@@ -62,7 +62,7 @@ public class ActionUpdateStatus {
             return Collections.emptyList();
         }
 
-        return Collections.unmodifiableList(message);
+        return message;
     }
 
     public boolean addMessage(final String message) {

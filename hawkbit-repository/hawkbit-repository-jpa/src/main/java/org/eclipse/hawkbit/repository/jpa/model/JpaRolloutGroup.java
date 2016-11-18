@@ -24,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
@@ -53,7 +54,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private JpaRollout rollout;
 
     @Column(name = "status")
-    private RolloutGroupStatus status = RolloutGroupStatus.READY;
+    private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
     @JoinColumn(name = "rolloutGroup_Id", insertable = false, updatable = false)
@@ -63,16 +64,19 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private JpaRolloutGroup parent;
 
     @Column(name = "success_condition", nullable = false)
+    @NotNull
     private RolloutGroupSuccessCondition successCondition = RolloutGroupSuccessCondition.THRESHOLD;
 
     @Column(name = "success_condition_exp", length = 512, nullable = false)
     @Size(max = 512)
+    @NotNull
     private String successConditionExp;
 
     @Column(name = "success_action", nullable = false)
+    @NotNull
     private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
 
-    @Column(name = "success_action_exp", length = 512, nullable = false)
+    @Column(name = "success_action_exp", length = 512)
     @Size(max = 512)
     private String successActionExp;
 
@@ -93,6 +97,13 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Column(name = "total_targets")
     private int totalTargets;
 
+    @Column(name = "target_filter", length = 1024)
+    @Size(max = 1024)
+    private String targetFilterQuery = "";
+
+    @Column(name = "target_percentage")
+    private float targetPercentage = 100;
+
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
@@ -101,7 +112,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return rollout;
     }
 
-    @Override
     public void setRollout(final Rollout rollout) {
         this.rollout = (JpaRollout) rollout;
     }
@@ -111,7 +121,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return status;
     }
 
-    @Override
     public void setStatus(final RolloutGroupStatus status) {
         this.status = status;
     }
@@ -138,7 +147,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return successCondition;
     }
 
-    @Override
     public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
         successCondition = finishCondition;
     }
@@ -148,7 +156,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return successConditionExp;
     }
 
-    @Override
     public void setSuccessConditionExp(final String finishExp) {
         successConditionExp = finishExp;
     }
@@ -158,7 +165,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorCondition;
     }
 
-    @Override
     public void setErrorCondition(final RolloutGroupErrorCondition errorCondition) {
         this.errorCondition = errorCondition;
     }
@@ -168,7 +174,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorConditionExp;
     }
 
-    @Override
     public void setErrorConditionExp(final String errorExp) {
         errorConditionExp = errorExp;
     }
@@ -178,7 +183,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorAction;
     }
 
-    @Override
     public void setErrorAction(final RolloutGroupErrorAction errorAction) {
         this.errorAction = errorAction;
     }
@@ -188,7 +192,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return errorActionExp;
     }
 
-    @Override
     public void setErrorActionExp(final String errorActionExp) {
         this.errorActionExp = errorActionExp;
     }
@@ -220,13 +223,31 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         this.successActionExp = successActionExp;
     }
 
+    @Override
+    public String getTargetFilterQuery() {
+        return targetFilterQuery;
+    }
+
+    public void setTargetFilterQuery(final String targetFilterQuery) {
+        this.targetFilterQuery = targetFilterQuery;
+    }
+
+    @Override
+    public float getTargetPercentage() {
+        return targetPercentage;
+    }
+
+    public void setTargetPercentage(final float targetPercentage) {
+        this.targetPercentage = targetPercentage;
+    }
+
     /**
      * @return the totalTargetCountStatus
      */
     @Override
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(new Long(totalTargets));
+            totalTargetCountStatus = new TotalTargetCountStatus(Long.valueOf(totalTargets));
         }
         return totalTargetCountStatus;
     }
@@ -235,17 +256,16 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
      * @param totalTargetCountStatus
      *            the totalTargetCountStatus to set
      */
-    @Override
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
     }
 
     @Override
     public String toString() {
-        return "RolloutGroup [rollout=" + rollout + ", status=" + status + ", rolloutTargetGroup=" + rolloutTargetGroup
-                + ", parent=" + parent + ", finishCondition=" + successCondition + ", finishExp=" + successConditionExp
-                + ", errorCondition=" + errorCondition + ", errorExp=" + errorConditionExp + ", getName()=" + getName()
-                + ", getId()=" + getId() + "]";
+        return "RolloutGroup [rollout=" + (rollout != null ? rollout.getId() : "") + ", status=" + status
+                + ", rolloutTargetGroup=" + rolloutTargetGroup + ", parent=" + parent + ", finishCondition="
+                + successCondition + ", finishExp=" + successConditionExp + ", errorCondition=" + errorCondition
+                + ", errorExp=" + errorConditionExp + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     @Override

@@ -21,13 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -44,6 +44,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -59,10 +60,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests.")
     public void getDistributionSetTypes() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
-        testType.setDescription("Desc1234");
-        testType = distributionSetManagement.updateDistributionSetType(testType);
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
+        testType = distributionSetManagement.updateDistributionSetType(
+                entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // 4 types overall (2 hawkbit tenant default, 1 test default and 1
         // generated in this test)
@@ -99,10 +101,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with sorting by KEY.")
     public void getDistributionSetTypesSortedByKey() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("zzzzz", "TestName123", "Desc123"));
-        testType.setDescription("Desc1234");
-        testType = distributionSetManagement.updateDistributionSetType(testType);
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("zzzzz").name("TestName123")
+                        .description("Desc123").colour("col12"));
+        testType = distributionSetManagement.updateDistributionSetType(
+                entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // descending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
@@ -138,35 +141,18 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes POST requests.")
     public void createDistributionSetTypes() throws JSONException, Exception {
 
-        assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES);
+        final List<DistributionSetType> types = createTestDistributionSetTestTypes();
 
-        final List<DistributionSetType> types = new ArrayList<>();
-        types.add(entityFactory.generateDistributionSetType("test1", "TestName1", "Desc1")
-                .addMandatoryModuleType(osType).addOptionalModuleType(runtimeType));
-        types.add(entityFactory.generateDistributionSetType("test2", "TestName2", "Desc2").addOptionalModuleType(osType)
-                .addOptionalModuleType(runtimeType).addOptionalModuleType(appType));
-        types.add(entityFactory.generateDistributionSetType("test3", "TestName3", "Desc3")
-                .addMandatoryModuleType(osType).addMandatoryModuleType(runtimeType));
+        final MvcResult mvcResult = runPostDistributionSetType(types);
 
-        final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("[0].name", equalTo("TestName1"))).andExpect(jsonPath("[0].key", equalTo("test1")))
-                .andExpect(jsonPath("[0].description", equalTo("Desc1")))
-                .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[1].name", equalTo("TestName2"))).andExpect(jsonPath("[1].key", equalTo("test2")))
-                .andExpect(jsonPath("[1].description", equalTo("Desc2")))
-                .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].name", equalTo("TestName3"))).andExpect(jsonPath("[2].key", equalTo("test3")))
-                .andExpect(jsonPath("[2].description", equalTo("Desc3")))
-                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
+        verifyCreatedDistributionSetTypes(mvcResult);
+    }
 
-        final DistributionSetType created1 = distributionSetManagement.findDistributionSetTypeByKey("test1");
-        final DistributionSetType created2 = distributionSetManagement.findDistributionSetTypeByKey("test2");
-        final DistributionSetType created3 = distributionSetManagement.findDistributionSetTypeByKey("test3");
+    @Step
+    private void verifyCreatedDistributionSetTypes(final MvcResult mvcResult) throws UnsupportedEncodingException {
+        final DistributionSetType created1 = distributionSetManagement.findDistributionSetTypeByKey("testKey1");
+        final DistributionSetType created2 = distributionSetManagement.findDistributionSetTypeByKey("testKey2");
+        final DistributionSetType created3 = distributionSetManagement.findDistributionSetTypeByKey("testKey3");
 
         assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
         assertThat(created1.getOptionalModuleTypes()).containsOnly(runtimeType);
@@ -206,12 +192,50 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(6);
     }
 
+    @Step
+    private MvcResult runPostDistributionSetType(final List<DistributionSetType> types) throws Exception {
+        return mvc
+                .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("[0].name", equalTo("TestName1")))
+                .andExpect(jsonPath("[0].key", equalTo("testKey1")))
+                .andExpect(jsonPath("[0].description", equalTo("Desc1")))
+                .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[1].name", equalTo("TestName2")))
+                .andExpect(jsonPath("[1].key", equalTo("testKey2")))
+                .andExpect(jsonPath("[1].description", equalTo("Desc2")))
+                .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].name", equalTo("TestName3")))
+                .andExpect(jsonPath("[2].key", equalTo("testKey3")))
+                .andExpect(jsonPath("[2].description", equalTo("Desc3")))
+                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
+    }
+
+    @Step
+    private List<DistributionSetType> createTestDistributionSetTestTypes() {
+        assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES);
+
+        return Lists.newArrayList(
+                entityFactory.distributionSetType().create().key("testKey1").name("TestName1").description("Desc1")
+                        .colour("col").mandatory(Lists.newArrayList(osType.getId()))
+                        .optional(Lists.newArrayList(runtimeType.getId())).build(),
+                entityFactory.distributionSetType().create().key("testKey2").name("TestName2").description("Desc2")
+                        .colour("col")
+                        .optional(Lists.newArrayList(runtimeType.getId(), osType.getId(), appType.getId())).build(),
+                entityFactory.distributionSetType().create().key("testKey3").name("TestName3").description("Desc3")
+                        .colour("col").mandatory(Lists.newArrayList(runtimeType.getId(), osType.getId())).build());
+    }
+
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
     public void addMandatoryModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
@@ -229,8 +253,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
     public void addOptionalModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -249,12 +274,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes GET requests.")
     public void getMandatoryModulesOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -268,12 +288,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes GET requests.")
     public void getOptionalModulesOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -288,12 +303,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} GET requests.")
     public void getMandatoryModuleOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
                 osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -306,16 +316,21 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(osType.getLastModifiedAt())));
     }
 
+    private DistributionSetType generateTestType() {
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(entityFactory
+                .distributionSetType().create().key("test123").name("TestName123").description("Desc123").colour("col")
+                .mandatory(Lists.newArrayList(osType.getId())).optional(Lists.newArrayList(appType.getId())));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
+        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        return testType;
+    }
+
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.")
     public void getOptionalModuleOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -332,12 +347,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} DELETE requests.")
     public void removeMandatoryModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
                 osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -354,12 +364,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} DELETE requests.")
     public void removeOptionalModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123")
-                        .addMandatoryModuleType(osType).addOptionalModuleType(appType));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -377,10 +382,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} GET requests.")
     public void getDistributionSetType() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
-        testType.setDescription("Desc1234");
-        testType = distributionSetManagement.updateDistributionSetType(testType);
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
+        testType = distributionSetManagement.updateDistributionSetType(
+                entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -396,8 +402,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteDistributionSetTypeUnused() throws Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
 
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES + 1);
 
@@ -411,10 +418,12 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteDistributionSetTypeUsed() throws Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
-        distributionSetManagement.createDistributionSet(
-                entityFactory.generateDistributionSet("sdfsd", "dsfsdf", "sdfsdf", testType, null));
+        final DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col12"));
+
+        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("sdfsd")
+                .description("dsfsdf").version("1").type(testType));
 
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(DEFAULT_DS_TYPES + 1);
         assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
@@ -429,8 +438,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.")
     public void updateDistributionSetTypeOnlyDescriptionAndNameUntouched() throws Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+                        .name("TestName123").description("Desc123").colour("col"));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -488,11 +498,12 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnDistributionSetTypesResource() throws Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        // final DistributionSetType testDsType = distributionSetManagement
+        // .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
+        // .name("TestName123").description("Desc123").colour("col"));
 
         final SoftwareModuleType testSmType = softwareManagement.createSoftwareModuleType(
-                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
         // DST does not exist
         mvc.perform(get("/rest/v1/distributionsettypes/12345678")).andDo(MockMvcResultPrinter.print())
@@ -532,10 +543,9 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         // Modules types at creation time invalid
 
-        final DistributionSetType testNewType = entityFactory.generateDistributionSetType("test123", "TestName123",
-                "Desc123");
-        testNewType.addMandatoryModuleType(
-                entityFactory.generateSoftwareModuleType("foo", "bar", "test", Integer.MAX_VALUE));
+        final DistributionSetType testNewType = entityFactory.distributionSetType().create().key("test123")
+                .name("TestName123").description("Desc123").colour("col").mandatory(Lists.newArrayList(osType.getId()))
+                .optional(Collections.emptyList()).build();
 
         mvc.perform(post("/rest/v1/distributionsettypes")
                 .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(testNewType)))
@@ -556,8 +566,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSetType toLongName = entityFactory.generateDistributionSetType("test123",
-                RandomStringUtils.randomAscii(80), "Desc123");
+        final DistributionSetType toLongName = entityFactory.distributionSetType().create().key("test123")
+                .name(RandomStringUtils.randomAscii(80)).build();
         mvc.perform(post("/rest/v1/distributionsettypes")
                 .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -580,10 +590,10 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Search erquest of software module types.")
     public void searchDistributionSetTypeRsql() throws Exception {
-        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test123", "TestName123", "Desc123"));
-        final DistributionSetType testType2 = distributionSetManagement.createDistributionSetType(
-                entityFactory.generateDistributionSetType("test1234", "TestName1234", "Desc123"));
+        distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("test123").name("TestName123"));
+        distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("test1234").name("TestName1234"));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -597,9 +607,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = entityFactory.generateSoftwareModule(osType, str, str, str, str);
-
-            softwareManagement.createSoftwareModule(softwareModule);
+            softwareManagement.createSoftwareModule(
+                    entityFactory.softwareModule().create().name(str).description(str).vendor(str).version(str));
             character++;
         }
     }

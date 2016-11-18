@@ -9,13 +9,13 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -44,16 +44,22 @@ public interface ControllerManagement {
      * Adds an {@link ActionStatus} for a cancel {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
      * 
-     * @param actionStatus
+     * @param create
      *            to be added
-     * @return the persisted {@link Action}
+     * @return the updated {@link Action}
      * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      * 
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
+     * @throws EntityNotFoundException
+     *             if given action does not exist
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
+    Action addCancelActionStatus(@NotNull ActionStatusCreate create);
 
     /**
      * Sends the download progress and notifies the event publisher with a
@@ -75,19 +81,25 @@ public interface ControllerManagement {
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
      * . No state changes.
      * 
-     * @param statusMessage
+     * @param create
      *            to add to the action
      * 
-     * @return create {@link ActionStatus} entity
+     * @return created {@link ActionStatus} entity
+     * 
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
+     * @throws EntityNotFoundException
+     *             if given action does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    ActionStatus addInformationalActionStatus(@NotNull ActionStatus statusMessage);
+    ActionStatus addInformationalActionStatus(@NotNull ActionStatusCreate create);
 
     /**
      * Adds an {@link ActionStatus} entry for an update {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
      *
-     * @param actionStatus
+     * @param create
      *            to be added
      * @return the updated {@link Action}
      *
@@ -96,20 +108,12 @@ public interface ControllerManagement {
      * @throws TooManyStatusEntriesException
      *             if more than the allowed number of status entries are
      *             inserted
+     * @throws TooManyStatusEntriesException
+     *             if more than the allowed number of status entries are
+     *             inserted
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action addUpdateActionStatus(@NotNull ActionStatus actionStatus);
-
-    /**
-     * Retrieves all {@link Action}s which are active and assigned to a
-     * {@link Target}.
-     *
-     * @param target
-     *            the target to retrieve the actions from
-     * @return a list of actions assigned to given target which are active
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> findActiveActionByTarget(@NotNull Target target);
+    Action addUpdateActionStatus(@NotNull ActionStatusCreate create);
 
     /**
      * Retrieves oldest {@link Action} that is active and assigned to a

@@ -1,0 +1,18 @@
+<div class="box">
+<h2 class="box-headline" id="header10">Existing Contributors</h2>
+<hr>
+{% for main in site.pages reversed %}
+{% if main.series == 'homepagecontributors' %}
+<div class="row">
+     <div class="col-md-6">
+        <a href="{{main.url1}}" target="_blank"><img src="{{main.image1}}" /></a>
+        </div>
+    <div class="col-md-6">
+         <a href="{{main.url2}}" target="_blank"><img src="{{main.image2}}" /></a>
+        </div>
+        </div>
+ {% endif %}       
+ 
+{% endfor %}
+</div>
+

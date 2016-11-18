@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -485,16 +484,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected Item addItem(final DistributionSet baseEntity) {
-        final Item item = super.addItem(baseEntity);
-        if (manageDistUIState.getSelectedDistributions().isPresent()) {
-            manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
-        }
-        select(DistributionSetIdName.generate(baseEntity));
-        return item;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     protected void updateEntity(final DistributionSet baseEntity, final Item item) {
         item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
@@ -560,13 +549,4 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         updateEntity(editedDs, item);
     }
 
-    @Override
-    protected DistributionSet createEntity(final DistributionSet entity) {
-        return distributionSetManagement.createDistributionSet(entity);
-    }
-
-    @Override
-    protected void deleteEntities(final Collection<Long> entities) {
-        distributionSetManagement.deleteDistributionSet(entities.toArray(new Long[entities.size()]));
-    }
 }

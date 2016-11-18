@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,8 +32,16 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -50,6 +56,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -113,80 +120,65 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModule updateSoftwareModule(final SoftwareModule sm) {
-        checkNotNull(sm.getId());
+    public SoftwareModule updateSoftwareModule(final SoftwareModuleUpdate u) {
+        final GenericSoftwareModuleUpdate update = (GenericSoftwareModuleUpdate) u;
 
-        final JpaSoftwareModule module = softwareModuleRepository.findOne(sm.getId());
+        final JpaSoftwareModule module = Optional.ofNullable(softwareModuleRepository.findOne(update.getId()))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Software module cannot be updated as it does not exixt" + update.getId()));
 
-        boolean updated = false;
-        if (null == sm.getDescription() || !sm.getDescription().equals(module.getDescription())) {
-            module.setDescription(sm.getDescription());
-            updated = true;
-        }
-        if (null == sm.getVendor() || !sm.getVendor().equals(module.getVendor())) {
-            module.setVendor(sm.getVendor());
-            updated = true;
-        }
+        update.getDescription().ifPresent(module::setDescription);
+        update.getVendor().ifPresent(module::setVendor);
 
-        return updated ? softwareModuleRepository.save(module) : module;
+        return softwareModuleRepository.save(module);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleType sm) {
-        checkNotNull(sm.getId());
+    public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
+        final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
-        final JpaSoftwareModuleType type = softwareModuleTypeRepository.findOne(sm.getId());
+        final JpaSoftwareModuleType type = findSoftwareModuleTypeAndThrowExceptionIfNotFound(update.getId());
 
-        boolean updated = false;
-        if (sm.getDescription() == null || !sm.getDescription().equals(type.getDescription())) {
-            type.setDescription(sm.getDescription());
-            updated = true;
+        update.getDescription().ifPresent(type::setDescription);
+        update.getColour().ifPresent(type::setColour);
+
+        return softwareModuleTypeRepository.save(type);
+    }
+
+    private JpaSoftwareModuleType findSoftwareModuleTypeAndThrowExceptionIfNotFound(final Long smTypeid) {
+        final JpaSoftwareModuleType set = softwareModuleTypeRepository.findOne(smTypeid);
+
+        if (set == null) {
+            throw new EntityNotFoundException("Software module type cannot be updated as it does not exixt" + smTypeid);
         }
-        if (sm.getColour() != null && !sm.getColour().equals(type.getColour())) {
-            type.setColour(sm.getColour());
-            updated = true;
-        }
-        return updated ? softwareModuleTypeRepository.save(type) : type;
+        return set;
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModule createSoftwareModule(final SoftwareModule swModule) {
-        if (null != swModule.getId()) {
-            throw new EntityAlreadyExistsException();
-        }
-        return softwareModuleRepository.save((JpaSoftwareModule) swModule);
+    public SoftwareModule createSoftwareModule(final SoftwareModuleCreate c) {
+        final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
+
+        return softwareModuleRepository.save(create.build());
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModule> swModules) {
-        swModules.forEach(swModule -> {
-            if (null != swModule.getId()) {
-                throw new EntityAlreadyExistsException();
-            }
-        });
-
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaSoftwareModule> jpaCast = (Collection) swModules;
-
-        return Collections.unmodifiableList(softwareModuleRepository.save(jpaCast));
+    public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModuleCreate> swModules) {
+        return swModules.stream().map(this::createSoftwareModule).collect(Collectors.toList());
     }
 
     @Override
     public Slice<SoftwareModule> findSoftwareModulesByType(final Pageable pageable, final Long typeId) {
 
-        final List<Specification<JpaSoftwareModule>> specList = new LinkedList<>();
+        final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(2);
 
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.equalType(typeId);
-        specList.add(spec);
-
-        spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
+        specList.add(SoftwareModuleSpecification.equalType(typeId));
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
         return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
     }
@@ -218,7 +210,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
-        return distributionSetRepository.findByModules(bsmMerged).isEmpty();
+        return distributionSetRepository.countByModules(bsmMerged) <= 0;
     }
 
     private Slice<JpaSoftwareModule> findSwModuleByCriteriaAPI(final Pageable pageable,
@@ -423,7 +415,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private static List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText,
             final Long typeId) {
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
+        final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(3);
         if (!Strings.isNullOrEmpty(searchText)) {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
@@ -491,12 +483,10 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleType type) {
-        if (type.getId() != null) {
-            throw new EntityAlreadyExistsException("Given type contains an Id!");
-        }
+    public SoftwareModuleType createSoftwareModuleType(final SoftwareModuleTypeCreate c) {
+        final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
 
-        return softwareModuleTypeRepository.save((JpaSoftwareModuleType) type);
+        return softwareModuleTypeRepository.save(create.build());
     }
 
     @Override
@@ -523,53 +513,74 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public SoftwareModuleMetadata createSoftwareModuleMetadata(final SoftwareModuleMetadata md) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
+    public SoftwareModuleMetadata createSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
-        if (softwareModuleMetadataRepository.exists(metadata.getId())) {
-            throwMetadataKeyAlreadyExists(metadata.getId().getKey());
+        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, md);
+
+        return softwareModuleMetadataRepository
+                .save(new JpaSoftwareModuleMetadata(md.getKey(), touch(moduleId), md.getValue()));
+    }
+
+    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId, final MetaData md) {
+        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
+            throwMetadataKeyAlreadyExists(md.getKey());
         }
-        // merge base software module so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base software module itself for
-        // auditing purposes.
-        entityManager.merge((JpaSoftwareModule) metadata.getSoftwareModule()).setLastModifiedAt(-1L);
-        return softwareModuleMetadataRepository.save(metadata);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Collection<SoftwareModuleMetadata> md) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaSoftwareModuleMetadata> metadata = (Collection) md;
+    public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(final Long moduleId,
+            final Collection<MetaData> md) {
+        md.forEach(meta -> checkAndThrowAlreadyIfSoftwareModuleMetadataExists(moduleId, meta));
 
-        for (final JpaSoftwareModuleMetadata softwareModuleMetadata : metadata) {
-            checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(softwareModuleMetadata.getId());
-        }
-        metadata.forEach(m -> entityManager.merge((JpaSoftwareModule) m.getSoftwareModule()).setLastModifiedAt(-1L));
-        return Collections.unmodifiableList(softwareModuleMetadataRepository.save(metadata));
+        final JpaSoftwareModule module = touch(moduleId);
+
+        return Collections.unmodifiableList(md.stream()
+                .map(meta -> softwareModuleMetadataRepository
+                        .save(new JpaSoftwareModuleMetadata(meta.getKey(), module, meta.getValue())))
+                .collect(Collectors.toList()));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public SoftwareModuleMetadata updateSoftwareModuleMetadata(final SoftwareModuleMetadata md) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) md;
+    public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        findSoftwareModuleMetadata(metadata.getId());
-        // touch it to update the lock revision because we are modifying the
-        // software module
-        // indirectly
-        entityManager.merge((JpaSoftwareModule) metadata.getSoftwareModule()).setLastModifiedAt(-1L);
+        final JpaSoftwareModuleMetadata metadata = findSoftwareModuleMetadata(
+                new SwMetadataCompositeKey(moduleId, md.getKey()));
+        metadata.setValue(md.getValue());
+
+        touch(moduleId);
         return softwareModuleMetadataRepository.save(metadata);
+    }
+
+    /**
+     * Method to get the latest module based on ID after the metadata changes
+     * for that module.
+     *
+     * @param distributionSet
+     *            Distribution set
+     */
+    private JpaSoftwareModule touch(final Long moduleId) {
+        final JpaSoftwareModule latestModule = softwareModuleRepository.findOne(moduleId);
+
+        // merge base distribution set so optLockRevision gets updated and audit
+        // log written because
+        // modifying metadata is modifying the base distribution set itself for
+        // auditing purposes.
+        final JpaSoftwareModule result = entityManager.merge(latestModule);
+        result.setLastModifiedAt(0L);
+
+        return result;
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteSoftwareModuleMetadata(final Long moduleId, final String key) {
+        touch(moduleId);
         softwareModuleMetadataRepository.delete(new SwMetadataCompositeKey(moduleId, key));
     }
 
@@ -609,8 +620,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         return findSoftwareModuleMetadata(new SwMetadataCompositeKey(moduleId, key));
     }
 
-    private SoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
-        final SoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
+    private JpaSoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
+        final JpaSoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
         if (findOne == null) {
             throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");
         }
@@ -638,9 +649,13 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleType> types) {
+    public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleTypeCreate> creates) {
+        return creates.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
+    }
 
-        return types.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
+    @Override
+    public List<SoftwareModuleType> findSoftwareModuleTypesById(final Collection<Long> ids) {
+        return Collections.unmodifiableList(softwareModuleTypeRepository.findByIdIn(ids));
     }
 
 }

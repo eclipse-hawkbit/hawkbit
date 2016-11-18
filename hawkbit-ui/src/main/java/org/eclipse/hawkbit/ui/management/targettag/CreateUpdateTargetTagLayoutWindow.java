@@ -12,7 +12,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -20,7 +19,6 @@ import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -36,9 +34,6 @@ import com.vaadin.spring.annotation.ViewScope;
 public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 2446682350481560235L;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
@@ -121,15 +116,13 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     protected void createNewTag() {
         super.createNewTag();
         if (isNotEmpty(getTagNameValue())) {
-            TargetTag newTargetTag = entityFactory.generateTargetTag(getTagNameValue());
-            if (isNotEmpty(getTagDescValue())) {
-                newTargetTag.setDescription(getTagDescValue());
-            }
-            newTargetTag.setColour(ColorPickerConstants.START_COLOR.getCSS());
+            String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (isNotEmpty(getColorPicked())) {
-                newTargetTag.setColour(getColorPicked());
+                colour = getColorPicked();
             }
-            newTargetTag = tagManagement.createTargetTag(newTargetTag);
+
+            final TargetTag newTargetTag = tagManagement.createTargetTag(
+                    entityFactory.tag().create().name(getTagNameValue()).description(getTagDescValue()).colour(colour));
             displaySuccess(newTargetTag.getName());
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));

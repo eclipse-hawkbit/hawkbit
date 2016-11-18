@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -336,17 +335,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    protected Item addItem(final SoftwareModule baseEntity) {
-        final Item item = super.addItem(baseEntity);
-
-        if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {
-            manageDistUIState.getSelectedSoftwareModules().stream().forEach(this::unselect);
-        }
-        select(baseEntity.getId());
-        return item;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
         final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
@@ -403,16 +391,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private void showMetadataDetails(final Long itemId) {
         final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
-    }
-
-    @Override
-    protected SoftwareModule createEntity(final SoftwareModule entity) {
-        throw new UnsupportedOperationException("Readonly table");
-    }
-
-    @Override
-    protected void deleteEntities(final Collection<Long> entities) {
-        throw new UnsupportedOperationException("Readonly table");
     }
 
 }

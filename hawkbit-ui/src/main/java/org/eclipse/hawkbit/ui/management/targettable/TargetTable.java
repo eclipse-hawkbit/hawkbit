@@ -836,14 +836,4 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
-
-    @Override
-    protected Target createEntity(final Target entity) {
-        return targetManagement.createTarget(entity);
-    }
-
-    @Override
-    protected void deleteEntities(final Collection<Long> entities) {
-        targetManagement.deleteTargets(entities);
-    }
 }

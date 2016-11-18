@@ -49,7 +49,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-artifact-repository-mongo</artifactId>
+         <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
