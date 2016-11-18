@@ -40,6 +40,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.base.Optional;
 import com.vaadin.data.Container;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
@@ -357,7 +358,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
 
         private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            final StatusFontIcon statusFontIcon = Optional.of(statusIconMap.get(value))
+                    .or(new StatusFontIcon(FontAwesome.QUESTION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE));
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
