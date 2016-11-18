@@ -14,10 +14,10 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Type of a software modules.
@@ -37,7 +37,7 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
 
     @Column(name = "type_key", nullable = false, length = 64)
     @Size(max = 64)
-    @NotNull
+    @NotEmpty
     private String key;
 
     @Column(name = "max_ds_assignments", nullable = false)
@@ -84,7 +84,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
      */
     public JpaSoftwareModuleType(final String key, final String name, final String description,
             final int maxAssignments, final String colour) {
-        super();
         this.key = key;
         this.maxAssignments = maxAssignments;
         setDescription(description);
@@ -99,7 +98,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         // Default Constructor for JPA.
     }
 
-    @Override
     public void setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
     }
@@ -128,7 +126,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }
@@ -138,7 +135,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         return "SoftwareModuleType [key=" + key + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }

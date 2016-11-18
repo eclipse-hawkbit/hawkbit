@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Extension for {@link NamedEntity} that are versioned.
@@ -29,7 +29,7 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
 
     @Column(name = "version", nullable = false, length = 64)
     @Size(max = 64)
-    @NotNull
+    @NotEmpty
     private String version;
 
     /**
@@ -55,7 +55,6 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
         return version;
     }
 
-    @Override
     public void setVersion(final String version) {
         this.version = version;
     }

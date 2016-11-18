@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-
 /**
  * The DistributionSet Metadata composite key which contains the meta data key
  * and the ID of the DistributionSet itself.
@@ -34,8 +32,8 @@ public final class DsMetadataCompositeKey implements Serializable {
      * @param key
      *            the key of the meta data
      */
-    public DsMetadataCompositeKey(final DistributionSet distributionSet, final String key) {
-        this.distributionSet = distributionSet.getId();
+    public DsMetadataCompositeKey(final Long distributionSet, final String key) {
+        this.distributionSet = distributionSet;
         this.key = key;
     }
 

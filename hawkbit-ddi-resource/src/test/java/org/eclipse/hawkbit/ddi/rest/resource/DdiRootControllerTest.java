@@ -23,11 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -96,7 +97,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTest {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
-        targetManagement.createTarget(entityFactory.generateTarget(knownTargetControllerId));
+        testdataFactory.createTarget(knownTargetControllerId);
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
@@ -186,7 +187,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTest {
         final Target target = targetManagement.findTargetByControllerID("4711");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4711" });
+        assignDistributionSet(ds.getId(), "4711");
 
         final Action updateAction = deploymentManagement.findActiveActionsByTarget(target).get(0);
         final String etagWithFirstUpdate = mvc
@@ -219,7 +220,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTest {
         // Now another deployment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
-        deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4711" });
+        assignDistributionSet(ds2.getId(), "4711");
 
         final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target).get(0);
 
@@ -240,8 +241,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = entityFactory.generateTarget("4711");
-        targetManagement.createTarget(target);
+        final Target target = testdataFactory.createTarget("4711");
 
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -296,15 +296,16 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTest {
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
-
-        // mock
-        final Target target = entityFactory.generateTarget("911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
+        Target savedTarget = testdataFactory.createTarget("911");
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())

@@ -40,10 +40,12 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
     }
 
     @Override
-    public void eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
+    public void eval(final Rollout rollout, final RolloutGroup rolloutG, final String expression) {
+        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
+
         systemSecurityContext.runAsSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
-            rolloutGroupRepository.save((JpaRolloutGroup) rolloutGroup);
+            rolloutGroupRepository.save(rolloutGroup);
             rolloutManagement.pauseRollout(rollout);
             return null;
         });

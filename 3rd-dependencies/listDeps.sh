@@ -1,4 +1,12 @@
-# This script
+#!/bin/sh
+#
+# Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
 cd ..
 mvn dependency:list -DexcludeGroupIds=org.eclipse.hawkbit -Dsort=true -DoutputFile=dependencies.txt
 find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:compile'|sort|uniq > 3rd-dependencies/compile.txt

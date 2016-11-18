@@ -13,38 +13,25 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
-import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -54,6 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -70,44 +58,41 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
     public void updateUnassignedDistributionSetTypeModules() {
-        DistributionSetType updatableType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("updatableType", "to be deleted", ""));
+        DistributionSetType updatableType = distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .isEmpty();
 
         // add OS
-        updatableType.addMandatoryModuleType(osType);
-        updatableType = distributionSetManagement.updateDistributionSetType(updatableType);
+        updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
+                Sets.newHashSet(osType.getId()));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .containsOnly(osType);
 
         // add JVM
-        updatableType.addMandatoryModuleType(runtimeType);
-        updatableType = distributionSetManagement.updateDistributionSetType(updatableType);
+        updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
+                Sets.newHashSet(runtimeType.getId()));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .containsOnly(osType, runtimeType);
 
         // remove OS
-        updatableType.removeModuleType(osType.getId());
-        updatableType = distributionSetManagement.updateDistributionSetType(updatableType);
+        updatableType = distributionSetManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .containsOnly(runtimeType);
     }
 
     @Test
-    @Description("Tests the successfull update of used distribution set type meta data hich is in fact allowed.")
+    @Description("Tests the successfull update of used distribution set type meta data which is in fact allowed.")
     public void updateAssignedDistributionSetTypeMetaData() {
-        final DistributionSetType nonUpdatableType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("updatableType", "to be deletd", ""));
+        final DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(entityFactory
+                .distributionSetType().create().key("updatableType").name("to be deleted").colour("test123"));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .isEmpty();
-        distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
+        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+                .version("1").type(nonUpdatableType.getKey()));
 
-        nonUpdatableType.setDescription("a new description");
-        nonUpdatableType.setColour("test123");
-
-        distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+        distributionSetManagement.updateDistributionSetType(
+                entityFactory.distributionSetType().update(nonUpdatableType.getId()).description("a new description"));
 
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getDescription())
                 .isEqualTo("a new description");
@@ -118,17 +103,16 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module addition).")
     public void addModuleToAssignedDistributionSetTypeFails() {
-        final DistributionSetType nonUpdatableType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("updatableType", "to be deletd", ""));
+        final DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .isEmpty();
-        distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
-
-        nonUpdatableType.addMandatoryModuleType(osType);
+        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+                .version("1").type(nonUpdatableType.getKey()));
 
         try {
-            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            distributionSetManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
+                    Sets.newHashSet(osType.getId()));
             fail("Should not have worked as DS is in use.");
         } catch (final EntityReadOnlyException e) {
 
@@ -139,19 +123,18 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module removal).")
     public void removeModuleToAssignedDistributionSetTypeFails() {
-        DistributionSetType nonUpdatableType = distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("updatableType", "to be deletd", ""));
+        DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
                 .isEmpty();
 
-        nonUpdatableType.addMandatoryModuleType(osType);
-        nonUpdatableType = distributionSetManagement.updateDistributionSetType(nonUpdatableType);
-        distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
+        nonUpdatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
+                Sets.newHashSet(osType.getId()));
+        distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
+                .version("1").type(nonUpdatableType.getKey()));
 
-        nonUpdatableType.removeModuleType(osType.getId());
         try {
-            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            distributionSetManagement.unassignSoftwareModuleType(nonUpdatableType.getId(), osType.getId());
             fail("Should not have worked as DS is in use.");
         } catch (final EntityReadOnlyException e) {
 
@@ -162,7 +145,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Tests the successfull deletion of unused (hard delete) distribution set types.")
     public void deleteUnassignedDistributionSetType() {
         final JpaDistributionSetType hardDelete = (JpaDistributionSetType) distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("deleted", "to be deleted", ""));
+                .createDistributionSetType(
+                        entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(hardDelete);
         distributionSetManagement.deleteDistributionSetType(hardDelete);
@@ -174,11 +158,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Tests the successfull deletion of used (soft delete) distribution set types.")
     public void deleteAssignedDistributionSetType() {
         final JpaDistributionSetType softDelete = (JpaDistributionSetType) distributionSetManagement
-                .createDistributionSetType(new JpaDistributionSetType("softdeleted", "to be deletd", ""));
+                .createDistributionSetType(
+                        entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(softDelete);
-        distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", softDelete, null));
+        distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name("softdeleted").version("1").type(softDelete.getKey()));
 
         distributionSetManagement.deleteDistributionSetType(softDelete);
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
@@ -201,7 +186,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that a DS is of default type if not specified explicitly at creation time.")
     public void createDistributionSetWithImplicitType() {
         final DistributionSet set = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", null, null));
+                .createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
 
         assertThat(set.getType()).as("Type should be equal to default type of tenant")
                 .isEqualTo(systemManagement.getTenantMetadata().getDefaultDsType());
@@ -212,12 +197,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that multiple DS are of default type if not specified explicitly at creation time.")
     public void createMultipleDistributionSetsWithImplicitType() {
 
-        List<DistributionSet> sets = new ArrayList<>();
+        final List<DistributionSetCreate> creates = Lists.newArrayListWithExpectedSize(10);
         for (int i = 0; i < 10; i++) {
-            sets.add(new JpaDistributionSet("another DS" + i, "X" + i, "", null, null));
+            creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
         }
 
-        sets = distributionSetManagement.createDistributionSets(sets);
+        final List<DistributionSet> sets = distributionSetManagement.createDistributionSets(creates);
 
         assertThat(sets).as("Type should be equal to default type of tenant").are(new Condition<DistributionSet>() {
             @Override
@@ -229,20 +214,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that a DS entity cannot be used for creation.")
-    public void createDistributionSetFailsOnExistingEntity() {
-        final DistributionSet set = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtypesoft", "1", "", null, null));
-
-        try {
-            distributionSetManagement.createDistributionSet(set);
-            fail("Should not have worked to create based on a persisted entity.");
-        } catch (final EntityAlreadyExistsException e) {
-
-        }
-    }
-
-    @Test
     @Description("Checks that metadata for a distribution set can be created.")
     public void createDistributionSetMetadata() {
         final String knownKey = "dsMetaKnownKey";
@@ -251,8 +222,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
 
         final DistributionSetMetadata metadata = new JpaDistributionSetMetadata(knownKey, ds, knownValue);
-        final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) distributionSetManagement
-                .createDistributionSetMetadata(metadata);
+        final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) createDistributionSetMetadata(
+                ds.getId(), metadata);
 
         assertThat(createdMetadata).isNotNull();
         assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
@@ -264,67 +235,34 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that updates concerning the internal software structure of a DS are not possible if the DS is already assigned.")
     public void updateDistributionSetForbiddedWithIllegalUpdate() {
         // prepare data
-        Target target = new JpaTarget("4711");
-        target = targetManagement.createTarget(target);
-
-        SoftwareModule ah2 = new JpaSoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
-        SoftwareModule os2 = new JpaSoftwareModule(osType, "poky2", "3.0.3", null, "");
+        final Target target = testdataFactory.createTarget();
 
         DistributionSet ds = testdataFactory.createDistributionSet("ds-1");
 
-        ah2 = softwareManagement.createSoftwareModule(ah2);
-        os2 = softwareManagement.createSoftwareModule(os2);
+        final SoftwareModule ah2 = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule os2 = testdataFactory.createSoftwareModuleOs();
 
         // update is allowed as it is still not assigned to a target
-        ds.addModule(ah2);
-        ds = distributionSetManagement.updateDistributionSet(ds);
+        ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(ah2.getId()));
 
         // assign target
-        deploymentManagement.assignDistributionSet(ds.getId(), target.getControllerId());
+        assignDistributionSet(ds.getId(), target.getControllerId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
 
-        // description change is still allowed
-        ds.setDescription("a different desc");
-        ds = distributionSetManagement.updateDistributionSet(ds);
-
-        // description change is still allowed
-        ds.setName("a new name");
-        ds = distributionSetManagement.updateDistributionSet(ds);
-
-        // description change is still allowed
-        ds.setVersion("a new version");
-        ds = distributionSetManagement.updateDistributionSet(ds);
-
         // not allowed as it is assigned now
-        ds.addModule(os2);
         try {
-            ds = distributionSetManagement.updateDistributionSet(ds);
-            fail("Expected EntityLockedException");
-        } catch (final EntityLockedException e) {
+            ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os2.getId()));
+            fail("Expected EntityReadOnlyException");
+        } catch (final EntityReadOnlyException e) {
 
         }
 
         // not allowed as it is assigned now
-        ds.removeModule(ds.findFirstModuleByType(appType));
         try {
-            ds = distributionSetManagement.updateDistributionSet(ds);
-            fail("Expected EntityLockedException");
-        } catch (final EntityLockedException e) {
-
-        }
-    }
-
-    @Test
-    @Description("Ensures that it is not possible to add a software module to a set that has no type defined.")
-    public void updateDistributionSetModuleWithUndefinedTypeFails() {
-        final DistributionSet testSet = new JpaDistributionSet();
-        final SoftwareModule module = new JpaSoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
-
-        // update data
-        try {
-            testSet.addModule(module);
-            fail("Should not have worked as DS type is undefined.");
-        } catch (final DistributionSetTypeUndefinedException e) {
+            ds = distributionSetManagement.unassignSoftwareModule(ds.getId(),
+                    ds.findFirstModuleByType(appType).getId());
+            fail("Expected EntityReadOnlyException");
+        } catch (final EntityReadOnlyException e) {
 
         }
     }
@@ -332,13 +270,18 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that it is not possible to add a software module that is not defined of the DS's type.")
     public void updateDistributionSetUnsupportedModuleFails() {
-        final DistributionSet set = new JpaDistributionSet("agent-hub2", "1.0.5", "desc",
-                new JpaDistributionSetType("test", "test", "test").addMandatoryModuleType(osType), null);
-        final SoftwareModule module = new JpaSoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
+        final DistributionSet set = distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name("agent-hub2").version("1.0.5")
+                        .type(distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                                .create().key("test").name("test").mandatory(Lists.newArrayList(osType.getId())))
+                                .getKey()));
+
+        final SoftwareModule module = softwareManagement.createSoftwareModule(
+                entityFactory.softwareModule().create().name("agent-hub2").version("1.0.5").type(appType.getKey()));
 
         // update data
         try {
-            set.addModule(module);
+            distributionSetManagement.assignSoftwareModules(set.getId(), Sets.newHashSet(module.getId()));
             fail("Should not have worked as module type is not in DS type.");
         } catch (final UnsupportedSoftwareModuleForThisDistributionSetException e) {
 
@@ -349,40 +292,30 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Legal updates of a DS, e.g. name or description and module addition, removal while still unassigned.")
     public void updateDistributionSet() {
         // prepare data
-        Target target = new JpaTarget("4711");
-        target = targetManagement.createTarget(target);
-
-        SoftwareModule os2 = new JpaSoftwareModule(osType, "poky2", "3.0.3", null, "");
-        final SoftwareModule app2 = new JpaSoftwareModule(appType, "app2", "3.0.3", null, "");
-
+        final Target target = testdataFactory.createTarget();
         DistributionSet ds = testdataFactory.createDistributionSet("");
-
-        os2 = softwareManagement.createSoftwareModule(os2);
+        final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
         // update data
         // legal update of module addition
-        ds.addModule(os2);
-        distributionSetManagement.updateDistributionSet(ds);
+        distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os.getId()));
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
-        assertThat(ds.findFirstModuleByType(osType)).isEqualTo(os2);
+        assertThat(ds.findFirstModuleByType(osType)).isEqualTo(os);
 
         // legal update of module removal
-        ds.removeModule(ds.findFirstModuleByType(appType));
-        distributionSetManagement.updateDistributionSet(ds);
+        distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).getId());
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
         assertThat(ds.findFirstModuleByType(appType)).isNull();
 
         // Update description
-        ds.setDescription("a new description");
-        distributionSetManagement.updateDistributionSet(ds);
+        distributionSetManagement
+                .updateDistributionSet(entityFactory.distributionSet().update(ds.getId()).name("a new name")
+                        .description("a new description").version("a new version").requiredMigrationStep(true));
         ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
         assertThat(ds.getDescription()).isEqualTo("a new description");
-
-        // Update name
-        ds.setName("a new name");
-        distributionSetManagement.updateDistributionSet(ds);
-        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
         assertThat(ds.getName()).isEqualTo("a new name");
+        assertThat(ds.getVersion()).isEqualTo("a new version");
+        assertThat(ds.isRequiredMigrationStep()).isTrue();
     }
 
     @Test
@@ -399,22 +332,16 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(ds.getOptLockRevision()).isEqualTo(1);
 
         // create an DS meta data entry
-        final DistributionSetMetadata dsMetadata = distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata(knownKey, ds, knownValue));
+        createDistributionSetMetadata(ds.getId(), new JpaDistributionSetMetadata(knownKey, ds, knownValue));
 
         DistributionSet changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId());
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
-
-        // modifying the meta data value
-        dsMetadata.setValue(knownUpdateValue);
-        dsMetadata.setKey(knownKey);
-        ((JpaDistributionSetMetadata) dsMetadata).setDistributionSet(changedLockRevisionDS);
 
         Thread.sleep(100);
 
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
-                .updateDistributionSetMetadata(dsMetadata);
+                .updateDistributionSetMetadata(ds.getId(), entityFactory.generateMetadata(knownKey, knownUpdateValue));
         // we are updating the sw meta data so also modifying the base software
         // module so opt lock
         // revision must be three
@@ -435,8 +362,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         final List<DistributionSet> buildDistributionSets = testdataFactory.createDistributionSets("dsOrder", 10);
 
-        final List<Target> buildTargetFixtures = targetManagement
-                .createTargets(testdataFactory.generateTargets(5, "tOrder", "someDesc"));
+        final List<Target> buildTargetFixtures = testdataFactory.createTargets(5, "tOrder", "someDesc");
 
         final Iterator<DistributionSet> dsIterator = buildDistributionSets.iterator();
         final Iterator<Target> tIterator = buildTargetFixtures.iterator();
@@ -448,14 +374,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final Target tSecond = tIterator.next();
 
         // set assigned
-        deploymentManagement.assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
-        deploymentManagement.assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
+        assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
+        assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
         // set installed
-        final ArrayList<Target> installedDSSecond = new ArrayList<>();
-        installedDSSecond.add(tSecond);
-        sendUpdateActionStatusToTargets(dsSecond, installedDSSecond, Status.FINISHED, "some message");
+        testdataFactory.sendUpdateActionStatusToTargets(Collections.singleton(tSecond), Status.FINISHED,
+                Lists.newArrayList("some message"));
 
-        deploymentManagement.assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
+        assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
 
         final DistributionSetFilterBuilder distributionSetFilterBuilder = new DistributionSetFilterBuilder()
                 .setIsDeleted(false).setIsComplete(true).setSelectDSWithNoTag(Boolean.FALSE);
@@ -479,28 +404,32 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("searches for distribution sets based on the various filter options, e.g. name, version, desc., tags.")
     public void searchDistributionSetsOnFilters() {
         DistributionSetTag dsTagA = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-A"));
+                .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-A"));
         final DistributionSetTag dsTagB = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-B"));
+                .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-B"));
         final DistributionSetTag dsTagC = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-C"));
-        final DistributionSetTag dsTagD = tagManagement
-                .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-D"));
+                .createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-C"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("DistributionSetTag-D"));
 
         Collection<DistributionSet> ds100Group1 = testdataFactory.createDistributionSets("", 100);
         Collection<DistributionSet> ds100Group2 = testdataFactory.createDistributionSets("test2", 100);
         DistributionSet dsDeleted = testdataFactory.createDistributionSet("deleted");
-        final DistributionSet dsInComplete = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("notcomplete", "1", "", standardDsType, null));
+        final DistributionSet dsInComplete = distributionSetManagement.createDistributionSet(entityFactory
+                .distributionSet().create().name("notcomplete").version("1").type(standardDsType.getKey()));
 
-        final DistributionSetType newType = distributionSetManagement.createDistributionSetType(
-                new JpaDistributionSetType("foo", "bar", "test").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(appType).addOptionalModuleType(runtimeType));
+        DistributionSetType newType = distributionSetManagement.createDistributionSetType(
+                entityFactory.distributionSetType().create().key("foo").name("bar").description("test"));
 
-        final DistributionSet dsNewType = distributionSetManagement
-                .createDistributionSet(new JpaDistributionSet("newtype", "1", "", newType, dsDeleted.getModules()));
+        distributionSetManagement.assignMandatorySoftwareModuleTypes(newType.getId(),
+                Lists.newArrayList(osType.getId()));
+        newType = distributionSetManagement.assignOptionalSoftwareModuleTypes(newType.getId(),
+                Lists.newArrayList(appType.getId(), runtimeType.getId()));
 
-        deploymentManagement.assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
+        final DistributionSet dsNewType = distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name("newtype").version("1").type(newType.getKey()).modules(
+                        dsDeleted.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList())));
+
+        assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
         distributionSetManagement.deleteDistributionSet(dsDeleted);
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
@@ -515,7 +444,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(203);
 
         // Find all
-        List<DistributionSet> expected = new ArrayList<DistributionSet>();
+        List<DistributionSet> expected = Lists.newArrayListWithExpectedSize(203);
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsDeleted);
@@ -539,7 +468,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         .hasSize(202);
 
         // search for completed
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsDeleted);
@@ -551,7 +480,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsInComplete);
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(1)
@@ -604,7 +533,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         expected.add(dsNewType);
@@ -615,14 +544,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(201)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsInComplete);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(1)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsDeleted);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setIsDeleted(Boolean.TRUE);
@@ -710,18 +639,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         return new DistributionSetFilterBuilder();
     }
 
-    private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
-            final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<>();
-        for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
-            }
-        }
-        return result;
-    }
-
     @Test
     @Description("Simple DS load without the related data that should be loaded lazy.")
     public void findDistributionSetsWithoutLazy() {
@@ -759,16 +676,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         for (int index = 0; index < 10; index++) {
 
-            ds1 = distributionSetManagement
-                    .createDistributionSetMetadata(new JpaDistributionSetMetadata("key" + index, ds1, "value" + index))
-                    .getDistributionSet();
+            ds1 = createDistributionSetMetadata(ds1.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds1, "value" + index)).getDistributionSet();
         }
 
         for (int index = 0; index < 20; index++) {
 
-            ds2 = distributionSetManagement
-                    .createDistributionSetMetadata(new JpaDistributionSetMetadata("key" + index, ds2, "value" + index))
-                    .getDistributionSet();
+            ds2 = createDistributionSetMetadata(ds2.getId(),
+                    new JpaDistributionSetMetadata("key" + index, ds2, "value" + index)).getDistributionSet();
         }
 
         final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement
@@ -799,11 +714,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // create assigned DS
         dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
                 dsToTargetAssigned.getVersion());
-        final Target target = new JpaTarget("4712");
-        final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<>();
-        toAssign.add(savedTarget);
-        deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        final Target savedTarget = testdataFactory.createTarget();
+        assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
 
         // create assigned rollout
         createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
@@ -827,47 +739,15 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // create assigned DS
         dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
                 dsToTargetAssigned.getVersion());
-        final Target target = new JpaTarget("4712");
-        final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = Lists.newArrayList(savedTarget);
-        DistributionSetAssignmentResult assignmentResult = deploymentManagement
-                .assignDistributionSet(dsToTargetAssigned, toAssign);
+        final Target savedTarget = testdataFactory.createTarget();
+        DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
+                savedTarget.getControllerId());
         assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
 
-        assignmentResult = deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
+        assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
         assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
 
         assertThat(distributionSetRepository.findAll()).hasSize(1);
-    }
-
-    private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
-            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition) {
-        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
-                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
-                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        final Rollout rolloutToCreate = new JpaRollout();
-        rolloutToCreate.setName(rolloutName);
-        rolloutToCreate.setDescription(rolloutDescription);
-        rolloutToCreate.setTargetFilterQuery(filterQuery);
-        rolloutToCreate.setDistributionSet(distributionSet);
-        return rolloutManagement.createRollout(rolloutToCreate, groupSize, conditions);
-    }
-
-    private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
-            final String... msgs) {
-        updActA.setStatus(status);
-
-        final ActionStatus statusMessages = new JpaActionStatus();
-        statusMessages.setAction(updActA);
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
-        controllerManagament.addUpdateActionStatus(statusMessages);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
 }

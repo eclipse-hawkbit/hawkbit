@@ -18,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -44,6 +43,8 @@ import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -119,7 +120,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that rollout can be created")
     public void createRollout() throws Exception {
-        targetManagement.createTargets(testdataFactory.generateTargets(20, "target", "rollout"));
+        testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 10, dsA.getId(), "id==target*");
@@ -131,25 +132,18 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "ro-target", "rollout"));
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        List<RolloutGroup> rolloutGroups = new ArrayList<>(2);
-        final int percentTargetsInGroup1 = 20;
-        final int percentTargetsInGroup2 = 100;
+        final float percentTargetsInGroup1 = 20;
+        final float percentTargetsInGroup2 = 100;
 
-        RolloutGroup group1 = entityFactory.generateRolloutGroup();
-        group1.setName("Group1");
-        group1.setDescription("Group1desc");
-        group1.setTargetPercentage(percentTargetsInGroup1);
-        rolloutGroups.add(group1);
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc")
+                        .targetPercentage(percentTargetsInGroup1).build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc")
+                        .targetPercentage(percentTargetsInGroup2).build());
 
-        RolloutGroup group2 = entityFactory.generateRolloutGroup();
-        group2.setName("Group2");
-        group2.setDescription("Group2desc");
-        group2.setTargetPercentage(percentTargetsInGroup2);
-        rolloutGroups.add(group2);
-
-        RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().build();
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("rollout2", "desc", null, dsA.getId(), "id==ro-target*",
@@ -161,41 +155,50 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithIllegalPercentages() throws Exception {
+    public void createRolloutWithToLowlPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "ro-target", "rollout"));
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        List<RolloutGroup> rolloutGroups = new ArrayList<>(2);
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
+                        .build());
 
-        RolloutGroup group1 = entityFactory.generateRolloutGroup();
-        group1.setName("Group1");
-        group1.setDescription("Group1desc");
-        group1.setTargetPercentage(0);
-        rolloutGroups.add(group1);
-
-        RolloutGroup group2 = entityFactory.generateRolloutGroup();
-        group2.setName("Group2");
-        group2.setDescription("Group2desc");
-        group2.setTargetPercentage(100);
-        rolloutGroups.add(group2);
-
-        RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().build();
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
                         rolloutGroupConditions, rolloutGroups))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isInternalServerError())
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
 
-        group1.setTargetPercentage(101);
+    }
+
+    @Test
+    @Description("Testing that no rollout with groups that have illegal percentages can be created")
+    public void createRolloutWithToHighPercentage() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
+
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
+
+        final List<RolloutGroup> rolloutGroups = Lists.newArrayList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)
+                        .build());
+
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("rollout4", "desc", null, dsA.getId(), "id==ro-target*",
                         rolloutGroupConditions, rolloutGroups))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isInternalServerError())
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
 
     }
@@ -213,7 +216,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void rolloutPagedListContainsAllRollouts() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        targetManagement.createTargets(testdataFactory.generateTargets(20, "target", "rollout"));
+        testdataFactory.createTargets(20, "target", "rollout");
 
         // setup - create 2 rollouts
         postRollout("rollout1", 10, dsA.getId(), "id==target*");
@@ -240,7 +243,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void rolloutPagedListIsLimitedToQueryParam() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        targetManagement.createTargets(testdataFactory.generateTargets(20, "target", "rollout"));
+        testdataFactory.createTargets(20, "target", "rollout");
 
         // setup - create 2 rollouts
         postRollout("rollout1", 10, dsA.getId(), "id==target*");
@@ -259,7 +262,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRollout() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -281,7 +284,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -312,7 +315,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void pausingRolloutSwitchesIntoPausedState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -341,7 +344,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -374,7 +377,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -398,7 +401,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -415,7 +418,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -443,7 +446,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveSingleRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -466,7 +469,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -488,8 +491,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
-        final List<Target> targets = targetManagement
-                .createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -513,7 +515,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -540,7 +542,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
 
         final int amountTargets = 1000;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -554,8 +556,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         rolloutManagement.checkStartingRollouts(0);
 
         // check if running
-        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 60_000, 100))
-                .isNotNull();
+        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), this::success, 60_000, 100)).isNotNull();
     }
 
     @Test
@@ -566,10 +567,10 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final int amountTargetsRollout2 = 25;
         final int amountTargetsRollout3 = 25;
         final int amountTargetsOther = 25;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout1, "rollout1", "rollout1"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout2, "rollout2", "rollout2"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsRollout3, "rollout3", "rollout3"));
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsOther, "other1", "other1"));
+        testdataFactory.createTargets(amountTargetsRollout1, "rollout1", "rollout1");
+        testdataFactory.createTargets(amountTargetsRollout2, "rollout2", "rollout2");
+        testdataFactory.createTargets(amountTargetsRollout3, "rollout3", "rollout3");
+        testdataFactory.createTargets(amountTargetsOther, "other1", "other1");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         createRollout("rollout1", 5, dsA.getId(), "controllerId==rollout1*");
@@ -600,7 +601,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
@@ -667,22 +668,20 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
             final String targetFilterQuery) throws Exception {
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
-                        new RolloutGroupConditionBuilder().build()))
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        Rollout rollout = entityFactory.generateRollout();
-        rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
-        rollout.setName(name);
-        rollout.setTargetFilterQuery(targetFilterQuery);
-        rollout = rolloutManagement.createRollout(rollout, amountGroups, new RolloutGroupConditionBuilder()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+        final Rollout rollout = rolloutManagement.createRollout(
+                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
+                amountGroups, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.fillRolloutGroupsWithTargets(rolloutManagement.findRolloutById(rollout.getId()));
+        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
 
         return rolloutManagement.findRolloutById(rollout.getId());
     }

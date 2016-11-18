@@ -38,17 +38,11 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Target filter query{#link {@link TargetFilterQuery} buttons layout .
- * 
- *
- * 
+ * Target filter query{#link {@link TargetFilterQuery} buttons layout.
  */
 @SpringComponent
 @ViewScope
 public class TargetFilterQueryButtons extends Table {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 9188095103191937850L;
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
@@ -115,10 +109,6 @@ public class TargetFilterQueryButtons extends Table {
         addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
     private Button addGeneratedCell(final Object itemId) {
         final Item item = getItem(itemId);
         final Long id = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
@@ -131,16 +121,9 @@ public class TargetFilterQueryButtons extends Table {
         return typeButton;
     }
 
-    /**
-     * @param id
-     * @return
-     */
     private boolean isClickedByDefault(final Long id) {
-        if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()
-                && (managementUIState.getTargetTableFilters().getTargetFilterQuery().get().getId().equals(id))) {
-            return true;
-        }
-        return false;
+        return managementUIState.getTargetTableFilters().getTargetFilterQuery().map(q -> q.getId().equals(id))
+                .orElse(false);
     }
 
     private Button createFilterButton(final Long id, final String name, final Object itemId) {

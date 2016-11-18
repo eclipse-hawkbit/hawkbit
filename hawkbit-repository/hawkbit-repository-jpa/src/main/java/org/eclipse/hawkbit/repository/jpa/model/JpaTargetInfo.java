@@ -40,20 +40,16 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Persistable;
@@ -71,7 +67,7 @@ import org.springframework.data.domain.Persistable;
         @Index(name = "sp_idx_target_info_02", columnList = "target_id,update_status") })
 @Entity
 @EntityListeners(EntityPropertyChangeListener.class)
-public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareEntity {
+public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetInfo.class);
@@ -176,25 +172,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
         }
     }
 
-    /**
-     * @param address
-     *            the target address to set
-     *
-     * @throws IllegalArgumentException
-     *             If the given string violates RFC&nbsp;2396
-     */
-    @Override
     public void setAddress(final String address) {
-        // check if this is a real URI
-        if (address != null) {
-            try {
-                URI.create(address);
-            } catch (final IllegalArgumentException e) {
-                throw new InvalidTargetAddressException(
-                        "The given address " + address + " violates the RFC-2396 specification", e);
-            }
-        }
-
         this.address = address;
     }
 
@@ -329,21 +307,5 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo, EventAwareE
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        // there is no target info created event
-    }
-
-    @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetUpdatedEvent(this.getTarget(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        // there is no target info deleted event
     }
 }

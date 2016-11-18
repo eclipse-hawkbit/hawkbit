@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
@@ -71,7 +70,7 @@ public final class DeploymentHelper {
      *            the action which is set to canceled
      * @param actionRepository
      *            for the operation
-     * @param targetManagement
+     * @param targetRepository
      *            for the operation
      * @param entityManager
      *            for the operation
@@ -79,7 +78,7 @@ public final class DeploymentHelper {
      *            for the operation
      */
     static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
-            final TargetManagement targetManagement, final TargetInfoRepository targetInfoRepository,
+            final TargetRepository targetRepository, final TargetInfoRepository targetInfoRepository,
             final EntityManager entityManager) {
 
         // set action inactive
@@ -96,7 +95,8 @@ public final class DeploymentHelper {
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }
-        targetManagement.updateTarget(target);
+        target.setNew(false);
+        targetRepository.save(target);
     }
 
 }

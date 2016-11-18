@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.ui.layouts;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -76,6 +78,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     @Autowired
     protected transient TagManagement tagManagement;
+
+    @Autowired
+    protected transient EntityFactory entityFactory;
 
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
@@ -550,22 +555,16 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
      * update tag.
      */
     protected void updateExistingTag(final Tag targetObj) {
-        final String nameUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
-        final String descUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
-
-        if (null != nameUpdateValue) {
-            targetObj.setName(nameUpdateValue);
-            targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
-            targetObj.setColour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
-            if (targetObj instanceof TargetTag) {
-                tagManagement.updateTargetTag((TargetTag) targetObj);
-            } else if (targetObj instanceof DistributionSetTag) {
-                tagManagement.updateDistributionSetTag((DistributionSetTag) targetObj);
-            }
-            uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
-        } else {
-            uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
+        final TagUpdate update = entityFactory.tag().update(targetObj.getId()).name(tagName.getValue())
+                .description(tagDesc.getValue())
+                .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
+        if (targetObj instanceof TargetTag) {
+            tagManagement.updateTargetTag(update);
+        } else if (targetObj instanceof DistributionSetTag) {
+            tagManagement.updateDistributionSetTag(update);
         }
+        uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
+
     }
 
     protected void displaySuccess(final String tagName) {

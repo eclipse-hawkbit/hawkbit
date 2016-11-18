@@ -21,12 +21,8 @@ public interface RolloutGroupConditionEvaluator {
         // percentage value between 0 and 100
         try {
             final Integer value = Integer.valueOf(expression);
-            if (value >= 0 || value <= 100) {
-                return true;
-            }
-            return true;
+            return value >= 0 && value <= 100;
         } catch (final NumberFormatException e) {
-
             return false;
         }
     }

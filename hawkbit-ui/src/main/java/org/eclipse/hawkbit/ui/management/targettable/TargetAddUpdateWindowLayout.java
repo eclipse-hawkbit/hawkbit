@@ -150,32 +150,23 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * Update the Target if modified.
      */
     public void updateTarget() {
-
-        final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
-        final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-        /* get latest entity */
-        final Target latestTarget = targetManagement.findTargetByControllerIDWithDetails(controllerId);
-        /* update new name & desc */
-        setTargetValues(latestTarget, newName, newDesc);
         /* save updated entity */
-        targetManagement.updateTarget(latestTarget);
+        final Target target = targetManagement.updateTarget(entityFactory.target().update(controllerId)
+                .name(nameTextField.getValue()).description(descTextArea.getValue()));
         /* display success msg */
-        uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { latestTarget.getName() }));
+        uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { target.getName() }));
         // publishing through event bus
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
     }
 
-    private void addNewTarget() {
-
+     private void addNewTarget() {
+        final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-        /* create new target entity */
-        Target newTarget = entityFactory.generateTarget(controllerId);
-        /* set values to the new target entity */
-        setTargetValues(newTarget, newName, newDesc);
         /* save new target */
-        newTarget = targetManagement.createTarget(newTarget);
+        final Target newTarget = targetManagement.createTarget(
+                entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
         final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
         final Set<TargetIdName> s = new HashSet<>();
         s.add(newTarget.getTargetIdName());
@@ -219,11 +210,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.clear();
         descTextArea.clear();
         editTarget = Boolean.FALSE;
-    }
-
-    private void setTargetValues(final Target target, final String name, final String description) {
-        target.setName(name == null ? target.getControllerId() : name);
-        target.setDescription(description);
     }
 
     /**

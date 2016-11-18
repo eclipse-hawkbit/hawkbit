@@ -40,11 +40,6 @@ public interface TargetFilterQueryRepository
     @Override
     Page<JpaTargetFilterQuery> findAll();
 
-    @Override
-    @Modifying
-    @Transactional
-    <S extends JpaTargetFilterQuery> S save(S entity);
-
     /**
      * Sets the auto assign distribution sets to null which match the ds ids.
      *

@@ -18,5 +18,4 @@ public interface TenantAwareBaseEntity extends BaseEntity {
      * @return tenant name
      */
     String getTenant();
-
 }

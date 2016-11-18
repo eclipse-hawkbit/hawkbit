@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -15,9 +16,11 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Lists;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
@@ -26,7 +29,7 @@ import com.vaadin.spring.annotation.ViewScope;
  */
 @SpringComponent
 @ViewScope
-public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<DistributionSet, DistributionSetMetadata> {
+public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<DistributionSet, MetaData> {
 
     private static final long serialVersionUID = -7778944849012048106L;
 
@@ -41,7 +44,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected void checkForDuplicate(final DistributionSet entity, final String value) {
-        distributionSetManagement.findOne(entity, value);
+        distributionSetManagement.findDistributionSetMetadata(entity.getId(), value);
     }
 
     /**
@@ -50,8 +53,8 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
-        final DistributionSetMetadata dsMetaData = distributionSetManagement
-                .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
+        final DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(
+                entity.getId(), Lists.newArrayList(entityFactory.generateMetadata(key, value))).get(0);
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -63,14 +66,14 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected DistributionSetMetadata updateMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement
-                .updateDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
+                .updateDistributionSetMetadata(entity.getId(), entityFactory.generateMetadata(key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
 
     @Override
-    protected List<DistributionSetMetadata> getMetadataList() {
-        return getSelectedEntity().getMetadata();
+    protected List<MetaData> getMetadataList() {
+        return Collections.unmodifiableList(getSelectedEntity().getMetadata());
     }
 
     /**
@@ -79,7 +82,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected void deleteMetadata(final DistributionSet entity, final String key, final String value) {
-        distributionSetManagement.deleteDistributionSetMetadata(entity, key);
+        distributionSetManagement.deleteDistributionSetMetadata(entity.getId(), key);
     }
 
     @Override

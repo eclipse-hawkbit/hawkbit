@@ -197,46 +197,22 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#findArtifact(java.lang.Long)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
     @Test
     @Description("Loads an local artifact based on given ID.")
     public void findArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
-        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(),
-                "file1", false);
+        final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
+                testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
         assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#loadArtifactBinary(java.lang.Long)}
-     * .
-     * 
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
     @Test
     @Description("Loads an artifact binary based on given ID.")
     public void loadStreamOfArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
+        final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+                testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
         try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result).getFileInputStream()) {
             assertTrue("The stored binary matches the given binary",
@@ -259,11 +235,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Searches an artifact through the relations of a software module.")
     public void findArtifactBySoftwareModule() {
-        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
-
-        SoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
-        sm2 = softwareManagement.createSoftwareModule(sm2);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.findArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
 
@@ -276,8 +248,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Searches an artifact through the relations of a software module and the filename.")
     public void findByFilenameAndSoftwareModule() {
-        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareManagement.createSoftwareModule(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
 

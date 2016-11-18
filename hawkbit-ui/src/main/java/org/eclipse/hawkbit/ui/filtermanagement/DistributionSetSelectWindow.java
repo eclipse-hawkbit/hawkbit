@@ -182,8 +182,7 @@ public class DistributionSetSelectWindow
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);
         } else {
-            tfq.setAutoAssignDistributionSet(null);
-            targetFilterQueryManagement.updateTargetFilterQuery(tfq);
+            targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(targetFilterQueryId, null);
             eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
         }
 
@@ -195,8 +194,7 @@ public class DistributionSetSelectWindow
             @Override
             public void onConfirmResult(final boolean accepted) {
                 if (accepted) {
-                    tfq.setAutoAssignDistributionSet(distributionSetManagement.findDistributionSetById(dsId));
-                    targetFilterQueryManagement.updateTargetFilterQuery(tfq);
+                    targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq.getId(), dsId);
                     eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
                 }
             }

@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
-import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown when force quitting an actions is not allowed. e.g. the action is not

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Test;
 
@@ -38,7 +36,7 @@ public class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag>
 
     @Override
     protected TargetTag createEntity() {
-        return tagManagement.createTargetTag(entityFactory.generateTargetTag("tag1"));
+        return tagManagement.createTargetTag(entityFactory.tag().create().name("tag1"));
     }
 
 }

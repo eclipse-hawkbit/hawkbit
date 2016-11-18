@@ -19,9 +19,4 @@ public interface Tag extends NamedEntity {
      */
     String getColour();
 
-    /**
-     * @param colour
-     */
-    void setColour(String colour);
-
 }

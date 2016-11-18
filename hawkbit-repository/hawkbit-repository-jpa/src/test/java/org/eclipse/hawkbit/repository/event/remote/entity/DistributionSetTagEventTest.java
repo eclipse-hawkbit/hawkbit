@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.junit.Test;
 
@@ -38,7 +36,7 @@ public class DistributionSetTagEventTest extends AbstractRemoteEntityEventTest<D
 
     @Override
     protected DistributionSetTag createEntity() {
-        return tagManagement.createDistributionSetTag(entityFactory.generateDistributionSetTag("tag1"));
+        return tagManagement.createDistributionSetTag(entityFactory.tag().create().name("tag1"));
     }
 
 }

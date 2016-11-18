@@ -16,8 +16,6 @@ import java.util.Arrays;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -38,22 +36,21 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     public void seuptBeforeTest() {
 
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
-        ds.setDescription("DS");
-        ds = distributionSetManagement.updateDistributionSet(ds);
-        distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds, "metaValue"));
+        ds = distributionSetManagement
+                .updateDistributionSet(entityFactory.distributionSet().update(ds.getId()).description("DS"));
+        createDistributionSetMetadata(ds.getId(), entityFactory.generateMetadata("metaKey", "metaValue"));
 
         DistributionSet ds2 = testdataFactory.createDistributionSets("NewDS", 3).get(0);
 
-        ds2.setDescription("DS%");
-        ds2 = distributionSetManagement.updateDistributionSet(ds2);
-        distributionSetManagement
-                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds2, "value"));
+        ds2 = distributionSetManagement
+                .updateDistributionSet(entityFactory.distributionSet().update(ds2.getId()).description("DS%"));
+        createDistributionSetMetadata(ds2.getId(), entityFactory.generateMetadata("metaKey", "value"));
 
-        final DistributionSetTag targetTag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag1"));
-        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag2"));
-        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag3"));
-        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag4"));
+        final DistributionSetTag targetTag = tagManagement
+                .createDistributionSetTag(entityFactory.tag().create().name("Tag1"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag2"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag3"));
+        tagManagement.createDistributionSetTag(entityFactory.tag().create().name("Tag4"));
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag);
     }

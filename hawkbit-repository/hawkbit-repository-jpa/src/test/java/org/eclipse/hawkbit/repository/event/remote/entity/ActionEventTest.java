@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -42,10 +40,9 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
 
     @Override
     protected Action createEntity() {
-        final JpaAction generateAction = (JpaAction) entityFactory.generateAction();
+        final JpaAction generateAction = new JpaAction();
         generateAction.setActionType(ActionType.FORCED);
-        final Target generateTarget = entityFactory.generateTarget("Test");
-        final Target target = targetManagement.createTarget(generateTarget);
+        final Target target = testdataFactory.createTarget("Test");
         generateAction.setTarget(target);
         return actionRepository.save(generateAction);
     }

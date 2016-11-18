@@ -13,7 +13,6 @@ import java.time.Instant;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for

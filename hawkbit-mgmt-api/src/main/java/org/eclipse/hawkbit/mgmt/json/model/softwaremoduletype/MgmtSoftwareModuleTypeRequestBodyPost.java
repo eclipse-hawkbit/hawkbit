@@ -14,19 +14,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Request Body for SoftwareModuleType POST.
  *
  */
-public class MgmtSoftwareModuleTypeRequestBodyPost {
+public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTypeRequestBodyPut {
 
     @JsonProperty(required = true)
     private String name;
-
-    @JsonProperty
-    private String description;
 
     @JsonProperty
     private String key;
 
     @JsonProperty
     private int maxAssignments;
+
+    @Override
+    public MgmtSoftwareModuleTypeRequestBodyPost setDescription(final String description) {
+        super.setDescription(description);
+        return this;
+    }
+
+    @Override
+    public MgmtSoftwareModuleTypeRequestBodyPost setColour(final String colour) {
+        super.setColour(colour);
+        return this;
+    }
 
     /**
      * @return the name
@@ -43,24 +52,6 @@ public class MgmtSoftwareModuleTypeRequestBodyPost {
      */
     public MgmtSoftwareModuleTypeRequestBodyPost setName(final String name) {
         this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     *
-     * @return updated body
-     */
-    public MgmtSoftwareModuleTypeRequestBodyPost setDescription(final String description) {
-        this.description = description;
         return this;
     }
 

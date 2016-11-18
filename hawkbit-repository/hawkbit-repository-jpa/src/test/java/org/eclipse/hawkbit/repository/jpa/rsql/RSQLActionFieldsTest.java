@@ -38,9 +38,8 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     @Before
     public void setupBeforeTest() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
-        target = new JpaTarget("targetId123");
-        target.setDescription("targetId123");
-        targetManagement.createTarget(target);
+        target = (JpaTarget) targetManagement
+                .createTarget(entityFactory.target().create().controllerId("targetId123").description("targetId123"));
         action = new JpaAction();
         action.setActionType(ActionType.SOFT);
         action.setDistributionSet(dsA);

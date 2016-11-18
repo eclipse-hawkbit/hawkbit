@@ -160,8 +160,8 @@ public class DistributionSetMetadatadetailslayout extends Table {
         final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
 
         /* display the window */
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet,
-                entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "")));
+        UI.getCurrent()
+                .addWindow(dsMetadataPopupLayout.getWindow(distSet, entityFactory.generateMetadata(metadataKey, "")));
     }
 
 }

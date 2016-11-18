@@ -81,10 +81,7 @@ public class TargetIdName implements Serializable {
             return false;
         }
         final TargetIdName other = (TargetIdName) obj;
-        if (targetId != other.targetId) {
-            return false;
-        }
-        return true;
+        return targetId == other.targetId;
     }
 
     @Override

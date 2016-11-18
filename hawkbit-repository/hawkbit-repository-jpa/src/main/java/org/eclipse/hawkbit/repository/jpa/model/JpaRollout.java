@@ -30,12 +30,13 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -58,7 +59,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Column(name = "target_filter", length = 1024, nullable = false)
     @Size(max = 1024)
-    @NotNull
+    @NotEmpty
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -94,7 +95,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return distributionSet;
     }
 
-    @Override
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
@@ -113,7 +113,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return targetFilterQuery;
     }
 
-    @Override
     public void setTargetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
     }
@@ -140,7 +139,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return actionType;
     }
 
-    @Override
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
     }
@@ -150,7 +148,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return forcedTime;
     }
 
-    @Override
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
     }

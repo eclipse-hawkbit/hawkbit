@@ -40,15 +40,15 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -359,7 +359,11 @@ public class AmqpMessageHandlerServiceTest {
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
-        when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
+        final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
+        final ActionStatusCreate create = mock(ActionStatusCreate.class);
+        when(builder.create(22L)).thenReturn(create);
+        when(create.status(Matchers.any())).thenReturn(create);
+        when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.of(action));
 
@@ -424,8 +428,8 @@ public class AmqpMessageHandlerServiceTest {
         initalizeSecurityTokenGenerator();
 
         // Mock
-        final JpaAction actionMock = mock(JpaAction.class);
-        final JpaTarget targetMock = mock(JpaTarget.class);
+        final Action actionMock = mock(Action.class);
+        final Target targetMock = mock(Target.class);
         final TargetInfo targetInfoMock = mock(TargetInfo.class);
         final DistributionSet distributionSetMock = mock(DistributionSet.class);
 

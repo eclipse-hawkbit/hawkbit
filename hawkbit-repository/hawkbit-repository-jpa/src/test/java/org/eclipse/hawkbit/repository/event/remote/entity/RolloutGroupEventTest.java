@@ -12,9 +12,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.UUID;
 
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -49,19 +46,15 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
 
     @Override
     protected RolloutGroup createEntity() {
-        targetManagement.createTarget(entityFactory.generateTarget(UUID.randomUUID().toString()));
-        final DistributionSet ds = distributionSetManagement
-                .createDistributionSet(entityFactory.generateDistributionSet(UUID.randomUUID().toString(), "2",
-                        "incomplete", distributionSetManagement.findDistributionSetTypeByKey("os"), null));
+        testdataFactory.createTarget(UUID.randomUUID().toString());
 
-        final Rollout rollout = entityFactory.generateRollout();
-        rollout.setName(UUID.randomUUID().toString());
-        rollout.setTargetFilterQuery("controllerId==*");
-        rollout.setDistributionSet(ds);
+        final DistributionSet ds = distributionSetManagement.createDistributionSet(entityFactory.distributionSet()
+                .create().name("incomplete").version("2").description("incomplete").type("os"));
 
-        final JpaRollout entity = (JpaRollout) rolloutManagement.createRollout(rollout, 10,
-                new RolloutGroupConditionBuilder().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10")
-                        .build());
+        final Rollout entity = rolloutManagement.createRollout(
+                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),
+                10, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
         return rolloutManagement.findRolloutById(entity.getId()).getRolloutGroups().get(0);
     }

@@ -23,6 +23,7 @@ import javax.validation.constraints.Size;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * JPA implementation of {@link LocalArtifact}.
@@ -37,14 +38,14 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 
-    @NotNull
     @Column(name = "gridfs_file_name", length = 40)
     @Size(max = 40)
+    @NotEmpty
     private String gridFsFileName;
 
-    @NotNull
     @Column(name = "provided_file_name", length = 256)
     @Size(max = 256)
+    @NotEmpty
     private String filename;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })

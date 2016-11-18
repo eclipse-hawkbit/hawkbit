@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
@@ -33,7 +34,7 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
 
     @Column(name = "conf_key", length = 128, nullable = false)
     @Size(max = 128)
-    @NotNull
+    @NotEmpty
     private String key;
 
     @Column(name = "conf_value", length = 512, nullable = false)
@@ -66,7 +67,6 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
@@ -76,7 +76,6 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
         return value;
     }
 
-    @Override
     public void setValue(final String value) {
         this.value = value;
     }

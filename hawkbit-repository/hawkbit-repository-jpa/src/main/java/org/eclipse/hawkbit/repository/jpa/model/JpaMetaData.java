@@ -12,23 +12,23 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Meta data for entities.
  *
  */
 @MappedSuperclass
-public abstract class AbstractJpaMetaData implements MetaData {
+public class JpaMetaData implements MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "meta_key", nullable = false, length = 128)
     @Size(min = 1, max = 128)
-    @NotNull
+    @NotEmpty
     private String key;
 
     @Column(name = "meta_value", length = 4000)
@@ -36,12 +36,12 @@ public abstract class AbstractJpaMetaData implements MetaData {
     @Basic
     private String value;
 
-    public AbstractJpaMetaData(final String key, final String value) {
+    public JpaMetaData(final String key, final String value) {
         this.key = key;
         this.value = value;
     }
 
-    public AbstractJpaMetaData() {
+    public JpaMetaData() {
         // Default constructor needed for JPA entities
     }
 
@@ -50,7 +50,6 @@ public abstract class AbstractJpaMetaData implements MetaData {
         return key;
     }
 
-    @Override
     public void setKey(final String key) {
         this.key = key;
     }
@@ -60,7 +59,6 @@ public abstract class AbstractJpaMetaData implements MetaData {
         return value;
     }
 
-    @Override
     public void setValue(final String value) {
         this.value = value;
     }
@@ -85,7 +83,7 @@ public abstract class AbstractJpaMetaData implements MetaData {
         if (!(this.getClass().isInstance(obj))) {
             return false;
         }
-        final AbstractJpaMetaData other = (AbstractJpaMetaData) obj;
+        final JpaMetaData other = (JpaMetaData) obj;
         if (key == null) {
             if (other.key != null) {
                 return false;

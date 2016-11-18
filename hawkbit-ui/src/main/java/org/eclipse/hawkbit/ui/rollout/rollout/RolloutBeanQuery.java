@@ -47,7 +47,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     private final String searchText;
 
-    private Sort sort = new Sort(Direction.ASC, "createdAt");
+    private Sort sort = new Sort(Direction.ASC, "id");
 
     private transient RolloutManagement rolloutManagement;
 

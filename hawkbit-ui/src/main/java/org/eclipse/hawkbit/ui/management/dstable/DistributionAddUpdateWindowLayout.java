@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -46,6 +44,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 
+import com.google.common.collect.Sets;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CheckBox;
@@ -88,9 +87,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private TextArea descTextArea;
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
-    private boolean editDistribution = Boolean.FALSE;
+    private boolean editDistribution;
     private Long editDistId;
-    private CommonDialogWindow window;
 
     private FormLayout formLayout;
 
@@ -182,7 +180,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         dtQF.setQueryConfiguration(Collections.emptyMap());
 
         final LazyQueryContainer disttypeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_NAME), dtQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_ID), dtQF);
 
         disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
 
@@ -202,17 +200,14 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         if (isDuplicate()) {
             return;
         }
-        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
-        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
-        final String distSetTypeName = HawkbitCommonUtil
-                .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
-        final DistributionSet currentDS = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
-        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final boolean isMigStepReq = reqMigStepCheckbox.getValue();
+        final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
 
-        /* identify the changes */
-        setDistributionValues(currentDS, name, version, distSetTypeName, desc, isMigStepReq);
-        distributionSetManagement.updateDistributionSet(currentDS);
+        final DistributionSet currentDS = distributionSetManagement
+                .updateDistributionSet(entityFactory.distributionSet().update(editDistId)
+                        .name(distNameTextField.getValue()).description(descTextArea.getValue())
+                        .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq)
+                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId)));
         notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                 new Object[] { currentDS.getName(), currentDS.getVersion() }));
         // update table row+details layout
@@ -228,46 +223,21 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
         final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
         final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
-        final String distSetTypeName = HawkbitCommonUtil
-                .trimAndNullIfEmpty((String) distsetTypeNameComboBox.getValue());
-
+        final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
         final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-        DistributionSet newDist = entityFactory.generateDistributionSet();
 
-        setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
-        newDist = distributionSetManagement.createDistributionSet(newDist);
+        final DistributionSet newDist = distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
+                        .description(desc).type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId))
+                        .requiredMigrationStep(isMigStepReq));
 
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
-        final Set<DistributionSetIdName> s = new HashSet<>();
-        s.add(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion()));
         final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
-        distributionSetTable.setValue(s);
-    }
-
-    /**
-     * Set Values for Distribution set.
-     *
-     * @param distributionSet
-     *            as reference
-     * @param name
-     *            as string
-     * @param version
-     *            as string
-     * @param desc
-     *            as string
-     * @param isMigStepReq
-     *            as string
-     */
-    private void setDistributionValues(final DistributionSet distributionSet, final String name, final String version,
-            final String distSetTypeName, final String desc, final boolean isMigStepReq) {
-        distributionSet.setName(name);
-        distributionSet.setVersion(version);
-        distributionSet.setType(distributionSetManagement.findDistributionSetTypeByName(distSetTypeName));
-        distributionSet.setDescription(desc != null ? desc : "");
-        distributionSet.setRequiredMigrationStep(isMigStepReq);
+        distributionSetTable.setValue(
+                Sets.newHashSet(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion())));
     }
 
     private boolean isDuplicate() {
@@ -324,9 +294,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distNameTextField.setValue(distSet.getName());
         distVersionTextField.setValue(distSet.getVersion());
         if (distSet.getType().isDeleted()) {
-            distsetTypeNameComboBox.addItem(distSet.getType().getName());
+            distsetTypeNameComboBox.addItem(distSet.getType().getId());
         }
-        distsetTypeNameComboBox.setValue(distSet.getType().getName());
+        distsetTypeNameComboBox.setValue(distSet.getType().getId());
+
         reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
         if (distSet.getDescription() != null) {
             descTextArea.setValue(distSet.getDescription());
@@ -344,11 +315,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
                 .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener())
                 .buildCommonDialogWindow();
-
-        return window;
     }
 
     /**
@@ -357,7 +326,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private void populateDistSetTypeNameCombo() {
         distsetTypeNameComboBox.setContainerDataSource(getDistSetTypeLazyQueryContainer());
         distsetTypeNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getName());
+        distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getId());
     }
 
 }

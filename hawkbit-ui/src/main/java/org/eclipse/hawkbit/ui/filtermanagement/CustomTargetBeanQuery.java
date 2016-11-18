@@ -45,7 +45,7 @@ import com.google.common.base.Strings;
 public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = 6490445732785388071L;
-    private Sort sort = new Sort(Direction.DESC, "createdAt");
+    private Sort sort = new Sort(Direction.ASC, "id");
     private transient TargetManagement targetManagement;
     private FilterManagementUIState filterManagementUIState;
     private transient I18N i18N;

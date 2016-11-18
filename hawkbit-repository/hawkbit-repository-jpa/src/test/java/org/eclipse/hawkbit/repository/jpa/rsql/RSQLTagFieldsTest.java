@@ -11,9 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.TagFields;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Before;
@@ -33,11 +32,10 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
     public void seuptBeforeTest() {
 
         for (int i = 0; i < 5; i++) {
-            final TargetTag targetTag = new JpaTargetTag("" + i, "" + i, i % 2 == 0 ? "red" : "blue");
+            final TagCreate targetTag = entityFactory.tag().create().name(Integer.toString(i))
+                    .description(Integer.toString(i)).colour(i % 2 == 0 ? "red" : "blue");
             tagManagement.createTargetTag(targetTag);
-            final DistributionSetTag distributionSetTag = new JpaDistributionSetTag("" + i, "" + i,
-                    i % 2 == 0 ? "red" : "blue");
-            tagManagement.createDistributionSetTag(distributionSetTag);
+            tagManagement.createDistributionSetTag(targetTag);
         }
     }
 

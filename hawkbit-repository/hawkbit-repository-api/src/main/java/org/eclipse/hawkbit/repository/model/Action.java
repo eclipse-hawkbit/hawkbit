@@ -25,12 +25,6 @@ public interface Action extends TenantAwareBaseEntity {
     DistributionSet getDistributionSet();
 
     /**
-     * @param distributionSet
-     *            the distributionSet to set
-     */
-    void setDistributionSet(DistributionSet distributionSet);
-
-    /**
      * @return <code>true</code> when action is in state
      *         {@link Status#CANCELING} or {@link Status#CANCELED}, false
      *         otherwise
@@ -43,12 +37,6 @@ public interface Action extends TenantAwareBaseEntity {
      * @return current {@link Status} of the {@link Action}.
      */
     Status getStatus();
-
-    /**
-     * @param status
-     *            of the {@link Action}
-     */
-    void setStatus(Status status);
 
     /**
      * @return <code>true</code> if {@link Action} is still running.
@@ -64,12 +52,6 @@ public interface Action extends TenantAwareBaseEntity {
      * @return list of {@link ActionStatus} entries.
      */
     List<ActionStatus> getActionStatus();
-
-    /**
-     * @param target
-     *            of this {@link Action}
-     */
-    void setTarget(Target target);
 
     /**
      * @return {@link Target} of this {@link Action}.

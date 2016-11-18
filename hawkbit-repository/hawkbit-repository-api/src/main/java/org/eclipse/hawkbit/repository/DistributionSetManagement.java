@@ -10,17 +10,21 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.DistributionSetCreationFailedMissingMandatoryModuleException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
@@ -29,10 +33,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,14 +53,27 @@ public interface DistributionSetManagement {
     /**
      * Assigns {@link SoftwareModule} to existing {@link DistributionSet}.
      *
-     * @param ds
+     * @param setId
      *            to assign and update
-     * @param softwareModules
+     * @param moduleIds
      *            to get assigned
      * @return the updated {@link DistributionSet}.
+     * 
+     * @throws EntityNotFoundException
+     *             if given module does not exist
+     * 
+     * @throws EntityReadOnlyException
+     *             if use tries to change the {@link DistributionSet} s while
+     *             the DS is already in use.
+     * 
+     * @throws UnsupportedSoftwareModuleForThisDistributionSetException
+     *             is {@link SoftwareModule#getType()} is not supported by this
+     *             {@link DistributionSet#getType()}.
+     * 
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet assignSoftwareModules(@NotNull DistributionSet ds, Set<SoftwareModule> softwareModules);
+    DistributionSet assignSoftwareModules(@NotNull Long setId, @NotEmpty Collection<Long> moduleIds);
 
     /**
      * Assign a {@link DistributionSetTag} assignment to given
@@ -99,84 +118,92 @@ public interface DistributionSetManagement {
     /**
      * Creates a new {@link DistributionSet}.
      *
-     * @param dSet
+     * @param create
      *            {@link DistributionSet} to be created
      * @return the new persisted {@link DistributionSet}
      *
-     * @throws EntityAlreadyExistsException
-     *             if a given entity already exists
+     * @throws EntityNotFoundException
+     *             if a provided linked entity does not exists
+     *             ({@link DistributionSet#getModules()} or
+     *             {@link DistributionSet#getType()})
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
      *             {@link SoftwareModule}s.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    DistributionSet createDistributionSet(@NotNull DistributionSet dSet);
+    DistributionSet createDistributionSet(@NotNull DistributionSetCreate create);
 
     /**
      * creates a list of distribution set meta data entries.
      *
+     * @param dsId
+     *            if the {@link DistributionSet} the metadata has to be created
+     *            for
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created distribution set meta data entries
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSetMetadata> createDistributionSetMetadata(@NotEmpty Collection<DistributionSetMetadata> metadata);
-
-    /**
-     * creates or updates a single distribution set meta data entry.
-     *
-     * @param metadata
-     *            the meta data entry to create or update
-     * @return the updated or created distribution set meta data entry
-     * @throws EntityAlreadyExistsException
-     *             in case the meta data entry already exists for the specific
-     *             key
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata createDistributionSetMetadata(@NotNull DistributionSetMetadata metadata);
+    List<DistributionSetMetadata> createDistributionSetMetadata(@NotNull Long dsId,
+            @NotEmpty Collection<MetaData> metadata);
 
     /**
      * Creates multiple {@link DistributionSet}s.
      *
-     * @param distributionSets
+     * @param creates
      *            to be created
      * @return the new {@link DistributionSet}s
-     * @throws EntityAlreadyExistsException
-     *             if a given entity already exists
+     * @throws EntityNotFoundException
+     *             if a provided linked entity does not exists
+     *             ({@link DistributionSet#getModules()} or
+     *             {@link DistributionSet#getType()})
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
      *             {@link SoftwareModule}s.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<DistributionSet> createDistributionSets(@NotNull Collection<DistributionSet> distributionSets);
+    List<DistributionSet> createDistributionSets(@NotNull Collection<DistributionSetCreate> creates);
 
     /**
      * Creates new {@link DistributionSetType}.
      *
-     * @param type
+     * @param create
      *            to create
-     * @return created {@link Entity}
+     * @return created entity
+     * 
+     * @throws EntityNotFoundException
+     *             if a provided linked entity does not exists
+     *             ({@link DistributionSetType#getMandatoryModuleTypes()} or
+     *             {@link DistributionSetType#getOptionalModuleTypes()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    DistributionSetType createDistributionSetType(@NotNull DistributionSetType type);
+    DistributionSetType createDistributionSetType(@NotNull DistributionSetTypeCreate create);
 
     /**
      * Creates multiple {@link DistributionSetType}s.
      *
-     * @param types
+     * @param creates
      *            to create
-     * @return created {@link Entity}
+     * @return created entity
+     * 
+     * @throws EntityNotFoundException
+     *             if a provided linked entity does not exists
+     *             ({@link DistributionSetType#getMandatoryModuleTypes()} or
+     *             {@link DistributionSetType#getOptionalModuleTypes()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<DistributionSetType> createDistributionSetTypes(@NotNull Collection<DistributionSetType> types);
+    List<DistributionSetType> createDistributionSetTypes(@NotNull Collection<DistributionSetTypeCreate> creates);
 
     /**
      * <p>
      * {@link DistributionSet} can be deleted/erased from the repository if they
-     * have never been assigned to any {@link UpdateAction} or {@link Target}.
+     * have never been assigned to any {@link Action} or {@link Target}.
      * </p>
      *
      * <p>
@@ -193,8 +220,8 @@ public interface DistributionSetManagement {
 
     /**
      * Deleted {@link DistributionSet}s by their IDs. That is either a soft
-     * delete of the entities have been linked to an {@link UpdateAction} before
-     * or a hard delete if not.
+     * delete of the entities have been linked to an {@link Action} before or a
+     * hard delete if not.
      *
      * @param distributionSetIDs
      *            to be deleted
@@ -205,13 +232,16 @@ public interface DistributionSetManagement {
     /**
      * deletes a distribution set meta data entry.
      *
-     * @param distributionSet
+     * @param dsId
      *            where meta data has to be deleted
      * @param key
      *            of the meta data element
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteDistributionSetMetadata(@NotNull final DistributionSet distributionSet, @NotNull final String key);
+    void deleteDistributionSetMetadata(@NotNull final Long dsId, @NotNull final String key);
 
     /**
      * Deletes or mark as delete in case the type is in use.
@@ -234,7 +264,7 @@ public interface DistributionSetManagement {
 
     /**
      * Find {@link DistributionSet} based on given ID without details, e.g.
-     * {@link DistributionSet#getAgentHub()}.
+     * {@link DistributionSet#getModules()}.
      *
      * @param distid
      *            to look for.
@@ -245,7 +275,7 @@ public interface DistributionSetManagement {
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
-     * details, e.g. {@link DistributionSet#getAgentHub()}.
+     * details, e.g. {@link DistributionSet#getModules()}.
      *
      * Note: for performance reasons it is recommended to use
      * {@link #findDistributionSetById(Long)} if details are not necessary.
@@ -319,9 +349,6 @@ public interface DistributionSetManagement {
      * Retrieves {@link DistributionSet} List for overview purposes (no
      * {@link SoftwareModule}s and {@link DistributionSetTag}s).
      *
-     * Please use {@link #findDistributionSetListWithDetails(Iterable)} if
-     * details are required.
-     *
      * @param dist
      *            List of {@link DistributionSet} IDs to be found
      * @return the found {@link DistributionSet}s
@@ -343,9 +370,6 @@ public interface DistributionSetManagement {
      *            to <code>true</code> for returning only completed distribution
      *            sets or <code>false</code> for only incomplete ones nor
      *            <code>null</code> to return both.
-     * @param complete
-     *            set to if <code>false</code> incomplete DS should also be
-     *            shown.
      *
      *
      * @return all found {@link DistributionSet}s
@@ -363,9 +387,9 @@ public interface DistributionSetManagement {
      *            the pagination parameter
      * @param deleted
      *            if TRUE, {@link DistributionSet}s marked as deleted are
-     *            returned. If FALSE, on {@link DistributionSet}s with
-     *            {@link DistributionSet#isDeleted()} == FALSE are returned.
-     *            <code>null</code> if both are to be returned
+     *            returned. If FALSE, on {@link DistributionSet}s not marked as
+     *            deleted are returned. <code>null</code> if both are to be
+     *            returned
      * @return all found {@link DistributionSet}s
      * 
      * @throws RSQLParameterUnsupportedFieldException
@@ -383,7 +407,7 @@ public interface DistributionSetManagement {
      * following order:
      * <p>
      * 1) {@link DistributionSet}s which have the given {@link Target} as
-     * {@link TargetStatus#getInstalledDistributionSet()}
+     * {@link TargetInfo#getInstalledDistributionSet()}
      * <p>
      * 2) {@link DistributionSet}s which have the given {@link Target} as
      * {@link Target#getAssignedDistributionSet()}
@@ -397,7 +421,7 @@ public interface DistributionSetManagement {
      *            has details of filters to be applied
      * @param assignedOrInstalled
      *            the controllerID of the Target to be ordered by
-     * @return
+     * @return {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSet> findDistributionSetsAllOrderedByLinkTarget(@NotNull Pageable pageable,
@@ -471,8 +495,8 @@ public interface DistributionSetManagement {
     /**
      * finds a single distribution set meta data by its id.
      *
-     * @param distributionSet
-     *            where meta data has to rind
+     * @param setId
+     *            of the {@link DistributionSet}
      * @param key
      *            of the meta data element
      * @return the found DistributionSetMetadata or {@code null} if not exits
@@ -480,7 +504,7 @@ public interface DistributionSetManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetMetadata findOne(@NotNull DistributionSet distributionSet, @NotEmpty String key);
+    DistributionSetMetadata findDistributionSetMetadata(@NotNull Long setId, @NotEmpty String key);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -495,7 +519,7 @@ public interface DistributionSetManagement {
     boolean isDistributionSetInUse(@NotNull DistributionSet distributionSet);
 
     /**
-     * {@link Entity} based method call for
+     * entity based method call for
      * {@link #toggleTagAssignment(Collection, String)}.
      *
      * @param sets
@@ -540,14 +564,21 @@ public interface DistributionSetManagement {
      * Unassigns a {@link SoftwareModule} form an existing
      * {@link DistributionSet}.
      *
-     * @param ds
+     * @param setId
      *            to get unassigned form
-     * @param softwareModule
-     *            to get unassigned
+     * @param moduleId
+     *            to be unassigned
      * @return the updated {@link DistributionSet}.
+     * 
+     * @throws EntityNotFoundException
+     *             if given module does not exist
+     * 
+     * @throws EntityReadOnlyException
+     *             if use tries to change the {@link DistributionSet} s while
+     *             the DS is already in use.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unassignSoftwareModule(@NotNull DistributionSet ds, @NotNull SoftwareModule softwareModule);
+    DistributionSet unassignSoftwareModule(@NotNull Long setId, @NotNull Long moduleId);
 
     /**
      * Unassign a {@link DistributionSetTag} assignment to given
@@ -565,43 +596,118 @@ public interface DistributionSetManagement {
     /**
      * Updates existing {@link DistributionSet}.
      *
-     * @param ds
+     * @param update
      *            to update
-     * @return the saved {@link Entity}.
-     * @throws NullPointerException
-     *             of {@link DistributionSet#getId()} is <code>null</code>
-     * @throw DataDependencyViolationException in case of illegal update
+     * 
+     * @return the saved entity.
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
+     * @throws EntityReadOnlyException
+     *             if user tries to change requiredMigrationStep or type on a DS
+     *             that is already assigned to targets
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet updateDistributionSet(@NotNull DistributionSet ds);
+    DistributionSet updateDistributionSet(@NotNull DistributionSetUpdate update);
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
      *
-     * @param metadata
-     *            the meta data entry to be updated
+     * @param dsId
+     *            {@link DistributionSet} of the meta data entry to be updated
+     * @param md
+     *            meta data entry to be updated
      * @return the updated meta data entry
+     * 
      * @throws EntityNotFoundException
      *             in case the meta data entry does not exists and cannot be
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata updateDistributionSetMetadata(@NotNull DistributionSetMetadata metadata);
+    DistributionSetMetadata updateDistributionSetMetadata(@NotNull Long dsId, @NotNull MetaData md);
 
     /**
-     * Updates existing {@link DistributionSetType}. However, keep in mind that
-     * is not possible to change the {@link DistributionSetTypeElement}s while
-     * the DS type is already in use.
+     * Updates existing {@link DistributionSetType}. Resets assigned
+     * {@link SoftwareModuleType}s as well and sets as provided.
      *
-     * @param dsType
+     * @param update
      *            to update
-     * @return updated {@link Entity}
-     *
+     * 
+     * @return updated entity
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetType} does not exists and
+     *             cannot be updated
+     * 
      * @throws EntityReadOnlyException
-     *             if use tries to change the {@link DistributionSetTypeElement}
-     *             s while the DS type is already in use.
+     *             if the {@link DistributionSetType} is already in use by a
+     *             {@link DistributionSet} and user tries to change list of
+     *             {@link SoftwareModuleType}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType updateDistributionSetType(@NotNull DistributionSetType dsType);
+    DistributionSetType updateDistributionSetType(@NotNull DistributionSetTypeUpdate update);
+
+    /**
+     * Unassigns a {@link SoftwareModuleType} from the
+     * {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
+     * has not been assigned in the first place.
+     * 
+     * @param dsTypeId
+     *            to update
+     * @param softwareModuleId
+     *            to unassign
+     * @return updated {@link DistributionSetType}
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetType} does not exist
+     * 
+     * @throws EntityReadOnlyException
+     *             if the {@link DistributionSetType} while it is already in use
+     *             by a {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSetType unassignSoftwareModuleType(@NotNull Long dsTypeId, @NotNull Long softwareModuleId);
+
+    /**
+     * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
+     * 
+     * @param dsTypeId
+     *            to update
+     * @param softwareModuleTypeIds
+     *            to assign
+     * @return updated {@link DistributionSetType}
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetType} or at least one of
+     *             the {@link SoftwareModuleType}s do not exist
+     * 
+     * @throws EntityReadOnlyException
+     *             if the {@link DistributionSetType} while it is already in use
+     *             by a {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSetType assignOptionalSoftwareModuleTypes(@NotNull Long dsTypeId,
+            @NotEmpty Collection<Long> softwareModuleTypeIds);
+
+    /**
+     * Assigns {@link DistributionSetType#getOptionalModuleTypes()}.
+     * 
+     * @param dsTypeId
+     *            to update
+     * @param softwareModuleTypes
+     *            to assign
+     * @return updated {@link DistributionSetType}
+     * 
+     * @throws EntityNotFoundException
+     *             in case the {@link DistributionSetType} or at least one of
+     *             the {@link SoftwareModuleType}s do not exist
+     * 
+     * @throws EntityReadOnlyException
+     *             if the {@link DistributionSetType} while it is already in use
+     *             by a {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSetType assignMandatorySoftwareModuleTypes(@NotNull Long dsTypeId,
+            @NotEmpty Collection<Long> softwareModuleTypes);
 
 }

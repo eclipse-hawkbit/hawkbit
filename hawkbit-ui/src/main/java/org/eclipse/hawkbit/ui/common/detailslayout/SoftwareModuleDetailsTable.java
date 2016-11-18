@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.exception.EntityLockedException;
+import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -123,9 +123,9 @@ public class SoftwareModuleDetailsTable extends Table {
         container.addContainerProperty(SOFT_TYPE_MANDATORY, Label.class, "");
         container.addContainerProperty(SOFT_TYPE_NAME, Label.class, "");
         container.addContainerProperty(SOFT_MODULE, VerticalLayout.class, "");
-        setColumnExpandRatio(SOFT_TYPE_MANDATORY, 0.1f);
-        setColumnExpandRatio(SOFT_TYPE_NAME, 0.4f);
-        setColumnExpandRatio(SOFT_MODULE, 0.3f);
+        setColumnExpandRatio(SOFT_TYPE_MANDATORY, 0.1F);
+        setColumnExpandRatio(SOFT_TYPE_NAME, 0.4F);
+        setColumnExpandRatio(SOFT_MODULE, 0.3F);
         setColumnAlignment(SOFT_TYPE_MANDATORY, Align.RIGHT);
         setColumnAlignment(SOFT_TYPE_NAME, Align.LEFT);
         setColumnAlignment(SOFT_MODULE, Align.LEFT);
@@ -149,7 +149,7 @@ public class SoftwareModuleDetailsTable extends Table {
             if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
                 try {
                     isTargetAssigned = false;
-                } catch (final EntityLockedException exception) {
+                } catch (final EntityReadOnlyException exception) {
                     isTargetAssigned = true;
                     LOG.info("Target already assigned for the distribution set: " + distributionSet.getName(),
                             exception);
@@ -187,10 +187,11 @@ public class SoftwareModuleDetailsTable extends Table {
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
         if (distributionSetManagement.isDistributionSetInUse(distributionSet)) {
-            uiNotification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",distributionSet.getName(), distributionSet.getVersion()));
+            uiNotification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",
+                    distributionSet.getName(), distributionSet.getVersion()));
         } else {
-            final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
-                    unAssignedSw);
+            final DistributionSet newDistributionSet = distributionSetManagement
+                    .unassignSoftwareModule(distributionSet.getId(), unAssignedSw.getId());
             manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
@@ -257,7 +258,7 @@ public class SoftwareModuleDetailsTable extends Table {
         return null;
     }
 
-    private Label createMandatoryLabel(final boolean mandatory) {
+    private static Label createMandatoryLabel(final boolean mandatory) {
         final Label mandatoryLable = mandatory ? HawkbitCommonUtil.getFormatedLabel(" * ")
                 : HawkbitCommonUtil.getFormatedLabel("  ");
         if (mandatory) {

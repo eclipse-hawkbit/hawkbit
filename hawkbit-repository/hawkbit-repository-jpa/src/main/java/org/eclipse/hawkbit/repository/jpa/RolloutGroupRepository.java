@@ -54,28 +54,6 @@ public interface RolloutGroupRepository
     List<JpaRolloutGroup> findByRolloutAndStatus(final Rollout rollout, final RolloutGroupStatus status);
 
     /**
-     * Counts all {@link RolloutGroup} referring a specific rollout.
-     * 
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
-     * @return the count of the rollout groups for a specific rollout
-     */
-    Long countByRollout(final JpaRollout rollout);
-
-    /**
-     * Counts all {@link RolloutGroup} referring a specific rollout in a
-     * specific {@link RolloutGroupStatus}.
-     * 
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
-     * @param rolloutGroupStatus
-     *            the status of the rollout groups
-     * @return the count of rollout groups belonging to a rollout in a specific
-     *         status
-     */
-    Long countByRolloutAndStatus(JpaRollout rollout, RolloutGroupStatus rolloutGroupStatus);
-
-    /**
      * Counts all {@link RolloutGroup} referring a specific rollout in specific
      * {@link RolloutGroupStatus}s. An in-clause statement does not work with
      * the spring-data, so this is specific usecase regarding to the

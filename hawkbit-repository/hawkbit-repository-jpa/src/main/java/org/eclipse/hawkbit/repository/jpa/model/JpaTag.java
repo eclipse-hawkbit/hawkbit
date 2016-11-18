@@ -23,14 +23,14 @@ import org.eclipse.hawkbit.repository.model.Tag;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements Tag {
+public class JpaTag extends AbstractJpaNamedEntity implements Tag {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "colour", nullable = true, length = 16)
     @Size(max = 16)
     private String colour;
 
-    protected AbstractJpaTag() {
+    protected JpaTag() {
         // Default constructor needed for JPA entities
     }
 
@@ -44,7 +44,7 @@ public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements T
      * @param colour
      *            of tag in UI
      */
-    public AbstractJpaTag(final String name, final String description, final String colour) {
+    public JpaTag(final String name, final String description, final String colour) {
         super(name, description);
         this.colour = colour;
     }
@@ -54,7 +54,6 @@ public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements T
         return colour;
     }
 
-    @Override
     public void setColour(final String colour) {
         this.colour = colour;
     }

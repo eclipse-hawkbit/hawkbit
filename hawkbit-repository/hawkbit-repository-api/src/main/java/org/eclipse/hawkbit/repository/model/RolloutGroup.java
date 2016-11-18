@@ -22,21 +22,9 @@ public interface RolloutGroup extends NamedEntity {
     Rollout getRollout();
 
     /**
-     * @param rollout
-     *            sets the {@link Rollout} for this group
-     */
-    void setRollout(Rollout rollout);
-
-    /**
      * @return the current {@link RolloutGroupStatus} for this group
      */
     RolloutGroupStatus getStatus();
-
-    /**
-     * @param status
-     *            the {@link RolloutGroupStatus} to set for this group
-     */
-    void setStatus(RolloutGroupStatus status);
 
     /**
      * @return the parent group of this group, in case the group is the root
@@ -51,14 +39,6 @@ public interface RolloutGroup extends NamedEntity {
     RolloutGroupSuccessCondition getSuccessCondition();
 
     /**
-     * @param successCondition
-     *            the {@link RolloutGroupSuccessCondition} to be set for this
-     *            group to indicate when a group is successfully and a next
-     *            group might be started
-     */
-    void setSuccessCondition(RolloutGroupSuccessCondition successCondition);
-
-    /**
      * @return a String representation of the expression to be evaluated by the
      *         {@link RolloutGroupSuccessCondition} to indicate if the condition
      *         is true, might be {@code null} if no expression must be set for
@@ -67,29 +47,10 @@ public interface RolloutGroup extends NamedEntity {
     String getSuccessConditionExp();
 
     /**
-     * @param successConditionExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupSuccessCondition}, might be {@code null} if
-     *            the set {@link RolloutGroupSuccessCondition} can handle
-     *            {@code null} value
-     */
-    void setSuccessConditionExp(String successConditionExp);
-
-    /**
      * @return the {@link RolloutGroupErrorCondition} for this group to indicate
      *         when a group should marked as failed
      */
     RolloutGroupErrorCondition getErrorCondition();
-
-    /**
-     * 
-     * @param errorCondition
-     *            the {@link RolloutGroupErrorCondition} to be set for this
-     *            group to indicate when a group is marked as failed and the
-     *            corresponding {@link RolloutGroupErrorAction} should be
-     *            executed
-     */
-    void setErrorCondition(RolloutGroupErrorCondition errorCondition);
 
     /**
      * @return a String representation of the expression to be evaluated by the
@@ -100,15 +61,6 @@ public interface RolloutGroup extends NamedEntity {
     String getErrorConditionExp();
 
     /**
-     * @param errorExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupErrorCondition}, might be {@code null} if
-     *            the set {@link RolloutGroupErrorCondition} can handle
-     *            {@code null} value
-     */
-    void setErrorConditionExp(String errorExp);
-
-    /**
      * @return a {@link RolloutGroupErrorAction} which is executed when the
      *         given {@link RolloutGroupErrorCondition} is met, might be
      *         {@code null} if no error action is set
@@ -116,28 +68,11 @@ public interface RolloutGroup extends NamedEntity {
     RolloutGroupErrorAction getErrorAction();
 
     /**
-     * @param errorAction
-     *            the {@link RolloutGroupErrorAction} to be set which should be
-     *            executed if the {@link RolloutGroupErrorCondition} is met,
-     *            might be {@code null} if no error action should be executed
-     */
-    void setErrorAction(RolloutGroupErrorAction errorAction);
-
-    /**
      * @return a String representation of the expression to be evaluated by the
      *         {@link RolloutGroupErrorAction} might be {@code null} if no
      *         expression must be set for the {@link RolloutGroupErrorAction}
      */
     String getErrorActionExp();
-
-    /**
-     * @param errorActionExp
-     *            sets a String represented expression which is evaluated by the
-     *            {@link RolloutGroupErrorAction}, might be {@code null} if the
-     *            set {@link RolloutGroupErrorAction} can handle {@code null}
-     *            value
-     */
-    void setErrorActionExp(String errorActionExp);
 
     /**
      * @return the {@link RolloutGroupSuccessAction} which is executed if the
@@ -153,23 +88,6 @@ public interface RolloutGroup extends NamedEntity {
     String getSuccessActionExp();
 
     /**
-     * @param successAction
-     *            which is executed if the {@link RolloutGroupSuccessCondition}
-     *            is met
-     */
-    void setSuccessAction(RolloutGroupSuccessAction successAction);
-
-    /**
-     *
-     * @param successActionExp
-     *            a String representation of the expression to be evaluated by
-     *            the {@link RolloutGroupSuccessAction} might be {@code null} if
-     *            no expression must be set for the
-     *            {@link RolloutGroupSuccessAction}
-     */
-    void setSuccessActionExp(String successActionExp);
-
-    /**
      * @return the total amount of targets containing in this group
      */
     int getTotalTargets();
@@ -180,36 +98,16 @@ public interface RolloutGroup extends NamedEntity {
     TotalTargetCountStatus getTotalTargetCountStatus();
 
     /**
-     * @param totalTargetCountStatus
-     *            the totalTargetCountStatus to set
-     */
-    void setTotalTargetCountStatus(TotalTargetCountStatus totalTargetCountStatus);
-
-    /**
      * @return the target filter query, that is used to assign Targets to this
      *         Group
      */
     String getTargetFilterQuery();
 
     /**
-     * @param targetFilterQuery
-     *            the target filter query, that is used to assign Targets to
-     *            this Group. Can be null, if no restrictions should apply.
-     */
-    void setTargetFilterQuery(String targetFilterQuery);
-
-    /**
      * @return the percentage of matching Targets that should be assigned to
      *         this Group
      */
     float getTargetPercentage();
-
-    /**
-     * @param targetPercentage
-     *            the percentage of matching Targets that should be assigned to
-     *            this Group
-     */
-    void setTargetPercentage(float targetPercentage);
 
     /**
      * Rollout group state machine.
@@ -290,7 +188,8 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#getErrorCondition()} is hit.
+     * The actions executed when the {@link RolloutGroup#getErrorCondition()} is
+     * hit.
      */
     enum RolloutGroupErrorAction {
         PAUSE("pauseRolloutGroupAction");
@@ -310,8 +209,8 @@ public interface RolloutGroup extends NamedEntity {
     }
 
     /**
-     * The actions executed when the {@link RolloutGroup#getSuccessCondition()} is
-     * hit.
+     * The actions executed when the {@link RolloutGroup#getSuccessCondition()}
+     * is hit.
      */
     enum RolloutGroupSuccessAction {
         NEXTGROUP("startNextRolloutGroupAction");

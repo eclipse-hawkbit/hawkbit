@@ -128,10 +128,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
-        TargetFilterQuery tfq = entityFactory.generateTargetFilterQuery();
-        tfq.setName(filterName);
-        tfq.setQuery(filterQuery);
-        tfq = targetFilterQueryManagement.createTargetFilterQuery(tfq);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.createTargetFilterQuery(
+                entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -319,11 +317,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
         final String dsName = "testDS";
 
         final DistributionSet set = testdataFactory.createDistributionSet(dsName);
-        TargetFilterQuery tfq = entityFactory.generateTargetFilterQuery();
-        tfq.setName(knownName);
-        tfq.setQuery(knownQuery);
-        tfq.setAutoAssignDistributionSet(set);
-        tfq = targetFilterQueryManagement.createTargetFilterQuery(tfq);
+        final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
+        targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq.getId(), set.getId());
 
         assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
                 .isEqualTo(set);
@@ -343,10 +338,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTe
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
-        final TargetFilterQuery target = entityFactory.generateTargetFilterQuery();
-        target.setName(name);
-        target.setQuery(query);
-        return targetFilterQueryManagement.createTargetFilterQuery(target);
+        return targetFilterQueryManagement
+                .createTargetFilterQuery(entityFactory.targetFilterQuery().create().name(name).query(query));
     }
 
 }

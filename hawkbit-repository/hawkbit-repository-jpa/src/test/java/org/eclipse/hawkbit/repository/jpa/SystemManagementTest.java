@@ -114,7 +114,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
                                     final DistributionSet ds = testdataFactory
                                             .createDistributionSet("to be deployed" + x, true);
 
-                                    deploymentManagement.assignDistributionSet(ds, createdTargets);
+                                    assignDistributionSet(ds, createdTargets);
                                 }
                             }
                         }
@@ -127,8 +127,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private List<Target> createTestTargets(final int targets) {
-        return targetManagement
-                .createTargets(testdataFactory.generateTargets(targets, "testTargetOfTenant", "testTargetOfTenant"));
+        return testdataFactory.createTargets(targets, "testTargetOfTenant", "testTargetOfTenant");
     }
 
     private void createTestArtifact(final byte[] random) {

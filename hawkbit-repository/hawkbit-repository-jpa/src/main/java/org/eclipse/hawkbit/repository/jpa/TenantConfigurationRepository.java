@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.springframework.transaction.annotation.Isolation;
@@ -30,9 +28,6 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
      * @return the found tenant configuration object otherwise {@code null}
      */
     JpaTenantConfiguration findByKey(String configurationKey);
-
-    @Override
-    List<JpaTenantConfiguration> findAll();
 
     /**
      * Deletes a tenant configuration by tenant and key.
