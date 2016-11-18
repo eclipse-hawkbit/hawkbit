@@ -150,8 +150,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            // TODO auf ID umstellen
-            // net für alle getEntity aufrufen
             eventContainer.getEvents().stream().map(event -> event.getEntity())
                     .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
