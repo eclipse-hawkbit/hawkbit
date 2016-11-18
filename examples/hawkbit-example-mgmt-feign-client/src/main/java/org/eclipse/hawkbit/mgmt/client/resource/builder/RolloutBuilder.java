@@ -32,33 +32,6 @@ public class RolloutBuilder {
     private String errorThreshold;
     private String description;
     private List<MgmtRolloutGroup> semiAutomaticGroups;
-    //
-    // class SemiAutomaticGroup {
-    // private String targetFilterQuery;
-    // private Float targetPercentage;
-    //
-    // public SemiAutomaticGroup(final String targetFilterQuery, final Float
-    // targetPercentage) {
-    // this.targetFilterQuery = targetFilterQuery;
-    // this.targetPercentage = targetPercentage;
-    // }
-    //
-    // public String getTargetFilterQuery() {
-    // return targetFilterQuery;
-    // }
-    //
-    // public void setTargetFilterQuery(final String targetFilterQuery) {
-    // this.targetFilterQuery = targetFilterQuery;
-    // }
-    //
-    // public Float getTargetPercentage() {
-    // return targetPercentage;
-    // }
-    //
-    // public void setTargetPercentage(final Float targetPercentage) {
-    // this.targetPercentage = targetPercentage;
-    // }
-    // }
 
     /**
      * @param name
