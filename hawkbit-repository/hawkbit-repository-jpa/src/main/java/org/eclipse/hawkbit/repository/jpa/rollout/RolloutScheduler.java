@@ -57,8 +57,12 @@ public class RolloutScheduler {
      * tenant the {@link RolloutManagement#checkRunningRollouts(long)} in the
      * {@link SystemSecurityContext}.
      */
-    @Scheduled(initialDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
+    @Scheduled(initialDelayString = RolloutProperties.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void rolloutScheduler() {
+        if (!rolloutProperties.getScheduler().isEnabled()) {
+            return;
+        }
+
         LOGGER.debug("rollout schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
@@ -74,9 +78,77 @@ public class RolloutScheduler {
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getScheduler().getFixedDelay();
-                    rolloutManagement.checkCreatingRollouts(fixedDelay);
-                    rolloutManagement.checkStartingRollouts(fixedDelay);
                     rolloutManagement.checkRunningRollouts(fixedDelay);
+                    return null;
+                });
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Scheduler method called by the spring-async mechanism. Retrieves all
+     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenant the {@link RolloutManagement#checkStartingRollouts(long)} in the
+     * {@link SystemSecurityContext}.
+     */
+    @Scheduled(initialDelayString = RolloutProperties.PROP_STARTING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_STARTING_SCHEDULER_DELAY_PLACEHOLDER)
+    public void staringRolloutScheduler() {
+        if (!rolloutProperties.getStartingScheduler().isEnabled()) {
+            return;
+        }
+
+        LOGGER.debug("rollout starting schedule checker has been triggered.");
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
+        systemSecurityContext.runAsSystem(() -> {
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multitenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+            final List<String> tenants = systemManagement.findTenants();
+            LOGGER.info("Checking starting rollouts for {} tenants", tenants.size());
+            for (final String tenant : tenants) {
+                tenantAware.runAsTenant(tenant, () -> {
+                    final long fixedDelay = rolloutProperties.getStartingScheduler().getFixedDelay();
+                    rolloutManagement.checkStartingRollouts(fixedDelay);
+                    return null;
+                });
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Scheduler method called by the spring-async mechanism. Retrieves all
+     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenant the {@link RolloutManagement#checkCreatingRollouts(long)} in the
+     * {@link SystemSecurityContext}.
+     */
+    @Scheduled(initialDelayString = RolloutProperties.PROP_CREATING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_CREATING_SCHEDULER_DELAY_PLACEHOLDER)
+    public void creatingRolloutScheduler() {
+        if (!rolloutProperties.getCreatingScheduler().isEnabled()) {
+            return;
+        }
+
+        LOGGER.debug("rollout creating schedule checker has been triggered.");
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
+        systemSecurityContext.runAsSystem(() -> {
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multitenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+            final List<String> tenants = systemManagement.findTenants();
+            LOGGER.info("Checking creating rollouts for {} tenants", tenants.size());
+            for (final String tenant : tenants) {
+                tenantAware.runAsTenant(tenant, () -> {
+                    final long fixedDelay = rolloutProperties.getCreatingScheduler().getFixedDelay();
+                    rolloutManagement.checkCreatingRollouts(fixedDelay);
                     return null;
                 });
             }

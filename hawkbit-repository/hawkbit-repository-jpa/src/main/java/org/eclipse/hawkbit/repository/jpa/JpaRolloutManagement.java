@@ -90,7 +90,7 @@ public class JpaRolloutManagement implements RolloutManagement {
      * Maximum amount of targets that are assigned to a Rollout Group in one
      * transaction.
      */
-    private static final long TRANSACTION_TARGETS = 1000;
+    private static final int TRANSACTION_TARGETS = 1000;
 
     @Autowired
     private EntityManager entityManager;
@@ -376,14 +376,14 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private Long runInNewCountingTransaction(final String transactionName, final TransactionCallback<Long> action) {
+    private int runInNewCountingTransaction(final String transactionName, final TransactionCallback<Integer> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def).execute(action);
     }
 
-    private long assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
+    private Integer assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
         return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
@@ -395,7 +395,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             createAssignmentOfTargetsToGroup(targets, group);
 
-            return targets.getTotalElements();
+            return targets.getNumberOfElements();
         });
     }
 
@@ -552,9 +552,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         return totalActionsCreated;
     }
 
-    private long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final long limit) {
+    private Integer createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
         return runInNewCountingTransaction("createActionsForTargets", status -> {
-            final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
+            final PageRequest pageRequest = new PageRequest(0, limit);
             final Rollout rollout = rolloutRepository.findOne(rolloutId);
             final RolloutGroup group = rolloutGroupRepository.findOne(groupId);
 
@@ -568,7 +568,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                         rollout, group);
             }
 
-            return targets.getTotalElements();
+            return targets.getNumberOfElements();
         });
     }
 

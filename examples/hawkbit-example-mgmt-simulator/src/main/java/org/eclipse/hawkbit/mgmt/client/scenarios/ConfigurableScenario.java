@@ -189,6 +189,16 @@ public class ConfigurableScenario {
                 .successThreshold(String.valueOf(scenario.getRolloutSuccessThreshold())).errorThreshold("5").build())
                 .getBody();
 
+        do {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (final InterruptedException e) {
+                LOGGER.warn("Interrupted!");
+                Thread.currentThread().interrupt();
+            }
+        } while (!"READY".equalsIgnoreCase(
+                rolloutResource.getRollout(rolloutResponseBody.getRolloutId()).getBody().getStatus()));
+
         // start the created Rollout
         rolloutResource.start(rolloutResponseBody.getRolloutId());
 
@@ -295,12 +305,10 @@ public class ConfigurableScenario {
             targetTagResource
                     .createTargetTags(new TagBuilder().name("Page " + page)
                             .description("Target tag for target page " + page).buildAsList(scenario.getTargetTags()))
-                    .getBody().forEach(
-                            tag -> targetTagResource.assignTargets(tag.getTagId(),
-                                    targets.stream()
-                                            .map(target -> new MgmtAssignedTargetRequestBody()
-                                                    .setControllerId(target.getControllerId()))
-                                            .collect(Collectors.toList())));
+                    .getBody()
+                    .forEach(tag -> targetTagResource.assignTargets(tag.getTagId(), targets.stream().map(
+                            target -> new MgmtAssignedTargetRequestBody().setControllerId(target.getControllerId()))
+                            .collect(Collectors.toList())));
         }
     }
 
