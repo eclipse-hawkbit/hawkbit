@@ -58,7 +58,7 @@ public class RolloutScheduler {
      * {@link SystemSecurityContext}.
      */
     @Scheduled(initialDelayString = RolloutProperties.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_SCHEDULER_DELAY_PLACEHOLDER)
-    public void rolloutScheduler() {
+    public void runningRolloutScheduler() {
         if (!rolloutProperties.getScheduler().isEnabled()) {
             return;
         }
@@ -93,7 +93,7 @@ public class RolloutScheduler {
      * {@link SystemSecurityContext}.
      */
     @Scheduled(initialDelayString = RolloutProperties.PROP_STARTING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_STARTING_SCHEDULER_DELAY_PLACEHOLDER)
-    public void staringRolloutScheduler() {
+    public void startingRolloutScheduler() {
         if (!rolloutProperties.getStartingScheduler().isEnabled()) {
             return;
         }
