@@ -593,9 +593,8 @@ public class UploadLayout extends VerticalLayout {
      */
     void clearFileList() {
         // delete file system zombies
-        artifactUploadState.getFileSelected().forEach(customFile -> {
-            FileUtils.deleteQuietly(new File(customFile.getFilePath()));
-        });
+        artifactUploadState.getFileSelected()
+                .forEach(customFile -> FileUtils.deleteQuietly(new File(customFile.getFilePath())));
 
         artifactUploadState.getFileSelected().clear();
         artifactUploadState.getBaseSwModuleList().clear();
