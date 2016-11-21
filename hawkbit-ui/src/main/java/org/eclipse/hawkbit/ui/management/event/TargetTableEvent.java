@@ -49,7 +49,7 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
      *            targets which will be deleted
      */
     public TargetTableEvent(final List<Long> entityIds) {
-        super(entityIds);
+        super(entityIds, Target.class);
     }
 
     /**
@@ -59,7 +59,7 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
      *            the target component event.
      */
     public TargetTableEvent(final TargetComponentEvent targetComponentEvent) {
-        super(null, null);
+        super(null, Target.class);
         this.targetComponentEvent = targetComponentEvent;
     }
 

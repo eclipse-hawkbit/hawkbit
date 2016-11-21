@@ -8,13 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
+import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
  * TenantAwareEvent to represent add, update or delete.
  *
+ * * @param <T> entity class
  */
 public class BaseUIEntityEvent<T extends BaseEntity> {
 
@@ -22,7 +27,9 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     private T entity;
 
-    private Collection<Long> entityIds;
+    private final Collection<Long> entityIds;
+
+    private final Class<?> entityClass;
 
     /**
      * Base entity event
@@ -35,6 +42,8 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     public BaseUIEntityEvent(final BaseEntityEventType eventType, final T entity) {
         this.eventType = eventType;
         this.entity = entity;
+        this.entityIds = Arrays.asList(entity.getId());
+        this.entityClass = entity.getClass();
     }
 
     /**
@@ -42,10 +51,13 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
      * 
      * @param entityIds
      *            entities which will be deleted
+     * @param entityClass
+     *            the entityClass
      */
-    public BaseUIEntityEvent(final Collection<Long> entityIds) {
+    public BaseUIEntityEvent(final Collection<Long> entityIds, final Class<T> entityClass) {
         this.eventType = BaseEntityEventType.REMOVE_ENTITIES;
         this.entityIds = entityIds;
+        this.entityClass = entityClass;
     }
 
     public Collection<Long> getEntityIds() {
@@ -58,6 +70,21 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     public BaseEntityEventType getEventType() {
         return eventType;
+    }
+
+    public boolean matchRemoteEvent(final TenantAwareEvent tenantAwareEvent) {
+        if (!(tenantAwareEvent instanceof RemoteEntityEvent)) {
+            return false;
+        }
+        final RemoteEntityEvent<?> remoteEntityEvent = (RemoteEntityEvent<?>) tenantAwareEvent;
+        try {
+            final Class<?> remoteEntityClass = ClassUtils.getClass(remoteEntityEvent.getEntityClass());
+            return entityClass.isAssignableFrom(remoteEntityClass)
+                    && entityIds.contains(remoteEntityEvent.getEntityId());
+        } catch (final ClassNotFoundException e) {
+            return false;
+        }
+
     }
 
 }

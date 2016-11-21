@@ -42,4 +42,8 @@ public class DistributionTableLayout extends AbstractTableLayout {
         super.init(dsTableHeader, dsTable, distributionDetails);
     }
 
+    public DistributionTable getDsTable() {
+        return dsTable;
+    }
+
 }

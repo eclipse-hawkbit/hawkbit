@@ -52,10 +52,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -122,16 +119,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     protected void init() {
         super.init();
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Target deleted", EventType.ENTITY_DELETED);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onTargetCreatedEvents(final TargetCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Target created", EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

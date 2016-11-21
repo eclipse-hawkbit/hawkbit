@@ -49,7 +49,7 @@ public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
      *            software modules which will be deleted
      */
     public SoftwareModuleEvent(final Collection<Long> entityIds) {
-        super(entityIds);
+        super(entityIds, SoftwareModule.class);
     }
 
     /**

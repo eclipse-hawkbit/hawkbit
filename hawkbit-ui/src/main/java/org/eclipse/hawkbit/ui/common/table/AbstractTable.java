@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -19,15 +18,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
-import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
-import org.eclipse.hawkbit.ui.push.event.RemoveNotificationEvent;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -60,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * @param <I>
  *            i is the id of the table
  */
-public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
+public abstract class AbstractTable<E extends NamedEntity, I> extends Table implements RefreshableContainer {
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
@@ -76,8 +71,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     @Autowired
     protected UINotification notification;
-
-    private final Set<Long> lastAddedOrDeletedEntities = new HashSet<>();
 
     /**
      * Initialize the components.
@@ -249,9 +242,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(() -> applyMaxTableSettings());
         } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()) {
-            UI.getCurrent().access(() -> addEntity(event.getEntity()));
+            UI.getCurrent().access(() -> refreshContainer());
         } else if (BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
-            UI.getCurrent().access(() -> removeEntities(event.getEntityIds()));
+            UI.getCurrent().access(() -> refreshContainer());
         }
     }
 
@@ -454,8 +447,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     }
 
     /**
-     * Refresh the container and clear all notfication.
+     * Refresh the container.
      */
+    @Override
     public void refreshContainer() {
         final Container container = getContainerDataSource();
         if (!(container instanceof LazyQueryContainer)) {
@@ -463,31 +457,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         }
         final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
         tableContainer.refresh();
-        eventBus.publish(this, new RemoveNotificationEvent(this));
-        lastAddedOrDeletedEntities.clear();
-    }
-
-    protected void sendUnreadNotificationMessage(final EventContainer<? extends RemoteIdEvent> eventContainer,
-            final String message, final EventType type) {
-        final long size = eventContainer.getEvents().stream()
-                .filter(event -> !lastAddedOrDeletedEntities.contains(event.getEntityId())).count();
-        if (size <= 0) {
-            return;
-        }
-
-        eventBus.publish(this,
-                new NotificationEntityChangeEvent(this, type, message, eventContainer.getEvents().size()));
-
-    }
-
-    private void addEntity(final E entity) {
-        refreshContainer();
-        lastAddedOrDeletedEntities.add(entity.getId());
-    }
-
-    private void removeEntities(final Collection<Long> entities) {
-        refreshContainer();
-        lastAddedOrDeletedEntities.addAll(entities);
     }
 
     protected abstract boolean hasDropPermission();

@@ -60,9 +60,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     @Autowired
     private transient EntityFactory entityFactory;
 
-    @Autowired
-    private TargetTable targetTable;
-
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;

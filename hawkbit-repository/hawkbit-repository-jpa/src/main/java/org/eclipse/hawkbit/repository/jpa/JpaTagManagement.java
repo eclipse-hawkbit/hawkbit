@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -136,8 +137,9 @@ public class JpaTagManagement implements TagManagement {
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new TargetTagDeletedEvent(tenantAware.getCurrentTenant(), tag.getId(), applicationContext.getId())));
+        afterCommit
+                .afterCommit(() -> eventPublisher.publishEvent(new TargetTagDeletedEvent(tenantAware.getCurrentTenant(),
+                        tag.getId(), JpaTargetTag.class.getName(), applicationContext.getId())));
 
     }
 
@@ -261,7 +263,7 @@ public class JpaTagManagement implements TagManagement {
 
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new DistributionSetTagDeletedEvent(tenantAware.getCurrentTenant(),
-                        tag.getId(), applicationContext.getId())));
+                        tag.getId(), JpaDistributionSet.class.getName(), applicationContext.getId())));
     }
 
     @Override

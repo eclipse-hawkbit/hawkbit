@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
-import javax.annotation.PreDestroy;
+import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.AbstractNotifcationView;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
 import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
@@ -24,6 +26,10 @@ import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
+import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -32,6 +38,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -43,7 +50,6 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 /**
  *
@@ -51,7 +57,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
-public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DeploymentView extends AbstractNotifcationView implements View, BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
@@ -96,15 +102,9 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
-        eventbus.subscribe(this);
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
         eventbus.publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventbus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -327,6 +327,19 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
                 distributionTableLayoutNew.setShowFilterButtonVisible(false);
             }
         }
+    }
+
+    @Override
+    protected Map<Class<?>, RefreshableContainer> getSupportedViewEvents() {
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
+
+        supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTargetTable());
+        supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTargetTable());
+
+        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayoutNew.getDsTable());
+        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayoutNew.getDsTable());
+
+        return supportedEvents;
     }
 
 }

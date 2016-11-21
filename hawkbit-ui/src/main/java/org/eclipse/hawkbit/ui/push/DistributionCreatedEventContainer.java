@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
  *
  */
 public class DistributionCreatedEventContainer implements EventContainer<DistributionSetCreatedEvent> {
+    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "distribution.created.event.container.notifcation.message";
     private final List<DistributionSetCreatedEvent> events;
 
     DistributionCreatedEventContainer(final List<DistributionSetCreatedEvent> events) {
@@ -26,6 +27,11 @@ public class DistributionCreatedEventContainer implements EventContainer<Distrib
     @Override
     public List<DistributionSetCreatedEvent> getEvents() {
         return events;
+    }
+
+    @Override
+    public String getUnreadNotficationMessageKey() {
+        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

@@ -40,10 +40,7 @@ import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -113,16 +110,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected void init() {
         super.init();
         notAllowedMsg = i18n.get("message.action.not.allowed");
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution created", EventType.ENITY_ADDED);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionDeleteEvents(final DistributionDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution deleted", EventType.ENTITY_DELETED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

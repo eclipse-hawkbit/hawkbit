@@ -38,6 +38,11 @@
         position: relative;
         padding-bottom: 20px;
       }
+      
+      .labelwrapper {
+        position: relative;
+        padding: 0 !important;
+      }
     }
 
     // View main content.When view content width and height is less than min-width and min-height ,scroll bars are displayed
@@ -119,6 +124,15 @@
     height: 100%;
     font-size: 14px;
     font-weight: 400;
+  }
+  
+  .valo-menu .valo-menu-badge,
+  .dashboard-view .notifications.unread .v-button-caption {
+    @include valo-badge-style;
+    position: absolute;
+    right: round($v-unit-size/3);
+    font-size: round($v-font-size * 0.9);
+    pointer-events: none;
   }
 
   //Menu item - white border is displayed after each menu item

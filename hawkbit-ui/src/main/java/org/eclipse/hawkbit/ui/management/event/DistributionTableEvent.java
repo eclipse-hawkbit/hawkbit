@@ -39,7 +39,7 @@ public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
      *            distribution sets which will be deleted
      */
     public DistributionTableEvent(final Collection<Long> entityIds) {
-        super(entityIds);
+        super(entityIds, DistributionSet.class);
     }
 
 }

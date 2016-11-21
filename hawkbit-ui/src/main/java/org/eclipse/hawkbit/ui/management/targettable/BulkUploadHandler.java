@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
@@ -397,9 +398,11 @@ public class BulkUploadHandler extends CustomComponent
                 final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(name);
                 final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-                /* create new target entity */
-                targetManagement.createTarget(entityFactory.target().create().controllerId(newControllerId)
-                        .name(newName).description(newDesc));
+                final Target newTarget = targetManagement.createTarget(entityFactory.target().create()
+                        .controllerId(newControllerId).name(newName).description(newDesc));
+
+                eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
+
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
                 successfullTargetCount++;
             }

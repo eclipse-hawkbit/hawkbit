@@ -40,10 +40,7 @@ import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
-import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -148,16 +145,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         events.stream().filter(event -> event.getEntity().isComplete())
                 .filter(event -> visibleItemIds.contains(DistributionSetIdName.generate(event.getEntity())))
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution Set created", EventType.ENITY_ADDED);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution Set deleted", EventType.ENTITY_DELETED);
     }
 
     @Override

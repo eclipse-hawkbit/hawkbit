@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import com.vaadin.server.Resource;
  */
 @Component
 @Order(700)
-public class TenantConfigurationDashboardViewMenuItem implements DashboardMenuItem {
+public class TenantConfigurationDashboardViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     private static final long serialVersionUID = 348659206461499664L;
 

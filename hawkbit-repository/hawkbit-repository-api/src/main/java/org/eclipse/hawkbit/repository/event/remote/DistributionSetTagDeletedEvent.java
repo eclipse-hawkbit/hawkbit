@@ -31,11 +31,14 @@ public class DistributionSetTagDeletedEvent extends RemoteIdEvent {
      *            the tenant
      * @param entityId
      *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
 
-    public DistributionSetTagDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
-        super(entityId, tenant, applicationId);
+    public DistributionSetTagDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 }

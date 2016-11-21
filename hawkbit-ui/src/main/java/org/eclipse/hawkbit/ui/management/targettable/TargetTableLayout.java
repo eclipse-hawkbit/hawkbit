@@ -51,8 +51,11 @@ public class TargetTableLayout extends AbstractTableLayout {
 
     @Override
     protected void publishEvent() {
-
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECT_ALL));
+    }
+
+    public TargetTable getTargetTable() {
+        return targetTable;
     }
 
 }

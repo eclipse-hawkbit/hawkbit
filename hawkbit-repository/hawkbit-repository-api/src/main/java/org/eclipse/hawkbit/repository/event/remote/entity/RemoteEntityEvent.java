@@ -30,8 +30,6 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
 
     private static final long serialVersionUID = 1L;
 
-    private String entityClass;
-
     private transient E entity;
 
     /**
@@ -50,16 +48,8 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
      *            the origin application id
      */
     protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
-        super(baseEntity.getId(), baseEntity.getTenant(), applicationId);
-        this.entityClass = baseEntity.getClass().getName();
+        super(baseEntity.getId(), baseEntity.getTenant(), baseEntity.getClass().getName(), applicationId);
         this.entity = baseEntity;
-    }
-
-    /**
-     * @return the entityClass
-     */
-    public String getEntityClass() {
-        return entityClass;
     }
 
     @JsonIgnore
@@ -73,7 +63,7 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
     @SuppressWarnings("unchecked")
     private E reloadEntityFromRepository() {
         try {
-            final Class<E> clazz = (Class<E>) ClassUtils.getClass(entityClass);
+            final Class<E> clazz = (Class<E>) ClassUtils.getClass(getEntityClass());
             return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(), getEntityId(),
                     clazz);
         } catch (final ClassNotFoundException e) {

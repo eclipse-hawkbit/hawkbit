@@ -8,12 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.distributions;
 
-import javax.annotation.PreDestroy;
+import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.AbstractNotifcationView;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
@@ -22,16 +24,17 @@ import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
+import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Maps;
 import com.vaadin.event.MouseEvents.ClickListener;
-import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
@@ -41,7 +44,6 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 /**
  * Manage distributions and distributions type view.
@@ -51,16 +53,13 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
-public class DistributionsView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DistributionsView extends AbstractNotifcationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "distributions";
     private static final long serialVersionUID = 3887435076372276300L;
 
     @Autowired
     private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private I18N i18n;
@@ -101,14 +100,8 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
-        eventBus.subscribe(this);
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     private void restoreState() {
@@ -152,7 +145,7 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         UI.getCurrent().addClickListener(new ClickListener() {
             @Override
             public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+                getEventbus().publish(this, DragEvent.HIDE_DROP_HINT);
             }
         });
     }
@@ -241,6 +234,16 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
                 softwareModuleTableLayout.setShowFilterButtonVisible(false);
             }
         }
+    }
+
+    @Override
+    protected Map<Class<?>, RefreshableContainer> getSupportedViewEvents() {
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
+
+        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getDsTable());
+        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getDsTable());
+
+        return supportedEvents;
     }
 
 }

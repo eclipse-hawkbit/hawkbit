@@ -274,8 +274,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        Arrays.stream(distributionSetIDs).forEach(dsId -> eventPublisher.publishEvent(
-                new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId, applicationContext.getId())));
+        Arrays.stream(distributionSetIDs)
+                .forEach(dsId -> eventPublisher
+                        .publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId,
+                                JpaDistributionSet.class.getName(), applicationContext.getId())));
     }
 
     @Override
