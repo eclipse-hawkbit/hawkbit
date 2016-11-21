@@ -31,9 +31,9 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 
+import com.vaadin.data.validator.AbstractStringValidator;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CustomComponent;
@@ -89,26 +89,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         @Override
         public boolean canWindowSaveOrUpdate() {
-            return editTarget || isValid();
+            return editTarget || !isDuplicate();
         }
 
-        private boolean isValid() {
-
-            controllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
-            if (StringUtils.isEmpty(controllerId)) {
-                uINotification.displayValidationError(i18n.get("message.target.name.not.valid"));
-                return false;
-            }
-
-            final Target existingTarget = targetManagement.findTargetByControllerID(controllerId);
-            if (existingTarget != null) {
-                uINotification.displayValidationError(
-                        i18n.get("message.target.duplicate.check", new Object[] { controllerId }));
-                return false;
-            } else {
-                return true;
-            }
-        }
     }
 
     /**
@@ -122,6 +105,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private void createRequiredComponents() {
         controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        controllerIDTextField.addValidator(new WhiteSpaceValidator(i18n.get("message.target.whitespace.check")));
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
@@ -159,7 +143,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
     }
 
-     private void addNewTarget() {
+    private void addNewTarget() {
         final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerIDTextField.getValue());
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
@@ -212,6 +196,19 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         editTarget = Boolean.FALSE;
     }
 
+    private boolean isDuplicate() {
+        final String newControlllerId = controllerIDTextField.getValue();
+        final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
+        if (existingTarget != null) {
+            uINotification.displayValidationError(
+                    i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     /**
      * @param controllerId
      */
@@ -230,6 +227,23 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     public FormLayout getFormLayout() {
         return formLayout;
+    }
+
+    private class WhiteSpaceValidator extends AbstractStringValidator {
+
+        private static final long serialVersionUID = 1L;
+
+        public WhiteSpaceValidator(final String errorMessage) {
+            super(errorMessage);
+        }
+
+        @Override
+        protected boolean isValidValue(final String value) {
+            if (value.contains(" ")) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }
