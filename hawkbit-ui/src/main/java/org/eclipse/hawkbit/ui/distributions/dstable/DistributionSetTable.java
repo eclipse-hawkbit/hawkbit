@@ -86,6 +86,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
             Arrays.asList(DragEvent.SOFTWAREMODULE_DRAG));
 
+    private static final String UNREAD_MESSAGE_CREATED = "distribution.set.table.created";
+    private static final String UNREAD_MESSAGE_DELETED = "distribution.set.table.deleted";
+
     @Autowired
     private SpPermissionChecker permissionChecker;
 
@@ -152,12 +155,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution Set created", EventType.ENITY_ADDED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_CREATED, EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution Set deleted", EventType.ENTITY_DELETED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_DELETED, EventType.ENTITY_DELETED);
     }
 
     @Override

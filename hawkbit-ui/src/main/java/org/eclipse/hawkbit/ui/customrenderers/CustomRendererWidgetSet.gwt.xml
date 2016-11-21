@@ -24,4 +24,6 @@
 
     <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
     
+
+    <inherits name="org.vaadin.teemu.switchui.SwitchComponentWidgetset" />
 </module>

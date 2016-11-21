@@ -11,22 +11,8 @@
    .notifications-unread{
     width: 37px !important;
     height: 37px !important;
-    margin: 0px !important;
+    padding-left: 10px !important;
    }
-   
-  .change-counter {
-    @include valo-badge-style;
-    pointer-events: none;
-    top: round($v-unit-size / -5);
-    right: round($v-unit-size / -5);
-    z-index: 1;
-    border-radius: $v-border-radius;
-    color: $widget-bg;
-    display: block;
-    position: absolute;
-  }
- 
-  
 
   .notifications-unread-popup.v-window {
     overflow: visible !important;
@@ -54,7 +40,7 @@
       content: "";
       position: absolute;
       top: -14px;
-      right: 2 * $v-unit-size - round($v-unit-size / 3);
+      right: (2 * $v-unit-size - round($v-unit-size / 3)) - 57px !important;
       border: 7px solid transparent;
       width: 0;
       height: 0;

@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.push.event.AutoRefreshChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.VaadinSession.State;
@@ -69,7 +72,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final int BLOCK_SIZE = 10_000;
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
-    private int uiid = -1;
 
     @Autowired
     private ScheduledExecutorService executorService;
@@ -81,17 +83,20 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
 
+    private UI vaadinUI;
+
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());
     }
 
     @Override
     public void init(final UI vaadinUI) {
-        uiid = vaadinUI.getUIId();
-        LOG.info("Initialize delayed event push strategy for UI {}", uiid);
+        this.vaadinUI = vaadinUI;
+        LOG.info("Initialize delayed event push strategy for UI {}", vaadinUI.getUIId());
         if (vaadinUI.getSession() == null) {
-            LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
+            LOG.error("Vaadin session of UI {} is null! Event push disabled!", vaadinUI.getUIId());
         }
+        eventBus.subscribe(this);
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
                 10_000, 1_000, TimeUnit.MILLISECONDS);
@@ -99,9 +104,20 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void clean() {
-        LOG.info("Cleanup delayed event push strategy for UI", uiid);
+        eventBus.unsubscribe(this);
+        LOG.info("Cleanup delayed event push strategy for UI", vaadinUI.getUIId());
         jobHandle.cancel(true);
         queue.clear();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    protected void onAutoRefreshChangeEvent(final AutoRefreshChangeEvent autoRefreshChange) {
+        long delay = 1_000;
+        if (autoRefreshChange.getAutoRefreshOn()) {
+            delay = 3_000;
+        }
+        jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()), 1_000,
+                delay, TimeUnit.MILLISECONDS);
     }
 
     private final class DispatchRunnable implements Runnable {

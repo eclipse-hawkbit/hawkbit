@@ -103,6 +103,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private static final long serialVersionUID = -2300392868806614568L;
     private static final int PROPERTY_DEPT = 3;
 
+    private static final String UNREAD_MESSAGE_CREATED = "target.table.created";
+    private static final String UNREAD_MESSAGE_DELETED = "target.table.deleted";
+
     @Autowired
     private transient TargetManagement targetManagement;
 
@@ -126,12 +129,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Target deleted", EventType.ENTITY_DELETED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_DELETED, EventType.ENTITY_DELETED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetCreatedEvents(final TargetCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Target created", EventType.ENITY_ADDED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_CREATED, EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

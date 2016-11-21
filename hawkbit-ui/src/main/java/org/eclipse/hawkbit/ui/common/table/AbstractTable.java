@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.push.EventContainer;
+import org.eclipse.hawkbit.ui.push.event.AutoRefreshChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.NotificationEntityChangeEvent.EventType;
 import org.eclipse.hawkbit.ui.push.event.RemoveNotificationEvent;
@@ -37,6 +38,8 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -79,6 +82,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     private final Set<Long> lastAddedOrDeletedEntities = new HashSet<>();
 
+    private Boolean autoRefreshOn;
+
     /**
      * Initialize the components.
      */
@@ -107,6 +112,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     @PreDestroy
     protected void destroy() {
         eventBus.unsubscribe(this);
+        lastAddedOrDeletedEntities.clear();
     }
 
     /**
@@ -464,20 +470,34 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
         tableContainer.refresh();
         eventBus.publish(this, new RemoveNotificationEvent(this));
-        lastAddedOrDeletedEntities.clear();
     }
 
-    protected void sendUnreadNotificationMessage(final EventContainer<? extends RemoteIdEvent> eventContainer,
-            final String message, final EventType type) {
+    protected void refreshContainerOrSendUnreadEvent(final EventContainer<? extends RemoteIdEvent> eventContainer,
+            final String messageKey, final EventType type) {
+        if (autoRefreshOn) {
+            refreshContainer();
+            return;
+        }
+        sendUnreadNotificationMessage(eventContainer, messageKey, type);
+    }
+
+    private void sendUnreadNotificationMessage(final EventContainer<? extends RemoteIdEvent> eventContainer,
+            final String messageKey, final EventType type) {
         final long size = eventContainer.getEvents().stream()
                 .filter(event -> !lastAddedOrDeletedEntities.contains(event.getEntityId())).count();
+        getContainerDataSource().getItemIds();
         if (size <= 0) {
             return;
         }
 
         eventBus.publish(this,
-                new NotificationEntityChangeEvent(this, type, message, eventContainer.getEvents().size()));
+                new NotificationEntityChangeEvent(this, type, i18n.get(messageKey), eventContainer.getEvents().size()));
 
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    protected void onAutoRefreshChangeEvent(final AutoRefreshChangeEvent autoRefreshChange) {
+        this.autoRefreshOn = autoRefreshChange.getAutoRefreshOn();
     }
 
     private void addEntity(final E entity) {

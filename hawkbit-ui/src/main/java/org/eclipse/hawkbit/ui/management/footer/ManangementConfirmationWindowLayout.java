@@ -484,6 +484,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         removeDeletedTargetsFromAssignmentTab();
 
         managementUIState.getDistributionTableFilters().getPinnedTargetId().ifPresent(this::unPinDeletedTarget);
+        eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
         managementUIState.getDeletedTargetList().clear();
 
     }

@@ -81,6 +81,8 @@ import com.vaadin.ui.UI;
 public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -1928335256399519494L;
+    private static final String UNREAD_MESSAGE_CREATED = "distribution.set.table.created";
+    private static final String UNREAD_MESSAGE_DELETED = "distribution.set.table.deleted";
 
     @Autowired
     private SpPermissionChecker permissionChecker;
@@ -117,12 +119,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution created", EventType.ENITY_ADDED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_CREATED, EventType.ENITY_ADDED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onDistributionDeleteEvents(final DistributionDeletedEventContainer eventContainer) {
-        sendUnreadNotificationMessage(eventContainer, "Distribution deleted", EventType.ENTITY_DELETED);
+        refreshContainerOrSendUnreadEvent(eventContainer, UNREAD_MESSAGE_DELETED, EventType.ENTITY_DELETED);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
