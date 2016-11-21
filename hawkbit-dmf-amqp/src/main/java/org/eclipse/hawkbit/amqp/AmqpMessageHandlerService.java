@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -312,12 +314,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Invalid message no action id");
         }
 
-        final Action action = controllerManagement.findActionWithDetails(actionId);
-
-        if (action == null) {
+        try {
+            final Action findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
+            if (findActionWithDetails == null) {
+                logAndThrowMessageError(message,
+                        "Got intermediate notification about action " + actionId + " but action does not exist");
+            }
+            return findActionWithDetails;
+        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException e) {
             logAndThrowMessageError(message,
                     "Got intermediate notification about action " + actionId + " but action does not exist");
         }
-        return action;
+        return null;
     }
 }
