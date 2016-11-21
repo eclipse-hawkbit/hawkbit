@@ -229,7 +229,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         return formLayout;
     }
 
-    private class WhiteSpaceValidator extends AbstractStringValidator {
+    private static class WhiteSpaceValidator extends AbstractStringValidator {
 
         private static final long serialVersionUID = 1L;
 
