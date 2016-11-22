@@ -14,6 +14,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -357,7 +358,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
 
         private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            final StatusFontIcon statusFontIcon = Optional.ofNullable(statusIconMap.get(value))
+                    .orElse(new StatusFontIcon(FontAwesome.QUESTION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE));
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);

@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -592,12 +593,8 @@ public class UploadLayout extends VerticalLayout {
      */
     void clearFileList() {
         // delete file system zombies
-        artifactUploadState.getFileSelected().forEach(customFile -> {
-            final File file = new File(customFile.getFilePath());
-            if (!file.delete()) {
-                LOG.warn("Failed to delete file {} in upload dialog", customFile.getFilePath());
-            }
-        });
+        artifactUploadState.getFileSelected()
+                .forEach(customFile -> FileUtils.deleteQuietly(new File(customFile.getFilePath())));
 
         artifactUploadState.getFileSelected().clear();
         artifactUploadState.getBaseSwModuleList().clear();

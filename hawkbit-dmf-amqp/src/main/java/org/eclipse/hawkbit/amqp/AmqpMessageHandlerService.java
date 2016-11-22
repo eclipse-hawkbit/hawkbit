@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -312,12 +313,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Invalid message no action id");
         }
 
-        final Action action = controllerManagement.findActionWithDetails(actionId);
-
-        if (action == null) {
+        try {
+            final Action findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
+            if (findActionWithDetails == null) {
+                logAndThrowMessageError(message,
+                        "Got intermediate notification about action " + actionId + " but action does not exist");
+            }
+            return findActionWithDetails;
+        } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException e) {
             logAndThrowMessageError(message,
                     "Got intermediate notification about action " + actionId + " but action does not exist");
         }
-        return action;
+        return null;
     }
 }
