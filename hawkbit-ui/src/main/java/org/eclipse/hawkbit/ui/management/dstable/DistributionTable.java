@@ -767,7 +767,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void showMetadataDetails(final Object itemId) {
         final DistributionSetIdName distIdName = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
                 .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distIdName.getId());
+        final DistributionSet ds = distributionSetManagement.findDistributionSetById(distIdName.getId());
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

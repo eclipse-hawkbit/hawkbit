@@ -77,8 +77,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private TextArea descTextArea;
 
-    private CommonDialogWindow window;
-
     private Boolean editSwModule = Boolean.FALSE;
 
     private Long baseSwModuleId;
@@ -133,9 +131,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     public CommonDialogWindow createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
         this.baseSwModuleId = baseSwModuleId;
         resetComponents();
+        populateTypeNameCombo();
         populateValuesOfSwModule();
-        createWindow();
-        return window;
+        return createWindow();
     }
 
     private void createRequiredComponents() {
@@ -157,7 +155,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
-        populateTypeNameCombo();
     }
 
     private TextField createTextField(final String in18Key, final String id) {
@@ -181,7 +178,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         editSwModule = Boolean.FALSE;
     }
 
-    private void createWindow() {
+    private CommonDialogWindow createWindow() {
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
@@ -198,7 +195,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         setCompositionRoot(formLayout);
 
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+        final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
@@ -206,6 +203,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setEnabled(!editSwModule);
 
         typeComboBox.focus();
+
+        return window;
     }
 
     private void addNewBaseSoftware() {
@@ -271,6 +270,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
         descTextArea.setValue(swModle.getDescription() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
+
         if (swModle.getType().isDeleted()) {
             typeComboBox.addItem(swModle.getType().getName());
         }

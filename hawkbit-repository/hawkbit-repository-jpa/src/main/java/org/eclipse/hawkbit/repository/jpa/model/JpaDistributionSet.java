@@ -209,7 +209,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return deleted;
     }
 
-    @Override
     public List<DistributionSetMetadata> getMetadata() {
         if (metadata == null) {
             return Collections.emptyList();
@@ -242,26 +241,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     @Override
-    public List<Target> getAssignedTargets() {
-        if (assignedToTargets == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(assignedToTargets);
-    }
-
-    @Override
     public List<TargetFilterQuery> getAutoAssignFilters() {
         return autoAssignFilters;
-    }
-
-    @Override
-    public List<TargetInfo> getInstalledTargets() {
-        if (installedAtTargets == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(installedAtTargets);
     }
 
     @Override

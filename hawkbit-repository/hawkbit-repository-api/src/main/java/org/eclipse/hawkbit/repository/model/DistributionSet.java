@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-
 /**
  * A {@link DistributionSet} defines a meta package that combines a set of
  * {@link SoftwareModule}s which have to be or are provisioned to a
@@ -37,12 +35,6 @@ public interface DistributionSet extends NamedVersionedEntity {
     boolean isDeleted();
 
     /**
-     * @return immutable {@link List} of {@link DistributionSetMetadata}
-     *         elements. See {@link DistributionSetManagement} to alter.
-     */
-    List<DistributionSetMetadata> getMetadata();
-
-    /**
      * @return <code>true</code> if {@link DistributionSet} contains a mandatory
      *         migration step, i.e. unfinished {@link Action}s will kept active
      *         and not automatically canceled if overridden by a newer update.
@@ -50,19 +42,9 @@ public interface DistributionSet extends NamedVersionedEntity {
     boolean isRequiredMigrationStep();
 
     /**
-     * @return the assignedTargets
-     */
-    List<Target> getAssignedTargets();
-
-    /**
      * @return the auto assign target filters
      */
     List<TargetFilterQuery> getAutoAssignFilters();
-
-    /**
-     * @return the installedTargets
-     */
-    List<TargetInfo> getInstalledTargets();
 
     /**
      *

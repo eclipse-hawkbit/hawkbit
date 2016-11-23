@@ -202,8 +202,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        final DistributionSet ds = distributionSetManagement
-                .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        final DistributionSet ds = distributionSetManagement.findDistributionSetById(getSelectedBaseEntityId());
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

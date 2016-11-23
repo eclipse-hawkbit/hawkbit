@@ -16,6 +16,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
@@ -80,6 +81,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private transient TargetManagement targetManagement;
 
     @Autowired
     private DsMetadataPopupLayout dsMetadataPopupLayout;
@@ -183,9 +187,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private Button assignSoftModuleButton(final String softwareModuleName) {
         if (getPermissionChecker().hasUpdateDistributionPermission()
                 && manageDistUIState.getLastSelectedDistribution().isPresent()
-                && distributionSetManagement
-                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
-                        .getAssignedTargets().isEmpty()) {
+                && targetManagement.countTargetByAssignedDistributionSet(
+                        manageDistUIState.getLastSelectedDistribution().get().getId()) <= 0) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
