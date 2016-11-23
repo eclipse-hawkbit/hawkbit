@@ -73,8 +73,8 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout, rsqlParam,
-                new PageRequest(0, 100));
+        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout.getId(),
+                rsqlParam, new PageRequest(0, 100));
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

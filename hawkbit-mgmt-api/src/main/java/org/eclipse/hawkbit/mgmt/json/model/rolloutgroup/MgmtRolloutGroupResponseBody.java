@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Model for the rollout group annotated with json-annotations for easier
@@ -32,34 +32,20 @@ public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
     private int totalTargets;
 
-    private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
+    private Map<String, Long> totalTargetsPerStatus;
 
-    /**
-     * @return the rolloutGroupId
-     */
     public Long getRolloutGroupId() {
         return rolloutGroupId;
     }
 
-    /**
-     * @param rolloutGroupId
-     *            the rolloutGroupId to set
-     */
     public void setRolloutGroupId(final Long rolloutGroupId) {
         this.rolloutGroupId = rolloutGroupId;
     }
 
-    /**
-     * @return the status
-     */
     public String getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final String status) {
         this.status = status;
     }
@@ -68,12 +54,20 @@ public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
         return totalTargets;
     }
 
-    public void setTotalTargets(int totalTargets) {
+    public void setTotalTargets(final int totalTargets) {
         this.totalTargets = totalTargets;
     }
 
     public Map<String, Long> getTotalTargetsPerStatus() {
         return totalTargetsPerStatus;
+    }
+
+    public void addTotalTargetsPerStatus(final String status, final Long totalTargetCountByStatus) {
+        if (totalTargetsPerStatus == null) {
+            totalTargetsPerStatus = new HashMap<>();
+        }
+
+        totalTargetsPerStatus.put(status, totalTargetCountByStatus);
     }
 
 }

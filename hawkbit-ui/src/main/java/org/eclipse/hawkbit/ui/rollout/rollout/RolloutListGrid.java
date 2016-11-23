@@ -397,7 +397,7 @@ public class RolloutListGrid extends AbstractGrid {
 
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
-        rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(rolloutId));
+        rolloutManagement.pauseRollout(rolloutId);
         uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
     }
 
@@ -408,13 +408,13 @@ public class RolloutListGrid extends AbstractGrid {
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
         if (RolloutStatus.READY.equals(rolloutStatus)) {
-            rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
+            rolloutManagement.startRollout(rolloutId);
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
             return;
         }
 
         if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
-            rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(rolloutId));
+            rolloutManagement.resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
             return;
         }

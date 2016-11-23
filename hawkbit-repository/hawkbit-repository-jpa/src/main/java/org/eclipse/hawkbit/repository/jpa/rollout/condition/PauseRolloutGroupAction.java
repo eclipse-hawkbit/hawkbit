@@ -46,7 +46,7 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
         systemSecurityContext.runAsSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
             rolloutGroupRepository.save(rolloutGroup);
-            rolloutManagement.pauseRollout(rollout);
+            rolloutManagement.pauseRollout(rollout.getId());
             return null;
         });
     }
