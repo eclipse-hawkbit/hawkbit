@@ -109,7 +109,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             rolloutBeans = getRolloutManagement().findAllRolloutsWithDetailedStatus(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            rolloutBeans = getRolloutManagement().findRolloutByFilters(
+            rolloutBeans = getRolloutManagement().findRolloutWithDetailedStatusByFilters(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     searchText);
         }

@@ -29,13 +29,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -94,7 +94,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findRolloutGroupsAll(final Rollout rollout, final String rsqlParam,
+    public Page<RolloutGroup> findRolloutGroupsAll(final Long rolloutId, final String rsqlParam,
             final Pageable pageable) {
 
         final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class,
@@ -103,9 +103,10 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         return convertPage(
                 rolloutGroupRepository
                         .findAll(
-                                (root, query, criteriaBuilder) -> criteriaBuilder.and(
-                                        criteriaBuilder.equal(root.get(JpaRolloutGroup_.rollout), rollout),
-                                        specification.toPredicate(root, query, criteriaBuilder)),
+                                (root, query,
+                                        criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(
+                                                root.get(JpaRolloutGroup_.rollout).get(JpaRollout_.id), rolloutId),
+                                                specification.toPredicate(root, query, criteriaBuilder)),
                                 pageable),
                 pageable);
     }

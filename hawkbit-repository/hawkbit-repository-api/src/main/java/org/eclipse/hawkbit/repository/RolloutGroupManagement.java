@@ -90,7 +90,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Rollout rollout, @NotNull String rsqlParam,
+    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Long rollout, @NotNull String rsqlParam,
             @NotNull Pageable pageable);
 
     /**

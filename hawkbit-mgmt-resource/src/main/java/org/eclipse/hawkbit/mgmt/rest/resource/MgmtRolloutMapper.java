@@ -61,10 +61,10 @@ final class MgmtRolloutMapper {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(MgmtRolloutMapper::toResponseRollout).collect(Collectors.toList());
+        return rollouts.stream().map(rollout -> toResponseRollout(rollout, false)).collect(Collectors.toList());
     }
 
-    static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout) {
+    static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
         final MgmtRolloutResponseBody body = new MgmtRolloutResponseBody();
         body.setCreatedAt(rollout.getCreatedAt());
         body.setCreatedBy(rollout.getCreatedBy());
@@ -78,9 +78,11 @@ final class MgmtRolloutMapper {
         body.setStatus(rollout.getStatus().toString().toLowerCase());
         body.setTotalTargets(rollout.getTotalTargets());
 
-        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
-            body.getTotalTargetsPerStatus().put(status.name().toLowerCase(),
-                    rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+        if (withDetails) {
+            for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
+                body.addTotalTargetsPerStatus(status.name().toLowerCase(),
+                        rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+            }
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withRel("self"));
@@ -144,10 +146,11 @@ final class MgmtRolloutMapper {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(MgmtRolloutMapper::toResponseRolloutGroup).collect(Collectors.toList());
+        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false)).collect(Collectors.toList());
     }
 
-    static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup) {
+    static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup,
+            final boolean withDetailedStatus) {
         final MgmtRolloutGroupResponseBody body = new MgmtRolloutGroupResponseBody();
         body.setCreatedAt(rolloutGroup.getCreatedAt());
         body.setCreatedBy(rolloutGroup.getCreatedBy());
@@ -171,9 +174,11 @@ final class MgmtRolloutMapper {
         body.setErrorAction(
                 new MgmtRolloutErrorAction(map(rolloutGroup.getErrorAction()), rolloutGroup.getErrorActionExp()));
 
-        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
-            body.getTotalTargetsPerStatus().put(status.name().toLowerCase(),
-                    rolloutGroup.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+        if (withDetailedStatus) {
+            for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
+                body.addTotalTargetsPerStatus(status.name().toLowerCase(),
+                        rolloutGroup.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+            }
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroup(rolloutGroup.getRollout().getId(),
