@@ -17,13 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Target table layout.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 2248703121998709112L;

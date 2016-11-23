@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -34,7 +34,7 @@ import com.vaadin.ui.Window;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class RolloutListHeader extends AbstractGridHeader {
     private static final long serialVersionUID = 2365400733081333174L;
 

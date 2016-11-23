@@ -29,14 +29,14 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Software module type filter buttons.
  * 
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 169198312654380358L;

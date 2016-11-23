@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
@@ -27,7 +27,7 @@ import com.vaadin.ui.UI;
  * Distribution Set Type filter buttons header.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 3433417459392880222L;

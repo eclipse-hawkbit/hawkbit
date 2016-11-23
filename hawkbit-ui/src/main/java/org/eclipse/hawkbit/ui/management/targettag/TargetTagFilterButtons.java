@@ -47,7 +47,7 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.Page;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -57,7 +57,7 @@ import com.vaadin.ui.UI;
  * Target Tag filter buttons table.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetTagFilterButtons extends AbstractFilterButtons {
     private static final String NO_TAG = "NO TAG";
 

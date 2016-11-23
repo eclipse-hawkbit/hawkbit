@@ -42,7 +42,7 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -58,7 +58,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Window for create update Distribution Set Type.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<DistributionSetType> {
 
     private static final long serialVersionUID = 1L;

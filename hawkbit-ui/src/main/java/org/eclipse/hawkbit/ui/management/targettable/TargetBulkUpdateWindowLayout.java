@@ -42,7 +42,7 @@ import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -64,7 +64,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     @Autowired

@@ -29,7 +29,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -45,7 +45,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Target details layout.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private static final long serialVersionUID = 4571732743399605843L;

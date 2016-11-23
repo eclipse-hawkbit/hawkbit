@@ -23,7 +23,7 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -41,7 +41,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class MultipleTargetFilter extends Accordion implements SelectedTabChangeListener {
 
     private static final long serialVersionUID = -2887693289126893943L;

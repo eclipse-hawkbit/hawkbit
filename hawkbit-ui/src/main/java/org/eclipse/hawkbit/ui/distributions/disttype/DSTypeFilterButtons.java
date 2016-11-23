@@ -27,13 +27,13 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Distribution Set Type filter buttons.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 771251569981876005L;

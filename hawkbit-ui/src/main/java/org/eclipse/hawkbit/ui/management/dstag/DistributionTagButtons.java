@@ -35,7 +35,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.UI;
 
 /**
@@ -43,7 +43,7 @@ import com.vaadin.ui.UI;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionTagButtons extends AbstractFilterButtons {
 
     private static final String NO_TAG = "NO TAG";

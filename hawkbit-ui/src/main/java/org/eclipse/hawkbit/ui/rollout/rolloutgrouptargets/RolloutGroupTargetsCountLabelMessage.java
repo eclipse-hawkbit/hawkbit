@@ -26,14 +26,14 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Label;
 
 /**
  * Count message label for the targets of the rollout group.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class RolloutGroupTargetsCountLabelMessage extends Label {
 
     private static final long serialVersionUID = -3876685878918411453L;

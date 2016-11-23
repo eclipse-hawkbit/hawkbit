@@ -59,7 +59,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -74,7 +74,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Upload files layout.
  */
-@ViewScope
+@UIScope
 @SpringComponent
 public class UploadLayout extends VerticalLayout {
 

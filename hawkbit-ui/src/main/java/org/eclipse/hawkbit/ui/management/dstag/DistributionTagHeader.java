@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -28,7 +28,7 @@ import com.vaadin.ui.Window;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionTagHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = -1439667766337270066L;

@@ -34,12 +34,12 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Software Module Type filter buttons.
  */
-@ViewScope
+@UIScope
 @SpringComponent
 public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 

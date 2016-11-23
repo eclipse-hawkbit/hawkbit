@@ -31,7 +31,7 @@ import com.vaadin.data.Property;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Sizeable;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -46,7 +46,7 @@ import com.vaadin.ui.Window;
  * query.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionSetSelectWindow
         implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
 

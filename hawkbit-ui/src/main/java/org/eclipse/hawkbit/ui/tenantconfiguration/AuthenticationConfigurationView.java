@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -34,7 +34,7 @@ import com.vaadin.ui.VerticalLayout;
  * View to configure the authentication mode.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class AuthenticationConfigurationView extends BaseConfigurationView
         implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener, ValueChangeListener {
 

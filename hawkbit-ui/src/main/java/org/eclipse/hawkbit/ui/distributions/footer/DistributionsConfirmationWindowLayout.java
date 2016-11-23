@@ -39,7 +39,7 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
@@ -52,7 +52,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 @org.springframework.stereotype.Component
-@ViewScope
+@UIScope
 public class DistributionsConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
     private static final long serialVersionUID = 3641621131320823058L;

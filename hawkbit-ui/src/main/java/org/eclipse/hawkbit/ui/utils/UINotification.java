@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Show success and error messages.
  */
-@ViewScope
+@UIScope
 @SpringComponent
 public class UINotification implements Serializable {
 

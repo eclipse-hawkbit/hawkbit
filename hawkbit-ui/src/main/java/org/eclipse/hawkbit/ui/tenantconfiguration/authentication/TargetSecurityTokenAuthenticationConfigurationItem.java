@@ -15,14 +15,14 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * This class represents the UI item for the target security token section in
  * the authentication configuration view.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;

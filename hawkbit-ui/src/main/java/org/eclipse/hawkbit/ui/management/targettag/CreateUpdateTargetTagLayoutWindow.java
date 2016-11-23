@@ -23,14 +23,14 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  *
  * Class for Create / Update Tag Layout of target
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 2446682350481560235L;

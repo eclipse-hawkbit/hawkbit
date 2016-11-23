@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Pop up layout to display distribution metadata.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<DistributionSet, MetaData> {
 
     private static final long serialVersionUID = -7778944849012048106L;

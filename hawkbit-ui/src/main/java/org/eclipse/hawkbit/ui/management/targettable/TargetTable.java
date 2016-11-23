@@ -84,7 +84,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -97,7 +97,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Concrete implementation of Target table.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);

@@ -25,14 +25,14 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.UI;
 
 /**
  * Class for Create/Update Tag Layout of distribution set
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag> {
 
     private static final long serialVersionUID = 444276149954167545L;

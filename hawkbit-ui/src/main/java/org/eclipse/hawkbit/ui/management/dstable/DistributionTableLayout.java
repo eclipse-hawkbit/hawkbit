@@ -14,13 +14,13 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Software module table layout.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 6464291374980641235L;

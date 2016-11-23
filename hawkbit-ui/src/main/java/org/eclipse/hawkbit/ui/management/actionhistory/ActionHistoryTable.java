@@ -56,7 +56,7 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -72,7 +72,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class ActionHistoryTable extends TreeTable {
 
     private static final long serialVersionUID = -1631514704696786653L;

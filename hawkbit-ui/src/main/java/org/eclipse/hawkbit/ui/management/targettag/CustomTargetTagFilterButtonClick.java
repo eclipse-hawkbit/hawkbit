@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -31,7 +31,7 @@ import com.vaadin.ui.Button.ClickEvent;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
     private static final long serialVersionUID = -6173433602055291533L;

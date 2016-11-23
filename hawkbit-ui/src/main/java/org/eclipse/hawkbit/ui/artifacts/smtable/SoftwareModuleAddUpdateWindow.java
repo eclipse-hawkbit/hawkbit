@@ -34,7 +34,7 @@ import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -47,7 +47,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Generates window for Software module add or update.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;

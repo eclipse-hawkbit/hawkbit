@@ -29,14 +29,14 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Implementation of target/ds tag token layout.
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private static final long serialVersionUID = -8022738301736043396L;

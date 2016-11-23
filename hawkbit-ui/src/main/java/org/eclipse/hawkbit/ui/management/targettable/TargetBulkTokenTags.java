@@ -14,14 +14,14 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Target tag layout in bulk upload popup.
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final long serialVersionUID = 4159616629565523717L;
 

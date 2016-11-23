@@ -43,7 +43,7 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -51,7 +51,7 @@ import com.vaadin.ui.UI;
 /**
  * Header of Software module table.
  */
-@ViewScope
+@UIScope
 @SpringComponent
 public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 

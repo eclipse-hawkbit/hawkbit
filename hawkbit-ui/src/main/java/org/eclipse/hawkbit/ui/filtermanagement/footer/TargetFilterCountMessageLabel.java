@@ -26,7 +26,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 
@@ -37,7 +37,7 @@ import com.vaadin.ui.UI;
  *         on pinning.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetFilterCountMessageLabel extends Label {
 
     private static final long serialVersionUID = -7188528790042766877L;

@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
@@ -28,7 +28,7 @@ import com.vaadin.ui.VerticalLayout;
  * reverse proxy in the authentication configuration view.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class CertificateAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;

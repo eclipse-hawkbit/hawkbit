@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Label;
 
 /**
@@ -22,7 +22,7 @@ import com.vaadin.ui.Label;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class RolloutGroupsListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = 7252345838154270259L;

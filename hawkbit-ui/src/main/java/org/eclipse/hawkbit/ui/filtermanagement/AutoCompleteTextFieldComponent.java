@@ -31,7 +31,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
@@ -44,7 +44,7 @@ import com.vaadin.ui.UI;
  * suggestions in a suggestion-pop-up window while typing.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class AutoCompleteTextFieldComponent extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;

@@ -23,13 +23,13 @@ import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Pop up layout to display software module metadata.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, MetaData> {
 
     private static final long serialVersionUID = -1252090014161012563L;

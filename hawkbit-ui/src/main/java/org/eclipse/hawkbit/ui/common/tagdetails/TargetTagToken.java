@@ -23,7 +23,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Implementation of Target tag token.
@@ -31,7 +31,7 @@ import com.vaadin.spring.annotation.ViewScope;
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;

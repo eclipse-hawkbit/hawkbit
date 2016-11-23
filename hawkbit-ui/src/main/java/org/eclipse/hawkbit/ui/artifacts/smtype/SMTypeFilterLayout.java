@@ -20,7 +20,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Software module type filter buttons layout.
@@ -29,7 +29,7 @@ import com.vaadin.spring.annotation.ViewScope;
  * 
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class SMTypeFilterLayout extends AbstractFilterLayout {
 
     private static final long serialVersionUID = 1581066345157393665L;
