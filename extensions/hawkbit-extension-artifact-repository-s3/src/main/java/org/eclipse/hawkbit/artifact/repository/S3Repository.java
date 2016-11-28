@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.RequestClientOptions;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -132,6 +133,10 @@ public class S3Repository implements ArtifactRepository {
             objectMetadata.setContentType(contentType);
             objectMetadata.setContentLength(file.length());
             objectMetadata.setHeader("x-amz-meta-md5chksum", mdMD5Hash64);
+            if (s3Properties.isServerSideEncrpytion()) {
+                objectMetadata.setHeader(Headers.SERVER_SIDE_ENCRYPTION,
+                        s3Properties.getServerSideEncrpytionAlgorithm());
+            }
 
             if (exists(sha1Hash16)) {
                 return s3Artifact;
