@@ -50,9 +50,9 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
     private final EntityFactory entityFactory;
 
-    private SoftwareModuleDetailsTable softwareModuleTable;
+    private final SoftwareModuleDetailsTable softwareModuleTable;
 
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
+    private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
     public DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
@@ -69,22 +69,17 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
                 distributionSetManagement, entityFactory, permissionChecker);
         this.entityFactory = entityFactory;
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
-        buildComponents();
-    }
 
-    private void buildComponents() {
-        softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null);
 
-        dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker(), distributionSetManagement, dsMetadataPopupLayout,
-                entityFactory);
+        dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
+                dsMetadataPopupLayout, entityFactory);
         addTabs(detailsTab);
         restoreState();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DistributionTableEvent distributionTableEvent) {
+    private void onEvent(final DistributionTableEvent distributionTableEvent) {
         onBaseEntityEvent(distributionTableEvent);
     }
 

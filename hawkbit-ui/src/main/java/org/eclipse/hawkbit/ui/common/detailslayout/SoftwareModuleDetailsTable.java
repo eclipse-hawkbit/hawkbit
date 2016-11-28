@@ -61,18 +61,18 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private boolean isTargetAssigned;
 
-    private boolean isUnassignSoftModAllowed;
-    private SpPermissionChecker permissionChecker;
+    private final boolean isUnassignSoftModAllowed;
+    private final SpPermissionChecker permissionChecker;
 
-    private DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    private I18N i18n;
+    private final I18N i18n;
 
-    private EventBus.UIEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    private UINotification uiNotification;
+    private final UINotification uiNotification;
 
     /**
      * Initialize software module table- to be displayed in details layout.
@@ -91,7 +91,7 @@ public class SoftwareModuleDetailsTable extends Table {
      * @param manageDistUIState
      *            ManageDistUIState
      */
-    public void init(final I18N i18n, final boolean isUnassignSoftModAllowed,
+    public SoftwareModuleDetailsTable(final I18N i18n, final boolean isUnassignSoftModAllowed,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
             final EventBus.UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;

@@ -53,7 +53,6 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
@@ -64,7 +63,6 @@ import com.vaadin.ui.VerticalLayout;
  *
  */
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
-@UIScope
 public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";

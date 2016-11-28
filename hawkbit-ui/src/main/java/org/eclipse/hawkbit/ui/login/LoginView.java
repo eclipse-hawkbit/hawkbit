@@ -39,7 +39,6 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -56,7 +55,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Login view for login credentials.
  */
 @SpringView(name = "")
-@UIScope
 public class LoginView extends VerticalLayout implements View {
     private static final String TENANT_PATTERN_PLACEHOLDER = "tenant";
     private static final String USER_PATTERN_PLACEHOLDER = "user";

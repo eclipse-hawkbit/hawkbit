@@ -24,8 +24,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
@@ -33,13 +31,9 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
  * DistributionSet Metadata details layout.
  *
  */
-
-@SpringComponent
-@UIScope
 public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final long serialVersionUID = 2913758299611837718L;
@@ -48,27 +42,19 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final String VIEW = "view";
 
-    private transient DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
+    private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    private SpPermissionChecker permissionChecker;
+    private final SpPermissionChecker permissionChecker;
 
     private transient EntityFactory entityFactory;
 
-    private I18N i18n;
+    private final I18N i18n;
 
     private Long selectedDistSetId;
 
-    /**
-     * 
-     * @param i18n
-     * @param permissionChecker
-     * @param distributionSetManagement
-     * @param dsMetadataPopupLayout
-     * @param entityFactory
-     */
-    public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
+    public DistributionSetMetadatadetailslayout(final I18N i18n, final SpPermissionChecker permissionChecker,
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory) {
         this.i18n = i18n;

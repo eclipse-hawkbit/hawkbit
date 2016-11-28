@@ -14,13 +14,13 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * Stores user actions in rollout management view.
  *
  */
-@UIScope
+@VaadinSessionScope
 @SpringComponent
 public class RolloutUIState implements Serializable {
 

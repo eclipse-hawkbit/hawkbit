@@ -44,7 +44,6 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
@@ -54,11 +53,8 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Display artifacts upload view.
- *
- *
  */
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
-@UIScope
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "spUpload";

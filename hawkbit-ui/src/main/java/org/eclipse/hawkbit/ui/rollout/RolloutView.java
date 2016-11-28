@@ -34,14 +34,12 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.VerticalLayout;
 
 /**
  * Rollout management view.
  */
 @SpringView(name = RolloutView.VIEW_NAME, ui = HawkbitUI.class)
-@UIScope
 public class RolloutView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = -6199789714170913988L;

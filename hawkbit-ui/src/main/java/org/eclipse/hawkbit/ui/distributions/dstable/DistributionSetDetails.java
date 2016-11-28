@@ -81,11 +81,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private final EntityFactory entityFactory;
 
-    private SoftwareModuleDetailsTable softwareModuleTable;
+    private final SoftwareModuleDetailsTable softwareModuleTable;
 
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
+    private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
-    private TargetFilterQueryDetailsTable tfqDetailsTable;
+    private final TargetFilterQueryDetailsTable tfqDetailsTable;
 
     private VerticalLayout tagsLayout;
 
@@ -110,20 +110,13 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         this.dsMetadataPopupLayout = popupLayout;
         this.entityFactory = entityFactory;
 
-        init();
-    }
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
+                eventBus, manageDistUIState);
 
-    private void init() {
-        softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
-                manageDistUIState);
+        dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
+                dsMetadataPopupLayout, entityFactory);
 
-        dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker(), distributionSetManagement, dsMetadataPopupLayout,
-                entityFactory);
-
-        tfqDetailsTable = new TargetFilterQueryDetailsTable();
-        tfqDetailsTable.init(getI18n());
+        tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
         addTabs(detailsTab);
         restoreState();
     }
