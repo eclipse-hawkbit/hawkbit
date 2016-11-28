@@ -133,9 +133,9 @@ public class S3Repository implements ArtifactRepository {
             objectMetadata.setContentType(contentType);
             objectMetadata.setContentLength(file.length());
             objectMetadata.setHeader("x-amz-meta-md5chksum", mdMD5Hash64);
-            if (s3Properties.isServerSideEncrpytion()) {
+            if (s3Properties.isServerSideEncryption()) {
                 objectMetadata.setHeader(Headers.SERVER_SIDE_ENCRYPTION,
-                        s3Properties.getServerSideEncrpytionAlgorithm());
+                        s3Properties.getServerSideEncryptionAlgorithm());
             }
 
             if (exists(sha1Hash16)) {

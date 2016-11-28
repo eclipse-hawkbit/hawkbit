@@ -18,8 +18,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class S3RepositoryProperties {
 
     private String bucketName = "artifactrepository";
-    private boolean serverSideEncrpytion = false;
-    private String serverSideEncrpytionAlgorithm = "AES256";
+    private boolean serverSideEncryption = false;
+    private String serverSideEncryptionAlgorithm = "AES256";
 
     public String getBucketName() {
         return bucketName;
@@ -29,19 +29,19 @@ public class S3RepositoryProperties {
         this.bucketName = bucketName;
     }
 
-    public boolean isServerSideEncrpytion() {
-        return serverSideEncrpytion;
+    public boolean isServerSideEncryption() {
+        return serverSideEncryption;
     }
 
-    public void setServerSideEncrpytion(final boolean serverSideEncrpytion) {
-        this.serverSideEncrpytion = serverSideEncrpytion;
+    public void setServerSideEncryption(final boolean serverSideEncryption) {
+        this.serverSideEncryption = serverSideEncryption;
     }
 
-    public String getServerSideEncrpytionAlgorithm() {
-        return serverSideEncrpytionAlgorithm;
+    public String getServerSideEncryptionAlgorithm() {
+        return serverSideEncryptionAlgorithm;
     }
 
-    public void setServerSideEncrpytionAlgorithm(final String serverSideEncrpytionAlgorithm) {
-        this.serverSideEncrpytionAlgorithm = serverSideEncrpytionAlgorithm;
+    public void setServerSideEncryptionAlgorithm(final String serverSideEncryptionAlgorithm) {
+        this.serverSideEncryptionAlgorithm = serverSideEncryptionAlgorithm;
     }
 }
