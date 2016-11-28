@@ -121,18 +121,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
     }
 
-    /**
-     * Initialize the artifact details layout in readonly mode (will not show
-     * the delete icon) .
-     * 
-     * @param readOnly
-     *            value true for read only.
-     */
-    // TODO kaizimmerm: fix this
-    public void init(final boolean readOnly) {
-        this.readOnly = readOnly;
-    }
-
     private void createComponents() {
         final String labelStr = artifactUploadState.getSelectedBaseSoftwareModule()
                 .map(softwareModule -> HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),

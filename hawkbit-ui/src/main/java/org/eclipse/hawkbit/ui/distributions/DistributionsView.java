@@ -47,6 +47,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
@@ -55,6 +56,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Manage distributions and distributions type view.
  */
+@UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
 public class DistributionsView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
