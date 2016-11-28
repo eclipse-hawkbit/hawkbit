@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
+import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CustomComponent;
@@ -104,6 +105,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private void createRequiredComponents() {
         controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        controllerIDTextField.addValidator(new RegexpValidator("[.\\S]*", i18n.get("message.target.whitespace.check")));
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
