@@ -23,40 +23,61 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 
 /**
- * 
  * Grid component with targets of rollout group.
- *
  */
-@SpringComponent
-@UIScope
 public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     private static final long serialVersionUID = -2244756637458984597L;
 
-    @Autowired
-    private transient RolloutUIState rolloutUIState;
+    private final RolloutUIState rolloutUIState;
 
-    private transient Map<Status, StatusFontIcon> statusIconMap = new EnumMap<>(Status.class);
+    private static final Map<Status, StatusFontIcon> statusIconMap = new EnumMap<>(Status.class);
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    static {
+        statusIconMap.put(Status.FINISHED,
+                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(Status.SCHEDULED,
+                new StatusFontIcon(FontAwesome.HOURGLASS_1, SPUIStyleDefinitions.STATUS_ICON_PENDING));
+        statusIconMap.put(Status.RUNNING,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.RETRIEVED,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.WARNING,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.DOWNLOAD,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.CANCELING,
+                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_PENDING));
+        statusIconMap.put(Status.CANCELED,
+                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(Status.ERROR,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+    }
+
+    public RolloutGroupTargetsListGrid(final I18N i18n, final UIEventBus eventBus,
+            final RolloutUIState rolloutUIState) {
+        super(i18n, eventBus, null);
+        this.rolloutUIState = rolloutUIState;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
         if (RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS != event) {
             return;
@@ -149,7 +170,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @Override
     protected void addColumnRenderes() {
-        createRolloutStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new StatusConverter());
     }
 
@@ -220,8 +240,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         }
 
         private String getStatus() {
-            final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
-                    ? rolloutUIState.getRolloutGroup().get() : null;
+            final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().orElse(null);
             if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
                 return HawkbitCommonUtil.getStatusLabelDetailsInString(
                         Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue", null);
@@ -236,27 +255,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     }
 
-    private void createRolloutStatusToFontMap() {
-        statusIconMap.put(Status.FINISHED,
-                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
-        statusIconMap.put(Status.SCHEDULED,
-                new StatusFontIcon(FontAwesome.HOURGLASS_1, SPUIStyleDefinitions.STATUS_ICON_PENDING));
-        statusIconMap.put(Status.RUNNING,
-                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
-        statusIconMap.put(Status.RETRIEVED,
-                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
-        statusIconMap.put(Status.WARNING,
-                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
-        statusIconMap.put(Status.DOWNLOAD,
-                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
-        statusIconMap.put(Status.CANCELING,
-                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_PENDING));
-        statusIconMap.put(Status.CANCELED,
-                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
-        statusIconMap.put(Status.ERROR,
-                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
-    }
-
     private String getDescription(final CellReference cell) {
         if (!SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             return null;
@@ -269,13 +267,11 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     private String getDescriptionWhenNoAction() {
-        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
-                ? rolloutUIState.getRolloutGroup().get() : null;
+        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().orElse(null);
         if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
             return RolloutGroupStatus.READY.toString().toLowerCase();
         } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
-            final String ds = rolloutUIState.getRolloutDistributionSet().isPresent()
-                    ? rolloutUIState.getRolloutDistributionSet().get() : "";
+            final String ds = rolloutUIState.getRolloutDistributionSet().orElse("");
             return i18n.get("message.dist.already.assigned", new Object[] { ds });
         }
         return "unknown";

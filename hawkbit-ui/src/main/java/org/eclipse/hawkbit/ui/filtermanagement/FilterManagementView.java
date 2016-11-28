@@ -8,15 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.footer.TargetFilterCountMessageLabel;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -30,11 +40,8 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * 
- *
- *
+ * View for custom target filter management.
  */
-
 @SpringView(name = FilterManagementView.VIEW_NAME, ui = HawkbitUI.class)
 @UIScope
 public class FilterManagementView extends VerticalLayout implements View {
@@ -43,29 +50,41 @@ public class FilterManagementView extends VerticalLayout implements View {
 
     public static final String VIEW_NAME = "targetFilters";
 
-    @Autowired
-    private TargetFilterHeader targetFilterHeader;
+    private final TargetFilterHeader targetFilterHeader;
+
+    private final TargetFilterTable targetFilterTable;
+
+    private final CreateOrUpdateFilterHeader createNewFilterHeader;
+
+    private final CreateOrUpdateFilterTable createNewFilterTable;
+
+    private final FilterManagementUIState filterManagementUIState;
+
+    private final TargetFilterCountMessageLabel targetFilterCountMessageLabel;
+
+    private final EventBus.UIEventBus eventBus;
 
     @Autowired
-    private TargetFilterTable targetFilterTable;
+    FilterManagementView(final I18N i18n, final UIEventBus eventBus,
+            final FilterManagementUIState filterManagementUIState,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
+            final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final AutoCompleteTextFieldComponent queryTextField, final ManageDistUIState manageDistUIState,
+            final TargetManagement targetManagement) {
+        this.targetFilterHeader = new TargetFilterHeader(eventBus, filterManagementUIState, permissionChecker);
+        this.targetFilterTable = new TargetFilterTable(i18n, notification, eventBus, filterManagementUIState,
+                targetFilterQueryManagement, manageDistUIState, targetManagement);
+        this.createNewFilterHeader = new CreateOrUpdateFilterHeader(i18n, eventBus, filterManagementUIState,
+                targetFilterQueryManagement, permissionChecker, notification, uiProperties, entityFactory,
+                queryTextField);
+        this.createNewFilterTable = new CreateOrUpdateFilterTable(i18n, eventBus, filterManagementUIState);
+        this.filterManagementUIState = filterManagementUIState;
+        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(filterManagementUIState, i18n, eventBus);
+        this.eventBus = eventBus;
+    }
 
-    @Autowired
-    private CreateOrUpdateFilterHeader createNewFilterHeader;
-
-    @Autowired
-    private CreateOrUpdateFilterTable createNewFilterTable;
-
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
-
-    @Autowired
-    private TargetFilterCountMessageLabel targetFilterCountMessageLabel;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    @PostConstruct
+    void init() {
         setSizeFull();
         setImmediate(true);
         buildLayout();
@@ -90,7 +109,7 @@ public class FilterManagementView extends VerticalLayout implements View {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final CustomFilterUIEvent custFilterUIEvent) {
         if (custFilterUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
             viewTargetFilterDetailLayout();
@@ -154,6 +173,11 @@ public class FilterManagementView extends VerticalLayout implements View {
         messageLabelLayout.addComponent(targetFilterCountMessageLabel);
         messageLabelLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         return messageLabelLayout;
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // This view is constructed in the init() method()
     }
 
 }

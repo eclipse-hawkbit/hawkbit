@@ -15,41 +15,31 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 
 /**
  * Single button click behaviour of filter buttons layout.
- * 
- *
- * 
  */
-
-@SpringComponent
-@UIScope
 public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
     private static final long serialVersionUID = -584783755917528648L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterUnClicked (com.vaadin.ui.Button)
-     */
+    public DSTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+            final DistributionSetManagement distributionSetManagement) {
+        this.eventBus = eventBus;
+        this.manageDistUIState = manageDistUIState;
+        this.distributionSetManagement = distributionSetManagement;
+    }
+
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         manageDistUIState.getManageDistFilters().setClickedDistSetType(null);
@@ -57,12 +47,6 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterClicked (com.vaadin.ui.Button)
-     */
     @Override
     protected void filterClicked(final Button clickedButton) {
         final DistributionSetType distSetType = distributionSetManagement

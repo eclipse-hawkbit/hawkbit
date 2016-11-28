@@ -30,11 +30,9 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
@@ -44,26 +42,19 @@ import com.vaadin.ui.Window;
 /**
  * Add and Update Target.
  */
-@SpringComponent
-@UIScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -6659290471705262389L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient UINotification uINotification;
+    private final UINotification uINotification;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -72,6 +63,18 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private String controllerId;
     private FormLayout formLayout;
     private CommonDialogWindow window;
+
+    public TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement,
+            final UIEventBus eventBus, final UINotification uINotification, final EntityFactory entityFactory) {
+        this.i18n = i18n;
+        this.targetManagement = targetManagement;
+        this.eventBus = eventBus;
+        this.uINotification = uINotification;
+        this.entityFactory = entityFactory;
+        createRequiredComponents();
+        buildLayout();
+        setCompositionRoot(formLayout);
+    }
 
     /**
      * Save or update the target.
@@ -91,15 +94,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             return editTarget || !isDuplicate();
         }
 
-    }
-
-    /**
-     * Initialize the Add Update Window Component for Target.
-     */
-    public void init() {
-        createRequiredComponents();
-        buildLayout();
-        setCompositionRoot(formLayout);
     }
 
     private void createRequiredComponents() {

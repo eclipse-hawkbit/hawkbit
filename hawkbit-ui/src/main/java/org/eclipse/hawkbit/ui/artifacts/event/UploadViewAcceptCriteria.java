@@ -14,6 +14,9 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -33,6 +36,11 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     private static final Map<String, List<String>> DROP_CONFIGS = createDropConfigurations();
 
     private static final Map<String, Object> DROP_HINTS_CONFIGS = createDropHintConfigurations();
+
+    @Autowired
+    UploadViewAcceptCriteria(final UINotification uiNotification, final UIEventBus eventBus) {
+        super(uiNotification, eventBus);
+    }
 
     @Override
     protected String getComponentId(final Component component) {

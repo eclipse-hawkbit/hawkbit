@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
@@ -15,14 +16,13 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -31,19 +31,20 @@ import com.vaadin.ui.Window;
  * Implementation of software module Header block using generic abstract details
  * style .
  */
-@SpringComponent
-@UIScope
 public class SwModuleTableHeader extends AbstractTableHeader {
 
     private static final long serialVersionUID = 242961845006626297L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    @Autowired
-    private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
+    public SwModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+            final ManageDistUIState manageDistUIstate,
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
+        super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
+        this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
+    }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionsUIEvent event) {
         if (event == DistributionsUIEvent.HIDE_SM_FILTER_BY_TYPE) {
             setFilterButtonsIconVisible(true);
@@ -72,10 +73,7 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String onLoadSearchBoxValue() {
-        if (manageDistUIState.getSoftwareModuleFilters().getSearchText().isPresent()) {
-            return manageDistUIState.getSoftwareModuleFilters().getSearchText().get();
-        }
-        return null;
+        return manageDistUIstate.getSoftwareModuleFilters().getSearchText().orElse(null);
     }
 
     @Override
@@ -102,14 +100,14 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected void showFilterButtonsLayout() {
-        manageDistUIState.setSwTypeFilterClosed(false);
+        manageDistUIstate.setSwTypeFilterClosed(false);
         eventbus.publish(this, DistributionsUIEvent.SHOW_SM_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
-        if (manageDistUIState.getSoftwareModuleFilters().getSearchText().isPresent()) {
-            manageDistUIState.getSoftwareModuleFilters().setSearchText(null);
+        if (manageDistUIstate.getSoftwareModuleFilters().getSearchText().isPresent()) {
+            manageDistUIstate.getSoftwareModuleFilters().setSearchText(null);
             eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
         }
     }
@@ -121,30 +119,30 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     @Override
     public void maximizeTable() {
-        manageDistUIState.setSwModuleTableMaximized(Boolean.TRUE);
+        manageDistUIstate.setSwModuleTableMaximized(Boolean.TRUE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED, null));
 
     }
 
     @Override
     public void minimizeTable() {
-        manageDistUIState.setSwModuleTableMaximized(Boolean.FALSE);
+        manageDistUIstate.setSwModuleTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override
     public Boolean onLoadIsTableMaximized() {
-        return manageDistUIState.isSwModuleTableMaximized();
+        return manageDistUIstate.isSwModuleTableMaximized();
     }
 
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
-        return manageDistUIState.isSwTypeFilterClosed();
+        return manageDistUIstate.isSwTypeFilterClosed();
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        manageDistUIState.getSoftwareModuleFilters().setSearchText(newSearchText);
+        manageDistUIstate.getSoftwareModuleFilters().setSearchText(newSearchText);
         eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT);
     }
 

@@ -10,7 +10,11 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
@@ -23,17 +27,18 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
@@ -44,35 +49,46 @@ import com.vaadin.ui.UI;
  *
  *
  */
-@SpringComponent
-@UIScope
 public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = -8112907467821886253L;
 
-    @Autowired
-    private transient TagManagement tagManagementService;
+    private final TagManagement tagManagementService;
 
-    @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ManangementConfirmationWindowLayout manangementConfirmationWindowLayout;
+    private final ManangementConfirmationWindowLayout manangementConfirmationWindowLayout;
 
-    @Autowired
-    private CountMessageLabel countMessageLabel;
+    private final CountMessageLabel countMessageLabel;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public DeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final UINotification notification, final TagManagement tagManagementService,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final ManagementUIState managementUIState,
+            final TargetManagement targetManagement, final TargetTable targetTable,
+            final DeploymentManagement deploymentManagement,
+            final DistributionSetManagement distributionSetManagement) {
+        super(i18n, permChecker, eventBus, notification);
+        this.tagManagementService = tagManagementService;
+        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementUIState = managementUIState;
+        this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
+                managementUIState, targetManagement, deploymentManagement, distributionSetManagement);
+        this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
+                targetTable);
+
+        init();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.UPDATE_COUNT) {
-            UI.getCurrent().access(() -> updateActionCount());
+            UI.getCurrent().access(this::updateActionCount);
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent event) {
         if (event == DragEvent.HIDE_DROP_HINT) {
             hideDropHints();
@@ -94,7 +110,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event != null) {
             UI.getCurrent().access(() -> {
@@ -110,7 +126,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final BulkUploadPopupEvent event) {
         if (BulkUploadPopupEvent.MINIMIZED == event) {
             UI.getCurrent().access(() -> enableBulkUploadStatusButton());
@@ -119,7 +135,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent event) {
         if (!managementUIState.isTargetTableMaximized()) {
             if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {

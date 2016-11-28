@@ -20,30 +20,24 @@ import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
 /**
  * Abstract layout of confirm actions window.
- *
- *
- *
  */
-@SpringComponent
-@UIScope
 public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
     private static final long serialVersionUID = 1804036019105286988L;
@@ -56,11 +50,16 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private static final String DISCARD = "Discard";
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final SoftwareManagement softwareManagement;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
+
+    public UploadViewConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+            final SoftwareManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
+        super(i18n, eventBus);
+        this.softwareManagement = softwareManagement;
+        this.artifactUploadState = artifactUploadState;
+    }
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {

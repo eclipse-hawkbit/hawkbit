@@ -8,43 +8,45 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 /**
  * Header of Software module table.
- * 
- *
- * 
  */
-@SpringComponent
-@UIScope
 public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     private static final long serialVersionUID = 242961845006626297L;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    @Autowired
-    private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
+    public SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+            final ArtifactUploadState artifactUploadState, final UINotification uiNotifcation,
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
+        super(i18n, permChecker, eventbus, null, null, artifactUploadState);
+        this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
+    }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE) {
             setFilterButtonsIconVisible(true);
@@ -73,10 +75,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     @Override
     protected String onLoadSearchBoxValue() {
-        if (artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()) {
-            return artifactUploadState.getSoftwareModuleFilters().getSearchText().get();
-        }
-        return null;
+        return artifactUploadState.getSoftwareModuleFilters().getSearchText().orElse(null);
     }
 
     @Override

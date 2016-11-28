@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
@@ -20,13 +23,13 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
@@ -37,47 +40,50 @@ import com.vaadin.ui.Window;
 /**
  * Distribution set details layout.
  */
-@SpringComponent
-@UIScope
 public class DistributionDetails extends AbstractNamedVersionedEntityTableDetailsLayout<DistributionSet> {
 
     private static final long serialVersionUID = 350360207334118826L;
 
-    @Autowired
-    private ManagementUIState managementUIState;
-
-    @Autowired
-    private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
-    @Autowired
-    private DistributionTagToken distributionTagToken;
-
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private final DistributionTagToken distributionTagToken;
+    private final DistributionSetManagement distributionSetManagement;
+    private final DsMetadataPopupLayout dsMetadataPopupLayout;
+    private final EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
 
     private DistributionSetMetadatadetailslayout dsMetadataTable;
 
-    @Override
-    protected void init() {
+    public DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+            final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
+            final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
+            final UINotification notificationMessage, final SystemManagement systemManagement,
+            final TagManagement tagManagement,
+            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
+        super(i18n, eventBus, permissionChecker, managementUIState);
+
+        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, notificationMessage, eventBus,
+                managementUIState, tagManagement, distributionSetManagement);
+        this.distributionSetManagement = distributionSetManagement;
+        this.dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notificationMessage, eventBus,
+                distributionSetManagement, entityFactory, permissionChecker);
+        this.entityFactory = entityFactory;
+        this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
+        buildComponents();
+    }
+
+    private void buildComponents() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
         dsMetadataTable.init(getI18n(), getPermissionChecker(), distributionSetManagement, dsMetadataPopupLayout,
                 entityFactory);
-
-        super.init();
+        addTabs(detailsTab);
+        restoreState();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         onBaseEntityEvent(distributionTableEvent);
     }

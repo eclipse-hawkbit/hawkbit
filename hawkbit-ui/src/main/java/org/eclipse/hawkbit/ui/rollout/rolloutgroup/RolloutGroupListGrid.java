@@ -30,50 +30,62 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
- *
  * Rollout group list grid component.
- *
  */
-@SpringComponent
-@UIScope
 public class RolloutGroupListGrid extends AbstractGrid {
     private static final long serialVersionUID = 4060904914954370524L;
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
-    @Autowired
-    private transient RolloutGroupManagement rolloutGroupManagement;
+    private final RolloutGroupManagement rolloutGroupManagement;
 
-    @Autowired
-    private transient RolloutUIState rolloutUIState;
+    private final RolloutUIState rolloutUIState;
 
-    @Autowired
-    private transient SpPermissionChecker permissionChecker;
+    private static final Map<RolloutGroupStatus, StatusFontIcon> statusIconMap = new EnumMap<>(
+            RolloutGroupStatus.class);
 
-    private transient Map<RolloutGroupStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutGroupStatus.class);
+    static {
+        statusIconMap.put(RolloutGroupStatus.FINISHED,
+                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(RolloutGroupStatus.SCHEDULED,
+                new StatusFontIcon(FontAwesome.HOURGLASS_1, SPUIStyleDefinitions.STATUS_ICON_PENDING));
+        statusIconMap.put(RolloutGroupStatus.RUNNING,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(RolloutGroupStatus.READY,
+                new StatusFontIcon(FontAwesome.DOT_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE));
+        statusIconMap.put(RolloutGroupStatus.ERROR,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+    }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public RolloutGroupListGrid(final I18N i18n, final UIEventBus eventBus,
+            final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
+            final SpPermissionChecker permissionChecker) {
+        super(i18n, eventBus, permissionChecker);
+        this.rolloutGroupManagement = rolloutGroupManagement;
+        this.rolloutUIState = rolloutUIState;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
         if (RolloutEvent.SHOW_ROLLOUT_GROUPS != event) {
             return;
@@ -90,7 +102,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
      *            the event which contains the rollout group which has been
      *            change
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     public void onRolloutGroupChangeEvent(final RolloutGroupChangeEventContainer eventContainer) {
         if (!rolloutUIState.isShowRolloutGroups()) {
             return;
@@ -211,7 +223,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected void addColumnRenderes() {
-        createRolloutGroupStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new RolloutGroupStatusConverter());
 
@@ -239,19 +250,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
         return this::getDescription;
-    }
-
-    private void createRolloutGroupStatusToFontMap() {
-        statusIconMap.put(RolloutGroupStatus.FINISHED,
-                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
-        statusIconMap.put(RolloutGroupStatus.SCHEDULED,
-                new StatusFontIcon(FontAwesome.HOURGLASS_1, SPUIStyleDefinitions.STATUS_ICON_PENDING));
-        statusIconMap.put(RolloutGroupStatus.RUNNING,
-                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
-        statusIconMap.put(RolloutGroupStatus.READY,
-                new StatusFontIcon(FontAwesome.DOT_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE));
-        statusIconMap.put(RolloutGroupStatus.ERROR,
-                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
     private String getDescription(final CellReference cell) {

@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
@@ -28,8 +25,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -61,20 +58,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected EventBus.UIEventBus eventBus;
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
     protected UINotification notification;
 
-    /**
-     * Initialize the components.
-     */
-    @PostConstruct
-    protected void init() {
+    protected AbstractTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification) {
+        this.eventBus = eventBus;
+        this.i18n = i18n;
+        this.notification = notification;
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
@@ -84,20 +77,11 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         setSortEnabled(false);
         setId(getTableId());
         addCustomGeneratedColumns();
-        addNewContainerDS();
-        setColumnProperties();
         setDefault();
         addValueChangeListener(event -> onValueChange());
-        selectRow();
         setPageLength(SPUIDefinitions.PAGE_SIZE);
 
-        setDataAvailable(getContainerDataSource().size() != 0);
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    protected void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     /**
@@ -148,7 +132,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         setDropHandler(getTableDropHandler());
     }
 
-    private void addNewContainerDS() {
+    protected void addNewContainerDS() {
         final Container container = createContainer();
         addContainerProperties(container);
         setContainerDataSource(container);
@@ -178,7 +162,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         }
     }
 
-    private void setColumnProperties() {
+    protected void setColumnProperties() {
         final List<TableColumn> columnList = getTableVisibleColumns();
         final List<Object> swColumnIds = new ArrayList<>();
         for (final TableColumn column : columnList) {
@@ -249,9 +233,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     protected void onBaseEntityEvent(final BaseUIEntityEvent<E> event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
-            UI.getCurrent().access(() -> applyMinTableSettings());
+            UI.getCurrent().access(this::applyMinTableSettings);
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
-            UI.getCurrent().access(() -> applyMaxTableSettings());
+            UI.getCurrent().access(this::applyMaxTableSettings);
         } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
             UI.getCurrent().access(() -> addEntity(event.getEntity()));
         }

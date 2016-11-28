@@ -14,9 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
@@ -37,11 +34,11 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -50,8 +47,6 @@ import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -65,12 +60,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Display the details of the artifacts for a selected software module.
- *
- *
  */
-
-@SpringComponent
-@UIScope
 public class ArtifactDetailsLayout extends VerticalLayout {
 
     private static final long serialVersionUID = -5189069028037133891L;
@@ -91,17 +81,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private static final String MD5HASH = "md5Hash";
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private transient UINotification uINotification;
+    private final UINotification uINotification;
 
     private Label titleOfArtifactDetails;
 
@@ -111,15 +97,17 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private Table maxArtifactDetailsTable;
 
-    private boolean fullWindowMode = false;
+    private boolean fullWindowMode;
 
-    private boolean readOnly = false;
+    private boolean readOnly;
 
-    /**
-     * Initialize the artifact details layout.
-     */
-    @PostConstruct
-    private void init() {
+    public ArtifactDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+            final ArtifactUploadState artifactUploadState, final UINotification uINotification) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.artifactUploadState = artifactUploadState;
+        this.uINotification = uINotification;
+
         createComponents();
         buildLayout();
         eventBus.subscribe(this);
@@ -140,9 +128,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * @param readOnly
      *            value true for read only.
      */
+    // TODO kaizimmerm: fix this
     public void init(final boolean readOnly) {
         this.readOnly = readOnly;
-        init();
     }
 
     private void createComponents() {
@@ -192,7 +180,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         header.addComponents(titleOfArtifactDetails, maxMinButton);
         header.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
         header.setComponentAlignment(maxMinButton, Alignment.TOP_RIGHT);
-        header.setExpandRatio(titleOfArtifactDetails, 1.0f);
+        header.setExpandRatio(titleOfArtifactDetails, 1.0F);
 
         setSizeFull();
         setImmediate(true);
@@ -202,7 +190,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         setComponentAlignment(header, Alignment.MIDDLE_CENTER);
         addComponent(artifactDetailsTable);
         setComponentAlignment(artifactDetailsTable, Alignment.MIDDLE_CENTER);
-        setExpandRatio(artifactDetailsTable, 1.0f);
+        setExpandRatio(artifactDetailsTable, 1.0F);
 
     }
 
@@ -308,15 +296,15 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             table.setColumnHeader(ACTION, i18n.get("upload.action"));
         }
 
-        table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5f);
+        table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5F);
         table.setColumnExpandRatio(SIZE, 2f);
         if (fullWindowMode) {
-            table.setColumnExpandRatio(SHA1HASH, 2.8f);
-            table.setColumnExpandRatio(MD5HASH, 2.4f);
+            table.setColumnExpandRatio(SHA1HASH, 2.8F);
+            table.setColumnExpandRatio(MD5HASH, 2.4F);
         }
-        table.setColumnExpandRatio(CREATE_MODIFIED_DATE_UPLOAD, 3f);
+        table.setColumnExpandRatio(CREATE_MODIFIED_DATE_UPLOAD, 3F);
         if (!readOnly) {
-            table.setColumnExpandRatio(ACTION, 2.5f);
+            table.setColumnExpandRatio(ACTION, 2.5F);
         }
 
         table.setVisibleColumns(getVisbleColumns().toArray());
@@ -460,7 +448,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         setVisible(false);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
         if (BaseEntityEventType.SELECTED_ENTITY == softwareModuleEvent.getEventType()) {
             UI.getCurrent().access(() -> {
@@ -484,14 +472,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 }
             });
         }
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this); // It's good manners to do this, even though
-        // we should be
-        // automatically unsubscribed when the UI is
-        // garbage collected
     }
 
     public Table getArtifactDetailsTable() {

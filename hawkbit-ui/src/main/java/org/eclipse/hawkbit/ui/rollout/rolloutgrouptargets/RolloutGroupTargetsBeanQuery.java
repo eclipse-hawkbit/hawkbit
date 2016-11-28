@@ -8,9 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -39,9 +41,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     private static final long serialVersionUID = -8841076207255485907L;
 
-    private final Sort sort = new Sort(Direction.ASC, "id");
+    private static final Sort sort = new Sort(Direction.ASC, "id");
 
-    private transient Page<TargetWithActionStatus> firstPageTargetSets = null;
+    private transient Page<TargetWithActionStatus> firstPageTargetSets;
 
     private transient RolloutManagement rolloutManagement;
 
@@ -49,7 +51,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     private transient RolloutUIState rolloutUIState;
 
-    private final RolloutGroup rolloutGroup;
+    private final Optional<RolloutGroup> rolloutGroup;
 
     /**
      * Parametric Constructor.
@@ -67,10 +69,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             final Object[] sortPropertyIds, final boolean[] sortStates) {
 
         super(definition, queryConfig, sortPropertyIds, sortStates);
-
-        rolloutGroup = getRolloutUIState().getRolloutGroup().isPresent() ? getRolloutUIState().getRolloutGroup().get()
-                : null;
-
+        rolloutGroup = getRolloutUIState().getRolloutGroup();
     }
 
     @Override
@@ -80,48 +79,48 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        List<TargetWithActionStatus> rolloutGroupTargetsList = new ArrayList<>();
         if (startIndex == 0 && firstPageTargetSets != null) {
-            rolloutGroupTargetsList = firstPageTargetSets.getContent();
-        } else if (null != rolloutGroup) {
-            rolloutGroupTargetsList = getRolloutGroupManagement()
-                    .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), rolloutGroup)
-                    .getContent();
+            return getProxyRolloutGroupTargetsList(firstPageTargetSets.getContent());
         }
-        return getProxyRolloutGroupTargetsList(rolloutGroupTargetsList);
+
+        return rolloutGroup.map(group -> getProxyRolloutGroupTargetsList(getRolloutGroupManagement()
+                .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), group).getContent()))
+                .orElse(Collections.emptyList());
     }
 
-    private List<ProxyTarget> getProxyRolloutGroupTargetsList(final List<TargetWithActionStatus> rolloutGroupTargets) {
-        final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
-        for (final TargetWithActionStatus targetWithActionStatus : rolloutGroupTargets) {
-            final Target targ = targetWithActionStatus.getTarget();
-            final ProxyTarget prxyTarget = new ProxyTarget();
-            prxyTarget.setTargetIdName(targ.getTargetIdName());
-            prxyTarget.setName(targ.getName());
-            prxyTarget.setDescription(targ.getDescription());
-            prxyTarget.setControllerId(targ.getControllerId());
-            prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
-            prxyTarget.setAddress(targ.getTargetInfo().getAddress());
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
-            prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
-            prxyTarget.setCreatedAt(targ.getCreatedAt());
-            prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
-            prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
-            if (targetWithActionStatus.getStatus() != null) {
-                prxyTarget.setStatus(targetWithActionStatus.getStatus());
-            }
-            prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
-            prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setId(targ.getId());
-            if (targ.getAssignedDistributionSet() != null) {
-                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
-                        targ.getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
-            }
-            proxyTargetBeans.add(prxyTarget);
+    private static List<ProxyTarget> getProxyRolloutGroupTargetsList(
+            final List<TargetWithActionStatus> rolloutGroupTargets) {
 
+        return rolloutGroupTargets.stream().map(RolloutGroupTargetsBeanQuery::mapTargetToProxy)
+                .collect(Collectors.toList());
+    }
+
+    private static ProxyTarget mapTargetToProxy(final TargetWithActionStatus targetWithActionStatus) {
+        final Target targ = targetWithActionStatus.getTarget();
+        final ProxyTarget prxyTarget = new ProxyTarget();
+        prxyTarget.setTargetIdName(targ.getTargetIdName());
+        prxyTarget.setName(targ.getName());
+        prxyTarget.setDescription(targ.getDescription());
+        prxyTarget.setControllerId(targ.getControllerId());
+        prxyTarget.setInstallationDate(targ.getTargetInfo().getInstallationDate());
+        prxyTarget.setAddress(targ.getTargetInfo().getAddress());
+        prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
+        prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
+        prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
+        prxyTarget.setCreatedAt(targ.getCreatedAt());
+        prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
+        prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
+        if (targetWithActionStatus.getStatus() != null) {
+            prxyTarget.setStatus(targetWithActionStatus.getStatus());
         }
-        return proxyTargetBeans;
+        prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
+        prxyTarget.setTargetInfo(targ.getTargetInfo());
+        prxyTarget.setId(targ.getId());
+        if (targ.getAssignedDistributionSet() != null) {
+            prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                    targ.getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
+        }
+        return prxyTarget;
     }
 
     @Override
@@ -134,9 +133,10 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     @Override
     public int size() {
         long size = 0;
-        if (null != rolloutGroup) {
-            firstPageTargetSets = getRolloutGroupManagement()
-                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
+
+        if (rolloutGroup.isPresent()) {
+            firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get());
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);

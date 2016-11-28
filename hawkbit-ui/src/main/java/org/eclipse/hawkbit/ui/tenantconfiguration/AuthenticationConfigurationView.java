@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AnonymousDownloadAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AuthenticationConfigurationItem;
@@ -18,12 +18,9 @@ import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.GatewaySecurity
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.TargetSecurityTokenAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -33,8 +30,6 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * View to configure the authentication mode.
  */
-@SpringComponent
-@UIScope
 public class AuthenticationConfigurationView extends BaseConfigurationView
         implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener, ValueChangeListener {
 
@@ -42,20 +37,15 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
+    private final CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
 
-    @Autowired
-    private TargetSecurityTokenAuthenticationConfigurationItem targetSecurityTokenAuthenticationConfigurationItem;
+    private final TargetSecurityTokenAuthenticationConfigurationItem targetSecurityTokenAuthenticationConfigurationItem;
 
-    @Autowired
-    private GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
+    private final GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
 
-    @Autowired
-    private AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
+    private final AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
 
     private CheckBox gatewaySecTokenCheckBox;
 
@@ -65,11 +55,23 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private CheckBox downloadAnonymousCheckBox;
 
-    /**
-     * Initialize Authentication Configuration layout.
-     */
-    @PostConstruct
-    public void init() {
+    public AuthenticationConfigurationView(final I18N i18n,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SecurityTokenGenerator securityTokenGenerator) {
+        this.i18n = i18n;
+        this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(
+                tenantConfigurationManagement, i18n);
+        this.targetSecurityTokenAuthenticationConfigurationItem = new TargetSecurityTokenAuthenticationConfigurationItem(
+                tenantConfigurationManagement, i18n);
+        this.gatewaySecurityTokenAuthenticationConfigurationItem = new GatewaySecurityTokenAuthenticationConfigurationItem(
+                tenantConfigurationManagement, i18n, securityTokenGenerator);
+        this.anonymousDownloadAuthenticationConfigurationItem = new AnonymousDownloadAuthenticationConfigurationItem(
+                tenantConfigurationManagement, i18n);
+
+        init();
+    }
+
+    private void init() {
 
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();

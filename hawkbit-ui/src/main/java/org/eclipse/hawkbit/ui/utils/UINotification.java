@@ -25,8 +25,12 @@ public class UINotification implements Serializable {
 
     private static final long serialVersionUID = -9030485417988977466L;
 
+    private final NotificationMessage notificationMessage;
+
     @Autowired
-    private NotificationMessage notificationMessage;
+    UINotification(final NotificationMessage notificationMessage) {
+        this.notificationMessage = notificationMessage;
+    }
 
     /**
      * Display success type of notification message.

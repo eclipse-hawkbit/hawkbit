@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.ui.common.confirmwindow.layout;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -20,8 +18,8 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
@@ -46,16 +44,15 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
 
     private String consolidatedMessage;
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected EventBus.UIEventBus eventBus;
 
-    /**
-     * PostConstruct.
-     */
-    @PostConstruct
+    protected AbstractConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+    }
+
     public void initialize() {
         removeAllComponents();
         consolidatedMessage = "";
@@ -69,8 +66,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     }
 
     private void createActionMessgaeLabel() {
-        actionMessage = new LabelBuilder().name("").id(UIComponentIdProvider.ACTION_LABEL).visible(false)
-                .buildLabel();
+        actionMessage = new LabelBuilder().name("").id(UIComponentIdProvider.ACTION_LABEL).visible(false).buildLabel();
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
     }
 

@@ -8,16 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.I18N;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
@@ -27,30 +23,21 @@ import com.vaadin.ui.VerticalLayout;
  * This class represents the UI item for the certificate authenticated by an
  * reverse proxy in the authentication configuration view.
  */
-@SpringComponent
-@UIScope
 public class CertificateAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean configurationEnabled = false;
-    private boolean configurationEnabledChange = false;
-    private boolean configurationCaRootAuthorityChanged = false;
+    private boolean configurationEnabled;
+    private boolean configurationEnabledChange;
+    private boolean configurationCaRootAuthorityChanged;
 
-    private VerticalLayout detailLayout;
-    private TextField caRootAuthorityTextField;
+    private final VerticalLayout detailLayout;
+    private final TextField caRootAuthorityTextField;
 
-    @Autowired
-    public CertificateAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, tenantConfigurationManagement);
-    }
+    public CertificateAuthenticationConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
+            final I18N i18n) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, tenantConfigurationManagement, i18n);
 
-    /**
-     * Init mehotd called by spring.
-     */
-    @PostConstruct
-    public void init() {
         super.init("label.configuration.auth.header");
         configurationEnabled = isConfigEnabled();
 

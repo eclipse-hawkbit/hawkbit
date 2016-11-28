@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -21,14 +18,12 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIButtonDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -40,19 +35,14 @@ import com.vaadin.ui.VerticalLayout;
  *
  *
  */
-@SpringComponent
-@UIScope
 public class FilterByStatusLayout extends VerticalLayout implements Button.ClickListener {
     private static final long serialVersionUID = -6930348859189929850L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
     private static final String OVERDUE_CAPTION = "overdue";
 
@@ -62,19 +52,24 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
     private Button error;
     private Button registered;
     private Button overdue;
-    private Boolean unknownBtnClicked = false;
-    private Boolean errorBtnClicked = false;
-    private Boolean pendingBtnClicked = false;
-    private Boolean inSyncBtnClicked = false;
-    private Boolean registeredBtnClicked = false;
-    private Boolean overdueBtnClicked = false;
+    private boolean unknownBtnClicked;
+    private boolean errorBtnClicked;
+    private boolean pendingBtnClicked;
+    private boolean inSyncBtnClicked;
+    private boolean registeredBtnClicked;
+    private boolean overdueBtnClicked;
     private Button buttonClicked;
     private static final String BTN_CLICKED = "btnClicked";
+
+    public FilterByStatusLayout(final I18N i18n, final UIEventBus eventBus, final ManagementUIState managementUIState) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.managementUIState = managementUIState;
+    }
 
     /**
      * Initialize the Status Layout Component.
      */
-    @PostConstruct
     public void init() {
         getFilterTargetsStatusLayout();
         restorePreviousState();
@@ -296,7 +291,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
 
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.RESET_SIMPLE_FILTERS && isStatusFilterApplied()) {
             removeClickedStyle();
@@ -329,10 +324,5 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
 
     private boolean isErrorOrRegisteredBtnClicked() {
         return errorBtnClicked || registeredBtnClicked;
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 }

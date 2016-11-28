@@ -33,23 +33,22 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Login UI window that is independent of the {@link HawkbitUI} itself.
  *
- *
- *
  */
 @Title("hawkBit UI - Login")
 public class HawkbitLoginUI extends DefaultHawkbitUI {
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitLoginUI.class);
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private SpringViewProvider viewProvider;
+    private final SpringViewProvider viewProvider;
+
+    private final ApplicationContext context;
 
     @Autowired
-    private transient ApplicationContext context;
+    protected HawkbitLoginUI(final SpringViewProvider viewProvider, final ApplicationContext context) {
+        this.viewProvider = viewProvider;
+        this.context = context;
+    }
 
     @Override
     protected void init(final VaadinRequest request) {

@@ -25,12 +25,6 @@ public abstract class AbstractFilterMultiButtonClick extends AbstractFilterButto
     private static final long serialVersionUID = 1L;
     protected final transient Set<Button> alreadyClickedButtons = new HashSet<>();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtonClick#
-     * processFilterButtonClick(com.vaadin.ui. Button.ClickEvent)
-     */
     @Override
     public void processFilterButtonClick(final ClickEvent event) {
         final Button clickedButton = (Button) event.getComponent();
@@ -46,12 +40,6 @@ public abstract class AbstractFilterMultiButtonClick extends AbstractFilterButto
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtonClickBehaviour#
-     * setDefaultClickedButton(com.vaadin .ui.Button)
-     */
     @Override
     protected void setDefaultClickedButton(final Button button) {
         if (button != null) {
@@ -60,10 +48,6 @@ public abstract class AbstractFilterMultiButtonClick extends AbstractFilterButto
         }
     }
 
-    /**
-     * @param clickedButton
-     * @return
-     */
     private boolean isButtonUnClicked(final Button clickedButton) {
         return !alreadyClickedButtons.isEmpty() && alreadyClickedButtons.contains(clickedButton);
     }

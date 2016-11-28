@@ -8,17 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets.RolloutGroupTargetsListView;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -39,29 +48,39 @@ public class RolloutView extends VerticalLayout implements View {
 
     public static final String VIEW_NAME = "rollout";
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
+
+    private final RolloutListView rolloutListView;
+
+    private final RolloutGroupsListView rolloutGroupsListView;
+
+    private final RolloutGroupTargetsListView rolloutGroupTargetsListView;
+
+    private final RolloutUIState rolloutUIState;
+
+    private final EventBus.UIEventBus eventBus;
 
     @Autowired
-    private RolloutListView rolloutListView;
+    RolloutView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
+            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final I18N i18n) {
+        this.permChecker = permissionChecker;
+        this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
+                targetManagement, uiNotification, uiProperties, entityFactory, i18n);
+        this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
+                permissionChecker);
+        this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);
+        this.rolloutUIState = rolloutUIState;
+        this.eventBus = eventBus;
+    }
 
-    @Autowired
-    private RolloutGroupsListView rolloutGroupsListView;
-
-    @Autowired
-    private RolloutGroupTargetsListView rolloutGroupTargetsListView;
-
-    @Autowired
-    private transient RolloutUIState rolloutUIState;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    @PostConstruct
+    void init() {
         setSizeFull();
-        if (!(rolloutUIState.isShowRollOuts() || rolloutUIState.isShowRolloutGroups() || rolloutUIState
-                .isShowRolloutGroupTargets())) {
+        if (!(rolloutUIState.isShowRollOuts() || rolloutUIState.isShowRolloutGroups()
+                || rolloutUIState.isShowRolloutGroupTargets())) {
             rolloutUIState.setShowRollOuts(true);
         }
         buildLayout();
@@ -73,7 +92,7 @@ public class RolloutView extends VerticalLayout implements View {
         eventBus.unsubscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
         if (event == RolloutEvent.SHOW_ROLLOUTS) {
             rolloutUIState.setShowRollOuts(true);
@@ -103,9 +122,6 @@ public class RolloutView extends VerticalLayout implements View {
         }
     }
 
-    /**
-     * 
-     */
     private void showRolloutGroupTargetsListView() {
         rolloutGroupTargetsListView.setVisible(true);
         if (rolloutListView.isVisible()) {
@@ -118,9 +134,6 @@ public class RolloutView extends VerticalLayout implements View {
         setExpandRatio(rolloutGroupTargetsListView, 1.0f);
     }
 
-    /**
-     * 
-     */
     private void showRolloutGroupListView() {
         rolloutGroupsListView.setVisible(true);
         if (rolloutListView.isVisible()) {
@@ -133,9 +146,6 @@ public class RolloutView extends VerticalLayout implements View {
         setExpandRatio(rolloutGroupsListView, 1.0f);
     }
 
-    /**
-     * 
-     */
     private void showRolloutListView() {
         rolloutListView.setVisible(true);
         if (rolloutGroupsListView.isVisible()) {
@@ -146,6 +156,11 @@ public class RolloutView extends VerticalLayout implements View {
         }
         addComponent(rolloutListView);
         setExpandRatio(rolloutListView, 1.0f);
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // This view is constructed in the init() method()
     }
 
 }

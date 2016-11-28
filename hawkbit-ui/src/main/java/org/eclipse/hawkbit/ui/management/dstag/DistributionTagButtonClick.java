@@ -12,38 +12,26 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterMultiButtonClick
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 
 /**
  *
  *
  */
-@SpringComponent
-@UIScope
 public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
-
-    /**
-    * 
-    */
     private static final long serialVersionUID = 4120296456125178019L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    public DistributionTagButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+        this.eventBus = eventBus;
+        this.managementUIState = managementUIState;
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterUnClicked (com.vaadin.ui.Button)
-     */
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {
@@ -54,12 +42,6 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         eventBus.publish(this, DistributionTableFilterEvent.FILTER_BY_TAG);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterClicked (com.vaadin.ui.Button)
-     */
     @Override
     protected void filterClicked(final Button clickedButton) {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {

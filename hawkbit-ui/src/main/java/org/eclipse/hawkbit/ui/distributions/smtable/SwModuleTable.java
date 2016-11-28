@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -27,15 +28,17 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteri
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -47,8 +50,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.window.WindowMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
@@ -60,39 +61,40 @@ import com.vaadin.ui.Window;
  * Implementation of software module table using generic abstract table styles .
  *
  */
-@SpringComponent
-@UIScope
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6785314784507424750L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final SoftwareManagement softwareManagement;
 
-    @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    @Autowired
-    private ArtifactDetailsLayout artifactDetailsLayout;
+    private final ArtifactDetailsLayout artifactDetailsLayout;
 
-    @Autowired
-    private SwMetadataPopupLayout swMetadataPopupLayout;
+    private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    /**
-     * Initialize the filter layout.
-     */
-    @Override
-    protected void init() {
-        super.init();
+    public SwModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
+            final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final SwMetadataPopupLayout swMetadataPopupLayout, final ArtifactUploadState artifactUploadState) {
+        super(eventBus, i18n, uiNotification);
+        this.manageDistUIState = manageDistUIState;
+        this.softwareManagement = softwareManagement;
+        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification);
+        this.swMetadataPopupLayout = swMetadataPopupLayout;
+
+        addNewContainerDS();
+        setColumnProperties();
+        setDataAvailable(getContainerDataSource().size() != 0);
         styleTableOnDistSelection();
     }
 
     /* All event Listeners */
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
 
@@ -105,7 +107,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionsUIEvent event) {
         UI.getCurrent().access(() -> {
             if (event == DistributionsUIEvent.ORDER_BY_DISTRIBUTION) {
@@ -115,14 +117,14 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
             UI.getCurrent().access(this::refreshFilter);
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         onBaseEntityEvent(event);
     }

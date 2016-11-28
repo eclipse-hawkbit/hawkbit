@@ -59,18 +59,20 @@ import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -83,8 +85,6 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -96,8 +96,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Concrete implementation of Target table.
  */
-@SpringComponent
-@UIScope
 public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
@@ -105,28 +103,34 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private static final long serialVersionUID = -2300392868806614568L;
     private static final int PROPERTY_DEPT = 3;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementUIState managementUIState;
 
     private Button targetPinnedBtn;
-    private Boolean isTargetPinned = Boolean.FALSE;
+    private boolean isTargetPinned;
 
-    @Override
-    protected void init() {
-        super.init();
+    public TargetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
+            final TargetManagement targetManagement, final ManagementUIState managementUIState,
+            final SpPermissionChecker permChecker, final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+        super(eventBus, i18n, notification);
+        this.targetManagement = targetManagement;
+        this.permChecker = permChecker;
+        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementUIState = managementUIState;
+
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
+
+        addNewContainerDS();
+        setColumnProperties();
+        setDataAvailable(getContainerDataSource().size() != 0);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
@@ -149,7 +153,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         reSelectItemsAfterDeletionEvent();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer eventContainer) {
         // workaround until push is available for action
         // history, re-select
@@ -158,7 +162,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         @SuppressWarnings("unchecked")
@@ -185,12 +189,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                 target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetCreatedEvents(final TargetCreatedEventContainer holder) {
         refreshTargets();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent dragEvent) {
         if (dragEvent == DragEvent.TARGET_TAG_DRAG || dragEvent == DragEvent.DISTRIBUTION_DRAG) {
             UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
@@ -199,7 +203,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final PinUnpinEvent pinUnpinEvent) {
         UI.getCurrent().access(() -> {
             if (pinUnpinEvent == PinUnpinEvent.PIN_DISTRIBUTION) {
@@ -212,7 +216,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void addOrEditEvent(final TargetAddUpdateWindowEvent targetUIEvent) {
         if (BaseEntityEventType.UPDATED_ENTITY != targetUIEvent.getEventType()) {
             return;
@@ -220,7 +224,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         UI.getCurrent().access(() -> updateTarget(targetUIEvent.getEntity()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
             if (checkFilterEvent(filterEvent)) {
@@ -230,7 +234,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
         UI.getCurrent().access(() -> {
             if (managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG
@@ -240,7 +244,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
             refreshTablecontainer();
@@ -253,7 +257,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         selectRow();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent event) {
         onBaseEntityEvent(event);
     }
@@ -539,8 +543,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     private void tagAssignment(final DragAndDropEvent event) {
-        final List<String> targetList = getDraggedTargetList(event).stream()
-                .map(targetIdName -> targetIdName.getControllerId()).collect(Collectors.toList());
+        final List<String> targetList = getDraggedTargetList(event).stream().map(TargetIdName::getControllerId)
+                .collect(Collectors.toList());
 
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);

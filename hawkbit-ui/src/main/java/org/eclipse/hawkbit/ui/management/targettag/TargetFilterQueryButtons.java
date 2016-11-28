@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
@@ -22,17 +20,15 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.ValoTheme;
@@ -40,19 +36,20 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Target filter query{#link {@link TargetFilterQuery} buttons layout.
  */
-@SpringComponent
-@UIScope
 public class TargetFilterQueryButtons extends Table {
     private static final long serialVersionUID = 9188095103191937850L;
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
-    @Autowired
-    ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
-    CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
+    private CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
+
+    public TargetFilterQueryButtons(final ManagementUIState managementUIState, final UIEventBus eventBus) {
+        this.managementUIState = managementUIState;
+        this.eventBus = eventBus;
+    }
 
     /**
      * initializing table.
@@ -147,15 +144,10 @@ public class TargetFilterQueryButtons extends Table {
         setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.RESET_TARGET_FILTER_QUERY) {
             customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
         }
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 }

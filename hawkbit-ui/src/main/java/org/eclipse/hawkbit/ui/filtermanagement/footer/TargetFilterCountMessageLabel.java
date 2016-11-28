@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement.footer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -18,15 +15,12 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 
@@ -36,37 +30,25 @@ import com.vaadin.ui.UI;
  *         Count message label which display current filter details and details
  *         on pinning.
  */
-@SpringComponent
-@UIScope
 public class TargetFilterCountMessageLabel extends Label {
 
     private static final long serialVersionUID = -7188528790042766877L;
 
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
+    private final FilterManagementUIState filterManagementUIState;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    public TargetFilterCountMessageLabel(final FilterManagementUIState filterManagementUIState, final I18N i18n,
+            final UIEventBus eventBus) {
+        this.filterManagementUIState = filterManagementUIState;
+        this.i18n = i18n;
 
-    /**
-     * PostConstruct method called by spring after bean has been initialized.
-     */
-    @PostConstruct
-    public void postConstruct() {
         applyStyle();
         displayTargetFilterMessage();
         eventBus.subscribe(this);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
         if (custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK

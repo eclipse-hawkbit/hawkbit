@@ -13,9 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -25,8 +22,8 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.tokenfield.TokenField;
 import org.vaadin.tokenfield.TokenField.InsertPosition;
 
@@ -65,19 +62,14 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected CssLayout tokenLayout = new CssLayout();
 
-    @Autowired
     protected SpPermissionChecker checker;
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
     protected UINotification uinotification;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected EventBus.UIEventBus eventBus;
 
-    @Autowired
     protected ManagementUIState managementUIState;
 
     // BaseEntity implements Serializable so this entity is serializable. Maybe
@@ -85,16 +77,16 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     @SuppressWarnings("squid:S1948")
     protected T selectedEntity;
 
-    @PostConstruct
-    protected void init() {
+    protected AbstractTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+            final UIEventBus eventBus, final ManagementUIState managementUIState) {
+        this.checker = checker;
+        this.i18n = i18n;
+        this.uinotification = uinotification;
+        this.eventBus = eventBus;
+        this.managementUIState = managementUIState;
         createTokenField();
         checkIfTagAssignedIsAllowed();
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    protected void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {

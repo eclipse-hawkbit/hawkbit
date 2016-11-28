@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
@@ -68,7 +66,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
     private String failureReason;
     private final I18N i18n;
-    private transient EventBus.SessionEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
     private final SoftwareModule selectedSw;
     private SoftwareModule selectedSwForUpload;
     private final ArtifactUploadState artifactUploadState;
@@ -85,21 +83,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.mimeType = mimeType;
         this.selectedSw = selectedSw;
         this.i18n = SpringContextHelper.getBean(I18N.class);
-        this.eventBus = SpringContextHelper.getBean(EventBus.SessionEventBus.class);
+        this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
         eventBus.subscribe(this);
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadStatusEventType event) {
         if (event == UploadStatusEventType.ABORT_UPLOAD) {
             aborted = true;

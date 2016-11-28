@@ -33,17 +33,16 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
@@ -53,8 +52,6 @@ import com.vaadin.ui.Table.Align;
  * 
  *
  */
-@SpringComponent
-@UIScope
 public class ManangementConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
     private static final long serialVersionUID = 2114943830055679554L;
@@ -69,22 +66,29 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private static final String TARGET_ID = "TargetId";
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private transient DeploymentManagement deploymentManagement;
+    private final DeploymentManagement deploymentManagement;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
+    private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
     private ConfirmationTab assignmnetTab;
+
+    public ManangementConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+            final ManagementUIState managementUIState, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement,
+            final DistributionSetManagement distributionSetManagement) {
+        super(i18n, eventBus);
+        this.managementUIState = managementUIState;
+        this.targetManagement = targetManagement;
+        this.deploymentManagement = deploymentManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+    }
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {

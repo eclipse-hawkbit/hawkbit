@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
@@ -28,8 +25,8 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -38,8 +35,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.window.WindowMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Grid;
@@ -58,18 +53,13 @@ import elemental.json.JsonValue;
 /**
  * Shows upload status during upload.
  */
-@UIScope
-@SpringComponent
 public class UploadStatusInfoWindow extends Window {
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
     private static final String PROGRESS = "Progress";
 
@@ -81,9 +71,9 @@ public class UploadStatusInfoWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 
-    private Grid grid;
+    private final Grid grid;
 
-    private IndexedContainer uploads;
+    private final IndexedContainer uploads;
 
     private volatile boolean errorOccured = false;
 
@@ -91,7 +81,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button minimizeButton;
 
-    private VerticalLayout mainLayout;
+    private final VerticalLayout mainLayout;
 
     private Label windowCaption;
 
@@ -99,15 +89,15 @@ public class UploadStatusInfoWindow extends Window {
 
     private Button resizeButton;
 
-    private UI ui;
+    private final UI ui;
 
     private ConfirmationDialog confirmDialog;
 
-    /**
-     * Default Constructor.
-     */
-    @PostConstruct
-    void init() {
+    public UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+            final I18N i18n) {
+        this.eventBus = eventBus;
+        this.artifactUploadState = artifactUploadState;
+        this.i18n = i18n;
 
         setPopupProperties();
         createStatusPopupHeaderComponents();
@@ -130,7 +120,7 @@ public class UploadStatusInfoWindow extends Window {
         createConfirmDialog();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadStatusEvent event) {
 
         final UploadFileStatus uploadStatus = event.getUploadStatus();
@@ -164,15 +154,6 @@ public class UploadStatusInfoWindow extends Window {
     private void onStartOfUpload(final UploadStatusEvent event) {
         uploadSessionStarted();
         uploadStarted(event.getUploadStatus().getFileName(), event.getUploadStatus().getSoftwareModule());
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
     }
 
     private void restoreState() {

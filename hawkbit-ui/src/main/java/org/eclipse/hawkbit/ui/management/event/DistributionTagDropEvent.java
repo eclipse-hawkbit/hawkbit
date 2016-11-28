@@ -24,14 +24,12 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -41,32 +39,36 @@ import com.vaadin.ui.Table.TableTransferable;
  *
  *
  */
-@SpringComponent
-@UIScope
 public class DistributionTagDropEvent implements DropHandler {
 
     private static final long serialVersionUID = 7338133229709850212L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification notification;
+    private final UINotification notification;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private DistributionTableFilters distFilterParameters;
+    private final DistributionTableFilters distFilterParameters;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
+
+    public DistributionTagDropEvent(final I18N i18n, final UINotification notification,
+            final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
+            final DistributionSetManagement distributionSetManagement, final UIEventBus eventBus,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+        this.i18n = i18n;
+        this.notification = notification;
+        this.permChecker = permChecker;
+        this.distFilterParameters = distFilterParameters;
+        this.distributionSetManagement = distributionSetManagement;
+        this.eventBus = eventBus;
+        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+    }
 
     @Override
     public void drop(final DragAndDropEvent event) {

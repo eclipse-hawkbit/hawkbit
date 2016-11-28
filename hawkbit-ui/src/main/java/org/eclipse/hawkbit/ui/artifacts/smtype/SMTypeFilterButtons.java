@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.EnumSet;
 
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -19,35 +20,36 @@ import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Software module type filter buttons.
  * 
  */
-@SpringComponent
-@UIScope
 public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 169198312654380358L;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+            final UploadViewAcceptCriteria uploadViewAcceptCriteria, final SoftwareManagement softwareManagement) {
+        super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareManagement));
+        this.artifactUploadState = artifactUploadState;
+        this.uploadViewAcceptCriteria = uploadViewAcceptCriteria;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleTypeEvent event) {
         if (event.getSoftwareModuleType() != null
                 && EnumSet.allOf(SoftwareModuleTypeEnum.class).contains(event.getSoftwareModuleTypeEnum())) {
@@ -56,7 +58,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE) {
             refreshTable();
@@ -70,14 +72,13 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        return HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class));
+        return HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class));
     }
 
     @Override
     protected boolean isClickedByDefault(final String typeName) {
-        return artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent() && artifactUploadState
-                .getSoftwareModuleFilters().getSoftwareModuleType().get().getName().equals(typeName);
+        return artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
+                .map(type -> type.getName().equals(typeName)).orElse(false);
     }
 
     @Override

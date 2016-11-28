@@ -67,7 +67,7 @@ public class UploadResultWindow implements Button.ClickListener {
 
     private static final String REASON = "reason";
     
-    private transient EventBus.SessionEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
 
     /**
@@ -81,7 +81,7 @@ public class UploadResultWindow implements Button.ClickListener {
     public UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
-        eventBus = SpringContextHelper.getBean( EventBus.SessionEventBus.class);
+        eventBus = SpringContextHelper.getBean( EventBus.UIEventBus.class);
         createComponents();
         createLayout();
     }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -29,12 +27,10 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -46,26 +42,19 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Generates window for Software module add or update.
  */
-@SpringComponent
-@UIScope
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotifcation;
+    private final UINotification uiNotifcation;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final SoftwareManagement softwareManagement;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
 
     private TextField nameTextField;
 
@@ -82,6 +71,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private Long baseSwModuleId;
 
     private FormLayout formLayout;
+
+    public SoftwareModuleAddUpdateWindow(final I18N i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
+            final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
+        this.i18n = i18n;
+        this.uiNotifcation = uiNotifcation;
+        this.eventBus = eventBus;
+        this.softwareManagement = softwareManagement;
+        this.entityFactory = entityFactory;
+
+        createRequiredComponents();
+    }
 
     /**
      * Save or update the sw module.
@@ -100,14 +100,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         public boolean canWindowSaveOrUpdate() {
             return editSwModule || !isDuplicate();
         }
-    }
-
-    /**
-     * Initialize Distribution Add and Edit Window.
-     */
-    @PostConstruct
-    void init() {
-        createRequiredComponents();
     }
 
     /**

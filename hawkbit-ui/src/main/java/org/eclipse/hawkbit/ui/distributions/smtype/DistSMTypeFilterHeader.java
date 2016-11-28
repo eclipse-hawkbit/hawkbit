@@ -8,19 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtype;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.artifacts.smtype.CreateUpdateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -28,22 +30,21 @@ import com.vaadin.ui.Window;
 /**
  * Software Module Type filter buttons header.
  */
-@SpringComponent
-@UIScope
 public class DistSMTypeFilterHeader extends AbstractFilterHeader {
-
     private static final long serialVersionUID = -8763788280848718344L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
+    private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
-    @Autowired
-    private CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
+    public DistSMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareManagement swTypeManagementService) {
+        super(permChecker, eventBus, i18n);
+        this.manageDistUIState = manageDistUIState;
+        this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, tagManagement, entityFactory, eventBus,
+                permChecker, uiNotification, swTypeManagementService);
 
-    @Override
-    @PostConstruct
-    public void init() {
-        super.init();
         if (hasCreateUpdatePermission()) {
             createUpdateSWTypeLayout.init();
         }

@@ -14,13 +14,13 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.VaadinSessionScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Stores user actions in rollout management view.
  *
  */
-@VaadinSessionScope
+@UIScope
 @SpringComponent
 public class RolloutUIState implements Serializable {
 
@@ -184,7 +184,7 @@ public class RolloutUIState implements Serializable {
     /**
      * @return rolloutDistributionSet
      */
-    public Optional<String>  getRolloutDistributionSet() {
+    public Optional<String> getRolloutDistributionSet() {
         return rolloutDistributionSet == null ? Optional.empty() : Optional.of(rolloutDistributionSet);
     }
 
@@ -193,7 +193,7 @@ public class RolloutUIState implements Serializable {
      * @param rolloutDistributionSet
      *            the distribution set of the rollout
      */
-    public void setRolloutDistributionSet(String rolloutDistributionSet) {
+    public void setRolloutDistributionSet(final String rolloutDistributionSet) {
         this.rolloutDistributionSet = rolloutDistributionSet;
     }
 }

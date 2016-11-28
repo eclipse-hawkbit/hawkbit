@@ -15,38 +15,27 @@ import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 
 /**
  * Multi button click behaviour of filter buttons layout.
- * 
- *
- * 
  */
-
-@SpringComponent
-@UIScope
 public class TargetTagFilterButtonClick extends AbstractFilterMultiButtonClick implements Serializable {
 
     private static final long serialVersionUID = -6173433602055291533L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterUnClicked (com.vaadin.ui.Button)
-     */
+    public TargetTagFilterButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+        this.eventBus = eventBus;
+        this.managementUIState = managementUIState;
+    }
+
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {
@@ -64,12 +53,6 @@ public class TargetTagFilterButtonClick extends AbstractFilterMultiButtonClick i
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
-     * AbstractFilterButtonClickBehaviour#filterClicked (com.vaadin.ui.Button)
-     */
     @Override
     protected void filterClicked(final Button clickedButton) {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {

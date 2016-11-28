@@ -32,23 +32,22 @@ import com.vaadin.ui.VerticalLayout;
  *
  * @see Navigator#setErrorView(Class)
  */
-@SuppressWarnings("serial")
 @SpringComponent
 @UIScope
 class ErrorView extends VerticalLayout implements View {
 
+    private static final long serialVersionUID = 1L;
+
     private final Label message;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
+
+    private final DashboardMenu dashboardMenu;
 
     @Autowired
-    private DashboardMenu dashboardMenu;
-
-    /**
-     * Constructor.
-     */
-    public ErrorView() {
+    ErrorView(final I18N i18n, final DashboardMenu dashboardMenu) {
+        this.i18n = i18n;
+        this.dashboardMenu = dashboardMenu;
         setMargin(true);
         message = new Label();
         addComponent(message);

@@ -12,13 +12,10 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
@@ -26,8 +23,6 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -38,22 +33,20 @@ import com.vaadin.ui.themes.ValoTheme;
  * 
  *
  */
-@SpringComponent
-@UIScope
 public class ActionTypeOptionGroupLayout extends HorizontalLayout {
 
     private static final long serialVersionUID = -5624576558669213864L;
     private static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
     private FlexibleOptionGroup actionTypeOptionGroup;
 
     private DateField forcedTimeDateField;
 
-    @PostConstruct
-    void init() {
+    public ActionTypeOptionGroupLayout(final I18N i18n) {
+        this.i18n = i18n;
+
         createOptionGroup();
         addValueChangeListener();
         setStyleName("dist-window-actiontype-horz-layout");

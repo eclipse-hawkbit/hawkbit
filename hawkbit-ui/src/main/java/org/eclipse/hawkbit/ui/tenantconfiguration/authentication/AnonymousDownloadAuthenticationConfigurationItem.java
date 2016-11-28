@@ -8,36 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
+import org.eclipse.hawkbit.ui.utils.I18N;
 
 /**
  * This class represents the UI item for the anonymous download by in the
  * authentication configuration view.
  */
-@SpringComponent
-@UIScope
 public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean configurationEnabled = false;
-    private boolean configurationEnabledChange = false;
+    private boolean configurationEnabled;
+    private boolean configurationEnabledChange;
 
-    @Autowired
     public AnonymousDownloadAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement);
-    }
+            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
+        super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement, i18n);
 
-    @PostConstruct
-    public void init() {
         super.init("label.configuration.anonymous.download");
         configurationEnabled = isConfigEnabled();
     }

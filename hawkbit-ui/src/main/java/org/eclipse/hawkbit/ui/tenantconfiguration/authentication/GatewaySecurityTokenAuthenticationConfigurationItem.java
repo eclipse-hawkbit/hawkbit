@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -17,11 +15,9 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.I18N;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -33,18 +29,15 @@ import com.vaadin.ui.themes.ValoTheme;
  * This class represents the UI item for the gateway security token section in
  * the authentication configuration view.
  */
-@SpringComponent
-@UIScope
 public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private transient SecurityTokenGenerator securityTokenGenerator;
+    private final SecurityTokenGenerator securityTokenGenerator;
 
-    private TextField gatewayTokenNameTextField;
+    private final TextField gatewayTokenNameTextField;
 
-    private Label gatewayTokenkeyLabel;
+    private final Label gatewayTokenkeyLabel;
 
     private boolean configurationEnabled;
     private boolean configurationEnabledChange;
@@ -53,24 +46,17 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     private boolean keyChanged;
 
-    private VerticalLayout detailLayout;
+    private final VerticalLayout detailLayout;
 
-    /**
-     * @param tenantConfigurationManagement
-     */
-    @Autowired
     public GatewaySecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement);
-    }
-
-    /**
-     * Init mehotd called by spring.
-     */
-    @PostConstruct
-    public void init() {
+            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n,
+            final SecurityTokenGenerator securityTokenGenerator) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
+                i18n);
+        this.securityTokenGenerator = securityTokenGenerator;
 
         super.init("label.configuration.auth.gatewaytoken");
+
         configurationEnabled = isConfigEnabled();
 
         detailLayout = new VerticalLayout();

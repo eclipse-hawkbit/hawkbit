@@ -8,17 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -27,25 +27,20 @@ import com.vaadin.ui.Window;
  *
  *
  */
-@SpringComponent
-@UIScope
 public class DistributionTagHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = -1439667766337270066L;
 
-    @Autowired
-    private I18N i18n;
+    private final ManagementUIState managementUIState;
+    private final CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
 
-    @Autowired
-    private ManagementUIState managementUIState;
-
-    @Autowired
-    private CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
-
-    @Override
-    @PostConstruct
-    public void init() {
-        super.init();
+    public DistributionTagHeader(final I18N i18n, final ManagementUIState managementUIState,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification) {
+        super(permChecker, eventBus, i18n);
+        this.managementUIState = managementUIState;
+        this.createORUpdateDistributionTagLayout = new CreateUpdateDistributionTagLayoutWindow(i18n, tagManagement,
+                entityFactory, eventBus, permChecker, uiNotification);
         if (hasCreateUpdatePermission()) {
             createORUpdateDistributionTagLayout.init();
         }

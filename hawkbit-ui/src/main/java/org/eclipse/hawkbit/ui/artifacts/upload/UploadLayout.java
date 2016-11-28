@@ -17,9 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -43,9 +40,9 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.util.SPInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -58,8 +55,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -74,36 +69,24 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Upload files layout.
  */
-@UIScope
-@SpringComponent
 public class UploadLayout extends VerticalLayout {
-
-    /**
-     * 
-     */
     private static final String HTML_DIV = "</div>";
 
     private static final long serialVersionUID = -566164756606779220L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadLayout.class);
 
-    @Autowired
-    private UploadStatusInfoWindow uploadInfoWindow;
+    private final UploadStatusInfoWindow uploadInfoWindow;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private transient SPInfo spInfo;
+    private final SPInfo spInfo;
 
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
@@ -115,7 +98,7 @@ public class UploadLayout extends VerticalLayout {
 
     private VerticalLayout dropAreaLayout;
 
-    private UI ui;
+    private final UI ui;
 
     private HorizontalLayout fileUploadLayout;
 
@@ -125,11 +108,15 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-    /**
-     * Initialize the upload layout.
-     */
-    @PostConstruct
-    void init() {
+    public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+            final ArtifactUploadState artifactUploadState, final SPInfo spInfo) {
+        this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
+        this.i18n = i18n;
+        this.uiNotification = uiNotification;
+        this.eventBus = eventBus;
+        this.artifactUploadState = artifactUploadState;
+        this.spInfo = spInfo;
+
         createComponents();
         buildLayout();
         restoreState();
@@ -137,7 +124,7 @@ public class UploadLayout extends VerticalLayout {
         ui = UI.getCurrent();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
             ui.access(() -> updateActionCount());
@@ -150,30 +137,21 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadStatusEvent event) {
         if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STARTED) {
-            ui.access(() -> onStartOfUpload());
+            ui.access(this::onStartOfUpload);
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_FAILED) {
             ui.access(() -> onUploadFailure(event));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_FINISHED) {
-            ui.access(() -> onUploadCompletion());
+            ui.access(this::onUploadCompletion);
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_SUCCESSFUL) {
             ui.access(() -> onUploadSuccess(event));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FAILED) {
             ui.access(() -> onUploadStreamingFailure(event));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FINISHED) {
-            ui.access(() -> onUploadStreamingSuccess());
+            ui.access(this::onUploadStreamingSuccess);
         }
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
     }
 
     private void createComponents() {

@@ -20,28 +20,28 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Pop up layout to display software module metadata.
  */
-@SpringComponent
-@UIScope
 public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, MetaData> {
 
     private static final long serialVersionUID = -1252090014161012563L;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final SoftwareManagement softwareManagement;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
 
-    @Autowired
-    protected SpPermissionChecker permChecker;
+    public SwMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+            final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final SpPermissionChecker permChecker) {
+        super(i18n, uiNotification, eventBus, permChecker);
+        this.softwareManagement = softwareManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     protected void checkForDuplicate(final SoftwareModule entity, final String value) {

@@ -71,17 +71,13 @@ public class LoginView extends VerticalLayout implements View {
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
 
-    @Autowired
-    private transient VaadinSecurity vaadinSecurity;
+    private final VaadinSecurity vaadinSecurity;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final UiProperties uiProperties;
 
-    @Autowired
-    private transient MultitenancyIndicator multiTenancyIndicator;
+    private final MultitenancyIndicator multiTenancyIndicator;
 
     private final transient AntPathMatcher matcher = new AntPathMatcher();
     private boolean useCookie = true;
@@ -90,6 +86,15 @@ public class LoginView extends VerticalLayout implements View {
     private TextField tenant;
     private PasswordField password;
     private Button signin;
+
+    @Autowired
+    LoginView(final VaadinSecurity vaadinSecurity, final I18N i18n, final UiProperties uiProperties,
+            final MultitenancyIndicator multiTenancyIndicator) {
+        this.vaadinSecurity = vaadinSecurity;
+        this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.multiTenancyIndicator = multiTenancyIndicator;
+    }
 
     void loginAuthenticationFailedNotification() {
         final Notification notification = new Notification(i18n.get("notification.login.failed.title"));

@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -19,13 +16,11 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
@@ -34,38 +29,22 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Header Layout of Rollout Group list view.
- *
  */
-@SpringComponent
-@UIScope
 public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     private static final long serialVersionUID = 5077741997839715209L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private RolloutUIState rolloutUiState;
-
-    @Autowired
-    private I18N i18n;
+    private final EventBus.UIEventBus eventBus;
 
     private Label headerCaption;
 
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
+    public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState, final I18N i18n) {
+        super(null, rolloutUiState, i18n);
+        this.eventBus = eventBus;
         eventBus.subscribe(this);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
         if (event == RolloutEvent.SHOW_ROLLOUT_GROUPS) {
             setCaptionDetails();
@@ -73,8 +52,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
     }
 
     private void setCaptionDetails() {
-        headerCaption
-                .setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName().get() : "");
+        headerCaption.setCaption(rolloutUIState.getRolloutName().orElse(""));
     }
 
     @Override

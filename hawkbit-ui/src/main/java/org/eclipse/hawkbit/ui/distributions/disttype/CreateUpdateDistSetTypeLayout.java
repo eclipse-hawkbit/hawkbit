@@ -13,7 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -28,21 +31,21 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -57,8 +60,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Window for create update Distribution Set Type.
  */
-@SpringComponent
-@UIScope
 public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<DistributionSetType> {
 
     private static final long serialVersionUID = 1L;
@@ -67,11 +68,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private static final String DIST_TYPE_MANDATORY = "mandatory";
     private static final String STAR = " * ";
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final SoftwareManagement softwareManagement;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
@@ -81,6 +80,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private IndexedContainer sourceTableContainer;
 
     private IndexedContainer originalSelectedTableContainer;
+
+    public CreateUpdateDistSetTypeLayout(final I18N i18n, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification, final SoftwareManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement) {
+        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        this.softwareManagement = softwareManagement;
+        this.distributionSetManagement = distributionSetManagement;
+    }
 
     @Override
     protected void createRequiredComponents() {

@@ -13,9 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.ui.distributions.dstable.ManageDistBeanQuery;
@@ -25,45 +22,34 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Table for selecting a distribution set.
  */
-@SpringComponent
-@UIScope
 public class DistributionSetSelectTable extends Table {
 
     private static final long serialVersionUID = -4307487829435471759L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
     private Container container;
 
-    /**
-     * Initialize the component.
-     */
-    @PostConstruct
-    protected void init() {
+    public DistributionSetSelectTable(final I18N i18n, final UIEventBus eventBus,
+            final ManageDistUIState manageDistUIState) {
+        this.i18n = i18n;
+        this.manageDistUIState = manageDistUIState;
         setStyleName("sp-table");
         setSizeFull();
         setSelectable(true);
@@ -78,12 +64,7 @@ public class DistributionSetSelectTable extends Table {
         eventBus.subscribe(this);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvents(final List<?> events) {
         final Object firstEvent = events.get(0);
         if (DistributionSetCreatedEvent.class.isInstance(firstEvent)
