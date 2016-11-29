@@ -76,7 +76,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private final UINotification uiNotification;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     private TextField keyTextField;
 

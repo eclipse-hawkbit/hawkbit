@@ -50,7 +50,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private final UINotification uiNotifcation;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final SoftwareManagement softwareManagement;
 

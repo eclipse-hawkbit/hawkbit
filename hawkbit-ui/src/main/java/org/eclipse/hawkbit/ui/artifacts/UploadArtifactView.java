@@ -62,7 +62,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     public static final String VIEW_NAME = "spUpload";
     private static final long serialVersionUID = 8754632011301553682L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final SpPermissionChecker permChecker;
 

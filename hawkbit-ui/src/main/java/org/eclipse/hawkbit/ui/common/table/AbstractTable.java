@@ -58,7 +58,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected I18N i18n;
 

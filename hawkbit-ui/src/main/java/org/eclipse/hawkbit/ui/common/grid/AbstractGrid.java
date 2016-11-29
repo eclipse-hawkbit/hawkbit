@@ -28,7 +28,7 @@ public abstract class AbstractGrid extends Grid {
 
     protected final I18N i18n;
 
-    protected final EventBus.UIEventBus eventBus;
+    protected final transient EventBus.UIEventBus eventBus;
 
     protected final SpPermissionChecker permissionChecker;
 

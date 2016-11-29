@@ -48,9 +48,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private final I18N i18n;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final UINotification uINotification;
 

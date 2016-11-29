@@ -83,7 +83,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final I18N i18n;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ArtifactUploadState artifactUploadState;
 

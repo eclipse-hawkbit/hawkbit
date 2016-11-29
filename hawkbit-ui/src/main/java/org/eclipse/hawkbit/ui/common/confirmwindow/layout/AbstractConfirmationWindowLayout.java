@@ -46,7 +46,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
 
     protected I18N i18n;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected AbstractConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus) {
         this.i18n = i18n;

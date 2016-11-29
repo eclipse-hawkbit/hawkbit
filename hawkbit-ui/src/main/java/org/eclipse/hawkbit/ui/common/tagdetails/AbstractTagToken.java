@@ -68,7 +68,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected UINotification uinotification;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected ManagementUIState managementUIState;
 

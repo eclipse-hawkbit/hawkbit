@@ -50,7 +50,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     private final SpPermissionChecker permChecker;
     private final ManagementUIState managementUIState;
     private final I18N i18n;
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private VerticalLayout simpleFilterTab;
 

@@ -34,7 +34,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     private static final long serialVersionUID = 5077741997839715209L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private Label headerCaption;
 

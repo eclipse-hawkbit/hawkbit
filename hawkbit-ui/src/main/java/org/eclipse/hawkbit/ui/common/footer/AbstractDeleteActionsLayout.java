@@ -49,7 +49,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     protected SpPermissionChecker permChecker;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected UINotification notification;
 

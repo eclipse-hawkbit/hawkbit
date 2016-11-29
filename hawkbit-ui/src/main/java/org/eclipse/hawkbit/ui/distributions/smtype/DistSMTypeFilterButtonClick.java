@@ -27,11 +27,11 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     private static final long serialVersionUID = -4166632002904286983L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManageDistUIState manageDistUIState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     public DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final SoftwareManagement softwareManagement) {

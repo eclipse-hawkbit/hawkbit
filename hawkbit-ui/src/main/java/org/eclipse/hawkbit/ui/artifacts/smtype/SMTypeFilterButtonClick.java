@@ -27,11 +27,11 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private static final long serialVersionUID = 3707945900524967887L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     public SMTypeFilterButtonClick(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final SoftwareManagement softwareManagement) {

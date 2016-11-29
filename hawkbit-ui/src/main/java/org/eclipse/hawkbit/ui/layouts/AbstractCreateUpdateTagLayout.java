@@ -57,7 +57,6 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Abstract class for create/update target tag layout.
  *
  * @param <E>
@@ -77,7 +76,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected EntityFactory entityFactory;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected SpPermissionChecker permChecker;
 

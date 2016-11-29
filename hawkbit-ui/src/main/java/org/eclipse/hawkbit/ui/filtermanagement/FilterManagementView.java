@@ -62,7 +62,7 @@ public class FilterManagementView extends VerticalLayout implements View {
 
     private final TargetFilterCountMessageLabel targetFilterCountMessageLabel;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     @Autowired
     FilterManagementView(final I18N i18n, final UIEventBus eventBus,

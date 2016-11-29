@@ -75,8 +75,8 @@ public class ActionHistoryTable extends TreeTable {
     private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
     private final I18N i18n;
-    private final DeploymentManagement deploymentManagement;
-    private final EventBus.UIEventBus eventBus;
+    private final transient DeploymentManagement deploymentManagement;
+    private final transient EventBus.UIEventBus eventBus;
     private final UINotification notification;
     private final ManagementUIState managementUIState;
 

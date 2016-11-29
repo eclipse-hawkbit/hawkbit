@@ -24,7 +24,7 @@ import com.vaadin.ui.Button;
 public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
     private static final long serialVersionUID = 4120296456125178019L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
     private final ManagementUIState managementUIState;
 
     public DistributionTagButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {

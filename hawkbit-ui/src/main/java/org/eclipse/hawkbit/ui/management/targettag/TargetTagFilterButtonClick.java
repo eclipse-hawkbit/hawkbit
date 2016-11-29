@@ -27,7 +27,7 @@ public class TargetTagFilterButtonClick extends AbstractFilterMultiButtonClick i
 
     private static final long serialVersionUID = -6173433602055291533L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManagementUIState managementUIState;
 

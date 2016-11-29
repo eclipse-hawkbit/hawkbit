@@ -60,11 +60,11 @@ public class TargetFilterTable extends Table {
 
     private final UINotification notification;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final FilterManagementUIState filterManagementUIState;
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private final DistributionSetSelectWindow dsSelectWindow;
 

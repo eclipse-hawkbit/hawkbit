@@ -52,11 +52,11 @@ public class DistributionSetSelectWindow
 
     private final DistributionSetSelectTable dsTable;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private CommonDialogWindow window;
     private CheckBox checkBox;

@@ -31,7 +31,7 @@ public class TargetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 2248703121998709112L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final TargetDetails targetDetails;
 

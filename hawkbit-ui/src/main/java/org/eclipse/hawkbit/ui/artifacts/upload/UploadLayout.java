@@ -82,7 +82,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final UINotification uiNotification;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ArtifactUploadState artifactUploadState;
 

@@ -73,7 +73,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     private final ScheduledExecutorService executorService;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;

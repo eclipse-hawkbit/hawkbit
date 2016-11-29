@@ -70,7 +70,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
 
-    private final EventBus.UIEventBus eventbus;
+    private final transient EventBus.UIEventBus eventbus;
 
     private final SpPermissionChecker permChecker;
 

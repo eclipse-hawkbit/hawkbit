@@ -95,7 +95,7 @@ public class BulkUploadHandler extends CustomComponent
     private long successfullTargetCount;
 
     private final transient Executor executor;
-    private transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private transient EntityFactory entityFactory;
     private final UI uiInstance;

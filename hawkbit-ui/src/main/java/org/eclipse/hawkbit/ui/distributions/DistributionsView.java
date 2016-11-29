@@ -65,7 +65,7 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
 
     private final SpPermissionChecker permChecker;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final I18N i18n;
 

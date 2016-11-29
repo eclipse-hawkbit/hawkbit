@@ -60,10 +60,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private final I18N i18n;
     private final UINotification notificationMessage;
-    private final EventBus.UIEventBus eventBus;
-    private final DistributionSetManagement distributionSetManagement;
-    private final SystemManagement systemManagement;
-    private final EntityFactory entityFactory;
+    private final transient EventBus.UIEventBus eventBus;
+    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient SystemManagement systemManagement;
+    private final transient EntityFactory entityFactory;
 
     private TextField distNameTextField;
     private TextField distVersionTextField;

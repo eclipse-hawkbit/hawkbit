@@ -41,7 +41,7 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
 
     protected UINotification uiNotification;
 
-    protected EventBus.UIEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     protected AbstractAcceptCriteria(final UINotification uiNotification, final UIEventBus eventBus) {
         this.uiNotification = uiNotification;

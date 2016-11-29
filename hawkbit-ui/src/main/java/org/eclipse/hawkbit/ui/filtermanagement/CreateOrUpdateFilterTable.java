@@ -58,7 +58,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private LazyQueryContainer container;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private static final int PROPERTY_DEPT = 3;
 

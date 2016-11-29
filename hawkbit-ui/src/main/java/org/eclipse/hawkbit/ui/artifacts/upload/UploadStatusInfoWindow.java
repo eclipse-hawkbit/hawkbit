@@ -55,7 +55,7 @@ import elemental.json.JsonValue;
  */
 public class UploadStatusInfoWindow extends Window {
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ArtifactUploadState artifactUploadState;
 
@@ -75,9 +75,9 @@ public class UploadStatusInfoWindow extends Window {
 
     private final IndexedContainer uploads;
 
-    private volatile boolean errorOccured = false;
+    private volatile boolean errorOccured;
 
-    private volatile boolean uploadAborted = false;
+    private volatile boolean uploadAborted;
 
     private Button minimizeButton;
 

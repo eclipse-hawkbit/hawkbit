@@ -64,15 +64,15 @@ import com.vaadin.ui.themes.ValoTheme;
 public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private final I18N i18n;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final TargetBulkTokenTags targetBulkTokenTags;
 
     private final ManagementUIState managementUIState;
 
-    private final DeploymentManagement deploymentManagement;
+    private final transient DeploymentManagement deploymentManagement;
 
     private final UiProperties uiproperties;
 

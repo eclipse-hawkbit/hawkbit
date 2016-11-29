@@ -34,7 +34,7 @@ import com.vaadin.ui.VerticalLayout;
 public class ActionHistoryHeader extends VerticalLayout {
     private static final long serialVersionUID = -6276188234115774351L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
     private final ManagementUIState managementUIState;
 
     private Label titleOfActionHistory;

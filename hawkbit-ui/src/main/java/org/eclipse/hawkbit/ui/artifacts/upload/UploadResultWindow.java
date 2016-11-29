@@ -37,11 +37,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Upload status popup.
- *
- *
- *
- *
- *
  */
 public class UploadResultWindow implements Button.ClickListener {
 
@@ -66,9 +61,8 @@ public class UploadResultWindow implements Button.ClickListener {
     private static final String UPLOAD_RESULT = "uploadResult";
 
     private static final String REASON = "reason";
-    
-    private transient EventBus.UIEventBus eventBus;
 
+    private transient EventBus.UIEventBus eventBus;
 
     /**
      * Initialize upload status popup.
@@ -81,7 +75,7 @@ public class UploadResultWindow implements Button.ClickListener {
     public UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
-        eventBus = SpringContextHelper.getBean( EventBus.UIEventBus.class);
+        eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         createComponents();
         createLayout();
     }
@@ -190,7 +184,7 @@ public class UploadResultWindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE)
                 || event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE)) {
             uploadResultsWindow.close();
-            //close upload status popup if open
+            // close upload status popup if open
             eventBus.publish(this, UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED);
         }
 

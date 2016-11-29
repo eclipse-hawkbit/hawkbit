@@ -38,7 +38,7 @@ public class TargetFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -7022704971955491673L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final FilterManagementUIState filterManagementUIState;
 

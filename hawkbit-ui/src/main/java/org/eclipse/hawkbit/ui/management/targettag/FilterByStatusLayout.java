@@ -40,7 +40,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
 
     private final I18N i18n;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManagementUIState managementUIState;
 

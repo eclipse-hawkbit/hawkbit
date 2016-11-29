@@ -30,11 +30,11 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     private static final long serialVersionUID = -6173433602055291533L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManagementUIState managementUIState;
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     public CustomTargetTagFilterButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement) {

@@ -51,9 +51,9 @@ public class DistributionTagDropEvent implements DropHandler {
 
     private final DistributionTableFilters distFilterParameters;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
 

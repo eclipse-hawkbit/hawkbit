@@ -27,7 +27,7 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private static final long serialVersionUID = -584783755917528648L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final ManageDistUIState manageDistUIState;
 

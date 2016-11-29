@@ -35,7 +35,7 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     private static final long serialVersionUID = 5613986489156507581L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private Button rolloutsGroupViewLink;
     private Label headerCaption;

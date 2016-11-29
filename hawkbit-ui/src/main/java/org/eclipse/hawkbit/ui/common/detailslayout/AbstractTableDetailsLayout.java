@@ -48,7 +48,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final I18N i18n;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final SpPermissionChecker permissionChecker;
 

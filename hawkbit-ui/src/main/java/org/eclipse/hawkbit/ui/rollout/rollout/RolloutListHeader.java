@@ -36,7 +36,7 @@ import com.vaadin.ui.Window;
 public class RolloutListHeader extends AbstractGridHeader {
     private static final long serialVersionUID = 2365400733081333174L;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 

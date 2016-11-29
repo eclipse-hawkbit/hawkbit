@@ -58,7 +58,7 @@ public class RolloutView extends VerticalLayout implements View {
 
     private final RolloutUIState rolloutUIState;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     @Autowired
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,

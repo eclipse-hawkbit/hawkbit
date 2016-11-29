@@ -52,7 +52,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
 
     private final FilterManagementUIState filterManagementUIState;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final RsqlValidationOracle rsqlValidationOracle;
 

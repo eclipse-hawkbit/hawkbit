@@ -82,19 +82,19 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
-    private final RolloutManagement rolloutManagement;
+    private final transient RolloutManagement rolloutManagement;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     private final UINotification uiNotification;
 
     private final UiProperties uiProperties;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private final I18N i18n;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private TextField rolloutName;
 

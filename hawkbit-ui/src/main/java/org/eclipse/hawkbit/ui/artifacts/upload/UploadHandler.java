@@ -58,11 +58,11 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private final long maxSize;
     private final Upload upload;
 
-    private volatile String fileName = null;
-    private volatile String mimeType = null;
-    private volatile boolean streamingInterrupted = false;
-    private volatile boolean uploadInterrupted = false;
-    private volatile boolean aborted = false;
+    private volatile String fileName;
+    private volatile String mimeType;
+    private volatile boolean streamingInterrupted;
+    private volatile boolean uploadInterrupted;
+    private volatile boolean aborted;
 
     private String failureReason;
     private final I18N i18n;

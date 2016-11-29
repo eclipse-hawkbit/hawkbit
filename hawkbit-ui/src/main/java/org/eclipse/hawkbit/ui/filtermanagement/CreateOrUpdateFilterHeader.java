@@ -59,11 +59,11 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private final I18N i18n;
 
-    private final EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final FilterManagementUIState filterManagementUIState;
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private final SpPermissionChecker permissionChecker;
 
