@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -101,12 +100,16 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private boolean readOnly;
 
+    private final ArtifactManagement artifactManagement;
+
     public ArtifactDetailsLayout(final I18N i18n, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final UINotification uINotification) {
+            final ArtifactUploadState artifactUploadState, final UINotification uINotification,
+            final ArtifactManagement artifactManagement) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.uINotification = uINotification;
+        this.artifactManagement = artifactManagement;
 
         createComponents();
         buildLayout();
@@ -252,8 +255,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 i18n.get("message.delete.artifact", new Object[] { fileName }), i18n.get("button.ok"),
                 i18n.get("button.cancel"), ok -> {
                     if (ok) {
-                        final ArtifactManagement artifactManagement = SpringContextHelper
-                                .getBean(ArtifactManagement.class);
                         artifactManagement.deleteArtifact(id);
                         uINotification.displaySuccess(i18n.get("message.artifact.deleted", fileName));
                         if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -94,7 +95,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final UploadViewAcceptCriteria uploadViewAcceptCriteria,
-            final SPInfo spInfo) {
+            final SPInfo spInfo, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -104,8 +105,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewAcceptCriteria);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
                 eventBus, softwareManagement, entityFactory, uploadViewAcceptCriteria);
-        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification);
-        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo);
+        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
+                artifactManagement);
+        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo,
+                artifactManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareManagement, uploadViewAcceptCriteria);
     }

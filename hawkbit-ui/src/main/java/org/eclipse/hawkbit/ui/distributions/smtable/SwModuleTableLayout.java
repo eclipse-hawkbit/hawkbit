@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -31,7 +32,7 @@ public class SwModuleTableLayout extends AbstractTableLayout {
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
-            final ArtifactUploadState artifactUploadState) {
+            final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareManagement, entityFactory);
@@ -42,7 +43,8 @@ public class SwModuleTableLayout extends AbstractTableLayout {
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
-                        distributionsViewAcceptCriteria, swMetadataPopupLayout, artifactUploadState),
+                        distributionsViewAcceptCriteria, artifactManagement, swMetadataPopupLayout,
+                        artifactUploadState),
                 new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow, manageDistUIState,
                         softwareManagement, swMetadataPopupLayout, entityFactory));
     }

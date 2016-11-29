@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.distributions;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -91,7 +92,8 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
             final TagManagement tagManagement, final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
-            final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement) {
+            final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
+            final ArtifactManagement artifactManagement) {
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.i18n = i18n;
@@ -103,7 +105,8 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
                 softwareManagement, distributionSetManagement, targetManagement, entityFactory, uiNotification,
                 tagManagement, distributionsViewAcceptCriteria, systemManagement);
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus, softwareManagement,
-                entityFactory, manageDistUIState, permChecker, distributionsViewAcceptCriteria, artifactUploadState);
+                entityFactory, manageDistUIState, permChecker, distributionsViewAcceptCriteria, artifactUploadState,
+                artifactManagement);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
                 tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewAcceptCriteria);
         this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,

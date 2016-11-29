@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -108,14 +109,18 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
+    private final transient ArtifactManagement artifactManagement;
+
     public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final SPInfo spInfo) {
+            final ArtifactUploadState artifactUploadState, final SPInfo spInfo,
+            final ArtifactManagement artifactManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.spInfo = spInfo;
+        this.artifactManagement = artifactManagement;
 
         createComponents();
         buildLayout();
@@ -621,7 +626,8 @@ public class UploadLayout extends VerticalLayout {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
-                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus);
+                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus,
+                        artifactManagement);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());

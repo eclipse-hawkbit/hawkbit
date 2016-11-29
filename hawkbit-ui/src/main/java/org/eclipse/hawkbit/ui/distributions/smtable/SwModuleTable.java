@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
@@ -78,12 +79,14 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     SwModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
-            final SwMetadataPopupLayout swMetadataPopupLayout, final ArtifactUploadState artifactUploadState) {
+            final ArtifactManagement artifactManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
+            final ArtifactUploadState artifactUploadState) {
         super(eventBus, i18n, uiNotification);
         this.manageDistUIState = manageDistUIState;
         this.softwareManagement = softwareManagement;
         this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
-        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification);
+        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
+                artifactManagement);
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
         addNewContainerDS();
