@@ -56,7 +56,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     private Button config;
 
-    public MultipleTargetFilter(final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+    MultipleTargetFilter(final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final I18N i18n,
             final UIEventBus eventBus, final ManagementViewAcceptCriteria managementViewAcceptCriteria,
             final UINotification notification, final EntityFactory entityFactory,

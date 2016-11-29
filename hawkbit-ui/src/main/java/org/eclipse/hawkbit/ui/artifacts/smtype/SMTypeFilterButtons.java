@@ -42,7 +42,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
 
-    public SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+    SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final UploadViewAcceptCriteria uploadViewAcceptCriteria, final SoftwareManagement softwareManagement) {
         super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareManagement));
         this.artifactUploadState = artifactUploadState;

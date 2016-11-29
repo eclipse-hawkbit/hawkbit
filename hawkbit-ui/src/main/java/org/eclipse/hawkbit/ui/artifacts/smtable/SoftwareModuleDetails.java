@@ -36,8 +36,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Software module details.
- * 
- *
  */
 public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDetailsLayout<SoftwareModule> {
 
@@ -53,8 +51,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     private final SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
-    public SoftwareModuleDetails(final I18N i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker,
+    SoftwareModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {

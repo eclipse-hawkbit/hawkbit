@@ -61,7 +61,7 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
     private Button buttonClicked;
     private static final String BTN_CLICKED = "btnClicked";
 
-    public FilterByStatusLayout(final I18N i18n, final UIEventBus eventBus, final ManagementUIState managementUIState) {
+    FilterByStatusLayout(final I18N i18n, final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;

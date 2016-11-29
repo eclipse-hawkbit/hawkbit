@@ -52,7 +52,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     private final SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
-    public SwModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    SwModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
             final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {

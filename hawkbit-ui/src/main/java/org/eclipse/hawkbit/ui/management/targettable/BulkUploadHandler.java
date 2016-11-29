@@ -100,7 +100,7 @@ public class BulkUploadHandler extends CustomComponent
     private transient EntityFactory entityFactory;
     private final UI uiInstance;
 
-    public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
+    BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
         this.uiInstance = uiInstance;
@@ -172,7 +172,7 @@ public class BulkUploadHandler extends CustomComponent
          *
          * @param event
          */
-        public UploadAsync(final SucceededEvent event) {
+        private UploadAsync(final SucceededEvent event) {
             this.event = event;
         }
 

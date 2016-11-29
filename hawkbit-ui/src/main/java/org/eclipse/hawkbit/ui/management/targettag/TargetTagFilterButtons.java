@@ -73,7 +73,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     private final TargetManagement targetManagement;
 
-    public TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
+    TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final I18N i18n,
             final UINotification notification, final SpPermissionChecker permChecker, final EntityFactory entityFactory,
             final TargetManagement targetManagement) {

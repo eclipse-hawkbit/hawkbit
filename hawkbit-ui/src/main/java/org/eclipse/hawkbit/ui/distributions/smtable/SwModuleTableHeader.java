@@ -37,7 +37,7 @@ public class SwModuleTableHeader extends AbstractTableHeader {
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    public SwModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    SwModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ManageDistUIState manageDistUIstate,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);

@@ -40,7 +40,7 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
-    public RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
+    RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
             final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n) {

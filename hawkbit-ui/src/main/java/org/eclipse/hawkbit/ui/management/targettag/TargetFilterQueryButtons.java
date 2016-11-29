@@ -46,7 +46,7 @@ public class TargetFilterQueryButtons extends Table {
 
     private CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
 
-    public TargetFilterQueryButtons(final ManagementUIState managementUIState, final UIEventBus eventBus) {
+    TargetFilterQueryButtons(final ManagementUIState managementUIState, final UIEventBus eventBus) {
         this.managementUIState = managementUIState;
         this.eventBus = eventBus;
     }
@@ -56,7 +56,7 @@ public class TargetFilterQueryButtons extends Table {
      * 
      * @param filterButtonClickBehaviour
      */
-    public void init(final CustomTargetTagFilterButtonClick filterButtonClickBehaviour) {
+    void init(final CustomTargetTagFilterButtonClick filterButtonClickBehaviour) {
         this.customTargetTagFilterButtonClick = filterButtonClickBehaviour;
         createTable();
         eventBus.subscribe(this);

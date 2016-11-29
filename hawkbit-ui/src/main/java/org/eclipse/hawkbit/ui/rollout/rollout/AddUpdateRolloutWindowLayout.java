@@ -128,10 +128,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
-    public AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
-            final UIEventBus eventBus) {
+    AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
+            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final I18N i18n, final UIEventBus eventBus) {
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
         this.targetManagement = targetManagement;

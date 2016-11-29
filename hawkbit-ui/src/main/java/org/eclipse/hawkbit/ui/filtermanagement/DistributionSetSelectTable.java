@@ -46,8 +46,7 @@ public class DistributionSetSelectTable extends Table {
 
     private Container container;
 
-    public DistributionSetSelectTable(final I18N i18n, final UIEventBus eventBus,
-            final ManageDistUIState manageDistUIState) {
+    DistributionSetSelectTable(final I18N i18n, final UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.manageDistUIState = manageDistUIState;
         setStyleName("sp-table");

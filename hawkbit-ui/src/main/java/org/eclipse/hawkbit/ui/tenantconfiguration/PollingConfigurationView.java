@@ -38,7 +38,7 @@ public class PollingConfigurationView extends BaseConfigurationView
     private Duration tenantPollTime;
     private Duration tenantOverdueTime;
 
-    public PollingConfigurationView(final I18N i18n, final ControllerPollProperties controllerPollProperties,
+    PollingConfigurationView(final I18N i18n, final ControllerPollProperties controllerPollProperties,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
 
@@ -130,7 +130,7 @@ public class PollingConfigurationView extends BaseConfigurationView
         notifyConfigurationChanged();
     }
 
-    private boolean compareDurations(final Duration d1, final Duration d2) {
+    private static boolean compareDurations(final Duration d1, final Duration d2) {
         if (d1 == null && d2 == null) {
             return true;
         }

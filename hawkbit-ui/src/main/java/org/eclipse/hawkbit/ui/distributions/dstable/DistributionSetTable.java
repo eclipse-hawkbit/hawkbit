@@ -98,7 +98,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    public DistributionSetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
+    DistributionSetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement, final SoftwareManagement softwareManagement,
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,

@@ -66,7 +66,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
-    public CreateOrUpdateFilterTable(final I18N i18n, final UIEventBus eventBus,
+    CreateOrUpdateFilterTable(final I18N i18n, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState) {
         this.i18n = i18n;
         this.filterManagementUIState = filterManagementUIState;

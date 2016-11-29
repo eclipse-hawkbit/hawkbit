@@ -38,7 +38,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    public SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ArtifactUploadState artifactUploadState, final UINotification uiNotifcation,
             final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {

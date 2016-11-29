@@ -13,32 +13,13 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * ComboBox with required style.
- * 
- *
- *
  */
 public class SPUICheckBox extends CheckBox {
 
     private static final long serialVersionUID = 2270323611612189225L;
 
-    /**
-     * Parametric constructor to decorate.
-     * 
-     * @param caption
-     *            as caption for checkbox
-     * @param style
-     *            style of the CheckBox
-     * @param styleName
-     *            styleName of the CheckBox
-     * @param required
-     *            required check for Checkbox
-     * @param data
-     *            data of the CheckBox
-     * 
-     */
-    public SPUICheckBox(final String caption, final String style, final String styleName, final boolean required,
+    SPUICheckBox(final String caption, final String style, final String styleName, final boolean required,
             final String data) {
-        super();
         decorate(caption, style, styleName, required, data);
     }
 

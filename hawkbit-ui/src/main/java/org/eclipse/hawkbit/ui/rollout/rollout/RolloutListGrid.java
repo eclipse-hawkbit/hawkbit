@@ -127,7 +127,7 @@ public class RolloutListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
-    public RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+    RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final UINotification uiNotification, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiProperties) {

@@ -62,9 +62,8 @@ public class DistributionSetSelectWindow
     private CheckBox checkBox;
     private Long tfqId;
 
-    public DistributionSetSelectWindow(final I18N i18n, final UIEventBus eventBus,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final ManageDistUIState manageDistUIState) {
+    DistributionSetSelectWindow(final I18N i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.dsTable = new DistributionSetSelectTable(i18n, eventBus, manageDistUIState);
         this.eventBus = eventBus;

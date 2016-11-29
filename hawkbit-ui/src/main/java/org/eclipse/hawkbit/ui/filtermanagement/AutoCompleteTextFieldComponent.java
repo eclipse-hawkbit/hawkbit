@@ -223,7 +223,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     class StatusCircledAsync implements Runnable {
         private final UI current;
 
-        public StatusCircledAsync(final UI current) {
+        StatusCircledAsync(final UI current) {
             this.current = current;
         }
 

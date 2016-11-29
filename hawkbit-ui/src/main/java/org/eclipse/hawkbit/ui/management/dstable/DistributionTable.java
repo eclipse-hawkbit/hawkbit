@@ -90,7 +90,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private boolean isDistPinned;
     private Button distributinPinnedBtn;
 
-    public DistributionTable(final UIEventBus eventBus, final I18N i18n, final SpPermissionChecker permissionChecker,
+    DistributionTable(final UIEventBus eventBus, final I18N i18n, final SpPermissionChecker permissionChecker,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TargetManagement targetService,
             final DsMetadataPopupLayout dsMetadataPopupLayout,

@@ -33,7 +33,7 @@ public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick
 
     private final transient SoftwareManagement softwareManagement;
 
-    public DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+    DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final SoftwareManagement softwareManagement) {
         this.eventBus = eventBus;
         this.manageDistUIState = manageDistUIState;

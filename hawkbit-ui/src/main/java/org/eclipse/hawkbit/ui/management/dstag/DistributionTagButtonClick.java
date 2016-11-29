@@ -27,7 +27,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
     private final transient EventBus.UIEventBus eventBus;
     private final ManagementUIState managementUIState;
 
-    public DistributionTagButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+    DistributionTagButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
     }

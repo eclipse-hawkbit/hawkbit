@@ -71,7 +71,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private boolean isComplexFilterViewDisplayed;
 
-    public TargetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    TargetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,

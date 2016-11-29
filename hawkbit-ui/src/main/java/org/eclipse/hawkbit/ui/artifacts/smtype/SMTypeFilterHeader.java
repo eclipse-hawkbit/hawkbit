@@ -36,7 +36,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     private final ArtifactUploadState artifactUploadState;
     private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
-    public SMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    SMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement) {

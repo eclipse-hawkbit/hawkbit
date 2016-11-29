@@ -85,8 +85,8 @@ public class ActionHistoryTable extends TreeTable {
 
     private Target target;
 
-    public ActionHistoryTable(final I18N i18n, final DeploymentManagement deploymentManagement,
-            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
+    ActionHistoryTable(final I18N i18n, final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
+            final UINotification notification, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.deploymentManagement = deploymentManagement;
         this.eventBus = eventBus;

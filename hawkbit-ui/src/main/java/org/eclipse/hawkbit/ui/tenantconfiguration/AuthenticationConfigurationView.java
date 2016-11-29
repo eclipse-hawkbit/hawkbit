@@ -55,8 +55,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
     private CheckBox downloadAnonymousCheckBox;
 
-    public AuthenticationConfigurationView(final I18N i18n,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+    AuthenticationConfigurationView(final I18N i18n, final TenantConfigurationManagement tenantConfigurationManagement,
             final SecurityTokenGenerator securityTokenGenerator) {
         this.i18n = i18n;
         this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(

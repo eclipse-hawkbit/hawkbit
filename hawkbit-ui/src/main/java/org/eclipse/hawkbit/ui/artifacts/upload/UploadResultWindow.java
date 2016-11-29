@@ -72,7 +72,7 @@ public class UploadResultWindow implements Button.ClickListener {
      * @param i18n
      *            I18N
      */
-    public UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
+    UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
         eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);

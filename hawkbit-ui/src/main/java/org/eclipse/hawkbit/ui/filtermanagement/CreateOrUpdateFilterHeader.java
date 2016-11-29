@@ -105,7 +105,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    public CreateOrUpdateFilterHeader(final I18N i18n, final UIEventBus eventBus,
+    CreateOrUpdateFilterHeader(final I18N i18n, final UIEventBus eventBus,
             final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,

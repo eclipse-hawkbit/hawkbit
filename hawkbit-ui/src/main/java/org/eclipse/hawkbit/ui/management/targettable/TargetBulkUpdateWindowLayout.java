@@ -90,10 +90,10 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private Button minimizeButton;
     private Button closeButton;
 
-    public TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement,
-            final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
-            final SpPermissionChecker checker, final UINotification uinotification, final TagManagement tagManagement) {
+    TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
+            final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
+            final TagManagement tagManagement) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;

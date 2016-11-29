@@ -33,11 +33,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
 
     private static final long serialVersionUID = 17896542758L;
 
-    private final SystemManagement systemManagement;
-
-    private final DistributionSetManagement distributionSetManagement;
-
-    private final I18N i18n;
+    private final transient SystemManagement systemManagement;
 
     private Long currentDefaultDisSetType;
 
@@ -49,11 +45,9 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
 
     private final Label changeIcon;
 
-    public DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
+    DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
             final DistributionSetManagement distributionSetManagement, final I18N i18n) {
         this.systemManagement = systemManagement;
-        this.distributionSetManagement = distributionSetManagement;
-        this.i18n = i18n;
 
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();

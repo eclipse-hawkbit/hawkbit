@@ -33,7 +33,7 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private final DistributionSetManagement distributionSetManagement;
 
-    public DSTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+    DSTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement) {
         this.eventBus = eventBus;
         this.manageDistUIState = manageDistUIState;

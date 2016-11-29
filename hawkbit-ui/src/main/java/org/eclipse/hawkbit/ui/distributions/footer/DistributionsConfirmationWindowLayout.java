@@ -79,7 +79,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private final ManageDistUIState manageDistUIState;
 
-    public DistributionsConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+    DistributionsConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
             final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement,
             final ManageDistUIState manageDistUIState) {
         super(i18n, eventBus);

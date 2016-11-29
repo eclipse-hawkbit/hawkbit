@@ -65,7 +65,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    public SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
+    SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
             final UploadViewAcceptCriteria uploadViewAcceptCriteria, final EntityFactory entityFactory,
             final SpPermissionChecker permChecker, final SwMetadataPopupLayout swMetadataPopupLayout) {

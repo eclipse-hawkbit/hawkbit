@@ -54,7 +54,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private final ManagementUIState managementUIState;
     private final EntityFactory entityFactory;
 
-    public DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
+    DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final EntityFactory entityFactory, final I18N i18n, final UINotification notification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,

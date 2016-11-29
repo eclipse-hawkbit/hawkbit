@@ -34,7 +34,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     private final ManagementUIState managementUIState;
     private final CreateUpdateDistributionTagLayoutWindow createORUpdateDistributionTagLayout;
 
-    public DistributionTagHeader(final I18N i18n, final ManagementUIState managementUIState,
+    DistributionTagHeader(final I18N i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification) {
         super(permChecker, eventBus, i18n);

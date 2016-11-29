@@ -62,7 +62,7 @@ public class ColorPickerLayout extends GridLayout {
         addComponent(colorSelect, 1, 1, 1, 3);
     }
 
-    public void init() {
+    private void init() {
 
         selectors = new HashSet<>();
         selectedColor = getDefaultColor();
@@ -80,7 +80,7 @@ public class ColorPickerLayout extends GridLayout {
         selectors.add(colorSelect);
     }
 
-    public Slider createRGBSlider(final String caption, final String styleName) {
+    private Slider createRGBSlider(final String caption, final String styleName) {
         final Slider slider = new Slider(caption, 0, 255);
         slider.setImmediate(true);
         slider.setWidth("150px");

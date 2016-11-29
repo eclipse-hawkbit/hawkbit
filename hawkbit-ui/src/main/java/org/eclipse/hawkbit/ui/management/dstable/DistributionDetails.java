@@ -48,13 +48,12 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private final DistributionTagToken distributionTagToken;
     private final DistributionSetManagement distributionSetManagement;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
-    private final EntityFactory entityFactory;
 
     private final SoftwareModuleDetailsTable softwareModuleTable;
 
     private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
-    public DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
             final UINotification notificationMessage, final SystemManagement systemManagement,
@@ -67,7 +66,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         this.distributionSetManagement = distributionSetManagement;
         this.dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notificationMessage, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
-        this.entityFactory = entityFactory;
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
 
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null);

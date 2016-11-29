@@ -37,7 +37,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     private final DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
-    public DistributionSetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    DistributionSetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final ManageDistUIState manageDistUIstate, final DistributionAddUpdateWindowLayout addUpdateWindowLayout) {
         super(i18n, permChecker, eventbus, null, manageDistUIstate, null);
         this.addUpdateWindowLayout = addUpdateWindowLayout;

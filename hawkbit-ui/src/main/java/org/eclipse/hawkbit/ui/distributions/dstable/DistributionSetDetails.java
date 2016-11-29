@@ -71,15 +71,13 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private final DistributionTagToken distributionTagToken;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
-
-    private final EntityFactory entityFactory;
 
     private final SoftwareModuleDetailsTable softwareModuleTable;
 
@@ -91,9 +89,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private Map<String, StringBuilder> assignedSWModule;
 
-    public DistributionSetDetails(final I18N i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final ManagementUIState managementUIState,
+    DistributionSetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+            final ManageDistUIState manageDistUIState, final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
@@ -108,7 +105,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         this.distributionSetManagement = distributionSetManagement;
         this.targetManagement = targetManagement;
         this.dsMetadataPopupLayout = popupLayout;
-        this.entityFactory = entityFactory;
 
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
                 eventBus, manageDistUIState);

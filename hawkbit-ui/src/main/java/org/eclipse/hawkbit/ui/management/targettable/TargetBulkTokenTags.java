@@ -26,7 +26,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final long serialVersionUID = 4159616629565523717L;
 
-    public TargetBulkTokenTags(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+    TargetBulkTokenTags(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }

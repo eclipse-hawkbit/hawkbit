@@ -40,7 +40,7 @@ public class ActionHistoryHeader extends VerticalLayout {
     private Label titleOfActionHistory;
     private SPUIButton maxMinButton;
 
-    public ActionHistoryHeader(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+    ActionHistoryHeader(final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
         buildComponent();

@@ -75,7 +75,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    public SwModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
+    SwModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
             final SwMetadataPopupLayout swMetadataPopupLayout, final ArtifactUploadState artifactUploadState) {

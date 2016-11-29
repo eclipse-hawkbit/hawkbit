@@ -36,7 +36,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
     private final ManageDistUIState manageDistUIState;
     private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
-    public DistSMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    DistSMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement swTypeManagementService) {

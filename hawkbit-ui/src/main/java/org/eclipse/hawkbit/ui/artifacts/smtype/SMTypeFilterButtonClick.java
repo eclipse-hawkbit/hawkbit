@@ -33,7 +33,7 @@ public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private final transient SoftwareManagement softwareManagement;
 
-    public SMTypeFilterButtonClick(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+    SMTypeFilterButtonClick(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final SoftwareManagement softwareManagement) {
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;

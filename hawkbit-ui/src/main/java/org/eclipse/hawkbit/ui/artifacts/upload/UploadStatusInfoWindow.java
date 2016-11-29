@@ -93,8 +93,7 @@ public class UploadStatusInfoWindow extends Window {
 
     private ConfirmationDialog confirmDialog;
 
-    public UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final I18N i18n) {
+    UploadStatusInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState, final I18N i18n) {
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;

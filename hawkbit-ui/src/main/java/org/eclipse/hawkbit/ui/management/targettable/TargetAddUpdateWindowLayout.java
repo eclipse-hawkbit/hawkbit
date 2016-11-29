@@ -64,8 +64,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private FormLayout formLayout;
     private CommonDialogWindow window;
 
-    public TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement,
-            final UIEventBus eventBus, final UINotification uINotification, final EntityFactory entityFactory) {
+    TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+            final UINotification uINotification, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;

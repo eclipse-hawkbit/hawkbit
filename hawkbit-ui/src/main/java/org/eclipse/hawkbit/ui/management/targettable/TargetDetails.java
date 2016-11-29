@@ -59,7 +59,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
 
-    public TargetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+    TargetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final UINotification uiNotification,
             final TagManagement tagManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory) {

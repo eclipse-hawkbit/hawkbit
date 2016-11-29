@@ -54,7 +54,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private final ArtifactUploadState artifactUploadState;
 
-    public UploadViewConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+    UploadViewConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final ArtifactUploadState artifactUploadState) {
         super(i18n, eventBus);
         this.softwareManagement = softwareManagement;

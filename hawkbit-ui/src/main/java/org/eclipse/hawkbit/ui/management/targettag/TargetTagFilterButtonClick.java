@@ -31,7 +31,7 @@ public class TargetTagFilterButtonClick extends AbstractFilterMultiButtonClick i
 
     private final ManagementUIState managementUIState;
 
-    public TargetTagFilterButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+    TargetTagFilterButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState) {
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
     }

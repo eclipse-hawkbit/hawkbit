@@ -46,7 +46,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    public DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+    DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
             final SoftwareManagement softwareManagement) {
         super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareManagement));

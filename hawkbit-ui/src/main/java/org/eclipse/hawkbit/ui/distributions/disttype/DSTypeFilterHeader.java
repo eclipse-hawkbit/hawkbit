@@ -37,7 +37,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
 
-    public DSTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+    DSTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {

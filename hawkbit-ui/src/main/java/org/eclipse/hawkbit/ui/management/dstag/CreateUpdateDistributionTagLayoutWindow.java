@@ -42,7 +42,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
 
-    public CreateUpdateDistributionTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
+    CreateUpdateDistributionTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);

@@ -124,8 +124,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      * @param artifactUploadState
      *            reference of session variable {@link ArtifactUploadState}.
      */
-    public UploadConfirmationWindow(final UploadLayout artifactUploadView,
-            final ArtifactUploadState artifactUploadState) {
+    UploadConfirmationWindow(final UploadLayout artifactUploadView, final ArtifactUploadState artifactUploadState) {
         this.uploadLayout = artifactUploadView;
         this.artifactUploadState = artifactUploadState;
         i18n = artifactUploadView.getI18n();
