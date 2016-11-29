@@ -36,20 +36,17 @@ public class DistributionTableLayout extends AbstractTableLayout {
             final UINotification notification, final SystemManagement systemManagement,
             final TagManagement tagManagement, final TargetManagement targetService) {
 
-        final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
-                i18n, notification, eventBus, distributionSetManagement, systemManagement, entityFactory);
-
         final DsMetadataPopupLayout dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
 
-        super.init(
-                new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState,
-                        distributionAddUpdateWindowLayout),
-                new DistributionTable(eventBus, i18n, permissionChecker, notification, managementUIState,
-                        managementViewAcceptCriteria, targetService, dsMetadataPopupLayout, distributionSetManagement),
+        final DistributionTable distributionTable = new DistributionTable(eventBus, i18n, permissionChecker,
+                notification, managementUIState, managementViewAcceptCriteria, targetService, dsMetadataPopupLayout,
+                distributionSetManagement);
+
+        super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState, null),
+                distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
-                        dsMetadataPopupLayout, entityFactory, notification, tagManagement,
-                        distributionAddUpdateWindowLayout));
+                        dsMetadataPopupLayout, entityFactory, notification, tagManagement, null));
     }
 
 }

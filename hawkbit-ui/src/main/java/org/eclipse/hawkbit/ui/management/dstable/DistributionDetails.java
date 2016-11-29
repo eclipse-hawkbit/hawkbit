@@ -66,7 +66,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
                 distributionSetManagement, entityFactory, permissionChecker);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
 
-        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null);
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
+                notificationMessage);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory);

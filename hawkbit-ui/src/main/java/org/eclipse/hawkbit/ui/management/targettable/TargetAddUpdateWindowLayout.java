@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus;
@@ -56,6 +55,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private final transient EntityFactory entityFactory;
 
+    private final TargetTable targetTable;
+
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
@@ -65,12 +66,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private CommonDialogWindow window;
 
     TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
-            final UINotification uINotification, final EntityFactory entityFactory) {
+            final UINotification uINotification, final EntityFactory entityFactory, final TargetTable targetTable) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
         this.uINotification = uINotification;
         this.entityFactory = entityFactory;
+        this.targetTable = targetTable;
         createRequiredComponents();
         buildLayout();
         setCompositionRoot(formLayout);
@@ -143,7 +145,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         /* save new target */
         final Target newTarget = targetManagement.createTarget(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
-        final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
+
         final Set<TargetIdName> s = new HashSet<>();
         s.add(newTarget.getTargetIdName());
         targetTable.setValue(s);

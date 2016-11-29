@@ -38,21 +38,24 @@ public class DistributionSetTableLayout extends AbstractTableLayout {
             final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
             final SystemManagement systemManagement) {
 
-        final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
-                i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory);
-
         final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
+
+        final DistributionSetTable distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification,
+                permissionChecker, manageDistUIState, distributionSetManagement, softwareManagement,
+                distributionsViewAcceptCriteria, targetManagement, popupLayout);
+
+        final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
+                i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,
+                distributionSetTable);
 
         super.init(
                 new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
                         distributionAddUpdateWindowLayout),
-                new DistributionSetTable(eventBus, i18n, uiNotification, permissionChecker, manageDistUIState,
-                        distributionSetManagement, softwareManagement, distributionsViewAcceptCriteria,
-                        targetManagement, popupLayout),
+                distributionSetTable,
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
                         distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
-                        targetManagement, entityFactory, uiNotification, tagManagement, popupLayout));
+                        targetManagement, entityFactory, uiNotification, tagManagement, popupLayout, uiNotification));
     }
 
 }

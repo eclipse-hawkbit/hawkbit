@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -65,6 +64,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private final transient SystemManagement systemManagement;
     private final transient EntityFactory entityFactory;
 
+    private final DistributionSetTable distributionSetTable;
+
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private TextArea descTextArea;
@@ -77,13 +78,15 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     public DistributionAddUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
-            final SystemManagement systemManagement, final EntityFactory entityFactory) {
+            final SystemManagement systemManagement, final EntityFactory entityFactory,
+            final DistributionSetTable distributionSetTable) {
         this.i18n = i18n;
         this.notificationMessage = notificationMessage;
         this.eventBus = eventBus;
         this.distributionSetManagement = distributionSetManagement;
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
+        this.distributionSetTable = distributionSetTable;
         createRequiredComponents();
         buildLayout();
     }
@@ -221,7 +224,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
-        final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
         distributionSetTable.setValue(
                 Sets.newHashSet(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion())));
     }

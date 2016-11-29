@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -116,6 +117,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private final ArtifactUploadState artifactUploadState;
 
+    private final UIEventBus eventBus;
+
     /**
      * Initialize the upload confirmation window.
      *
@@ -124,9 +127,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      * @param artifactUploadState
      *            reference of session variable {@link ArtifactUploadState}.
      */
-    UploadConfirmationWindow(final UploadLayout artifactUploadView, final ArtifactUploadState artifactUploadState) {
+    UploadConfirmationWindow(final UploadLayout artifactUploadView, final ArtifactUploadState artifactUploadState,
+            final UIEventBus eventBus) {
         this.uploadLayout = artifactUploadView;
         this.artifactUploadState = artifactUploadState;
+        this.eventBus = eventBus;
         i18n = artifactUploadView.getI18n();
         createRequiredComponents();
         buildLayout();
@@ -601,7 +606,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             uploadLayout.clearFileList();
             window.close();
             // call upload result window
-            currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n);
+            currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n, eventBus);
             UI.getCurrent().addWindow(currentUploadResultWindow.getUploadResultsWindow());
             currentUploadResultWindow.getUploadResultsWindow().addCloseListener(event -> onResultDetailsPopupClose());
             uploadLayout.setResultPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),

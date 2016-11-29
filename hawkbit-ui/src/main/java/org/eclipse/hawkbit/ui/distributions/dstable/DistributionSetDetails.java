@@ -95,7 +95,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
             final UINotification uinotification, final TagManagement tagManagement,
-            final DsMetadataPopupLayout popupLayout) {
+            final DsMetadataPopupLayout popupLayout, final UINotification uiNotification) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.manageDistUIState = manageDistUIState;
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
@@ -107,7 +107,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         this.dsMetadataPopupLayout = popupLayout;
 
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
-                eventBus, manageDistUIState);
+                eventBus, manageDistUIState, uiNotification);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
                 dsMetadataPopupLayout, entityFactory);

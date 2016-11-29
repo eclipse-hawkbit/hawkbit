@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,14 +92,15 @@ public class SoftwareModuleDetailsTable extends Table {
      */
     public SoftwareModuleDetailsTable(final I18N i18n, final boolean isUnassignSoftModAllowed,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
-            final EventBus.UIEventBus eventBus, final ManageDistUIState manageDistUIState) {
+            final EventBus.UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+            final UINotification uiNotification) {
         this.i18n = i18n;
         this.isUnassignSoftModAllowed = isUnassignSoftModAllowed;
         this.permissionChecker = permissionChecker;
         this.distributionSetManagement = distributionSetManagement;
         this.manageDistUIState = manageDistUIState;
         this.eventBus = eventBus;
-        this.uiNotification = SpringContextHelper.getBean(UINotification.class);
+        this.uiNotification = uiNotification;
         createSwModuleTable();
     }
 

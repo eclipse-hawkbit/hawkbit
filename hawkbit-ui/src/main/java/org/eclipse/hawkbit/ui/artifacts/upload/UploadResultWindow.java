@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus;
 
@@ -72,10 +71,10 @@ public class UploadResultWindow implements Button.ClickListener {
      * @param i18n
      *            I18N
      */
-    UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
+    UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n, final EventBus.UIEventBus eventBus) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
-        eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
+        this.eventBus = eventBus;
         createComponents();
         createLayout();
     }

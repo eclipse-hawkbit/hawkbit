@@ -62,12 +62,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     TargetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final UINotification uiNotification,
             final TagManagement tagManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory) {
+            final EntityFactory entityFactory, final TargetTable targetTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
         targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
-                entityFactory);
+                entityFactory, targetTable);
         addTabs(detailsTab);
         restoreState();
     }

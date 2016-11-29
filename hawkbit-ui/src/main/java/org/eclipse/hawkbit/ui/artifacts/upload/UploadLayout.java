@@ -621,7 +621,7 @@ public class UploadLayout extends VerticalLayout {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
-                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState);
+                currentUploadConfirmationwindow = new UploadConfirmationWindow(this, artifactUploadState, eventBus);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
                 setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
                         Page.getCurrent().getBrowserWindowHeight());
