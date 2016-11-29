@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -38,8 +37,8 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
     SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
-            final EntityFactory entityFactory, final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
+            final ArtifactUploadState artifactUploadState, final EntityFactory entityFactory,
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, null, artifactUploadState);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
     }

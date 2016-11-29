@@ -64,7 +64,7 @@ public final class DashboardMenu extends CustomComponent {
 
     private final UiProperties uiProperties;
 
-    private final HawkbitServerProperties serverProperties;
+    private final transient HawkbitServerProperties serverProperties;
 
     private static final long serialVersionUID = 5394474618559481462L;
 

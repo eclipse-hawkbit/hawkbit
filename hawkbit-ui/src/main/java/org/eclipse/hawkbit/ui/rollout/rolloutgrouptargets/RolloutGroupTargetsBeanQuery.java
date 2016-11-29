@@ -51,7 +51,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     private transient RolloutUIState rolloutUIState;
 
-    private final Optional<RolloutGroup> rolloutGroup;
+    private final transient Optional<RolloutGroup> rolloutGroup;
 
     /**
      * Parametric Constructor.

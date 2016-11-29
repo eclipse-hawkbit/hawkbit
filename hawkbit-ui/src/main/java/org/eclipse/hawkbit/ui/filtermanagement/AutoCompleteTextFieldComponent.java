@@ -54,11 +54,11 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final RsqlValidationOracle rsqlValidationOracle;
+    private final transient RsqlValidationOracle rsqlValidationOracle;
 
-    private final Executor executor;
+    private final transient Executor executor;
 
-    private final List<FilterQueryChangeListener> listeners = new LinkedList<>();
+    private final transient List<FilterQueryChangeListener> listeners = new LinkedList<>();
 
     private Label validationIcon;
     private TextField queryTextField;

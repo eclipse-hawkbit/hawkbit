@@ -57,7 +57,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             Arrays.asList(DragEvent.DISTRIBUTION_TYPE_DRAG, DragEvent.DISTRIBUTION_DRAG, DragEvent.SOFTWAREMODULE_DRAG,
                     DragEvent.SOFTWAREMODULE_TYPE_DRAG));
 
-    private final SystemManagement systemManagement;
+    private final transient SystemManagement systemManagement;
 
     private final ManageDistUIState manageDistUIState;
 

@@ -57,7 +57,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
-    private final RolloutGroupManagement rolloutGroupManagement;
+    private final transient RolloutGroupManagement rolloutGroupManagement;
 
     private final RolloutUIState rolloutUIState;
 
