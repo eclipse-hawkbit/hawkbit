@@ -174,11 +174,7 @@ public class ViewComponentClientCriterionTest {
         when(VDragAndDropManager.get().getCurrentDropHandler()).thenReturn(dropHandler);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        when(uidl.getIntAttribute("cdt")).thenReturn(3);
-        for (int i = 0; i < 3; i++) {
-            when(uidl.getStringAttribute("dt" + String.valueOf(i))).thenReturn("dropTarget" + String.valueOf(i));
-        }
+        UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
         boolean result = cut.isValidDropTarget(uidl);
@@ -198,11 +194,7 @@ public class ViewComponentClientCriterionTest {
         when(VDragAndDropManager.get().getCurrentDropHandler()).thenReturn(dropHandler);
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        when(uidl.getIntAttribute("cdt")).thenReturn(3);
-        for (int i = 0; i < 3; i++) {
-            when(uidl.getStringAttribute("dt" + String.valueOf(i))).thenReturn("dropTarget" + String.valueOf(i));
-        }
+        UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
         boolean result = cut.isValidDropTarget(uidl);
@@ -224,11 +216,7 @@ public class ViewComponentClientCriterionTest {
         doThrow(new RuntimeException()).when(dropHandler).getConnector();
 
         // prepare configuration:
-        UIDL uidl = GWT.create(UIDL.class);
-        when(uidl.getIntAttribute("cdt")).thenReturn(3);
-        for (int i = 0; i < 3; i++) {
-            when(uidl.getStringAttribute("dt" + String.valueOf(i))).thenReturn("dropTarget" + String.valueOf(i));
-        }
+        UIDL uidl = createUidlWithThreeDropTargets();
 
         // act
         Boolean result = null;
@@ -240,6 +228,15 @@ public class ViewComponentClientCriterionTest {
 
         // assure that in case of exception the drop target is declared invalid
         assertThat(result).as("Expected: Invalid drop if exception occures.").isFalse();
+    }
+
+    private UIDL createUidlWithThreeDropTargets() {
+        UIDL uidl = GWT.create(UIDL.class);
+        when(uidl.getIntAttribute("cdt")).thenReturn(3);
+        for (int i = 0; i < 3; i++) {
+            when(uidl.getStringAttribute("dt" + String.valueOf(i))).thenReturn("dropTarget" + String.valueOf(i));
+        }
+        return uidl;
     }
 
 }

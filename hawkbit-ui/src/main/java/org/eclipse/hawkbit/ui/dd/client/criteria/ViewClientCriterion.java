@@ -58,6 +58,14 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
 
     static final String SP_DRAG_COUNT = "sp-drag-count";
 
+    private boolean accepted;
+
+    private ViewCriterionTemplates multiRowSelectStyle;
+
+    private VDragEvent previousDragEvent;
+
+    private HandlerRegistration nativeEventHandlerRegistration;
+
     /**
      * This interface is used to compile string templates in the GWT context (as
      * other approaches like <code>MessageFormat</code> would fail).
@@ -83,14 +91,6 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
         @Template("<p class=\"v-Notification-description\"><span class=\"v-icon\" style=\"font-family: FontAwesome;\">&#xF071;</span> {0}</p>")
         SafeHtml notificationMsg(String msg);
     }
-
-    private boolean accepted;
-
-    private ViewCriterionTemplates multiRowSelectStyle;
-
-    private VDragEvent previousDragEvent;
-
-    private HandlerRegistration nativeEventHandlerRegistration;
 
     private static VAcceptCriterion getCriteria(UIDL configuration, int i) {
         UIDL childUIDL = configuration.getChildUIDL(i);
