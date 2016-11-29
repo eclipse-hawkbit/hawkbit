@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * Auto configuration for the {@link MongoDBArtifactStore}.
  */
 @Configuration
+@ConditionalOnProperty(prefix = "org.eclipse.hawkbit.artifact.repository.mongo", name = "enabled", matchIfMissing = true)
 public class MongoDBArtifactStoreAutoConfiguration {
 
     /**
