@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -33,7 +34,10 @@ public class DistributionTableLayout extends AbstractTableLayout {
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final EntityFactory entityFactory,
             final UINotification notification, final TagManagement tagManagement,
-            final TargetManagement targetService) {
+            final SystemManagement systemManagement, final TargetManagement targetService) {
+
+        final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
+                i18n, notification, eventBus, distributionSetManagement, systemManagement, entityFactory, null);
 
         final DsMetadataPopupLayout dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
@@ -42,10 +46,13 @@ public class DistributionTableLayout extends AbstractTableLayout {
                 notification, managementUIState, managementViewAcceptCriteria, targetService, dsMetadataPopupLayout,
                 distributionSetManagement);
 
-        super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState, null),
+        super.init(
+                new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState,
+                        distributionAddUpdateWindowLayout),
                 distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
-                        dsMetadataPopupLayout, entityFactory, notification, tagManagement, null));
+                        dsMetadataPopupLayout, entityFactory, notification, tagManagement,
+                        distributionAddUpdateWindowLayout));
     }
 
 }
