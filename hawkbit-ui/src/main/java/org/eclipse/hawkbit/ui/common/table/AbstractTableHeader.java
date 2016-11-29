@@ -45,7 +45,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     protected SpPermissionChecker permChecker;
 
-    protected EventBus.UIEventBus eventbus;
+    protected transient EventBus.UIEventBus eventbus;
 
     private Label headerCaption;
 

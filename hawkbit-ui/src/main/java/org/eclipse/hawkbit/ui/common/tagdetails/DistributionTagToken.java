@@ -41,7 +41,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private static final long serialVersionUID = -8022738301736043396L;
 
-    private final TagManagement tagManagement;
+    private final transient TagManagement tagManagement;
 
     private final transient DistributionSetManagement distributionSetManagement;
 

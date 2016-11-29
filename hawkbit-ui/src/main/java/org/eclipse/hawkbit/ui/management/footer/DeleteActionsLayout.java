@@ -53,7 +53,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = -8112907467821886253L;
 
-    private final TagManagement tagManagementService;
+    private final transient TagManagement tagManagementService;
 
     private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
 

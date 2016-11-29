@@ -45,7 +45,7 @@ public class I18N implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(I18N.class);
 
-    private final MessageSource source;
+    private final transient MessageSource source;
 
     @Autowired
     I18N(final MessageSource source) {

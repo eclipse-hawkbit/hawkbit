@@ -72,7 +72,7 @@ public final class DashboardMenu extends CustomComponent {
     // the buttons directly via events
     private final List<ValoMenuItemButton> menuButtons = new ArrayList<>();
 
-    private final PermissionService permissionService;
+    private final transient PermissionService permissionService;
 
     private final List<DashboardMenuItem> dashboardVaadinViews;
 

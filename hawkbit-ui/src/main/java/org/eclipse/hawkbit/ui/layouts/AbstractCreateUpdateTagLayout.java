@@ -72,9 +72,9 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
 
     protected I18N i18n;
 
-    protected TagManagement tagManagement;
+    protected transient TagManagement tagManagement;
 
-    protected EntityFactory entityFactory;
+    protected transient EntityFactory entityFactory;
 
     protected transient EventBus.UIEventBus eventBus;
 

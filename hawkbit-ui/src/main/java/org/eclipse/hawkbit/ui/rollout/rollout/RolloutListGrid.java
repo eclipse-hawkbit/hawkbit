@@ -99,7 +99,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
-    private final RolloutManagement rolloutManagement;
+    private final transient RolloutManagement rolloutManagement;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 

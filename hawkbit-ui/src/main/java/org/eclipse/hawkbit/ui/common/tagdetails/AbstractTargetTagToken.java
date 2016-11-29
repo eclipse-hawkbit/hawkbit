@@ -35,7 +35,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     private static final long serialVersionUID = 7772876588903171201L;
 
-    protected final TagManagement tagManagement;
+    protected final transient TagManagement tagManagement;
 
     protected AbstractTargetTagToken(final SpPermissionChecker checker, final I18N i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
@@ -58,7 +58,7 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagUpdateEvent(final List<TargetTagUpdateEvent> events) {
-        events.stream().map(event -> event.getEntity()).forEach(entity -> {
+        events.stream().map(TargetTagUpdateEvent::getEntity).forEach(entity -> {
             final Item item = container.getItem(entity.getId());
             if (item != null) {
                 updateItem(entity.getName(), entity.getColour(), item);

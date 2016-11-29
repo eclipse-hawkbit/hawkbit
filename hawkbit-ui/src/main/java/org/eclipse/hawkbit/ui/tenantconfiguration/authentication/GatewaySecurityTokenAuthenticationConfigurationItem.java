@@ -33,7 +33,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     private static final long serialVersionUID = 1L;
 
-    private final SecurityTokenGenerator securityTokenGenerator;
+    private final transient SecurityTokenGenerator securityTokenGenerator;
 
     private final TextField gatewayTokenNameTextField;
 

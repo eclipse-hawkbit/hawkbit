@@ -30,7 +30,7 @@ public class PollingConfigurationView extends BaseConfigurationView
 
     private static final long serialVersionUID = 1L;
 
-    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
     private final DurationConfigField fieldPollTime;
     private final DurationConfigField fieldPollingOverdueTime;

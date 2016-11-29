@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -66,7 +65,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
-            final UploadViewAcceptCriteria uploadViewAcceptCriteria, final SpPermissionChecker permChecker,
+            final UploadViewAcceptCriteria uploadViewAcceptCriteria,
             final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(eventBus, i18n, uiNotification);
         this.artifactUploadState = artifactUploadState;

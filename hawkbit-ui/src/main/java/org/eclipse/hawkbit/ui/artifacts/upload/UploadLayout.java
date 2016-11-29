@@ -86,7 +86,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final SPInfo spInfo;
+    private final transient SPInfo spInfo;
 
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
