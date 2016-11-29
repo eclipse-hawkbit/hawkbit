@@ -52,9 +52,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private TextField nameTextField;
 

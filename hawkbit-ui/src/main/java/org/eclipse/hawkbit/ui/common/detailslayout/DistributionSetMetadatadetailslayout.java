@@ -42,13 +42,13 @@ public class DistributionSetMetadatadetailslayout extends Table {
 
     private static final String VIEW = "view";
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private final SpPermissionChecker permissionChecker;
 
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private final I18N i18n;
 

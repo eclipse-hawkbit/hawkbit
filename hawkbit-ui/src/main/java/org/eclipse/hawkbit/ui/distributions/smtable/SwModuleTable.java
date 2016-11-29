@@ -67,7 +67,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private final ManageDistUIState manageDistUIState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 

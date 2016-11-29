@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -39,8 +38,8 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
     SoftwareModuleTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ArtifactUploadState artifactUploadState, final UINotification uiNotifcation,
-            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final ArtifactUploadState artifactUploadState, final UIEventBus eventBus,
+            final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
         super(i18n, permChecker, eventbus, null, null, artifactUploadState);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;

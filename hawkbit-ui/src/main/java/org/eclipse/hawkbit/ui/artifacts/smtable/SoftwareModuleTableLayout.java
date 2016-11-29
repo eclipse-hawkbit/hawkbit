@@ -38,10 +38,10 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
                 softwareManagement, entityFactory, permChecker);
 
         super.init(
-                new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState, uiNotification,
-                        eventBus, softwareManagement, entityFactory, softwareModuleAddUpdateWindow),
+                new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState, eventBus,
+                        softwareManagement, entityFactory, softwareModuleAddUpdateWindow),
                 new SoftwareModuleTable(eventBus, i18n, uiNotification, artifactUploadState, softwareManagement,
-                        uploadViewAcceptCriteria, entityFactory, permChecker, swMetadataPopupLayout),
+                        uploadViewAcceptCriteria, permChecker, swMetadataPopupLayout),
                 new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
                         artifactUploadState, softwareManagement, swMetadataPopupLayout, entityFactory));
     }

@@ -48,7 +48,7 @@ public class DistributionTableLayout extends AbstractTableLayout {
                 new DistributionTable(eventBus, i18n, permissionChecker, notification, managementUIState,
                         managementViewAcceptCriteria, targetService, dsMetadataPopupLayout, distributionSetManagement),
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
-                        dsMetadataPopupLayout, entityFactory, notification, systemManagement, tagManagement,
+                        dsMetadataPopupLayout, entityFactory, notification, tagManagement,
                         distributionAddUpdateWindowLayout));
     }
 

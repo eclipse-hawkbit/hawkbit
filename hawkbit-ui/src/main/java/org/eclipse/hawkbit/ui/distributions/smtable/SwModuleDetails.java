@@ -46,7 +46,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     private final ManageDistUIState manageDistUIState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 

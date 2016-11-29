@@ -88,13 +88,13 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final ManageDistUIState manageDistUIState;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 

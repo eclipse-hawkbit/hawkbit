@@ -68,11 +68,11 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     private final ManagementUIState managementUIState;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    private final DeploymentManagement deploymentManagement;
+    private final transient DeploymentManagement deploymentManagement;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 

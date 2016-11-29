@@ -31,9 +31,9 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     private static final long serialVersionUID = -7778944849012048106L;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     public DsMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,

@@ -103,7 +103,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private static final long serialVersionUID = -2300392868806614568L;
     private static final int PROPERTY_DEPT = 3;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     private final SpPermissionChecker permChecker;
 

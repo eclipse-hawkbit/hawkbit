@@ -52,7 +52,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
-    private final SoftwareManagement swTypeManagementService;
+    private final transient SoftwareManagement swTypeManagementService;
 
     private String singleAssignStr;
     private String multiAssignStr;

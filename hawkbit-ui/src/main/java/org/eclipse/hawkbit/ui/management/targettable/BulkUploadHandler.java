@@ -172,7 +172,7 @@ public class BulkUploadHandler extends CustomComponent
          *
          * @param event
          */
-        private UploadAsync(final SucceededEvent event) {
+        public UploadAsync(final SucceededEvent event) {
             this.event = event;
         }
 

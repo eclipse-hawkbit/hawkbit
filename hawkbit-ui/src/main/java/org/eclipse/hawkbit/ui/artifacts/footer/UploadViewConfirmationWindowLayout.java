@@ -50,7 +50,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     private static final String DISCARD = "Discard";
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final ArtifactUploadState artifactUploadState;
 

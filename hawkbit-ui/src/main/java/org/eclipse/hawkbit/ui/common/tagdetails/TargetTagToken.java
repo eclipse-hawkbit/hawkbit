@@ -39,7 +39,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     public TargetTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
             final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,

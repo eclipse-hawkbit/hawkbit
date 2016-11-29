@@ -82,9 +82,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private final SpPermissionChecker permissionChecker;
     private final ManagementUIState managementUIState;
     private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
-    private final TargetManagement targetService;
+    private final transient TargetManagement targetService;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private final String notAllowedMsg;
     private boolean isDistPinned;

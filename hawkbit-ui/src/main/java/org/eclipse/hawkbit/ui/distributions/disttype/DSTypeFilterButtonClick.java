@@ -31,7 +31,7 @@ public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick imp
 
     private final ManageDistUIState manageDistUIState;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     DSTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement) {

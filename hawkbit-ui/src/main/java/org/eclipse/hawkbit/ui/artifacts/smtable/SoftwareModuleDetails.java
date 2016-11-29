@@ -45,7 +45,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 

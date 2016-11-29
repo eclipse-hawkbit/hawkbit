@@ -40,7 +40,7 @@ import com.vaadin.ui.Label;
 public class CountMessageLabel extends Label {
     private static final long serialVersionUID = -1533826352473259653L;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     private final I18N i18n;
 

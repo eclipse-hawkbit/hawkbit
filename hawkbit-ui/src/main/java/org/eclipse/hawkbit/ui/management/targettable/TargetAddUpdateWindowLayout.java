@@ -54,7 +54,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private final UINotification uINotification;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;

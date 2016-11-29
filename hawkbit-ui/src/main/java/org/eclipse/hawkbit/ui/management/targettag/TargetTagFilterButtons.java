@@ -69,9 +69,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     private final SpPermissionChecker permChecker;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    private final TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
     TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final I18N i18n,

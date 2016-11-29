@@ -38,9 +38,8 @@ public class TargetTableLayout extends AbstractTableLayout {
     private final TargetTableHeader targetTableHeader;
 
     public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
-            final TargetManagement targetManagement, final UINotification uINotification,
-            final EntityFactory entityFactory, final I18N i18n, final UIEventBus eventbus,
-            final UINotification notification, final ManagementUIState managementUIState,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final I18N i18n,
+            final UIEventBus eventbus, final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
             final SpPermissionChecker permissionChecker, final UINotification uinotification,

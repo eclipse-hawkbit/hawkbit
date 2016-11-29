@@ -71,7 +71,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private final UiProperties uiProperties;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private final AutoCompleteTextFieldComponent queryTextField;
 

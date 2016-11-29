@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
@@ -46,7 +45,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
     private final DistributionTagToken distributionTagToken;
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private final SoftwareModuleDetailsTable softwareModuleTable;
@@ -56,8 +55,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
-            final UINotification notificationMessage, final SystemManagement systemManagement,
-            final TagManagement tagManagement,
+            final UINotification notificationMessage, final TagManagement tagManagement,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState);
 

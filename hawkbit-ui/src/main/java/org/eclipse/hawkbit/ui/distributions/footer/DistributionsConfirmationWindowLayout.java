@@ -73,9 +73,9 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private ConfirmationTab assignmnetTab;
 
-    private final DistributionSetManagement dsManagement;
+    private final transient DistributionSetManagement dsManagement;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
     private final ManageDistUIState manageDistUIState;
 

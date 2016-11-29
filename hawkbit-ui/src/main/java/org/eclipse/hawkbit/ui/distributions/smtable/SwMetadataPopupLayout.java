@@ -31,9 +31,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     private static final long serialVersionUID = -1252090014161012563L;
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     public SwMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory,

@@ -43,7 +43,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private final TagManagement tagManagement;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;

@@ -118,9 +118,9 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                 managementUIState, permChecker, managementViewAcceptCriteria);
 
-        this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, uiNotification,
-                entityFactory, i18n, eventBus, uiNotification, managementUIState, managementViewAcceptCriteria,
-                deploymentManagement, uiproperties, permChecker, uiNotification, tagManagement);
+        this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
+                eventBus, uiNotification, managementUIState, managementViewAcceptCriteria, deploymentManagement,
+                uiproperties, permChecker, uiNotification, tagManagement);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,

@@ -68,9 +68,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
     private static final String DIST_TYPE_MANDATORY = "mandatory";
     private static final String STAR = " * ";
 
-    private final SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
