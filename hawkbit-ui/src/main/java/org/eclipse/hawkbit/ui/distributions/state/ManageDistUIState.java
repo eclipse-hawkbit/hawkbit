@@ -36,11 +36,9 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     private static final long serialVersionUID = -7569047247017742928L;
 
-    @Autowired
-    private ManageDistFilters manageDistFilters;
+    private final ManageDistFilters manageDistFilters;
 
-    @Autowired
-    private ManageSoftwareModuleFilters softwareModuleFilters;
+    private final ManageSoftwareModuleFilters softwareModuleFilters;
 
     private final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = new HashMap<>();
 
@@ -75,6 +73,13 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
     private boolean noDataAvilableSwModule;
 
     private boolean noDataAvailableDist;
+
+    @Autowired
+    ManageDistUIState(final ManageDistFilters manageDistFilters,
+            final ManageSoftwareModuleFilters softwareModuleFilters) {
+        this.manageDistFilters = manageDistFilters;
+        this.softwareModuleFilters = softwareModuleFilters;
+    }
 
     /**
      * @return the manageDistFilters

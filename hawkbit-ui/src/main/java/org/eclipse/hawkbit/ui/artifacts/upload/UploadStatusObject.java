@@ -27,15 +27,7 @@ public class UploadStatusObject implements Serializable {
     private String reason;
     private final SoftwareModule selectedSoftwareModule;
 
-    public UploadStatusObject(final String status, final Double progress, final String fileName, final String reason,
-            final SoftwareModule selectedSoftwareModule) {
-        this(fileName, selectedSoftwareModule);
-        this.status = status;
-        this.progress = progress;
-        this.reason = reason;
-    }
-
-    public UploadStatusObject(final String fileName, final SoftwareModule selectedSoftwareModule) {
+    UploadStatusObject(final String fileName, final SoftwareModule selectedSoftwareModule) {
         this.filename = fileName;
         this.selectedSoftwareModule = selectedSoftwareModule;
     }

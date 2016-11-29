@@ -14,10 +14,6 @@ import com.vaadin.ui.Button;
 
 /**
  * Abstract button click behaviour of filter buttons layout.
- * 
- *
- *
- * 
  */
 public abstract class AbstractFilterButtonClickBehaviour implements Serializable {
 

@@ -8,34 +8,29 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
  * Groups List View.
- *
  */
-@SpringComponent
-@ViewScope
 public class RolloutGroupsListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = 7252345838154270259L;
 
-    @Autowired
-    private RolloutGroupsListHeader rolloutGroupListHeader;
+    public RolloutGroupsListView(final I18N i18n, final UIEventBus eventBus,
+            final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
+            final SpPermissionChecker permissionChecker) {
+        super(new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n),
+                new RolloutGroupListGrid(i18n, eventBus, rolloutGroupManagement, rolloutUIState, permissionChecker));
 
-    @Autowired
-    private RolloutGroupListGrid rolloutListGrid;
-
-    @PostConstruct
-    protected void init() {
-        super.init(rolloutGroupListHeader, rolloutListGrid);
+        buildLayout();
     }
 
     @Override

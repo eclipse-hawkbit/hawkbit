@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -27,56 +24,39 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Optional;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
  * Count message label which display current filter details and details on
  * pinning.
- *
- *
  */
-@SpringComponent
-@ViewScope
 public class CountMessageLabel extends Label {
     private static final long serialVersionUID = -1533826352473259653L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final I18N i18n;
 
-    @Autowired
-    private I18N i18n;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final TargetTable targetTable;
 
-    @Autowired
-    private TargetTable targetTable;
+    public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement, final I18N i18n,
+            final ManagementUIState managementUIState, final TargetTable targetTable) {
+        this.targetManagement = targetManagement;
+        this.i18n = i18n;
+        this.managementUIState = managementUIState;
+        this.targetTable = targetTable;
 
-    /**
-     * PostConstruct method called by spring after bean has been initialized.
-     */
-    @PostConstruct
-    public void postConstruct() {
         applyStyle();
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     /**
@@ -84,7 +64,7 @@ public class CountMessageLabel extends Label {
      *
      * @param event
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.TARGET_TABLE_FILTER || event == ManagementUIEvent.SHOW_COUNT_MESSAGE) {
             displayTargetCountStatus();
@@ -92,7 +72,7 @@ public class CountMessageLabel extends Label {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent event) {
         if (TargetTableEvent.TargetComponentEvent.SELECT_ALL == event.getTargetComponentEvent()
                 || TargetComponentEvent.REFRESH_TARGETS == event.getTargetComponentEvent()) {
@@ -106,7 +86,7 @@ public class CountMessageLabel extends Label {
      *
      * @param event
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final PinUnpinEvent event) {
         if (event == PinUnpinEvent.PIN_DISTRIBUTION
                 && managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {

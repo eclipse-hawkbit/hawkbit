@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit;
 
+import java.io.Serializable;
+
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
@@ -25,7 +27,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "hawkbit.controller")
-public class ControllerPollProperties {
+public class ControllerPollProperties implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Maximum polling time that can be configured by a tenant in HH:MM:SS

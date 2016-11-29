@@ -13,9 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -27,21 +24,20 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
@@ -52,22 +48,17 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class CreateOrUpdateFilterTable extends Table {
 
     private static final long serialVersionUID = 6887304217281629713L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
+    private final FilterManagementUIState filterManagementUIState;
 
     private LazyQueryContainer container;
+
+    private final transient EventBus.UIEventBus eventBus;
 
     private static final int PROPERTY_DEPT = 3;
 
@@ -75,15 +66,16 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
-    /**
-     * Initialize the Action History Table.
-     */
-    @PostConstruct
-    public void init() {
+    CreateOrUpdateFilterTable(final I18N i18n, final UIEventBus eventBus,
+            final FilterManagementUIState filterManagementUIState) {
+        this.i18n = i18n;
+        this.filterManagementUIState = filterManagementUIState;
+        this.eventBus = eventBus;
+
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
-        setHeight(100.0f, Unit.PERCENTAGE);
+        setHeight(100.0F, Unit.PERCENTAGE);
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
         setColumnCollapsingAllowed(true);
@@ -96,18 +88,13 @@ public class CreateOrUpdateFilterTable extends Table {
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
         if (custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            UI.getCurrent().access(() -> populateTableData());
+            UI.getCurrent().access(this::populateTableData);
         } else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
-            UI.getCurrent().access(() -> onQuery());
+            UI.getCurrent().access(this::onQuery);
         }
     }
 
@@ -192,9 +179,9 @@ public class CreateOrUpdateFilterTable extends Table {
     }
 
     private List<TableColumn> getVisbleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.15f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
+        final List<TableColumn> columnList = Lists.newArrayListWithExpectedSize(7);
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.15F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
         columnList.add(

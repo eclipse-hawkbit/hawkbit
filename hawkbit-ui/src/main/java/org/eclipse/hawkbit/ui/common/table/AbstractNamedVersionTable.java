@@ -11,8 +11,11 @@ package org.eclipse.hawkbit.ui.common.table;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -30,12 +33,8 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
 
     private static final long serialVersionUID = 780050712209750719L;
 
-    /**
-     * Initialize the component.
-     */
-    @Override
-    protected void init() {
-        super.init();
+    protected AbstractNamedVersionTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification) {
+        super(eventBus, i18n, notification);
         setMultiSelect(true);
         setSelectable(true);
     }

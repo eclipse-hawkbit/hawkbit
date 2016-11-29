@@ -176,14 +176,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         this.type = type;
     }
 
-    public List<SoftwareModuleMetadata> getMetadata() {
-        if (metadata == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(metadata);
-    }
-
     @Override
     public String toString() {
         return "SoftwareModule [deleted=" + deleted + ", name=" + getName() + ", version=" + getVersion()

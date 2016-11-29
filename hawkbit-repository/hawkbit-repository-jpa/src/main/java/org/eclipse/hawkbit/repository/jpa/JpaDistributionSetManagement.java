@@ -231,7 +231,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetByIdWithDetails(setId);
+        final JpaDistributionSet set = (JpaDistributionSet) findDistributionSetById(setId);
 
         if (set == null) {
             throw new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId);

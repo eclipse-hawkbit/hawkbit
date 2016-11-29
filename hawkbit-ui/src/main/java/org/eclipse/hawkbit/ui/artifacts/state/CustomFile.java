@@ -85,16 +85,6 @@ public class CustomFile implements Serializable {
         this.baseSoftwareModuleVersion = baseSoftwareModuleVersion;
     }
 
-    /**
-     * Default constructor with the immutable fileName set.
-     *
-     * @param fileName
-     *            uploaded file name
-     */
-    public CustomFile(final String fileName) {
-        this.fileName = fileName;
-    }
-
     public String getBaseSoftwareModuleName() {
         return baseSoftwareModuleName;
     }

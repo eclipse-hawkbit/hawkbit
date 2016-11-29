@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -15,35 +16,34 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 /**
  * Distribution table header.
- * 
  *
  */
-@SpringComponent
-@ViewScope
 public class DistributionTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 7597766804650170127L;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
-    @Autowired
-    private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+            final ManagementUIState managementUIState,
+            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
+        super(i18n, permChecker, eventbus, managementUIState, null, null);
+        this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
+    }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT) {
             setFilterButtonsIconVisible(true);

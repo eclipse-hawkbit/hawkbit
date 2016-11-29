@@ -83,7 +83,6 @@ public final class DistributionSetSpecification {
             targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.metadata, JoinType.LEFT);
             query.distinct(true);
 
             return predicate;
@@ -110,8 +109,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by
-     * "like name or like description or like version".
+     * {@link Specification} for retrieving {@link DistributionSet}s by "like
+     * name or like description or like version".
      * 
      * @param subString
      *            to be filtered on
@@ -125,8 +124,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by
-     * "has at least one of the given tag names".
+     * {@link Specification} for retrieving {@link DistributionSet}s by "has at
+     * least one of the given tag names".
      * 
      * @param tagNames
      *            to be filtered on

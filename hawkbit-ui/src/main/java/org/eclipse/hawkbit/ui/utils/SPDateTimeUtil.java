@@ -199,7 +199,7 @@ public final class SPDateTimeUtil {
         /**
          * 
          */
-        private CalendarI18N(final String single, final String plural) {
+        CalendarI18N(final String single, final String plural) {
             this.single = single;
             this.plural = plural;
         }
