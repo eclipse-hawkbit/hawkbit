@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -33,8 +32,8 @@ public class DistributionTableLayout extends AbstractTableLayout {
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final EntityFactory entityFactory,
-            final UINotification notification, final SystemManagement systemManagement,
-            final TagManagement tagManagement, final TargetManagement targetService) {
+            final UINotification notification, final TagManagement tagManagement,
+            final TargetManagement targetService) {
 
         final DsMetadataPopupLayout dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);

@@ -100,7 +100,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private boolean readOnly;
 
-    private final ArtifactManagement artifactManagement;
+    private final transient ArtifactManagement artifactManagement;
 
     public ArtifactDetailsLayout(final I18N i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final UINotification uINotification,
