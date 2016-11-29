@@ -15,18 +15,36 @@ import com.vaadin.ui.AbstractComponent;
 
 import java.util.List;
 
+/**
+ * Draws a pie charts for the provided groups.
+ */
 public class GroupsPieChart extends AbstractComponent {
+
+    private static final long serialVersionUID = 1311542227339430098L;
+
+    /**
+     * Instantiates a new pie chart and registers the RPC channel
+     */
     public GroupsPieChart() {
         registerRpc(new GroupsPieChartServerRpc() {
+            @SuppressWarnings("squid:UnusedPrivateMethod")
             private GroupsPieChartClientRpc getClientRpc() {
                 return getRpcProxy(GroupsPieChartClientRpc.class);
             }
         });
     }
 
+    /**
+     * Updates the state of the chart
+     * 
+     * @param groupTargetCounts
+     *            list of target counts
+     * @param totalTargetsCount
+     *            total count of targets that are represented by the pie
+     */
     public void setChartState(final List<Long> groupTargetCounts, final Long totalTargetsCount) {
-        getState().groupTargetCounts = groupTargetCounts;
-        getState().totalTargetCount = totalTargetsCount;
+        getState().setGroupTargetCounts(groupTargetCounts);
+        getState().setTotalTargetCount(totalTargetsCount);
         markAsDirty();
     }
 

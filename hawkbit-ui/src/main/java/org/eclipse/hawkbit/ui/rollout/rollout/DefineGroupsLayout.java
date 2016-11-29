@@ -91,7 +91,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private transient List<GroupRow> groupRows;
 
-    private int groupsCount = 0;
+    private int groupsCount;
 
     private transient List<RolloutGroupCreate> savedRolloutGroups;
 
@@ -249,7 +249,7 @@ public class DefineGroupsLayout extends GridLayout {
     }
 
     private void resetRemainingTargetsError() {
-        groupRows.forEach(row -> row.markWithLastGroupError(false));
+        groupRows.forEach(GroupRow::hideLastGroupError);
     }
 
     private boolean validateRemainingTargets() {
@@ -260,10 +260,13 @@ public class DefineGroupsLayout extends GridLayout {
         final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
         final List<RolloutGroup> groups = savedRolloutGroups.stream().map(RolloutGroupCreate::build)
                 .collect(Collectors.toList());
-        groupsValidation = rolloutManagement.validateTargetsInGroups(groups, targetFilter,
-                System.currentTimeMillis());
+        groupsValidation = rolloutManagement.validateTargetsInGroups(groups, targetFilter, System.currentTimeMillis());
 
-        lastRow.markWithLastGroupError(!groupsValidation.isValid());
+        if (groupsValidation.isValid()) {
+            lastRow.hideLastGroupError();
+        } else {
+            lastRow.markWithLastGroupError();
+        }
         return groupsValidation.isValid();
     }
 
@@ -275,8 +278,18 @@ public class DefineGroupsLayout extends GridLayout {
         this.validationListener = validationListener;
     }
 
+    /**
+     * Implement the interface and set the instance with setValidationListener
+     * to receive updates for any changes within the group rows.
+     */
     @FunctionalInterface
     public interface ValidationListener {
+        /**
+         * Is called after user input
+         * 
+         * @param isValid
+         *            whether the input of the group rows is valid
+         */
         void validation(boolean isValid);
     }
 
@@ -296,17 +309,18 @@ public class DefineGroupsLayout extends GridLayout {
 
         private HorizontalLayout optionsLayout;
 
-        private boolean populated = false;
+        private boolean populated;
 
-        private boolean initialized = false;
+        private boolean initialized;
 
         public GroupRow() {
             init();
         }
 
         private void init() {
+            groupsCount += 1;
             groupName = createTextField("textfield.name", UIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID);
-            groupName.setValue(i18n.get("textfield.rollout.group.default.name", ++groupsCount));
+            groupName.setValue(i18n.get("textfield.rollout.group.default.name", groupsCount));
             groupName.setStyleName("rollout-group-name");
 
             targetFilterQueryCombo = createTargetFilterQueryCombo();
@@ -368,7 +382,7 @@ public class DefineGroupsLayout extends GridLayout {
             if (value != null) {
                 final String message = i18n.get("message.rollout.field.value.range", 0, 100);
                 if (value instanceof Float) {
-                    new FloatRangeValidator(message, 0f, 100f).validate(value);
+                    new FloatRangeValidator(message, 0F, 100F).validate(value);
                 }
                 if (value instanceof Integer) {
                     new IntegerRangeValidator(message, 0, 100).validate(value);
@@ -379,7 +393,7 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private void valueChanged() {
-            if(initialized) {
+            if (initialized) {
                 updateValidation();
             }
         }
@@ -466,6 +480,14 @@ public class DefineGroupsLayout extends GridLayout {
             return null;
         }
 
+        /**
+         * Adds this group row to a grid layout
+         * 
+         * @param layout
+         *            the grid layout
+         * @param rowIndex
+         *            the row of the grid layout
+         */
         public void addToGridRow(GridLayout layout, int rowIndex) {
             layout.addComponent(groupName, 0, rowIndex);
             if (populated) {
@@ -480,6 +502,11 @@ public class DefineGroupsLayout extends GridLayout {
 
         }
 
+        /**
+         * Builds a group definition from this group row
+         * 
+         * @return the RolloutGroupCreate definition
+         */
         public RolloutGroupCreate getGroupEntity() {
             final RolloutGroupConditionBuilder conditionBuilder = new RolloutGroupConditionBuilder()
                     .successAction(RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, null)
@@ -492,14 +519,17 @@ public class DefineGroupsLayout extends GridLayout {
             String percentageString = targetPercentage.getValue().replace(",", ".");
             Float percentage = Float.parseFloat(percentageString);
 
-            return entityFactory.rolloutGroup().create()
-                    .name(groupName.getValue())
-                    .description(groupName.getValue())
-                    .targetFilterQuery(getTargetFilterQuery())
-                    .targetPercentage(percentage)
+            return entityFactory.rolloutGroup().create().name(groupName.getValue()).description(groupName.getValue())
+                    .targetFilterQuery(getTargetFilterQuery()).targetPercentage(percentage)
                     .conditions(conditionBuilder.build());
         }
 
+        /**
+         * Populates the row with the data from the provided groups.
+         * 
+         * @param group
+         *            the data source
+         */
         public void populateByGroup(final RolloutGroup group) {
 
             groupName.setValue(group.getName());
@@ -514,17 +544,26 @@ public class DefineGroupsLayout extends GridLayout {
 
         }
 
+        /**
+         * @return whether the data entered in this row is valid
+         */
         public boolean isValid() {
             return StringUtils.isNotEmpty(groupName.getValue()) && targetPercentage.isValid()
                     && triggerThreshold.isValid() && errorThreshold.isValid();
         }
 
-        public void markWithLastGroupError(boolean mark) {
-            if (mark) {
-                targetPercentage.setComponentError(new UserError(i18n.get("message.rollout.remaining.targets.error")));
-            } else {
-                targetPercentage.setComponentError(null);
-            }
+        /**
+         * Displays an error for the row
+         */
+        public void markWithLastGroupError() {
+            targetPercentage.setComponentError(new UserError(i18n.get("message.rollout.remaining.targets.error")));
+        }
+
+        /**
+         * Hides an error of the row
+         */
+        public void hideLastGroupError() {
+            targetPercentage.setComponentError(null);
         }
 
     }

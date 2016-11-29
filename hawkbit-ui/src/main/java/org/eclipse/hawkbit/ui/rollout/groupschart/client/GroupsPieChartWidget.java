@@ -31,9 +31,11 @@ import java.util.List;
  */
 public class GroupsPieChartWidget extends DockLayoutPanel {
 
+    private static final String ATTR_VISIBILITY = "visibility";
+
     private List<Long> groupTargetCounts;
     private Long totalTargetCount;
-    private long unassignedTargets = 0;
+    private long unassignedTargets;
 
     private Selection svg;
     private Selection pieGroup;
@@ -41,6 +43,9 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     private Arc arc;
 
+    /**
+     * Initializes the pie chart
+     */
     public GroupsPieChartWidget() {
         super(Style.Unit.PX);
         init();
@@ -54,6 +59,14 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     }
 
+    /**
+     * Updates the pie chart with new data
+     * 
+     * @param groupTargetCounts
+     *            list of target counts
+     * @param totalTargetCount
+     *            total count of targets that are represented by the pie
+     */
     public void update(final List<Long> groupTargetCounts, final Long totalTargetCount) {
         this.groupTargetCounts = groupTargetCounts;
         this.totalTargetCount = totalTargetCount;
@@ -70,7 +83,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     }
 
-    private PieArc getPie(Long count, Long total, double startAngle) {
+    private static PieArc getPie(Long count, Long total, double startAngle) {
         final Double percentage = count.doubleValue() / total.doubleValue();
         return new PieArc(startAngle, startAngle + percentage * 2 * Math.PI);
     }
@@ -103,7 +116,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
                     infoText.html(index + ".: " + groupTargetCounts.get(index - 1));
                 }
 
-                infoText.attr("visibility", "visible");
+                infoText.attr(ATTR_VISIBILITY, "visible");
                 infoText.attr("x", point.getNumber(0));
                 infoText.attr("y", point.getNumber(1));
                 return null;
@@ -111,7 +124,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
         }).on(BrowserEvents.MOUSEOUT, new DatumFunction<Void>() {
             @Override
             public Void apply(Element context, Value d, int index) {
-                infoText.attr("visibility", "hidden");
+                infoText.attr(ATTR_VISIBILITY, "hidden");
                 return null;
             }
         });
@@ -129,12 +142,12 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
                 "translate(" + ((float) width / 2) + "," + ((float) height / 2) + ")");
 
         pieGroup = svg.append("g");
-        infoText = svg.append("text").attr("visibility", "hidden").classed("pie-info", true).attr("text-anchor",
+        infoText = svg.append("text").attr(ATTR_VISIBILITY, "hidden").classed("pie-info", true).attr("text-anchor",
                 "middle");
 
     }
 
-    private class PieArc {
+    private static class PieArc {
         private double startAngle;
 
         private double endAngle;

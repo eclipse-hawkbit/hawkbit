@@ -198,6 +198,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      *
      * @param rolloutId
      *            the rollout id
+     * @param copy
+     *            whether the rollout should be copied
      * @return the window
      */
     public CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
@@ -555,7 +557,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     }
 
-    private Container createTargetFilterComboContainer() {
+    private static Container createTargetFilterComboContainer() {
         final BeanQueryFactory<TargetFilterBeanQuery> targetFilterQF = new BeanQueryFactory<>(
                 TargetFilterBeanQuery.class);
         return new LazyQueryContainer(
@@ -593,7 +595,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private long getForcedTimeStamp() {
-        return (actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue() == ActionTypeOption.AUTO_FORCED)
+        return ActionTypeOption.AUTO_FORCED.equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
                 ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                 : RepositoryModelConstants.NO_FORCE_TIME;
     }
@@ -732,7 +734,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         distributionSet.setContainerDataSource(container);
     }
 
-    private Container createDsComboContainer() {
+    private static Container createDsComboContainer() {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         return new LazyQueryContainer(

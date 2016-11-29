@@ -12,10 +12,30 @@ import com.vaadin.shared.AbstractComponentState;
 
 import java.util.List;
 
+/**
+ * State to transfer for the groups pie chart between server and client.
+ */
 public class GroupsPieChartState extends AbstractComponentState {
 
-    public transient List<Long> groupTargetCounts;
+    private static final long serialVersionUID = 7344220498082627571L;
 
-    public Long totalTargetCount;
+    private transient List<Long> groupTargetCounts;
 
+    private Long totalTargetCount;
+
+    public List<Long> getGroupTargetCounts() {
+        return groupTargetCounts;
+    }
+
+    public void setGroupTargetCounts(List<Long> groupTargetCounts) {
+        this.groupTargetCounts = groupTargetCounts;
+    }
+
+    public Long getTotalTargetCount() {
+        return totalTargetCount;
+    }
+
+    public void setTotalTargetCount(Long totalTargetCount) {
+        this.totalTargetCount = totalTargetCount;
+    }
 }

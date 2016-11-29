@@ -12,14 +12,20 @@ import com.vaadin.client.communication.StateChangeEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
 
+/**
+ * Connector between client side GroupsPieChartWidget and service side.
+ */
 @Connect(GroupsPieChart.class)
 public class GroupsPieChartConnector extends AbstractComponentConnector {
-    private final GroupsPieChartServerRpc serverRpc = RpcProxy.create(GroupsPieChartServerRpc.class, this);
 
+    private static final long serialVersionUID = -2907528194018611155L;
+
+    /**
+     * Initializes the connector
+     */
     public GroupsPieChartConnector() {
         registerRpc(GroupsPieChartClientRpc.class, new GroupsPieChartClientRpc() {
         });
@@ -43,6 +49,6 @@ public class GroupsPieChartConnector extends AbstractComponentConnector {
     @Override
     public void onStateChanged(StateChangeEvent stateChangeEvent) {
         super.onStateChanged(stateChangeEvent);
-        getWidget().update(getState().groupTargetCounts, getState().totalTargetCount);
+        getWidget().update(getState().getGroupTargetCounts(), getState().getTotalTargetCount());
     }
 }
