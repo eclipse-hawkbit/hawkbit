@@ -46,10 +46,10 @@ public class TargetTableLayout extends AbstractTableLayout {
             final TagManagement tagManagement) {
         this.eventBus = eventBus;
         this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
-                tagManagement, targetManagement, entityFactory);
+                tagManagement, targetManagement, entityFactory, targetTable);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
                 managementUIState, managementViewAcceptCriteria, targetManagement, deploymentManagement, uiproperties,
-                eventbus, entityFactory, uinotification, tagManagement);
+                eventbus, entityFactory, uinotification, tagManagement, targetTable);
 
         super.init(targetTableHeader, targetTable, targetDetails);
     }
