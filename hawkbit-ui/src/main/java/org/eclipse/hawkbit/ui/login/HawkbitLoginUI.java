@@ -42,7 +42,7 @@ public class HawkbitLoginUI extends DefaultHawkbitUI {
 
     private final SpringViewProvider viewProvider;
 
-    private final ApplicationContext context;
+    private final transient ApplicationContext context;
 
     @Autowired
     protected HawkbitLoginUI(final SpringViewProvider viewProvider, final ApplicationContext context) {

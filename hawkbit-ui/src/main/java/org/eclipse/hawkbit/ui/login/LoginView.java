@@ -69,13 +69,13 @@ public class LoginView extends VerticalLayout implements View {
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
 
-    private final VaadinSecurity vaadinSecurity;
+    private final transient VaadinSecurity vaadinSecurity;
 
     private final I18N i18n;
 
     private final UiProperties uiProperties;
 
-    private final MultitenancyIndicator multiTenancyIndicator;
+    private final transient MultitenancyIndicator multiTenancyIndicator;
 
     private final transient AntPathMatcher matcher = new AntPathMatcher();
     private boolean useCookie = true;
