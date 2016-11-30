@@ -556,6 +556,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void updateDistributionInTable(final DistributionSet editedDs) {
         final Item item = getContainerDataSource()
                 .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        if (item == null) {
+            return;
+        }
         updateEntity(editedDs, item);
     }
 
