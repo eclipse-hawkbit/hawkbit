@@ -11,6 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -20,16 +24,16 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -44,28 +48,28 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Target details layout.
  */
-@SpringComponent
-@ViewScope
 public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private static final long serialVersionUID = 4571732743399605843L;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final TargetTagToken targetTagToken;
 
-    @Autowired
-    private TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
-
-    @Autowired
-    private TargetTagToken targetTagToken;
+    private final TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
 
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
 
-    @Override
-    public void init() {
-        super.init();
-        targetAddUpdateWindowLayout.init();
+    TargetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+            final ManagementUIState managementUIState, final UINotification uiNotification,
+            final TagManagement tagManagement, final TargetManagement targetManagement,
+            final EntityFactory entityFactory, final TargetTable targetTable) {
+        super(i18n, eventBus, permissionChecker, managementUIState);
+        this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
+                tagManagement, targetManagement);
+        targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
+                entityFactory, targetTable);
+        addTabs(detailsTab);
+        restoreState();
     }
 
     @Override
@@ -237,7 +241,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         return getPermissionChecker().hasUpdateTargetPermission();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent targetTableEvent) {
         onBaseEntityEvent(targetTableEvent);
     }

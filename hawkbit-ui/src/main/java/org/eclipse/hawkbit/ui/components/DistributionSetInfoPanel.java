@@ -19,9 +19,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Distribution set panel for Target.
- *
- *
- *
  */
 @SuppressWarnings("serial")
 public class DistributionSetInfoPanel extends Panel {
@@ -38,9 +35,8 @@ public class DistributionSetInfoPanel extends Panel {
      * @param style2
      *            as String
      */
-    public DistributionSetInfoPanel(final DistributionSet distributionSet, final String caption, final String style1,
+    DistributionSetInfoPanel(final DistributionSet distributionSet, final String caption, final String style1,
             final String style2) {
-        super();
         setImmediate(false);
         decorate(distributionSet, caption, style1, style2);
     }

@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -34,18 +32,15 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Sets;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
@@ -57,29 +52,18 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * WindowContent for adding/editing a Distribution
  */
-@SpringComponent
-@ViewScope
 public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -5602182034230568435L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
+    private final UINotification notificationMessage;
+    private final transient EventBus.UIEventBus eventBus;
+    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient SystemManagement systemManagement;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    private transient UINotification notificationMessage;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private transient SystemManagement systemManagement;
-
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final DistributionSetTable distributionSetTable;
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
@@ -90,6 +74,21 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private Long editDistId;
 
     private FormLayout formLayout;
+
+    public DistributionAddUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
+            final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
+            final SystemManagement systemManagement, final EntityFactory entityFactory,
+            final DistributionSetTable distributionSetTable) {
+        this.i18n = i18n;
+        this.notificationMessage = notificationMessage;
+        this.eventBus = eventBus;
+        this.distributionSetManagement = distributionSetManagement;
+        this.systemManagement = systemManagement;
+        this.entityFactory = entityFactory;
+        this.distributionSetTable = distributionSetTable;
+        createRequiredComponents();
+        buildLayout();
+    }
 
     /**
      * Save or update distribution set.
@@ -110,15 +109,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             return !isDuplicate();
         }
 
-    }
-
-    /**
-     * Initialize Distribution Add and Edit Window.
-     */
-    @PostConstruct
-    void init() {
-        createRequiredComponents();
-        buildLayout();
     }
 
     private void buildLayout() {
@@ -148,7 +138,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(UIComponentIdProvider.DIST_ADD_DISTSETTYPE);
-        populateDistSetTypeNameCombo();
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
@@ -234,7 +223,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
-        final DistributionSetTable distributionSetTable = SpringContextHelper.getBean(DistributionSetTable.class);
         distributionSetTable.setValue(
                 Sets.newHashSet(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion())));
     }

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -20,18 +19,17 @@ import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Property;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Sizeable;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -45,36 +43,35 @@ import com.vaadin.ui.Window;
  * Creates a dialog window to select the distribution set for a target filter
  * query.
  */
-@SpringComponent
-@ViewScope
 public class DistributionSetSelectWindow
         implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
 
     private static final long serialVersionUID = 4752345414134989396L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private DistributionSetSelectTable dsTable;
+    private final DistributionSetSelectTable dsTable;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
-
-    @Autowired
-    private transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private CommonDialogWindow window;
     private CheckBox checkBox;
     private Long tfqId;
 
-    private void init() {
+    DistributionSetSelectWindow(final I18N i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
+        this.i18n = i18n;
+        this.dsTable = new DistributionSetSelectTable(i18n, eventBus, manageDistUIState);
+        this.eventBus = eventBus;
+        this.targetManagement = targetManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+    }
+
+    private void initLocal() {
         final Label label = new Label(i18n.get("label.auto.assign.description"));
 
         checkBox = new CheckBox(i18n.get("label.auto.assign.enable"));
@@ -120,7 +117,7 @@ public class DistributionSetSelectWindow
             throw new IllegalStateException("TargetFilterQuery does not exist for the given id");
         }
 
-        init();
+        initLocal();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         if (distributionSet != null) {

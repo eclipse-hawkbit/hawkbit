@@ -8,43 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import org.eclipse.hawkbit.ui.utils.I18N;
 
 /**
  * This class represents the UI item for the target security token section in
  * the authentication configuration view.
  */
-@SpringComponent
-@ViewScope
 public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean configurationEnabled = false;
-    private boolean configurationEnabledChange = false;
+    private boolean configurationEnabled;
+    private boolean configurationEnabledChange;
 
-    /**
-     * @param systemManagement
-     *            the system management to retrie the configuration
-     */
-    @Autowired
     public TargetSecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement);
-    }
+            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
+                i18n);
 
-    /**
-     * Init mehotd called by spring.
-     */
-    @PostConstruct
-    public void init() {
         super.init("label.configuration.auth.targettoken");
         configurationEnabled = isConfigEnabled();
     }

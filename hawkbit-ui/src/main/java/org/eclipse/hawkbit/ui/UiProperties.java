@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import java.io.Serializable;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +19,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties("hawkbit.server.ui")
-public class UiProperties {
+public class UiProperties implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Demo account login information.
      *
      */
-    public static class Demo {
+    public static class Demo implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         /**
          * Demo tenant.
@@ -72,12 +76,15 @@ public class UiProperties {
      * documentation etc.).
      *
      */
-    public static class Links {
+    public static class Links implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         /**
          * Configuration of UI documentation links.
          *
          */
-        public static class Documentation {
+        public static class Documentation implements Serializable {
+            private static final long serialVersionUID = 1L;
             /**
              * Link to root of documentation and user guides.
              */
@@ -235,13 +242,15 @@ public class UiProperties {
      * Configuration of login view.
      *
      */
-    public static class Login {
+    public static class Login implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         /**
          * Cookie configuration for login credential cookie.
          *
          */
-        public static class Cookie {
+        public static class Cookie implements Serializable {
+            private static final long serialVersionUID = 1L;
             /**
              * Secure cookie enabled.
              */

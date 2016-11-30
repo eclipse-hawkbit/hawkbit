@@ -8,38 +8,42 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Software module table layout. (Upload Management)
  */
-@SpringComponent
-@ViewScope
 public class SoftwareModuleTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 6464291374980641235L;
 
-    @Autowired
-    private SoftwareModuleDetails softwareModuleDetails;
+    public SoftwareModuleTableLayout(final I18N i18n, final SpPermissionChecker permChecker,
+            final ArtifactUploadState artifactUploadState, final UINotification uiNotification,
+            final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
+            final UploadViewClientCriterion uploadViewClientCriterion) {
 
-    @Autowired
-    private SoftwareModuleTableHeader smTableHeader;
+        final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
+                uiNotification, eventBus, softwareManagement, entityFactory);
 
-    @Autowired
-    private SoftwareModuleTable smTable;
+        final SwMetadataPopupLayout swMetadataPopupLayout = new SwMetadataPopupLayout(i18n, uiNotification, eventBus,
+                softwareManagement, entityFactory, permChecker);
 
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    void init() {
-        super.init(smTableHeader, smTable, softwareModuleDetails);
+        super.init(
+                new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
+                        softwareModuleAddUpdateWindow),
+                new SoftwareModuleTable(eventBus, i18n, uiNotification, artifactUploadState, softwareManagement,
+                        uploadViewClientCriterion, swMetadataPopupLayout),
+                new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
+                        artifactUploadState, softwareManagement, swMetadataPopupLayout, entityFactory));
     }
 
 }

@@ -8,21 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
@@ -41,14 +41,11 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 4881626370291837175L;
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
     protected SpPermissionChecker permChecker;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventbus;
+    protected transient EventBus.UIEventBus eventbus;
 
     private Label headerCaption;
 
@@ -64,24 +61,25 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private HorizontalLayout filterDroppedInfo;
 
-    private DragAndDropWrapper dropFilterLayout;
-
     private Button bulkUploadIcon;
 
-    /**
-     * Initialze components.
-     */
-    @PostConstruct
-    protected void init() {
+    protected final ManagementUIState managementUIState;
+    protected final ManageDistUIState manageDistUIstate;
+    protected final ArtifactUploadState artifactUploadState;
+
+    protected AbstractTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+            final ManagementUIState managementUIState, final ManageDistUIState manageDistUIstate,
+            final ArtifactUploadState artifactUploadState) {
+        this.i18n = i18n;
+        this.permChecker = permChecker;
+        this.eventbus = eventbus;
+        this.managementUIState = managementUIState;
+        this.manageDistUIstate = manageDistUIstate;
+        this.artifactUploadState = artifactUploadState;
         createComponents();
         buildLayout();
         restoreState();
         eventbus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventbus.unsubscribe(this);
     }
 
     private void createComponents() {
@@ -181,7 +179,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
             filterDroppedInfo.setHeightUndefined();
             filterDroppedInfo.setSizeUndefined();
             displayFilterDropedInfoOnLoad();
-            dropFilterLayout = new DragAndDropWrapper(filterDroppedInfo);
+            final DragAndDropWrapper dropFilterLayout = new DragAndDropWrapper(filterDroppedInfo);
             dropFilterLayout.setId(getDropFilterId());
             dropFilterLayout.setDropHandler(getDropFilterHandler());
 

@@ -69,24 +69,11 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#constructBean()
-     */
     @Override
     protected ProxyDistribution constructBean() {
         return new ProxyDistribution();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#loadBeans(int,
-     * int)
-     */
     @Override
     protected List<ProxyDistribution> loadBeans(final int startIndex, final int count) {
         Page<DistributionSet> distBeans;
@@ -121,24 +108,12 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         return proxyDistributions;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#saveBeans(java.
-     * util.List, java.util.List, java.util.List)
-     */
     @Override
     protected void saveBeans(final List<ProxyDistribution> arg0, final List<ProxyDistribution> arg1,
             final List<ProxyDistribution> arg2) {
         // Add,Delete and Update are performed through repository methods
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#size()
-     */
     @Override
     public int size() {
         final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)

@@ -8,11 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -23,11 +27,12 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Lists;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
@@ -39,35 +44,47 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Main UI for the system configuration view.
  */
+@UIScope
 @SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
-@ViewScope
 public class TenantConfigurationDashboardView extends CustomComponent implements View, ConfigurationItemChangeListener {
 
     public static final String VIEW_NAME = "spSystemConfig";
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private DefaultDistributionSetTypeLayout defaultDistributionSetTypeLayout;
+    private final DefaultDistributionSetTypeLayout defaultDistributionSetTypeLayout;
 
-    @Autowired
-    private AuthenticationConfigurationView authenticationConfigurationView;
+    private final AuthenticationConfigurationView authenticationConfigurationView;
 
-    @Autowired
-    private PollingConfigurationView pollingConfigurationView;
+    private final PollingConfigurationView pollingConfigurationView;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final UiProperties uiProperties;
 
-    @Autowired
-    private transient UINotification uINotification;
+    private final UINotification uINotification;
 
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
 
-    private final List<ConfigurationGroup> configurationViews = new ArrayList<>();
+    private final List<ConfigurationGroup> configurationViews = Lists.newArrayListWithExpectedSize(3);
+
+    @Autowired
+    TenantConfigurationDashboardView(final I18N i18n, final UiProperties uiProperties,
+            final UINotification uINotification, final SystemManagement systemManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SecurityTokenGenerator securityTokenGenerator,
+            final ControllerPollProperties controllerPollProperties) {
+        this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
+                distributionSetManagement, i18n);
+        this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
+                securityTokenGenerator);
+        this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
+                tenantConfigurationManagement);
+        this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.uINotification = uINotification;
+    }
 
     /**
      * Init method adds all Configuration Views to the list of Views.
@@ -77,10 +94,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         configurationViews.add(defaultDistributionSetTypeLayout);
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
-    }
-
-    @Override
-    public void enter(final ViewChangeEvent event) {
 
         final Panel rootPanel = new Panel();
         rootPanel.setStyleName("tenantconfig-root");
@@ -90,7 +103,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         rootLayout.setMargin(true);
         rootLayout.setSpacing(true);
 
-        configurationViews.forEach(view -> rootLayout.addComponent(view));
+        configurationViews.forEach(rootLayout::addComponent);
 
         final HorizontalLayout buttonContent = saveConfigurationButtonsLayout();
         rootLayout.addComponent(buttonContent);
@@ -105,8 +118,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
         final HorizontalLayout hlayout = new HorizontalLayout();
         hlayout.setSpacing(true);
-        saveConfigurationBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "",
-                "", "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+        saveConfigurationBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "",
+                "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveConfigurationBtn.setEnabled(false);
         saveConfigurationBtn.setDescription(i18n.get("configuration.savebutton.tooltip"));
         saveConfigurationBtn.addClickListener(event -> saveConfiguration());
@@ -128,13 +141,13 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private void saveConfiguration() {
 
-        final boolean isUserInputValid = configurationViews.stream().allMatch(confView -> confView.isUserInputValid());
+        final boolean isUserInputValid = configurationViews.stream().allMatch(ConfigurationGroup::isUserInputValid);
 
         if (!isUserInputValid) {
             uINotification.displayValidationError(i18n.get("notification.configuration.save.notpossible"));
             return;
         }
-        configurationViews.forEach(confView -> confView.save());
+        configurationViews.forEach(ConfigurationGroup::save);
 
         // More methods
         saveConfigurationBtn.setEnabled(false);
@@ -143,7 +156,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     }
 
     private void undoConfiguration() {
-        configurationViews.forEach(confView -> confView.undo());
+        configurationViews.forEach(ConfigurationGroup::undo);
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);
@@ -153,6 +166,11 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     public void configurationHasChanged() {
         saveConfigurationBtn.setEnabled(true);
         undoConfigurationBtn.setEnabled(true);
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // This view is constructed in the init() method()
     }
 
 }

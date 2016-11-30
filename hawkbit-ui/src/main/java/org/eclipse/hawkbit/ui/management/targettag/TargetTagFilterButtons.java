@@ -33,9 +33,9 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -44,8 +44,6 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -54,46 +52,38 @@ import com.vaadin.ui.UI;
 /**
  * Target Tag filter buttons table.
  */
-@SpringComponent
-@ViewScope
 public class TargetTagFilterButtons extends AbstractFilterButtons {
     private static final String NO_TAG = "NO TAG";
 
-    private static final long serialVersionUID = 5049554600376508073L;
+    private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ManagementViewClientCriterion managementViewClientCriterion;
+    private final ManagementViewClientCriterion managementViewClientCriterion;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification notification;
+    private final UINotification notification;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    TargetTagFilterButtonClick filterButtonClickBehaviour;
+    TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final ManagementViewClientCriterion managementViewClientCriterion, final I18N i18n,
+            final UINotification notification, final SpPermissionChecker permChecker, final EntityFactory entityFactory,
+            final TargetManagement targetManagement) {
+        super(eventBus, new TargetTagFilterButtonClick(eventBus, managementUIState));
+        this.managementUIState = managementUIState;
+        this.managementViewClientCriterion = managementViewClientCriterion;
+        this.i18n = i18n;
+        this.notification = notification;
+        this.permChecker = permChecker;
+        this.entityFactory = entityFactory;
+        this.targetManagement = targetManagement;
 
-    /**
-     * Initialize component.
-     *
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
-
-    public void init(final TargetTagFilterButtonClick filterButtonClickBehaviour) {
-        this.filterButtonClickBehaviour = filterButtonClickBehaviour;
-        super.init(filterButtonClickBehaviour);
         addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
     }
 
@@ -266,21 +256,21 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return SPUIDefinitions.TARGET_TAG_ID_PREFIXS;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEvent(final TargetTagUpdatedEventContainer eventContainer) {
         refreshContainer();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
         refreshContainer();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
@@ -294,11 +284,11 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         addColumn();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.RESET_SIMPLE_FILTERS
                 && !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty()) {
-            filterButtonClickBehaviour.clearTargetTagFilters();
+            ((TargetTagFilterButtonClick) filterButtonClickBehaviour).clearTargetTagFilters();
         }
     }
 

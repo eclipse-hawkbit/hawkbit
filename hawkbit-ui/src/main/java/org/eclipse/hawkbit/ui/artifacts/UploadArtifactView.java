@@ -8,9 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
@@ -21,11 +26,14 @@ import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.util.SPInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -35,7 +43,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
@@ -44,45 +52,33 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Display artifacts upload view.
- *
- *
  */
+@UIScope
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = HawkbitUI.class)
-@ViewScope
 public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "spUpload";
     private static final long serialVersionUID = 8754632011301553682L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private SMTypeFilterLayout filterByTypeLayout;
+    private final SMTypeFilterLayout filterByTypeLayout;
 
-    @Autowired
-    private SoftwareModuleTableLayout smTableLayout;
+    private final SoftwareModuleTableLayout smTableLayout;
 
-    @Autowired
-    private ArtifactDetailsLayout artifactDetailsLayout;
+    private final ArtifactDetailsLayout artifactDetailsLayout;
 
-    @Autowired
-    private UploadLayout uploadLayout;
+    private final UploadLayout uploadLayout;
 
-    @Autowired
-    private SMDeleteActionsLayout deleteActionsLayout;
+    private final SMDeleteActionsLayout deleteActionsLayout;
 
     private VerticalLayout detailAndUploadLayout;
 
@@ -91,8 +87,31 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private GridLayout mainLayout;
     private DragAndDropWrapper dadw;
 
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    @Autowired
+    UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final I18N i18n,
+            final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
+            final TagManagement tagManagement, final EntityFactory entityFactory,
+            final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
+            final SPInfo spInfo, final ArtifactManagement artifactManagement) {
+        this.eventBus = eventBus;
+        this.permChecker = permChecker;
+        this.i18n = i18n;
+        this.uiNotification = uiNotification;
+        this.artifactUploadState = artifactUploadState;
+        this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
+                tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewClientCriterion);
+        this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
+                eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
+        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
+                artifactManagement);
+        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo,
+                artifactManagement);
+        this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
+                artifactUploadState, softwareManagement, uploadViewClientCriterion);
+    }
+
+    @PostConstruct
+    void init() {
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
@@ -106,7 +125,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         eventBus.unsubscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeSwTable();
@@ -115,7 +134,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ArtifactDetailsEvent event) {
         if (event == ArtifactDetailsEvent.MINIMIZED) {
             minimizeArtifactoryDetails();
@@ -255,6 +274,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             filterByTypeLayout.setVisible(true);
             smTableLayout.setShowFilterButtonVisible(false);
         }
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // This view is constructed in the init() method()
     }
 
 }

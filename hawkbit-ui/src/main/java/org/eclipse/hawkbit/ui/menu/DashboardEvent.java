@@ -18,8 +18,6 @@ package org.eclipse.hawkbit.ui.menu;
  */
 /**
  * Containing all dashboard events.
- * 
- *
  *
  */
 public final class DashboardEvent {
@@ -48,7 +46,8 @@ public final class DashboardEvent {
     }
 
     /**
-     * TenantAwareEvent to indicate that the current shown view has been changed.
+     * TenantAwareEvent to indicate that the current shown view has been
+     * changed.
      * 
      *
      *

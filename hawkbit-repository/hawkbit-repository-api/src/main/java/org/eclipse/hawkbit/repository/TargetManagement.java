@@ -63,7 +63,8 @@ public interface TargetManagement {
      *
      * @return number of found {@link Target}s.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countTargetByAssignedDistributionSet(@NotNull Long distId);
 
     /**
@@ -104,7 +105,8 @@ public interface TargetManagement {
      *            to search for
      * @return number of found {@link Target}s.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countTargetByInstalledDistributionSet(@NotNull Long distId);
 
     /**

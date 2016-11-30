@@ -8,13 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Indexed;
@@ -27,19 +25,18 @@ import com.vaadin.ui.Grid;
 public abstract class AbstractGrid extends Grid {
 
     private static final long serialVersionUID = 4856562746502217630L;
-    
-    @Autowired
-    protected I18N i18n;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected final I18N i18n;
 
+    protected final transient EventBus.UIEventBus eventBus;
 
-    /**
-     * Initialize the components.
-     */
-    @PostConstruct
-    protected void init() {
+    protected final SpPermissionChecker permissionChecker;
+
+    protected AbstractGrid(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.permissionChecker = permissionChecker;
+
         setSizeFull();
         setImmediate(true);
         setId(getGridId());
@@ -48,13 +45,8 @@ public abstract class AbstractGrid extends Grid {
         addNewContainerDS();
         eventBus.subscribe(this);
     }
-    
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
-    public void addNewContainerDS() {
+    private void addNewContainerDS() {
         final Container container = createContainer();
         setContainerDataSource((Indexed) container);
         addContainerProperties();

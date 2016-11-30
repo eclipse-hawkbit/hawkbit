@@ -24,14 +24,14 @@ public class GravatarResource extends ExternalResource {
 
     /**
      * Construct based on given email address. Generates external resource
-     * pointing to gravatar with rating
-     * "g: suitable for display on all websites with any audience type." and
-     * "mystery-man" icon as backup as secure request.
+     * pointing to gravatar with rating "g: suitable for display on all websites
+     * with any audience type." and "mystery-man" icon as backup as secure
+     * request.
      * 
      * @param email
      *            to generate resource for
      */
-    public GravatarResource(final String email) {
+    GravatarResource(final String email) {
         super("https://www.gravatar.com/avatar/" + DigestUtils.md5DigestAsHex(email.getBytes()) + ".jpg?s=56&r=g&d=mm");
     }
 

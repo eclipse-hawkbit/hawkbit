@@ -38,9 +38,6 @@ import com.vaadin.ui.UI;
  * Utility class leveraging Spring Boot auto configuration of
  * {@link MessageSource}.
  *
- *
- *
- *
  */
 @Service
 public class I18N implements Serializable {
@@ -48,8 +45,12 @@ public class I18N implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(I18N.class);
 
+    private final transient MessageSource source;
+
     @Autowired
-    private transient MessageSource source;
+    I18N(final MessageSource source) {
+        this.source = source;
+    }
 
     /**
      * Tries to resolve the message.

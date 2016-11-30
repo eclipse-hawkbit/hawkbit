@@ -11,7 +11,10 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
@@ -23,17 +26,17 @@ import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
@@ -44,21 +47,25 @@ import com.vaadin.ui.themes.ValoTheme;
  * Layout for the create or update software module type.
  *
  */
-@SpringComponent
-@ViewScope
 public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<SoftwareModuleType> {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
-    @Autowired
-    private transient SoftwareManagement swTypeManagementService;
+    private final transient SoftwareManagement swTypeManagementService;
 
     private String singleAssignStr;
     private String multiAssignStr;
     private Label singleAssign;
     private Label multiAssign;
     private OptionGroup assignOptiongroup;
+
+    public CreateUpdateSoftwareTypeLayout(final I18N i18n, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification, final SoftwareManagement swTypeManagementService) {
+        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        this.swTypeManagementService = swTypeManagementService;
+    }
 
     @Override
     protected void addListeners() {

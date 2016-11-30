@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -17,13 +15,10 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -34,20 +29,11 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Default DistributionSet Panel.
  */
-@SpringComponent
-@ViewScope
 public class DefaultDistributionSetTypeLayout extends BaseConfigurationView implements ConfigurationGroup {
 
     private static final long serialVersionUID = 17896542758L;
 
-    @Autowired
-    private transient SystemManagement systemManagement;
-
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private I18N i18n;
+    private final transient SystemManagement systemManagement;
 
     private Long currentDefaultDisSetType;
 
@@ -55,15 +41,13 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
 
     private TenantMetaData tenantMetaData;
 
-    private ComboBox combobox;
+    private final ComboBox combobox;
 
-    private Label changeIcon;
+    private final Label changeIcon;
 
-    /**
-     * Initialize Default Distribution Set layout.
-     */
-    @PostConstruct
-    public void init() {
+    DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
+            final DistributionSetManagement distributionSetManagement, final I18N i18n) {
+        this.systemManagement = systemManagement;
 
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();
