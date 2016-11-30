@@ -16,6 +16,7 @@ import javax.servlet.http.Cookie;
 
 import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -199,6 +200,9 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
             @Override
             public void afterViewChange(final ViewChangeEvent event) {
                 final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
+                if (view instanceof AbstractDashboardMenuItemNotification) {
+                    ((AbstractDashboardMenuItemNotification) view).setNotificationContent(5000);
+                }
                 dashboardMenu.postViewChange(new PostViewChangeEvent(view));
                 if (view == null) {
                     viewHeader.setCaption(null);

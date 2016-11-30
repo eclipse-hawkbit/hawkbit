@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -41,6 +42,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -234,11 +236,35 @@ public final class DashboardMenu extends CustomComponent {
         }
         initialViewName = accessibleViews.get(0).getViewName();
         for (final DashboardMenuItem view : accessibleViews) {
-            final ValoMenuItemButton menuItemComponent = new ValoMenuItemButton(view);
-            menuButtons.add(menuItemComponent);
+            Component menuItemComponent = new ValoMenuItemButton(view);
+            menuButtons.add((ValoMenuItemButton) menuItemComponent);
+
+            menuItemComponent = buildLabelWrapper(menuItemComponent,
+                    ((AbstractDashboardMenuItemNotification) view).getNotificationLabel());
             menuItemsLayout.addComponent(menuItemComponent);
         }
         return menuItemsLayout;
+    }
+
+    /**
+     * Creates the wrapper which contains the menu item and the adjacent label
+     * for displaying the occurred events
+     * 
+     * @param menuItemButton
+     *            the menu item
+     * @param notificationLabel
+     *            the label for displaying the occurred events
+     * @return Component of type CssLayout
+     */
+    private static Component buildLabelWrapper(final Component menuItemButton, final Component notificationLabel) {
+        final CssLayout dashboardWrapper = new CssLayout(menuItemButton);
+        dashboardWrapper.addStyleName("labelwrapper");
+        dashboardWrapper.addStyleName(ValoTheme.MENU_ITEM);
+        notificationLabel.addStyleName(ValoTheme.MENU_BADGE);
+        notificationLabel.setWidthUndefined();
+        notificationLabel.setVisible(false);
+        dashboardWrapper.addComponent(notificationLabel);
+        return dashboardWrapper;
     }
 
     /**
