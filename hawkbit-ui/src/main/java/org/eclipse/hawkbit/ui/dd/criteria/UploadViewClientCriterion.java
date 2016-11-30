@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.ui.dd.criteria;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Upload UI View for Accept criteria.
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public final class UploadViewClientCriterion extends ServerViewClientCriterion {
 
     /**

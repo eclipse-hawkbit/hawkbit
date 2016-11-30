@@ -86,7 +86,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final transient SoftwareManagement softwareManagement;
 
-    private DistributionsViewClientCriterion distributionsViewClientCriterion;
+    private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     private final transient TargetManagement targetManagement;
 

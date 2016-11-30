@@ -12,14 +12,14 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Distribution UI View for Accept criteria.
  *
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public final class DistributionsViewClientCriterion extends ServerViewClientCriterion {
 
     /**

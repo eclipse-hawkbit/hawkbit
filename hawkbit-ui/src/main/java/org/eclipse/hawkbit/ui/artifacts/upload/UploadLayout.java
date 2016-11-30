@@ -111,7 +111,7 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-    private AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
+    private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
             UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
 
     private final transient ArtifactManagement artifactManagement;
