@@ -65,22 +65,16 @@ import com.vaadin.ui.TextField;
 /**
  * Define groups for a Rollout
  */
-@SpringComponent
-@ViewScope
 public class DefineGroupsLayout extends GridLayout {
 
     private static final long serialVersionUID = 2939193468001472916L;
 
-    @Autowired
     private I18N i18n;
 
-    @Autowired
     private transient EntityFactory entityFactory;
 
-    @Autowired
     private transient RolloutManagement rolloutManagement;
 
-    @Autowired
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private String defaultTriggerThreshold;
@@ -101,10 +95,13 @@ public class DefineGroupsLayout extends GridLayout {
 
     private transient RolloutGroupsValidation groupsValidation;
 
-    /**
-     * Create components and layout.
-     */
-    public void init() {
+    DefineGroupsLayout(I18N i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
+            TargetFilterQueryManagement targetFilterQueryManagement) {
+        this.i18n = i18n;
+        this.entityFactory = entityFactory;
+        this.rolloutManagement = rolloutManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+
         groupRows = new ArrayList<>(10);
         setSizeUndefined();
         buildLayout();

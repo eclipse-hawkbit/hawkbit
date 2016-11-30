@@ -84,7 +84,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     }
 
     private Long getRolloutId() {
-        return getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
+        return getRolloutUIState().getRolloutId().orElse(null);
     }
 
     @Override
@@ -163,9 +163,6 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         return (int) size;
     }
 
-    /**
-     * @return the rolloutManagement
-     */
     public RolloutManagement getRolloutManagement() {
         if (null == rolloutManagement) {
             rolloutManagement = SpringContextHelper.getBean(RolloutManagement.class);
@@ -173,9 +170,6 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         return rolloutManagement;
     }
 
-    /**
-     * @return the rolloutManagement
-     */
     public RolloutGroupManagement getRolloutGroupManagement() {
         if (null == rolloutGroupManagement) {
             rolloutGroupManagement = SpringContextHelper.getBean(RolloutGroupManagement.class);
@@ -183,9 +177,6 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         return rolloutGroupManagement;
     }
 
-    /**
-     * @return the rolloutUIState
-     */
     public RolloutUIState getRolloutUIState() {
         if (null == rolloutUIState) {
             rolloutUIState = SpringContextHelper.getBean(RolloutUIState.class);

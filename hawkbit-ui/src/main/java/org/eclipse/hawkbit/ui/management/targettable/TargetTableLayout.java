@@ -8,43 +8,48 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
+import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Target table layout.
  */
-@SpringComponent
-@ViewScope
 public class TargetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 2248703121998709112L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private TargetDetails targetDetails;
+    private final TargetDetails targetDetails;
 
-    @Autowired
-    private TargetTableHeader targetTableHeader;
+    private final TargetTableHeader targetTableHeader;
 
-    @Autowired
-    private TargetTable targetTable;
-
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    void init() {
+    public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final I18N i18n,
+            final UIEventBus eventbus, final UINotification notification, final ManagementUIState managementUIState,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria,
+            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
+            final SpPermissionChecker permissionChecker, final UINotification uinotification,
+            final TagManagement tagManagement) {
+        this.eventBus = eventBus;
+        this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
+                tagManagement, targetManagement, entityFactory, targetTable);
+        this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
+                managementUIState, managementViewAcceptCriteria, targetManagement, deploymentManagement, uiproperties,
+                eventbus, entityFactory, uinotification, tagManagement, targetTable);
 
         super.init(targetTableHeader, targetTable, targetDetails);
     }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -33,8 +31,8 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -59,7 +57,6 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Abstract class for create/update target tag layout.
  *
  * @param <E>
@@ -73,23 +70,17 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
     protected transient TagManagement tagManagement;
 
-    @Autowired
     protected transient EntityFactory entityFactory;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
-    @Autowired
     protected SpPermissionChecker permChecker;
 
-    @Autowired
-    protected transient UINotification uiNotification;
+    protected UINotification uiNotification;
 
     private final FormLayout formLayout = new FormLayout();
 
@@ -115,6 +106,17 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     private String colorPicked;
     protected String tagNameValue;
     protected String tagDescValue;
+
+    public AbstractCreateUpdateTagLayout(final I18N i18n, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
+        this.i18n = i18n;
+        this.tagManagement = tagManagement;
+        this.entityFactory = entityFactory;
+        this.eventBus = eventBus;
+        this.permChecker = permChecker;
+        this.uiNotification = uiNotification;
+    }
 
     /**
      * 
@@ -167,11 +169,6 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
         buildLayout();
         addListeners();
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     protected void createRequiredComponents() {

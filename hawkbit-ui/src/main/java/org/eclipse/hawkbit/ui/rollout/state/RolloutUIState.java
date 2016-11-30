@@ -184,7 +184,7 @@ public class RolloutUIState implements Serializable {
     /**
      * @return rolloutDistributionSet
      */
-    public Optional<String>  getRolloutDistributionSet() {
+    public Optional<String> getRolloutDistributionSet() {
         return rolloutDistributionSet == null ? Optional.empty() : Optional.of(rolloutDistributionSet);
     }
 
@@ -193,7 +193,7 @@ public class RolloutUIState implements Serializable {
      * @param rolloutDistributionSet
      *            the distribution set of the rollout
      */
-    public void setRolloutDistributionSet(String rolloutDistributionSet) {
+    public void setRolloutDistributionSet(final String rolloutDistributionSet) {
         this.rolloutDistributionSet = rolloutDistributionSet;
     }
 }

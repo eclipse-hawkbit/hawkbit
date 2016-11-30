@@ -26,11 +26,10 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.spring.events.EventBus.SessionEventBus;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -46,9 +45,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Software module details table.
  * 
- *
- *
- *
  */
 public class SoftwareModuleDetailsTable extends Table {
 
@@ -64,18 +60,18 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private boolean isTargetAssigned;
 
-    private boolean isUnassignSoftModAllowed;
-    private SpPermissionChecker permissionChecker;
+    private final boolean isUnassignSoftModAllowed;
+    private final SpPermissionChecker permissionChecker;
 
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    private I18N i18n;
+    private final I18N i18n;
 
-    private transient SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    private transient ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    private transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
     /**
      * Initialize software module table- to be displayed in details layout.
@@ -94,16 +90,17 @@ public class SoftwareModuleDetailsTable extends Table {
      * @param manageDistUIState
      *            ManageDistUIState
      */
-    public void init(final I18N i18n, final boolean isUnassignSoftModAllowed,
+    public SoftwareModuleDetailsTable(final I18N i18n, final boolean isUnassignSoftModAllowed,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
-            final SessionEventBus eventBus, final ManageDistUIState manageDistUIState) {
+            final EventBus.UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+            final UINotification uiNotification) {
         this.i18n = i18n;
         this.isUnassignSoftModAllowed = isUnassignSoftModAllowed;
         this.permissionChecker = permissionChecker;
         this.distributionSetManagement = distributionSetManagement;
         this.manageDistUIState = manageDistUIState;
         this.eventBus = eventBus;
-        this.uiNotification = SpringContextHelper.getBean(UINotification.class);
+        this.uiNotification = uiNotification;
         createSwModuleTable();
     }
 

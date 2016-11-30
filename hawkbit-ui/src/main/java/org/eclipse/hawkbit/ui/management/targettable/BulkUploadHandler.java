@@ -95,25 +95,14 @@ public class BulkUploadHandler extends CustomComponent
     private long successfullTargetCount;
 
     private final transient Executor executor;
-    private transient EventBus.SessionEventBus eventBus;
-
-    final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
+    private final transient EventBus.UIEventBus eventBus;
 
     private transient EntityFactory entityFactory;
     private final UI uiInstance;
 
-    /**
-     *
-     * @param targetBulkUpdateWindowLayout
-     * @param targetManagement
-     * @param managementUIState
-     * @param deploymentManagement
-     * @param i18n
-     */
-    public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
+    BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
-        this.targetBulkUpdateWindowLayout = targetBulkUpdateWindowLayout;
         this.uiInstance = uiInstance;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();

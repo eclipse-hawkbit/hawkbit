@@ -8,20 +8,23 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -29,32 +32,24 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 /**
- * 
  * Header layout of rollout list view.
- *
  */
-@SpringComponent
-@ViewScope
 public class RolloutListHeader extends AbstractGridHeader {
     private static final long serialVersionUID = 2365400733081333174L;
 
-    @Autowired
-    private SpPermissionChecker permissionChecker;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient RolloutUIState rolloutUIState;
+    private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        addUpdateRolloutWindow.init();
+    RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final TargetManagement targetManagement, final UINotification uiNotification,
+            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
+        super(permissionChecker, rolloutUIState, i18n);
+        this.eventBus = eventBus;
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
+                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
     }
 
     @Override
@@ -123,7 +118,7 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected String onLoadSearchBoxValue() {
-        return rolloutUIState.getSearchText().isPresent() ? rolloutUIState.getSearchText().get() : null;
+        return rolloutUIState.getSearchText().orElse(null);
     }
 
     @Override

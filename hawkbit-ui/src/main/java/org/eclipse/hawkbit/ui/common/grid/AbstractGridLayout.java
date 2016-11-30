@@ -18,27 +18,24 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * 
- * Abstract grid layout class which builds layout with grid
- * {@link AbstractGrid} and table header
- * {@link AbstractGridHeader}.
+ * Abstract grid layout class which builds layout with grid {@link AbstractGrid}
+ * and table header {@link AbstractGridHeader}.
  *
  */
 public abstract class AbstractGridLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 8611248179949245460L;
 
-    private AbstractGridHeader tableHeader;
-    
-    private AbstractGrid grid;
+    private final AbstractGridHeader tableHeader;
 
+    protected final AbstractGrid grid;
 
-    protected void init(final AbstractGridHeader tableHeader,final AbstractGrid grid) {
+    protected AbstractGridLayout(final AbstractGridHeader tableHeader, final AbstractGrid grid) {
         this.tableHeader = tableHeader;
         this.grid = grid;
-        buildLayout();
     }
 
-    private void buildLayout() {
+    protected void buildLayout() {
         setSizeFull();
         setSpacing(true);
         setMargin(false);
@@ -54,18 +51,17 @@ public abstract class AbstractGridLayout extends VerticalLayout {
         tableHeaderLayout.setComponentAlignment(tableHeader, Alignment.TOP_CENTER);
         tableHeaderLayout.addComponent(grid);
         tableHeaderLayout.setComponentAlignment(grid, Alignment.TOP_CENTER);
-        tableHeaderLayout.setExpandRatio(grid, 1.0f);
-        
+        tableHeaderLayout.setExpandRatio(grid, 1.0F);
 
         addComponent(tableHeaderLayout);
         setComponentAlignment(tableHeaderLayout, Alignment.TOP_CENTER);
-        setExpandRatio(tableHeaderLayout, 1.0f);
+        setExpandRatio(tableHeaderLayout, 1.0F);
         if (hasCountMessage()) {
             final HorizontalLayout rolloutGroupTargetsCountLayout = createCountMessageComponent();
             addComponent(rolloutGroupTargetsCountLayout);
             setComponentAlignment(rolloutGroupTargetsCountLayout, Alignment.BOTTOM_CENTER);
         }
-        
+
     }
 
     private HorizontalLayout createCountMessageComponent() {

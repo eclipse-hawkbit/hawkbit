@@ -84,10 +84,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     }
 
     private String getSearchText() {
-        if (getRolloutUIState().getSearchText().isPresent()) {
-            return String.format("%%%s%%", getRolloutUIState().getSearchText().get());
-        }
-        return null;
+        return getRolloutUIState().getSearchText().map(value -> String.format("%%%s%%", value)).orElse(null);
     }
 
     @Override
@@ -95,13 +92,6 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return new ProxyRollout();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#loadBeans(int,
-     * int)
-     */
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
@@ -164,11 +154,6 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
          */
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#size()
-     */
     @Override
     public int size() {
         int size = getRolloutManagement().countRolloutsAll().intValue();

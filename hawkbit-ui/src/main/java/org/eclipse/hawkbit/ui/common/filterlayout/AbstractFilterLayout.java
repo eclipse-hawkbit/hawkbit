@@ -15,35 +15,25 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Parent class for filter button layout.
- * 
- *
- *
- * 
  */
 public abstract class AbstractFilterLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 9190616426688385851L;
 
-    private AbstractFilterHeader filterHeader;
+    private final AbstractFilterHeader filterHeader;
 
-    private AbstractFilterButtons filterButtons;
+    private final AbstractFilterButtons filterButtons;
 
-    /**
-     * Initialize the artifact details layout.
-     */
-    protected void init(final AbstractFilterHeader filterHeader, final AbstractFilterButtons filterButtons,
-            final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
+    protected AbstractFilterLayout(final AbstractFilterHeader filterHeader, final AbstractFilterButtons filterButtons) {
         this.filterHeader = filterHeader;
         this.filterButtons = filterButtons;
-        filterButtons.init(filterButtonClickBehaviour);
         buildLayout();
-        restoreState();
     }
 
     private void buildLayout() {
         setWidth(SPUIDefinitions.FILTER_BY_TYPE_WIDTH, Unit.PIXELS);
         setStyleName("filter-btns-main-layout");
-        setHeight(100.0f, Unit.PERCENTAGE);
+        setHeight(100.0F, Unit.PERCENTAGE);
         setSpacing(false);
         setMargin(false);
 
@@ -52,10 +42,10 @@ public abstract class AbstractFilterLayout extends VerticalLayout {
         setComponentAlignment(filterHeader, Alignment.TOP_CENTER);
         setComponentAlignment(filterButtons, Alignment.TOP_CENTER);
 
-        setExpandRatio(filterButtons, 1.0f);
+        setExpandRatio(filterButtons, 1.0F);
     }
 
-    private void restoreState() {
+    protected void restoreState() {
         if (onLoadIsTypeFilterIsClosed()) {
             setVisible(false);
         }

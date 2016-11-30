@@ -25,7 +25,7 @@ public class StatusFontIcon {
     final FontAwesome fontIcon;
     final String style;
 
-    public StatusFontIcon(FontAwesome fontIcon, String style) {
+    public StatusFontIcon(final FontAwesome fontIcon, final String style) {
         super();
         this.fontIcon = fontIcon;
         this.style = style;

@@ -12,42 +12,49 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Implementation of target/ds tag token layout.
  *
  */
-@SpringComponent
-@ViewScope
 public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private static final long serialVersionUID = -8022738301736043396L;
-    @Autowired
-    private transient TagManagement tagManagement;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient TagManagement tagManagement;
+
+    private final transient DistributionSetManagement distributionSetManagement;
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
+
+    public DistributionTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
+            final DistributionSetManagement distributionSetManagement) {
+        super(checker, i18n, uinotification, eventBus, managementUIState);
+        this.tagManagement = tagManagement;
+        this.distributionSetManagement = distributionSetManagement;
+    }
 
     @Override
     protected String getTagStyleName() {
@@ -111,25 +118,25 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         onBaseEntityEvent(distributionTableEvent);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
         eventContainer.getEvents().stream().map(event -> event.getEntity())
                 .forEach(distributionSetTag -> setContainerPropertValues(distributionSetTag.getId(),
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
         eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
                 .forEach(this::removeTagFromCombo);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         eventContainer.getEvents().stream().map(event -> event.getEntity()).forEach(entity -> {
             final Item item = container.getItem(entity.getId());

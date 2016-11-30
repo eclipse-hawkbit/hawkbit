@@ -24,15 +24,17 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -42,34 +44,41 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
- * Header of Software module table.
+ * The Software module table.
  */
-@ViewScope
-@SpringComponent
 public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6469417305487144809L;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
 
-    @Autowired
-    private SwMetadataPopupLayout swMetadataPopupLayout;
+    private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
+            final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
+            final UploadViewAcceptCriteria uploadViewAcceptCriteria,
+            final SwMetadataPopupLayout swMetadataPopupLayout) {
+        super(eventBus, i18n, uiNotification);
+        this.artifactUploadState = artifactUploadState;
+        this.softwareManagement = softwareManagement;
+        this.uploadViewAcceptCriteria = uploadViewAcceptCriteria;
+        this.swMetadataPopupLayout = swMetadataPopupLayout;
+
+        addNewContainerDS();
+        setColumnProperties();
+        setDataAvailable(getContainerDataSource().size() != 0);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
 
@@ -153,12 +162,12 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         onBaseEntityEvent(event);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
             UI.getCurrent().access(this::refreshFilter);

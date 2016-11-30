@@ -15,20 +15,20 @@ import java.util.Map;
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
 
 /**
  * Management View for Accept criteria.
- * 
- *
- * 
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class ManagementViewAcceptCriteria extends AbstractAcceptCriteria {
 
     private static final long serialVersionUID = 1718217664674701006L;
@@ -36,6 +36,11 @@ public class ManagementViewAcceptCriteria extends AbstractAcceptCriteria {
     private static final Map<String, List<String>> DROP_CONFIGS = createDropConfigurations();
 
     private static final Map<String, Object> DROP_HINTS_CONFIGS = createDropHintConfigurations();
+
+    @Autowired
+    ManagementViewAcceptCriteria(final UINotification uiNotification, final UIEventBus eventBus) {
+        super(uiNotification, eventBus);
+    }
 
     @Override
     protected String getComponentId(final Component component) {

@@ -13,17 +13,15 @@ import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.NO_TAG_BUTTON_ID;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
@@ -45,26 +43,17 @@ public abstract class AbstractFilterButtons extends Table {
 
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
-    private AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
+    protected final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
 
-    /**
-     * Initialize layout of filter buttons.
-     *
-     * @param filterButtonClickBehaviour
-     *            click behaviour of filter buttons.
-     */
-    public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
+    protected AbstractFilterButtons(final UIEventBus eventBus,
+            final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
+        this.eventBus = eventBus;
+
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     private void createTable() {

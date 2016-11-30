@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.footer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -21,8 +18,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
@@ -48,17 +45,13 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private static final long serialVersionUID = -6047975388519155509L;
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
     protected SpPermissionChecker permChecker;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    protected transient UINotification notification;
+    protected UINotification notification;
 
     private DragAndDropWrapper deleteWrapper;
 
@@ -68,30 +61,30 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Button bulkUploadStatusButton;
 
-    /**
-     * Initialize.
-     */
-    @PostConstruct
+    protected AbstractDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification notification) {
+        this.i18n = i18n;
+        this.permChecker = permChecker;
+        this.eventBus = eventBus;
+        this.notification = notification;
+
+        eventBus.subscribe(this);
+    }
+
     protected void init() {
         if (hasCountMessage() || hasDeletePermission() || hasUpdatePermission() || hasBulkUploadPermission()) {
             createComponents();
             buildLayout();
             reload();
         }
-        eventBus.subscribe(this);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    private void reload() {
+    protected void reload() {
         restoreActionCount();
         restoreBulkUploadStatusCount();
     }
 
-    private void createComponents() {
+    protected void createComponents() {
         if (hasDeletePermission()) {
             deleteWrapper = createDeleteWrapperLayout();
         }
@@ -103,7 +96,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         }
     }
 
-    private void buildLayout() {
+    protected void buildLayout() {
         final HorizontalLayout dropHintLayout = new HorizontalLayout();
         if (hasCountMessage()) {
             dropHintLayout.addComponent(getCountMessageLabel());

@@ -15,24 +15,18 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.ui.VerticalLayout;
 
 /**
  * abstract authentication configuration item.
- *
- *
- *
- *
  */
 abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout
         implements AuthenticationConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
     private final TenantConfigurationKey configurationKey;
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
@@ -47,9 +41,10 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      *            configuration value
      */
     public AbstractAuthenticationTenantConfigurationItem(final TenantConfigurationKey configurationKey,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
         this.configurationKey = configurationKey;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.i18n = i18n;
     }
 
     /**

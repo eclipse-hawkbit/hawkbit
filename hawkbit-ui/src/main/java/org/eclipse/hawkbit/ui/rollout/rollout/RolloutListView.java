@@ -8,35 +8,38 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
- * 
  * Rollout list view.
- *
  */
-@SpringComponent
-@ViewScope
 public class RolloutListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = -2703552177439393208L;
 
-    @Autowired
-    private RolloutListHeader rolloutListHeader;
+    public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final TargetManagement targetManagement, final UINotification uiNotification,
+            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
+        super(new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
+                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement),
+                new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState,
+                        permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement));
 
-    @Autowired
-    private RolloutListGrid rolloutListGrid;
-
-    @PostConstruct
-    void init() {
-        super.init(rolloutListHeader, rolloutListGrid);
+        buildLayout();
     }
 
     @Override

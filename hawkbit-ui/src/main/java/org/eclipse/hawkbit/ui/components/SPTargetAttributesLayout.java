@@ -21,9 +21,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Attributes Vertical layout for Target.
- *
- *
- *
  */
 public class SPTargetAttributesLayout {
     private final VerticalLayout targetAttributesLayout;
@@ -35,7 +32,7 @@ public class SPTargetAttributesLayout {
      *            controller attributes
      *
      */
-    public SPTargetAttributesLayout(final Map<String, String> controllerAttibs) {
+    SPTargetAttributesLayout(final Map<String, String> controllerAttibs) {
         targetAttributesLayout = new VerticalLayout();
         targetAttributesLayout.setSpacing(true);
         targetAttributesLayout.setMargin(true);

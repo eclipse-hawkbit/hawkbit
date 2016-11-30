@@ -53,13 +53,13 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.Container;
@@ -70,8 +70,6 @@ import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -84,8 +82,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Rollout add or update popup layout.
  */
-@SpringComponent
-@ViewScope
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 2999293468801479916L;
@@ -94,35 +90,25 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
 
-    @Autowired
-    private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
+    private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
-    @Autowired
-    private transient RolloutManagement rolloutManagement;
+    private final transient RolloutManagement rolloutManagement;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    @Autowired
-    private UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final transient UiProperties uiProperties;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    private transient DefineGroupsLayout defineGroupsLayout;
+    private final DefineGroupsLayout defineGroupsLayout;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private TextField rolloutName;
 
@@ -160,6 +146,28 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
+    AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
+            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final I18N i18n, final UIEventBus eventBus, final TargetFilterQueryManagement targetFilterQueryManagement) {
+        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        this.rolloutManagement = rolloutManagement;
+        this.targetManagement = targetManagement;
+        this.uiNotification = uiNotification;
+        this.uiProperties = uiProperties;
+        this.entityFactory = entityFactory;
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+
+        this.defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement,
+                targetFilterQueryManagement);
+
+        setSizeUndefined();
+        createRequiredComponents();
+        buildLayout();
+        defineGroupsLayout.setValidationListener(isValid -> validateGroups());
+    }
+
     /**
      * Save or update the rollout.
      */
@@ -180,17 +188,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
             return duplicateCheck();
         }
-    }
-
-    /**
-     * Create components and layout.
-     */
-    public void init() {
-        setSizeUndefined();
-        createRequiredComponents();
-        buildLayout();
-        defineGroupsLayout.init();
-        defineGroupsLayout.setValidationListener(isValid -> validateGroups());
     }
 
     /**

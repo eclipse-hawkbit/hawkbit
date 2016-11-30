@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_
 
 import java.util.Collections;
 
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -23,33 +24,35 @@ import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Software Module Type filter buttons.
  */
-@ViewScope
-@SpringComponent
 public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 6804534533362387433L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+
+    DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final SoftwareManagement softwareManagement) {
+        super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareManagement));
+        this.manageDistUIState = manageDistUIState;
+        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+    }
 
     @Override
     protected String getButtonsTableId() {
@@ -103,7 +106,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
         return SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleTypeEvent event) {
         if (isCreateOrUpdate(event) && event.getSoftwareModuleType() != null) {
             refreshTypeTable();
@@ -115,7 +118,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
                 || event.getSoftwareModuleTypeEnum() == UPDATE_SOFTWARE_MODULE_TYPE;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES) {
             refreshTypeTable();

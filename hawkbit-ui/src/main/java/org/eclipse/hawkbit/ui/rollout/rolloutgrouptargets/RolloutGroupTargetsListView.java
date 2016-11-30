@@ -8,39 +8,31 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
  * Rollout Group Targets List View.
  */
-@SpringComponent
-@ViewScope
 public class RolloutGroupTargetsListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = 26089134783467012L;
 
-    @Autowired
-    private RolloutGroupTargetsListHeader rolloutGroupTargetsListHeader;
+    private final RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
 
-    @Autowired
-    private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
-    
-    @Autowired
-    private RolloutGroupTargetsListGrid rolloutListGrid;
+    public RolloutGroupTargetsListView(final UIEventBus eventBus, final I18N i18n,
+            final RolloutUIState rolloutUIState) {
+        super(new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState),
+                new RolloutGroupTargetsListGrid(i18n, eventBus, rolloutUIState));
 
-    /**
-     * Initialization of Rollout group component.
-     */
-    @PostConstruct
-    protected void init() {
-        super.init(rolloutGroupTargetsListHeader, rolloutListGrid);
+        this.rolloutGroupTargetsCountLabelMessage = new RolloutGroupTargetsCountLabelMessage(rolloutUIState,
+                (RolloutGroupTargetsListGrid) grid, i18n, eventBus);
+
+        buildLayout();
     }
 
     @Override
