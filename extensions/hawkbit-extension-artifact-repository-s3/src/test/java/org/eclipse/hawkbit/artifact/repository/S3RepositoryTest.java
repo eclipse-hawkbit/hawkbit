@@ -51,7 +51,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @RunWith(MockitoJUnitRunner.class)
 @Features("Unit Tests - S3 Repository")
-@Stories("S3 Artifact Repository ")
+@Stories("S3 Artifact Repository")
 public class S3RepositoryTest {
 
     @Mock
@@ -81,7 +81,7 @@ public class S3RepositoryTest {
     @Description("Verifies that the amazonS3 client is called to put the object to S3 with the correct inputstream and meta-data")
     public void storeInputStreamCallAmazonS3Client() throws IOException, NoSuchAlgorithmException {
         final byte[] rndBytes = randomBytes();
-        final String knownSHA1 = getSha1OfRandomBytes(rndBytes);
+        final String knownSHA1 = getSha1OfBytes(rndBytes);
         final String knownContentType = "application/octet-stream";
 
         // test
@@ -128,7 +128,7 @@ public class S3RepositoryTest {
     @Description("Verifies that the amazonS3 client is not called to put the object to S3 due the artifact already exists on S3")
     public void artifactIsNotUploadedIfAlreadyExists() throws NoSuchAlgorithmException, IOException {
         final byte[] rndBytes = randomBytes();
-        final String knownSHA1 = getSha1OfRandomBytes(rndBytes);
+        final String knownSHA1 = getSha1OfBytes(rndBytes);
         final String knownContentType = "application/octet-stream";
 
         when(amazonS3Mock.doesObjectExist(s3Properties.getBucketName(), knownSHA1)).thenReturn(true);
@@ -150,7 +150,7 @@ public class S3RepositoryTest {
         }
     }
 
-    private static String getSha1OfRandomBytes(final byte[] bytes) throws IOException, NoSuchAlgorithmException {
+    private static String getSha1OfBytes(final byte[] bytes) throws IOException, NoSuchAlgorithmException {
         final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
 
         try (InputStream input = new ByteArrayInputStream(bytes);

@@ -30,7 +30,6 @@ import com.amazonaws.RequestClientOptions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.google.common.io.BaseEncoding;
@@ -94,53 +93,40 @@ public class S3Repository implements ArtifactRepository {
         }
 
         LOG.debug("Creating temporary file to store the inputstream to it");
-        final File file = createTempFile();
 
-        String sha1Hash16;
-        String md5Hash16;
+        final File file = createTempFile();
         LOG.debug("Calculating sha1 and md5 hashes");
         try (final DigestOutputStream outputstream = openFileOutputStream(file, mdSHA1, mdMD5)) {
             ByteStreams.copy(content, outputstream);
             outputstream.flush();
-            sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
-            md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
+            final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
+            final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
+
+            return store(sha1Hash16, md5Hash16, contentType, file, hash);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
+        } finally {
+            file.delete();
         }
-
-        return store(sha1Hash16, md5Hash16, contentType, file, hash);
     }
 
     private DbArtifact store(final String sha1Hash16, final String mdMD5Hash16, final String contentType,
             final File file, final DbArtifactHash hash) {
-        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, sha1Hash16);
+        final S3Artifact s3Artifact = createS3Artifact(sha1Hash16, mdMD5Hash16, contentType, file);
         checkHashes(s3Artifact, hash);
+
         LOG.info("Storing file {} with length {} to AWS S3 bucket as SHA1 {}", file.getName(), file.length(),
                 s3Properties.getBucketName(), sha1Hash16);
+
+        if (exists(sha1Hash16)) {
+            LOG.debug("Artifact {} already exists on S3 bucket {}, don't need to upload twice", sha1Hash16,
+                    s3Properties.getBucketName());
+            return s3Artifact;
+        }
+
         try (final InputStream inputStream = new BufferedInputStream(new FileInputStream(file),
                 RequestClientOptions.DEFAULT_STREAM_BUFFER_SIZE)) {
-
-            s3Artifact.setContentType(contentType);
-            s3Artifact.setArtifactId(sha1Hash16);
-            s3Artifact.setSize(file.length());
-            s3Artifact.setContentType(contentType);
-            s3Artifact.setHashes(new DbArtifactHash(sha1Hash16, mdMD5Hash16));
-
-            final ObjectMetadata objectMetadata = new ObjectMetadata();
-            final String mdMD5Hash64 = BaseEncoding.base64()
-                    .encode(BaseEncoding.base16().lowerCase().decode(mdMD5Hash16));
-            objectMetadata.setContentMD5(mdMD5Hash64);
-            objectMetadata.setContentType(contentType);
-            objectMetadata.setContentLength(file.length());
-            objectMetadata.setHeader("x-amz-meta-md5chksum", mdMD5Hash64);
-            if (s3Properties.isServerSideEncryption()) {
-                objectMetadata.setHeader(Headers.SERVER_SIDE_ENCRYPTION,
-                        s3Properties.getServerSideEncryptionAlgorithm());
-            }
-
-            if (exists(sha1Hash16)) {
-                return s3Artifact;
-            }
+            final ObjectMetadata objectMetadata = createObjectMetadata(mdMD5Hash16, contentType, file);
             amazonS3.putObject(s3Properties.getBucketName(), sha1Hash16, inputStream, objectMetadata);
 
         } catch (final IOException | AmazonClientException e) {
@@ -149,6 +135,30 @@ public class S3Repository implements ArtifactRepository {
             file.delete();
         }
         return s3Artifact;
+    }
+
+    private S3Artifact createS3Artifact(final String sha1Hash16, final String mdMD5Hash16, final String contentType,
+            final File file) {
+        final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, sha1Hash16);
+        s3Artifact.setContentType(contentType);
+        s3Artifact.setArtifactId(sha1Hash16);
+        s3Artifact.setSize(file.length());
+        s3Artifact.setContentType(contentType);
+        s3Artifact.setHashes(new DbArtifactHash(sha1Hash16, mdMD5Hash16));
+        return s3Artifact;
+    }
+
+    private ObjectMetadata createObjectMetadata(final String mdMD5Hash16, final String contentType, final File file) {
+        final ObjectMetadata objectMetadata = new ObjectMetadata();
+        final String mdMD5Hash64 = BaseEncoding.base64().encode(BaseEncoding.base16().lowerCase().decode(mdMD5Hash16));
+        objectMetadata.setContentMD5(mdMD5Hash64);
+        objectMetadata.setContentType(contentType);
+        objectMetadata.setContentLength(file.length());
+        objectMetadata.setHeader("x-amz-meta-md5chksum", mdMD5Hash64);
+        if (s3Properties.isServerSideEncryption()) {
+            objectMetadata.setHeader(Headers.SERVER_SIDE_ENCRYPTION, s3Properties.getServerSideEncryptionAlgorithm());
+        }
+        return objectMetadata;
     }
 
     @Override
@@ -160,8 +170,11 @@ public class S3Repository implements ArtifactRepository {
     @Override
     public DbArtifact getArtifactBySha1(final String sha1) {
         LOG.info("Retrieving S3 object from bucket {} and key {}", s3Properties.getBucketName(), sha1);
-        final GetObjectRequest getObjectRequest = new GetObjectRequest(s3Properties.getBucketName(), sha1);
-        final S3Object s3Object = amazonS3.getObject(getObjectRequest);
+        final S3Object s3Object = amazonS3.getObject(s3Properties.getBucketName(), sha1);
+        if (s3Object == null) {
+            return null;
+        }
+
         final ObjectMetadata s3ObjectMetadata = s3Object.getObjectMetadata();
 
         final S3Artifact s3Artifact = new S3Artifact(amazonS3, s3Properties, sha1);
@@ -174,9 +187,9 @@ public class S3Repository implements ArtifactRepository {
         return s3Artifact;
     }
 
-    private static DbArtifact checkHashes(final DbArtifact artifact, final DbArtifactHash hash) {
+    private static void checkHashes(final DbArtifact artifact, final DbArtifactHash hash) {
         if (hash == null) {
-            return artifact;
+            return;
         }
         if (hash.getSha1() != null && !artifact.getHashes().getSha1().equals(hash.getSha1())) {
             throw new HashNotMatchException("The given sha1 hash " + hash.getSha1()
@@ -188,7 +201,6 @@ public class S3Repository implements ArtifactRepository {
                     + " does not match with the calcualted md5 hash " + artifact.getHashes().getMd5(),
                     HashNotMatchException.MD5);
         }
-        return artifact;
     }
 
     private static File createTempFile() {

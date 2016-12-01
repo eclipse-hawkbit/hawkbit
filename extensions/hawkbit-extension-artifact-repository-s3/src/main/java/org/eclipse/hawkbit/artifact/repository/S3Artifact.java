@@ -13,7 +13,6 @@ import java.io.InputStream;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 
 /**
  * An {@link DbArtifact} implementation which retrieves the {@link InputStream}
@@ -33,8 +32,7 @@ public class S3Artifact extends DbArtifact {
 
     @Override
     public InputStream getFileInputStream() {
-        final GetObjectRequest getObjectRequest = new GetObjectRequest(s3Properties.getBucketName(), sha1);
-        return this.amazonS3.getObject(getObjectRequest).getObjectContent();
+        return amazonS3.getObject(s3Properties.getBucketName(), sha1).getObjectContent();
     }
 
     @Override

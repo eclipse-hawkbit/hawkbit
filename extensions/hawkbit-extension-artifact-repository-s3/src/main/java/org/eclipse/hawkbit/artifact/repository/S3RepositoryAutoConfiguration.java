@@ -14,6 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -50,13 +51,26 @@ public class S3RepositoryAutoConfiguration {
     }
 
     /**
+     * The default AmazonS3 client configuration, which declares the
+     * configuration for managing connection behavior to s3.
+     * 
+     * @return the default {@link ClientConfiguration} bean with the default
+     *         client configuration
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ClientConfiguration awsClientConfiguration() {
+        return new ClientConfiguration();
+    }
+
+    /**
      * @return the {@link AmazonS3Client} if no other {@link AmazonS3} bean is
      *         registered.
      */
     @Bean
     @ConditionalOnMissingBean
     public AmazonS3 amazonS3() {
-        return new AmazonS3Client(awsCredentialsProvider());
+        return new AmazonS3Client(awsCredentialsProvider(), awsClientConfiguration());
     }
 
     /**
