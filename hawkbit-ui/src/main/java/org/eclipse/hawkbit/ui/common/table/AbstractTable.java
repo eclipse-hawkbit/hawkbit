@@ -241,9 +241,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             UI.getCurrent().access(() -> applyMinTableSettings());
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(() -> applyMaxTableSettings());
-        } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()) {
-            UI.getCurrent().access(() -> refreshContainer());
-        } else if (BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
+        } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()
+                || BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
             UI.getCurrent().access(() -> refreshContainer());
         }
     }

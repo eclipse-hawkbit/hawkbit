@@ -13,8 +13,10 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TenantAwareEvent to represent add, update or delete.
@@ -22,6 +24,8 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  * * @param <T> entity class
  */
 public class BaseUIEntityEvent<T extends BaseEntity> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BaseUIEntityEvent.class);
 
     private final BaseEntityEventType eventType;
 
@@ -72,16 +76,24 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
         return eventType;
     }
 
+    /**
+     * Check if the remove event is the same this ui event. Then maybe you can
+     * skip the remote event because is already executed.
+     * 
+     * @param tenantAwareEvent
+     *            the remote event
+     * @return <true> match <false> not match
+     */
     public boolean matchRemoteEvent(final TenantAwareEvent tenantAwareEvent) {
-        if (!(tenantAwareEvent instanceof RemoteEntityEvent)) {
+        if (!(tenantAwareEvent instanceof RemoteIdEvent)) {
             return false;
         }
-        final RemoteEntityEvent<?> remoteEntityEvent = (RemoteEntityEvent<?>) tenantAwareEvent;
+        final RemoteIdEvent remoteIdEvent = (RemoteIdEvent) tenantAwareEvent;
         try {
-            final Class<?> remoteEntityClass = ClassUtils.getClass(remoteEntityEvent.getEntityClass());
-            return entityClass.isAssignableFrom(remoteEntityClass)
-                    && entityIds.contains(remoteEntityEvent.getEntityId());
+            final Class<?> remoteEntityClass = ClassUtils.getClass(remoteIdEvent.getEntityClass());
+            return entityClass.isAssignableFrom(remoteEntityClass) && entityIds.contains(remoteIdEvent.getEntityId());
         } catch (final ClassNotFoundException e) {
+            LOG.error("Class not found", e);
             return false;
         }
 

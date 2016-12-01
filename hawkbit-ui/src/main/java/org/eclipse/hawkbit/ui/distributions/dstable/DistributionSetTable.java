@@ -83,9 +83,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
             Arrays.asList(DragEvent.SOFTWAREMODULE_DRAG));
 
-    private static final String UNREAD_MESSAGE_CREATED = "distribution.set.table.created";
-    private static final String UNREAD_MESSAGE_DELETED = "distribution.set.table.deleted";
-
     @Autowired
     private SpPermissionChecker permissionChecker;
 

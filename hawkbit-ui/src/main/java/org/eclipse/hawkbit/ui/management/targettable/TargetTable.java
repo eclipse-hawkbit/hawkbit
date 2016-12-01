@@ -100,9 +100,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     private static final long serialVersionUID = -2300392868806614568L;
     private static final int PROPERTY_DEPT = 3;
 
-    private static final String UNREAD_MESSAGE_CREATED = "target.table.created";
-    private static final String UNREAD_MESSAGE_DELETED = "target.table.deleted";
-
     @Autowired
     private transient TargetManagement targetManagement;
 
