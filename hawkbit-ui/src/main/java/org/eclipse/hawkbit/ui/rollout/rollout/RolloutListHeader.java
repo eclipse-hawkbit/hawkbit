@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;

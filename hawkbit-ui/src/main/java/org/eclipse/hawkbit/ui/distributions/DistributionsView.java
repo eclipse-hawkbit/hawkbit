@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.distributions;
 
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;

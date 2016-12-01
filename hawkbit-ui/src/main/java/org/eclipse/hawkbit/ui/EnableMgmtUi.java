@@ -6,29 +6,29 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.mgmt;
+package org.eclipse.hawkbit.ui;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Controller;
+
+import com.vaadin.spring.annotation.SpringComponent;
 
 /**
  * Annotation to enable {@link ComponentScan} in the resource package to setup
- * all {@link Controller} annotated classes and setup the REST-Resources for the
- * Management API.
+ * all {@link SpringComponent} annotated classes and setup the Vaadin managed
+ * beans.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Configuration
 @ComponentScan
-@Import(RestConfiguration.class)
-public @interface EnableMgmtApi {
+@Import({ UiConfiguration.class, AsyncVaadinServletConfiguration.class })
+public @interface EnableMgmtUi {
 
 }

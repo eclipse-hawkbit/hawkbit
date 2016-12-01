@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.management;
 
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;

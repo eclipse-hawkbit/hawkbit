@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
@@ -43,7 +42,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Cancel Action Resource")
-public class DdiCancelActionTest extends AbstractRestIntegrationTest {
+public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")

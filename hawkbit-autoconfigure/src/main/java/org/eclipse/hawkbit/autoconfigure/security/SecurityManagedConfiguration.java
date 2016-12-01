@@ -277,9 +277,6 @@ public class SecurityManagedConfiguration {
         private SystemManagement systemManagement;
 
         @Autowired
-        private TenantAware tenantAware;
-
-        @Autowired
         private SecurityProperties springSecurityProperties;
 
         @Autowired

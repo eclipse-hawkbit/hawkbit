@@ -9,13 +9,11 @@
 package org.eclipse.hawkbit.repository;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Rollout Management properties.
  *
  */
-@Component
 @ConfigurationProperties("hawkbit.rollout")
 public class RolloutProperties {
     // used by @Scheduled annotation which needs constant

@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
-import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -54,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;

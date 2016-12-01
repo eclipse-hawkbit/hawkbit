@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -50,7 +50,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -63,7 +62,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
-@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
+@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
@@ -73,20 +72,15 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TEST_TOKEN = "testToken";
 
+    private static final String CONTROLLER_ID = "1";
+
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private RabbitTemplate rabbitTemplate;
 
     private DefaultAmqpSenderService senderService;
 
-    private SystemManagement systemManagement;
-
-    private static final String CONTROLLER_ID = "1";
-
     private Target testTarget;
-
-    @Autowired
-    protected ActionRepository actionRepository;
 
     @Override
     public void before() throws Exception {

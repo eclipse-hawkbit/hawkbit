@@ -9,18 +9,17 @@
 package org.eclipse.hawkbit.autoconfigure.web;
 
 import org.eclipse.hawkbit.ddi.EnableDdiApi;
-import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Auto-Configuration for enabling the REST-Resources.
+ * Auto-Configuration for enabling the DDI REST-Resources.
  *
  */
 @Configuration
-@ConditionalOnClass({ EnableDdiApi.class, EnableMgmtApi.class })
-@Import({ EnableDdiApi.class, EnableMgmtApi.class })
-public class ResourceControllerAutoConfiguration {
+@ConditionalOnClass(EnableDdiApi.class)
+@Import(EnableDdiApi.class)
+public class DDiApiAutoConfiguration {
 
 }

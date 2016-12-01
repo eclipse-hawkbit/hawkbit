@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.rollout;
 
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;

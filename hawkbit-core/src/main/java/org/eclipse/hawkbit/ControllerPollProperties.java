@@ -11,7 +11,6 @@ package org.eclipse.hawkbit;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.stereotype.Component;
 
 /**
  * Defines global configuration for the controllers/clients on the provisioning
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
  * {@link TenantConfigurationKey} and injected using {@link EnvironmentAware}.
  * 
  */
-@Component
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties {
 
