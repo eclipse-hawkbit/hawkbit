@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.artifact.repository;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
@@ -36,7 +36,6 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.google.common.io.BaseEncoding;
@@ -107,7 +106,7 @@ public class S3RepositoryTest {
         final String knownMdBase16 = BaseEncoding.base16().lowerCase().encode(knownMd5.getBytes());
         final String knownMd5Base64 = BaseEncoding.base64().encode(knownMd5.getBytes());
 
-        when(amazonS3Mock.getObject(any(GetObjectRequest.class))).thenReturn(s3ObjectMock);
+        when(amazonS3Mock.getObject(anyString(), anyString())).thenReturn(s3ObjectMock);
         when(s3ObjectMock.getObjectMetadata()).thenReturn(s3ObjectMetadataMock);
         when(s3ObjectMetadataMock.getContentLength()).thenReturn(knownContentLength);
         when(s3ObjectMetadataMock.getETag()).thenReturn(knownMd5Base64);
