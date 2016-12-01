@@ -18,7 +18,7 @@
     .v-caption-header-content {
       padding-left: 20px;
       color: $widget-caption-color;
-      font: $view-caption-font-style;
+      font: $view-caption-font-style !important;
     }
     
     .view-header-layout{
