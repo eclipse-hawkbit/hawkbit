@@ -94,7 +94,7 @@ public class AmqpProperties {
     private int declarationRetries = DEFAULT_QUEUE_DECLARATION_RETRIES;
 
     /**
-     * Delay for messages that are requeued.
+     * Delay for messages that are requeued in milliseconds.
      */
     private long requeueDelay = DEFAULT_REQUEUE_DELAY;
 
