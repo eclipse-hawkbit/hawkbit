@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
@@ -34,13 +35,11 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.event.MouseEvents.ClickListener;
-import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
@@ -53,17 +52,14 @@ import com.vaadin.ui.UI;
 
 /**
  *
- *
+ * The depoyment view.
  */
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
-public class DeploymentView extends AbstractNotifcationView implements View, BrowserWindowResizeListener {
+public class DeploymentView extends AbstractNotifcationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
 
     @Autowired
     private SpPermissionChecker permChecker;
@@ -97,6 +93,9 @@ public class DeploymentView extends AbstractNotifcationView implements View, Bro
 
     private GridLayout mainLayout;
 
+    @Autowired
+    private DeploymentViewMenuItem deploymentViewMenuItem;
+
     @Override
     public void enter(final ViewChangeEvent event) {
         buildLayout();
@@ -105,6 +104,11 @@ public class DeploymentView extends AbstractNotifcationView implements View, Bro
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
         eventbus.publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
+    }
+
+    @Override
+    protected DashboardMenuItem getDashboardMenuItem() {
+        return deploymentViewMenuItem;
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

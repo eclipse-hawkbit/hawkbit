@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.server.Resource;
+import com.vaadin.ui.Label;
 
 /**
  * Describe a menu entry for the Dashboard.
@@ -56,5 +57,19 @@ public interface DashboardMenuItem extends Serializable {
      * @return the list of permissions.
      */
     List<String> getPermissions();
+
+    /**
+     * Set the value of the
+     * 
+     * @param notificationUnread
+     *            the unreadNotifciations
+     */
+    void setNotificationUnreadValue(int notificationUnread);
+
+    /**
+     * 
+     * @return return the notification
+     */
+    Label getNotificationUnreadLabel();
 
 }

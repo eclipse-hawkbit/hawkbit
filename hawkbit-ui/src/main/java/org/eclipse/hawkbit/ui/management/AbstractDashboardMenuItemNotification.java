@@ -21,16 +21,15 @@ public abstract class AbstractDashboardMenuItemNotification implements Dashboard
 
     private final Label notificationsLabel = new Label();
 
-    public void setNotificationContent(final int notificationContent) {
+    @Override
+    public void setNotificationUnreadValue(final int notificationUnread) {
+        notificationsLabel.setValue(String.valueOf(notificationUnread));
+        notificationsLabel.setVisible(notificationUnread > 0);
 
-        notificationsLabel.setValue(String.valueOf(notificationContent));
-        notificationsLabel.setVisible(false);
-        if (notificationContent > 0) {
-            notificationsLabel.setVisible(true);
-        }
     }
 
-    public Label getNotificationLabel() {
+    @Override
+    public Label getNotificationUnreadLabel() {
         return notificationsLabel;
     }
 

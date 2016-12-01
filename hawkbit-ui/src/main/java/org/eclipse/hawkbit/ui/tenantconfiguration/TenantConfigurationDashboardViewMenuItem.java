@@ -14,15 +14,17 @@ import java.util.List;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Menu item for system configuration view.
  */
-@Component
+@UIScope
+@SpringComponent
 @Order(700)
 public class TenantConfigurationDashboardViewMenuItem extends AbstractDashboardMenuItemNotification {
 

@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -85,6 +86,9 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
     @Autowired
     private ManageDistUIState manageDistUIState;
 
+    @Autowired
+    private DistributionsViewMenuItem distributionsViewMenuItem;
+
     private GridLayout mainLayout;
 
     /*
@@ -102,6 +106,11 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         checkNoDataAvaialble();
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
+    }
+
+    @Override
+    protected DashboardMenuItem getDashboardMenuItem() {
+        return distributionsViewMenuItem;
     }
 
     private void restoreState() {

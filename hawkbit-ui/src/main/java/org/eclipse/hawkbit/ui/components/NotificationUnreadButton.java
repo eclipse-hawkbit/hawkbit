@@ -4,6 +4,7 @@
 package org.eclipse.hawkbit.ui.components;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.ui.push.EventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -49,6 +50,7 @@ public class NotificationUnreadButton extends Button {
     @Autowired
     public NotificationUnreadButton(final I18N i18n) {
         this.i18n = i18n;
+        this.unreadNotfications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
         addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
@@ -56,9 +58,7 @@ public class NotificationUnreadButton extends Button {
         addStyleName(STYLE);
         setHtmlContentAllowed(true);
         createNotficationWindow();
-        addClickListener(event -> {
-            toggleWindow(event);
-        });
+        addClickListener(event -> toggleWindow(event));
     }
 
     private void createUnreadMessagesLayout() {
@@ -97,7 +97,7 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow.setPositionY(event.getClientY() - event.getRelativeY() + 40);
         getUI().addWindow(notificationsWindow);
         notificationsWindow.focus();
-        currentView.refresh(unreadNotfications.keySet());
+        currentView.refreshView(unreadNotfications.keySet());
         clear();
 
     }
@@ -114,12 +114,13 @@ public class NotificationUnreadButton extends Button {
             setEnabled(false);
             return;
         }
-        clear();
         setEnabled(true);
         this.currentView = (AbstractNotifcationView) currentView;
+        this.currentView.refreshView();
+        clear();
     }
 
-    public void clear() {
+    private void clear() {
         unreadNotficationCounter = 0;
         unreadNotfications.clear();
         refreshCaption();

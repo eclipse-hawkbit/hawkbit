@@ -14,10 +14,11 @@ import java.util.List;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Menu item for rollout .
@@ -25,7 +26,8 @@ import com.vaadin.server.Resource;
  *
  *
  */
-@Component
+@UIScope
+@SpringComponent
 @Order(200)
 public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 

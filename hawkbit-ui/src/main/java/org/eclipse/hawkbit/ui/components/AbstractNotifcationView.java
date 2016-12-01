@@ -14,6 +14,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -42,14 +43,19 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
     @Autowired
     private NotificationUnreadButton notificationUnreadButton;
 
+    private int viewUnreadNotifcations;
+
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEventContainerEvent(final EventContainer<?> eventContainer) {
         if (!supportNotifcationEventContainer(eventContainer.getClass()) || eventContainer.getEvents().isEmpty()) {
             return;
         }
 
-        eventContainer.getEvents().stream().filter(event -> !anyEventMatch(event))
-                .forEach(event -> notificationUnreadButton.incrementUnreadNotification(this, eventContainer));
+        eventContainer.getEvents().stream().filter(event -> !anyEventMatch(event)).forEach(event -> {
+            notificationUnreadButton.incrementUnreadNotification(this, eventContainer);
+            viewUnreadNotifcations++;
+        });
+        getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
     private boolean anyEventMatch(final TenantAwareEvent tenantAwareEvent) {
@@ -82,9 +88,28 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
      *            event container which container changed
      * 
      */
-    public void refresh(final Set<Class<?>> eventContainers) {
+    public void refreshView(final Set<Class<?>> eventContainers) {
         eventContainers.stream().filter(clazz -> supportNotifcationEventContainer(clazz))
                 .forEach(clazz -> getSupportedEvents().get(clazz).refreshContainer());
+        clear();
+    }
+
+    /**
+     * Refresh the view by event container changes.
+     * 
+     * 
+     */
+    public void refreshView() {
+        if (viewUnreadNotifcations <= 0) {
+            return;
+        }
+        supportedEvents.values().stream().forEach(container -> container.refreshContainer());
+        clear();
+    }
+
+    private void clear() {
+        viewUnreadNotifcations = 0;
+        getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
     protected boolean supportNotifcationEventContainer(final Class<?> eventContainerClass) {
@@ -109,5 +134,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
      * @return the supportedEvents
      */
     protected abstract Map<Class<?>, RefreshableContainer> getSupportedViewEvents();
+
+    protected abstract DashboardMenuItem getDashboardMenuItem();
 
 }

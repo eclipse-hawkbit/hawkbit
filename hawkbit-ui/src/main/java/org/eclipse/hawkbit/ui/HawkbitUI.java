@@ -16,12 +16,10 @@ import javax.servlet.http.Cookie;
 
 import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
-import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
-import org.eclipse.hawkbit.ui.push.event.AutoRefreshChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -31,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.vaadin.spring.events.EventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.teemu.switchui.Switch;
 
 import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
@@ -87,8 +83,6 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     @Autowired
     private NotificationUnreadButton notificationUnreadButton;
-
-    private Switch liveSwitch;
 
     /**
      * Default constructor.
@@ -155,20 +149,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         viewHeader.setStyleName("header-content");
         viewHeadercontent.addComponent(viewHeader);
 
-        liveSwitch = new Switch();
-        liveSwitch.setValue(false);
-        liveSwitch.setStyleName("compact");
-        liveSwitch.setImmediate(true);
-        liveSwitch.setDescription("Auto Live Event");
-        liveSwitch.addValueChangeListener(event -> eventBus.publish(EventScope.UI, this,
-                new AutoRefreshChangeEvent((Boolean) event.getProperty().getValue())));
-
-        final HorizontalLayout horizontalLayout = new HorizontalLayout(liveSwitch, notificationUnreadButton);
-        horizontalLayout.setSpacing(true);
-        horizontalLayout.setComponentAlignment(liveSwitch, Alignment.MIDDLE_CENTER);
-
-        viewHeadercontent.addComponent(horizontalLayout);
-        viewHeadercontent.setComponentAlignment(horizontalLayout, Alignment.MIDDLE_RIGHT);
+        viewHeadercontent.addComponent(notificationUnreadButton);
+        viewHeadercontent.setComponentAlignment(notificationUnreadButton, Alignment.MIDDLE_RIGHT);
 
         final HorizontalLayout content = new HorizontalLayout();
         contentVerticalLayout.addComponent(content);
@@ -200,9 +182,6 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
             @Override
             public void afterViewChange(final ViewChangeEvent event) {
                 final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
-                if (view instanceof AbstractDashboardMenuItemNotification) {
-                    ((AbstractDashboardMenuItemNotification) view).setNotificationContent(5000);
-                }
                 dashboardMenu.postViewChange(new PostViewChangeEvent(view));
                 if (view == null) {
                     viewHeader.setCaption(null);

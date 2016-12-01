@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -239,8 +238,7 @@ public final class DashboardMenu extends CustomComponent {
             Component menuItemComponent = new ValoMenuItemButton(view);
             menuButtons.add((ValoMenuItemButton) menuItemComponent);
 
-            menuItemComponent = buildLabelWrapper(menuItemComponent,
-                    ((AbstractDashboardMenuItemNotification) view).getNotificationLabel());
+            menuItemComponent = buildLabelWrapper(menuItemComponent, view.getNotificationUnreadLabel());
             menuItemsLayout.addComponent(menuItemComponent);
         }
         return menuItemsLayout;
