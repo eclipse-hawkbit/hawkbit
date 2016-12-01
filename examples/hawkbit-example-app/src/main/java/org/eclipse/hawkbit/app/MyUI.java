@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
-import org.vaadin.spring.events.EventBus.SessionEventBus;
 
 import com.vaadin.annotations.Push;
 import com.vaadin.shared.communication.PushMode;
@@ -41,8 +40,8 @@ public class MyUI extends HawkbitUI {
      * @param eventBus
      *            the event bus
      */
-    public MyUI(final EventPushStrategy pushStrategy, final SessionEventBus eventBus) {
-        super(pushStrategy, eventBus);
+    public MyUI(final EventPushStrategy pushStrategy) {
+        super(pushStrategy);
     }
 
 }

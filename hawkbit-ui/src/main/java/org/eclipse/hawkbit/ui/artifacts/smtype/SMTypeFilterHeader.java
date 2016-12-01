@@ -8,18 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -27,25 +29,22 @@ import com.vaadin.ui.Window;
 /**
  * Software module type filter buttons header.
  */
-@SpringComponent
-@ViewScope
 public class SMTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = -4855810338059032342L;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
+    private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
 
-    @Autowired
-    private CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
+    SMTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final ArtifactUploadState artifactUploadState, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareManagement softwareManagement) {
+        super(permChecker, eventBus, i18n);
+        this.artifactUploadState = artifactUploadState;
+        this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, tagManagement, entityFactory, eventBus,
+                permChecker, uiNotification, softwareManagement);
 
-    /**
-     * Initialize the components.
-     */
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
         if (permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission()) {
             createUpdateSWTypeLayout.init();
         }

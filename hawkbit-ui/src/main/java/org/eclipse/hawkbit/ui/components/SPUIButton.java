@@ -13,29 +13,11 @@ import com.vaadin.ui.Button;
 
 /**
  * Basic button for SPUI. Any commonality can be decorated.
- * 
- *
- *
  */
-
 public class SPUIButton extends Button {
-
-    /**
-     * ID.
-     */
     private static final long serialVersionUID = -7327726430436273739L;
 
-    /**
-     * Parametric constructor.
-     * 
-     * @param id
-     *            as String
-     * @param buttonName
-     *            as String
-     * @param buttonDesc
-     *            as String
-     */
-    public SPUIButton(final String id, final String buttonName, final String buttonDesc) {
+    SPUIButton(final String id, final String buttonName, final String buttonDesc) {
         super(buttonName);
         setDescription(buttonDesc);
         setImmediate(false);
@@ -50,7 +32,7 @@ public class SPUIButton extends Button {
      * @param icon
      *            as Resource
      */
-    public void togleIcon(Resource icon) {
+    public void togleIcon(final Resource icon) {
         setIcon(icon);
     }
 }

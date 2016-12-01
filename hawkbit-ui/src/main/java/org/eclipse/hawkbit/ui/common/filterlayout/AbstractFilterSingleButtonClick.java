@@ -16,9 +16,6 @@ import com.vaadin.ui.Button.ClickEvent;
 /**
  * Abstract Single button click behaviour of filter buttons layout.
  *
- *
- *
- *
  */
 public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButtonClickBehaviour {
 
@@ -26,12 +23,6 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
 
     private Button alreadyClickedButton;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtonClick#
-     * processFilterButtonClick(com.vaadin.ui. Button.ClickEvent)
-     */
     @Override
     protected void processFilterButtonClick(final ClickEvent event) {
         final Button clickedButton = (Button) event.getComponent();
@@ -54,20 +45,10 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
         }
     }
 
-    /**
-     * @param clickedButton
-     * @return
-     */
     private boolean isButtonUnClicked(final Button clickedButton) {
         return alreadyClickedButton != null && alreadyClickedButton.equals(clickedButton);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtonClickBehaviour#
-     * setDefaultClickedButton(com.vaadin .ui.Button)
-     */
     @Override
     protected void setDefaultClickedButton(final Button button) {
         alreadyClickedButton = button;
@@ -76,17 +57,10 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
         }
     }
 
-    /**
-     * @return the alreadyClickedButton
-     */
     public Button getAlreadyClickedButton() {
         return alreadyClickedButton;
     }
 
-    /**
-     * @param alreadyClickedButton
-     *            the alreadyClickedButton to set
-     */
     public void setAlreadyClickedButton(final Button alreadyClickedButton) {
         this.alreadyClickedButton = alreadyClickedButton;
     }

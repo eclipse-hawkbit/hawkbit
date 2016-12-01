@@ -18,19 +18,13 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
  * DistributionSet TargetFilterQuery table
  *
  */
-
-@SpringComponent
-@VaadinSessionScope
 public class TargetFilterQueryDetailsTable extends Table {
 
     private static final long serialVersionUID = 2913758299611837718L;
@@ -38,13 +32,9 @@ public class TargetFilterQueryDetailsTable extends Table {
     private static final String TFQ_NAME = "name";
     private static final String TFQ_QUERY = "query";
 
-    private I18N i18n;
+    private final I18N i18n;
 
-    /**
-     * 
-     * @param i18n
-     */
-    public void init(final I18N i18n) {
+    public TargetFilterQueryDetailsTable(final I18N i18n) {
         this.i18n = i18n;
         createTable();
     }
@@ -52,7 +42,8 @@ public class TargetFilterQueryDetailsTable extends Table {
     /**
      * Populate software module metadata.
      *
-     * @param distributionSet the selected distribution set
+     * @param distributionSet
+     *            the selected distribution set
      */
     public void populateTableByDistributionSet(final DistributionSet distributionSet) {
         removeAllItems();
@@ -60,11 +51,11 @@ public class TargetFilterQueryDetailsTable extends Table {
             return;
         }
 
-        Container dataSource = getContainerDataSource();
-        List<TargetFilterQuery> filters = distributionSet.getAutoAssignFilters();
+        final Container dataSource = getContainerDataSource();
+        final List<TargetFilterQuery> filters = distributionSet.getAutoAssignFilters();
         filters.forEach(query -> {
-            Object itemId = dataSource.addItem();
-            Item item = dataSource.getItem(itemId);
+            final Object itemId = dataSource.addItem();
+            final Item item = dataSource.getItem(itemId);
             item.getItemProperty(TFQ_NAME).setValue(query.getName());
             item.getItemProperty(TFQ_QUERY).setValue(query.getQuery());
         });
@@ -102,6 +93,5 @@ public class TargetFilterQueryDetailsTable extends Table {
         setColumnHeader(TFQ_NAME, i18n.get("header.target.filter.name"));
         setColumnHeader(TFQ_QUERY, i18n.get("header.target.filter.query"));
     }
-
 
 }

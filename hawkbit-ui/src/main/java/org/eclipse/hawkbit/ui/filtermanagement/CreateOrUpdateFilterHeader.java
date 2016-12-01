@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -30,8 +27,8 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -40,8 +37,6 @@ import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -56,40 +51,29 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * A Vaadin layout for create or update the target filter.
  */
-@SpringComponent
-@ViewScope
 public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button.ClickListener {
 
     private static final long serialVersionUID = 7474232427119031474L;
 
     private static final String BREADCRUMB_CUSTOM_FILTERS = "breadcrumb.target.filter.custom.filters";
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
+    private final FilterManagementUIState filterManagementUIState;
 
-    @Autowired
-    private transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    @Autowired
-    private SpPermissionChecker permissionChecker;
+    private final SpPermissionChecker permissionChecker;
 
-    @Autowired
-    private UINotification notification;
+    private final UINotification notification;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final UiProperties uiProperties;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    private AutoCompleteTextFieldComponent queryTextField;
+    private final AutoCompleteTextFieldComponent queryTextField;
 
     private Button breadcrumbButton;
 
@@ -121,11 +105,21 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    /**
-     * Initialize the Campaign Status History Header.
-     */
-    @PostConstruct
-    public void init() {
+    CreateOrUpdateFilterHeader(final I18N i18n, final UIEventBus eventBus,
+            final FilterManagementUIState filterManagementUIState,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
+            final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final AutoCompleteTextFieldComponent queryTextField) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.filterManagementUIState = filterManagementUIState;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.permissionChecker = permissionChecker;
+        this.notification = notification;
+        this.uiProperties = uiProperties;
+        this.entityFactory = entityFactory;
+        this.queryTextField = queryTextField;
+
         createComponents();
         createListeners();
         buildLayout();
@@ -140,12 +134,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
         if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
             populateComponents();

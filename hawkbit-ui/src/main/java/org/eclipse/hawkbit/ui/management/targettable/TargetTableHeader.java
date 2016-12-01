@@ -10,6 +10,12 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
@@ -26,10 +32,11 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -37,8 +44,6 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -52,52 +57,51 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Target table header layout.
  */
-@SpringComponent
-@ViewScope
 public class TargetTableHeader extends AbstractTableHeader {
 
     private static final long serialVersionUID = -8647521126666320022L;
 
-    @Autowired
-    private UINotification notification;
+    private final UINotification notification;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    @Autowired
-    private ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final TargetAddUpdateWindowLayout targetAddUpdateWindow;
 
-    @Autowired
-    private TargetAddUpdateWindowLayout targetAddUpdateWindow;
+    private final TargetBulkUpdateWindowLayout targetBulkUpdateWindow;
 
-    @Autowired
-    private TargetBulkUpdateWindowLayout targetBulkUpdateWindow;
+    private boolean isComplexFilterViewDisplayed;
 
-    private Boolean isComplexFilterViewDisplayed = Boolean.FALSE;
+    TargetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+            final UINotification notification, final ManagementUIState managementUIState,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
+            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
+            final TargetTable targetTable) {
+        super(i18n, permChecker, eventbus, managementUIState, null, null);
+        this.notification = notification;
+        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
+                entityFactory, targetTable);
+        this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
+                managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement);
 
-    @Override
-    protected void init() {
-        super.init();
-        // creating add window for adding new target
-        targetAddUpdateWindow.init();
-        targetBulkUpdateWindow.init();
         onLoadRestoreState();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT) {
             setFilterButtonsIconVisible(true);
         } else if (event == ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT) {
             setFilterButtonsIconVisible(false);
         } else if (event == ManagementUIEvent.RESET_SIMPLE_FILTERS) {
-            UI.getCurrent().access(() -> onSimpleFilterReset());
+            UI.getCurrent().access(this::onSimpleFilterReset);
         } else if (event == ManagementUIEvent.RESET_TARGET_FILTER_QUERY) {
-            UI.getCurrent().access(() -> onCustomFilterReset());
+            UI.getCurrent().access(this::onCustomFilterReset);
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final BulkUploadPopupEvent event) {
         if (BulkUploadPopupEvent.MAXIMIMIZED == event) {
             targetBulkUpdateWindow.restoreComponentsValue();
@@ -107,12 +111,12 @@ public class TargetTableHeader extends AbstractTableHeader {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final BulkUploadValidationMessageEvent event) {
         this.getUI().access(() -> notification.displayValidationError(event.getValidationErrorMessage()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent event) {
         if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {
             this.getUI().access(() -> targetBulkUpdateWindow.setProgressBarValue(
@@ -153,7 +157,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent dragEvent) {
         if (dragEvent == DragEvent.DISTRIBUTION_DRAG) {
             if (!isComplexFilterViewDisplayed) {
@@ -251,13 +255,13 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED,null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED, null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED,null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override
@@ -375,7 +379,8 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable.getSourceComponent();
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable
+                .getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }
 

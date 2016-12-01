@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.ui.Alignment;
@@ -17,23 +18,25 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Parent class for custom target filter button layout.
  * 
- *
- * 
  */
 public abstract class AbstractTargetTagFilterLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 9190616426688385851L;
 
-    private AbstractFilterHeader filterHeader;
+    private final AbstractFilterHeader filterHeader;
 
-    private MultipleTargetFilter multipleFilterTabs;
+    private final MultipleTargetFilter multipleFilterTabs;
+
+    protected final ManagementUIState managementUIState;
 
     /**
      * Initialize the artifact details layout.
      */
-    protected void init(final AbstractFilterHeader filterHeader, final MultipleTargetFilter multipleFilterTabs) {
+    protected AbstractTargetTagFilterLayout(final AbstractFilterHeader filterHeader,
+            final MultipleTargetFilter multipleFilterTabs, final ManagementUIState managementUIState) {
         this.filterHeader = filterHeader;
         this.multipleFilterTabs = multipleFilterTabs;
+        this.managementUIState = managementUIState;
         buildLayout();
         restoreState();
     }

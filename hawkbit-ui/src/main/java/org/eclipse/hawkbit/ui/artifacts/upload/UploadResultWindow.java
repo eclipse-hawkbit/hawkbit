@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus;
 
@@ -37,11 +36,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Upload status popup.
- *
- *
- *
- *
- *
  */
 public class UploadResultWindow implements Button.ClickListener {
 
@@ -66,9 +60,8 @@ public class UploadResultWindow implements Button.ClickListener {
     private static final String UPLOAD_RESULT = "uploadResult";
 
     private static final String REASON = "reason";
-    
-    private transient EventBus.SessionEventBus eventBus;
 
+    private transient EventBus.UIEventBus eventBus;
 
     /**
      * Initialize upload status popup.
@@ -78,10 +71,10 @@ public class UploadResultWindow implements Button.ClickListener {
      * @param i18n
      *            I18N
      */
-    public UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
+    UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n, final EventBus.UIEventBus eventBus) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
-        eventBus = SpringContextHelper.getBean( EventBus.SessionEventBus.class);
+        this.eventBus = eventBus;
         createComponents();
         createLayout();
     }
@@ -190,7 +183,7 @@ public class UploadResultWindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE)
                 || event.getComponent().getId().equals(UIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE)) {
             uploadResultsWindow.close();
-            //close upload status popup if open
+            // close upload status popup if open
             eventBus.publish(this, UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED);
         }
 

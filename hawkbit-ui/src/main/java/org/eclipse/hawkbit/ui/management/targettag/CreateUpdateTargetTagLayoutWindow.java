@@ -12,6 +12,9 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
@@ -19,37 +22,41 @@ import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  *
  * Class for Create / Update Tag Layout of target
  */
-@SpringComponent
-@ViewScope
 public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
 
     private static final long serialVersionUID = 2446682350481560235L;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public CreateUpdateTargetTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
+        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
         populateTagNameCombo();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagUpdateEvent(final TargetTagUpdatedEventContainer eventContainer) {

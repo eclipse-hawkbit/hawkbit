@@ -15,52 +15,37 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 
 /**
  * Single button click behaviour of filter buttons layout.
- * 
- *
- * 
  */
-@SpringComponent
-@ViewScope
 public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
 
     private static final long serialVersionUID = 3707945900524967887L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtonClickBehaviour#
-     * filterUnClicked(com.vaadin.ui. Button)
-     */
+    SMTypeFilterButtonClick(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+            final SoftwareManagement softwareManagement) {
+        this.eventBus = eventBus;
+        this.artifactUploadState = artifactUploadState;
+        this.softwareManagement = softwareManagement;
+    }
+
     @Override
     protected void filterUnClicked(final Button clickedButton) {
         artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
         eventBus.publish(this, SMFilterEvent.FILTER_BY_TYPE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.layouts.SPFilterButtonClickBehaviour#filterClicked
-     * (com.vaadin.ui.Button )
-     */
     @Override
     protected void filterClicked(final Button clickedButton) {
         final SoftwareModuleType softwareModuleType = softwareManagement

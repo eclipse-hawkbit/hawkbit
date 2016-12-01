@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import java.time.Duration;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -19,10 +17,7 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -30,44 +25,30 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * View to configure the polling interval and the overdue time.
  */
-@SpringComponent
-@ViewScope
 public class PollingConfigurationView extends BaseConfigurationView
         implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener {
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private I18N i18n;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
-    @Autowired
-    private transient ControllerPollProperties controllerPollProperties;
+    private final DurationConfigField fieldPollTime;
+    private final DurationConfigField fieldPollingOverdueTime;
 
-    @Autowired
-    private transient TenantConfigurationManagement tenantConfigurationManagement;
+    private Duration tenantPollTime;
+    private Duration tenantOverdueTime;
 
-    private DurationConfigField fieldPollTime = null;
-    private DurationConfigField fieldPollingOverdueTime = null;
+    PollingConfigurationView(final I18N i18n, final ControllerPollProperties controllerPollProperties,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
 
-    private Duration minDuration;
-    private Duration maxDuration;
-    private Duration globalPollTime;
-    private Duration globalOverdueTime;
-
-    private Duration tenantPollTime = null;
-    private Duration tenantOverdueTime = null;
-
-    /**
-     * Initialize Authentication Configuration layout.
-     */
-    @PostConstruct
-    public void init() {
-
-        minDuration = DurationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
-        maxDuration = DurationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
-        globalPollTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
+        final Duration minDuration = DurationHelper
+                .formattedStringToDuration(controllerPollProperties.getMinPollingTime());
+        final Duration maxDuration = DurationHelper
+                .formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
+        final Duration globalPollTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
                 .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class));
-        globalOverdueTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
+        final Duration globalOverdueTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
                 .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class));
 
         final TenantConfigurationValue<String> pollTimeConfValue = tenantConfigurationManagement
@@ -149,7 +130,7 @@ public class PollingConfigurationView extends BaseConfigurationView
         notifyConfigurationChanged();
     }
 
-    private boolean compareDurations(final Duration d1, final Duration d2) {
+    private static boolean compareDurations(final Duration d1, final Duration d2) {
         if (d1 == null && d2 == null) {
             return true;
         }
