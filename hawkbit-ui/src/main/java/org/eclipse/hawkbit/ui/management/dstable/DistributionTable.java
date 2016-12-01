@@ -78,6 +78,8 @@ import com.vaadin.ui.UI;
 public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -1928335256399519494L;
+    private static final String UNREAD_MESSAGE_CREATED = "distribution.set.table.created";
+    private static final String UNREAD_MESSAGE_DELETED = "distribution.set.table.deleted";
 
     @Autowired
     private SpPermissionChecker permissionChecker;

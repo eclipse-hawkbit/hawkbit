@@ -25,5 +25,9 @@
 
     <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
 
+<<<<<<< HEAD
     
+=======
+    <inherits name="org.vaadin.teemu.switchui.SwitchComponentWidgetset" />
+>>>>>>> branch 'Feature_new_event_strategy' of https://github.com/bsinno/hawkbit.git
 </module>

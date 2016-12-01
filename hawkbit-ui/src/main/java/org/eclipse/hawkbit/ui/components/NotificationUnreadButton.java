@@ -4,12 +4,12 @@
 package org.eclipse.hawkbit.ui.components;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.ui.push.EventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
@@ -22,14 +22,14 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Button which shows all notification as small number.
+ * Button which shows all notification in a popup.
  */
 @UIScope
 @SpringComponent
 public class NotificationUnreadButton extends Button {
     private static final long serialVersionUID = 1L;
-    private static final String DESCRIPTION = "notification.unread.button.description";
     private static final String TITLE = "notification.unread.button.title";
+    private static final String DESCRIPTION = "notification.unread.button.description";
     private static final String STYLE = "notifications-unread";
     private static final String STYLE_UNREAD_COUNTER = "unread";
     private static final String STYLE_POPUP = "notifications-unread-popup";
@@ -38,7 +38,6 @@ public class NotificationUnreadButton extends Button {
     private AbstractNotifcationView currentView;
     private transient Map<Class<?>, NotificationUnreadValue> unreadNotfications;
     private transient I18N i18n;
-
     private Window notificationsWindow;
 
     /**
@@ -47,9 +46,9 @@ public class NotificationUnreadButton extends Button {
      * @param i18n
      *            i18n
      */
+    @Autowired
     public NotificationUnreadButton(final I18N i18n) {
         this.i18n = i18n;
-        unreadNotfications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
         addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
@@ -60,10 +59,13 @@ public class NotificationUnreadButton extends Button {
         addClickListener(event -> {
             toggleWindow(event);
         });
-        unreadNotfications = new ConcurrentHashMap<>();
     }
 
     private void createUnreadMessagesLayout() {
+        if (!notificationsWindow.isAttached()) {
+            return;
+        }
+
         final VerticalLayout notificationsLayout = new VerticalLayout();
         notificationsLayout.setMargin(true);
         notificationsLayout.setSpacing(true);
@@ -74,8 +76,16 @@ public class NotificationUnreadButton extends Button {
         notificationsLayout.addComponent(title);
 
         unreadNotfications.values().stream().forEach(value -> createNotfication(notificationsLayout, value));
-
         notificationsWindow.setContent(notificationsLayout);
+    }
+
+    private void createNotficationWindow() {
+        notificationsWindow = new Window();
+        notificationsWindow.setWidth(300.0F, Unit.PIXELS);
+        notificationsWindow.addStyleName(STYLE_POPUP);
+        notificationsWindow.setClosable(true);
+        notificationsWindow.setResizable(false);
+        notificationsWindow.setDraggable(false);
     }
 
     private void toggleWindow(final ClickEvent event) {
@@ -99,22 +109,12 @@ public class NotificationUnreadButton extends Button {
         notificationsLayout.addComponent(contentLabel);
     }
 
-    private void createNotficationWindow() {
-        notificationsWindow = new Window();
-        notificationsWindow.setWidth(300.0F, Unit.PIXELS);
-        notificationsWindow.addStyleName(STYLE_POPUP);
-        notificationsWindow.setClosable(true);
-        notificationsWindow.setResizable(false);
-        notificationsWindow.setDraggable(false);
-    }
-
     public void setCurrentView(final View currentView) {
         if (!(currentView instanceof AbstractNotifcationView)) {
             setEnabled(false);
             return;
         }
         clear();
-
         setEnabled(true);
         this.currentView = (AbstractNotifcationView) currentView;
     }
@@ -135,7 +135,6 @@ public class NotificationUnreadButton extends Button {
         if (!currentView.equals(view) || newEventContainer.getUnreadNotficationMessageKey() == null) {
             return;
         }
-
         NotificationUnreadValue notificationUnreadValue = unreadNotfications.get(newEventContainer.getClass());
         if (notificationUnreadValue == null) {
             notificationUnreadValue = new NotificationUnreadValue(0,
@@ -155,10 +154,6 @@ public class NotificationUnreadButton extends Button {
             setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotficationCounter + "</div>");
         }
         setDescription(i18n.get(DESCRIPTION, new Object[] { unreadNotficationCounter }));
-    }
-
-    public int getUnreadNotficationCounter() {
-        return unreadNotficationCounter;
     }
 
     private static class NotificationUnreadValue {

@@ -124,6 +124,7 @@
       <vaadin.addon.tokenfield.version>7.0.1</vaadin.addon.tokenfield.version>
       <vaadin.addon.dbar-addon.version>2.0.0</vaadin.addon.dbar-addon.version>
       <vaadin.addon.contextmenu.version>4.5</vaadin.addon.contextmenu.version>
+      <vaadin.addon.switch.version>2.0.3</vaadin.addon.switch.version>
       <!-- Vaadin versions - END -->
 
       <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
@@ -513,6 +514,11 @@
             <groupId>org.vaadin.addons</groupId>
             <artifactId>contextmenu</artifactId>
             <version>${vaadin.addon.contextmenu.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.teemu</groupId>
+            <artifactId>switch</artifactId>
+            <version>${vaadin.addon.switch.version}</version>
          </dependency>
 
          <!-- Misc -->
