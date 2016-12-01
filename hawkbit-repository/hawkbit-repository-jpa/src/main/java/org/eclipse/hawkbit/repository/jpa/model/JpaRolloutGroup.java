@@ -32,6 +32,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -45,6 +48,13 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
+@ObjectTypeConverter(name = "rolloutgroupstatus", objectType = RolloutGroup.RolloutGroupStatus.class, dataType = Integer.class, conversionValues = {
+        @ConversionValue(objectValue = "READY", dataValue = "0"),
+        @ConversionValue(objectValue = "SCHEDULED", dataValue = "1"),
+        @ConversionValue(objectValue = "FINISHED", dataValue = "2"),
+        @ConversionValue(objectValue = "ERROR", dataValue = "3"),
+        @ConversionValue(objectValue = "RUNNING", dataValue = "4"),
+        @ConversionValue(objectValue = "CREATING", dataValue = "5") })
 public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;
@@ -54,6 +64,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     private JpaRollout rollout;
 
     @Column(name = "status")
+    @Convert("rolloutgroupstatus")
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)

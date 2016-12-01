@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
@@ -17,32 +18,34 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Distribution Set Type filter buttons.
  */
-@SpringComponent
-@ViewScope
 public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 771251569981876005L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+
+    DSTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionSetManagement distributionSetManagement) {
+        super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetManagement));
+        this.manageDistUIState = manageDistUIState;
+        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+    }
 
     @Override
     protected String getButtonsTableId() {
@@ -52,8 +55,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        return HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));
+        return HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(DistributionSetTypeBeanQuery.class));
     }
 
     @Override
@@ -97,7 +99,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
         return SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionSetTypeEvent event) {
         if (event.getDistributionSetTypeEnum() == DistributionSetTypeEvent.DistributionSetTypeEnum.ADD_DIST_SET_TYPE
                 || event.getDistributionSetTypeEnum() == DistributionSetTypeEvent.DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE) {
@@ -106,7 +108,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES) {
             refreshTypeTable();

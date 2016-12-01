@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.ServerSideCriterion;
@@ -39,11 +39,14 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
 
     private int previousRowCount;
 
-    @Autowired
-    protected transient UINotification uiNotification;
+    protected UINotification uiNotification;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
+
+    protected AbstractAcceptCriteria(final UINotification uiNotification, final UIEventBus eventBus) {
+        this.uiNotification = uiNotification;
+        this.eventBus = eventBus;
+    }
 
     @Override
     public boolean accept(final DragAndDropEvent dragEvent) {

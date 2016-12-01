@@ -148,13 +148,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatusByPredicate(final String rsqlParam, final Pageable pageable) {
+    public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaRollout> specification = RSQLUtility.parse(rsqlParam, RolloutFields.class,
                 virtualPropertyReplacer);
 
         final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, pageable);
-        setRolloutStatusDetails(findAll);
         return convertPage(findAll, pageable);
     }
 
@@ -468,11 +467,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public Rollout startRollout(final Rollout rollout) {
-        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
-        checkIfRolloutCanStarted(rollout, mergedRollout);
-        mergedRollout.setStatus(RolloutStatus.STARTING);
-        return rolloutRepository.save(mergedRollout);
+    public Rollout startRollout(final Long rolloutId) {
+        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        checkIfRolloutCanStarted(rollout, rollout);
+        rollout.setStatus(RolloutStatus.STARTING);
+        return rolloutRepository.save(rollout);
     }
 
     private void startFirstRolloutGroup(final Rollout rollout) {
@@ -575,9 +575,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void pauseRollout(final Rollout rollout) {
-        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
-        if (mergedRollout.getStatus() != RolloutStatus.RUNNING) {
+    public void pauseRollout(final Long rolloutId) {
+        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        if (rollout.getStatus() != RolloutStatus.RUNNING) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -586,21 +587,22 @@ public class JpaRolloutManagement implements RolloutManagement {
         // not started until rollout goes back to running state again. The
         // periodically check for running rollouts will skip rollouts in pause
         // state.
-        mergedRollout.setStatus(RolloutStatus.PAUSED);
-        rolloutRepository.save(mergedRollout);
+        rollout.setStatus(RolloutStatus.PAUSED);
+        rolloutRepository.save(rollout);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void resumeRollout(final Rollout rollout) {
-        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
-        if (!(RolloutStatus.PAUSED.equals(mergedRollout.getStatus()))) {
+    public void resumeRollout(final Long rolloutId) {
+        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
-        mergedRollout.setStatus(RolloutStatus.RUNNING);
-        rolloutRepository.save(mergedRollout);
+        rollout.setStatus(RolloutStatus.RUNNING);
+        rolloutRepository.save(rollout);
     }
 
     @Override
@@ -834,7 +836,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Slice<Rollout> findRolloutByFilters(final Pageable pageable, final String searchText) {
+    public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText) {
         final Specification<JpaRollout> specs = likeNameOrDescription(searchText);
         final Slice<JpaRollout> findAll = criteriaNoCountDao.findAll(specs, pageable, JpaRollout.class);
         setRolloutStatusDetails(findAll);

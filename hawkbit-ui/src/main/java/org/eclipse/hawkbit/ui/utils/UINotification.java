@@ -14,19 +14,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Show success and error messages.
  */
-@ViewScope
+@UIScope
 @SpringComponent
 public class UINotification implements Serializable {
 
     private static final long serialVersionUID = -9030485417988977466L;
 
+    private final NotificationMessage notificationMessage;
+
     @Autowired
-    private NotificationMessage notificationMessage;
+    UINotification(final NotificationMessage notificationMessage) {
+        this.notificationMessage = notificationMessage;
+    }
 
     /**
      * Display success type of notification message.

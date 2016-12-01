@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -19,13 +17,11 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -35,26 +31,18 @@ import com.vaadin.ui.VerticalLayout;
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class ActionHistoryHeader extends VerticalLayout {
-
     private static final long serialVersionUID = -6276188234115774351L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final transient EventBus.UIEventBus eventBus;
+    private final ManagementUIState managementUIState;
 
     private Label titleOfActionHistory;
     private SPUIButton maxMinButton;
 
-    /**
-     * Initialize the Action History Header.
-     */
-    @PostConstruct
-    public void init() {
+    ActionHistoryHeader(final UIEventBus eventBus, final ManagementUIState managementUIState) {
+        this.eventBus = eventBus;
+        this.managementUIState = managementUIState;
         buildComponent();
         buildLayout();
         restorePreviousState();

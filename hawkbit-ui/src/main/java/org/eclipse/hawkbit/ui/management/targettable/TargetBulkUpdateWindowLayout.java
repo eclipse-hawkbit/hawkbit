@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
@@ -30,19 +32,18 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.tokenfield.TokenField;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -59,34 +60,21 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Bulk target upload layout.
- * 
- *
- *
  */
-@SpringComponent
-@ViewScope
 public class TargetBulkUpdateWindowLayout extends CustomComponent {
+    private final I18N i18n;
 
-    @Autowired
-    private I18N i18n;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final TargetBulkTokenTags targetBulkTokenTags;
 
-    @Autowired
-    private TargetBulkTokenTags targetBulkTokenTags;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final transient DeploymentManagement deploymentManagement;
 
-    @Autowired
-    private transient DeploymentManagement deploymentManagement;
-
-    @Autowired
-    private transient UiProperties uiproperties;
+    private final UiProperties uiproperties;
 
     private static final long serialVersionUID = -6659290471705262389L;
     private VerticalLayout tokenVerticalLayout;
@@ -102,10 +90,19 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private Button minimizeButton;
     private Button closeButton;
 
-    /**
-     * Initialize the Add Update Window Component for Target.
-     */
-    public void init() {
+    TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+            final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
+            final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
+            final TagManagement tagManagement) {
+        this.i18n = i18n;
+        this.targetManagement = targetManagement;
+        this.eventBus = eventBus;
+        this.targetBulkTokenTags = new TargetBulkTokenTags(checker, i18n, uinotification, eventBus, managementUIState,
+                tagManagement);
+        this.managementUIState = managementUIState;
+        this.deploymentManagement = deploymentManagement;
+        this.uiproperties = uiproperties;
+
         createRequiredComponents();
         buildLayout();
         setImmediate(true);
@@ -158,9 +155,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private Button getMinimizeButton() {
-        final Button minimizeBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
-                SPUIButtonStyleSmallNoBorder.class);
+        final Button minimizeBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID,
+                "", "", "", true, FontAwesome.MINUS, SPUIButtonStyleSmallNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
         minimizeBtn.setEnabled(false);
@@ -412,7 +408,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     /**
      * @return the eventBus
      */
-    public EventBus.SessionEventBus getEventBus() {
+    public EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 

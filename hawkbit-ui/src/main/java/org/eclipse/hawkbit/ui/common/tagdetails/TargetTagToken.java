@@ -11,27 +11,27 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Implementation of Target tag token.
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;
@@ -39,8 +39,14 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
+
+    public TargetTagToken(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement,
+            final TargetManagement targetManagement) {
+        super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
+        this.targetManagement = targetManagement;
+    }
 
     @Override
     protected String getTagStyleName() {
@@ -136,7 +142,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
         return false;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent targetTableEvent) {
         onBaseEntityEvent(targetTableEvent);
     }

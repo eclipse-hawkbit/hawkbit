@@ -8,66 +8,49 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class DistributionTagLayout extends AbstractFilterLayout {
 
-    /**
-    * 
-    */
     private static final long serialVersionUID = 4363033587261057567L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private DistributionTagHeader distributionTagHeader;
+    public DistributionTagLayout(final UIEventBus eventbus, final ManagementUIState managementUIState, final I18N i18n,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final DistributionTableFilters distFilterParameters,
+            final DistributionSetManagement distributionSetManagement,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
 
-    @Autowired
-    private DistributionTagButtons distributionTagButtons;
+        super(new DistributionTagHeader(i18n, managementUIState, permChecker, eventBus, tagManagement, entityFactory,
+                uiNotification),
+                new DistributionTagButtons(eventBus, managementUIState, entityFactory, i18n, uiNotification,
+                        permChecker, distFilterParameters, distributionSetManagement, managementViewAcceptCriteria));
+        this.managementUIState = managementUIState;
 
-    @Autowired
-    private DistributionTagButtonClick distributionTagButtonClick;
-
-    @Autowired
-    private ManagementUIState managementUIState;
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterLayout#
-     * onLoadIsTypeFilterIsClosed()
-     */
-
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    public void init() {
-        super.init(distributionTagHeader, distributionTagButtons, distributionTagButtonClick);
+        restoreState();
         eventbus.subscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT) {
             managementUIState.setDistTagFilterClosed(true);
@@ -77,15 +60,6 @@ public class DistributionTagLayout extends AbstractFilterLayout {
             managementUIState.setDistTagFilterClosed(false);
             setVisible(true);
         }
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventbus.unsubscribe(this);
     }
 
     @Override

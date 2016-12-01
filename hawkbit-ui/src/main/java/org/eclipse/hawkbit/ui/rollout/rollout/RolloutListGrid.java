@@ -35,12 +35,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
@@ -54,14 +57,15 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -70,8 +74,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
@@ -79,8 +81,6 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 /**
  * Rollout list grid component.
  */
-@SpringComponent
-@ViewScope
 public class RolloutListGrid extends AbstractGrid {
 
     private static final long serialVersionUID = 4060904914954370524L;
@@ -99,28 +99,51 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
-    @Autowired
-    private transient RolloutManagement rolloutManagement;
+    private final transient RolloutManagement rolloutManagement;
 
-    @Autowired
-    private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
+    private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
-    @Autowired
-    private UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private transient RolloutUIState rolloutUIState;
+    private final RolloutUIState rolloutUIState;
 
-    @Autowired
-    private transient SpPermissionChecker permissionChecker;
+    private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
-    private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
+    static {
+        statusIconMap.put(RolloutStatus.FINISHED,
+                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(RolloutStatus.PAUSED,
+                new StatusFontIcon(FontAwesome.PAUSE, SPUIStyleDefinitions.STATUS_ICON_BLUE));
+        statusIconMap.put(RolloutStatus.RUNNING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_YELLOW));
+        statusIconMap.put(RolloutStatus.READY,
+                new StatusFontIcon(FontAwesome.DOT_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE));
+        statusIconMap.put(RolloutStatus.STOPPED,
+                new StatusFontIcon(FontAwesome.STOP, SPUIStyleDefinitions.STATUS_ICON_RED));
+        statusIconMap.put(RolloutStatus.CREATING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_GREY));
+        statusIconMap.put(RolloutStatus.STARTING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_BLUE));
+        statusIconMap.put(RolloutStatus.ERROR_CREATING,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+        statusIconMap.put(RolloutStatus.ERROR_STARTING,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+    }
+
+    RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final UINotification uiNotification, final RolloutUIState rolloutUIState,
+            final SpPermissionChecker permissionChecker, final TargetManagement targetManagement,
+            final EntityFactory entityFactory, final UiProperties uiProperties) {
+        super(i18n, eventBus, permissionChecker);
+        this.rolloutManagement = rolloutManagement;
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
+                uiNotification, uiProperties, entityFactory, i18n, eventBus);
+        this.uiNotification = uiNotification;
+        this.rolloutUIState = rolloutUIState;
+    }
 
     /**
      * Handles the RolloutEvent to refresh Grid.
      *
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final RolloutEvent event) {
         switch (event) {
         case FILTER_BY_TEXT:
@@ -141,7 +164,7 @@ public class RolloutListGrid extends AbstractGrid {
      *            the event which contains the rollout which has been changed
      */
     @SuppressWarnings("unchecked")
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     public void onRolloutChangeEvent(final RolloutChangeEventContainer eventContainer) {
         eventContainer.getEvents().forEach(this::handleEvent);
     }
@@ -333,7 +356,6 @@ public class RolloutListGrid extends AbstractGrid {
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
 
-        createRolloutStatusToFontMap();
         getColumn(VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
 
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
@@ -351,24 +373,6 @@ public class RolloutListGrid extends AbstractGrid {
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())));
         }
 
-    }
-
-    private void createRolloutStatusToFontMap() {
-        statusIconMap.put(RolloutStatus.FINISHED,
-                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
-        statusIconMap.put(RolloutStatus.PAUSED,
-                new StatusFontIcon(FontAwesome.PAUSE, SPUIStyleDefinitions.STATUS_ICON_BLUE));
-        statusIconMap.put(RolloutStatus.RUNNING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_YELLOW));
-        statusIconMap.put(RolloutStatus.READY,
-                new StatusFontIcon(FontAwesome.DOT_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE));
-        statusIconMap.put(RolloutStatus.STOPPED,
-                new StatusFontIcon(FontAwesome.STOP, SPUIStyleDefinitions.STATUS_ICON_RED));
-        statusIconMap.put(RolloutStatus.CREATING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_GREY));
-        statusIconMap.put(RolloutStatus.STARTING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_BLUE));
-        statusIconMap.put(RolloutStatus.ERROR_CREATING,
-                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
-        statusIconMap.put(RolloutStatus.ERROR_STARTING,
-                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
     private void alignColumns() {
@@ -397,7 +401,7 @@ public class RolloutListGrid extends AbstractGrid {
 
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
-        rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(rolloutId));
+        rolloutManagement.pauseRollout(rolloutId);
         uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
     }
 
@@ -408,13 +412,13 @@ public class RolloutListGrid extends AbstractGrid {
         final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
 
         if (RolloutStatus.READY.equals(rolloutStatus)) {
-            rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
+            rolloutManagement.startRollout(rolloutId);
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
             return;
         }
 
         if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
-            rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(rolloutId));
+            rolloutManagement.resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
             return;
         }

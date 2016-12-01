@@ -10,14 +10,26 @@ package org.eclipse.hawkbit.ui.distributions;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotifcationView;
+import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
+import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
@@ -31,75 +43,86 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.event.MouseEvents.ClickListener;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
 
 /**
  * Manage distributions and distributions type view.
- * 
- *
- * 
  */
+@UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
-@ViewScope
 public class DistributionsView extends AbstractNotifcationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "distributions";
     private static final long serialVersionUID = 3887435076372276300L;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private DSTypeFilterLayout filterByDSTypeLayout;
+    private final DSTypeFilterLayout filterByDSTypeLayout;
 
-    @Autowired
-    private DistributionSetTableLayout distributionTableLayout;
+    private final DistributionSetTableLayout distributionTableLayout;
 
-    @Autowired
-    private SwModuleTableLayout softwareModuleTableLayout;
+    private final SwModuleTableLayout softwareModuleTableLayout;
 
-    @Autowired
-    private DistSMTypeFilterLayout filterBySMTypeLayout;
+    private final DistSMTypeFilterLayout filterBySMTypeLayout;
 
-    @Autowired
-    private DSDeleteActionsLayout deleteActionsLayout;
+    private final DSDeleteActionsLayout deleteActionsLayout;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private DistributionsViewMenuItem distributionsViewMenuItem;
+    private final DistributionsViewMenuItem distributionsViewMenuItem;
 
     private GridLayout mainLayout;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.navigator.View#enter(com.vaadin.navigator.ViewChangeListener.
-     * ViewChangeEvent)
-     */
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    @Autowired
+    DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final I18N i18n,
+            final UINotification uiNotification, final ManageDistUIState manageDistUIState,
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory,
+            final TagManagement tagManagement, final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
+            final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
+            final DistributionsViewMenuItem distributionsViewMenuItem) {
+        super(eventBus, notificationUnreadButton);
+        this.permChecker = permChecker;
+        this.i18n = i18n;
+        this.uiNotification = uiNotification;
+        this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
+                tagManagement, entityFactory, uiNotification, softwareManagement, distributionSetManagement,
+                distributionsViewAcceptCriteria);
+        this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
+                softwareManagement, distributionSetManagement, targetManagement, entityFactory, uiNotification,
+                tagManagement, distributionsViewAcceptCriteria, systemManagement);
+        this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus, softwareManagement,
+                entityFactory, manageDistUIState, permChecker, distributionsViewAcceptCriteria, artifactUploadState,
+                artifactManagement);
+        this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
+                tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewAcceptCriteria);
+        this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
+                systemManagement, manageDistUIState, distributionsViewAcceptCriteria, distributionSetManagement,
+                softwareManagement);
+        this.manageDistUIState = manageDistUIState;
+        this.distributionsViewMenuItem = distributionsViewMenuItem;
+    }
+
+    @PostConstruct
+    void init() {
         // Build the Distributions view layout with all the required components.
         buildLayout();
         restoreState();
@@ -144,9 +167,9 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
         mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
-        mainLayout.setRowExpandRatio(0, 1.0f);
-        mainLayout.setColumnExpandRatio(1, 0.5f);
-        mainLayout.setColumnExpandRatio(2, 0.5f);
+        mainLayout.setRowExpandRatio(0, 1.0F);
+        mainLayout.setColumnExpandRatio(1, 0.5F);
+        mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
@@ -154,12 +177,12 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         UI.getCurrent().addClickListener(new ClickListener() {
             @Override
             public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                getEventbus().publish(this, DragEvent.HIDE_DROP_HINT);
+                getEventBus().publish(this, DragEvent.HIDE_DROP_HINT);
             }
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeDistTable();
@@ -168,7 +191,7 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeSwTable();
@@ -181,17 +204,17 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         mainLayout.removeComponent(filterByDSTypeLayout);
         mainLayout.removeComponent(distributionTableLayout);
         mainLayout.removeComponent(deleteActionsLayout);
-        mainLayout.setColumnExpandRatio(2, 1f);
-        mainLayout.setColumnExpandRatio(0, 0f);
-        mainLayout.setColumnExpandRatio(1, 0f);
+        mainLayout.setColumnExpandRatio(2, 1F);
+        mainLayout.setColumnExpandRatio(0, 0F);
+        mainLayout.setColumnExpandRatio(1, 0F);
     }
 
     private void minimizeSwTable() {
         mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
         mainLayout.addComponent(distributionTableLayout, 1, 0);
         mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
-        mainLayout.setColumnExpandRatio(1, 0.5f);
-        mainLayout.setColumnExpandRatio(2, 0.5f);
+        mainLayout.setColumnExpandRatio(1, 0.5F);
+        mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
@@ -199,8 +222,8 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
         mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
-        mainLayout.setColumnExpandRatio(1, 0.5f);
-        mainLayout.setColumnExpandRatio(2, 0.5f);
+        mainLayout.setColumnExpandRatio(1, 0.5F);
+        mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
@@ -208,9 +231,9 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
         mainLayout.removeComponent(softwareModuleTableLayout);
         mainLayout.removeComponent(filterBySMTypeLayout);
         mainLayout.removeComponent(deleteActionsLayout);
-        mainLayout.setColumnExpandRatio(1, 1f);
-        mainLayout.setColumnExpandRatio(2, 0f);
-        mainLayout.setColumnExpandRatio(3, 0f);
+        mainLayout.setColumnExpandRatio(1, 1F);
+        mainLayout.setColumnExpandRatio(2, 0F);
+        mainLayout.setColumnExpandRatio(3, 0F);
     }
 
     private void checkNoDataAvaialble() {
@@ -247,10 +270,10 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
 
     @Override
     protected Map<Class<?>, RefreshableContainer> getSupportedViewEvents() {
-        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(2);
 
-        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getDsTable());
-        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getDsTable());
+        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getTable());
 
         return supportedEvents;
     }

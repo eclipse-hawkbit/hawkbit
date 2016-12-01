@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -24,6 +23,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -35,17 +35,29 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
     private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEvents = CacheBuilder.newBuilder()
             .expireAfterAccess(10, SECONDS).build();
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventbus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private transient Map<Class<?>, RefreshableContainer> supportedEvents;
 
-    @Autowired
-    private NotificationUnreadButton notificationUnreadButton;
+    private final NotificationUnreadButton notificationUnreadButton;
 
     private int viewUnreadNotifcations;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    /**
+     * Constructor.
+     * 
+     * @param eventBus
+     *            the ui event bus
+     * @param notificationUnreadButton
+     *            the notificationUnreadButton
+     */
+    public AbstractNotifcationView(final EventBus.UIEventBus eventBus,
+            final NotificationUnreadButton notificationUnreadButton) {
+        this.eventBus = eventBus;
+        this.notificationUnreadButton = notificationUnreadButton;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEventContainerEvent(final EventContainer<?> eventContainer) {
         if (!supportNotifcationEventContainer(eventContainer.getClass()) || eventContainer.getEvents().isEmpty()) {
             return;
@@ -62,7 +74,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
         return skipUiEvents.asMap().keySet().stream().anyMatch(uiEvent -> uiEvent.matchRemoteEvent(tenantAwareEvent));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onUiEvent(final BaseUIEntityEvent<?> event) {
         if (BaseEntityEventType.ADD_ENTITY != event.getEventType()
                 && BaseEntityEventType.REMOVE_ENTITIES != event.getEventType()) {
@@ -73,12 +85,12 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
 
     @PostConstruct
     protected void subscribe() {
-        eventbus.subscribe(this);
+        eventBus.subscribe(this);
     }
 
     @PreDestroy
     protected void destroy() {
-        eventbus.unsubscribe(this);
+        eventBus.unsubscribe(this);
     }
 
     /**
@@ -116,8 +128,11 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
         return getSupportedEvents().containsKey(eventContainerClass);
     }
 
-    protected EventBus.SessionEventBus getEventbus() {
-        return eventbus;
+    /**
+     * @return the eventBus
+     */
+    public EventBus.UIEventBus getEventBus() {
+        return eventBus;
     }
 
     /**
@@ -128,6 +143,11 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
             supportedEvents = getSupportedViewEvents();
         }
         return supportedEvents;
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // intended to override
     }
 
     /**

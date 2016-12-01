@@ -126,6 +126,54 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify that a target with whitespaces in controller id cannot be created")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    public void createTargetWithWhitespaces() {
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId(" "));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId(" a"));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId("a "));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId("a b"));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId("     "));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(entityFactory.target().create().controllerId("aaa   bbb"));
+            fail("target with whitespaces in controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+    }
+
+    @Test
     @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 4),
             @Expect(type = TargetTagCreatedEvent.class, count = 1),

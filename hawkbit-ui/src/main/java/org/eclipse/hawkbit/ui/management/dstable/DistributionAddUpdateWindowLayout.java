@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.distributions.dstable;
+package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
 
@@ -18,14 +18,17 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -36,8 +39,9 @@ import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
-import org.vaadin.spring.events.EventBus.SessionEventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.google.common.collect.Sets;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
@@ -49,64 +53,63 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * WindowContent for adding/editing a Distribution
  */
-public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomComponent {
+public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -5602182034230568435L;
 
-    protected I18N i18n;
+    private final I18N i18n;
+    private final UINotification notificationMessage;
+    private final transient EventBus.UIEventBus eventBus;
+    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient SystemManagement systemManagement;
+    private final transient EntityFactory entityFactory;
 
-    protected transient UINotification notificationMessage;
+    private final DistributionSetTable distributionSetTable;
 
-    protected transient EventBus.SessionEventBus eventBus;
+    private TextField distNameTextField;
+    private TextField distVersionTextField;
+    private TextArea descTextArea;
+    private CheckBox reqMigStepCheckbox;
+    private ComboBox distsetTypeNameComboBox;
+    private boolean editDistribution;
+    private Long editDistId;
 
-    protected transient DistributionSetManagement distributionSetManagement;
+    private FormLayout formLayout;
 
-    protected transient SystemManagement systemManagement;
-
-    protected transient EntityFactory entityFactory;
-
-    protected TextField distNameTextField;
-    protected TextField distVersionTextField;
-    protected TextArea descTextArea;
-    protected CheckBox reqMigStepCheckbox;
-    protected ComboBox distsetTypeNameComboBox;
-    protected boolean editDistribution = Boolean.FALSE;
-    protected Long editDistId;
-    protected CommonDialogWindow window;
-
-    protected FormLayout formLayout;
-
-    /**
-     * Constructor.
-     * 
-     * @param i18n
-     *            the i18n
-     * @param notificationMessage
-     *            the notification message
-     * @param eventBus
-     *            the event bus
-     * @param distributionSetManagement
-     *            the distributionSetManagement
-     * @param systemManagement
-     *            the systemManagement
-     * @param entityFactory
-     *            the entityFactory
-     */
-    public AbstractDistributionSetUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
-            final SessionEventBus eventBus, final DistributionSetManagement distributionSetManagement,
-            final SystemManagement systemManagement, final EntityFactory entityFactory) {
+    public DistributionAddUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
+            final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
+            final SystemManagement systemManagement, final EntityFactory entityFactory,
+            final DistributionSetTable distributionSetTable) {
         this.i18n = i18n;
         this.notificationMessage = notificationMessage;
         this.eventBus = eventBus;
         this.distributionSetManagement = distributionSetManagement;
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
-        init();
-    }
-
-    void init() {
+        this.distributionSetTable = distributionSetTable;
         createRequiredComponents();
         buildLayout();
+    }
+
+    /**
+     * Save or update distribution set.
+     *
+     */
+    private final class SaveOnCloseDialogListener implements SaveDialogCloseListener {
+        @Override
+        public void saveOrUpdate() {
+            if (editDistribution) {
+                updateDistribution();
+                return;
+            }
+            addNewDistribution();
+        }
+
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return !isDuplicate();
+        }
+
     }
 
     private void buildLayout() {
@@ -136,7 +139,6 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(UIComponentIdProvider.DIST_ADD_DISTSETTYPE);
-        populateDistSetTypeNameCombo();
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
@@ -157,9 +159,32 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
     }
 
     /**
+     * Get the LazyQueryContainer instance for DistributionSetTypes.
+     *
+     * @return
+     */
+    private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
+        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
+                DistributionSetTypeBeanQuery.class);
+        dtQF.setQueryConfiguration(Collections.emptyMap());
+
+        final LazyQueryContainer disttypeContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_ID), dtQF);
+
+        disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
+
+        return disttypeContainer;
+    }
+
+    private DistributionSetType getDefaultDistributionSetType() {
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
+        return tenantMetaData.getDefaultDsType();
+    }
+
+    /**
      * Update Distribution.
      */
-    protected void updateDistribution() {
+    private void updateDistribution() {
 
         if (isDuplicate()) {
             return;
@@ -180,29 +205,30 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
     }
 
     /**
-     * Get the LazyQueryContainer instance for DistributionSetTypes.
-     *
-     * @return
+     * Add new Distribution set.
      */
-    private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
-                DistributionSetTypeBeanQuery.class);
-        dtQF.setQueryConfiguration(Collections.emptyMap());
+    private void addNewDistribution() {
+        editDistribution = Boolean.FALSE;
 
-        final LazyQueryContainer disttypeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_NAME), dtQF);
+        final String name = HawkbitCommonUtil.trimAndNullIfEmpty(distNameTextField.getValue());
+        final String version = HawkbitCommonUtil.trimAndNullIfEmpty(distVersionTextField.getValue());
+        final Long distSetTypeId = (Long) distsetTypeNameComboBox.getValue();
+        final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+        final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-        disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
+        final DistributionSet newDist = distributionSetManagement
+                .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
+                        .description(desc).type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId))
+                        .requiredMigrationStep(isMigStepReq));
 
-        return disttypeContainer;
+        notificationMessage.displaySuccess(
+                i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
+
+        distributionSetTable.setValue(
+                Sets.newHashSet(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion())));
     }
 
-    private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
-        return tenantMetaData.getDefaultDsType();
-    }
-
-    protected boolean isDuplicate() {
+    private boolean isDuplicate() {
         final String name = distNameTextField.getValue();
         final String version = distVersionTextField.getValue();
 
@@ -256,9 +282,10 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
         distNameTextField.setValue(distSet.getName());
         distVersionTextField.setValue(distSet.getVersion());
         if (distSet.getType().isDeleted()) {
-            distsetTypeNameComboBox.addItem(distSet.getType().getName());
+            distsetTypeNameComboBox.addItem(distSet.getType().getId());
         }
-        distsetTypeNameComboBox.setValue(distSet.getType().getName());
+        distsetTypeNameComboBox.setValue(distSet.getType().getId());
+
         reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
         if (distSet.getDescription() != null) {
             descTextArea.setValue(distSet.getDescription());
@@ -276,14 +303,10 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(createSaveOnCloseDialogListener())
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
+                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener())
                 .buildCommonDialogWindow();
-
-        return window;
     }
-
-    protected abstract SaveDialogCloseListener createSaveOnCloseDialogListener();
 
     /**
      * Populate DistributionSet Type name combo.
@@ -291,7 +314,7 @@ public abstract class AbstractDistributionSetUpdateWindowLayout extends CustomCo
     private void populateDistSetTypeNameCombo() {
         distsetTypeNameComboBox.setContainerDataSource(getDistSetTypeLazyQueryContainer());
         distsetTypeNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getName());
+        distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getId());
     }
 
 }

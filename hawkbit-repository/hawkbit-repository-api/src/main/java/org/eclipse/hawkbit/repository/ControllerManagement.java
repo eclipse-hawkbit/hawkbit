@@ -108,9 +108,6 @@ public interface ControllerManagement {
      * @throws TooManyStatusEntriesException
      *             if more than the allowed number of status entries are
      *             inserted
-     * @throws TooManyStatusEntriesException
-     *             if more than the allowed number of status entries are
-     *             inserted
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action addUpdateActionStatus(@NotNull ActionStatusCreate create);

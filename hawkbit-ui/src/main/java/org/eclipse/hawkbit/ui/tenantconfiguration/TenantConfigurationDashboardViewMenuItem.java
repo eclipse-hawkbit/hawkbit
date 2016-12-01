@@ -23,8 +23,8 @@ import com.vaadin.spring.annotation.UIScope;
 /**
  * Menu item for system configuration view.
  */
-@UIScope
 @SpringComponent
+@UIScope
 @Order(700)
 public class TenantConfigurationDashboardViewMenuItem extends AbstractDashboardMenuItemNotification {
 

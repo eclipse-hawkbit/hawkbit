@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
@@ -41,6 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.VaadinSession.State;
@@ -70,17 +70,21 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
 
-    @Autowired
-    private ScheduledExecutorService executorService;
+    private final ScheduledExecutorService executorService;
 
-    @Autowired
-    private EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private UIEventProvider eventProvider;
+    private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
 
     private UI vaadinUI;
+
+    public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
+            final UIEventProvider eventProvider) {
+        this.executorService = executorService;
+        this.eventBus = eventBus;
+        this.eventProvider = eventProvider;
+    }
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
         return eventProvider.getEvents().containsKey(event.getClass());

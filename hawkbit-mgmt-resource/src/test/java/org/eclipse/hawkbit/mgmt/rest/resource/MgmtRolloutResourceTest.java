@@ -9,9 +9,13 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -47,6 +51,7 @@ import org.springframework.http.MediaType;
 import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -55,6 +60,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Management API")
 @Stories("Rollout Resource")
 public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
+
+    private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";
 
     @Autowired
     private RolloutManagement rolloutManagement;
@@ -123,7 +130,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        postRollout("rollout1", 10, dsA.getId(), "id==target*");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*", 20);
     }
 
     @Test
@@ -212,6 +219,103 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     }
 
     @Test
+    @Description("Terives sinle rollout from management API includinfg extra data that is delieverd only for single rollout access.")
+    public void retrieveSingleRollout() throws Exception {
+        testdataFactory.createTargets(20, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = rolloutManagement.createRollout(
+                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+        retrieveAndVerifyRolloutInCreating(dsA, rollout);
+        retrieveAndVerifyRolloutInReady(rollout);
+        retrieveAndVerifyRolloutInStarting(rollout);
+        retrieveAndVerifyRolloutInRunning(rollout);
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutInRunning(final Rollout rollout) throws Exception {
+        rolloutManagement.checkStartingRollouts(0);
+
+        mvc.perform(get("/rest/v1/rollouts/" + rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo("rollout1"))).andExpect(jsonPath("$.status", equalTo("running")))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(5)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(15)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutInStarting(final Rollout rollout) throws Exception {
+        rolloutManagement.startRollout(rollout.getId());
+
+        mvc.perform(get("/rest/v1/rollouts/" + rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo("rollout1"))).andExpect(jsonPath("$.status", equalTo("starting")))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(20)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutInReady(final Rollout rollout) throws Exception {
+        rolloutManagement.checkCreatingRollouts(0);
+
+        mvc.perform(get("/rest/v1/rollouts/" + rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo("rollout1"))).andExpect(jsonPath("$.status", equalTo("ready")))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(20)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutInCreating(final DistributionSet dsA, final Rollout rollout) throws Exception {
+        mvc.perform(get("/rest/v1/rollouts/" + rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("$.name", equalTo("rollout1"))).andExpect(jsonPath("$.status", equalTo("creating")))
+                .andExpect(jsonPath("$.targetFilterQuery", equalTo("controllerId==rollout*")))
+                .andExpect(jsonPath("$.distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("$.createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.lastModifiedBy").doesNotExist())
+                .andExpect(jsonPath("$.lastModifiedAt").doesNotExist())
+                .andExpect(jsonPath("$.totalTargets", equalTo(20)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(20)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+                .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
+                .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
+                .andExpect(
+                        jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath("$._links.groups.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+    }
+
+    @Test
     @Description("Testing that rollout paged list contains rollouts")
     public void rolloutPagedListContainsAllRollouts() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -219,8 +323,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         testdataFactory.createTargets(20, "target", "rollout");
 
         // setup - create 2 rollouts
-        postRollout("rollout1", 10, dsA.getId(), "id==target*");
-        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*", 20);
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.checkCreatingRollouts(0);
@@ -232,10 +336,40 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("content[0].status", equalTo("ready")))
                 .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("id==target*")))
                 .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[0].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
+                .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+                .andExpect(jsonPath("content[0]._links.start.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
+                .andExpect(jsonPath("content[0]._links.pause.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
+                .andExpect(jsonPath("content[0]._links.resume.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath("content[0]._links.groups.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
                 .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
                 .andExpect(jsonPath("content[1].status", equalTo("ready")))
                 .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
-                .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())));
+                .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[1].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[1].lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
+                .andExpect(jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
+                .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+                .andExpect(jsonPath("content[1]._links.start.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
+                .andExpect(jsonPath("content[1]._links.pause.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
+                .andExpect(jsonPath("content[1]._links.resume.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath("content[1]._links.groups.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
     @Test
@@ -246,8 +380,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         testdataFactory.createTargets(20, "target", "rollout");
 
         // setup - create 2 rollouts
-        postRollout("rollout1", 10, dsA.getId(), "id==target*");
-        postRollout("rollout2", 5, dsA.getId(), "id==target*");
+        postRollout("rollout1", 10, dsA.getId(), "id==target*", 20);
+        postRollout("rollout2", 5, dsA.getId(), "id==target*", 20);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.checkCreatingRollouts(0);
@@ -445,23 +579,100 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Description("Testing that a single rollout group can be retrieved")
     public void retrieveSingleRolloutGroup() throws Exception {
         // setup
-        final int amountTargets = 10;
+        final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = rolloutManagement.createRollout(
+                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
+        final RolloutGroup secondGroup = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(1, 1, Direction.ASC, "id")).getContent()
+                .get(0);
 
-        // retrieve single rollout group with known ID
+        retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
+        retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
+        retrieveAndVerifyRolloutGroupInRunningAndScheduled(rollout, firstGroup, secondGroup);
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutGroupInRunningAndScheduled(final Rollout rollout,
+            final RolloutGroup firstGroup, final RolloutGroup secondGroup) throws Exception {
+        rolloutManagement.startRollout(rollout.getId());
+        rolloutManagement.checkStartingRollouts(0);
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("status", equalTo("running")))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(5)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), secondGroup.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("status", equalTo("scheduled")))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(5)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutGroupInReady(final Rollout rollout, final RolloutGroup firstGroup)
+            throws Exception {
+        rolloutManagement.checkCreatingRollouts(0);
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("status", equalTo("ready")))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.totalTargets", equalTo(5)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(5)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)));
+    }
+
+    @Step
+    private void retrieveAndVerifyRolloutGroupInCreating(final Rollout rollout, final RolloutGroup firstGroup)
+            throws Exception {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("id", equalTo(firstGroup.getId().intValue())))
-                .andExpect(jsonPath("status", equalTo("ready"))).andExpect(jsonPath("name", notNullValue()));
+                .andExpect(jsonPath("status", equalTo("creating"))).andExpect(jsonPath("name", endsWith("1")))
+                .andExpect(jsonPath("description", endsWith("1")))
+                .andExpect(jsonPath("$.targetFilterQuery", equalTo("")))
+                .andExpect(jsonPath("$.targetPercentage", equalTo(25.0)))
+                .andExpect(jsonPath("$.createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.lastModifiedBy").doesNotExist())
+                .andExpect(jsonPath("$.lastModifiedAt").doesNotExist())
+                .andExpect(jsonPath("$.totalTargets", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$._links.self.href", equalTo(
+                        HREF_ROLLOUT_PREFIX + rollout.getId() + "/deploygroups/" + firstGroup.getId().intValue())));
     }
 
     @Test
@@ -521,7 +732,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        rolloutManagement.startRollout(rollout);
+        rolloutManagement.startRollout(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
         rolloutManagement.checkStartingRollouts(0);
@@ -664,13 +875,37 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         return duration <= timeout || timeout < 0;
     }
 
-    private void postRollout(final String name, final int groupSize, final long distributionSetId,
-            final String targetFilterQuery) throws Exception {
+    private void postRollout(final String name, final int groupSize, final Long distributionSetId,
+            final String targetFilterQuery, final int targets) throws Exception {
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", equalTo(name))).andExpect(jsonPath("$.status", equalTo("creating")))
+                .andExpect(jsonPath("$.targetFilterQuery", equalTo(targetFilterQuery)))
+                .andExpect(jsonPath("$.description", equalTo("desc")))
+                .andExpect(jsonPath("$.distributionSetId", equalTo(distributionSetId.intValue())))
+                .andExpect(jsonPath("$.createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("$.totalTargets", equalTo(targets)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(targets)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("$._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+                .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
+                .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
+                .andExpect(
+                        jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath("$._links.groups.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
+
+        ;
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,

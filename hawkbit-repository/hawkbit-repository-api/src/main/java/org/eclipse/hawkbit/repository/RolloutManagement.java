@@ -236,7 +236,7 @@ public interface RolloutManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllWithDetailedStatusByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Finds rollouts by given text in name or description.
@@ -249,7 +249,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> findRolloutByFilters(@NotNull Pageable pageable, @NotEmpty String searchText);
+    Slice<Rollout> findRolloutWithDetailedStatusByFilters(@NotNull Pageable pageable, @NotEmpty String searchText);
 
     /**
      * Retrieves a specific rollout by its ID.
@@ -312,12 +312,14 @@ public interface RolloutManagement {
      * @param rollout
      *            the rollout to be paused.
      *
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void pauseRollout(@NotNull Rollout rollout);
+    void pauseRollout(@NotNull Long rollout);
 
     /**
      * Resumes a paused rollout. The rollout switches back to
@@ -326,12 +328,15 @@ public interface RolloutManagement {
      *
      * @param rollout
      *            the rollout to be resumed
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void resumeRollout(@NotNull Rollout rollout);
+    void resumeRollout(@NotNull Long rollout);
 
     /**
      * Starts a rollout which has been created. The rollout must be in
@@ -344,13 +349,15 @@ public interface RolloutManagement {
      *            the rollout to be started
      *
      * @return started rollout
-     *
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRollout(@NotNull Rollout rollout);
+    Rollout startRollout(@NotNull Long rollout);
 
     /**
      * Update rollout details.

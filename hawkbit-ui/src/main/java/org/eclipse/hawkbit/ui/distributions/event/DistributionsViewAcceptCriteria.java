@@ -15,10 +15,13 @@ import java.util.Map;
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
 
 /**
@@ -26,7 +29,7 @@ import com.vaadin.ui.Component;
  * 
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
 
     private static final long serialVersionUID = -7686564967583118935L;
@@ -34,6 +37,11 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     private static final Map<String, Object> DROP_HINTS_CONFIGS = createDropHintConfigurations();
 
     private static final Map<String, List<String>> DROP_CONFIGS = createDropConfigurations();
+
+    @Autowired
+    DistributionsViewAcceptCriteria(final UINotification uiNotification, final UIEventBus eventBus) {
+        super(uiNotification, eventBus);
+    }
 
     @Override
     protected String getComponentId(final Component component) {

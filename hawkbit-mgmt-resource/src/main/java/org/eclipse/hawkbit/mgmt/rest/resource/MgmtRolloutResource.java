@@ -83,7 +83,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = this.rolloutManagement.findAllWithDetailedStatusByPredicate(rsqlParam, pageable);
+            findModulesAll = this.rolloutManagement.findAllByPredicate(rsqlParam, pageable);
         } else {
             findModulesAll = this.rolloutManagement.findAll(pageable);
         }
@@ -95,7 +95,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout findRolloutById = findRolloutOrThrowException(rolloutId);
-        return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById), HttpStatus.OK);
+        return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById, true), HttpStatus.OK);
     }
 
     @Override
@@ -126,27 +126,24 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             throw new ConstraintViolationException("Either 'amountGroups' or 'groups' must be defined in the request");
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout));
+        return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout, true));
     }
 
     @Override
     public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        this.rolloutManagement.startRollout(rollout);
+        this.rolloutManagement.startRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> pause(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        this.rolloutManagement.pauseRollout(rollout);
+        this.rolloutManagement.pauseRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> resume(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        this.rolloutManagement.resumeRollout(rollout);
+        this.rolloutManagement.resumeRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
@@ -157,8 +154,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        final Rollout rollout = findRolloutOrThrowException(rolloutId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutGroupSortParam(sortParam);
@@ -167,7 +162,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsAll(rollout, rsqlParam, pageable);
+            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsAll(rolloutId, rsqlParam, pageable);
         } else {
             findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsByRolloutId(rolloutId, pageable);
         }
@@ -182,7 +177,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @PathVariable("groupId") final Long groupId) {
         findRolloutOrThrowException(rolloutId);
         final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
-        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup));
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
     }
 
     @Override
@@ -223,7 +218,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     private RolloutGroup findRolloutGroupOrThrowException(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = this.rolloutGroupManagement.findRolloutGroupById(rolloutGroupId);
+        final RolloutGroup rolloutGroup = this.rolloutGroupManagement
+                .findRolloutGroupWithDetailedStatus(rolloutGroupId);
         if (rolloutGroup == null) {
             throw new EntityNotFoundException("Group with Id {" + rolloutGroupId + DOES_NOT_EXIST);
         }

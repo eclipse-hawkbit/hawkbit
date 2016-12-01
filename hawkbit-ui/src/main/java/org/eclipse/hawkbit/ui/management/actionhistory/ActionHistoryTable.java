@@ -13,9 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -40,13 +37,13 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -55,8 +52,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -71,42 +66,33 @@ import com.vaadin.ui.themes.ValoTheme;
  * Table for {@link Target#getActions()} history.
  *
  */
-@SpringComponent
-@ViewScope
 public class ActionHistoryTable extends TreeTable {
 
     private static final long serialVersionUID = -1631514704696786653L;
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
+    private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient DeploymentManagement deploymentManagement;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private UINotification notification;
-
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final I18N i18n;
+    private final transient DeploymentManagement deploymentManagement;
+    private final transient EventBus.UIEventBus eventBus;
+    private final UINotification notification;
+    private final ManagementUIState managementUIState;
 
     private Container hierarchicalContainer;
     private boolean alreadyHasMessages;
 
     private Target target;
 
-    private static final String STATUS_ICON_GREEN = "statusIconGreen";
+    ActionHistoryTable(final I18N i18n, final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
+            final UINotification notification, final ManagementUIState managementUIState) {
+        this.i18n = i18n;
+        this.deploymentManagement = deploymentManagement;
+        this.eventBus = eventBus;
+        this.notification = notification;
+        this.managementUIState = managementUIState;
 
-    /**
-     * Initialize the Action History Table.
-     */
-    @PostConstruct
-    public void init() {
         initializeTableSettings();
         buildComponent();
         restorePreviousState();
@@ -115,12 +101,7 @@ public class ActionHistoryTable extends TreeTable {
         setPageLength(SPUIDefinitions.PAGE_SIZE);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent mgmtUIEvent) {
         if (mgmtUIEvent == ManagementUIEvent.MAX_ACTION_HISTORY) {
             UI.getCurrent().access(() -> createTableContentForMax());
@@ -411,9 +392,9 @@ public class ActionHistoryTable extends TreeTable {
         actionCancel.setEnabled(isActionActive && !actionWithActiveStatus.isCancelingOrCanceled());
         actionCancel.addClickListener(event -> confirmAndCancelAction(actionId));
 
-        final Button actionForce = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, "", i18n.get("message.force.action"),
-                ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT, SPUIButtonStyleSmallNoBorder.class);
+        final Button actionForce = SPUIComponentProvider.getButton(UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID,
+                "", i18n.get("message.force.action"), ValoTheme.BUTTON_TINY, true, FontAwesome.BOLT,
+                SPUIButtonStyleSmallNoBorder.class);
         actionForce.setEnabled(
                 isActionActive && !actionWithActiveStatus.isForce() && !actionWithActiveStatus.isCancelingOrCanceled());
         actionForce.addClickListener(event -> confirmAndForceAction(actionId));

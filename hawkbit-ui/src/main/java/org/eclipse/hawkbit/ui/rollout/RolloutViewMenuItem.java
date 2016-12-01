@@ -26,8 +26,8 @@ import com.vaadin.spring.annotation.UIScope;
  *
  *
  */
-@UIScope
 @SpringComponent
+@UIScope
 @Order(200)
 public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 

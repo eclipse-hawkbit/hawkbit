@@ -25,11 +25,10 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
@@ -39,26 +38,21 @@ import com.vaadin.ui.Window;
 /**
  * Add and Update Target.
  */
-@SpringComponent
-@ViewScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -6659290471705262389L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient UINotification uINotification;
+    private final UINotification uINotification;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
+
+    private final TargetTable targetTable;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -67,6 +61,19 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private String controllerId;
     private FormLayout formLayout;
     private CommonDialogWindow window;
+
+    TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
+            final UINotification uINotification, final EntityFactory entityFactory, final TargetTable targetTable) {
+        this.i18n = i18n;
+        this.targetManagement = targetManagement;
+        this.eventBus = eventBus;
+        this.uINotification = uINotification;
+        this.entityFactory = entityFactory;
+        this.targetTable = targetTable;
+        createRequiredComponents();
+        buildLayout();
+        setCompositionRoot(formLayout);
+    }
 
     /**
      * Save or update the target.
@@ -88,17 +95,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     }
 
-    /**
-     * Initialize the Add Update Window Component for Target.
-     */
-    public void init() {
-        createRequiredComponents();
-        buildLayout();
-        setCompositionRoot(formLayout);
-    }
-
     private void createRequiredComponents() {
         controllerIDTextField = createTextField("prompt.target.id", UIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
+        controllerIDTextField.addValidator(new RegexpValidator("[.\\S]*", i18n.get("message.target.whitespace.check")));
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.TARGET_ADD_NAME);
         nameTextField.setRequired(false);
 
@@ -143,6 +142,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         final Target newTarget = targetManagement.createTarget(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
+
+
+
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
 

@@ -37,8 +37,8 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     @JsonProperty(required = true)
     private Long totalTargets;
 
-    @JsonProperty(required = true)
-    private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
+    @JsonProperty
+    private Map<String, Long> totalTargetsPerStatus;
 
     /**
      * @return the status
@@ -120,5 +120,13 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
      */
     public Map<String, Long> getTotalTargetsPerStatus() {
         return totalTargetsPerStatus;
+    }
+
+    public void addTotalTargetsPerStatus(final String status, final Long totalTargetCountByStatus) {
+        if (totalTargetsPerStatus == null) {
+            totalTargetsPerStatus = new HashMap<>();
+        }
+
+        totalTargetsPerStatus.put(status, totalTargetCountByStatus);
     }
 }

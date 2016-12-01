@@ -38,6 +38,8 @@ public abstract class AbstractTableLayout extends VerticalLayout {
         this.table = table;
         this.detailsLayout = detailsLayout;
         buildLayout();
+
+        table.selectRow();
     }
 
     private void buildLayout() {
@@ -102,6 +104,10 @@ public abstract class AbstractTableLayout extends VerticalLayout {
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);
+    }
+
+    public AbstractTable<?, ?> getTable() {
+        return table;
     }
 
     private class TableShortCutHandler implements Handler {

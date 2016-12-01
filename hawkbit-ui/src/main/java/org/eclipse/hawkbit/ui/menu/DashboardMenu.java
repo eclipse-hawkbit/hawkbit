@@ -61,14 +61,11 @@ public final class DashboardMenu extends CustomComponent {
 
     private static final String ID = "dashboard-menu";
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final UiProperties uiProperties;
 
-    @Autowired
-    private transient HawkbitServerProperties serverProperties;
+    private final transient HawkbitServerProperties serverProperties;
 
     private static final long serialVersionUID = 5394474618559481462L;
 
@@ -76,15 +73,23 @@ public final class DashboardMenu extends CustomComponent {
     // the buttons directly via events
     private final List<ValoMenuItemButton> menuButtons = new ArrayList<>();
 
-    @Autowired
-    private transient PermissionService permissionService;
+    private final transient PermissionService permissionService;
 
-    @Autowired
-    private final List<DashboardMenuItem> dashboardVaadinViews = new ArrayList<>();
+    private final List<DashboardMenuItem> dashboardVaadinViews;
 
     private String initialViewName;
 
     private boolean accessibleViewsEmpty;
+
+    @Autowired
+    DashboardMenu(final I18N i18n, final UiProperties uiProperties, final HawkbitServerProperties serverProperties,
+            final PermissionService permissionService, final List<DashboardMenuItem> dashboardVaadinViews) {
+        this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.serverProperties = serverProperties;
+        this.permissionService = permissionService;
+        this.dashboardVaadinViews = dashboardVaadinViews;
+    }
 
     /**
      * initializing the view and creating the layout, cannot be done in the

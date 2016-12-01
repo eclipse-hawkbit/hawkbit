@@ -34,7 +34,7 @@ public interface TargetTagRepository
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    Long deleteByName(final String tagName);
+    Long deleteByName(String tagName);
 
     /**
      * find {@link TargetTag} by its name.
@@ -43,7 +43,7 @@ public interface TargetTagRepository
      *            to filter on
      * @return the {@link TargetTag} if found, otherwise null
      */
-    JpaTargetTag findByNameEquals(final String tagName);
+    JpaTargetTag findByNameEquals(String tagName);
 
     /**
      * Returns all instances of the type.

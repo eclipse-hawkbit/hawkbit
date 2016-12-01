@@ -16,6 +16,9 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
@@ -31,17 +34,19 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
@@ -53,66 +58,63 @@ import com.vaadin.ui.Window;
 
 /**
  * Distribution set details layout.
- *
- *
- *
  */
-@SpringComponent
-@ViewScope
 public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDetailsLayout<DistributionSet> {
 
     private static final long serialVersionUID = -4595004466943546669L;
 
     private static final String SOFT_MODULE = "softwareModule";
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private DistributionSetAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
 
-    @Autowired
-    private DistributionTagToken distributionTagToken;
+    private final DistributionTagToken distributionTagToken;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    private SoftwareModuleDetailsTable softwareModuleTable;
+    private final SoftwareModuleDetailsTable softwareModuleTable;
 
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
+    private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
-    private TargetFilterQueryDetailsTable tfqDetailsTable;
+    private final TargetFilterQueryDetailsTable tfqDetailsTable;
 
     private VerticalLayout tagsLayout;
 
     private Map<String, StringBuilder> assignedSWModule;
 
-    /**
-     * softwareLayout Initialize the component.
-     */
-    @Override
-    protected void init() {
-        softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
-                manageDistUIState);
+    DistributionSetDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+            final ManageDistUIState manageDistUIState, final ManagementUIState managementUIState,
+            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory,
+            final UINotification uinotification, final TagManagement tagManagement,
+            final DsMetadataPopupLayout popupLayout, final UINotification uiNotification) {
+        super(i18n, eventBus, permissionChecker, managementUIState);
+        this.manageDistUIState = manageDistUIState;
+        this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
+        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uinotification, eventBus,
+                managementUIState, tagManagement, distributionSetManagement);
+        this.softwareManagement = softwareManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.targetManagement = targetManagement;
+        this.dsMetadataPopupLayout = popupLayout;
 
-        dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker(), distributionSetManagement, dsMetadataPopupLayout,
-                entityFactory);
+        softwareModuleTable = new SoftwareModuleDetailsTable(i18n, true, permissionChecker, distributionSetManagement,
+                eventBus, manageDistUIState, uiNotification);
 
-        tfqDetailsTable = new TargetFilterQueryDetailsTable();
-        tfqDetailsTable.init(getI18n());
+        dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
+                dsMetadataPopupLayout, entityFactory);
 
-        super.init();
+        tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
+        addTabs(detailsTab);
+        restoreState();
     }
 
     protected VerticalLayout createTagsLayout() {
@@ -182,9 +184,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private Button assignSoftModuleButton(final String softwareModuleName) {
         if (getPermissionChecker().hasUpdateDistributionPermission()
                 && manageDistUIState.getLastSelectedDistribution().isPresent()
-                && distributionSetManagement
-                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
-                        .getAssignedTargets().isEmpty()) {
+                && targetManagement.countTargetByAssignedDistributionSet(
+                        manageDistUIState.getLastSelectedDistribution().get().getId()) <= 0) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
@@ -351,19 +352,19 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE) {
             UI.getCurrent().access(() -> updateSoftwareModule(event.getEntity()));
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         onBaseEntityEvent(distributionTableEvent);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
@@ -373,11 +374,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             }
             setSelectedBaseEntity(
                     distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
-            UI.getCurrent().access(() -> populateModule());
+            UI.getCurrent().access(this::populateModule);
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEventDiscard(final SaveActionWindowEvent saveActionWindowEvent) {
         if (saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ASSIGNMENT
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS

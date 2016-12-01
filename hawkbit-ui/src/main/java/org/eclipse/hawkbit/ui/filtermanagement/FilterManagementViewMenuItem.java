@@ -26,8 +26,8 @@ import com.vaadin.spring.annotation.UIScope;
  * 
  *
  */
-@UIScope
 @SpringComponent
+@UIScope
 @Order(300)
 public class FilterManagementViewMenuItem extends AbstractDashboardMenuItemNotification {
 

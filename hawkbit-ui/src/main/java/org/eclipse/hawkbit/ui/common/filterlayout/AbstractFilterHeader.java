@@ -12,9 +12,10 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
@@ -25,20 +26,14 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Parent class for filter button header layout.
- * 
- *
- *
- * 
  */
 public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -1388340600522323332L;
 
-    @Autowired
     protected SpPermissionChecker permChecker;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     private Label title;
 
@@ -46,10 +41,12 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private Button hideIcon;
 
-    /**
-     * Initialize the header layout.
-     */
-    protected void init() {
+    protected final I18N i18n;
+
+    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final I18N i18n) {
+        this.permChecker = permChecker;
+        this.eventBus = eventBus;
+        this.i18n = i18n;
         createComponents();
         buildLayout();
     }

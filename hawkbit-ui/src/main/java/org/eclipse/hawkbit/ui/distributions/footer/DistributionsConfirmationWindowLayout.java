@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTable;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
@@ -28,11 +27,12 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -41,7 +41,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
@@ -50,11 +49,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Abstract layout of confirm actions window.
  *
- *
- *
  */
-@org.springframework.stereotype.Component
-@ViewScope
 public class DistributionsConfirmationWindowLayout extends AbstractConfirmationWindowLayout {
 
     private static final long serialVersionUID = 3641621131320823058L;
@@ -79,17 +74,20 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private ConfirmationTab assignmnetTab;
 
-    @Autowired
-    private transient DistributionSetManagement dsManagement;
+    private final transient DistributionSetManagement dsManagement;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private SoftwareModuleTable softwareModuleTable;
+    DistributionsConfirmationWindowLayout(final I18N i18n, final UIEventBus eventBus,
+            final DistributionSetManagement dsManagement, final SoftwareManagement softwareManagement,
+            final ManageDistUIState manageDistUIState) {
+        super(i18n, eventBus);
+        this.dsManagement = dsManagement;
+        this.softwareManagement = softwareManagement;
+        this.manageDistUIState = manageDistUIState;
+    }
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
@@ -637,7 +635,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEventDiscard(final SaveActionWindowEvent saveActionWindowEvent) {
         if (saveActionWindowEvent == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
             getSWAssignmentsTableContainer();

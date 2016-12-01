@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -30,12 +28,10 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
@@ -47,26 +43,19 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Generates window for Software module add or update.
  */
-@SpringComponent
-@ViewScope
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotifcation;
+    private final UINotification uiNotifcation;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
     private TextField nameTextField;
 
@@ -78,13 +67,22 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private TextArea descTextArea;
 
-    private CommonDialogWindow window;
-
     private Boolean editSwModule = Boolean.FALSE;
 
     private Long baseSwModuleId;
 
     private FormLayout formLayout;
+
+    public SoftwareModuleAddUpdateWindow(final I18N i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
+            final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
+        this.i18n = i18n;
+        this.uiNotifcation = uiNotifcation;
+        this.eventBus = eventBus;
+        this.softwareManagement = softwareManagement;
+        this.entityFactory = entityFactory;
+
+        createRequiredComponents();
+    }
 
     /**
      * Save or update the sw module.
@@ -103,14 +101,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         public boolean canWindowSaveOrUpdate() {
             return editSwModule || !isDuplicate();
         }
-    }
-
-    /**
-     * Initialize Distribution Add and Edit Window.
-     */
-    @PostConstruct
-    void init() {
-        createRequiredComponents();
     }
 
     /**
@@ -134,9 +124,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     public CommonDialogWindow createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
         this.baseSwModuleId = baseSwModuleId;
         resetComponents();
+        populateTypeNameCombo();
         populateValuesOfSwModule();
-        createWindow();
-        return window;
+        return createWindow();
     }
 
     private void createRequiredComponents() {
@@ -158,7 +148,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
-        populateTypeNameCombo();
     }
 
     private TextField createTextField(final String in18Key, final String id) {
@@ -182,7 +171,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         editSwModule = Boolean.FALSE;
     }
 
-    private void createWindow() {
+    private CommonDialogWindow createWindow() {
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
@@ -199,7 +188,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         setCompositionRoot(formLayout);
 
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+        final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.get("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
@@ -207,6 +196,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setEnabled(!editSwModule);
 
         typeComboBox.focus();
+
+        return window;
     }
 
     private void addNewBaseSoftware() {
@@ -275,6 +266,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
         descTextArea.setValue(swModle.getDescription() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
+
         if (swModle.getType().isDeleted()) {
             typeComboBox.addItem(swModle.getType().getName());
         }

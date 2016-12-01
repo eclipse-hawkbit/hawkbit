@@ -38,11 +38,9 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
 
     private final transient Set<Object> expandParentActionRowId = new HashSet<>();
 
-    @Autowired
-    private DistributionTableFilters distributionTableFilters;
+    private final DistributionTableFilters distributionTableFilters;
 
-    @Autowired
-    private TargetTableFilters targetTableFilters;
+    private final TargetTableFilters targetTableFilters;
 
     private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<>();
 
@@ -59,7 +57,7 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
     // Contains list of ID and Names of all the selected Targets
     private Set<TargetIdName> selectedTargetIdName = Collections.emptySet();
 
-    private boolean targetTagFilterClosed = false;
+    private boolean targetTagFilterClosed;
 
     private boolean distTagFilterClosed = true;
 
@@ -67,20 +65,20 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
 
     private final AtomicLong targetsCountAll = new AtomicLong();
 
-    private boolean dsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized;
 
     // Contains ID and NAme of last selected target
     private DistributionSetIdName lastSelectedDsIdName;
     // Contains list of ID and Names of all the selected Targets
     private Set<DistributionSetIdName> selectedDsIdName = Collections.emptySet();
 
-    private boolean targetTableMaximized = Boolean.FALSE;
+    private boolean targetTableMaximized;
 
-    private boolean actionHistoryMaximized = Boolean.FALSE;
+    private boolean actionHistoryMaximized;
 
-    private boolean noDataAvilableTarget = Boolean.FALSE;
+    private boolean noDataAvilableTarget;
 
-    private boolean noDataAvailableDistribution = Boolean.FALSE;
+    private boolean noDataAvailableDistribution;
 
     private final Set<String> canceledTargetName = new HashSet<>();
 
@@ -89,6 +87,13 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
     private boolean bulkUploadWindowMinimised;
 
     private DistributionSetIdName lastSelectedDistribution;
+
+    @Autowired
+    ManagementUIState(final DistributionTableFilters distributionTableFilters,
+            final TargetTableFilters targetTableFilters) {
+        this.distributionTableFilters = distributionTableFilters;
+        this.targetTableFilters = targetTableFilters;
+    }
 
     /**
      * @return the lastSelectedDistribution

@@ -33,6 +33,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -77,6 +78,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @Column(name = "controller_id", length = 64)
     @Size(min = 1, max = 64)
     @NotEmpty
+    @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
     @Transient

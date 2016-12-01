@@ -23,8 +23,8 @@ import com.vaadin.spring.annotation.UIScope;
  * Menu item for deplyoment.
  *
  */
-@UIScope
 @SpringComponent
+@UIScope
 @Order(100)
 public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotification {
 

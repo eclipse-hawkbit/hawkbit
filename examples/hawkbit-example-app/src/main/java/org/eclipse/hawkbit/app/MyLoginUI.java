@@ -10,8 +10,11 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.ui.login.HawkbitLoginUI;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.navigator.SpringViewProvider;
 
 /**
  * Example hawkBit login UI implementation.
@@ -26,6 +29,11 @@ import com.vaadin.spring.annotation.SpringUI;
 // Vaadin.
 @SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class MyLoginUI extends HawkbitLoginUI {
+
+    @Autowired
+    protected MyLoginUI(final SpringViewProvider viewProvider, final ApplicationContext context) {
+        super(viewProvider, context);
+    }
 
     private static final long serialVersionUID = 1L;
 

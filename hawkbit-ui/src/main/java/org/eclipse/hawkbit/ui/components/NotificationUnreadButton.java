@@ -25,14 +25,14 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Button which shows all notification in a popup.
  */
-@UIScope
 @SpringComponent
+@UIScope
 public class NotificationUnreadButton extends Button {
     private static final long serialVersionUID = 1L;
-    
+
     private static final String TITLE = "notification.unread.button.title";
     private static final String DESCRIPTION = "notification.unread.button.description";
-    
+
     private static final String STYLE = "notifications-unread";
     private static final String STYLE_UNREAD_COUNTER = "unread";
     private static final String STYLE_POPUP = "notifications-unread-popup";

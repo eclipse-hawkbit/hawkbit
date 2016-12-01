@@ -14,22 +14,21 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * Bean which contains all SP permissions.
  *
- *
- *
- *
  */
-@Validated
 @Service
 public class SpPermissionChecker implements Serializable {
     private static final long serialVersionUID = 2757865286212875704L;
 
-    @Autowired
     private transient PermissionService permissionService;
+
+    @Autowired
+    SpPermissionChecker(final PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
 
     /**
      * Gets the SP monitor View Permission.

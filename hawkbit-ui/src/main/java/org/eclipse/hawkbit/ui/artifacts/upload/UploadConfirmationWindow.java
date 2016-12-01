@@ -35,10 +35,10 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -116,6 +116,10 @@ public class UploadConfirmationWindow implements Button.ClickListener {
 
     private final ArtifactUploadState artifactUploadState;
 
+    private final transient UIEventBus eventBus;
+
+    private final transient ArtifactManagement artifactManagement;
+
     /**
      * Initialize the upload confirmation window.
      *
@@ -124,10 +128,12 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      * @param artifactUploadState
      *            reference of session variable {@link ArtifactUploadState}.
      */
-    public UploadConfirmationWindow(final UploadLayout artifactUploadView,
-            final ArtifactUploadState artifactUploadState) {
+    UploadConfirmationWindow(final UploadLayout artifactUploadView, final ArtifactUploadState artifactUploadState,
+            final UIEventBus eventBus, final ArtifactManagement artifactManagement) {
         this.uploadLayout = artifactUploadView;
         this.artifactUploadState = artifactUploadState;
+        this.eventBus = eventBus;
+        this.artifactManagement = artifactManagement;
         i18n = artifactUploadView.getI18n();
         createRequiredComponents();
         buildLayout();
@@ -188,7 +194,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
      */
     private void setWarningIcon(final Label warningIconLabel, final String fileName, final Object itemId) {
         final Item item = uploadDetailsTable.getItem(itemId);
-        final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
         if (HawkbitCommonUtil.trimAndNullIfEmpty(fileName) != null) {
             final Long baseSwId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();
             final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(fileName, baseSwId);
@@ -432,7 +437,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     private void hideErrorIcon(final Label warningLabel, final int errorLabelCount, final int duplicateCount,
             final Label errorLabel, final String oldFileName, final Long currentSwId) {
         if (warningLabel == null && (errorLabelCount > 1 || (duplicateCount == 1 && errorLabelCount == 1))) {
-            final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
+
             final List<Artifact> artifactList = artifactManagement.findByFilenameAndSoftwareModule(oldFileName,
                     currentSwId);
             errorLabel.removeStyleName(SPUIStyleDefinitions.ERROR_LABEL);
@@ -577,7 +582,6 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     private void processArtifactUpload() {
         final List<String> itemIds = (List<String>) uploadDetailsTable.getItemIds();
         if (preUploadValidation(itemIds)) {
-            final ArtifactManagement artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
             Boolean refreshArtifactDetailsLayout = false;
             for (final String itemId : itemIds) {
                 final String[] itemDet = itemId.split("/");
@@ -602,7 +606,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             uploadLayout.clearFileList();
             window.close();
             // call upload result window
-            currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n);
+            currentUploadResultWindow = new UploadResultWindow(uploadResultList, i18n, eventBus);
             UI.getCurrent().addWindow(currentUploadResultWindow.getUploadResultsWindow());
             currentUploadResultWindow.getUploadResultsWindow().addCloseListener(event -> onResultDetailsPopupClose());
             uploadLayout.setResultPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
