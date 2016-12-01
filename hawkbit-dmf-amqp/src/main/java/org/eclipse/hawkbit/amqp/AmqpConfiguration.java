@@ -51,7 +51,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.util.ErrorHandler;
 
 import com.google.common.collect.Maps;
 
@@ -329,9 +328,8 @@ public class AmqpConfiguration {
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
-            final ErrorHandler errorHandler) {
-        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
     }
 
     /**

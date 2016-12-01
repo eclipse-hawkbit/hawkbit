@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.amqp;
 
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.util.ErrorHandler;
 
 /**
  * {@link RabbitListenerContainerFactory} that can be configured through
@@ -28,14 +28,13 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
      * @param rabbitConnectionFactory
      *            for the container factory
      * @param amqpProperties
-     *            to configure the container factory
-     * @param errorHandler
-     *            the error handler which should be use
+     *            to configure the container factory *
      */
     public ConfigurableRabbitListenerContainerFactory(final AmqpProperties amqpProperties,
-            final ConnectionFactory rabbitConnectionFactory, final ErrorHandler errorHandler) {
+            final ConnectionFactory rabbitConnectionFactory) {
         this.amqpProperties = amqpProperties;
-        setErrorHandler(errorHandler);
+        setErrorHandler(new ConditionalRejectingErrorHandler(
+                new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay())));
         setDefaultRequeueRejected(true);
         setConnectionFactory(rabbitConnectionFactory);
         setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());

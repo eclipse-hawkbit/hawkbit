@@ -30,6 +30,8 @@ public class AmqpProperties {
 
     private static final int DEFAULT_MAX_CONSUMERS = 10;
 
+    private static final long DEFAULT_REQUEUE_DELAY = 0;
+
     /**
      * Enable DMF API based on AMQP 0.9
      */
@@ -90,6 +92,19 @@ public class AmqpProperties {
      * initialization.
      */
     private int declarationRetries = DEFAULT_QUEUE_DECLARATION_RETRIES;
+
+    /**
+     * Delay for messages that are requeued.
+     */
+    private long requeueDelay = DEFAULT_REQUEUE_DELAY;
+
+    public long getRequeueDelay() {
+        return requeueDelay;
+    }
+
+    public void setRequeueDelay(final long requeueDelay) {
+        this.requeueDelay = requeueDelay;
+    }
 
     public int getDeclarationRetries() {
         return declarationRetries;
