@@ -29,6 +29,12 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
 
     private static final long ENTITY_ID = 1L;
 
+    private static String TENANT = "tenant";
+
+    private static String ENTIY_CLASS = "EntityClass";
+
+    private static String NODE = "Node";
+
     @Test
     @Description("Verifies that the is ds id correct reloaded")
     public void testDistributionSetDeletedEvent() {
@@ -56,11 +62,11 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {
 
         final Constructor<?> constructor = Arrays.stream(eventType.getDeclaredConstructors())
-                .filter(con -> con.getParameterCount() == 3).findAny()
+                .filter(con -> con.getParameterCount() == 4).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Given event is not RemoteIdEvent compatible"));
 
         try {
-            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance("tenant", ENTITY_ID, "Node");
+            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance(TENANT, ENTITY_ID, ENTIY_CLASS, NODE);
             assertEntity(ENTITY_ID, event);
         } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
@@ -71,12 +77,19 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
         assertThat(event.getEntityId()).isSameAs(id);
 
         RemoteIdEvent underTestCreatedEvent = (RemoteIdEvent) createProtoStuffEvent(event);
-        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+        assertDeserializeEvent(id, underTestCreatedEvent);
 
         underTestCreatedEvent = (RemoteIdEvent) createJacksonEvent(event);
-        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+        assertDeserializeEvent(id, underTestCreatedEvent);
 
         return underTestCreatedEvent;
+    }
+
+    private void assertDeserializeEvent(final long id, final RemoteIdEvent underTestCreatedEvent) {
+        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+        assertThat(underTestCreatedEvent.getTenant()).isEqualTo(TENANT);
+        assertThat(underTestCreatedEvent.getEntityClass()).isEqualTo(ENTIY_CLASS);
+        assertThat(underTestCreatedEvent.getOriginService()).isEqualTo(NODE);
     }
 
 }

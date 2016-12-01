@@ -29,17 +29,19 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 public class NotificationUnreadButton extends Button {
     private static final long serialVersionUID = 1L;
+    
     private static final String TITLE = "notification.unread.button.title";
     private static final String DESCRIPTION = "notification.unread.button.description";
+    
     private static final String STYLE = "notifications-unread";
     private static final String STYLE_UNREAD_COUNTER = "unread";
     private static final String STYLE_POPUP = "notifications-unread-popup";
 
     private int unreadNotficationCounter;
     private AbstractNotifcationView currentView;
+    private Window notificationsWindow;
     private transient Map<Class<?>, NotificationUnreadValue> unreadNotfications;
     private transient I18N i18n;
-    private Window notificationsWindow;
 
     /**
      * Constructor.
@@ -62,10 +64,6 @@ public class NotificationUnreadButton extends Button {
     }
 
     private void createUnreadMessagesLayout() {
-        if (!notificationsWindow.isAttached()) {
-            return;
-        }
-
         final VerticalLayout notificationsLayout = new VerticalLayout();
         notificationsLayout.setMargin(true);
         notificationsLayout.setSpacing(true);
