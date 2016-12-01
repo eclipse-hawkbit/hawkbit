@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +27,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 // don't active the auto assign scheduler in test, otherwise it is hard to test
 @Profile("!test")
 @EnableConfigurationProperties(AutoAssignProperties.class)
+@ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
 public class AutoAssignScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);
@@ -50,8 +52,8 @@ public class AutoAssignScheduler {
      * @param autoAssignChecker
      *            to run a check as tenant
      */
-    public AutoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
-            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+    public AutoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker) {
         this.tenantAware = tenantAware;
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;

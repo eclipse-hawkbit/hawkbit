@@ -8,25 +8,22 @@
  */
 package org.eclipse.hawkbit.autoconfigure.amqp;
 
-import org.eclipse.hawkbit.amqp.AmqpConfiguration;
-import org.eclipse.hawkbit.amqp.annotation.EnableAmqp;
+import org.eclipse.hawkbit.amqp.EnableDmfApi;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.util.ErrorHandler;
 
 /**
- * The amqp autoconfiguration.
- *
- *
- *
+ * The AMQP 0.9 based evice Management Federation API (DMF) autoconfiguration.
  */
 @Configuration
-@ConditionalOnClass(value = AmqpConfiguration.class)
-@EnableAmqp
-public class AmqpAutoConfiguration {
+@ConditionalOnClass(EnableDmfApi.class)
+@Import(EnableDmfApi.class)
+public class DmfApiAutoConfiguration {
 
     /**
      * Create default error handler bean.

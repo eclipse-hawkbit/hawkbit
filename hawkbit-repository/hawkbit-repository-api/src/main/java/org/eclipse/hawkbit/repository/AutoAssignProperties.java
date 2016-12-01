@@ -24,10 +24,12 @@ public class AutoAssignProperties {
         public static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:60000}";
 
         /**
-         * Schedule where the autoassign scheduler looks necessary state changes in
-         * milliseconds.
+         * Schedule where the autoassign scheduler looks necessary state changes
+         * in milliseconds.
          */
         private long fixedDelay = 60000L;
+
+        private boolean enabled = true;
 
         public long getFixedDelay() {
             return fixedDelay;
@@ -35,6 +37,14 @@ public class AutoAssignProperties {
 
         public void setFixedDelay(final long fixedDelay) {
             this.fixedDelay = fixedDelay;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
         }
 
     }
