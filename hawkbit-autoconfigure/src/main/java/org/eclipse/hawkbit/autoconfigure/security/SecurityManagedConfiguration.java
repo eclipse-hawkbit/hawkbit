@@ -24,12 +24,12 @@ import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
-import org.eclipse.hawkbit.ddi.EnableDdiApi;
+import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
-import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
+import org.eclipse.hawkbit.mgmt.MgmtApiConfiguration;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.ui.EnableMgmtUi;
+import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +135,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(300)
-    @ConditionalOnClass(EnableDdiApi.class)
+    @ConditionalOnClass(DdiApiConfiguration.class)
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -167,7 +167,7 @@ public class SecurityManagedConfiguration {
          *         of service protection filter in the filter chain
          */
         @Bean
-        @ConditionalOnClass(EnableDdiApi.class)
+        @ConditionalOnClass(DdiApiConfiguration.class)
         public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
             final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
@@ -304,7 +304,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(350)
-    @ConditionalOnClass(EnableMgmtApi.class)
+    @ConditionalOnClass(MgmtApiConfiguration.class)
     public static class RestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -383,7 +383,7 @@ public class SecurityManagedConfiguration {
     @Configuration
     @Order(400)
     @EnableVaadinSecurity
-    @ConditionalOnClass(EnableMgmtUi.class)
+    @ConditionalOnClass(MgmtUiConfiguration.class)
     public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
@@ -481,7 +481,7 @@ public class SecurityManagedConfiguration {
     @Configuration
     @EnableWebSecurity
     @Order(200)
-    @ConditionalOnClass(EnableDdiApi.class)
+    @ConditionalOnClass(DdiApiConfiguration.class)
     public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired

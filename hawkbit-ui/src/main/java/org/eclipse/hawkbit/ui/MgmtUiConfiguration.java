@@ -8,27 +8,29 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.eclipse.hawkbit.im.authentication.PermissionService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.vaadin.spring.annotation.SpringComponent;
-
 /**
- * Annotation to enable {@link ComponentScan} in the resource package to setup
- * all {@link SpringComponent} annotated classes and setup the Vaadin managed
- * beans.
+ * Enables UI components for the Management UI.
+ *
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 @Configuration
 @ComponentScan
-@Import({ UiConfiguration.class, AsyncVaadinServletConfiguration.class })
-public @interface EnableMgmtUi {
+@Import(AsyncVaadinServletConfiguration.class)
+public class MgmtUiConfiguration {
+
+    /**
+     * @param permissionService
+     *            to use in the checker
+     * @return {@link SpPermissionChecker} bean
+     */
+    @Bean
+    public SpPermissionChecker spPermissionChecker(final PermissionService permissionService) {
+        return new SpPermissionChecker(permissionService);
+    }
 
 }

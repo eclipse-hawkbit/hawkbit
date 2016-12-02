@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.ui;
 
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
-import org.eclipse.hawkbit.ui.EnableMgmtUi;
+import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
@@ -33,8 +33,8 @@ import com.vaadin.spring.annotation.UIScope;
 @EnableVaadinSecurity
 @EnableVaadinExtensions
 @EnableEventBus
-@ConditionalOnClass(EnableMgmtUi.class)
-@Import(EnableMgmtUi.class)
+@ConditionalOnClass(MgmtUiConfiguration.class)
+@Import(MgmtUiConfiguration.class)
 public class UIAutoConfiguration {
 
     /**

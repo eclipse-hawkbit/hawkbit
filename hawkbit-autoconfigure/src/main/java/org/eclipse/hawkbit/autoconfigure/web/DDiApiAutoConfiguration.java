@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.web;
 
-import org.eclipse.hawkbit.ddi.EnableDdiApi;
+import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Import;
  *
  */
 @Configuration
-@ConditionalOnClass(EnableDdiApi.class)
-@Import(EnableDdiApi.class)
+@ConditionalOnClass(DdiApiConfiguration.class)
+@Import(DdiApiConfiguration.class)
 public class DDiApiAutoConfiguration {
 
 }
