@@ -27,7 +27,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Target table layout.
  */
-public class TargetTableLayout extends AbstractTableLayout {
+public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
 
     private static final long serialVersionUID = 2248703121998709112L;
 
@@ -46,10 +46,10 @@ public class TargetTableLayout extends AbstractTableLayout {
             final TagManagement tagManagement) {
         this.eventBus = eventBus;
         this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
-                tagManagement, targetManagement, entityFactory, targetTable);
+                tagManagement, targetManagement, entityFactory);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
                 managementUIState, managementViewAcceptCriteria, targetManagement, deploymentManagement, uiproperties,
-                eventbus, entityFactory, uinotification, tagManagement, targetTable);
+                eventbus, entityFactory, uinotification, tagManagement);
 
         super.init(targetTableHeader, targetTable, targetDetails);
     }

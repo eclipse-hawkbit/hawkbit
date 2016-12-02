@@ -12,8 +12,11 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -24,9 +27,10 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 /**
  * Target Tag filter layout.
  */
-public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout {
+public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout implements RefreshableContainer {
 
     private static final long serialVersionUID = 2153612878428575009L;
+    private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
 
     public TargetTagFilterLayout(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final ManagementUIState managementUIState, final ManagementViewAcceptCriteria managementViewAcceptCriteria,
@@ -38,6 +42,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout {
                         managementViewAcceptCriteria, notification, entityFactory, targetManagement,
                         targetFilterQueryManagement),
                 managementUIState);
+        this.createUpdateTargetTagLayout = createUpdateTargetTagLayout;
         eventBus.subscribe(this);
     }
 
@@ -51,8 +56,23 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout {
         }
     }
 
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
+        if (BaseEntityEventType.ADD_ENTITY != tableEvent.getEventType()
+                && BaseEntityEventType.REMOVE_ENTITIES != tableEvent.getEventType()) {
+            return;
+        }
+        refreshContainer();
+    }
+
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
         return managementUIState.isTargetTagFilterClosed();
+    }
+
+    @Override
+    public void refreshContainer() {
+        getMultipleFilterTabs().getFilterByButtons().refreshContainer();
+        createUpdateTargetTagLayout.refreshContainer();
     }
 }

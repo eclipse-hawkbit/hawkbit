@@ -99,7 +99,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
-                10_000, 5_000, TimeUnit.MILLISECONDS);
+                10_000, 2_000, TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -33,7 +33,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     private final Collection<Long> entityIds;
 
-    private final Class<?> entityClass;
+    private Class<?> entityClass;
 
     /**
      * Base entity event
@@ -46,8 +46,11 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     public BaseUIEntityEvent(final BaseEntityEventType eventType, final T entity) {
         this.eventType = eventType;
         this.entity = entity;
-        this.entityIds = Arrays.asList(entity.getId());
-        this.entityClass = entity.getClass();
+        entityIds = new ArrayList<>();
+        if (entity != null) {
+            entityIds.add(entity.getId());
+            this.entityClass = entity.getClass();
+        }
     }
 
     /**
@@ -85,7 +88,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
      * @return <true> match <false> not match
      */
     public boolean matchRemoteEvent(final TenantAwareEvent tenantAwareEvent) {
-        if (!(tenantAwareEvent instanceof RemoteIdEvent)) {
+        if (!(tenantAwareEvent instanceof RemoteIdEvent) || entityClass == null || entityIds == null) {
             return false;
         }
         final RemoteIdEvent remoteIdEvent = (RemoteIdEvent) tenantAwareEvent;

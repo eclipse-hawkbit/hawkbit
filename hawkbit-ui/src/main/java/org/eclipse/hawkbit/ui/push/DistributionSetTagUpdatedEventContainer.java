@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
  *
  */
 public class DistributionSetTagUpdatedEventContainer implements EventContainer<DistributionSetTagUpdateEvent> {
+    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "distribution.set.tag.Updated.event.container.notifcation.message";
     private final List<DistributionSetTagUpdateEvent> events;
 
     DistributionSetTagUpdatedEventContainer(final List<DistributionSetTagUpdateEvent> events) {
@@ -26,6 +27,11 @@ public class DistributionSetTagUpdatedEventContainer implements EventContainer<D
     @Override
     public List<DistributionSetTagUpdateEvent> getEvents() {
         return events;
+    }
+
+    @Override
+    public String getUnreadNotificationMessageKey() {
+        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

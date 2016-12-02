@@ -45,13 +45,13 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
+    public void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
         container.getEvents().stream().map(event -> event.getEntity())
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
+    public void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
         container.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
                 .forEach(this::removeTagFromCombo);
     }

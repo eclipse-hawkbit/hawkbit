@@ -75,13 +75,12 @@ public class TargetTableHeader extends AbstractTableHeader {
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
-            final TargetTable targetTable) {
+            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewAcceptCriteria = managementViewAcceptCriteria;
         this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
-                entityFactory, targetTable);
+                entityFactory);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
                 managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement);
 

@@ -37,10 +37,10 @@ public class NotificationUnreadButton extends Button {
     private static final String STYLE_UNREAD_COUNTER = "unread";
     private static final String STYLE_POPUP = "notifications-unread-popup";
 
-    private int unreadNotficationCounter;
-    private AbstractNotifcationView currentView;
+    private int unreadNotificationCounter;
+    private AbstractNotificationView currentView;
     private Window notificationsWindow;
-    private transient Map<Class<?>, NotificationUnreadValue> unreadNotfications;
+    private transient Map<Class<?>, NotificationUnreadValue> unreadNotifications;
     private transient I18N i18n;
 
     /**
@@ -52,14 +52,14 @@ public class NotificationUnreadButton extends Button {
     @Autowired
     public NotificationUnreadButton(final I18N i18n) {
         this.i18n = i18n;
-        this.unreadNotfications = new ConcurrentHashMap<>();
+        this.unreadNotifications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
         addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         addStyleName(ValoTheme.BUTTON_SMALL);
         addStyleName(STYLE);
         setHtmlContentAllowed(true);
-        createNotficationWindow();
+        createNotificationWindow();
         addClickListener(event -> toggleWindow(event));
     }
 
@@ -73,11 +73,11 @@ public class NotificationUnreadButton extends Button {
         title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
         notificationsLayout.addComponent(title);
 
-        unreadNotfications.values().stream().forEach(value -> createNotfication(notificationsLayout, value));
+        unreadNotifications.values().stream().forEach(value -> createNotification(notificationsLayout, value));
         notificationsWindow.setContent(notificationsLayout);
     }
 
-    private void createNotficationWindow() {
+    private void createNotificationWindow() {
         notificationsWindow = new Window();
         notificationsWindow.setWidth(300.0F, Unit.PIXELS);
         notificationsWindow.addStyleName(STYLE_POPUP);
@@ -95,12 +95,12 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow.setPositionY(event.getClientY() - event.getRelativeY() + 40);
         getUI().addWindow(notificationsWindow);
         notificationsWindow.focus();
-        currentView.refreshView(unreadNotfications.keySet());
+        currentView.refreshView(unreadNotifications.keySet());
         clear();
 
     }
 
-    private void createNotfication(final VerticalLayout notificationsLayout,
+    private void createNotification(final VerticalLayout notificationsLayout,
             final NotificationUnreadValue notificationUnreadValue) {
         final Label contentLabel = new Label(notificationUnreadValue.getUnreadNotifications() + " "
                 + i18n.get(notificationUnreadValue.getUnreadNotificationMessageKey()));
@@ -108,19 +108,19 @@ public class NotificationUnreadButton extends Button {
     }
 
     public void setCurrentView(final View currentView) {
-        if (!(currentView instanceof AbstractNotifcationView)) {
+        if (!(currentView instanceof AbstractNotificationView)) {
             setEnabled(false);
             return;
         }
         setEnabled(true);
-        this.currentView = (AbstractNotifcationView) currentView;
+        this.currentView = (AbstractNotificationView) currentView;
         this.currentView.refreshView();
         clear();
     }
 
     private void clear() {
-        unreadNotficationCounter = 0;
-        unreadNotfications.clear();
+        unreadNotificationCounter = 0;
+        unreadNotifications.clear();
         refreshCaption();
     }
 
@@ -129,30 +129,30 @@ public class NotificationUnreadButton extends Button {
      * @param view
      * @param newEventContainer
      */
-    public void incrementUnreadNotification(final AbstractNotifcationView view,
+    public void incrementUnreadNotification(final AbstractNotificationView view,
             final EventContainer<?> newEventContainer) {
-        if (!currentView.equals(view) || newEventContainer.getUnreadNotficationMessageKey() == null) {
+        if (!currentView.equals(view) || newEventContainer.getUnreadNotificationMessageKey() == null) {
             return;
         }
-        NotificationUnreadValue notificationUnreadValue = unreadNotfications.get(newEventContainer.getClass());
+        NotificationUnreadValue notificationUnreadValue = unreadNotifications.get(newEventContainer.getClass());
         if (notificationUnreadValue == null) {
             notificationUnreadValue = new NotificationUnreadValue(0,
-                    newEventContainer.getUnreadNotficationMessageKey());
-            unreadNotfications.put(newEventContainer.getClass(), notificationUnreadValue);
+                    newEventContainer.getUnreadNotificationMessageKey());
+            unreadNotifications.put(newEventContainer.getClass(), notificationUnreadValue);
         }
 
-        notificationUnreadValue.incrementUnreadNotfications();
-        unreadNotficationCounter++;
+        notificationUnreadValue.incrementUnreadNotifications();
+        unreadNotificationCounter++;
         refreshCaption();
     }
 
     private void refreshCaption() {
         setCaption(null);
-        if (unreadNotficationCounter > 0) {
+        if (unreadNotificationCounter > 0) {
             setVisible(true);
-            setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotficationCounter + "</div>");
+            setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotificationCounter + "</div>");
         }
-        setDescription(i18n.get(DESCRIPTION, new Object[] { unreadNotficationCounter }));
+        setDescription(i18n.get(DESCRIPTION, new Object[] { unreadNotificationCounter }));
     }
 
     private static class NotificationUnreadValue {
@@ -172,7 +172,7 @@ public class NotificationUnreadButton extends Button {
          * Increment the unread notifications.
          * 
          */
-        public void incrementUnreadNotfications() {
+        public void incrementUnreadNotifications() {
             unreadNotifications++;
         }
 

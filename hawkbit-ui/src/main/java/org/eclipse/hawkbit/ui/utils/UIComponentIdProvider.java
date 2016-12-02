@@ -907,6 +907,8 @@ public final class UIComponentIdProvider {
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
 
+    public static final String NOTIFICATION_MENU_ID = "notification.menu";
+
     /**
      * /* Private Constructor.
      */

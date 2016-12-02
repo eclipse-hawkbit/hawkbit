@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.AbstractNotifcationView;
+import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
@@ -63,7 +63,7 @@ import com.vaadin.ui.UI;
  */
 @UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
-public class DistributionsView extends AbstractNotifcationView implements BrowserWindowResizeListener {
+public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "distributions";
     private static final long serialVersionUID = 3887435076372276300L;
@@ -269,7 +269,7 @@ public class DistributionsView extends AbstractNotifcationView implements Browse
     }
 
     @Override
-    protected Map<Class<?>, RefreshableContainer> getSupportedViewEvents() {
+    protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
         final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(2);
 
         supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());

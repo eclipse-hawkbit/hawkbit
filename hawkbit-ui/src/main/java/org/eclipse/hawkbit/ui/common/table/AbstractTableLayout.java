@@ -21,18 +21,22 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for table layout.
+ * 
+ *
+ * @param <T>
+ *            type of the concert table
  */
-public abstract class AbstractTableLayout extends VerticalLayout {
+public abstract class AbstractTableLayout<T extends AbstractTable<?, ?>> extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
     private AbstractTableHeader tableHeader;
 
-    private AbstractTable<?, ?> table;
+    private T table;
 
     private AbstractTableDetailsLayout<?> detailsLayout;
 
-    protected void init(final AbstractTableHeader tableHeader, final AbstractTable<?, ?> table,
+    protected void init(final AbstractTableHeader tableHeader, final T table,
             final AbstractTableDetailsLayout<?> detailsLayout) {
         this.tableHeader = tableHeader;
         this.table = table;
@@ -106,7 +110,7 @@ public abstract class AbstractTableLayout extends VerticalLayout {
         tableHeader.setFilterButtonsIconVisible(visible);
     }
 
-    public AbstractTable<?, ?> getTable() {
+    public T getTable() {
         return table;
     }
 

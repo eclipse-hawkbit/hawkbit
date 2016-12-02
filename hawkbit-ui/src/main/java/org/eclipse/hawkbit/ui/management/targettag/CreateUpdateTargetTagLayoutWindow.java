@@ -18,21 +18,19 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
-import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 /**
  *
  * Class for Create / Update Tag Layout of target
  */
-public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag> {
+public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag>
+        implements RefreshableContainer {
 
     private static final long serialVersionUID = 2446682350481560235L;
 
@@ -40,27 +38,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
-        populateTagNameCombo();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
-        populateTagNameCombo();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagUpdateEvent(final TargetTagUpdatedEventContainer eventContainer) {
-        populateTagNameCombo();
     }
 
     @Override
@@ -130,6 +107,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
             final TargetTag newTargetTag = tagManagement.createTargetTag(
                     entityFactory.tag().create().name(getTagNameValue()).description(getTagDescValue()).colour(colour));
+            eventBus.publish(this, new TargetTagTableEvent(newTargetTag));
             displaySuccess(newTargetTag.getName());
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
@@ -152,6 +130,11 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     protected String getWindowCaption() {
         return i18n.get("caption.add.tag");
+    }
+
+    @Override
+    public void refreshContainer() {
+        populateTagNameCombo();
     }
 
 }

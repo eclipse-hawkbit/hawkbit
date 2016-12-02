@@ -31,7 +31,7 @@ public class TargetCreatedEventContainer implements EventContainer<TargetCreated
     }
 
     @Override
-    public String getUnreadNotficationMessageKey() {
+    public String getUnreadNotificationMessageKey() {
         return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 

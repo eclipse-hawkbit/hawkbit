@@ -26,7 +26,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * DistributionSet table layout
  */
-public class DistributionSetTableLayout extends AbstractTableLayout {
+public class DistributionSetTableLayout extends AbstractTableLayout<DistributionSetTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 

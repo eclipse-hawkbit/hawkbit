@@ -75,6 +75,10 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         buildComponents();
     }
 
+    public TargetTagFilterButtons getFilterByButtons() {
+        return filterByButtons;
+    }
+
     /**
      * Intialize component.
      */

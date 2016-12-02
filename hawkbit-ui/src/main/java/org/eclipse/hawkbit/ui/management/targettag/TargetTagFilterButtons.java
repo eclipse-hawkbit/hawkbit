@@ -20,14 +20,12 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
-import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -54,7 +52,7 @@ import com.vaadin.ui.UI;
 /**
  * Target Tag filter buttons table.
  */
-public class TargetTagFilterButtons extends AbstractFilterButtons {
+public class TargetTagFilterButtons extends AbstractFilterButtons implements RefreshableContainer {
     private static final String NO_TAG = "NO TAG";
 
     private static final long serialVersionUID = 1L;
@@ -273,28 +271,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return SPUIDefinitions.TARGET_TAG_ID_PREFIXS;
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEvent(final TargetTagUpdatedEventContainer eventContainer) {
-        refreshContainer();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetTagCreated(final TargetTagCreatedEventContainer eventContainer) {
-        refreshContainer();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onEventTargetDeletedEvent(final TargetTagDeletedEventContainer eventContainer) {
-        refreshContainer();
-    }
-
-    private void refreshContainer() {
+    @Override
+    public void refreshContainer() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());

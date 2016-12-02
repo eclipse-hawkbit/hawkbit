@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.AbstractNotifcationView;
+import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
@@ -44,8 +44,14 @@ import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -72,7 +78,7 @@ import com.vaadin.ui.UI;
  */
 @UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
-public class DeploymentView extends AbstractNotifcationView implements BrowserWindowResizeListener {
+public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
@@ -382,14 +388,22 @@ public class DeploymentView extends AbstractNotifcationView implements BrowserWi
     }
 
     @Override
-    protected Map<Class<?>, RefreshableContainer> getSupportedViewEvents() {
-        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
+    protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(8);
 
         supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
         supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());
 
         supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayoutNew.getTable());
         supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayoutNew.getTable());
+
+        supportedEvents.put(TargetTagCreatedEventContainer.class, targetTagFilterLayout);
+        supportedEvents.put(TargetTagDeletedEventContainer.class, targetTagFilterLayout);
+        supportedEvents.put(TargetTagUpdatedEventContainer.class, targetTagFilterLayout);
+
+        supportedEvents.put(DistributionSetTagCreatedEventContainer.class, distributionTagLayout);
+        supportedEvents.put(DistributionSetTagDeletedEventContainer.class, distributionTagLayout);
+        supportedEvents.put(DistributionSetTagUpdatedEventContainer.class, distributionTagLayout);
 
         return supportedEvents;
     }

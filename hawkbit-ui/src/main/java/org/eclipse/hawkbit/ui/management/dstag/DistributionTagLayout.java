@@ -12,7 +12,12 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
@@ -27,7 +32,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  *
  *
  */
-public class DistributionTagLayout extends AbstractFilterLayout {
+public class DistributionTagLayout extends AbstractFilterLayout implements RefreshableContainer {
 
     private static final long serialVersionUID = 4363033587261057567L;
 
@@ -62,9 +67,32 @@ public class DistributionTagLayout extends AbstractFilterLayout {
         }
     }
 
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onDistributionSetTagTableEvent(final DistributionSetTagTableEvent distributionSetTagTableEvent) {
+        if (BaseEntityEventType.ADD_ENTITY != distributionSetTagTableEvent.getEventType()
+                && BaseEntityEventType.REMOVE_ENTITIES != distributionSetTagTableEvent.getEventType()) {
+            return;
+        }
+        refreshContainer();
+    }
+
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
         return managementUIState.isDistTagFilterClosed();
+    }
+
+    @Override
+    public void refreshContainer() {
+        final AbstractFilterButtons filterButtons = getFilterButtons();
+        if (filterButtons instanceof RefreshableContainer) {
+            ((RefreshableContainer) filterButtons).refreshContainer();
+        }
+
+        final AbstractFilterHeader filterHeader = getFilterHeader();
+        if (filterHeader instanceof RefreshableContainer) {
+            ((RefreshableContainer) filterHeader).refreshContainer();
+        }
+
     }
 
 }

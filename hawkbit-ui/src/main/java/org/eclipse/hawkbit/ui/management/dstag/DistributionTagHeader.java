@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -27,7 +28,7 @@ import com.vaadin.ui.Window;
  *
  *
  */
-public class DistributionTagHeader extends AbstractFilterHeader {
+public class DistributionTagHeader extends AbstractFilterHeader implements RefreshableContainer {
 
     private static final long serialVersionUID = -1439667766337270066L;
 
@@ -88,6 +89,11 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     @Override
     protected boolean isAddTagRequired() {
         return true;
+    }
+
+    @Override
+    public void refreshContainer() {
+        createORUpdateDistributionTagLayout.refreshContainer();
     }
 
 }

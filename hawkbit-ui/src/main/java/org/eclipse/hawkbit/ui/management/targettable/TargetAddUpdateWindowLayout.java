@@ -52,8 +52,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private final transient EntityFactory entityFactory;
 
-    private final TargetTable targetTable;
-
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
@@ -63,13 +61,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private CommonDialogWindow window;
 
     TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
-            final UINotification uINotification, final EntityFactory entityFactory, final TargetTable targetTable) {
+            final UINotification uINotification, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
         this.uINotification = uINotification;
         this.entityFactory = entityFactory;
-        this.targetTable = targetTable;
         createRequiredComponents();
         buildLayout();
         setCompositionRoot(formLayout);
@@ -142,9 +139,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
         final Target newTarget = targetManagement.createTarget(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
-
-
-
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
 

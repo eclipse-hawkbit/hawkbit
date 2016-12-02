@@ -29,7 +29,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Abstract view for all views, which show notifications.
  */
-public abstract class AbstractNotifcationView extends VerticalLayout implements View {
+public abstract class AbstractNotificationView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
     private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEvents = CacheBuilder.newBuilder()
@@ -51,7 +51,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
      * @param notificationUnreadButton
      *            the notificationUnreadButton
      */
-    public AbstractNotifcationView(final EventBus.UIEventBus eventBus,
+    public AbstractNotificationView(final EventBus.UIEventBus eventBus,
             final NotificationUnreadButton notificationUnreadButton) {
         this.eventBus = eventBus;
         this.notificationUnreadButton = notificationUnreadButton;
@@ -59,7 +59,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEventContainerEvent(final EventContainer<?> eventContainer) {
-        if (!supportNotifcationEventContainer(eventContainer.getClass()) || eventContainer.getEvents().isEmpty()) {
+        if (!supportNotificationEventContainer(eventContainer.getClass()) || eventContainer.getEvents().isEmpty()) {
             return;
         }
 
@@ -101,9 +101,13 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
      * 
      */
     public void refreshView(final Set<Class<?>> eventContainers) {
-        eventContainers.stream().filter(clazz -> supportNotifcationEventContainer(clazz))
-                .forEach(clazz -> getSupportedEvents().get(clazz).refreshContainer());
+        eventContainers.stream().filter(clazz -> supportNotificationEventContainer(clazz))
+                .forEach(clazz -> refreshContainer(clazz));
         clear();
+    }
+
+    protected void refreshContainer(final Class<?> containerClazz) {
+        getSupportedEvents().get(containerClazz).refreshContainer();
     }
 
     /**
@@ -124,7 +128,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
-    protected boolean supportNotifcationEventContainer(final Class<?> eventContainerClass) {
+    protected boolean supportNotificationEventContainer(final Class<?> eventContainerClass) {
         return getSupportedEvents().containsKey(eventContainerClass);
     }
 
@@ -140,7 +144,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
      */
     private Map<Class<?>, RefreshableContainer> getSupportedEvents() {
         if (supportedEvents == null) {
-            supportedEvents = getSupportedViewEvents();
+            supportedEvents = getSupportedPushEvents();
         }
         return supportedEvents;
     }
@@ -153,7 +157,7 @@ public abstract class AbstractNotifcationView extends VerticalLayout implements 
     /**
      * @return the supportedEvents
      */
-    protected abstract Map<Class<?>, RefreshableContainer> getSupportedViewEvents();
+    protected abstract Map<Class<?>, RefreshableContainer> getSupportedPushEvents();
 
     protected abstract DashboardMenuItem getDashboardMenuItem();
 

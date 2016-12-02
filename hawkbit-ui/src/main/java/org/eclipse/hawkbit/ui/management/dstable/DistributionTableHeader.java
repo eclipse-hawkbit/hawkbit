@@ -31,15 +31,9 @@ import com.vaadin.ui.Button.ClickEvent;
 public class DistributionTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 7597766804650170127L;
 
-    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
-
-
     DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManagementUIState managementUIState,
-            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
+            final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
-        this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

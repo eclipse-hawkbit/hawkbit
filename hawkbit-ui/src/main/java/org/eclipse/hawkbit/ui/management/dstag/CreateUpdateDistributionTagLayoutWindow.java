@@ -18,24 +18,22 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.UI;
 
 /**
  * Class for Create/Update Tag Layout of distribution set
  */
-public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag> {
+public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout<DistributionSetTag>
+        implements RefreshableContainer {
 
     private static final long serialVersionUID = 444276149954167545L;
 
@@ -46,27 +44,6 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
-        populateTagNameCombo();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
-        populateTagNameCombo();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        populateTagNameCombo();
     }
 
     @Override
@@ -114,6 +91,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
             final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(
                     entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
+            eventBus.publish(this, new DistributionSetTagTableEvent(newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
         } else {
@@ -183,5 +161,10 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected String getWindowCaption() {
         return i18n.get("caption.add.tag");
+    }
+
+    @Override
+    public void refreshContainer() {
+        populateTagNameCombo();
     }
 }

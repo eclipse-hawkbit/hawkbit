@@ -24,7 +24,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Implementation of software module Layout
  */
-public class SwModuleTableLayout extends AbstractTableLayout {
+public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 

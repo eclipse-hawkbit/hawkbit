@@ -33,7 +33,7 @@ public interface EventContainer<T extends TenantAwareEvent> {
      * @return the message for unread notification button. <null> means that no
      *         unread message is supported.
      */
-    default String getUnreadNotficationMessageKey() {
+    default String getUnreadNotificationMessageKey() {
         return null;
     }
 

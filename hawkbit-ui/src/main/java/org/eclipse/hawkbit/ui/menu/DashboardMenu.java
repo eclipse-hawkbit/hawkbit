@@ -266,6 +266,7 @@ public final class DashboardMenu extends CustomComponent {
         notificationLabel.addStyleName(ValoTheme.MENU_BADGE);
         notificationLabel.setWidthUndefined();
         notificationLabel.setVisible(false);
+        notificationLabel.setId(UIComponentIdProvider.NOTIFICATION_MENU_ID);
         dashboardWrapper.addComponent(notificationLabel);
         return dashboardWrapper;
     }
