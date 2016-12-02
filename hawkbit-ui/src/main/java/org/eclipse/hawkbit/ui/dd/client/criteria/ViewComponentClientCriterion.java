@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.dd.client.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DRAG_SOURCE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_TARGET;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_TARGET_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_COUNT;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,7 +84,7 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     boolean isValidDragSource(VDragEvent drag, UIDL configuration) {
         try {
             String dragSource = drag.getTransferable().getDragSource().getWidget().getElement().getId();
-            String dragSourcePrefix = configuration.getStringAttribute("ds");
+            String dragSourcePrefix = configuration.getStringAttribute(DRAG_SOURCE);
             if (dragSource.startsWith(dragSourcePrefix)) {
                 return true;
             }
@@ -102,10 +108,10 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
     void showDropTargetHints(UIDL configuration) {
-        int dropAreaCount = configuration.getIntAttribute("cda");
-        for (int i = 0; i < dropAreaCount; i++) {
+        int dropAreaCount = configuration.getIntAttribute(DROP_AREA_COUNT);
+        for (int dropAreaIndex = 0; dropAreaIndex < dropAreaCount; dropAreaIndex++) {
             try {
-                String dropArea = configuration.getStringAttribute("da" + i);
+                String dropArea = configuration.getStringAttribute(DROP_AREA + dropAreaIndex);
                 LOGGER.log(Level.FINE, "Hint Area: " + dropArea);
 
                 Element showHintFor = Document.get().getElementById(dropArea);
@@ -139,9 +145,9 @@ public final class ViewComponentClientCriterion extends VAcceptCriterion {
         try {
             String dropTarget = VDragAndDropManager.get().getCurrentDropHandler().getConnector().getWidget()
                     .getElement().getId();
-            int dropTargetCount = configuration.getIntAttribute("cdt");
-            for (int i = 0; i < dropTargetCount; i++) {
-                String dropTargetPrefix = configuration.getStringAttribute("dt" + i);
+            int dropTargetCount = configuration.getIntAttribute(DROP_TARGET_COUNT);
+            for (int dropTargetIndex = 0; dropTargetIndex < dropTargetCount; dropTargetIndex++) {
+                String dropTargetPrefix = configuration.getStringAttribute(DROP_TARGET + dropTargetIndex);
                 LOGGER.log(Level.FINE, "Drop Target: " + dropTargetPrefix);
                 if (dropTarget.startsWith(dropTargetPrefix)) {
                     return true;

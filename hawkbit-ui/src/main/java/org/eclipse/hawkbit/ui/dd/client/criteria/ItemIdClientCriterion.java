@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.dd.client.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.MODE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.STRICT_MODE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.PREFIX_MODE;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +45,12 @@ public final class ItemIdClientCriterion extends VAcceptCriterion {
         try {
 
             String component = drag.getTransferable().getDragSource().getWidget().getElement().getId();
-            int c = configuration.getIntAttribute("c");
-            String mode = configuration.getStringAttribute("m");
-            for (int i = 0; i < c; i++) {
-                String requiredPid = configuration.getStringAttribute("component" + i);
-                if (("s".equals(mode) && component.equals(requiredPid))
-                        || ("p".equals(mode) && component.startsWith(requiredPid))) {
+            int c = configuration.getIntAttribute(COMPONENT_COUNT);
+            String mode = configuration.getStringAttribute(MODE);
+            for (int dragSourceIndex = 0; dragSourceIndex < c; dragSourceIndex++) {
+                String requiredPid = configuration.getStringAttribute(COMPONENT + dragSourceIndex);
+                if ((STRICT_MODE.equals(mode) && component.equals(requiredPid))
+                        || (PREFIX_MODE.equals(mode) && component.startsWith(requiredPid))) {
                     return true;
                 }
 

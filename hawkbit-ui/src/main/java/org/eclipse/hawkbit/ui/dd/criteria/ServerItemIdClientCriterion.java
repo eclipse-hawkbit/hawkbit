@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.dd.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.MODE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.STRICT_MODE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.PREFIX_MODE;
+
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.ClientSideCriterion;
 import com.vaadin.server.PaintException;
@@ -30,11 +36,11 @@ public class ServerItemIdClientCriterion extends ClientSideCriterion {
         /**
          * Valid drop targets are found using {@link String#equals(Object)}.
          */
-        STRICT("s"),
+        STRICT(STRICT_MODE),
         /**
          * Valid drop targets are found using {@link String#startsWith(String)}
          */
-        PREFIX("p");
+        PREFIX(PREFIX_MODE);
 
         String modeShort;
 
@@ -63,9 +69,9 @@ public class ServerItemIdClientCriterion extends ClientSideCriterion {
      */
     private static final long serialVersionUID = 131826179001511177L;
 
-    private String[] componentIds;
+    private final String[] componentIds;
 
-    private Mode verificationMode;
+    private final Mode verificationMode;
 
     /**
      * Constructor.
@@ -89,11 +95,11 @@ public class ServerItemIdClientCriterion extends ClientSideCriterion {
         super.paintContent(target);
         int paintedComponents = 0;
         for (String cId : componentIds) {
-            target.addAttribute("component" + paintedComponents, cId);
+            target.addAttribute(COMPONENT + paintedComponents, cId);
             paintedComponents++;
         }
-        target.addAttribute("c", paintedComponents);
-        target.addAttribute("m", verificationMode.getShort());
+        target.addAttribute(COMPONENT_COUNT, paintedComponents);
+        target.addAttribute(MODE, verificationMode.getShort());
     }
 
     @Override

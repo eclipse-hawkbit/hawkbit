@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.dd.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DRAG_SOURCE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_TARGET;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_TARGET_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_COUNT;
+
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.ClientSideCriterion;
 import com.vaadin.server.PaintException;
@@ -22,11 +28,11 @@ public class ServerViewComponentClientCriterion extends ClientSideCriterion {
 
     private static final long serialVersionUID = -2744174296987361607L;
 
-    private String dragSourceIdPrefix;
+    private final String dragSourceIdPrefix;
 
-    private String[] validDropTargetIdPrefixes;
+    private final String[] validDropTargetIdPrefixes;
 
-    private String[] validDropAreaIds;
+    private final String[] validDropAreaIds;
 
     /**
      * Constructor for the accept criterion using a builder.
@@ -88,21 +94,21 @@ public class ServerViewComponentClientCriterion extends ClientSideCriterion {
     public void paintContent(PaintTarget target) throws PaintException {
         super.paintContent(target);
 
-        target.addAttribute("ds", dragSourceIdPrefix);
+        target.addAttribute(DRAG_SOURCE, dragSourceIdPrefix);
 
         int countDropTarget = 0;
         for (String prefix : validDropTargetIdPrefixes) {
-            target.addAttribute("dt" + countDropTarget, prefix);
+            target.addAttribute(DROP_TARGET + countDropTarget, prefix);
             countDropTarget++;
         }
-        target.addAttribute("cdt", countDropTarget);
+        target.addAttribute(DROP_TARGET_COUNT, countDropTarget);
 
         int countDropAreas = 0;
         for (String dropArea : validDropAreaIds) {
-            target.addAttribute("da" + countDropAreas, dropArea);
+            target.addAttribute(DROP_AREA + countDropAreas, dropArea);
             countDropAreas++;
         }
-        target.addAttribute("cda", countDropAreas);
+        target.addAttribute(DROP_AREA_COUNT, countDropAreas);
     }
 
     @Override

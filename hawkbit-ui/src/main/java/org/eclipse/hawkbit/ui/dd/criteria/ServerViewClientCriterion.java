@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.dd.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG_COUNT;
+
 import java.util.Arrays;
 import java.util.Set;
 
@@ -42,7 +45,7 @@ public class ServerViewClientCriterion extends Or {
      */
     private static final long serialVersionUID = 3208301105751198826L;
 
-    private Set<String> dropAreaHints;
+    private final Set<String> dropAreaHints;
 
     /**
      * Constructor for the server part of the client-side accept criterion.
@@ -62,10 +65,10 @@ public class ServerViewClientCriterion extends Or {
     public void paintContent(PaintTarget target) throws PaintException {
         int dropAreaStylesConfigCount = 0;
         for (String dropAreaEntry : dropAreaHints) {
-            target.addAttribute("dac" + dropAreaStylesConfigCount, dropAreaEntry);
+            target.addAttribute(DROP_AREA_CONFIG + dropAreaStylesConfigCount, dropAreaEntry);
             dropAreaStylesConfigCount++;
         }
-        target.addAttribute("cdac", dropAreaStylesConfigCount);
+        target.addAttribute(DROP_AREA_CONFIG_COUNT, dropAreaStylesConfigCount);
 
         super.paintContent(target);
     }

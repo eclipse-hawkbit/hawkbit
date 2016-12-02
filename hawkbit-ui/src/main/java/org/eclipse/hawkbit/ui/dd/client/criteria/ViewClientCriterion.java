@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.dd.client.criteria;
 
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG_COUNT;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -135,9 +138,9 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
 
         int childCount = configuration.getChildCount();
         accepted = false;
-        for (int i = 0; i < childCount; i++) {
-            VAcceptCriterion crit = getCriteria(configuration, i);
-            crit.accept(drag, configuration.getChildUIDL(i), this);
+        for (int childIndex = 0; childIndex < childCount; childIndex++) {
+            VAcceptCriterion crit = getCriteria(configuration, childIndex);
+            crit.accept(drag, configuration.getChildUIDL(childIndex), this);
             if (Boolean.TRUE.equals(accepted)) {
                 callback.accepted(drag);
                 return;
@@ -240,10 +243,10 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
     void hideDropTargetHints(UIDL configuration) {
-        int totalDropTargetHintsCount = configuration.getIntAttribute("cdac");
-        for (int i = 0; i < totalDropTargetHintsCount; i++) {
+        int totalDropTargetHintsCount = configuration.getIntAttribute(DROP_AREA_CONFIG_COUNT);
+        for (int dropAreaIndex = 0; dropAreaIndex < totalDropTargetHintsCount; dropAreaIndex++) {
             try {
-                String dropArea = configuration.getStringAttribute("dac" + i);
+                String dropArea = configuration.getStringAttribute(DROP_AREA_CONFIG + dropAreaIndex);
                 Element hideHintFor = Document.get().getElementById(dropArea);
                 if (hideHintFor != null) {
                     hideHintFor.removeClassName(ViewComponentClientCriterion.HINT_AREA_STYLE);
