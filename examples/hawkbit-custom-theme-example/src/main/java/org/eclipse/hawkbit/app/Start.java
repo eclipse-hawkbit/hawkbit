@@ -9,8 +9,6 @@ package org.eclipse.hawkbit.app;
  */
 
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
-import org.eclipse.hawkbit.repository.jpa.EnableJpaRepository;
-import org.eclipse.hawkbit.ui.EnableMgmtUi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -21,8 +19,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @EnableHawkbitManagedSecurityConfiguration
-@EnableMgmtUi
-@EnableJpaRepository
 // Exception squid:S1118 - Spring boot standard behavior
 @SuppressWarnings({ "squid:S1118" })
 public class Start {

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.repository;
 
-import org.eclipse.hawkbit.repository.jpa.EnableJpaRepository;
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -22,8 +22,8 @@ import org.springframework.context.annotation.Import;
  *
  */
 @Configuration
-@ConditionalOnClass({ EnableJpaRepository.class })
-@Import({ EnableJpaRepository.class })
+@ConditionalOnClass({ RepositoryApplicationConfiguration.class })
+@Import({ RepositoryApplicationConfiguration.class })
 public class JpaRepositoryAutoConfiguration {
 
     /**
