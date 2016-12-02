@@ -185,6 +185,14 @@ public class DefineGroupsLayout extends GridLayout {
         groupRows.clear();
     }
 
+    public void setDefaultTriggerThreshold(final String defaultTriggerThreshold) {
+        this.defaultTriggerThreshold = defaultTriggerThreshold;
+    }
+
+    public void setDefaultErrorThreshold(final String defaultErrorThreshold) {
+        this.defaultErrorThreshold = defaultErrorThreshold;
+    }
+
     /**
      * Reset the field values.
      */
@@ -192,8 +200,6 @@ public class DefineGroupsLayout extends GridLayout {
 
         lastGroupValid = true;
         groupsCount = 0;
-        defaultErrorThreshold = "30";
-        defaultTriggerThreshold = "50";
 
         removeAllRows();
         addGroupRow();
@@ -255,9 +261,7 @@ public class DefineGroupsLayout extends GridLayout {
             return false;
         }
         final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
-        final List<RolloutGroup> groups = savedRolloutGroups.stream().map(RolloutGroupCreate::build)
-                .collect(Collectors.toList());
-        groupsValidation = rolloutManagement.validateTargetsInGroups(groups, targetFilter, System.currentTimeMillis());
+        groupsValidation = rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis());
 
         if (groupsValidation.isValid()) {
             lastRow.hideLastGroupError();

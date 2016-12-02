@@ -12,6 +12,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -70,7 +71,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      */
     public void reset() {
         totalTargetsLabel.setVisible(false);
-        populateGroupsLegend(Collections.emptyList());
+        populateGroupsLegendByTargetCounts(Collections.emptyList());
     }
 
     private static Label createTotalTargetsLabel() {
@@ -122,7 +123,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      * @param targetsPerGroup
      *            list of target counts
      */
-    public void populateGroupsLegend(final List<Long> targetsPerGroup) {
+    public void populateGroupsLegendByTargetCounts(final List<Long> targetsPerGroup) {
         for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
             final Component component = groupsLegend.getComponent(i);
             final Label label = (Label) component;
@@ -155,7 +156,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      * @param groups
      *            List of groups with their name
      */
-    public void populateGroupsLegend(final RolloutGroupsValidation validation, final List<RolloutGroupCreate> groups) {
+    public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation, final List<RolloutGroupCreate> groups) {
         if (validation == null) {
             return;
         }
@@ -184,6 +185,31 @@ public class GroupsLegendLayout extends VerticalLayout {
         } else {
             unassignedTargetsLabel.setValue("");
             unassignedTargetsLabel.setVisible(false);
+        }
+
+    }
+
+    /**
+     * Populates the legend based on a list of groups.
+     *
+     * @param groups
+     *            List of groups with their name
+     */
+    public void populateGroupsLegendByGroups(final List<RolloutGroup> groups) {
+
+        for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
+            final Component component = groupsLegend.getComponent(i);
+            final Label label = (Label) component;
+            if (groups.size() > i) {
+                final int targetCount = groups.get(i).getTotalTargets();
+                final String groupName = groups.get(i).getName();
+
+                label.setValue(getTargetsInGroupMessage((long) targetCount, groupName));
+                label.setVisible(true);
+            } else {
+                label.setValue("");
+                label.setVisible(false);
+            }
         }
 
     }

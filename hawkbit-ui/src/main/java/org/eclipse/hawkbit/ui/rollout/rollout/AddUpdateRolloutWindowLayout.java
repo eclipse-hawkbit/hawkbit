@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
@@ -131,7 +133,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private CommonDialogWindow window;
 
-    private Boolean editRolloutEnabled;
+    private boolean editRolloutEnabled;
 
     private Rollout rollout;
 
@@ -144,6 +146,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private GroupsPieChart groupsPieChart;
 
     private GroupsLegendLayout groupsLegendLayout;
+
+    private final transient RolloutGroupConditions defaultRolloutGroupConditions;
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
@@ -163,10 +167,15 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement,
                 targetFilterQueryManagement);
 
+        defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
         setSizeUndefined();
         createRequiredComponents();
         buildLayout();
+
         defineGroupsLayout.setValidationListener(isValid -> validateGroups());
+        defineGroupsLayout.setDefaultErrorThreshold(defaultRolloutGroupConditions.getErrorConditionExp());
+        defineGroupsLayout.setDefaultTriggerThreshold(defaultRolloutGroupConditions.getSuccessConditionExp());
     }
 
     /**
@@ -228,7 +237,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      */
     public void resetComponents() {
         defineGroupsLayout.resetComponents();
-        editRolloutEnabled = Boolean.FALSE;
+        editRolloutEnabled = false;
         rolloutName.clear();
         targetFilterQuery.clear();
         resetFields();
@@ -252,9 +261,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rolloutName.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         noOfGroups.clear();
         noOfGroups.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        triggerThreshold.setValue("50");
+        triggerThreshold.setValue(defaultRolloutGroupConditions.getSuccessConditionExp());
         triggerThreshold.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        errorThreshold.setValue("30");
+        errorThreshold.setValue(defaultRolloutGroupConditions.getErrorConditionExp());
         errorThreshold.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         description.clear();
         description.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
@@ -268,6 +277,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setColumns(4);
         setStyleName("marginTop");
         setColumnExpandRatio(3, 1);
+        setWidth(850, Unit.PIXELS);
 
         addComponent(getMandatoryLabel("textfield.name"), 0, 0);
         addComponent(rolloutName, 1, 0);
@@ -461,6 +471,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void validateGroups() {
+        if(editRolloutEnabled) {
+            return;
+        }
         if(isGroupsDefinition()) {
             List<RolloutGroupCreate> savedRolloutGroups = defineGroupsLayout.getSavedRolloutGroups();
             if(!defineGroupsLayout.isValid() || savedRolloutGroups == null || savedRolloutGroups.isEmpty()) {
@@ -492,14 +505,22 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsPieChart.setChartState(targetsPerGroup, validation.getTotalTargets());
         }
 
-        groupsLegendLayout.populateGroupsLegend(validation, defineGroupsLayout.getSavedRolloutGroups());
+        groupsLegendLayout.populateGroupsLegendByValidation(validation, defineGroupsLayout.getSavedRolloutGroups());
 
+    }
+
+    private void updateGroupsChart(final List<RolloutGroup> savedGroups, long totalTargetsCount) {
+        List<Long> targetsPerGroup = savedGroups.stream().map(group -> (long) group.getTotalTargets())
+                .collect(Collectors.toList());
+
+        groupsPieChart.setChartState(targetsPerGroup, totalTargetsCount);
+        groupsLegendLayout.populateGroupsLegendByGroups(savedGroups);
     }
 
     private void updateGroupsChart(final int amountOfGroups) {
         if (totalTargetsCount == null || totalTargetsCount == 0L || amountOfGroups == 0) {
             groupsPieChart.setChartState(null, null);
-            groupsLegendLayout.populateGroupsLegend(Collections.emptyList());
+            groupsLegendLayout.populateGroupsLegendByTargetCounts(Collections.emptyList());
         } else {
             final List<Long> groups = new ArrayList<>(amountOfGroups);
             long leftTargets = totalTargetsCount;
@@ -511,7 +532,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
 
             groupsPieChart.setChartState(groups, totalTargetsCount);
-            groupsLegendLayout.populateGroupsLegend(groups);
+            groupsLegendLayout.populateGroupsLegendByTargetCounts(groups);
         }
 
     }
@@ -680,7 +701,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
         errorField.addValidator(new ThresholdFieldValidator());
         errorField.setMaxLength(7);
-        errorField.setValue("30");
+        errorField.setValue(defaultRolloutGroupConditions.getErrorConditionExp());
         return errorField;
     }
 
@@ -688,7 +709,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final TextField thresholdField = createIntegerTextField("prompt.tigger.threshold",
                 UIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
         thresholdField.addValidator(new ThresholdFieldValidator());
-        thresholdField.setValue("50");
+        thresholdField.setValue(defaultRolloutGroupConditions.getSuccessConditionExp());
         return thresholdField;
     }
 
@@ -702,6 +723,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void onGroupNumberChange(final ValueChangeEvent event) {
+        if(editRolloutEnabled) {
+            return;
+        }
         if (event.getProperty().getValue() != null && noOfGroups.isValid() && totalTargetsCount != null
                 && isNumberOfGroups()) {
             groupSizeLabel.setValue(getTargetPerGroupMessage(String.valueOf(getGroupSize())));
@@ -842,6 +866,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             targetFilterQuery.addValidator(nullValidator);
 
             window.setOrginaleValues();
+
+            updateGroupsChart(rollout.getRolloutGroups(), rollout.getTotalTargets());
         }
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());

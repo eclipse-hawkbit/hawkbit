@@ -107,30 +107,22 @@
        */
       .pie:nth-child(1) { fill: #CBCBCB }
 
-      .pie:nth-child(24n+2) { fill: #CB0002 }
-      .pie:nth-child(24n+3) { fill: #0094EB }
-      .pie:nth-child(24n+4) { fill: #01CB00 }
-      .pie:nth-child(24n+5) { fill: #C500CB }
-      .pie:nth-child(24n+6) { fill: #EBA900 }
-      .pie:nth-child(24n+7) { fill: #CBC501 }
-      .pie:nth-child(24n+8) { fill: #04CBC6 }
-      .pie:nth-child(24n+9) { fill: #0100CB }
-      .pie:nth-child(24n+10) { fill: #EBA900 }
-      .pie:nth-child(24n+11) { fill: #BEEB00 }
-      .pie:nth-child(24n+12) { fill: #00EB43 }
-      .pie:nth-child(24n+13) { fill: #7FA5EB }
-      .pie:nth-child(24n+14) { fill: #EB5F6B }
-      .pie:nth-child(24n+15) { fill: #EB53B8 }
-      .pie:nth-child(24n+16) { fill: #CAEB77 }
-      .pie:nth-child(24n+17) { fill: #73D0EB }
-      .pie:nth-child(24n+18) { fill: #B41B3C }
-      .pie:nth-child(24n+19) { fill: #B48730 }
-      .pie:nth-child(24n+20) { fill: #B45C00 }
-      .pie:nth-child(24n+21) { fill: #007A04 }
-      .pie:nth-child(24n+22) { fill: #00127A }
-      .pie:nth-child(24n+23) { fill: #00737A }
-      .pie:nth-child(24n+24) { fill: #78007A }
-      .pie:nth-child(24n+25) { fill: #7A0012 }
+      .pie:nth-child(16n+2) { fill: #E20015 }
+      .pie:nth-child(16n+3) { fill: #B90276 }
+      .pie:nth-child(16n+4) { fill: #50237F }
+      .pie:nth-child(16n+5) { fill: #005691 }
+      .pie:nth-child(16n+6) { fill: #008ECF }
+      .pie:nth-child(16n+7) { fill: #00A8B0 }
+      .pie:nth-child(16n+8) { fill: #78BE20 }
+      .pie:nth-child(16n+9) { fill: #006249 }
+      .pie:nth-child(16n+10) { fill: #F07F8A }
+      .pie:nth-child(16n+11) { fill: #DC80BA }
+      .pie:nth-child(16n+12) { fill: #A791BF }
+      .pie:nth-child(16n+13) { fill: #7FAAC8 }
+      .pie:nth-child(16n+14) { fill: #7FC6E7 }
+      .pie:nth-child(16n+15) { fill: #7FD3D7 }
+      .pie:nth-child(16n+16) { fill: #BBDE8F }
+      .pie:nth-child(16n+17) { fill: #7FB0A4 }
 
       .pie-info {
         pointer-events: none;
@@ -154,30 +146,22 @@
     .rollout-group-name {
       border-left: 5px solid #000000;
     }
-    .v-gridlayout-slot:nth-child(24n+8) .rollout-group-name { border-left-color: #CB0002 }
-    .v-gridlayout-slot:nth-child(24n+14) .rollout-group-name  { border-left-color: #0094EB }
-    .v-gridlayout-slot:nth-child(24n+20) .rollout-group-name  { border-left-color: #01CB00 }
-    .v-gridlayout-slot:nth-child(24n+26) .rollout-group-name  { border-left-color: #C500CB }
-    .v-gridlayout-slot:nth-child(24n+32) .rollout-group-name  { border-left-color: #EBA900 }
-    .v-gridlayout-slot:nth-child(24n+38) .rollout-group-name  { border-left-color: #CBC501 }
-    .v-gridlayout-slot:nth-child(24n+44) .rollout-group-name  { border-left-color: #04CBC6 }
-    .v-gridlayout-slot:nth-child(24n+50) .rollout-group-name  { border-left-color: #0100CB }
-    .v-gridlayout-slot:nth-child(24n+56) .rollout-group-name  { border-left-color: #EBA900 }
-    .v-gridlayout-slot:nth-child(24n+62) .rollout-group-name  { border-left-color: #BEEB00 }
-    .v-gridlayout-slot:nth-child(24n+68) .rollout-group-name  { border-left-color: #00EB43 }
-    .v-gridlayout-slot:nth-child(24n+74) .rollout-group-name  { border-left-color: #7FA5EB }
-    .v-gridlayout-slot:nth-child(24n+80) .rollout-group-name  { border-left-color: #EB5F6B }
-    .v-gridlayout-slot:nth-child(24n+86) .rollout-group-name  { border-left-color: #EB53B8 }
-    .v-gridlayout-slot:nth-child(24n+92) .rollout-group-name  { border-left-color: #CAEB77 }
-    .v-gridlayout-slot:nth-child(24n+98) .rollout-group-name  { border-left-color: #73D0EB }
-    .v-gridlayout-slot:nth-child(24n+104) .rollout-group-name  { border-left-color: #B41B3C }
-    .v-gridlayout-slot:nth-child(24n+110) .rollout-group-name  { border-left-color: #B48730 }
-    .v-gridlayout-slot:nth-child(24n+116) .rollout-group-name  { border-left-color: #B45C00 }
-    .v-gridlayout-slot:nth-child(24n+120) .rollout-group-name  { border-left-color: #007A04 }
-    .v-gridlayout-slot:nth-child(24n+126) .rollout-group-name  { border-left-color: #00127A }
-    .v-gridlayout-slot:nth-child(24n+132) .rollout-group-name  { border-left-color: #00737A }
-    .v-gridlayout-slot:nth-child(24n+138) .rollout-group-name  { border-left-color: #78007A }
-    .v-gridlayout-slot:nth-child(24n+144) .rollout-group-name  { border-left-color: #7A0012 }
+    .v-gridlayout-slot:nth-child(16n+8) .rollout-group-name { border-left-color: #E20015 }
+    .v-gridlayout-slot:nth-child(16n+14) .rollout-group-name  { border-left-color: #B90276 }
+    .v-gridlayout-slot:nth-child(16n+20) .rollout-group-name  { border-left-color: #50237F }
+    .v-gridlayout-slot:nth-child(16n+26) .rollout-group-name  { border-left-color: #005691 }
+    .v-gridlayout-slot:nth-child(16n+32) .rollout-group-name  { border-left-color: #008ECF }
+    .v-gridlayout-slot:nth-child(16n+38) .rollout-group-name  { border-left-color: #00A8B0 }
+    .v-gridlayout-slot:nth-child(16n+44) .rollout-group-name  { border-left-color: #78BE20 }
+    .v-gridlayout-slot:nth-child(16n+50) .rollout-group-name  { border-left-color: #006249 }
+    .v-gridlayout-slot:nth-child(16n+56) .rollout-group-name  { border-left-color: #F07F8A }
+    .v-gridlayout-slot:nth-child(16n+62) .rollout-group-name  { border-left-color: #DC80BA }
+    .v-gridlayout-slot:nth-child(16n+68) .rollout-group-name  { border-left-color: #A791BF }
+    .v-gridlayout-slot:nth-child(16n+74) .rollout-group-name  { border-left-color: #7FAAC8 }
+    .v-gridlayout-slot:nth-child(16n+80) .rollout-group-name  { border-left-color: #7FC6E7 }
+    .v-gridlayout-slot:nth-child(16n+86) .rollout-group-name  { border-left-color: #7FD3D7 }
+    .v-gridlayout-slot:nth-child(16n+92) .rollout-group-name  { border-left-color: #BBDE8F }
+    .v-gridlayout-slot:nth-child(16n+98) .rollout-group-name  { border-left-color: #7FB0A4 }
   }
 
   .rollout-target-count-title {
@@ -198,32 +182,22 @@
       font-size: $v-font-size * .7;
     }
 
-    .v-slot:nth-child(24n+1) .rollout-group-count { border-left-color: #CB0002 }
-    .v-slot:nth-child(24n+2) .rollout-group-count { border-left-color: #0094EB }
-    .v-slot:nth-child(24n+3) .rollout-group-count { border-left-color: #01CB00 }
-    .v-slot:nth-child(24n+4) .rollout-group-count { border-left-color: #C500CB }
-    .v-slot:nth-child(24n+5) .rollout-group-count { border-left-color: #EBA900 }
-    .v-slot:nth-child(24n+6) .rollout-group-count { border-left-color: #CBC501 }
-    .v-slot:nth-child(24n+7) .rollout-group-count { border-left-color: #04CBC6 }
-    .v-slot:nth-child(24n+8) .rollout-group-count { border-left-color: #0100CB }
-    .v-slot:nth-child(24n+9) .rollout-group-count { border-left-color: #EBA900 }
-    .v-slot:nth-child(24n+10) .rollout-group-count { border-left-color: #BEEB00 }
-    .v-slot:nth-child(24n+11) .rollout-group-count { border-left-color: #00EB43 }
-    .v-slot:nth-child(24n+12) .rollout-group-count { border-left-color: #7FA5EB }
-    .v-slot:nth-child(24n+13) .rollout-group-count { border-left-color: #EB5F6B }
-    .v-slot:nth-child(24n+14) .rollout-group-count { border-left-color: #EB53B8 }
-    .v-slot:nth-child(24n+15) .rollout-group-count { border-left-color: #CAEB77 }
-    .v-slot:nth-child(24n+16) .rollout-group-count { border-left-color: #73D0EB }
-    .v-slot:nth-child(24n+17) .rollout-group-count { border-left-color: #B41B3C }
-    .v-slot:nth-child(24n+18) .rollout-group-count { border-left-color: #B48730 }
-    .v-slot:nth-child(24n+19) .rollout-group-count { border-left-color: #B45C00 }
-    .v-slot:nth-child(24n+20) .rollout-group-count { border-left-color: #007A04 }
-    .v-slot:nth-child(24n+21) .rollout-group-count { border-left-color: #00127A }
-    .v-slot:nth-child(24n+22) .rollout-group-count { border-left-color: #00737A }
-    .v-slot:nth-child(24n+23) .rollout-group-count { border-left-color: #78007A }
-    .v-slot:nth-child(24n+24) .rollout-group-count { border-left-color: #7A0012 }
-
+    .v-slot:nth-child(16n+1) .rollout-group-count { border-left-color: #E20015 }
+    .v-slot:nth-child(16n+2) .rollout-group-count { border-left-color: #B90276 }
+    .v-slot:nth-child(16n+3) .rollout-group-count { border-left-color: #50237F }
+    .v-slot:nth-child(16n+4) .rollout-group-count { border-left-color: #005691 }
+    .v-slot:nth-child(16n+5) .rollout-group-count { border-left-color: #008ECF }
+    .v-slot:nth-child(16n+6) .rollout-group-count { border-left-color: #00A8B0 }
+    .v-slot:nth-child(16n+7) .rollout-group-count { border-left-color: #78BE20 }
+    .v-slot:nth-child(16n+8) .rollout-group-count { border-left-color: #006249 }
+    .v-slot:nth-child(16n+9) .rollout-group-count { border-left-color: #F07F8A }
+    .v-slot:nth-child(16n+10) .rollout-group-count { border-left-color: #DC80BA }
+    .v-slot:nth-child(16n+11) .rollout-group-count { border-left-color: #A791BF }
+    .v-slot:nth-child(16n+12) .rollout-group-count { border-left-color: #7FAAC8 }
+    .v-slot:nth-child(16n+13) .rollout-group-count { border-left-color: #7FC6E7 }
+    .v-slot:nth-child(16n+14) .rollout-group-count { border-left-color: #7FD3D7 }
+    .v-slot:nth-child(16n+15) .rollout-group-count { border-left-color: #BBDE8F }
+    .v-slot:nth-child(16n+16) .rollout-group-count { border-left-color: #7FB0A4 }
   }
 
 }
-   

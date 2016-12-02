@@ -419,8 +419,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String targetFilter,
-                                                           final Long createdAt) {
+    public RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroupCreate> groups,
+            final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
         final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
@@ -428,7 +428,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        return validateTargetsInGroups(groups, baseFilter, totalTargets);
+        return validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
+                baseFilter, totalTargets);
     }
 
     private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,

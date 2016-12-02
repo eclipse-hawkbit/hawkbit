@@ -197,7 +197,7 @@ public interface RolloutManagement {
      *             thrown when no targets are targeted by the rollout
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    RolloutGroupsValidation validateTargetsInGroups(List<RolloutGroup> groups, String targetFilter, Long createdAt);
+    RolloutGroupsValidation validateTargetsInGroups(List<RolloutGroupCreate> groups, String targetFilter, Long createdAt);
 
     /**
      * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
