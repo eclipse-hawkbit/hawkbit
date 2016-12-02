@@ -13,9 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Annotation to enable amqp based DMF API.
- */
-/**
  * Enable Device Management Federation API.
  */
 @Configuration
