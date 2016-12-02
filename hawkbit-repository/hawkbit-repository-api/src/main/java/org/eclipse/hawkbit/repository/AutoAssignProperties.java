@@ -29,6 +29,9 @@ public class AutoAssignProperties {
          */
         private long fixedDelay = 60000L;
 
+        /**
+         * Set to true to run the autoassign scheduler.
+         */
         private boolean enabled = true;
 
         public long getFixedDelay() {

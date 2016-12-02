@@ -44,9 +44,11 @@ import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.ui.EnableMgmtUi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
@@ -327,6 +329,7 @@ public class SecurityManagedConfiguration {
     @Configuration
     @Order(400)
     @EnableVaadinSecurity
+    @ConditionalOnClass(EnableMgmtUi.class)
     public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
@@ -414,8 +417,7 @@ public class SecurityManagedConfiguration {
 
         @Override
         public void configure(final WebSecurity webSecurity) throws Exception {
-            webSecurity.ignoring().antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/v2/api-docs/**",
-                    "/docs/**");
+            webSecurity.ignoring().antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/docs/**");
         }
     }
 

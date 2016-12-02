@@ -64,8 +64,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
                 ProtobufIOUtil.mergeFrom((byte[]) message.getPayload(), deserializeEvent, schema);
                 return deserializeEvent;
             }
-        } catch (final ClassNotFoundException e) {
-            LOG.error("Protostuff cannot find derserialize class", e);
+        } catch (final ClassNotFoundException | RuntimeException e) {
             throw new MessageConversionException(message, "Failed to read payload", e);
         }
 
