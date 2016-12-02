@@ -29,9 +29,11 @@ import java.util.List;
  * unassigned targets will be displayed.
  *
  */
+@SuppressWarnings("squid:TrailingCommentCheck")
 public class GroupsPieChartWidget extends DockLayoutPanel {
 
     private static final String ATTR_VISIBILITY = "visibility";
+    private static final String ATTR_TRANSFORM = "transform";
 
     private List<Long> groupTargetCounts;
     private Long totalTargetCount;
@@ -110,15 +112,14 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
             @Override
             public Void apply(Element context, Value d, int index) {
                 Array<Double> point = arc.centroid(d.as(Arc.class), index);
+                double x = point.getNumber(0);
+                double y = point.getNumber(1);
                 if (index == 0) {
-                    infoText.html("Unassigned: " + unassignedTargets);
+                    updateHoverText("Unassigned: " + unassignedTargets, x, y);
                 } else {
-                    infoText.html(index + ".: " + groupTargetCounts.get(index - 1));
+                    updateHoverText(index + ": " + groupTargetCounts.get(index - 1), x, y);
                 }
 
-                infoText.attr(ATTR_VISIBILITY, "visible");
-                infoText.attr("x", point.getNumber(0));
-                infoText.attr("y", point.getNumber(1));
                 return null;
             }
         }).on(BrowserEvents.MOUSEOUT, new DatumFunction<Void>() {
@@ -133,17 +134,49 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     }
 
+    private void updateHoverText(final String displayText, final double x, final double y) {
+        final Selection text = infoText.select("text");
+        final Selection background = infoText.select("rect");
+
+        text.html(displayText);
+
+        final double textWidth = getTextWidth(text.node());
+        final double textHeight = getTextHeight(text.node());
+
+        background.attr("width", textWidth * 1.1);
+        background.attr("height", textHeight);
+
+        moveSelection(background, -textWidth * 1.1 / 2.0, -textHeight*0.8);
+        moveSelection(infoText, x, y);
+        infoText.attr(ATTR_VISIBILITY, "visible");
+    }
+
+    private static void moveSelection(Selection sel, double x, double y) {
+        sel.attr(ATTR_TRANSFORM, "translate(" + x + ", " + y + ")");
+    }
+
+
+    private static final native double getTextWidth(Element e)/*-{
+        return e.getBBox().width;
+    }-*/;
+
+    private static final native double getTextHeight(Element e)/*-{
+        return e.getBBox().height;
+    }-*/;
+
     private void initChart() {
         arc = D3.svg().arc().innerRadius(0).outerRadius(90);
         int height = 200;
-        int width = 200;
+        int width = 260;
 
-        svg = D3.select(this).append("svg").attr("width", width).attr("height", height).append("g").attr("transform",
-                "translate(" + ((float) width / 2) + "," + ((float) height / 2) + ")");
+        svg = D3.select(this).append("svg").attr("width", width).attr("height", height).append("g");
+        moveSelection(svg, (float) width / 2, (float) height / 2);
 
         pieGroup = svg.append("g");
-        infoText = svg.append("text").attr(ATTR_VISIBILITY, "hidden").classed("pie-info", true).attr("text-anchor",
-                "middle");
+
+        infoText = svg.append("g").attr(ATTR_VISIBILITY, "hidden").classed("pie-info", true);
+        infoText.append("rect");
+        infoText.append("text").attr("text-anchor", "middle");
 
     }
 

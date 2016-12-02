@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -136,13 +137,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private Long totalTargetsCount;
 
-    private Label totalTargetsLabel;
-
     private TextArea targetFilterQuery;
 
     private TabSheet groupsDefinitionTabs;
 
     private GroupsPieChart groupsPieChart;
+
+    private GroupsLegendLayout groupsLegendLayout;
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
@@ -235,7 +236,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         populateDistributionSet();
         populateTargetFilterQuery();
         setDefaultSaveStartGroupOption();
-        totalTargetsLabel.setVisible(false);
+        groupsLegendLayout.reset();
         groupSizeLabel.setVisible(false);
         noOfGroups.setVisible(true);
         removeComponent(1, 2);
@@ -266,7 +267,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setRows(7);
         setColumns(4);
         setStyleName("marginTop");
-        setColumnExpandRatio(2, 1);
         setColumnExpandRatio(3, 1);
 
         addComponent(getMandatoryLabel("textfield.name"), 0, 0);
@@ -282,12 +282,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         targetFilterQueryCombo.addValidator(nullValidator);
         targetFilterQuery.removeValidator(nullValidator);
 
-        addComponent(totalTargetsLabel, 2, 2);
-
         addComponent(getLabel("textfield.description"), 0, 3);
-        addComponent(description, 1, 3, 2, 3);
+        addComponent(description, 1, 3, 1, 3);
 
-        addComponent(groupsPieChart, 3, 0, 3, 3);
+        addComponent(groupsLegendLayout, 3, 0, 3, 3);
+        addComponent(groupsPieChart, 2, 0, 2, 3);
 
         addComponent(getMandatoryLabel("caption.rollout.action.type"), 0, 4);
         addComponent(actionTypeOptionGroupLayout, 1, 4, 3, 4);
@@ -345,16 +344,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         actionTypeOptionGroupLayout.selectDefaultOption();
-        totalTargetsLabel = createCountLabel();
         targetFilterQuery = createTargetFilterQuery();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
         groupsDefinitionTabs = createGroupDefinitionTabs();
 
         groupsPieChart = new GroupsPieChart();
-        groupsPieChart.setWidth(200, Unit.PIXELS);
+        groupsPieChart.setWidth(260, Unit.PIXELS);
         groupsPieChart.setHeight(200, Unit.PIXELS);
         groupsPieChart.setStyleName(SPUIStyleDefinitions.ROLLOUT_GROUPS_CHART);
+
+        groupsLegendLayout = new GroupsLegendLayout(i18n);
+
     }
 
     private TabSheet createGroupDefinitionTabs() {
@@ -491,11 +492,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsPieChart.setChartState(targetsPerGroup, validation.getTotalTargets());
         }
 
+        groupsLegendLayout.populateGroupsLegend(validation, defineGroupsLayout.getSavedRolloutGroups());
+
     }
 
     private void updateGroupsChart(final int amountOfGroups) {
         if (totalTargetsCount == null || totalTargetsCount == 0L || amountOfGroups == 0) {
             groupsPieChart.setChartState(null, null);
+            groupsLegendLayout.populateGroupsLegend(Collections.emptyList());
         } else {
             final List<Long> groups = new ArrayList<>(amountOfGroups);
             long leftTargets = totalTargetsCount;
@@ -507,6 +511,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
 
             groupsPieChart.setChartState(groups, totalTargetsCount);
+            groupsLegendLayout.populateGroupsLegend(groups);
         }
 
     }
@@ -520,19 +525,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final String filterQueryString = getTargetFilterQuery();
         if (Strings.isNullOrEmpty(filterQueryString)) {
             totalTargetsCount = 0L;
-            totalTargetsLabel.setVisible(false);
+            groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);
         } else {
             totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(filterQueryString);
-            totalTargetsLabel.setValue(getTotalTargetMessage());
-            totalTargetsLabel.setVisible(true);
+            groupsLegendLayout.populateTotalTargets(totalTargetsCount);
             defineGroupsLayout.setTargetFilter(filterQueryString);
         }
         onGroupNumberChange(event);
-    }
-
-    private String getTotalTargetMessage() {
-        return new StringBuilder(i18n.get("label.target.filter.count")).append(totalTargetsCount).toString();
     }
 
     private String getTargetPerGroupMessage(final String value) {
@@ -790,7 +790,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     class GroupNumberValidator implements Validator {
-        private static final long serialVersionUID = 9049939751976326550L;
+        private static final long serialVersionUID = 9043919751971326521L;
 
         @Override
         public void validate(final Object value) {
@@ -845,8 +845,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
-        totalTargetsLabel.setValue(getTotalTargetMessage());
-        totalTargetsLabel.setVisible(true);
+        groupsLegendLayout.populateTotalTargets(totalTargetsCount);
     }
 
     private void disableRequiredFieldsOnEdit() {
