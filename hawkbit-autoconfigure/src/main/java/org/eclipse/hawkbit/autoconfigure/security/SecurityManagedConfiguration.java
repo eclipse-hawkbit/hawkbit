@@ -24,10 +24,12 @@ import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
+import org.eclipse.hawkbit.ddi.EnableDdiApi;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
+import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -133,6 +135,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(300)
+    @ConditionalOnClass(EnableDdiApi.class)
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -152,6 +155,26 @@ public class SecurityManagedConfiguration {
 
         @Autowired
         private SystemSecurityContext systemSecurityContext;
+
+        /**
+         * Filter to protect the hawkBit server DDI interface against to many
+         * requests.
+         * 
+         * @param securityProperties
+         *            for filter configuration
+         *
+         * @return he spring filter registration bean for registering an denial
+         *         of service protection filter in the filter chain
+         */
+        @Bean
+        @ConditionalOnClass(EnableDdiApi.class)
+        public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
+
+            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
+            filterRegBean.addUrlPatterns("/{tenant}/controller/v1/**");
+
+            return filterRegBean;
+        }
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
@@ -223,14 +246,26 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Filter to protect the SP server against denial of service attacks.
+     * Filter to protect the hawkBit server system management interface against
+     * to many requests.
+     * 
+     * @param securityProperties
+     *            for filter configuration
      *
      * @return he spring filter registration bean for registering an denial of
      *         service protection filter in the filter chain
      */
     @Bean
-    @Order(50)
-    public FilterRegistrationBean dosFilter() {
+    @Order(52)
+    public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
+
+        final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
+        filterRegBean.addUrlPatterns("/system/*");
+
+        return filterRegBean;
+    }
+
+    private static FilterRegistrationBean dosFilter(final HawkbitSecurityProperties securityProperties) {
 
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
@@ -238,7 +273,6 @@ public class SecurityManagedConfiguration {
                 securityProperties.getDos().getFilter().getMaxWrite(),
                 securityProperties.getDos().getFilter().getWhitelist(), securityProperties.getClients().getBlacklist(),
                 securityProperties.getClients().getRemoteIpHeader()));
-        filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*", "/rest/*");
 
         return filterRegBean;
     }
@@ -270,6 +304,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(350)
+    @ConditionalOnClass(EnableMgmtApi.class)
     public static class RestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
@@ -283,6 +318,25 @@ public class SecurityManagedConfiguration {
 
         @Autowired
         private SystemSecurityContext systemSecurityContext;
+
+        /**
+         * Filter to protect the hawkBit server Management interface against to
+         * many requests.
+         * 
+         * @param securityProperties
+         *            for filter configuration
+         *
+         * @return he spring filter registration bean for registering an denial
+         *         of service protection filter in the filter chain
+         */
+        @Bean
+        public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
+
+            final FilterRegistrationBean filterRegBean = dosFilter(securityProperties);
+            filterRegBean.addUrlPatterns("/rest/**");
+
+            return filterRegBean;
+        }
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
@@ -427,6 +481,7 @@ public class SecurityManagedConfiguration {
     @Configuration
     @EnableWebSecurity
     @Order(200)
+    @ConditionalOnClass(EnableDdiApi.class)
     public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
