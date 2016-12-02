@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 
 /**
  * Implementation of the {@link ArtifactRepository} to store artifacts on the
@@ -129,8 +130,12 @@ public class ArtifactFilesystemRepository implements ArtifactRepository {
         final ArtifactFilesystem fileSystemArtifact = new ArtifactFilesystem(fileSHA1Naming);
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
-        } else if (!file.renameTo(fileSHA1Naming)) {
-            throw new ArtifactStoreException("Could not store the file " + fileSHA1Naming);
+        } else {
+            try {
+                Files.move(file, fileSHA1Naming);
+            } catch (final IOException e) {
+                throw new ArtifactStoreException("Could not store the file " + fileSHA1Naming, e);
+            }
         }
 
         file.delete();
