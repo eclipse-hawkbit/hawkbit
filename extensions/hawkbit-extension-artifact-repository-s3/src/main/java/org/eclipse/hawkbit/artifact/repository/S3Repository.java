@@ -129,12 +129,10 @@ public class S3Repository implements ArtifactRepository {
             final ObjectMetadata objectMetadata = createObjectMetadata(mdMD5Hash16, contentType, file);
             amazonS3.putObject(s3Properties.getBucketName(), sha1Hash16, inputStream, objectMetadata);
 
+            return s3Artifact;
         } catch (final IOException | AmazonClientException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
-        } finally {
-            file.delete();
         }
-        return s3Artifact;
     }
 
     private S3Artifact createS3Artifact(final String sha1Hash16, final String mdMD5Hash16, final String contentType,
