@@ -17,6 +17,18 @@ public class DistributionSetTagTableEvent extends BaseUIEntityEvent<Distribution
     /**
      * Constructor
      * 
+     * @param eventType
+     *            the event type
+     * @param entity
+     *            the entity.
+     */
+    public DistributionSetTagTableEvent(final BaseEntityEventType eventType, final DistributionSetTag entity) {
+        super(eventType, entity);
+    }
+
+    /**
+     * Constructor
+     * 
      * @param entity
      *            the created entity.
      */

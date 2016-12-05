@@ -17,6 +17,18 @@ public class TargetTagTableEvent extends BaseUIEntityEvent<TargetTag> {
     /**
      * Constructor
      * 
+     * @param eventType
+     *            the event typ
+     * @param entity
+     *            the created entity.
+     */
+    public TargetTagTableEvent(final BaseEntityEventType eventType, final TargetTag entity) {
+        super(eventType, entity);
+    }
+
+    /**
+     * Constructor
+     * 
      * @param entity
      *            the created entity.
      */

@@ -125,8 +125,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         setDataAvailable(getContainerDataSource().size() != 0);
     }
 
-   
-
     @EventBusListenerMethod(scope = EventScope.UI)
     void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer eventContainer) {
         // workaround until push is available for action
@@ -147,13 +145,17 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
                     .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
         }
+        // workaround until push is available for action
+        // history, re-select
+        // the updated target so the action history gets
+        // refreshed.
+        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
     }
 
     private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
         targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
                 target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
     }
-
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent dragEvent) {
@@ -710,10 +712,10 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
 
-        item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
+        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
                 .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
+        item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {

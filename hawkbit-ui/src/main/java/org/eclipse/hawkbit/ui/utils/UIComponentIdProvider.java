@@ -397,10 +397,6 @@ public final class UIComponentIdProvider {
      * Tab sheet id.
      */
     public static final String TARGET_DETAILS_TABSHEET = "target.details.tabsheet";
-    /**
-     * Tab sheet id.
-     */
-    public static final String DISTRIBUTION_DETAILS_TABSHEET = "distribution.details.tabsheet.";
 
     /**
      * Combobox id.
@@ -907,7 +903,7 @@ public final class UIComponentIdProvider {
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";
 
-    public static final String NOTIFICATION_MENU_ID = "notification.menu";
+    public static final String NOTIFICATION_MENU_ID = "notification.menu.";
 
     /**
      * /* Private Constructor.

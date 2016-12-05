@@ -240,11 +240,9 @@ public final class DashboardMenu extends CustomComponent {
         }
         initialViewName = accessibleViews.get(0).getViewName();
         for (final DashboardMenuItem view : accessibleViews) {
-            Component menuItemComponent = new ValoMenuItemButton(view);
-            menuButtons.add((ValoMenuItemButton) menuItemComponent);
-
-            menuItemComponent = buildLabelWrapper(menuItemComponent, view.getNotificationUnreadLabel());
-            menuItemsLayout.addComponent(menuItemComponent);
+            final ValoMenuItemButton menuItemComponent = new ValoMenuItemButton(view);
+            menuButtons.add(menuItemComponent);
+            menuItemsLayout.addComponent(buildLabelWrapper(menuItemComponent, view.getNotificationUnreadLabel()));
         }
         return menuItemsLayout;
     }
@@ -259,14 +257,15 @@ public final class DashboardMenu extends CustomComponent {
      *            the label for displaying the occurred events
      * @return Component of type CssLayout
      */
-    private static Component buildLabelWrapper(final Component menuItemButton, final Component notificationLabel) {
+    private static Component buildLabelWrapper(final ValoMenuItemButton menuItemButton,
+            final Component notificationLabel) {
         final CssLayout dashboardWrapper = new CssLayout(menuItemButton);
         dashboardWrapper.addStyleName("labelwrapper");
         dashboardWrapper.addStyleName(ValoTheme.MENU_ITEM);
         notificationLabel.addStyleName(ValoTheme.MENU_BADGE);
         notificationLabel.setWidthUndefined();
         notificationLabel.setVisible(false);
-        notificationLabel.setId(UIComponentIdProvider.NOTIFICATION_MENU_ID);
+        notificationLabel.setId(UIComponentIdProvider.NOTIFICATION_MENU_ID + menuItemButton.getCaption().toLowerCase());
         dashboardWrapper.addComponent(notificationLabel);
         return dashboardWrapper;
     }
@@ -398,6 +397,7 @@ public final class DashboardMenu extends CustomComponent {
             setIcon(view.getDashboardIcon());
             setCaption(view.getDashboardCaption());
             setDescription(view.getDashboardCaptionLong());
+            setId(view.getDashboardCaption().toLowerCase());
             /* Avoid double click */
             setDisableOnClick(true);
             addClickListener(event -> event.getComponent().getUI().getNavigator().navigateTo(view.getViewName()));

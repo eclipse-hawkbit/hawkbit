@@ -77,7 +77,8 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     @EventBusListenerMethod(scope = EventScope.UI)
     void onUiEvent(final BaseUIEntityEvent<?> event) {
         if (BaseEntityEventType.ADD_ENTITY != event.getEventType()
-                && BaseEntityEventType.REMOVE_ENTITIES != event.getEventType()) {
+                && BaseEntityEventType.REMOVE_ENTITIES != event.getEventType()
+                && BaseEntityEventType.UPDATED_ENTITY != event.getEventType()) {
             return;
         }
         skipUiEvents.put(event, new Object());

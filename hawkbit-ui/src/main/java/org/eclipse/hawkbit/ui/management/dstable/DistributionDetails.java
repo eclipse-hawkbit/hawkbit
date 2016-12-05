@@ -125,7 +125,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getTabSheetId() {
-        return UIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
+        return UIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
     }
 
     @Override

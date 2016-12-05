@@ -221,6 +221,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                         .description(desc).type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId))
                         .requiredMigrationStep(isMigStepReq));
 
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
+
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 

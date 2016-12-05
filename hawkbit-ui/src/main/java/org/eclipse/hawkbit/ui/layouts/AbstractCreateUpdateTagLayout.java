@@ -25,7 +25,10 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -557,8 +560,11 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
                 .colour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
         if (targetObj instanceof TargetTag) {
             tagManagement.updateTargetTag(update);
+            eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (TargetTag) targetObj));
         } else if (targetObj instanceof DistributionSetTag) {
             tagManagement.updateDistributionSetTag(update);
+            eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY,
+                    (DistributionSetTag) targetObj));
         }
         uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
 
