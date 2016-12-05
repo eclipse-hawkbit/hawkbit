@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -31,7 +32,6 @@ import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.util.SPInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -95,7 +95,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final UploadViewAcceptCriteria uploadViewAcceptCriteria,
-            final SPInfo spInfo, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement spInfo, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.i18n = i18n;

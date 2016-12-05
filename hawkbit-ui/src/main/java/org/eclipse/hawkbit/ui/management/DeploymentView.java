@@ -8,10 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
@@ -19,16 +28,21 @@ import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
+import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
+import org.eclipse.hawkbit.ui.management.targettag.CreateUpdateTargetTagLayoutWindow;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -39,60 +53,88 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- *
+ * Target status and deployment management view.
  *
  */
+@UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
-@ViewScope
 public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
+    private final transient EventBus.UIEventBus eventbus;
 
-    @Autowired
-    private SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private ActionHistoryComponent actionHistoryComponent;
+    private final ActionHistoryComponent actionHistoryComponent;
 
-    @Autowired
-    private TargetTagFilterLayout targetTagFilterLayout;
+    private final TargetTagFilterLayout targetTagFilterLayout;
 
-    @Autowired
-    private TargetTableLayout targetTableLayout;
+    private final TargetTableLayout targetTableLayout;
 
-    @Autowired
-    private DistributionTagLayout distributionTagLayout;
+    private final DistributionTagLayout distributionTagLayout;
 
-    @Autowired
-    private DistributionTableLayout distributionTableLayoutNew;
+    private final DistributionTableLayout distributionTableLayoutNew;
 
-    @Autowired
-    private DeleteActionsLayout deleteAndActionsLayout;
+    private final DeleteActionsLayout deleteAndActionsLayout;
 
     private GridLayout mainLayout;
 
-    @Override
-    public void enter(final ViewChangeEvent event) {
+    @Autowired
+    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final I18N i18n,
+            final UINotification uiNotification, final ManagementUIState managementUIState,
+            final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
+            final DistributionTableFilters distFilterParameters,
+            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
+            final EntityFactory entityFactory, final UiProperties uiproperties,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TagManagement tagManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement) {
+        this.eventbus = eventbus;
+        this.permChecker = permChecker;
+        this.i18n = i18n;
+        this.uiNotification = uiNotification;
+        this.managementUIState = managementUIState;
+        this.actionHistoryComponent = new ActionHistoryComponent(i18n, deploymentManagement, eventBus, uiNotification,
+                managementUIState);
+        final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
+                i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+        this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
+                managementViewAcceptCriteria, permChecker, eventBus, uiNotification, entityFactory, targetManagement,
+                targetFilterQueryManagement);
+        final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
+                managementUIState, permChecker, managementViewAcceptCriteria);
+
+        this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
+                eventBus, uiNotification, managementUIState, managementViewAcceptCriteria, deploymentManagement,
+                uiproperties, permChecker, uiNotification, tagManagement);
+
+        this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
+                tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,
+                managementViewAcceptCriteria);
+        this.distributionTableLayoutNew = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
+                distributionSetManagement, managementViewAcceptCriteria, entityFactory, uiNotification, tagManagement,
+                systemManagement, targetManagement);
+        this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
+                tagManagement, managementViewAcceptCriteria, managementUIState, targetManagement, targetTable,
+                deploymentManagement, distributionSetManagement);
+    }
+
+    @PostConstruct
+    void init() {
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
@@ -107,7 +149,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         eventbus.unsubscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeDistTable();
@@ -116,7 +158,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent event) {
         if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeTargetTable();
@@ -125,13 +167,13 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent mgmtUIEvent) {
         if (mgmtUIEvent == ManagementUIEvent.MAX_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> maximizeActionHistory());
+            UI.getCurrent().access(this::maximizeActionHistory);
         }
         if (mgmtUIEvent == ManagementUIEvent.MIN_ACTION_HISTORY) {
-            UI.getCurrent().access(() -> minimizeActionHistory());
+            UI.getCurrent().access(this::minimizeActionHistory);
         }
     }
 
@@ -163,7 +205,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         layoutWidgets();
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
-        mainLayout.setRowExpandRatio(0, 1f);
+        mainLayout.setRowExpandRatio(0, 1F);
     }
 
     private void layoutWidgets() {
@@ -185,9 +227,9 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         mainLayout.addComponent(actionHistoryComponent, 4, 0);
         mainLayout.addComponent(distributionTableLayoutNew, 2, 0);
         mainLayout.addComponent(distributionTagLayout, 3, 0);
-        mainLayout.setColumnExpandRatio(1, 0.275f);
-        mainLayout.setColumnExpandRatio(2, 0.275f);
-        mainLayout.setColumnExpandRatio(4, 0.45f);
+        mainLayout.setColumnExpandRatio(1, 0.275F);
+        mainLayout.setColumnExpandRatio(2, 0.275F);
+        mainLayout.setColumnExpandRatio(4, 0.45F);
         if (showFooterLayout()) {
             mainLayout.addComponent(deleteAndActionsLayout, 1, 1, 2, 1);
             mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
@@ -199,7 +241,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         mainLayout.setRows(2);
         mainLayout.addComponent(distributionTableLayoutNew, 0, 0);
         mainLayout.addComponent(distributionTagLayout, 1, 0);
-        mainLayout.setColumnExpandRatio(0, 1f);
+        mainLayout.setColumnExpandRatio(0, 1F);
         if (showFooterLayout()) {
             mainLayout.addComponent(deleteAndActionsLayout, 0, 1);
             mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
@@ -225,8 +267,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(actionHistoryComponent, 2, 0);
-        mainLayout.setColumnExpandRatio(1, 0.4f);
-        mainLayout.setColumnExpandRatio(2, 0.6f);
+        mainLayout.setColumnExpandRatio(1, 0.4F);
+        mainLayout.setColumnExpandRatio(2, 0.6F);
         if (showFooterLayout()) {
             mainLayout.addComponent(deleteAndActionsLayout, 1, 1);
             mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
@@ -249,10 +291,10 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
         mainLayout.removeComponent(actionHistoryComponent);
         mainLayout.removeComponent(deleteAndActionsLayout);
-        mainLayout.setColumnExpandRatio(1, 1f);
-        mainLayout.setColumnExpandRatio(2, 0f);
-        mainLayout.setColumnExpandRatio(3, 0f);
-        mainLayout.setColumnExpandRatio(4, 0f);
+        mainLayout.setColumnExpandRatio(1, 1F);
+        mainLayout.setColumnExpandRatio(2, 0F);
+        mainLayout.setColumnExpandRatio(3, 0F);
+        mainLayout.setColumnExpandRatio(4, 0F);
     }
 
     private void maximizeDistTable() {
@@ -262,10 +304,10 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             mainLayout.removeComponent(actionHistoryComponent);
         }
         mainLayout.removeComponent(deleteAndActionsLayout);
-        mainLayout.setColumnExpandRatio(0, 0f);
-        mainLayout.setColumnExpandRatio(1, 0f);
-        mainLayout.setColumnExpandRatio(2, 1f);
-        mainLayout.setColumnExpandRatio(4, 0f);
+        mainLayout.setColumnExpandRatio(0, 0F);
+        mainLayout.setColumnExpandRatio(1, 0F);
+        mainLayout.setColumnExpandRatio(2, 1F);
+        mainLayout.setColumnExpandRatio(4, 0F);
     }
 
     private void maximizeActionHistory() {
@@ -276,11 +318,11 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             mainLayout.removeComponent(distributionTableLayoutNew);
             mainLayout.removeComponent(distributionTagLayout);
         }
-        mainLayout.setColumnExpandRatio(0, 0f);
-        mainLayout.setColumnExpandRatio(1, 0f);
-        mainLayout.setColumnExpandRatio(2, 0f);
-        mainLayout.setColumnExpandRatio(3, 0f);
-        mainLayout.setColumnExpandRatio(4, 1f);
+        mainLayout.setColumnExpandRatio(0, 0F);
+        mainLayout.setColumnExpandRatio(1, 0F);
+        mainLayout.setColumnExpandRatio(2, 0F);
+        mainLayout.setColumnExpandRatio(3, 0F);
+        mainLayout.setColumnExpandRatio(4, 1F);
         mainLayout.removeComponent(deleteAndActionsLayout);
         mainLayout.setComponentAlignment(actionHistoryComponent, Alignment.TOP_LEFT);
     }
@@ -327,6 +369,11 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
                 distributionTableLayoutNew.setShowFilterButtonVisible(false);
             }
         }
+    }
+
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        // This view is constructed in the init() method()
     }
 
 }
