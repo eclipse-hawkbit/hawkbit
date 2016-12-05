@@ -37,6 +37,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -51,6 +52,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ErrorHandler;
 
 import com.google.common.collect.Maps;
 
@@ -76,6 +78,18 @@ public class AmqpConfiguration {
 
     @Autowired(required = false)
     private ServiceMatcher serviceMatcher;
+
+    /**
+     * Register the bean for the custom error handler.
+     * 
+     * @return custom error handler
+     */
+    @Bean
+    @ConditionalOnMissingBean(ErrorHandler.class)
+    public ErrorHandler errorHandler() {
+        return new ConditionalRejectingErrorHandler(
+                new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay()));
+    }
 
     @Configuration
     @ConditionalOnMissingBean(ConnectionFactory.class)
@@ -328,8 +342,9 @@ public class AmqpConfiguration {
      *         AMQP messages
      */
     @Bean(name = { "listenerContainerFactory" })
-    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory() {
-        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory);
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(
+            final ErrorHandler errorHandler) {
+        return new ConfigurableRabbitListenerContainerFactory(amqpProperties, rabbitConnectionFactory, errorHandler);
     }
 
     /**

@@ -30,7 +30,11 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
 
     private final long delay;
 
-    DelayedRequeueExceptionStrategy(final long delay) {
+    /**
+     * @param delay
+     *            in {@link TimeUnit#MILLISECONDS} before requeue.
+     */
+    public DelayedRequeueExceptionStrategy(final long delay) {
         this.delay = delay;
     }
 
