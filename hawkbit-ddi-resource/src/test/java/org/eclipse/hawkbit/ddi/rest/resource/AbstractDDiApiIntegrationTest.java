@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-@SpringApplicationConfiguration(classes = { TestDDiApiConfiguration.class })
+@SpringApplicationConfiguration(classes = { DdiApiConfiguration.class })
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
 }

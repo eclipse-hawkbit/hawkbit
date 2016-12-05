@@ -8,29 +8,21 @@
  */
 package org.eclipse.hawkbit.autoconfigure.repository;
 
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemConfiguration;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Auto configuration for the {@link ArtifactFilesystemRepository}.
  */
 @Configuration
 @ConditionalOnMissingBean(ArtifactRepository.class)
-@EnableConfigurationProperties(ArtifactFilesystemProperties.class)
+@ConditionalOnClass({ ArtifactFilesystemConfiguration.class })
+@Import(ArtifactFilesystemConfiguration.class)
 public class ArtifactStoreAutoConfiguration {
 
-    /**
-     * @param artifactFilesystemProperties
-     *            the artifact file system properties
-     * @return Default {@link ArtifactRepository} implementation.
-     */
-    @Bean
-    public ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
-        return new ArtifactFilesystemRepository(artifactFilesystemProperties);
-    }
 }

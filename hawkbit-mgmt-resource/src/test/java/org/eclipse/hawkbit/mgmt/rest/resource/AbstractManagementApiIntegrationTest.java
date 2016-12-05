@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import org.eclipse.hawkbit.mgmt.MgmtApiConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-@SpringApplicationConfiguration(classes = { TestManagementApiConfiguration.class })
+@SpringApplicationConfiguration(classes = { MgmtApiConfiguration.class })
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 
 }

@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -37,6 +36,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
