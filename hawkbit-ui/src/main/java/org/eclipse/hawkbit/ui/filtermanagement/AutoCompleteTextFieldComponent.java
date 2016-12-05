@@ -25,13 +25,14 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
@@ -44,33 +45,39 @@ import com.vaadin.ui.UI;
  * suggestions in a suggestion-pop-up window while typing.
  */
 @SpringComponent
-@ViewScope
+@UIScope
 public class AutoCompleteTextFieldComponent extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
+    private final FilterManagementUIState filterManagementUIState;
+
+    private final transient EventBus.UIEventBus eventBus;
+
+    private final transient RsqlValidationOracle rsqlValidationOracle;
+
+    private final transient Executor executor;
+
+    private final transient List<FilterQueryChangeListener> listeners = new LinkedList<>();
+
+    private Label validationIcon;
+    private TextField queryTextField;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient RsqlValidationOracle rsqlValidationOracle;
-
-    @Autowired
-    @Qualifier("uiExecutor")
-    private transient Executor executor;
-
-    private transient List<FilterQueryChangeListener> listeners = new LinkedList<>();
-
-    private final Label validationIcon;
-    private final TextField queryTextField;
+    public AutoCompleteTextFieldComponent(final FilterManagementUIState filterManagementUIState,
+            final UIEventBus eventBus, final RsqlValidationOracle rsqlValidationOracle,
+            @Qualifier("uiExecutor") final Executor executor) {
+        this.filterManagementUIState = filterManagementUIState;
+        this.eventBus = eventBus;
+        this.rsqlValidationOracle = rsqlValidationOracle;
+        this.executor = executor;
+    }
 
     /**
      * Constructor.
      */
-    public AutoCompleteTextFieldComponent() {
+    @PostConstruct
+    void init() {
 
         queryTextField = createSearchField();
         validationIcon = createStatusIcon();
@@ -80,13 +87,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
         addStyleName("custom-search-layout");
         addComponents(validationIcon, queryTextField);
         setComponentAlignment(validationIcon, Alignment.TOP_CENTER);
-    }
 
-    /**
-     * Called by the spring-framework when this bean has be post-constructed.
-     */
-    @PostConstruct
-    public void postConstruct() {
         eventBus.subscribe(this);
         new TextFieldSuggestionBox(rsqlValidationOracle, this).extend(queryTextField);
     }
@@ -96,7 +97,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
         eventBus.unsubscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
         if (custFUIEvent == CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON) {
             validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
@@ -222,7 +223,7 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     class StatusCircledAsync implements Runnable {
         private final UI current;
 
-        public StatusCircledAsync(final UI current) {
+        StatusCircledAsync(final UI current) {
             this.current = current;
         }
 

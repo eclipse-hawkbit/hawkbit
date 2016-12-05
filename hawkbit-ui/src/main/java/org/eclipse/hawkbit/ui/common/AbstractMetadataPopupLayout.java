@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -30,8 +29,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -73,14 +72,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private static final String KEY = "key";
 
-    @Autowired
     protected I18N i18n;
 
-    @Autowired
-    private UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    protected transient EventBus.UIEventBus eventBus;
 
     private TextField keyTextField;
 
@@ -97,6 +93,18 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private E selectedEntity;
 
     private HorizontalLayout mainLayout;
+    protected SpPermissionChecker permChecker;
+
+    protected AbstractMetadataPopupLayout(final I18N i18n, final UINotification uiNotification,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker) {
+        this.i18n = i18n;
+        this.uiNotification = uiNotification;
+        this.eventBus = eventBus;
+        this.permChecker = permChecker;
+
+        createComponents();
+        buildLayout();
+    }
 
     /**
      * Save the metadata and never close the window after saving.
@@ -116,13 +124,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         public boolean canWindowSaveOrUpdate() {
             return true;
         }
-
-    }
-
-    @PostConstruct
-    void init() {
-        createComponents();
-        buildLayout();
 
     }
 

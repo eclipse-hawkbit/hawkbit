@@ -38,6 +38,8 @@ public abstract class AbstractTableLayout extends VerticalLayout {
         this.table = table;
         this.detailsLayout = detailsLayout;
         buildLayout();
+
+        table.selectRow();
     }
 
     private void buildLayout() {

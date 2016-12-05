@@ -8,58 +8,46 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
+import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
-
 /**
  * Distribution Set Type filter buttons layout.
- * 
- *
- * 
  */
-
-@SpringComponent
-@ViewScope
 public class DSTypeFilterLayout extends AbstractFilterLayout {
 
     private static final long serialVersionUID = 2689002932344750781L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private DSTypeFilterHeader dsTypeFilterHeader;
+    public DSTypeFilterLayout(final ManageDistUIState manageDistUIState, final I18N i18n,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria) {
+        super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, tagManagement, entityFactory,
+                uiNotification, softwareManagement, distributionSetManagement),
+                new DSTypeFilterButtons(eventBus, manageDistUIState, distributionsViewAcceptCriteria,
+                        distributionSetManagement));
+        this.manageDistUIState = manageDistUIState;
 
-    @Autowired
-    private DSTypeFilterButtons dsTypeFilterButtons;
-
-    @Autowired
-    private DSTypeFilterButtonClick dsTypeFilterButtonClick;
-
-    @Autowired
-    private ManageDistUIState manageDistUIState;
-
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    public void init() {
-        super.init(dsTypeFilterHeader, dsTypeFilterButtons, dsTypeFilterButtonClick);
-        eventbus.subscribe(this);
+        restoreState();
+        eventBus.subscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionsUIEvent event) {
         if (event == DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE) {
             setVisible(false);
@@ -69,22 +57,6 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventbus.unsubscribe(this);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterLayout#
-     * onLoadIsTypeFilterIsClosed()
-     */
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
 

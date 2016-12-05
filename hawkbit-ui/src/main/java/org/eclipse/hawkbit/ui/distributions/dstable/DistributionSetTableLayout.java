@@ -8,42 +8,54 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * DistributionSet table layout
  */
-@SpringComponent
-@ViewScope
 public class DistributionSetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 6464291374980641235L;
 
-    /**
-     * Details to be autowired before table as details listens to value change
-     * of table.
-     */
-    @Autowired
-    private DistributionSetDetails distributionDetails;
+    public DistributionSetTableLayout(final I18N i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory,
+            final UINotification uiNotification, final TagManagement tagManagement,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final SystemManagement systemManagement) {
 
-    @Autowired
-    private DistributionSetTableHeader dsTableHeader;
+        final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
+                distributionSetManagement, entityFactory, permissionChecker);
 
-    @Autowired
-    private DistributionSetTable dsTable;
+        final DistributionSetTable distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification,
+                permissionChecker, manageDistUIState, distributionSetManagement, softwareManagement,
+                distributionsViewAcceptCriteria, targetManagement, popupLayout);
 
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    void init() {
-        super.init(dsTableHeader, dsTable, distributionDetails);
+        final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
+                i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,
+                distributionSetTable);
+
+        super.init(
+                new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
+                        distributionAddUpdateWindowLayout),
+                distributionSetTable,
+                new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
+                        distributionAddUpdateWindowLayout, softwareManagement, distributionSetManagement,
+                        targetManagement, entityFactory, uiNotification, tagManagement, popupLayout, uiNotification));
     }
 
 }

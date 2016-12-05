@@ -1,7 +1,7 @@
 ---
 layout: default
 date : "2015-06-22T11:08:19+08:00"
-title : "What is hawkBit"
+title : "What is Eclipse hawkBit"
 series : "homepagetop"
 sequence: "1"
 order : "1"

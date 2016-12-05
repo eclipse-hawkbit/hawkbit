@@ -45,17 +45,19 @@ import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -65,8 +67,6 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
@@ -75,8 +75,6 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
-@SpringComponent
-@ViewScope
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -7731776093470487988L;
@@ -86,37 +84,41 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
             Arrays.asList(DragEvent.SOFTWAREMODULE_DRAG));
 
-    @Autowired
-    private SpPermissionChecker permissionChecker;
+    private final SpPermissionChecker permissionChecker;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    @Autowired
-    private transient TargetManagement targetManagement;
+    private final transient TargetManagement targetManagement;
 
-    @Autowired
-    private DsMetadataPopupLayout dsMetadataPopupLayout;
+    private final DsMetadataPopupLayout dsMetadataPopupLayout;
 
-    /**
-     * Initialize the component.
-     */
-    @Override
-    protected void init() {
-        super.init();
+    DistributionSetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
+            final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
+            final DistributionSetManagement distributionSetManagement, final SoftwareManagement softwareManagement,
+            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
+        super(eventBus, i18n, notification);
+        this.permissionChecker = permissionChecker;
+        this.manageDistUIState = manageDistUIState;
+        this.distributionSetManagement = distributionSetManagement;
+        this.softwareManagement = softwareManagement;
+        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.targetManagement = targetManagement;
+        this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         addTableStyleGenerator();
+
+        addNewContainerDS();
+        setColumnProperties();
+        setDataAvailable(getContainerDataSource().size() != 0);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent event) {
         if (event == DragEvent.HIDE_DROP_HINT) {
             UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
@@ -125,7 +127,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
 
         final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
@@ -150,12 +152,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionCreatedEvents(final DistributionCreatedEventContainer eventContainer) {
         refreshDistributions();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionDeletedEvents(final DistributionDeletedEventContainer eventContainer) {
         final LazyQueryContainer dsContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
@@ -470,7 +472,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DistributionTableEvent event) {
         onBaseEntityEvent(event);
         if (BaseEntityEventType.UPDATED_ENTITY != event.getEventType()) {
@@ -479,7 +481,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.DELETED_DISTRIBUTIONS || event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
             UI.getCurrent().access(this::refreshFilter);
@@ -492,7 +494,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
      * @param event
      *            as instance of {@link DistributionTableFilterEvent}
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final DistributionTableFilterEvent event) {
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT

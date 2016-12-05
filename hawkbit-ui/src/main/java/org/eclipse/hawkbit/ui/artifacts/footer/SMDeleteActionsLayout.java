@@ -10,22 +10,24 @@ package org.eclipse.hawkbit.ui.artifacts.footer;
 
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
@@ -33,24 +35,30 @@ import com.vaadin.ui.UI;
 
 /**
  * Upload view footer layout implementation.
- *
  */
-@SpringComponent
-@ViewScope
 public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = -3273982053389866299L;
 
-    @Autowired
-    private ArtifactUploadState artifactUploadState;
+    private final ArtifactUploadState artifactUploadState;
 
-    @Autowired
-    private UploadViewConfirmationWindowLayout uploadViewConfirmationWindowLayout;
+    private final UploadViewConfirmationWindowLayout uploadViewConfirmationWindowLayout;
 
-    @Autowired
-    private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public SMDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final UINotification notification, final ArtifactUploadState artifactUploadState,
+            final SoftwareManagement softwareManagement, final UploadViewAcceptCriteria uploadViewAcceptCriteria) {
+        super(i18n, permChecker, eventBus, notification);
+        this.artifactUploadState = artifactUploadState;
+        this.uploadViewConfirmationWindowLayout = new UploadViewConfirmationWindowLayout(i18n, eventBus,
+                softwareManagement, artifactUploadState);
+        this.uploadViewAcceptCriteria = uploadViewAcceptCriteria;
+
+        init();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
 
         if (isSoftwareEvent(event) || isSoftwareTypeEvent(event)) {
@@ -84,7 +92,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
                 || event == UploadArtifactUIEvent.DISCARD_DELETE_SOFTWARE_TYPE;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent event) {
         if (event == DragEvent.HIDE_DROP_HINT) {
             UI.getCurrent().access(() -> hideDropHints());
@@ -134,9 +142,8 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
             final String swModuleTypeName = sourceComponent.getId()
                     .replace(UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
-            if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
-                    && artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
-                            .equalsIgnoreCase(swModuleTypeName)) {
+            if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
+                    .map(type -> type.getName().equalsIgnoreCase(swModuleTypeName)).orElse(false)) {
                 notification.displayValidationError(
                         i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
             } else {

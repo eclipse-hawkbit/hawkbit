@@ -9,7 +9,11 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  *
@@ -19,6 +23,11 @@ public abstract class AbstractNamedVersionedEntityTableDetailsLayout<T extends N
         extends AbstractTableDetailsLayout<T> {
 
     private static final long serialVersionUID = 1L;
+
+    protected AbstractNamedVersionedEntityTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
+        super(i18n, eventBus, permissionChecker, managementUIState);
+    }
 
     @Override
     protected String getName() {

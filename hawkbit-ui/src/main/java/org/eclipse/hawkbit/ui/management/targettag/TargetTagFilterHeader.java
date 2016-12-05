@@ -8,41 +8,30 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Target Tag filter by Tag Header.
  */
-@SpringComponent
-@ViewScope
 public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 3046367045669148009L;
 
-    @Autowired
-    private I18N i18n;
+    private final ManagementUIState managementUIState;
 
-    @Autowired
-    private CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
-
-    @Autowired
-    private ManagementUIState managementUIState;
-
-    @Override
-    @PostConstruct
-    public void init() {
-        super.init();
+    TargetTagFilterHeader(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+            final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus) {
+        super(permChecker, eventBus, i18n);
+        this.managementUIState = managementUIState;
         if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
             createUpdateTargetTagLayout.init();
         }

@@ -8,42 +8,43 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
 /**
  * Distribution Set Type filter buttons header.
  */
-@SpringComponent
-@ViewScope
 public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 3433417459392880222L;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
+    private final CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
 
-    private CommonDialogWindow addUpdateWindow;
-
-    @Override
-    @PostConstruct
-    public void init() {
-        super.init();
+    DSTypeFilterHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
+        super(permChecker, eventBus, i18n);
+        this.manageDistUIState = manageDistUIState;
+        this.createUpdateDistSetTypeLayout = new CreateUpdateDistSetTypeLayout(i18n, tagManagement, entityFactory,
+                eventBus, permChecker, uiNotification, softwareManagement, distributionSetManagement);
         if (hasCreateUpdatePermission()) {
             createUpdateDistSetTypeLayout.init();
         }
@@ -61,7 +62,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected void settingsIconClicked(final ClickEvent event) {
-        addUpdateWindow = createUpdateDistSetTypeLayout.getWindow();
+        final CommonDialogWindow addUpdateWindow = createUpdateDistSetTypeLayout.getWindow();
         UI.getCurrent().addWindow(addUpdateWindow);
     }
 

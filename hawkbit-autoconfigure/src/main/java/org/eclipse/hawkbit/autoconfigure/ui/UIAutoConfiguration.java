@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.autoconfigure.ui;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
 import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
@@ -21,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.annotation.EnableEventBus;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 
@@ -70,8 +73,11 @@ public class UIAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @UIScope
-    public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext) {
-        final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy();
+    public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext,
+            final ScheduledExecutorService executorService, final UIEventBus eventBus,
+            final UIEventProvider eventProvider) {
+        final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,
+                eventBus, eventProvider);
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);
         return delayedEventBusPushStrategy;
     }

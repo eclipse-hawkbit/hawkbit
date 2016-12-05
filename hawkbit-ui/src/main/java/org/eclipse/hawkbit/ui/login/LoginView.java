@@ -39,7 +39,6 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -56,7 +55,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Login view for login credentials.
  */
 @SpringView(name = "")
-@UIScope
 public class LoginView extends VerticalLayout implements View {
     private static final String TENANT_PATTERN_PLACEHOLDER = "tenant";
     private static final String USER_PATTERN_PLACEHOLDER = "user";
@@ -71,17 +69,13 @@ public class LoginView extends VerticalLayout implements View {
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
 
-    @Autowired
-    private transient VaadinSecurity vaadinSecurity;
+    private final transient VaadinSecurity vaadinSecurity;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient UiProperties uiProperties;
+    private final UiProperties uiProperties;
 
-    @Autowired
-    private transient MultitenancyIndicator multiTenancyIndicator;
+    private final transient MultitenancyIndicator multiTenancyIndicator;
 
     private final transient AntPathMatcher matcher = new AntPathMatcher();
     private boolean useCookie = true;
@@ -90,6 +84,15 @@ public class LoginView extends VerticalLayout implements View {
     private TextField tenant;
     private PasswordField password;
     private Button signin;
+
+    @Autowired
+    LoginView(final VaadinSecurity vaadinSecurity, final I18N i18n, final UiProperties uiProperties,
+            final MultitenancyIndicator multiTenancyIndicator) {
+        this.vaadinSecurity = vaadinSecurity;
+        this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.multiTenancyIndicator = multiTenancyIndicator;
+    }
 
     void loginAuthenticationFailedNotification() {
         final Notification notification = new Notification(i18n.get("notification.login.failed.title"));

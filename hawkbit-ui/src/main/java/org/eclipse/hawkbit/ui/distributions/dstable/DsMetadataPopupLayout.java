@@ -18,29 +18,30 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Lists;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Pop up layout to display distribution metadata.
  */
-@SpringComponent
-@ViewScope
 public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<DistributionSet, MetaData> {
 
     private static final long serialVersionUID = -7778944849012048106L;
 
-    @Autowired
-    private transient DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    protected SpPermissionChecker permChecker;
+    public DsMetadataPopupLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
+            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
+            final SpPermissionChecker permChecker) {
+        super(i18n, uiNotification, eventBus, permChecker);
+        this.distributionSetManagement = distributionSetManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     protected void checkForDuplicate(final DistributionSet entity, final String value) {
@@ -73,7 +74,8 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected List<MetaData> getMetadataList() {
-        return Collections.unmodifiableList(getSelectedEntity().getMetadata());
+        return Collections.unmodifiableList(
+                distributionSetManagement.findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId()));
     }
 
     /**

@@ -10,50 +10,38 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
-
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Target tag layout in bulk upload popup.
  *
  */
-@SpringComponent
-@ViewScope
 public class TargetBulkTokenTags extends AbstractTargetTagToken {
     private static final long serialVersionUID = 4159616629565523717L;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagdetails.TargetTagToken#assignTag(java.
-     * lang.String)
-     */
+    TargetBulkTokenTags(final SpPermissionChecker checker, final I18N i18n, final UINotification uinotification,
+            final UIEventBus eventBus, final ManagementUIState managementUIState, final TagManagement tagManagement) {
+        super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
+    }
+
     @Override
     protected void assignTag(final String tagNameSelected) {
         managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagNameSelected);
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagdetails.TargetTagToken#unassignTag(java.
-     * lang.String)
-     */
     @Override
     protected void unassignTag(final String tagName) {
         managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagdetails.AbstractTagToken#getTagStyleName
-     * ()
-     */
     @Override
     protected String getTagStyleName() {
         return "target-tag-";
@@ -64,12 +52,6 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
         return i18n.get("combo.type.tag.name");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagdetails.AbstractTagToken#
-     * hasUpdatePermission()
-     */
     @Override
     protected Boolean isToggleTagAssignmentAllowed() {
         return checker.hasCreateTargetPermission();
@@ -87,12 +69,6 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagdetails.AbstractTagToken#
-     * populateContainer()
-     */
     @Override
     protected void populateContainer() {
         container.removeAllItems();

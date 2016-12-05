@@ -8,14 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
@@ -38,6 +44,11 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
+
+    public CreateUpdateTypeLayout(final I18N i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
+        super(i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
+    }
 
     @Override
     protected void addListeners() {

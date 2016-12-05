@@ -10,83 +10,86 @@ package org.eclipse.hawkbit.ui.management.dstag;
 
 import java.util.Collections;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
 
 /**
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class DistributionTagButtons extends AbstractFilterButtons {
 
     private static final String NO_TAG = "NO TAG";
-
     private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private DistributionTagDropEvent spDistTagDropEvent;
+    private final DistributionTagDropEvent spDistTagDropEvent;
+    private final ManagementUIState managementUIState;
+    private final transient EntityFactory entityFactory;
 
-    @Autowired
-    private ManagementUIState managementUIState;
+    DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final EntityFactory entityFactory, final I18N i18n, final UINotification notification,
+            final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
+            final DistributionSetManagement distributionSetManagement,
+            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+        super(eventBus, new DistributionTagButtonClick(eventBus, managementUIState));
+        this.spDistTagDropEvent = new DistributionTagDropEvent(i18n, notification, permChecker, distFilterParameters,
+                distributionSetManagement, eventBus, managementViewAcceptCriteria);
+        this.managementUIState = managementUIState;
+        this.entityFactory = entityFactory;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
-
-    @Override
-    public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
-        super.init(filterButtonClickBehaviour);
         addNewTag(entityFactory.tag().create().name(NO_TAG).build());
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
         refreshTagTable();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
         refreshTagTable();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     // Exception squid:S1172 - event not needed
     @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         refreshTagTable();
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final DragEvent dragEvent) {
         if (dragEvent == DragEvent.DISTRIBUTION_DRAG) {
             UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_FILTER_BUTTON));

@@ -8,55 +8,40 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
-
 /**
  * Target Tag filter layout.
- * 
- *
- *
- * 
  */
-
-@SpringComponent
-@ViewScope
 public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout {
 
     private static final long serialVersionUID = 2153612878428575009L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
-
-    @Autowired
-    private ManagementUIState managementUIState;
-
-    @Autowired
-    private TargetTagFilterHeader filterByHeader;
-
-    @Autowired
-    private MultipleTargetFilter multipleTargetFilter;
-
-    /**
-     * Initialize the filter layout.
-     */
-    @PostConstruct
-    public void init() {
-        super.init(filterByHeader, multipleTargetFilter);
-        eventbus.subscribe(this);
-
+    public TargetTagFilterLayout(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
+            final ManagementUIState managementUIState, final ManagementViewAcceptCriteria managementViewAcceptCriteria,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final UINotification notification,
+            final EntityFactory entityFactory, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
+        super(new TargetTagFilterHeader(i18n, createUpdateTargetTagLayout, managementUIState, permChecker, eventBus),
+                new MultipleTargetFilter(createUpdateTargetTagLayout, permChecker, managementUIState, i18n, eventBus,
+                        managementViewAcceptCriteria, notification, entityFactory, targetManagement,
+                        targetFilterQueryManagement),
+                managementUIState);
+        eventBus.subscribe(this);
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT) {
             setVisible(false);
@@ -66,16 +51,8 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterLayout#
-     * onLoadIsTypeFilterIsClosed()
-     */
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
-
         return managementUIState.isTargetTagFilterClosed();
     }
 }

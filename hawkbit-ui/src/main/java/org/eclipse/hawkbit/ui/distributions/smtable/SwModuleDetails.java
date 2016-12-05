@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
@@ -20,13 +21,12 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
@@ -38,38 +38,35 @@ import com.vaadin.ui.Window;
  * Implementation of software module details block using generic abstract
  * details style .
  */
-@SpringComponent
-@ViewScope
 public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLayout<SoftwareModule> {
 
     private static final long serialVersionUID = -1052279281066089812L;
 
-    @Autowired
-    private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
+    private final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
-    @Autowired
-    private ManageDistUIState manageDistUIState;
+    private final ManageDistUIState manageDistUIState;
 
-    @Autowired
-    private transient SoftwareManagement softwareManagement;
+    private final transient SoftwareManagement softwareManagement;
 
-    @Autowired
-    private SwMetadataPopupLayout swMetadataPopupLayout;
+    private final SwMetadataPopupLayout swMetadataPopupLayout;
 
-    @Autowired
-    private transient EntityFactory entityFactory;
+    private final SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
-    private SoftwareModuleMetadatadetailslayout swmMetadataTable;
+    SwModuleDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
+            final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow,
+            final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
+            final SwMetadataPopupLayout swMetadataPopupLayout, final EntityFactory entityFactory) {
+        super(i18n, eventBus, permissionChecker, null);
+        this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
+        this.manageDistUIState = manageDistUIState;
+        this.softwareManagement = softwareManagement;
+        this.swMetadataPopupLayout = swMetadataPopupLayout;
 
-    /**
-     * softwareLayout Initialize the component.
-     */
-    @Override
-    protected void init() {
         swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
         swmMetadataTable.init(getI18n(), getPermissionChecker(), softwareManagement, swMetadataPopupLayout,
                 entityFactory);
-        super.init();
+        addTabs(detailsTab);
+        restoreState();
     }
 
     /**
@@ -79,7 +76,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
      *            as instance of {@link MetadataEvent}
      */
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final MetadataEvent event) {
         UI.getCurrent().access(() -> {
             final MetaData softwareModuleMetadata = event.getMetaData();
@@ -94,7 +91,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         });
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
+    @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
         onBaseEntityEvent(softwareModuleEvent);
     }
@@ -203,10 +200,12 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     private boolean isSoftwareModuleSelected(final SoftwareModule softwareModule) {
-        final Long selectedDistSWModuleId = manageDistUIState.getSelectedBaseSwModuleId().isPresent()
-                ? manageDistUIState.getSelectedBaseSwModuleId().get() : null;
-        return softwareModule != null && selectedDistSWModuleId != null
-                && selectedDistSWModuleId.equals(softwareModule.getId());
+        if (softwareModule == null) {
+            return false;
+        }
+
+        return manageDistUIState.getSelectedBaseSwModuleId().map(module -> module.equals(softwareModule.getId()))
+                .orElse(false);
     }
 
     @Override

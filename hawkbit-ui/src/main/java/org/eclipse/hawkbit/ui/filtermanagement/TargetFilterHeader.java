@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -21,12 +19,10 @@ import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -38,20 +34,15 @@ import com.vaadin.ui.VerticalLayout;
  *
  *
  */
-@SpringComponent
-@ViewScope
 public class TargetFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -7022704971955491673L;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private FilterManagementUIState filterManagementUIState;
+    private final FilterManagementUIState filterManagementUIState;
 
-    @Autowired
-    private SpPermissionChecker permissionChecker;
+    private final SpPermissionChecker permissionChecker;
 
     private Label headerCaption;
 
@@ -61,11 +52,12 @@ public class TargetFilterHeader extends VerticalLayout {
 
     private SPUIButton searchResetIcon;
 
-    /**
-     * Initialize the Campaign Status History Header.
-     */
-    @PostConstruct
-    public void init() {
+    public TargetFilterHeader(final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
+            final SpPermissionChecker permissionChecker) {
+        this.eventBus = eventBus;
+        this.filterManagementUIState = filterManagementUIState;
+        this.permissionChecker = permissionChecker;
+
         createComponents();
         buildLayout();
     }

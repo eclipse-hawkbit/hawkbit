@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -22,13 +19,14 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -48,14 +46,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private static final long serialVersionUID = 4862529368471627190L;
 
-    @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    @Autowired
-    private SpPermissionChecker permissionChecker;
+    private final SpPermissionChecker permissionChecker;
 
     private T selectedBaseEntity;
 
@@ -65,37 +60,38 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private Button manageMetadataBtn;
 
-    private TabSheet detailsTab;
+    protected TabSheet detailsTab;
 
-    private VerticalLayout detailsLayout;
+    private final VerticalLayout detailsLayout;
 
-    private VerticalLayout descriptionLayout;
+    private final VerticalLayout descriptionLayout;
 
-    private VerticalLayout logLayout;
+    private final VerticalLayout logLayout;
 
-    private VerticalLayout attributesLayout;
+    private final VerticalLayout attributesLayout;
 
-    /**
-     * Initialize components.
-     */
-    @PostConstruct
-    protected void init() {
+    protected final ManagementUIState managementUIState;
+
+    protected AbstractTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
+        this.i18n = i18n;
+        this.eventBus = eventBus;
+        this.permissionChecker = permissionChecker;
+        this.managementUIState = managementUIState;
+        detailsLayout = getTabLayout();
+        descriptionLayout = getTabLayout();
+        logLayout = getTabLayout();
+        attributesLayout = getTabLayout();
         createComponents();
         buildLayout();
-        restoreState();
         eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     protected SpPermissionChecker getPermissionChecker() {
         return permissionChecker;
     }
 
-    protected EventBus.SessionEventBus getEventBus() {
+    protected EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 
@@ -153,7 +149,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.setHeight(90, Unit.PERCENTAGE);
         detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         detailsTab.setId(getTabSheetId());
-        addTabs(detailsTab);
     }
 
     private void buildLayout() {
@@ -196,7 +191,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
     }
 
-    private void restoreState() {
+    protected void restoreState() {
         if (onLoadIsTableRowSelected()) {
             populateData(null);
             editButton.setEnabled(true);
@@ -276,22 +271,18 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected VerticalLayout createLogLayout() {
-        logLayout = getTabLayout();
         return logLayout;
     }
 
     protected VerticalLayout createAttributesLayout() {
-        attributesLayout = getTabLayout();
         return attributesLayout;
     }
 
     protected VerticalLayout createDetailsLayout() {
-        detailsLayout = getTabLayout();
         return detailsLayout;
     }
 
     protected VerticalLayout createDescriptionLayout() {
-        descriptionLayout = getTabLayout();
         return descriptionLayout;
     }
 

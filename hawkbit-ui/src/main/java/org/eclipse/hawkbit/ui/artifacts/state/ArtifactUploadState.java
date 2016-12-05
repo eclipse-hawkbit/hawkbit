@@ -38,8 +38,7 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
 
     private static final long serialVersionUID = 8273440375917450859L;
 
-    @Autowired
-    private SoftwareModuleFilters softwareModuleFilters;
+    private final SoftwareModuleFilters softwareModuleFilters;
 
     private final Map<Long, String> deleteSofwareModules = new HashMap<>();
 
@@ -74,6 +73,11 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
 
     private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
+
+    @Autowired
+    ArtifactUploadState(final SoftwareModuleFilters softwareModuleFilters) {
+        this.softwareModuleFilters = softwareModuleFilters;
+    }
 
     public AtomicInteger getNumberOfFileUploadsFailed() {
         return numberOfFileUploadsFailed;
