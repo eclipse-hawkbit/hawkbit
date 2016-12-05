@@ -27,6 +27,10 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](https://github.com/eclipse/hawkbit/wiki/Run-hawkBit) for setting up a complete landscape.
 
+# hawkBit (Spring boot) starters
+
+Next to the [Example Application](examples/hawkbit-example-app) we are also providing a set of [Spring Boot Starters](hawkbit-starters) to quick start your own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
+
 #### Clone and build hawkBit
 ```
 $ git clone https://github.com/eclipse/hawkbit.git
@@ -57,24 +61,3 @@ $ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgm
   * Clustering capabilities for the update server.
   * Upgrade of Spring Boot and Vaadin dependencies.
   * And of course tons of usability improvements and bug fixes.
-
-
-# Modules
-* `examples` : hawkBit examples 
-* `hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
-* `hawkbit-autoconfigure` : Spring-boot auto-configuration. 
-* `hawkbit-core` : Core elements for internal interfaces and utility classes.
-* `hawkbit-ddi-api` : The hawkBit DDI API.
-* `hawkbit-ddi-dl-api` : The hawkBit DDI Download API.
-* `hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
-* `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
-* `hawkbit-dmf-api` : API for the Device Management Integration.  
-* `hawkbit-http-security` : Implementation for security filters for HTTP.  
-* `hawkbit-mgmt-api` : The hawkBit Management API
-* `hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
-* `hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
-* `hawkbit-rest-core` : Core elements for the rest modules.
-* `hawkbit-security-core` : Core security elements.  
-* `hawkbit-security-integration` : Security integration elements to integrate security into hawkBit.  
-* `hawkbit-test-report` : Test reports
-* `hawkbit-ui` : Vaadin UI.  
