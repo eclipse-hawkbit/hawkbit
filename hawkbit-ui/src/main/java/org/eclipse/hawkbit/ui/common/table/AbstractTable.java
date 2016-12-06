@@ -229,6 +229,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
                 || BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
             UI.getCurrent().access(this::refreshContainer);
         }
+
+        if (BaseEntityEventType.ADD_ENTITY == event.getEventType()) {
+            select(event.getEntity().getId());
+        }
     }
 
     /**

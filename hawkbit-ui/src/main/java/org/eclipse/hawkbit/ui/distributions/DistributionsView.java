@@ -39,6 +39,9 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -274,6 +277,10 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
         supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());
         supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getTable());
+
+        supportedEvents.put(SoftwareModuleCreatedEventContainer.class, softwareModuleTableLayout.getTable());
+        supportedEvents.put(SoftwareModuleDeletedEventContainer.class, softwareModuleTableLayout.getTable());
+        supportedEvents.put(SoftwareModuleUpdatedEventContainer.class, softwareModuleTableLayout.getTable());
 
         return supportedEvents;
     }
