@@ -23,7 +23,7 @@ import com.vaadin.server.WebBrowser;
 
 /**
  * Common Util to get date/time related information.
- * 
+ *
  *
  *
  *
@@ -87,6 +87,18 @@ public final class SPDateTimeUtil {
     }
 
     /**
+     * Get formatted date with browser time zone.
+     *
+     * @param lastQueryDate
+     * @param datePattern
+     *            pattern how to format the date (cp. {@code SimpleDateFormat})
+     * @return String formatted date
+     */
+    public static String getFormattedDate(final Long lastQueryDate, final String datePattern) {
+        return formatDate(lastQueryDate, null, datePattern);
+    }
+
+    /**
      * Get formatted date 'created at' by entity.
      *
      * @param baseEntity
@@ -114,20 +126,40 @@ public final class SPDateTimeUtil {
         return formatDate(baseEntity.getLastModifiedAt(), StringUtils.EMPTY);
     }
 
-    private static String formatDate(final Long lastQueryDate, final String defaultString) {
+    /**
+     * Get formatted date 'last modified at' by entity.
+     *
+     * @param baseEntity
+     *            the entity
+     * @param datePattern
+     *            pattern how to format the date (cp. {@code SimpleDateFormat})
+     * @return String formatted date
+     */
+    public static String formatLastModifiedAt(final BaseEntity baseEntity, final String datePattern) {
+        if (baseEntity == null) {
+            return StringUtils.EMPTY;
+        }
+        return formatDate(baseEntity.getLastModifiedAt(), StringUtils.EMPTY, datePattern);
+    }
+
+    private static String formatDate(final Long lastQueryDate, final String defaultString, final String datePattern) {
         if (lastQueryDate != null) {
-            final SimpleDateFormat format = new SimpleDateFormat(SPUIDefinitions.LAST_QUERY_DATE_FORMAT);
+            final SimpleDateFormat format = new SimpleDateFormat(datePattern);
             format.setTimeZone(getBrowserTimeZone());
             return format.format(new Date(lastQueryDate));
         }
         return defaultString;
     }
 
+    private static String formatDate(final Long lastQueryDate, final String defaultString) {
+        return formatDate(lastQueryDate, defaultString, SPUIDefinitions.LAST_QUERY_DATE_FORMAT);
+    }
+
     /**
      * Creates a formatted string of a duration in format '1 year 2 months 3
      * days 4 hours 5 minutes 6 seconds' zero values will be ignored in the
      * formatted string.
-     * 
+     *
      * @param startMillis
      *            the start milliseconds of the duration
      * @param endMillis
@@ -162,34 +194,34 @@ public final class SPDateTimeUtil {
 
     /**
      * Enum to get the i18n key for single or plural calendar labels.
-     * 
+     *
      *
      *
      *
      */
     private enum CalendarI18N {
         /**
-         * 
+         *
          */
         YEAR("calendar.year", "calendar.years"),
         /**
-         * 
+         *
          */
         MONTH("calendar.month", "calendar.months"),
         /**
-         * 
+         *
          */
         DAY("calendar.days", "calendar.days"),
         /**
-         * 
+         *
          */
         HOUR("calendar.hour", "calendar.hours"),
         /**
-         * 
+         *
          */
         MINUTE("calendar.minute", "calendar.minutes"),
         /**
-         * 
+         *
          */
         SECOND("calendar.second", "calendar.seconds");
 
@@ -197,7 +229,7 @@ public final class SPDateTimeUtil {
         private final String plural;
 
         /**
-         * 
+         *
          */
         CalendarI18N(final String single, final String plural) {
             this.single = single;

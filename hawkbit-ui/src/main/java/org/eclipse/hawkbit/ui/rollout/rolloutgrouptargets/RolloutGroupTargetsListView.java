@@ -8,43 +8,51 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
-import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Label;
 
 /**
  * Rollout Group Targets List View.
  */
-public class RolloutGroupTargetsListView extends AbstractGridLayout {
-
+public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
     private static final long serialVersionUID = 26089134783467012L;
 
-    private final RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
+    private final RolloutUIState rolloutUIState;
 
     public RolloutGroupTargetsListView(final UIEventBus eventBus, final I18N i18n,
             final RolloutUIState rolloutUIState) {
-        super(new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState),
-                new RolloutGroupTargetsListGrid(i18n, eventBus, rolloutUIState));
-
-        this.rolloutGroupTargetsCountLabelMessage = new RolloutGroupTargetsCountLabelMessage(rolloutUIState,
-                (RolloutGroupTargetsListGrid) grid, i18n, eventBus);
-
-        buildLayout();
+        super(i18n, eventBus);
+        this.rolloutUIState = rolloutUIState;
+        this.setFooterSupport(new RolloutTargetsCountFooterSupport());
+        init();
     }
 
     @Override
-    protected boolean hasCountMessage() {
-
-        return true;
+    public AbstractOrderedLayout createGridHeader() {
+        return new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState);
     }
 
     @Override
-    protected Label getCountMessageLabel() {
-
-        return rolloutGroupTargetsCountLabelMessage;
+    public RolloutGroupTargetsListGrid createGrid() {
+        return new RolloutGroupTargetsListGrid(i18n, eventBus, rolloutUIState);
     }
 
+    class RolloutTargetsCountFooterSupport extends AbstractFooterSupport {
+        private static final long serialVersionUID = 3300400541786329735L;
+
+        @Override
+        protected Label getFooterMessageLabel() {
+            RolloutGroupTargetsCountLabelMessage countMessageLabel = new RolloutGroupTargetsCountLabelMessage(
+                    rolloutUIState, (RolloutGroupTargetsListGrid) grid, i18n,
+                    eventBus);
+            countMessageLabel.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
+            return countMessageLabel;
+        }
+    }
 }

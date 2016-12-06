@@ -18,9 +18,21 @@
     padding-bottom: 25px;
     padding-top: 5px;
   }
-
-  //Color of forced label
-  .action-history-table-col-forced-label {
-    color: $hawkbit-primary-color;
+  
+  .action-history-message-grid {
+    .v-grid-cell {
+      border: none !important;
+      cursor: move;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      -o-text-overflow: ellipsis;
+      -icab-text-overflow: ellipsis;
+      -khtml-text-overflow: ellipsis;
+      -moz-text-overflow: ellipsis;
+      -webkit-text-overflow: ellipsis;
+      font-size: $v-font-size--small !important;
+      box-shadow: none !important;
+    }
   }
 }

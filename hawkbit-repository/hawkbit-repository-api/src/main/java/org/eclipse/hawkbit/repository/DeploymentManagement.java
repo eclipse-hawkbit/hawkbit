@@ -62,7 +62,7 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
-     * 
+     *
      * @throw {@link EntityNotFoundException} if either provided
      *        {@link DistributionSet} or {@link Target}s do not exist
      */
@@ -83,7 +83,7 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
-     * 
+     *
      * @throw {@link EntityNotFoundException} if either provided
      *        {@link DistributionSet} or {@link Target}s do not exist
      */
@@ -106,7 +106,7 @@ public interface DeploymentManagement {
      * @throw IncompleteDistributionSetException if mandatory
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
-     * 
+     *
      * @throw {@link EntityNotFoundException} if either provided
      *        {@link DistributionSet} or {@link Target}s do not exist
      */
@@ -143,7 +143,7 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -273,15 +273,16 @@ public interface DeploymentManagement {
     Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Long actionId);
 
     /**
-     * Retrieves all {@link Action}s of a specific target ordered by action ID.
+     * Retrieves all messages for an {@link ActionStatus}.
      *
-     * @param controllerId
-     *            the target associated with the actions
-     * @return a list of actions associated with the given target ordered by
-     *         action ID
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param actionStatusId
+     *            the id of {@link ActionStatus} to retrieve the messages from
+     * @return a page of messages by a specific {@link ActionStatus} id
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(@NotNull String controllerId);
+    Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, @NotNull Long actionStatusId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
@@ -362,7 +363,7 @@ public interface DeploymentManagement {
 
     /**
      * All {@link ActionStatus} entries in the repository.
-     * 
+     *
      * @param pageable
      *            the pagination parameter
      * @return {@link Page} of {@link ActionStatus} entries

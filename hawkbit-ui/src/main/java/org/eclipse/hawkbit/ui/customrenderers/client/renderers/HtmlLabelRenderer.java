@@ -17,7 +17,7 @@ import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
 /**
- * 
+ *
  * Renders label with provided value and style.
  *
  */
@@ -33,6 +33,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         Map<String, String> map = formatInput(input);
         String value = map.containsKey("value") ? map.get("value") : null;
         String style = map.containsKey("style") ? map.get("style") : null;
+        String title = map.containsKey("title") ? map.get("title") : null;
         String id = map.containsKey("id") ? map.get("id") : null;
 
         if (value != null) {
@@ -42,6 +43,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         }
         applyStyle(label, style);
         label.getElement().setId(id);
+        label.getElement().setTitle(title);
     }
 
     private void applyStyle(VLabel label, String style) {
@@ -57,7 +59,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         return new StringBuilder(style).append(" ").append(VLabel.CLASSNAME).append("-").append(style).toString();
     }
 
-    private Map<String, String> formatInput(String input) {
+    private static Map<String, String> formatInput(String input) {
         Map<String, String> details = new HashMap<>();
         String[] tempData = input.split(",");
         for (String statusWithCount : tempData) {

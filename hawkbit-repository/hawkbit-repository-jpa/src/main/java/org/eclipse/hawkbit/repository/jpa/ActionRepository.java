@@ -80,6 +80,17 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Slice<Action> findByTargetControllerId(Pageable pageable, String controllerId);
 
     /**
+     * Retrieves all {@link Action}s which are referring the given targetId
+     *
+     * @param pageable
+     *            page parameters
+     * @param targetId
+     *            the target to find assigned actions for
+     * @return the found {@link Action}s
+     */
+    Page<Action> findByTargetId(Pageable pageable, Long targetId);
+
+    /**
      * Retrieves all {@link Action}s which are active and referring to the given
      * {@link Target} order by ID ascending.
      *
@@ -94,14 +105,14 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Retrieves the oldest {@link Action} that is active and referring to the
      * given {@link Target}.
-     * 
+     *
      * @param sort
      *            order
      * @param controllerId
      *            the target to find assigned actions
      * @param active
      *            the action active flag
-     * 
+     *
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
@@ -208,6 +219,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the count of actions referring to the given target
      */
     Long countByTargetControllerId(String controllerId);
+
+    /**
+     * Counts all {@link Action}s referring to the given targetId.
+     *
+     * @param targetId
+     *            the target to count the {@link Action}s
+     * @return the count of actions referring to the given target
+     */
+    Long countByTargetId(Long targetId);
 
     /**
      * Counts all {@link Action}s referring to the given DistributionSet.

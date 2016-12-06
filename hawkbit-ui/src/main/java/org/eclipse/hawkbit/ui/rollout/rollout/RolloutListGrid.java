@@ -81,7 +81,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 /**
  * Rollout list grid component.
  */
-public class RolloutListGrid extends AbstractGrid {
+public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final long serialVersionUID = 4060904914954370524L;
 
@@ -137,6 +137,8 @@ public class RolloutListGrid extends AbstractGrid {
                 uiNotification, uiProperties, entityFactory, i18n, eventBus);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
+
+        init();
     }
 
     /**
@@ -195,7 +197,7 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     @Override
-    protected Container createContainer() {
+    protected LazyQueryContainer createContainer() {
         final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<>(RolloutBeanQuery.class);
         return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, VAR_ID), rolloutQf);
     }

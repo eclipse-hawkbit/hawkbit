@@ -37,7 +37,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     /**
      * Base entity event
-     * 
+     *
      * @param eventType
      *            the event type
      * @param entity
@@ -55,7 +55,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
 
     /**
      * Base entity event
-     * 
+     *
      * @param eventType
      *            the event type
      * @param entityIds
@@ -74,6 +74,10 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
         return entity;
     }
 
+    public Collection<Long> getEntityIds() {
+        return entityIds;
+    }
+
     public BaseEntityEventType getEventType() {
         return eventType;
     }
@@ -81,7 +85,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     /**
      * Checks if the remote event is the same as this UI event. Then maybe you
      * can skip the remote event because it is already executed.
-     * 
+     *
      * @param tenantAwareEvent
      *            the remote event
      * @return {@code true} match ; {@code false} not match

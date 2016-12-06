@@ -216,24 +216,57 @@ public final class UIComponentIdProvider {
      */
     public static final String PENDING_ACTION_BUTTON = "pending.action.button";
     /**
-     * Action history table Id.
+     * Action history grid Id.
      */
-    public static final String ACTION_HISTORY_TABLE_ID = "action.history.tableId";
+    public static final String ACTION_HISTORY_GRID_ID = "action.history.gridId";
+    /**
+     * Action history details grid Id.
+     */
+    public static final String ACTION_HISTORY_DETAILS_GRID_ID = "action.history.details.gridId";
+    /**
+     * Action history message grid Id.
+     */
+    public static final String ACTION_HISTORY_MESSAGE_GRID_ID = "action.history.message.gridId";
 
     /**
-     * Action history table cancel Id.
+     * Action history table cancel button Id.
      */
     public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
 
     /**
-     * Action history table force Id.
+     * Action history table force button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
 
     /**
-     * Action history table force quit Id.
+     * Action history table force quit button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
+
+    /**
+     * Action history table forced label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCED_LABEL_ID = "action.history.table.forcedId";
+
+    /**
+     * Action history table time-forced label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID = "action.history.table.timedforceId";
+
+    /**
+     * Action history table status label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_STATUS_LABEL_ID = "action.history.table.statusId";
+
+    /**
+     * Action history table active-state label Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";
+
+    /**
+     * Action status grid status label Id.
+     */
+    public static final String ACTION_STATUS_GRID_STATUS_LABEL_ID = "action.status.grid.statusId";
 
     /**
      * ID for option group save timeforced

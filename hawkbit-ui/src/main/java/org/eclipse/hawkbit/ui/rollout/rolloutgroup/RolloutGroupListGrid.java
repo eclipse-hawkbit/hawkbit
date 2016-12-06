@@ -52,7 +52,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 /**
  * Rollout group list grid component.
  */
-public class RolloutGroupListGrid extends AbstractGrid {
+public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final long serialVersionUID = 4060904914954370524L;
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
@@ -83,6 +83,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
         super(i18n, eventBus, permissionChecker);
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.rolloutUIState = rolloutUIState;
+
+        init();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -112,7 +114,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     @Override
-    protected Container createContainer() {
+    protected LazyQueryContainer createContainer() {
         final BeanQueryFactory<RolloutGroupBeanQuery> rolloutQf = new BeanQueryFactory<>(RolloutGroupBeanQuery.class);
         return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);

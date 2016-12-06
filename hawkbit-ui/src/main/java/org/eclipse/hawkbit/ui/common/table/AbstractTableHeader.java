@@ -258,7 +258,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private void openSearchTextField() {
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
-        searchResetIcon.togleIcon(FontAwesome.TIMES);
+        searchResetIcon.toggleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);
         searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchField.focus();
@@ -268,7 +268,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         searchField.setValue("");
         searchField.addStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
-        searchResetIcon.togleIcon(FontAwesome.SEARCH);
+        searchResetIcon.toggleIcon(FontAwesome.SEARCH);
         searchResetIcon.setData(Boolean.FALSE);
         resetSearchText();
     }
@@ -297,12 +297,12 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     private void showMinIcon() {
-        maxMinIcon.togleIcon(FontAwesome.COMPRESS);
+        maxMinIcon.toggleIcon(FontAwesome.COMPRESS);
         maxMinIcon.setData(Boolean.TRUE);
     }
 
     private void showMaxIcon() {
-        maxMinIcon.togleIcon(FontAwesome.EXPAND);
+        maxMinIcon.toggleIcon(FontAwesome.EXPAND);
         maxMinIcon.setData(Boolean.FALSE);
     }
 

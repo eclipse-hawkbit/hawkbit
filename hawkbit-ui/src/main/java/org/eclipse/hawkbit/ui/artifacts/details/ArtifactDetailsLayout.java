@@ -476,12 +476,12 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void showMinIcon() {
-        maxMinButton.togleIcon(FontAwesome.COMPRESS);
+        maxMinButton.toggleIcon(FontAwesome.COMPRESS);
         maxMinButton.setData(Boolean.TRUE);
     }
 
     private void showMaxIcon() {
-        maxMinButton.togleIcon(FontAwesome.EXPAND);
+        maxMinButton.toggleIcon(FontAwesome.EXPAND);
         maxMinButton.setData(Boolean.FALSE);
     }
 

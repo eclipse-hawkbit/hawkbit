@@ -316,5 +316,11 @@
   .form-lastrow {
 	padding-bottom: 12px !important;
   }
+  
+  .text-cut {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 
 }

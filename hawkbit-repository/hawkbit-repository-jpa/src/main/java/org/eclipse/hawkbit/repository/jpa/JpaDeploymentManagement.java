@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionWithStatusCount;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -557,29 +558,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final String controllerId) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<JpaActionWithStatusCount> query = cb.createQuery(JpaActionWithStatusCount.class);
-        final Root<JpaAction> actionRoot = query.from(JpaAction.class);
-        final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionRoot.join(JpaAction_.actionStatus,
-                JoinType.LEFT);
-        final Join<JpaAction, JpaDistributionSet> actionDsJoin = actionRoot.join(JpaAction_.distributionSet);
-        final Join<JpaAction, JpaRollout> actionRolloutJoin = actionRoot.join(JpaAction_.rollout, JoinType.LEFT);
-
-        final CriteriaQuery<JpaActionWithStatusCount> multiselect = query.distinct(true).multiselect(
-                actionRoot.get(JpaAction_.id), actionRoot.get(JpaAction_.actionType), actionRoot.get(JpaAction_.active),
-                actionRoot.get(JpaAction_.forcedTime), actionRoot.get(JpaAction_.status),
-                actionRoot.get(JpaAction_.createdAt), actionRoot.get(JpaAction_.lastModifiedAt),
-                actionDsJoin.get(JpaDistributionSet_.id), actionDsJoin.get(JpaDistributionSet_.name),
-                actionDsJoin.get(JpaDistributionSet_.version), cb.count(actionStatusJoin),
-                actionRolloutJoin.get(JpaRollout_.name));
-        multiselect.where(cb.equal(actionRoot.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
-        multiselect.orderBy(cb.desc(actionRoot.get(JpaAction_.id)));
-        multiselect.groupBy(actionRoot.get(JpaAction_.id));
-        return Collections.unmodifiableList(entityManager.createQuery(multiselect).getResultList());
-    }
-
-    @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
             final Pageable pageable) {
 
@@ -638,6 +616,29 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
         return actionStatusRepository.getByActionId(pageReq, actionId);
+    }
+
+    @Override
+    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final Long actionStatusId) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
+        final Root<JpaActionStatus> countMsgQueryFrom = countMsgQuery.distinct(true).from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> cJoin = countMsgQueryFrom.joinList("messages", JoinType.LEFT);
+        countMsgQuery.select(cb.count(cJoin))
+                .where(cb.equal(countMsgQueryFrom.get(JpaActionStatus_.id), actionStatusId));
+        final Long totalCount = entityManager.createQuery(countMsgQuery).getSingleResult();
+
+        final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
+        final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
+        final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
+        selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
+
+        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult(pageable.getOffset())
+                .setMaxResults(pageable.getPageSize()).getResultList().stream().collect(Collectors.toList());
+
+        return new PageImpl<>(result, pageable, totalCount);
     }
 
     @Override

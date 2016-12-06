@@ -42,7 +42,7 @@ import com.vaadin.server.FontAwesome;
 /**
  * Grid component with targets of rollout group.
  */
-public class RolloutGroupTargetsListGrid extends AbstractGrid {
+public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final long serialVersionUID = -2244756637458984597L;
 
@@ -75,6 +75,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
             final RolloutUIState rolloutUIState) {
         super(i18n, eventBus, null);
         this.rolloutUIState = rolloutUIState;
+
+        init();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -87,7 +89,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     @Override
-    protected Container createContainer() {
+    protected LazyQueryContainer createContainer() {
         final BeanQueryFactory<RolloutGroupTargetsBeanQuery> rolloutgrouBeanQueryFactory = new BeanQueryFactory<>(
                 RolloutGroupTargetsBeanQuery.class);
         return new LazyQueryContainer(
@@ -195,7 +197,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     /**
-     * 
+     *
      * Converts {@link Status} into string with status icon details.
      *
      */

@@ -10,9 +10,11 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Label;
@@ -20,27 +22,32 @@ import com.vaadin.ui.Label;
 /**
  * Groups List View.
  */
-public class RolloutGroupsListView extends AbstractGridLayout {
+public class RolloutGroupsListView extends AbstractGridComponentLayout {
 
     private static final long serialVersionUID = 7252345838154270259L;
+
+    private final SpPermissionChecker permissionChecker;
+    private final RolloutUIState rolloutUIState;
+    private final transient RolloutGroupManagement rolloutGroupManagement;
 
     public RolloutGroupsListView(final I18N i18n, final UIEventBus eventBus,
             final RolloutGroupManagement rolloutGroupManagement, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker) {
-        super(new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n),
-                new RolloutGroupListGrid(i18n, eventBus, rolloutGroupManagement, rolloutUIState, permissionChecker));
-
-        buildLayout();
+        super(i18n, eventBus);
+        this.permissionChecker = permissionChecker;
+        this.rolloutUIState = rolloutUIState;
+        this.rolloutGroupManagement = rolloutGroupManagement;
+        init();
     }
 
     @Override
-    protected boolean hasCountMessage() {
-        return false;
+    public RolloutGroupsListHeader createGridHeader() {
+        return new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n);
     }
 
     @Override
-    protected Label getCountMessageLabel() {
-        return null;
+    public AbstractGrid<LazyQueryContainer> createGrid() {
+        return new RolloutGroupListGrid(i18n, eventBus, rolloutGroupManagement, rolloutUIState, permissionChecker);
     }
 
 }
