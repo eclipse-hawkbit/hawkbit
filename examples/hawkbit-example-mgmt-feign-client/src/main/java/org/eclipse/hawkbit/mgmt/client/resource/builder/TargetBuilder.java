@@ -110,7 +110,7 @@ public class TargetBuilder {
     public List<MgmtTargetRequestBody> buildAsList(final int offset, final int count) {
         final List<MgmtTargetRequestBody> bodyList = Lists.newArrayList();
         for (int index = offset; index < count + offset; index++) {
-            bodyList.add(doBuild(String.valueOf(index)));
+            bodyList.add(doBuild(String.format("%06d", index)));
         }
         return bodyList;
     }
