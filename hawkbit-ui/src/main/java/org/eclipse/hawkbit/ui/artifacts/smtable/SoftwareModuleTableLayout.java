@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -29,7 +29,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
     public SoftwareModuleTableLayout(final I18N i18n, final SpPermissionChecker permChecker,
             final ArtifactUploadState artifactUploadState, final UINotification uiNotification,
             final UIEventBus eventBus, final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
-            final UploadViewAcceptCriteria uploadViewAcceptCriteria) {
+            final UploadViewClientCriterion uploadViewClientCriterion) {
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareManagement, entityFactory);
@@ -41,7 +41,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
                 new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
                         softwareModuleAddUpdateWindow),
                 new SoftwareModuleTable(eventBus, i18n, uiNotification, artifactUploadState, softwareManagement,
-                        uploadViewAcceptCriteria, swMetadataPopupLayout),
+                        uploadViewClientCriterion, swMetadataPopupLayout),
                 new SoftwareModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
                         artifactUploadState, softwareManagement, swMetadataPopupLayout, entityFactory));
     }

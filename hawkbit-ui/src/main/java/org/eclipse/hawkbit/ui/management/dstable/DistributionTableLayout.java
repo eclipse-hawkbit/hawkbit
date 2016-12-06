@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -32,7 +32,7 @@ public class DistributionTableLayout extends AbstractTableLayout {
     public DistributionTableLayout(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final DistributionSetManagement distributionSetManagement,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final EntityFactory entityFactory,
+            final ManagementViewClientCriterion managementViewClientCriterion, final EntityFactory entityFactory,
             final UINotification notification, final TagManagement tagManagement,
             final SystemManagement systemManagement, final TargetManagement targetService) {
 
@@ -43,7 +43,7 @@ public class DistributionTableLayout extends AbstractTableLayout {
                 distributionSetManagement, entityFactory, permissionChecker);
 
         final DistributionTable distributionTable = new DistributionTable(eventBus, i18n, permissionChecker,
-                notification, managementUIState, managementViewAcceptCriteria, targetService, dsMetadataPopupLayout,
+                notification, managementUIState, managementViewClientCriterion, targetService, dsMetadataPopupLayout,
                 distributionSetManagement);
 
         super.init(

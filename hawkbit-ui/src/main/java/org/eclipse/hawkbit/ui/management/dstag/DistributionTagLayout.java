@@ -13,8 +13,8 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -38,12 +38,12 @@ public class DistributionTagLayout extends AbstractFilterLayout {
             final EntityFactory entityFactory, final UINotification uiNotification,
             final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+            final ManagementViewClientCriterion managementViewClientCriterion) {
 
         super(new DistributionTagHeader(i18n, managementUIState, permChecker, eventBus, tagManagement, entityFactory,
                 uiNotification),
                 new DistributionTagButtons(eventBus, managementUIState, entityFactory, i18n, uiNotification,
-                        permChecker, distFilterParameters, distributionSetManagement, managementViewAcceptCriteria));
+                        permChecker, distFilterParameters, distributionSetManagement, managementViewClientCriterion));
         this.managementUIState = managementUIState;
 
         restoreState();

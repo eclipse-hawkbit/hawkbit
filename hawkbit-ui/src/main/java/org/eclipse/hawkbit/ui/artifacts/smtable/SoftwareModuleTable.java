@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -59,18 +59,18 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    private final UploadViewClientCriterion uploadViewClientCriterion;
 
     private final SwMetadataPopupLayout swMetadataPopupLayout;
 
     SoftwareModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final SoftwareManagement softwareManagement,
-            final UploadViewAcceptCriteria uploadViewAcceptCriteria,
+            final UploadViewClientCriterion uploadViewClientCriterion,
             final SwMetadataPopupLayout swMetadataPopupLayout) {
         super(eventBus, i18n, uiNotification);
         this.artifactUploadState = artifactUploadState;
         this.softwareManagement = softwareManagement;
-        this.uploadViewAcceptCriteria = uploadViewAcceptCriteria;
+        this.uploadViewClientCriterion = uploadViewClientCriterion;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
 
         addNewContainerDS();
@@ -224,7 +224,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected AcceptCriterion getDropAcceptCriterion() {
-        return uploadViewAcceptCriteria;
+        return uploadViewClientCriterion;
     }
 
     @Override

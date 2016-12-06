@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -35,7 +35,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout {
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
             final UINotification uiNotification, final TagManagement tagManagement,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SystemManagement systemManagement) {
 
         final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
@@ -43,7 +43,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout {
 
         final DistributionSetTable distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification,
                 permissionChecker, manageDistUIState, distributionSetManagement, softwareManagement,
-                distributionsViewAcceptCriteria, targetManagement, popupLayout);
+                distributionsViewClientCriterion, targetManagement, popupLayout);
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, uiNotification, eventBus, distributionSetManagement, systemManagement, entityFactory,

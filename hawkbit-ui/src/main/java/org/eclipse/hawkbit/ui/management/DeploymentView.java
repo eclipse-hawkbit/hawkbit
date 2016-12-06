@@ -22,13 +22,12 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
 import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
@@ -46,7 +45,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -101,7 +99,7 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiproperties,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TagManagement tagManagement,
+            final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement) {
         this.eventbus = eventbus;
         this.permChecker = permChecker;
@@ -113,23 +111,23 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
                 i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
         this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
-                managementViewAcceptCriteria, permChecker, eventBus, uiNotification, entityFactory, targetManagement,
+                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory, targetManagement,
                 targetFilterQueryManagement);
         final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
-                managementUIState, permChecker, managementViewAcceptCriteria);
+                managementUIState, permChecker, managementViewClientCriterion);
 
         this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
-                eventBus, uiNotification, managementUIState, managementViewAcceptCriteria, deploymentManagement,
+                eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
                 uiproperties, permChecker, uiNotification, tagManagement);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,
-                managementViewAcceptCriteria);
+                managementViewClientCriterion);
         this.distributionTableLayoutNew = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
-                distributionSetManagement, managementViewAcceptCriteria, entityFactory, uiNotification, tagManagement,
+                distributionSetManagement, managementViewClientCriterion, entityFactory, uiNotification, tagManagement,
                 systemManagement, targetManagement);
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                tagManagement, managementViewAcceptCriteria, managementUIState, targetManagement, targetTable,
+                tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
                 deploymentManagement, distributionSetManagement);
     }
 
@@ -196,7 +194,6 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -273,15 +270,6 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             mainLayout.addComponent(deleteAndActionsLayout, 1, 1);
             mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
         }
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventbus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     private void maximizeTargetTable() {

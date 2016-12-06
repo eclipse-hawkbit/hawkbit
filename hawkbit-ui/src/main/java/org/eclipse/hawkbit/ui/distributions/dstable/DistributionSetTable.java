@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +31,9 @@ import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -81,9 +78,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetTable.class);
 
-    private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
-            Arrays.asList(DragEvent.SOFTWAREMODULE_DRAG));
-
     private final SpPermissionChecker permissionChecker;
 
     private final ManageDistUIState manageDistUIState;
@@ -92,7 +86,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     private final transient TargetManagement targetManagement;
 
@@ -101,14 +95,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     DistributionSetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement, final SoftwareManagement softwareManagement,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(eventBus, i18n, notification);
         this.permissionChecker = permissionChecker;
         this.manageDistUIState = manageDistUIState;
         this.distributionSetManagement = distributionSetManagement;
         this.softwareManagement = softwareManagement;
-        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.targetManagement = targetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         addTableStyleGenerator();
@@ -116,15 +110,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent event) {
-        if (event == DragEvent.HIDE_DROP_HINT) {
-            UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        } else if (DISPLAY_DROP_HINT_EVENTS.contains(event)) {
-            UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -139,7 +124,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(lastSelectedDsIdName -> events.stream().map(event -> event.getEntity())
+                .ifPresent(lastSelectedDsIdName -> events.stream().map(DistributionSetUpdateEvent::getEntity)
                         .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
                         .ifPresent(selectedSetUpdated -> eventBus.publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated))));
@@ -258,7 +243,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
-        return distributionsViewAcceptCriteria;
+        return distributionsViewClientCriterion;
     }
 
     @Override
@@ -380,7 +365,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
 
         eventBus.publish(this, DistributionsUIEvent.UPDATE_COUNT);
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
     }
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {

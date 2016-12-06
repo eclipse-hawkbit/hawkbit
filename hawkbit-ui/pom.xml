@@ -252,7 +252,6 @@
          <artifactId>spring-boot-configuration-processor</artifactId>
          <optional>true</optional>
       </dependency>
-
       <!-- Test -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
@@ -263,6 +262,11 @@
       <dependency>
          <groupId>org.mockito</groupId>
          <artifactId>mockito-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.google.gwt.gwtmockito</groupId>
+         <artifactId>gwtmockito</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

@@ -42,9 +42,8 @@ import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetAddUpdateWindowEvent;
@@ -107,7 +106,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private final SpPermissionChecker permChecker;
 
-    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final ManagementUIState managementUIState;
 
@@ -116,11 +115,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     public TargetTable(final UIEventBus eventBus, final I18N i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
-            final SpPermissionChecker permChecker, final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+            final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion) {
         super(eventBus, i18n, notification);
         this.targetManagement = targetManagement;
         this.permChecker = permChecker;
-        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
@@ -192,15 +191,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetCreatedEvents(final TargetCreatedEventContainer holder) {
         refreshTargets();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent dragEvent) {
-        if (dragEvent == DragEvent.TARGET_TAG_DRAG || dragEvent == DragEvent.DISTRIBUTION_DRAG) {
-            UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        } else {
-            UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -344,7 +334,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
-        return managementViewAcceptCriteria;
+        return managementViewClientCriterion;
     }
 
     private void reSelectItemsAfterDeletionEvent() {
@@ -453,7 +443,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
      *            as event
      */
     private void addPinClickListener(final ClickEvent event) {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         checkifAlreadyPinned(event.getButton());
         if (isTargetPinned) {
             pinTarget(event.getButton());

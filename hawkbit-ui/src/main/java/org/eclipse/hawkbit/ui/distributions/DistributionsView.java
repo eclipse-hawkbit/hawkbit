@@ -23,10 +23,9 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
@@ -41,7 +40,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -91,7 +89,7 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
             final UINotification uiNotification, final ManageDistUIState manageDistUIState,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
-            final TagManagement tagManagement, final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final TagManagement tagManagement, final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
             final ArtifactManagement artifactManagement) {
         this.permChecker = permChecker;
@@ -100,17 +98,17 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         this.uiNotification = uiNotification;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, distributionSetManagement,
-                distributionsViewAcceptCriteria);
+                distributionsViewClientCriterion);
         this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
                 softwareManagement, distributionSetManagement, targetManagement, entityFactory, uiNotification,
-                tagManagement, distributionsViewAcceptCriteria, systemManagement);
+                tagManagement, distributionsViewClientCriterion, systemManagement);
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus, softwareManagement,
-                entityFactory, manageDistUIState, permChecker, distributionsViewAcceptCriteria, artifactUploadState,
+                entityFactory, manageDistUIState, permChecker, distributionsViewClientCriterion, artifactUploadState,
                 artifactManagement);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
-                tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewAcceptCriteria);
+                tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewClientCriterion);
         this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                systemManagement, manageDistUIState, distributionsViewAcceptCriteria, distributionSetManagement,
+                systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
                 softwareManagement);
         this.manageDistUIState = manageDistUIState;
     }
@@ -149,7 +147,6 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -166,15 +163,6 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

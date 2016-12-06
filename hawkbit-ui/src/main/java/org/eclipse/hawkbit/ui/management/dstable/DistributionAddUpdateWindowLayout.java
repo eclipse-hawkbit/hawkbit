@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTable;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -299,7 +298,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * @return window
      */
     public CommonDialogWindow getWindow(final Long editDistId) {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
