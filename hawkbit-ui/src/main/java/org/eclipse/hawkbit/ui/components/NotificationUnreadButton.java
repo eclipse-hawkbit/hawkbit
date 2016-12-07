@@ -59,6 +59,7 @@ public class NotificationUnreadButton extends Button {
         addStyleName(ValoTheme.BUTTON_SMALL);
         addStyleName(STYLE);
         setHtmlContentAllowed(true);
+        setEnabled(false);
         createNotificationWindow();
         addClickListener(event -> toggleWindow(event));
     }
@@ -89,6 +90,7 @@ public class NotificationUnreadButton extends Button {
     private void toggleWindow(final ClickEvent event) {
         if (notificationsWindow.isAttached()) {
             notificationsWindow.close();
+            refreshCaption();
             return;
         }
         createUnreadMessagesLayout();
@@ -148,8 +150,10 @@ public class NotificationUnreadButton extends Button {
 
     private void refreshCaption() {
         setCaption(null);
+        setEnabled(notificationsWindow.isAttached());
         if (unreadNotificationCounter > 0) {
             setVisible(true);
+            setEnabled(true);
             setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotificationCounter + "</div>");
         }
         setDescription(i18n.get(DESCRIPTION, new Object[] { unreadNotificationCounter }));
