@@ -21,9 +21,8 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -43,7 +42,6 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.Page;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -59,7 +57,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     private final ManagementUIState managementUIState;
 
-    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final I18N i18n;
 
@@ -72,12 +70,12 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
     private final transient TargetManagement targetManagement;
 
     TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final I18N i18n,
+            final ManagementViewClientCriterion managementViewClientCriterion, final I18N i18n,
             final UINotification notification, final SpPermissionChecker permChecker, final EntityFactory entityFactory,
             final TargetManagement targetManagement) {
         super(eventBus, new TargetTagFilterButtonClick(eventBus, managementUIState));
         this.managementUIState = managementUIState;
-        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementViewClientCriterion = managementViewClientCriterion;
         this.i18n = i18n;
         this.notification = notification;
         this.permChecker = permChecker;
@@ -85,21 +83,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         this.targetManagement = targetManagement;
 
         addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent dragEvent) {
-        /*
-         * this has some flickering issue for addStyleName(
-         * "show-filter-drop-hint" ); Hence, doing with Javascripts
-         */
-        if (dragEvent == DragEvent.TARGET_DRAG) {
-            UI.getCurrent().access(
-                    () -> Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.dispTargetTagsDropHintScript()));
-        } else {
-            UI.getCurrent().access(
-                    () -> Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.hideTargetTagsDropHintScript()));
-        }
     }
 
     @Override
@@ -138,7 +121,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return managementViewAcceptCriteria;
+                return managementViewClientCriterion;
             }
 
             @Override

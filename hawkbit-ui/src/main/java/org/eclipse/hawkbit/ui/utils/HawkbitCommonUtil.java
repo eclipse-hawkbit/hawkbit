@@ -59,16 +59,9 @@ public final class HawkbitCommonUtil {
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
     public static final String HTML_UL_OPEN_TAG = "<ul>";
 
-    private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
     public static final String DIV_DESCRIPTION_START = "<div id=\"desc-length\"><p id=\"desciption-p\">";
     public static final String DIV_DESCRIPTION_END = "</p></div>";
 
-    private static final String DRAG_COUNT_ELEMENT = "var x = document.getElementById('sp-drag-count'); ";
-    private static final String CLOSE_BRACE = "\"; }';";
-    private static final String CLOSE_BRACE_NOSEMICOLON = "\"; } ";
-    private static final String COUNT_STYLE = " countStyle = document.createElement('style'); ";
-    private static final String COUNT_STYLE_ID = " countStyle.id=\"sp-drag-count\"; ";
-    private static final String APPEND_CHILD = " document.head.appendChild(countStyle);";
     private static final String SM_HIGHLIGHT_CREATE_SCRIPT = "smHighlight = document.createElement('style'); smHighlight.id=\"sm-table-highlight\";  document.head.appendChild(smHighlight); ";
     private static final String SM_HIGHLIGHT_REMOVE_SCRIPT = "var y = document.getElementById('sm-table-highlight'); if(y) { document.head.removeChild(y); } ";
     private static final String SM_HIGHLIGHT_RESET_SCRIPT = SM_HIGHLIGHT_REMOVE_SCRIPT + SM_HIGHLIGHT_CREATE_SCRIPT
@@ -81,10 +74,6 @@ public final class HawkbitCommonUtil {
     private static final String PREVIEW_BUTTON_COLOR_CREATE_SCRIPT = "tagColorPreview = document.createElement('style'); tagColorPreview.id=\"tag-color-preview\";  document.head.appendChild(tagColorPreview); ";
     private static final String PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT = "var a = document.getElementById('tag-color-preview'); if(a) { document.head.removeChild(a); } ";
     private static final String PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT = "document.getElementById('tag-color-preview').innerHTML = tagColorPreviewStyle;";
-    private static final String TARGET_TAG_DROP_CREATE_SCRIPT = "var p = document.getElementById('show-filter-drop-hint'); if(p) { } else { showTargetTagDrop = document.createElement('style'); showTargetTagDrop.id=\"show-filter-drop-hint\";  document.head.appendChild(showTargetTagDrop); }";
-    private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
-    private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
-    private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
 
     private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
@@ -107,7 +96,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Trim the text and convert into null in case of empty string.
-     * 
+     *
      * @param text
      *            as text to be trimed
      * @return null if the text is null or if the text is blank, text.trim() if
@@ -124,7 +113,7 @@ public final class HawkbitCommonUtil {
     /**
      * Concatenate the given text all the string arguments with the given
      * delimiter.
-     * 
+     *
      * @param delimiter
      *            the delimiter text to be used while concatenation.
      * @param texts
@@ -150,7 +139,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Returns the input text within html bold tag <b>..</b>.
-     * 
+     *
      * @param text
      *            is the text to be converted in to Bold
      * @return null if the input text param is null returns text with <b>...</b>
@@ -169,7 +158,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     * 
+     *
      * @param name
      * @return
      */
@@ -181,7 +170,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     * 
+     *
      * @param caption
      *            as caption of the details
      * @param name
@@ -196,7 +185,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Action History Details.
-     * 
+     *
      * @param name
      * @return
      */
@@ -208,7 +197,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get tool tip for Poll status.
-     * 
+     *
      * @param pollStatus
      * @param i18N
      * @return
@@ -226,7 +215,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Null check for text.
-     * 
+     *
      * @param orgText
      *            text to be formatted
      * @return String formatted text
@@ -293,27 +282,6 @@ public final class HawkbitCommonUtil {
             return text.replaceFirst(prefix, "");
         }
         return null;
-    }
-
-    /**
-     * Create javascript to display number of targets or distributions your are
-     * dragging in the drag image.
-     *
-     * @param count
-     * @return
-     */
-    public static String getDragRowCountJavaScript(final int count) {
-        final StringBuilder exeJS = new StringBuilder(DRAG_COUNT_ELEMENT).append(JS_DRAG_COUNT_REM_CHILD);
-        final String currentTheme = UI.getCurrent().getTheme();
-        if (count > 1) {
-            exeJS.append(COUNT_STYLE).append(COUNT_STYLE_ID)
-                    .append(" countStyle.innerHTML = '." + currentTheme + " tbody.v-drag-element tr:after { content:\""
-                            + count + "\";top:-15px } ." + currentTheme + " tr.v-drag-element:after { content:\""
-                            + count + CLOSE_BRACE_NOSEMICOLON + "." + currentTheme
-                            + " table.v-drag-element:after{ content:\"" + count + CLOSE_BRACE)
-                    .append(APPEND_CHILD);
-        }
-        return exeJS.toString();
     }
 
     /**
@@ -491,46 +459,6 @@ public final class HawkbitCommonUtil {
                 .append(color)
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
                 .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT).toString();
-    }
-
-    /**
-     * Java script to display drop hints for tags.
-     *
-     * @return javascript
-     */
-    public static String dispTargetTagsDropHintScript() {
-        final String targetDropStyle = "document.getElementById('show-filter-drop-hint').innerHTML = '."
-                + UI.getCurrent().getTheme() + " .target-tag-drop-hint { border: 1px dashed #26547a !important; }';";
-        return new StringBuilder().append(TARGET_TAG_DROP_CREATE_SCRIPT).append(targetDropStyle).toString();
-    }
-
-    /**
-     * Java script to hide drop hints for tags.
-     *
-     * @return javascript
-     */
-    public static String hideTargetTagsDropHintScript() {
-        return TARGET_TAG_DROP_REMOVE_SCRIPT;
-    }
-
-    /**
-     * Java script to display drop hint for Delete button.
-     *
-     * @return javascript
-     */
-    public static String dispDeleteDropHintScript() {
-        final String deleteTagDropStyle = "document.getElementById('show-delete-drop-hint').innerHTML = '."
-                + UI.getCurrent().getTheme() + " .show-delete-drop-hint { border: 1px dashed #26547a !important; }';";
-        return new StringBuilder().append(DELETE_DROP_CREATE_SCRIPT).append(deleteTagDropStyle).toString();
-    }
-
-    /**
-     * Java script to hide drop hint for delete button.
-     *
-     * @return javascript
-     */
-    public static String hideDeleteDropHintScript() {
-        return DELETE_TAG_DROP_REMOVE_SCRIPT;
     }
 
     /**

@@ -29,6 +29,8 @@
   &[style*="hidden"] {
 
   }
+  right: -10px;
+  top: -15px;
 }
 
 @mixin table {
@@ -87,7 +89,6 @@
 
     &:after {
       @include count-sp-drag-image;
-      right: -10px;
     }
 
     &.v-table-focus {
@@ -128,7 +129,6 @@
 
     &:after {
       @include count-sp-drag-image;
-      right: -10px;
     }
   }
 }

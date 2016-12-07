@@ -30,6 +30,8 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEven
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
+import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -50,8 +52,8 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.base.Strings;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.event.dd.acceptcriteria.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamVariable;
@@ -108,6 +110,9 @@ public class UploadLayout extends VerticalLayout {
     private Boolean hasDirectory = Boolean.FALSE;
 
     private Button uploadStatusButton;
+
+    private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
+            UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
 
     private final transient ArtifactManagement artifactManagement;
 
@@ -229,7 +234,7 @@ public class UploadLayout extends VerticalLayout {
 
         @Override
         public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
+            return acceptAllExceptBlacklisted;
         }
 
         @Override
@@ -755,7 +760,7 @@ public class UploadLayout extends VerticalLayout {
 
     /**
      * set upload status and confirmation window.
-     * 
+     *
      * @param newWidth
      *            browser width
      * @param newHeight

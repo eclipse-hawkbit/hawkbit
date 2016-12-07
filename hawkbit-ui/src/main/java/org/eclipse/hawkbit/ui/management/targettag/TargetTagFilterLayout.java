@@ -14,8 +14,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -33,13 +33,13 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     private final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
 
     public TargetTagFilterLayout(final I18N i18n, final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
-            final ManagementUIState managementUIState, final ManagementViewAcceptCriteria managementViewAcceptCriteria,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final UINotification notification,
-            final EntityFactory entityFactory, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final ManagementUIState managementUIState,
+            final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(new TargetTagFilterHeader(i18n, createUpdateTargetTagLayout, managementUIState, permChecker, eventBus),
                 new MultipleTargetFilter(createUpdateTargetTagLayout, permChecker, managementUIState, i18n, eventBus,
-                        managementViewAcceptCriteria, notification, entityFactory, targetManagement,
+                        managementViewClientCriterion, notification, entityFactory, targetManagement,
                         targetFilterQueryManagement),
                 managementUIState);
         this.createUpdateTargetTagLayout = createUpdateTargetTagLayout;

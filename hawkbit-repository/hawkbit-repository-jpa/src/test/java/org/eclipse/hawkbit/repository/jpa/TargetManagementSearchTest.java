@@ -67,6 +67,9 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 targetDsAIdPref.concat(" description"), lastTargetQueryNotOverdue);
         targAs = targetManagement.toggleTagAssignment(targAs, targTagX).getAssignedEntity();
 
+        final Target targSpecialName = targetManagement
+                .updateTarget(entityFactory.target().update(targAs.get(0).getControllerId()).name("targ-A-special"));
+
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = testdataFactory.createTargets(100, targetDsBIdPref,
                 targetDsBIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
@@ -113,6 +116,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findTargetByControllerID(targCs.stream().map(Target::getControllerId).collect(Collectors.toList()));
 
         // try to find several targets with different filter settings
+        verifyThat1TargetHasNameAndId("targ-A-special", targSpecialName.getControllerId());
         verifyThatRepositoryContains400Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);
@@ -633,6 +637,23 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         .as("and contains the following elements").containsExactly(expectedIdName)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
                                 .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
+    }
+
+    @Step
+    private void verifyThat1TargetHasNameAndId(final String name, final String controllerId) {
+        assertThat(targetManagement
+                .findTargetByFilters(pageReq, null, null, name, null, Boolean.FALSE)
+                .getContent()).as("has number of elements").hasSize(1)
+                .as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countTargetByFilters(null, null, name,
+                        null, Boolean.FALSE)));
+
+        assertThat(targetManagement
+                .findTargetByFilters(pageReq, null, null, controllerId, null, Boolean.FALSE)
+                .getContent()).as("has number of elements").hasSize(1)
+                .as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countTargetByFilters(null, null, controllerId,
+                        null, Boolean.FALSE)));
     }
 
     @Step

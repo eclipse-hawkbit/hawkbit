@@ -20,11 +20,10 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
@@ -59,7 +58,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private final transient TagManagement tagManagementService;
 
-    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewClientCriterion managementViewClientCriterion;
 
     private final ManagementUIState managementUIState;
 
@@ -69,13 +68,13 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     public DeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final TagManagement tagManagementService,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final ManagementUIState managementUIState,
-            final TargetManagement targetManagement, final TargetTable targetTable,
-            final DeploymentManagement deploymentManagement,
+            final ManagementViewClientCriterion managementViewClientCriterion,
+            final ManagementUIState managementUIState, final TargetManagement targetManagement,
+            final TargetTable targetTable, final DeploymentManagement deploymentManagement,
             final DistributionSetManagement distributionSetManagement) {
         super(i18n, permChecker, eventBus, notification);
         this.tagManagementService = tagManagementService;
-        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.manangementConfirmationWindowLayout = new ManangementConfirmationWindowLayout(i18n, eventBus,
                 managementUIState, targetManagement, deploymentManagement, distributionSetManagement);
@@ -89,28 +88,6 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.UPDATE_COUNT) {
             UI.getCurrent().access(this::updateActionCount);
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent event) {
-        if (event == DragEvent.HIDE_DROP_HINT) {
-            hideDropHints();
-        } else if (event == DragEvent.TARGET_TAG_DRAG || event == DragEvent.TARGET_DRAG) {
-            /**
-             * Duplicate permission check required as hasDeletePermission() is
-             * generic both for target and ds.
-             */
-            if (permChecker.hasDeleteTargetPermission()) {
-                showDropHints();
-            }
-        } else if ((event == DragEvent.DISTRIBUTION_TAG_DRAG || event == DragEvent.DISTRIBUTION_DRAG)
-                && permChecker.hasDeleteDistributionPermission()) {
-            /**
-             * Duplicate permission check required as hasDeletePermission() is
-             * generic both for target and ds.
-             */
-            showDropHints();
         }
     }
 
@@ -177,7 +154,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected AcceptCriterion getDeleteLayoutAcceptCriteria() {
-        return managementViewAcceptCriteria;
+        return managementViewClientCriterion;
     }
 
     @Override
@@ -188,8 +165,6 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         } else {
             processDeletion(event, source);
         }
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        hideDropHints();
     }
 
     private void processDeletion(final DragAndDropEvent event, final Component source) {

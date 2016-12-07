@@ -13,9 +13,9 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -34,10 +34,10 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     public SMTypeFilterLayout(final ArtifactUploadState artifactUploadState, final I18N i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
-            final SoftwareManagement softwareManagement, final UploadViewAcceptCriteria uploadViewAcceptCriteria) {
+            final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion) {
         super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, tagManagement, entityFactory,
                 uiNotification, softwareManagement),
-                new SMTypeFilterButtons(eventBus, artifactUploadState, uploadViewAcceptCriteria, softwareManagement));
+                new SMTypeFilterButtons(eventBus, artifactUploadState, uploadViewClientCriterion, softwareManagement));
 
         this.artifactUploadState = artifactUploadState;
         restoreState();

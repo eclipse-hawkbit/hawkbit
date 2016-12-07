@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -31,7 +31,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
     public SwModuleTableLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory,
             final ManageDistUIState manageDistUIState, final SpPermissionChecker permChecker,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final ArtifactManagement artifactManagement) {
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
@@ -43,7 +43,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState, softwareManagement,
-                        distributionsViewAcceptCriteria, artifactManagement, swMetadataPopupLayout,
+                        distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout,
                         artifactUploadState),
                 new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow, manageDistUIState,
                         softwareManagement, swMetadataPopupLayout, entityFactory));

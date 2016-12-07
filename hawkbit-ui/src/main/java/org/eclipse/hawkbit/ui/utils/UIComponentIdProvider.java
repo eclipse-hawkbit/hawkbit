@@ -379,6 +379,12 @@ public final class UIComponentIdProvider {
      * ID-Target tag table.
      */
     public static final String TARGET_TAG_TABLE_ID = "target.tag.tableId";
+
+    /**
+     * ID-Target tag table drop area.
+     */
+    public static final String TARGET_TAG_DROP_AREA_ID = "target.tag.drop.area";
+
     /**
      * ID-Distibution tag table.
      */

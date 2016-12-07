@@ -27,10 +27,9 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
@@ -51,7 +50,6 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -59,7 +57,6 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.UI;
 
 /**
  * Manage distributions and distributions type view.
@@ -98,7 +95,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             final UINotification uiNotification, final ManageDistUIState manageDistUIState,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory,
-            final TagManagement tagManagement, final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final TagManagement tagManagement, final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
             final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
             final DistributionsViewMenuItem distributionsViewMenuItem) {
@@ -108,17 +105,17 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.uiNotification = uiNotification;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, softwareManagement, distributionSetManagement,
-                distributionsViewAcceptCriteria);
+                distributionsViewClientCriterion);
         this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
                 softwareManagement, distributionSetManagement, targetManagement, entityFactory, uiNotification,
-                tagManagement, distributionsViewAcceptCriteria, systemManagement);
+                tagManagement, distributionsViewClientCriterion, systemManagement);
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus, softwareManagement,
-                entityFactory, manageDistUIState, permChecker, distributionsViewAcceptCriteria, artifactUploadState,
+                entityFactory, manageDistUIState, permChecker, distributionsViewClientCriterion, artifactUploadState,
                 artifactManagement);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
-                tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewAcceptCriteria);
+                tagManagement, entityFactory, uiNotification, softwareManagement, distributionsViewClientCriterion);
         this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                systemManagement, manageDistUIState, distributionsViewAcceptCriteria, distributionSetManagement,
+                systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
                 softwareManagement);
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewMenuItem = distributionsViewMenuItem;
@@ -157,7 +154,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -174,15 +170,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                getEventBus().publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -37,14 +37,14 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
+    private final DistributionsViewClientCriterion distributionsViewClientCriterion;
+    
     DSTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final DistributionSetManagement distributionSetManagement) {
         super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetManagement));
         this.manageDistUIState = manageDistUIState;
-        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.distributionsViewClientCriterion = distributionsViewClientCriterion;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return distributionsViewAcceptCriteria;
+                return distributionsViewClientCriterion;
             }
 
             @Override

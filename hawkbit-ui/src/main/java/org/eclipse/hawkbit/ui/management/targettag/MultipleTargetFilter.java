@@ -13,9 +13,9 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -58,10 +58,10 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     MultipleTargetFilter(final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout,
             final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final I18N i18n,
-            final UIEventBus eventBus, final ManagementViewAcceptCriteria managementViewAcceptCriteria,
+            final UIEventBus eventBus, final ManagementViewClientCriterion managementViewClientCriterion,
             final UINotification notification, final EntityFactory entityFactory,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
-        this.filterByButtons = new TargetTagFilterButtons(eventBus, managementUIState, managementViewAcceptCriteria,
+        this.filterByButtons = new TargetTagFilterButtons(eventBus, managementUIState, managementViewClientCriterion,
                 i18n, notification, permChecker, entityFactory, targetManagement);
         this.targetFilterQueryButtonsTab = new TargetFilterQueryButtons(managementUIState, eventBus);
         this.filterByStatusFotter = new FilterByStatusLayout(i18n, eventBus, managementUIState);
@@ -100,7 +100,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     }
 
     /**
-     * 
+     *
      */
     private void switchToTabSelectedOnLoad() {
         if (managementUIState.isCustomFilterSelected()) {
@@ -128,7 +128,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         }
         targetTagTableLayout.addComponent(filterByButtons);
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
-        targetTagTableLayout.addStyleName("target-tag-drop-hint");
+        targetTagTableLayout.setId(UIComponentIdProvider.TARGET_TAG_DROP_AREA_ID);
         targetTagTableLayout.setExpandRatio(filterByButtons, 1.0F);
         simpleFilterTab.setCaption(i18n.get("caption.filter.simple"));
         simpleFilterTab.addComponent(targetTagTableLayout);
@@ -147,7 +147,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.ui.TabSheet.SelectedTabChangeListener#selectedTabChange(com
      * .vaadin.ui.TabSheet.SelectedTabChangeEvent)

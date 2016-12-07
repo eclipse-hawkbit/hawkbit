@@ -9,32 +9,30 @@
 // scss-lint:disable ImportantRule, PropertySortOrder
 @mixin drop-hint {
 
-  //Distribution tag table -Drop hint - Dashed border displayed
-  .show-filter-drop-hint {
-    border: 1px dashed $hawkbit-primary-color !important;
+  //Border for delete button wrapper.Which will be displayed when deletable components are dragged
+  .delete-button-border {
+    border: 1px dashed transparent;
   }
-
-  //Style to display drop hint on tables
-  .show-table-drop-hint {
+   
+  .show-drop-hint {
+    .type-button-layout {
+      border: 1px dashed $hawkbit-primary-color !important;
+    } 
+  }
+  .show-drop-hint.type-button-layout {
+      border-style: dashed !important;
+      border-width: 1px !important;
+      border-color: $hawkbit-primary-color !important;
+  }
+  .show-drop-hint.sp-table {
     .v-table-body {
       border-style: dashed !important;
       border-width: 1px !important;
       border-color: $hawkbit-primary-color !important;
     }
   }
-
-  //Style for target table header drop hint
-  .show-table-header-drop-hint {
-    .filter-drop-hint-layout {
-      border-style: dashed;
-      border-width: 1px;
-      border-color: $hawkbit-primary-color;
-    }
-  }
-
-  //Border for delete button wrapper.Which will be displayed when deletable components are dragged
-  .delete-button-border {
-    border: 1px dashed transparent;
+  .show-drop-hint.v-ddwrapper {
+    border: 1px dashed $hawkbit-primary-color !important;
   }
 
   //Target table header - distribution filter text field style
