@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -25,7 +24,6 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -143,7 +141,6 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         wrapper.setId(getDeleteAreaId());
         wrapper.setDropHandler(this);
         wrapper.addStyleName("delete-button-border");
-        wrapper.addStyleName(SPUIStyleDefinitions.SHOW_DELETE_DROP_HINT);
         return wrapper;
     }
 
@@ -246,24 +243,6 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             } else {
                 noActionBtn.setCaption(getNoActionsButtonLabel());
             }
-        }
-    }
-
-    /**
-     * Hide the drop hints.
-     */
-    protected void hideDropHints() {
-        if (hasDeletePermission()) {
-            Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.hideDeleteDropHintScript());
-        }
-    }
-
-    /**
-     * show the drop hints.
-     */
-    protected void showDropHints() {
-        if (hasDeletePermission()) {
-            Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.dispDeleteDropHintScript());
         }
     }
 

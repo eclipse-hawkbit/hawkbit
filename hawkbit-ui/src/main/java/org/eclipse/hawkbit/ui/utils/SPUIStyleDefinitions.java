@@ -59,11 +59,6 @@ public final class SPUIStyleDefinitions {
     public static final String SP_SMALL_TABLE_STYLE = "sp-table-small";
 
     /**
-     * Show drop hint style.
-     */
-    public static final String SHOW_DROP_HINT = "show-drop-hint";
-
-    /**
      * Drag highligh layout style.
      */
     public static final String DRAG_HIGHLIGHT_LAYOUT = "drag-hightlight-layout";
@@ -168,21 +163,6 @@ public final class SPUIStyleDefinitions {
      * Deployment view - message label style.
      */
     public static final String COUNT_MSG_BOX_SHOW = "count-msg-box";
-
-    /**
-     * Style to display drop hints for filter buttons.
-     */
-    public static final String SHOW_DROP_HINT_FILTER_BUTTON = "show-filter-drop-hint";
-
-    /**
-     * Style to display drop hints for table.
-     */
-    public static final String SHOW_DROP_HINT_TABLE = "show-table-drop-hint";
-
-    /**
-     * Style to display drop hint for delete area.
-     */
-    public static final String SHOW_DELETE_DROP_HINT = "show-delete-drop-hint";
 
     /**
      * Action button style- footer buttons.
