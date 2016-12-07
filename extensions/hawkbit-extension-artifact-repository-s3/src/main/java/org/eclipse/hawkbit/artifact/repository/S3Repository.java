@@ -115,7 +115,7 @@ public class S3Repository implements ArtifactRepository {
         final S3Artifact s3Artifact = createS3Artifact(sha1Hash16, mdMD5Hash16, contentType, file);
         checkHashes(s3Artifact, hash);
 
-        LOG.info("Storing file {} with length {} to AWS S3 bucket as SHA1 {}", file.getName(), file.length(),
+        LOG.info("Storing file {} with length {} to AWS S3 bucket {} as SHA1 {}", file.getName(), file.length(),
                 s3Properties.getBucketName(), sha1Hash16);
 
         if (exists(sha1Hash16)) {
