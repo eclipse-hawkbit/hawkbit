@@ -190,10 +190,6 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
             this.endAngle = endAngle;
         }
 
-        public double getStartAngle() {
-            return startAngle;
-        }
-
         public double getEndAngle() {
             return endAngle;
         }

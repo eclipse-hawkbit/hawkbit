@@ -23,14 +23,6 @@ public class GroupsPieChartConnector extends AbstractComponentConnector {
 
     private static final long serialVersionUID = -2907528194018611155L;
 
-    /**
-     * Initializes the connector
-     */
-    public GroupsPieChartConnector() {
-        registerRpc(GroupsPieChartClientRpc.class, new GroupsPieChartClientRpc() {
-        });
-    }
-
     @Override
     protected Widget createWidget() {
         return GWT.create(GroupsPieChartWidget.class);

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.groupschart;
 
-import org.eclipse.hawkbit.ui.rollout.groupschart.client.GroupsPieChartClientRpc;
-import org.eclipse.hawkbit.ui.rollout.groupschart.client.GroupsPieChartServerRpc;
 import org.eclipse.hawkbit.ui.rollout.groupschart.client.GroupsPieChartState;
 import com.vaadin.ui.AbstractComponent;
 
@@ -21,18 +19,6 @@ import java.util.List;
 public class GroupsPieChart extends AbstractComponent {
 
     private static final long serialVersionUID = 1311542227339430098L;
-
-    /**
-     * Instantiates a new pie chart and registers the RPC channel
-     */
-    public GroupsPieChart() {
-        registerRpc(new GroupsPieChartServerRpc() {
-            @SuppressWarnings("squid:UnusedPrivateMethod")
-            private GroupsPieChartClientRpc getClientRpc() {
-                return getRpcProxy(GroupsPieChartClientRpc.class);
-            }
-        });
-    }
 
     /**
      * Updates the state of the chart
