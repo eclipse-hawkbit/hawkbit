@@ -14,10 +14,10 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -32,7 +32,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 
 /**
  * Software module type filter buttons.
- * 
+ *
  */
 public class SMTypeFilterButtons extends AbstractFilterButtons {
 
@@ -40,13 +40,13 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final UploadViewAcceptCriteria uploadViewAcceptCriteria;
-
+    private final UploadViewClientCriterion uploadViewClientCriterion;
+    
     SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
-            final UploadViewAcceptCriteria uploadViewAcceptCriteria, final SoftwareManagement softwareManagement) {
+            final UploadViewClientCriterion uploadViewClientCriterion, final SoftwareManagement softwareManagement) {
         super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareManagement));
         this.artifactUploadState = artifactUploadState;
-        this.uploadViewAcceptCriteria = uploadViewAcceptCriteria;
+        this.uploadViewClientCriterion = uploadViewClientCriterion;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -93,7 +93,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return uploadViewAcceptCriteria;
+                return uploadViewClientCriterion;
             }
 
             @Override

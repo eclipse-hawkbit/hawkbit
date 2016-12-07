@@ -13,8 +13,8 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -35,10 +35,10 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
             final ManageDistUIState manageDistUIState, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareManagement softwareManagement,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria) {
+            final DistributionsViewClientCriterion distributionsViewClientCriterion) {
         super(new DistSMTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, tagManagement, entityFactory,
                 uiNotification, softwareManagement),
-                new DistSMTypeFilterButtons(eventBus, manageDistUIState, distributionsViewAcceptCriteria,
+                new DistSMTypeFilterButtons(eventBus, manageDistUIState, distributionsViewClientCriterion,
                         softwareManagement));
         this.manageDistUIState = manageDistUIState;
 

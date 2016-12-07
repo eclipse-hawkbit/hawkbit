@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Condition;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 
 /**
  * 
@@ -28,6 +31,7 @@ public class RolloutBuilder {
     private String successThreshold;
     private String errorThreshold;
     private String description;
+    private List<MgmtRolloutGroup> semiAutomaticGroups;
 
     /**
      * @param name
@@ -36,6 +40,16 @@ public class RolloutBuilder {
      */
     public RolloutBuilder name(final String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * @param semiAutomaticGroups
+     *            as alternative to full automatic, i.e. {@link #groupSize(int)}
+     * @return the builder itself
+     */
+    public RolloutBuilder semiAutomaticGroups(final List<MgmtRolloutGroup> semiAutomaticGroups) {
+        this.semiAutomaticGroups = semiAutomaticGroups;
         return this;
     }
 
@@ -121,6 +135,7 @@ public class RolloutBuilder {
         body.setDescription(description);
         body.setSuccessCondition(new MgmtRolloutCondition(Condition.THRESHOLD, successThreshold));
         body.setErrorCondition(new MgmtRolloutCondition(Condition.THRESHOLD, errorThreshold));
+        body.setGroups(semiAutomaticGroups);
         return body;
     }
 

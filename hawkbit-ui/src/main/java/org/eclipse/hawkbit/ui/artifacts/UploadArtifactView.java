@@ -21,14 +21,13 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
+import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -38,7 +37,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.MouseEvents.ClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -50,7 +48,6 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -94,7 +91,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final I18N i18n,
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
-            final SoftwareManagement softwareManagement, final UploadViewAcceptCriteria uploadViewAcceptCriteria,
+            final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
             final MultipartConfigElement spInfo, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
@@ -102,15 +99,15 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
         this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
-                tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewAcceptCriteria);
+                tagManagement, entityFactory, uiNotification, softwareManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
-                eventBus, softwareManagement, entityFactory, uploadViewAcceptCriteria);
+                eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo,
                 artifactManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                artifactUploadState, softwareManagement, uploadViewAcceptCriteria);
+                artifactUploadState, softwareManagement, uploadViewClientCriterion);
     }
 
     @PostConstruct
@@ -161,7 +158,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             createMainLayout();
             addComponents(mainLayout);
             setExpandRatio(mainLayout, 1);
-            hideDropHints();
         }
     }
 
@@ -255,17 +251,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.removeComponent(uplaodButtonsLayout);
 
-    }
-
-    private void hideDropHints() {
-        UI.getCurrent().addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
-                eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-            }
-        });
     }
 
     private void checkNoDataAvaialble() {

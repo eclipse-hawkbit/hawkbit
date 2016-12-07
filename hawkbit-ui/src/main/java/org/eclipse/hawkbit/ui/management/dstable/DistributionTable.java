@@ -31,13 +31,12 @@ import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -81,7 +80,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final SpPermissionChecker permissionChecker;
     private final ManagementUIState managementUIState;
-    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
+    private final ManagementViewClientCriterion managementViewClientCriterion;
     private final transient TargetManagement targetService;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
     private final transient DistributionSetManagement distributionSetManagement;
@@ -92,13 +91,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     DistributionTable(final UIEventBus eventBus, final I18N i18n, final SpPermissionChecker permissionChecker,
             final UINotification notification, final ManagementUIState managementUIState,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria, final TargetManagement targetService,
+            final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetService,
             final DsMetadataPopupLayout dsMetadataPopupLayout,
             final DistributionSetManagement distributionSetManagement) {
         super(eventBus, i18n, notification);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
-        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetService = targetService;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
@@ -203,7 +202,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     /**
      * DistributionTableFilterEvent.
-     * 
+     *
      * @param event
      *            as instance of {@link DistributionTableFilterEvent}
      */
@@ -213,16 +212,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
             UI.getCurrent().access(() -> refreshFilter());
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent dragEvent) {
-        if (dragEvent == DragEvent.TARGET_DRAG || dragEvent == DragEvent.TARGET_TAG_DRAG
-                || dragEvent == DragEvent.DISTRIBUTION_TAG_DRAG) {
-            UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
-        } else {
-            UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
         }
     }
 
@@ -399,7 +388,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
-        return managementViewAcceptCriteria;
+        return managementViewClientCriterion;
     }
 
     @Override
@@ -629,7 +618,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void addPinClickListener(final ClickEvent event) {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         checkifAlreadyPinned(event.getButton());
         if (isDistPinned) {
             pinDitribution(event.getButton());

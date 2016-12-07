@@ -15,9 +15,8 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
@@ -28,7 +27,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -39,7 +37,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
-import com.vaadin.ui.UI;
 
 /**
  *
@@ -58,10 +55,10 @@ public class DistributionTagButtons extends AbstractFilterButtons {
             final EntityFactory entityFactory, final I18N i18n, final UINotification notification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+            final ManagementViewClientCriterion managementViewClientCriterion) {
         super(eventBus, new DistributionTagButtonClick(eventBus, managementUIState));
         this.spDistTagDropEvent = new DistributionTagDropEvent(i18n, notification, permChecker, distFilterParameters,
-                distributionSetManagement, eventBus, managementViewAcceptCriteria);
+                distributionSetManagement, eventBus, managementViewClientCriterion);
         this.managementUIState = managementUIState;
         this.entityFactory = entityFactory;
 
@@ -87,15 +84,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         refreshTagTable();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DragEvent dragEvent) {
-        if (dragEvent == DragEvent.DISTRIBUTION_DRAG) {
-            UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_FILTER_BUTTON));
-        } else {
-            UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_FILTER_BUTTON));
-        }
     }
 
     @Override

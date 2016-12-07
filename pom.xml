@@ -138,6 +138,7 @@
       <allure.version>1.4.22</allure.version>
       <eclipselink.version>2.6.4</eclipselink.version>
       <org.powermock.version>1.6.5</org.powermock.version>
+      <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.5.3</mariadb-java-client.version>
@@ -706,6 +707,12 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
             <version>${org.powermock.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>com.google.gwt.gwtmockito</groupId>
+            <artifactId>gwtmockito</artifactId>
+            <version>${gwtmockito.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>

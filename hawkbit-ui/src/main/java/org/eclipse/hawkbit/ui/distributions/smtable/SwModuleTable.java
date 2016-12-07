@@ -23,9 +23,9 @@ import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -70,7 +70,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private final transient SoftwareManagement softwareManagement;
 
-    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
+    private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     private final ArtifactDetailsLayout artifactDetailsLayout;
 
@@ -78,13 +78,13 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     SwModuleTable(final UIEventBus eventBus, final I18N i18n, final UINotification uiNotification,
             final ManageDistUIState manageDistUIState, final SoftwareManagement softwareManagement,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactManagement artifactManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
             final ArtifactUploadState artifactUploadState) {
         super(eventBus, i18n, uiNotification);
         this.manageDistUIState = manageDistUIState;
         this.softwareManagement = softwareManagement;
-        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement);
         this.swMetadataPopupLayout = swMetadataPopupLayout;
@@ -258,7 +258,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected AcceptCriterion getDropAcceptCriterion() {
-        return distributionsViewAcceptCriteria;
+        return distributionsViewClientCriterion;
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -40,7 +40,7 @@ public class TargetTableLayout extends AbstractTableLayout {
     public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
             final TargetManagement targetManagement, final EntityFactory entityFactory, final I18N i18n,
             final UIEventBus eventbus, final UINotification notification, final ManagementUIState managementUIState,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria,
+            final ManagementViewClientCriterion managementViewClientCriterion,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
             final SpPermissionChecker permissionChecker, final UINotification uinotification,
             final TagManagement tagManagement) {
@@ -48,7 +48,7 @@ public class TargetTableLayout extends AbstractTableLayout {
         this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
                 tagManagement, targetManagement, entityFactory, targetTable);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
-                managementUIState, managementViewAcceptCriteria, targetManagement, deploymentManagement, uiproperties,
+                managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiproperties,
                 eventbus, entityFactory, uinotification, tagManagement, targetTable);
 
         super.init(targetTableHeader, targetTable, targetDetails);

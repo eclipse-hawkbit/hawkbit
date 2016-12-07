@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -55,8 +56,10 @@ public class ClientConfigurationProperties {
         private int artifactsPerSM = 1;
         private String targetAddress = "amqp:/simulator.replyTo";
         private boolean runRollouts = true;
+        private boolean runSemiAutomaticRollouts = true;
         private short rolloutSuccessThreshold = 80;
         private int rolloutDeploymentGroups = 4;
+        private List<String> deviceGroups = Arrays.asList("EU", "AM", "APAC");
 
         /**
          * Targets tags per page.
@@ -73,6 +76,22 @@ public class ClientConfigurationProperties {
          * Megabyte or Kilobyte size.
          */
         private String artifactSize = "1MB";
+
+        public boolean isRunSemiAutomaticRollouts() {
+            return runSemiAutomaticRollouts;
+        }
+
+        public void setRunSemiAutomaticRollouts(final boolean runSemiAutomaticRollouts) {
+            this.runSemiAutomaticRollouts = runSemiAutomaticRollouts;
+        }
+
+        public List<String> getDeviceGroups() {
+            return deviceGroups;
+        }
+
+        public void setDeviceGroups(final List<String> deviceGroups) {
+            this.deviceGroups = deviceGroups;
+        }
 
         public boolean isCleanRepository() {
             return cleanRepository;

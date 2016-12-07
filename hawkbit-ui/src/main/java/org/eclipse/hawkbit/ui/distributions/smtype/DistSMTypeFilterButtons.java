@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
+import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -42,16 +42,16 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 6804534533362387433L;
 
-    private final ManageDistUIState manageDistUIState;
+	private final ManageDistUIState manageDistUIState;
 
-    private final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
+    private final DistributionsViewClientCriterion distributionsViewClientCriterion;
+    
     DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
-            final DistributionsViewAcceptCriteria distributionsViewAcceptCriteria,
+            final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SoftwareManagement softwareManagement) {
         super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareManagement));
         this.manageDistUIState = manageDistUIState;
-        this.distributionsViewAcceptCriteria = distributionsViewAcceptCriteria;
+        this.distributionsViewClientCriterion = distributionsViewClientCriterion;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
             @Override
             public AcceptCriterion getAcceptCriterion() {
-                return distributionsViewAcceptCriteria;
+                return distributionsViewClientCriterion;
             }
 
             @Override

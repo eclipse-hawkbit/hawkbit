@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -55,19 +56,19 @@ public class DistributionTagDropEvent implements DropHandler {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final ManagementViewAcceptCriteria managementViewAcceptCriteria;
-
+    private final ManagementViewClientCriterion managementViewClientCriterion;
+    
     public DistributionTagDropEvent(final I18N i18n, final UINotification notification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement, final UIEventBus eventBus,
-            final ManagementViewAcceptCriteria managementViewAcceptCriteria) {
+            final ManagementViewClientCriterion managementViewClientCriterion) {
         this.i18n = i18n;
         this.notification = notification;
         this.permChecker = permChecker;
         this.distFilterParameters = distFilterParameters;
         this.distributionSetManagement = distributionSetManagement;
         this.eventBus = eventBus;
-        this.managementViewAcceptCriteria = managementViewAcceptCriteria;
+        this.managementViewClientCriterion = managementViewClientCriterion;
     }
 
     @Override
@@ -155,12 +156,12 @@ public class DistributionTagDropEvent implements DropHandler {
 
     /**
      * Criteria.
-     * 
+     *
      * @return AcceptCriterion as accept
      */
     @Override
     public AcceptCriterion getAcceptCriterion() {
-        return managementViewAcceptCriteria;
+        return managementViewClientCriterion;
 
     }
 }
