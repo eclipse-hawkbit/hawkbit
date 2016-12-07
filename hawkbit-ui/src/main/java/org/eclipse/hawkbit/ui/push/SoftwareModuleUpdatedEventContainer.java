@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
  *
  */
 public class SoftwareModuleUpdatedEventContainer implements EventContainer<SoftwareModuleUpdatedEvent> {
-    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "software.module.updated.event.container.notifcation.message";
 
     private final List<SoftwareModuleUpdatedEvent> events;
 
@@ -28,11 +27,6 @@ public class SoftwareModuleUpdatedEventContainer implements EventContainer<Softw
     @Override
     public List<SoftwareModuleUpdatedEvent> getEvents() {
         return events;
-    }
-
-    @Override
-    public String getUnreadNotificationMessageKey() {
-        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

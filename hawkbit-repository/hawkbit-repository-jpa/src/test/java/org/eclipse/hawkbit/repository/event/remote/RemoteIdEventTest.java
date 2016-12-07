@@ -59,6 +59,12 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
         assertAndCreateRemoteEvent(TargetTagDeletedEvent.class);
     }
 
+    @Test
+    @Description("Verifies that the software module id is correct reloaded")
+    public void testSoftwareModuleDeletedEvent() {
+        assertAndCreateRemoteEvent(SoftwareModuleDeletedEvent.class);
+    }
+
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {
 
         final Constructor<?> constructor = Arrays.stream(eventType.getDeclaredConstructors())
