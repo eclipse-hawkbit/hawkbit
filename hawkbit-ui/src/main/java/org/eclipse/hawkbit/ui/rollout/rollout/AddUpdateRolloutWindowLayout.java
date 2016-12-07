@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
@@ -538,8 +537,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private ComboBox createTargetFilterQueryCombo() {
-        return new ComboBoxBuilder().setI18n(i18n).setValueChangeListener(this::onTargetFilterChange)
-                .setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID).buildTargetFilterQueryCombo();
+        return new ComboBoxBuilder().setValueChangeListener(this::onTargetFilterChange)
+                .setPrompt(i18n.get("prompt.target.filter")).setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
+                .buildCombBox();
     }
 
     private void onTargetFilterChange(final ValueChangeEvent event) {
@@ -740,14 +740,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private ComboBox createDistributionSetCombo() {
-        final ComboBox dsSet = SPUIComponentProvider.getComboBox(null, "", null, ValoTheme.COMBOBOX_SMALL, false, "",
-                i18n.get("prompt.distribution.set"));
-        dsSet.setImmediate(true);
-        dsSet.setPageLength(7);
-        dsSet.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        dsSet.setId(UIComponentIdProvider.ROLLOUT_DS_ID);
-        dsSet.setSizeUndefined();
-        return dsSet;
+        return new ComboBoxBuilder().setPrompt(i18n.get("prompt.distribution.set"))
+                .setId(UIComponentIdProvider.ROLLOUT_DS_ID).buildCombBox();
     }
 
     private void populateDistributionSet() {

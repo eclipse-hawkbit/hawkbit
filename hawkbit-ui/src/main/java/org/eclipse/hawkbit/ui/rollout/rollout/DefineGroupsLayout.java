@@ -400,8 +400,9 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private ComboBox createTargetFilterQueryCombo() {
-            return new ComboBoxBuilder().setI18n(i18n).setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
-                    .setValueChangeListener(event -> valueChanged()).buildTargetFilterQueryCombo();
+            return new ComboBoxBuilder().setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
+                    .setPrompt(i18n.get("prompt.target.filter")).setValueChangeListener(event -> valueChanged())
+                    .buildCombBox();
         }
 
         private TextArea createTargetFilterQuery() {

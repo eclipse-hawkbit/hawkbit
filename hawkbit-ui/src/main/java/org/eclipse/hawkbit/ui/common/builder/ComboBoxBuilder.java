@@ -9,25 +9,22 @@
 package org.eclipse.hawkbit.ui.common.builder;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
 import com.vaadin.data.Property;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * Builds ComboBox Elements with a commonly used properties.
+ */
 public class ComboBoxBuilder {
-
-    private I18N i18n;
 
     private Property.ValueChangeListener valueChangeListener;
 
     private String id;
 
-    public ComboBoxBuilder setI18n(final I18N i18n) {
-        this.i18n = i18n;
-        return this;
-    }
+    private String prompt;
 
     public ComboBoxBuilder setValueChangeListener(final Property.ValueChangeListener valueChangeListener) {
         this.valueChangeListener = valueChangeListener;
@@ -39,15 +36,27 @@ public class ComboBoxBuilder {
         return this;
     }
 
-    public ComboBox buildTargetFilterQueryCombo() {
+    public ComboBoxBuilder setPrompt(String prompt) {
+        this.prompt = prompt;
+        return this;
+    }
+
+    /**
+     * @return a new ComboBox
+     */
+    public ComboBox buildCombBox() {
         final ComboBox targetFilter = SPUIComponentProvider.getComboBox(null, "", null, ValoTheme.COMBOBOX_SMALL, false,
-                "", i18n.get("prompt.target.filter"));
+                "", prompt);
         targetFilter.setImmediate(true);
         targetFilter.setPageLength(7);
         targetFilter.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        targetFilter.setId(id);
         targetFilter.setSizeUndefined();
-        targetFilter.addValueChangeListener(valueChangeListener);
+        if (id != null) {
+            targetFilter.setId(id);
+        }
+        if (valueChangeListener != null) {
+            targetFilter.addValueChangeListener(valueChangeListener);
+        }
         return targetFilter;
     }
 }
