@@ -64,6 +64,11 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-github-login</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-mgmt-resource</artifactId>
          <version>${project.version}</version>
       </dependency>
