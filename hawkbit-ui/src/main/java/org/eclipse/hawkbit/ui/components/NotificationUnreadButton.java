@@ -85,21 +85,22 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow.setClosable(true);
         notificationsWindow.setResizable(false);
         notificationsWindow.setDraggable(false);
+        notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_id);
+        notificationsWindow.addCloseListener(event -> refreshCaption());
     }
 
     private void toggleWindow(final ClickEvent event) {
         if (notificationsWindow.isAttached()) {
             notificationsWindow.close();
-            refreshCaption();
+            getUI().removeWindow(notificationsWindow);
             return;
         }
         createUnreadMessagesLayout();
         notificationsWindow.setPositionY(event.getClientY() - event.getRelativeY() + 40);
         getUI().addWindow(notificationsWindow);
-        notificationsWindow.focus();
         currentView.refreshView(unreadNotifications.keySet());
         clear();
-
+        notificationsWindow.focus();
     }
 
     private void createNotification(final VerticalLayout notificationsLayout,

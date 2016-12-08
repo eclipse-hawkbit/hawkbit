@@ -580,13 +580,17 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     public void updateTarget(final Target updatedTarget) {
         if (updatedTarget != null) {
             final Item item = getItem(updatedTarget.getTargetIdName());
-            /* Update the new Name, Description and poll date */
-            item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(updatedTarget.getName());
-
             // TO DO update SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER
             // &
             // SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER
 
+            /*
+             * Update the status which will trigger the value change lister
+             * registered for the target update status. That listener will
+             * update the new status icon showing for this target in the table.
+             */
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
+                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
             /*
              * Update the last query which will trigger the value change lister
              * registered for the target last query column. That listener will
@@ -601,13 +605,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());
 
-            /*
-             * Update the status which will trigger the value change lister
-             * registered for the target update status. That listener will
-             * update the new status icon showing for this target in the table.
-             */
-            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
-                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
+            /* Update the new Name, Description and poll date */
+            item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(updatedTarget.getName());
+
         }
     }
 
@@ -701,10 +701,10 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
 
+        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
                 .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
