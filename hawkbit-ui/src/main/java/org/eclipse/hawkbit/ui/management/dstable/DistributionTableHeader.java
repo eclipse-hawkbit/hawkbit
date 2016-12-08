@@ -147,7 +147,7 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        // is okay an not supported
+        // is okay and not supported
     }
 
     @Override

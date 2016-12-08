@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.ShortCutModifierUtils;
 
 import com.vaadin.event.Action;
@@ -24,7 +25,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * 
  *
  * @param <T>
- *            type of the concert table
+ *            type of the concrete table
  */
 public abstract class AbstractTableLayout<T extends AbstractTable<?, ?>> extends VerticalLayout {
 
@@ -110,7 +111,7 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?, ?>> extends
         tableHeader.setFilterButtonsIconVisible(visible);
     }
 
-    public T getTable() {
+    public RefreshableContainer getTable() {
         return table;
     }
 

@@ -70,9 +70,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
 
 /**
- * Target status and deployment management view.
- *
- * The depoyment view.
+ * Target status and deployment management view
  */
 @UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
@@ -377,7 +375,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     @Override
     protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
-        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(8);
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(10);
 
         supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
         supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());

@@ -67,10 +67,6 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
         this.entityClass = entityClass;
     }
 
-    public Collection<Long> getEntityIds() {
-        return entityIds;
-    }
-
     public T getEntity() {
         return entity;
     }
@@ -80,12 +76,12 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     }
 
     /**
-     * Check if the remove event is the same this ui event. Then maybe you can
-     * skip the remote event because is already executed.
+     * Checks if the remote event is the same as this UI event. Then maybe you
+     * can skip the remote event because it is already executed.
      * 
      * @param tenantAwareEvent
      *            the remote event
-     * @return <true> match <false> not match
+     * @return {@code true} match ; {@code false} not match
      */
     public boolean matchRemoteEvent(final TenantAwareEvent tenantAwareEvent) {
         if (!(tenantAwareEvent instanceof RemoteIdEvent) || entityClass == null || entityIds == null) {
@@ -96,7 +92,7 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
             final Class<?> remoteEntityClass = ClassUtils.getClass(remoteIdEvent.getEntityClass());
             return entityClass.isAssignableFrom(remoteEntityClass) && entityIds.contains(remoteIdEvent.getEntityId());
         } catch (final ClassNotFoundException e) {
-            LOG.error("Class not found", e);
+            LOG.error("Entity Class of remoteIdEvent cannot be found", e);
             return false;
         }
 

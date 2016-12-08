@@ -73,26 +73,26 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
 
         try {
             final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance(TENANT, ENTITY_ID, ENTIY_CLASS, NODE);
-            assertEntity(ENTITY_ID, event);
+            assertEntity(event);
         } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
         }
     }
 
-    protected RemoteIdEvent assertEntity(final long id, final RemoteIdEvent event) {
-        assertThat(event.getEntityId()).isSameAs(id);
+    protected RemoteIdEvent assertEntity(final RemoteIdEvent event) {
+        assertThat(event.getEntityId()).isSameAs(ENTITY_ID);
 
         RemoteIdEvent underTestCreatedEvent = (RemoteIdEvent) createProtoStuffEvent(event);
-        assertDeserializeEvent(id, underTestCreatedEvent);
+        assertDeserializeEvent(underTestCreatedEvent);
 
         underTestCreatedEvent = (RemoteIdEvent) createJacksonEvent(event);
-        assertDeserializeEvent(id, underTestCreatedEvent);
+        assertDeserializeEvent(underTestCreatedEvent);
 
         return underTestCreatedEvent;
     }
 
-    private void assertDeserializeEvent(final long id, final RemoteIdEvent underTestCreatedEvent) {
-        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(id);
+    private void assertDeserializeEvent(final RemoteIdEvent underTestCreatedEvent) {
+        assertThat(underTestCreatedEvent.getEntityId()).isEqualTo(ENTITY_ID);
         assertThat(underTestCreatedEvent.getTenant()).isEqualTo(TENANT);
         assertThat(underTestCreatedEvent.getEntityClass()).isEqualTo(ENTIY_CLASS);
         assertThat(underTestCreatedEvent.getOriginService()).isEqualTo(NODE);

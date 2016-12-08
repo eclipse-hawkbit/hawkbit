@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.menu;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Label;
@@ -64,7 +65,7 @@ public interface DashboardMenuItem extends Serializable {
      * @param notificationUnread
      *            the unreadNotifciations
      */
-    void setNotificationUnreadValue(int notificationUnread);
+    void setNotificationUnreadValue(AtomicInteger notificationUnread);
 
     /**
      * 

@@ -27,7 +27,7 @@ import com.vaadin.ui.Grid;
 public abstract class AbstractGrid extends Grid implements RefreshableContainer {
 
     private static final long serialVersionUID = 4856562746502217630L;
-    
+
     protected final I18N i18n;
 
     protected final transient EventBus.UIEventBus eventBus;
@@ -56,8 +56,7 @@ public abstract class AbstractGrid extends Grid implements RefreshableContainer 
         if (!(container instanceof LazyQueryContainer)) {
             return;
         }
-        final LazyQueryContainer gridContainer = (LazyQueryContainer) getContainerDataSource();
-        gridContainer.refresh();
+        ((LazyQueryContainer) container).refresh();
     }
 
     private void addNewContainerDS() {

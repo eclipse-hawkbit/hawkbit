@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 
 import com.vaadin.ui.Label;
@@ -22,9 +24,9 @@ public abstract class AbstractDashboardMenuItemNotification implements Dashboard
     private final Label notificationsLabel = new Label();
 
     @Override
-    public void setNotificationUnreadValue(final int notificationUnread) {
-        notificationsLabel.setValue(String.valueOf(notificationUnread));
-        notificationsLabel.setVisible(notificationUnread > 0);
+    public void setNotificationUnreadValue(final AtomicInteger notificationUnread) {
+        notificationsLabel.setValue(String.valueOf(notificationUnread.get()));
+        notificationsLabel.setVisible(notificationUnread.get() > 0);
 
     }
 

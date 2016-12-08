@@ -1,5 +1,10 @@
 /**
- * Copyright (c) 2011-2016 Bosch Software Innovations GmbH, Germany. All rights reserved.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.hawkbit.ui.components;
 
@@ -7,6 +12,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -41,7 +47,7 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
     private final NotificationUnreadButton notificationUnreadButton;
 
-    private int viewUnreadNotifcations;
+    private final AtomicInteger viewUnreadNotifcations = new AtomicInteger(0);
 
     /**
      * Constructor.
@@ -65,7 +71,7 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
 
         eventContainer.getEvents().stream().filter(event -> !anyEventMatch(event)).forEach(event -> {
             notificationUnreadButton.incrementUnreadNotification(this, eventContainer);
-            viewUnreadNotifcations++;
+            viewUnreadNotifcations.incrementAndGet();
         });
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
@@ -102,12 +108,11 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
      * 
      */
     public void refreshView(final Set<Class<?>> eventContainers) {
-        eventContainers.stream().filter(clazz -> supportNotificationEventContainer(clazz))
-                .forEach(clazz -> refreshContainer(clazz));
+        eventContainers.stream().filter(this::supportNotificationEventContainer).forEach(this::refreshContainer);
         clear();
     }
 
-    protected void refreshContainer(final Class<?> containerClazz) {
+    private void refreshContainer(final Class<?> containerClazz) {
         getSupportedEvents().get(containerClazz).refreshContainer();
     }
 
@@ -117,19 +122,19 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
      * 
      */
     public void refreshView() {
-        if (viewUnreadNotifcations <= 0) {
+        if (viewUnreadNotifcations.get() <= 0) {
             return;
         }
-        supportedEvents.values().stream().forEach(container -> container.refreshContainer());
+        getSupportedEvents().values().stream().forEach(container -> container.refreshContainer());
         clear();
     }
 
     private void clear() {
-        viewUnreadNotifcations = 0;
+        viewUnreadNotifcations.set(0);
         getDashboardMenuItem().setNotificationUnreadValue(viewUnreadNotifcations);
     }
 
-    protected boolean supportNotificationEventContainer(final Class<?> eventContainerClass) {
+    private boolean supportNotificationEventContainer(final Class<?> eventContainerClass) {
         return getSupportedEvents().containsKey(eventContainerClass);
     }
 

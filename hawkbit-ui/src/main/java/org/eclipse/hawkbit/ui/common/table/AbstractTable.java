@@ -438,8 +438,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         if (!(container instanceof LazyQueryContainer)) {
             return;
         }
-        final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
-        tableContainer.refresh();
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
     protected abstract boolean hasDropPermission();
