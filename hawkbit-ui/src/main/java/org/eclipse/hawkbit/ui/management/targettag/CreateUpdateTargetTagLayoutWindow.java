@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
@@ -107,7 +108,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
             final TargetTag newTargetTag = tagManagement.createTargetTag(
                     entityFactory.tag().create().name(getTagNameValue()).description(getTagDescValue()).colour(colour));
-            eventBus.publish(this, new TargetTagTableEvent(newTargetTag));
+            eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());
         } else {
             displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));

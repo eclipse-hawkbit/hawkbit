@@ -25,6 +25,16 @@ public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
      * 
      * @param eventType
      *            the event type
+     */
+    public DistributionTableEvent(final BaseEntityEventType eventType) {
+        super(eventType, null);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param eventType
+     *            the event type
      * @param entity
      *            the distribution set
      */
@@ -33,13 +43,15 @@ public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
     }
 
     /**
-     * Delete distribution sets.
+     * Constructor
      * 
+     * @param eventType
+     *            the event type
      * @param entityIds
-     *            distribution sets which will be deleted
+     *            the entity ids
      */
-    public DistributionTableEvent(final Collection<Long> entityIds) {
-        super(entityIds, DistributionSet.class);
+    public DistributionTableEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, DistributionSet.class);
     }
 
 }

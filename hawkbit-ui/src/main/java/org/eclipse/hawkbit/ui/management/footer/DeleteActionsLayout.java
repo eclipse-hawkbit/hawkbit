@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
@@ -237,7 +238,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getDistributionTagId((DragAndDropWrapper) source);
-                eventBus.publish(this, new DistributionSetTagTableEvent(Arrays.asList(id)));
+                eventBus.publish(this,
+                        new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
             notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));
@@ -253,7 +255,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
             if (source instanceof DragAndDropWrapper) {
                 final Long id = DeleteActionsLayoutHelper.getTargetTagId((DragAndDropWrapper) source);
-                eventBus.publish(this, new TargetTagTableEvent(Arrays.asList(id)));
+                eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
             }
 
             notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));

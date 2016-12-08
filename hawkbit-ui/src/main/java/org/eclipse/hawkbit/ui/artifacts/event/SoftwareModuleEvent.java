@@ -35,6 +35,16 @@ public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
      * 
      * @param entityEventType
      *            the event type
+     */
+    public SoftwareModuleEvent(final BaseEntityEventType entityEventType) {
+        super(entityEventType, null);
+    }
+
+    /**
+     * Creates software module event.
+     * 
+     * @param entityEventType
+     *            the event type
      * @param softwareModule
      *            the module
      */
@@ -43,13 +53,15 @@ public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
     }
 
     /**
-     * Delete software modules
+     * Constructor
      * 
+     * @param eventType
+     *            the event type
      * @param entityIds
-     *            software modules which will be deleted
+     *            the entity ids
      */
-    public SoftwareModuleEvent(final Collection<Long> entityIds) {
-        super(entityIds, SoftwareModule.class);
+    public SoftwareModuleEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, SoftwareModule.class);
     }
 
     /**

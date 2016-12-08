@@ -120,13 +120,13 @@ public class DistributionTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -31,7 +31,17 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
     private TargetComponentEvent targetComponentEvent;
 
     /**
-     * Constructor.
+     * Constrcutor.
+     * 
+     * @param eventType
+     *            the event type.
+     */
+    public TargetTableEvent(final BaseEntityEventType eventType) {
+        super(eventType, null);
+    }
+
+    /**
+     * Constrcutor .
      * 
      * @param eventType
      *            the event type.
@@ -43,13 +53,15 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
     }
 
     /**
-     * Delete targets.
+     * Constructor
      * 
+     * @param eventType
+     *            the event type
      * @param entityIds
-     *            targets which will be deleted
+     *            the entity ids
      */
-    public TargetTableEvent(final List<Long> entityIds) {
-        super(entityIds, Target.class);
+    public TargetTableEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, Target.class);
     }
 
     /**
@@ -59,7 +71,7 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
      *            the target component event.
      */
     public TargetTableEvent(final TargetComponentEvent targetComponentEvent) {
-        super(null, Target.class);
+        super(null, null);
         this.targetComponentEvent = targetComponentEvent;
     }
 

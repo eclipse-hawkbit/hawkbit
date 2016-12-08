@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
@@ -38,16 +37,15 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractNotificationView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
-    private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEvents = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, SECONDS).build();
+    private final transient Cache<BaseUIEntityEvent<?>, Object> skipUiEventsCache;
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private transient Map<Class<?>, RefreshableContainer> supportedEvents;
-
     private final NotificationUnreadButton notificationUnreadButton;
 
-    private final AtomicInteger viewUnreadNotifcations = new AtomicInteger(0);
+    private final AtomicInteger viewUnreadNotifcations;
+
+    private transient Map<Class<?>, RefreshableContainer> supportedEvents;
 
     /**
      * Constructor.
@@ -61,6 +59,9 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
             final NotificationUnreadButton notificationUnreadButton) {
         this.eventBus = eventBus;
         this.notificationUnreadButton = notificationUnreadButton;
+        this.viewUnreadNotifcations = new AtomicInteger(0);
+        skipUiEventsCache = CacheBuilder.newBuilder().expireAfterAccess(10, SECONDS).build();
+        eventBus.subscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -77,22 +78,18 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     }
 
     private boolean anyEventMatch(final TenantAwareEvent tenantAwareEvent) {
-        return skipUiEvents.asMap().keySet().stream().anyMatch(uiEvent -> uiEvent.matchRemoteEvent(tenantAwareEvent));
+        return skipUiEventsCache.asMap().keySet().stream()
+                .anyMatch(uiEvent -> uiEvent.matchRemoteEvent(tenantAwareEvent));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onUiEvent(final BaseUIEntityEvent<?> event) {
         if (BaseEntityEventType.ADD_ENTITY != event.getEventType()
-                && BaseEntityEventType.REMOVE_ENTITIES != event.getEventType()
+                && BaseEntityEventType.REMOVE_ENTITY != event.getEventType()
                 && BaseEntityEventType.UPDATED_ENTITY != event.getEventType()) {
             return;
         }
-        skipUiEvents.put(event, new Object());
-    }
-
-    @PostConstruct
-    protected void subscribe() {
-        eventBus.subscribe(this);
+        skipUiEventsCache.put(event, new Object());
     }
 
     @PreDestroy
@@ -125,8 +122,12 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
         if (viewUnreadNotifcations.get() <= 0) {
             return;
         }
-        getSupportedEvents().values().stream().forEach(container -> container.refreshContainer());
+        refreshAllContainer();
         clear();
+    }
+
+    private void refreshAllContainer() {
+        getSupportedEvents().values().stream().forEach(container -> container.refreshContainer());
     }
 
     private void clear() {
@@ -138,16 +139,10 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
         return getSupportedEvents().containsKey(eventContainerClass);
     }
 
-    /**
-     * @return the eventBus
-     */
     public EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 
-    /**
-     * @return the supportedEvents
-     */
     private Map<Class<?>, RefreshableContainer> getSupportedEvents() {
         if (supportedEvents == null) {
             supportedEvents = getSupportedPushEvents();
@@ -161,10 +156,15 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
     }
 
     /**
-     * @return the supportedEvents
+     * @return a map with all supported events and this related component which
+     *         should be refreshed after a change.
      */
     protected abstract Map<Class<?>, RefreshableContainer> getSupportedPushEvents();
 
+    /**
+     * 
+     * @return the related dashboard menu item for this view.
+     */
     protected abstract DashboardMenuItem getDashboardMenuItem();
 
 }

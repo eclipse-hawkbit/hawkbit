@@ -59,7 +59,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
         if (BaseEntityEventType.ADD_ENTITY != tableEvent.getEventType()
-                && BaseEntityEventType.REMOVE_ENTITIES != tableEvent.getEventType()) {
+                && BaseEntityEventType.REMOVE_ENTITY != tableEvent.getEventType()) {
             return;
         }
         refreshContainer();

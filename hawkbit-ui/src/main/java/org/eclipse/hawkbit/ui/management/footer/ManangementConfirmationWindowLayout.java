@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
@@ -69,7 +70,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private static final String TARGET_ID = "TargetId";
 
     private final ManagementUIState managementUIState;
-
 
     private final transient TargetManagement targetManagement;
 
@@ -385,7 +385,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         managementUIState.getDeletedDistributionList().forEach(distIdName -> deletedIds.add(distIdName.getId()));
 
         distributionSetManagement.deleteDistributionSet(deletedIds.toArray(new Long[deletedIds.size()]));
-        eventBus.publish(this, new DistributionTableEvent(deletedIds));
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, deletedIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.dist.deleted", managementUIState.getDeletedDistributionList().size()));
@@ -480,7 +480,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         targetManagement.deleteTargets(targetIds);
 
-        eventBus.publish(this, new TargetTableEvent(targetIds));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, targetIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.deleted", targetIds.size()));

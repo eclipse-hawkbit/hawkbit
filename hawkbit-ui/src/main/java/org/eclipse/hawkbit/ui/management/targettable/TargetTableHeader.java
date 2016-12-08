@@ -242,13 +242,13 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED, null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED, null));
+        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override

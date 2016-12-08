@@ -125,14 +125,14 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
 
     }
 
     @Override
     public void minimizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override

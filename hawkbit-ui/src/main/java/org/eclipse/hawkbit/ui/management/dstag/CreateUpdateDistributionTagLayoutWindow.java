@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
@@ -91,7 +92,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
             final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(
                     entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
-            eventBus.publish(this, new DistributionSetTagTableEvent(newDistTag));
+            eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();
         } else {

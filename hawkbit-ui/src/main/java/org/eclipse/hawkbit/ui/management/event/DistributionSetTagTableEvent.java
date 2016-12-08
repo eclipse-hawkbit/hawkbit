@@ -34,21 +34,13 @@ public class DistributionSetTagTableEvent extends BaseUIEntityEvent<Distribution
     /**
      * Constructor
      * 
-     * @param entity
-     *            the created entity.
-     */
-    public DistributionSetTagTableEvent(final DistributionSetTag entity) {
-        super(BaseEntityEventType.ADD_ENTITY, entity);
-    }
-
-    /**
-     * Delete entity event.
-     * 
+     * @param eventType
+     *            the event type
      * @param entityIds
-     *            entities which will be deleted
+     *            the entity ids
      */
-    public DistributionSetTagTableEvent(final Collection<Long> entityIds) {
-        super(entityIds, DistributionSetTag.class);
+    public DistributionSetTagTableEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, DistributionSetTag.class);
     }
 
 }

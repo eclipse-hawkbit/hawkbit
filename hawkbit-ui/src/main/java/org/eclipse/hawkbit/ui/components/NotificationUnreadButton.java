@@ -116,14 +116,14 @@ public class NotificationUnreadButton extends Button {
     }
 
     public void setCurrentView(final View currentView) {
+        clear();
+        this.currentView = null;
+
         if (!(currentView instanceof AbstractNotificationView)) {
-            setEnabled(false);
             return;
         }
-        setEnabled(true);
         this.currentView = (AbstractNotificationView) currentView;
         this.currentView.refreshView();
-        clear();
     }
 
     private void clear() {
@@ -133,13 +133,16 @@ public class NotificationUnreadButton extends Button {
     }
 
     /**
+     * Increment the counter.
      * 
      * @param view
+     *            the view
      * @param newEventContainer
+     *            the event container
      */
     public void incrementUnreadNotification(final AbstractNotificationView view,
             final EventContainer<?> newEventContainer) {
-        if (!currentView.equals(view) || newEventContainer.getUnreadNotificationMessageKey() == null) {
+        if (!view.equals(currentView) || newEventContainer.getUnreadNotificationMessageKey() == null) {
             return;
         }
         NotificationUnreadValue notificationUnreadValue = unreadNotifications.get(newEventContainer.getClass());

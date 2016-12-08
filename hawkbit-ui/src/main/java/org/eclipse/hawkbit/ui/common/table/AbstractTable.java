@@ -226,7 +226,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(this::applyMaxTableSettings);
         } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()
-                || BaseEntityEventType.REMOVE_ENTITIES == event.getEventType()) {
+                || BaseEntityEventType.REMOVE_ENTITY == event.getEventType()) {
             UI.getCurrent().access(this::refreshContainer);
         }
     }

@@ -54,17 +54,20 @@ public class BaseUIEntityEvent<T extends BaseEntity> {
     }
 
     /**
-     * Delete entity event.
+     * Base entity event
      * 
+     * @param eventType
+     *            the event type
      * @param entityIds
      *            entities which will be deleted
-     * @param entityClass
+     * @param class1
      *            the entityClass
      */
-    public BaseUIEntityEvent(final Collection<Long> entityIds, final Class<T> entityClass) {
-        this.eventType = BaseEntityEventType.REMOVE_ENTITIES;
+    public BaseUIEntityEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds,
+            final Class<? extends BaseEntity> class1) {
+        this.eventType = eventType;
         this.entityIds = entityIds;
-        this.entityClass = entityClass;
+        this.entityClass = class1;
     }
 
     public T getEntity() {
