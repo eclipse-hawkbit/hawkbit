@@ -1,24 +1,16 @@
-<!--
-
-    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
-
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-
--->
+<!-- Copyright (c) 2015 Bosch Software Innovations GmbH and others. All rights reserved. This program and the accompanying materials are made available 
+   under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eclipse.hawkbit</groupId>
-    <artifactId>hawkbit-repository</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>hawkbit-repository-core</artifactId>
-  <name>hawkBit :: Repository Core Implementation Support</name>
-  
-  <dependencies>
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <artifactId>hawkbit-repository</artifactId>
+      <version>0.2.0-SNAPSHOT</version>
+   </parent>
+   <artifactId>hawkbit-repository-core</artifactId>
+   <name>hawkBit :: Repository Core Implementation Support</name>
+
+   <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-api</artifactId>
@@ -34,6 +26,33 @@
          <artifactId>protostuff-runtime</artifactId>
          <optional>true</optional>
       </dependency>
-  </dependencies>
-  
+
+      <!-- TEST -->
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>ru.yandex.qatools.allure</groupId>
+         <artifactId>allure-junit-adaptor</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
 </project>

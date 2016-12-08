@@ -8,16 +8,13 @@
  */
 package org.eclipse.hawkbit.event;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
-import org.springframework.integration.support.MutableMessageHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import io.protostuff.LinkedBuffer;
@@ -29,13 +26,23 @@ import io.protostuff.runtime.RuntimeSchema;
 /**
  * A customize message converter for the spring cloud events. The converter is
  * registered for the application/binary+protostuff type.
+ * 
+ * The clazz-type-information is encoded into the message payload infront with a
+ * length of {@link #EVENT_TYPE_LENGTH}. This is necessary due in case of
+ * rabbitMQ batching the message headers will be merged together and custom
+ * message header information will get lost. So in this implementation the
+ * information about the event-type is encoded in the payload of the message
+ * directly using the encoded values of {@link EventType}.
  *
  */
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
     private static final Logger LOG = LoggerFactory.getLogger(BusProtoStuffMessageConverter.class);
-    private static final String DEFAULT_CLASS_FIELD_NAME = "__Class__";
+    /**
+     * The length of the class type length of the payload.
+     */
+    private static final byte EVENT_TYPE_LENGTH = 2;
 
     /**
      * Constructor.
@@ -52,34 +59,89 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     @Override
     public Object convertFromInternal(final Message<?> message, final Class<?> targetClass,
             final Object conversionHint) {
-        final Object payload = message.getPayload();
+        final Object objectPayload = message.getPayload();
+        if (objectPayload instanceof byte[]) {
+            final byte[] payload = (byte[]) objectPayload;
+            final byte[] clazzHeader = new byte[EVENT_TYPE_LENGTH];
+            final byte[] content = new byte[payload.length - EVENT_TYPE_LENGTH];
 
-        try {
-            final Class<?> deserializeClass = ClassUtils
-                    .getClass(message.getHeaders().get(DEFAULT_CLASS_FIELD_NAME).toString());
-            if (payload instanceof byte[]) {
-                @SuppressWarnings("unchecked")
-                final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(deserializeClass);
-                final Object deserializeEvent = schema.newMessage();
-                ProtobufIOUtil.mergeFrom((byte[]) message.getPayload(), deserializeEvent, schema);
-                return deserializeEvent;
-            }
-        } catch (final ClassNotFoundException e) {
-            LOG.error("Protostuff cannot find derserialize class", e);
-            throw new MessageConversionException(message, "Failed to read payload", e);
+            splitClazzHeaderAndContent(payload, clazzHeader, content);
+
+            final EventType eventType = readClassHeader(clazzHeader);
+            return readContent(eventType, content);
         }
-
         return null;
     }
 
     @Override
     protected Object convertToInternal(final Object payload, final MessageHeaders headers,
             final Object conversionHint) {
-        checkIfHeaderMutable(headers);
+
+        final byte[] clazzHeader = writeClassHeader(payload.getClass());
+
+        final byte[] writeContent = writeContent(payload);
+
+        final byte[] body = new byte[clazzHeader.length + writeContent.length];
+
+        mergeClassHeaderAndContent(clazzHeader, writeContent, body);
+
+        return body;
+    }
+
+    private static Object readContent(final EventType eventType, final byte[] content) {
+        final Class<?> targetClass = eventType.getTargetClass();
+        if (targetClass == null) {
+            LOG.error("Cannot read clazz header for given EventType value {}, missing mapping", eventType.getValue());
+            throw new MessageConversionException("Missing mapping of EventType for value " + eventType.getValue());
+        }
+        @SuppressWarnings("unchecked")
+        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(targetClass);
+        final Object deserializeEvent = schema.newMessage();
+        ProtobufIOUtil.mergeFrom(content, deserializeEvent, schema);
+        return deserializeEvent;
+    }
+
+    private static void mergeClassHeaderAndContent(final byte[] clazzHeader, final byte[] writeContent,
+            final byte[] body) {
+        System.arraycopy(clazzHeader, 0, body, 0, clazzHeader.length);
+        System.arraycopy(writeContent, 0, body, clazzHeader.length, writeContent.length);
+    }
+
+    private static void splitClazzHeaderAndContent(final byte[] payload, final byte[] clazzHeader,
+            final byte[] content) {
+        System.arraycopy(payload, 0, clazzHeader, 0, clazzHeader.length);
+        System.arraycopy(payload, clazzHeader.length, content, 0, content.length);
+    }
+
+    private static EventType readClassHeader(final byte[] typeInformation) {
+        final Schema<EventType> schema = RuntimeSchema.getSchema(EventType.class);
+        final EventType deserializedType = schema.newMessage();
+        ProtobufIOUtil.mergeFrom(typeInformation, deserializedType, schema);
+        return deserializedType;
+    }
+
+    private static byte[] writeContent(final Object payload) {
         final Class<? extends Object> serializeClass = payload.getClass();
         @SuppressWarnings("unchecked")
         final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
+        return writeProtoBuf(payload, schema, buffer);
+    }
+
+    private static byte[] writeClassHeader(final Class<?> clazz) {
+        final EventType clazzEventType = EventType.from(clazz);
+        if (clazzEventType == null) {
+            LOG.error("There is no mapping to EventType for the given clazz {}", clazzEventType);
+            throw new MessageConversionException("Missing EventType for given class : " + clazz);
+        }
+        @SuppressWarnings("unchecked")
+        final Schema<Object> schema = (Schema<Object>) RuntimeSchema
+                .getSchema((Class<? extends Object>) EventType.class);
+        final LinkedBuffer buffer = LinkedBuffer.allocate();
+        return writeProtoBuf(clazzEventType, schema, buffer);
+    }
+
+    private static byte[] writeProtoBuf(final Object payload, final Schema<Object> schema, final LinkedBuffer buffer) {
         final byte[] serializeByte;
         try {
             serializeByte = ProtostuffIOUtil.toByteArray(payload, schema, buffer);
@@ -87,22 +149,6 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
             buffer.clear();
         }
 
-        headers.put(DEFAULT_CLASS_FIELD_NAME, serializeClass.getName());
         return serializeByte;
     }
-
-    private static void checkIfHeaderMutable(final MessageHeaders headers) {
-        if (isAccessorMutable(headers) || headers instanceof MutableMessageHeaders) {
-            return;
-        }
-        LOG.error("Protostuff cannot set serializae class because message header is not mutable");
-        throw new MessageConversionException(
-                "Cannot set the serialize class to message header. Need Mutable message header");
-    }
-
-    private static boolean isAccessorMutable(final MessageHeaders headers) {
-        final MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
-        return accessor != null && accessor.isMutable();
-    }
-
 }
