@@ -128,6 +128,9 @@ public interface TargetManagement {
      * @param targetFilterQueryId
      *            {@link TargetFilterQuery#getId()}
      * @return the found number {@link Target}s
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link TargetFilterQuery} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countTargetByTargetFilterQuery(@NotNull Long targetFilterQueryId);
