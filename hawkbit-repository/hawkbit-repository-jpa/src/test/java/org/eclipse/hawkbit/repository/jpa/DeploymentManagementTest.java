@@ -699,9 +699,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.countTargetsAll()).as("size of targets is wrong").isNotZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isNotZero();
 
-        targetManagement
-                .deleteTargets(deploymentResult.getUndeployedTargetIDs().toArray(new Long[noOfUndeployedTargets]));
-        targetManagement.deleteTargets(deploymentResult.getDeployedTargetIDs().toArray(new Long[noOfDeployedTargets]));
+        targetManagement.deleteTargets(deploymentResult.getUndeployedTargetIDs());
+        targetManagement.deleteTargets(deploymentResult.getDeployedTargetIDs());
 
         assertThat(targetManagement.countTargetsAll()).as("size of targets should be zero").isZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isZero();

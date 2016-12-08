@@ -128,7 +128,7 @@ public class JpaTagManagement implements TagManagement {
     public void deleteTargetTag(final String targetTagName) {
         final JpaTargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
 
-        targetRepository.findByTag(tag).forEach(set -> {
+        targetRepository.findByTag(tag.getId()).forEach(set -> {
             set.removeTag(tag);
             targetRepository.save(set);
         });

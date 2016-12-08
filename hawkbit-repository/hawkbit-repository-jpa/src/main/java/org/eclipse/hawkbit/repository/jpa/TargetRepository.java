@@ -14,7 +14,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -67,8 +66,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to be found
      * @return list of found targets
      */
-    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt = :tag")
-    List<JpaTarget> findByTag(@Param("tag") final JpaTargetTag tag);
+    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
+    List<JpaTarget> findByTag(@Param("tag") final Long tag);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}

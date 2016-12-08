@@ -340,8 +340,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
-        final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
-                RolloutGroupStatus.READY, group);
+        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout, RolloutGroupStatus.READY,
+                group);
 
         final long targetsInGroupFilter = targetManagement
                 .countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter);
@@ -387,7 +387,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-            final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
+            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement
                     .findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
@@ -562,7 +562,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest, group);
+            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest,
+                    groupId);
             if (targets.getTotalElements() > 0) {
                 deploymentManagement.createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime,
                         rollout, group);

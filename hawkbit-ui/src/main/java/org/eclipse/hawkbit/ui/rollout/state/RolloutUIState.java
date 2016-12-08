@@ -50,7 +50,7 @@ public class RolloutUIState implements Serializable {
      * @return the searchText
      */
     public Optional<String> getSearchText() {
-        return null != searchText ? Optional.of(searchText) : Optional.empty();
+        return Optional.ofNullable(searchText);
     }
 
     /**
@@ -65,7 +65,7 @@ public class RolloutUIState implements Serializable {
      * @return the rolloutId
      */
     public Optional<Long> getRolloutId() {
-        return rolloutId != null ? Optional.of(rolloutId) : Optional.empty();
+        return Optional.ofNullable(rolloutId);
     }
 
     /**
@@ -80,7 +80,7 @@ public class RolloutUIState implements Serializable {
      * @return the rolloutGroup
      */
     public Optional<RolloutGroup> getRolloutGroup() {
-        return rolloutGroup == null ? Optional.empty() : Optional.of(rolloutGroup);
+        return Optional.ofNullable(rolloutGroup);
     }
 
     /**
@@ -140,7 +140,7 @@ public class RolloutUIState implements Serializable {
      * @return the rolloutName
      */
     public Optional<String> getRolloutName() {
-        return rolloutName == null ? Optional.empty() : Optional.of(rolloutName);
+        return Optional.ofNullable(rolloutName);
     }
 
     /**
@@ -185,7 +185,7 @@ public class RolloutUIState implements Serializable {
      * @return rolloutDistributionSet
      */
     public Optional<String> getRolloutDistributionSet() {
-        return rolloutDistributionSet == null ? Optional.empty() : Optional.of(rolloutDistributionSet);
+        return Optional.ofNullable(rolloutDistributionSet);
     }
 
     /**

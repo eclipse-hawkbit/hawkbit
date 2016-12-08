@@ -206,7 +206,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
                 .createTargetTag(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
-        TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
+        TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
@@ -216,7 +216,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
         assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
@@ -226,7 +226,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> both unassigned
-        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        result = toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
@@ -439,7 +439,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = testdataFactory.createTargets(20);
         final Iterable<TargetTag> tags = testdataFactory.createTargetTags(20, "");
 
-        tags.forEach(tag -> targetManagement.toggleTagAssignment(targets, tag));
+        tags.forEach(tag -> toggleTagAssignment(targets, tag));
 
         return targetTagRepository.findAll();
     }

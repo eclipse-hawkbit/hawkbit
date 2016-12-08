@@ -207,8 +207,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
-        targetManagement.deleteTargets(runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId());
+        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(3).getTarget().getId(),
+                runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups, second group should be in running status")
@@ -226,9 +226,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
                 Status.RUNNING);
         finishAction(runningActions.get(0));
-        targetManagement.deleteTargets(runningActions.get(1).getTarget().getId(),
-                runningActions.get(2).getTarget().getId(), runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId());
+        targetManagement.deleteTargets(
+                Lists.newArrayList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                        runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
 
     }
 
@@ -236,9 +236,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
                 Status.SCHEDULED);
-        targetManagement.deleteTargets(runningActions.get(0).getTarget().getId(),
+        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
-                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId());
+                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups and the rollout")

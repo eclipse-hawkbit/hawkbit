@@ -472,7 +472,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final Set<TargetIdName> itemIds = managementUIState.getDeletedTargetList();
         final List<Long> targetIds = itemIds.stream().map(t -> t.getTargetId()).collect(Collectors.toList());
 
-        targetManagement.deleteTargets(targetIds.toArray(new Long[targetIds.size()]));
+        targetManagement.deleteTargets(targetIds);
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.deleted", targetIds.size()));
         removeCurrentTab(tab);

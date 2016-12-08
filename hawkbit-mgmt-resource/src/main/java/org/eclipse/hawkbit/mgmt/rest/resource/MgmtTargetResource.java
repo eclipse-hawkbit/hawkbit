@@ -130,8 +130,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        this.targetManagement.deleteTargets(target.getId());
+        this.targetManagement.deleteTarget(controllerId);
         LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -192,7 +192,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final TargetTag targetTag = tagManagement.createTargetTag(entityFactory.tag().create().name("Tag1"));
 
-        final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag);
+        final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
         assignedTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(1));
 
@@ -200,16 +200,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
                 .isEqualTo(findTargetTag.getAssignedToTargets().size());
 
-        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag)).as("Unassign target does not work")
+        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag.getId())).as("Unassign target does not work")
                 .isNull();
 
-        final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag);
+        final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(unAssignTarget.getTags()).as("Tag size is wrong").isEmpty();
         findTargetTag = tagManagement.findTargetTag("Tag1");
         assertThat(findTargetTag.getAssignedToTargets()).as("Assigned targets are wrong").hasSize(3);
 
-        final List<Target> unAssignTargets = targetManagement.unAssignAllTargetsByTag(findTargetTag);
+        final List<Target> unAssignTargets = targetManagement.unAssignAllTargetsByTag(findTargetTag.getId());
         findTargetTag = tagManagement.findTargetTag("Tag1");
         assertThat(findTargetTag.getAssignedToTargets()).as("Unassigned targets are wrong").isEmpty();
         assertThat(unAssignTargets).as("Unassigned targets are wrong").hasSize(3);
@@ -223,12 +223,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     public void deleteAndCreateTargets() {
         Target target = targetManagement.createTarget(entityFactory.target().create().controllerId("targetId123"));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
-        targetManagement.deleteTargets(target.getId());
+        targetManagement.deleteTargets(Lists.newArrayList(target.getId()));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
-        targetManagement.deleteTargets(target.getId());
+        targetManagement.deleteTargets(Lists.newArrayList(target.getId()));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         final List<Long> targets = new ArrayList<>();
@@ -238,7 +238,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             targets.add(createTargetWithAttributes("" + (i * i + 1000)).getId());
         }
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(10);
-        targetManagement.deleteTargets(targets.toArray(new Long[targets.size()]));
+        targetManagement.deleteTargets(targets);
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
     }
 
@@ -470,7 +470,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             }
         }
 
-        targetManagement.deleteTargets(extra.getId());
+        targetManagement.deleteTarget(extra.getControllerId());
 
         final int numberToDelete = 50;
         final Iterable<Target> targetsToDelete = limit(firstList, numberToDelete);
@@ -498,11 +498,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final int noT1Tags = 3;
         final List<TargetTag> t1Tags = testdataFactory.createTargetTags(noT1Tags, "tag1");
 
-        t1Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t1.getControllerId()), tag));
+        t1Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t1.getControllerId()), tag.getId()));
 
         final Target t2 = testdataFactory.createTarget("id-2");
         final List<TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
-        t2Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t2.getControllerId()), tag));
+        t2Tags.forEach(tag -> targetManagement.assignTag(Lists.newArrayList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.findTargetByControllerID(t1.getControllerId());
         assertThat(t11.getTags()).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
@@ -535,16 +535,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         tagManagement.createTargetTag(entityFactory.tag().create().name("X"));
 
         // doing different assignments
-        targetManagement.toggleTagAssignment(tagATargets, tagA);
-        targetManagement.toggleTagAssignment(tagBTargets, tagB);
-        targetManagement.toggleTagAssignment(tagCTargets, tagC);
+        toggleTagAssignment(tagATargets, tagA);
+        toggleTagAssignment(tagBTargets, tagB);
+        toggleTagAssignment(tagCTargets, tagC);
 
-        targetManagement.toggleTagAssignment(tagABTargets, tagA);
-        targetManagement.toggleTagAssignment(tagABTargets, tagB);
+        toggleTagAssignment(tagABTargets, tagA);
+        toggleTagAssignment(tagABTargets, tagB);
 
-        targetManagement.toggleTagAssignment(tagABCTargets, tagA);
-        targetManagement.toggleTagAssignment(tagABCTargets, tagB);
-        targetManagement.toggleTagAssignment(tagABCTargets, tagC);
+        toggleTagAssignment(tagABCTargets, tagA);
+        toggleTagAssignment(tagABCTargets, tagB);
+        toggleTagAssignment(tagABCTargets, tagC);
 
         assertThat(targetManagement.countTargetByFilters(null, null, null, null, Boolean.FALSE, "X"))
                 .as("Target count is wrong").isEqualTo(0);
@@ -603,20 +603,20 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targBCs = testdataFactory.createTargets(7, "target-id-BC", "first description");
         final List<Target> targABCs = testdataFactory.createTargets(17, "target-id-ABC", "first description");
 
-        targetManagement.toggleTagAssignment(targAs, targTagA);
-        targetManagement.toggleTagAssignment(targABs, targTagA);
-        targetManagement.toggleTagAssignment(targACs, targTagA);
-        targetManagement.toggleTagAssignment(targABCs, targTagA);
+        toggleTagAssignment(targAs, targTagA);
+        toggleTagAssignment(targABs, targTagA);
+        toggleTagAssignment(targACs, targTagA);
+        toggleTagAssignment(targABCs, targTagA);
 
-        targetManagement.toggleTagAssignment(targBs, targTagB);
-        targetManagement.toggleTagAssignment(targABs, targTagB);
-        targetManagement.toggleTagAssignment(targBCs, targTagB);
-        targetManagement.toggleTagAssignment(targABCs, targTagB);
+        toggleTagAssignment(targBs, targTagB);
+        toggleTagAssignment(targABs, targTagB);
+        toggleTagAssignment(targBCs, targTagB);
+        toggleTagAssignment(targABCs, targTagB);
 
-        targetManagement.toggleTagAssignment(targCs, targTagC);
-        targetManagement.toggleTagAssignment(targACs, targTagC);
-        targetManagement.toggleTagAssignment(targBCs, targTagC);
-        targetManagement.toggleTagAssignment(targABCs, targTagC);
+        toggleTagAssignment(targCs, targTagC);
+        toggleTagAssignment(targACs, targTagC);
+        toggleTagAssignment(targBCs, targTagC);
+        toggleTagAssignment(targABCs, targTagC);
 
         checkTargetHasTags(true, targAs, targTagA);
         checkTargetHasTags(true, targBs, targTagB);
@@ -625,10 +625,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasTags(true, targBCs, targTagB, targTagC);
         checkTargetHasTags(true, targABCs, targTagA, targTagB, targTagC);
 
-        targetManagement.toggleTagAssignment(targCs, targTagC);
-        targetManagement.toggleTagAssignment(targACs, targTagC);
-        targetManagement.toggleTagAssignment(targBCs, targTagC);
-        targetManagement.toggleTagAssignment(targABCs, targTagC);
+        toggleTagAssignment(targCs, targTagC);
+        toggleTagAssignment(targACs, targTagC);
+        toggleTagAssignment(targBCs, targTagC);
+        toggleTagAssignment(targABCs, targTagC);
 
         checkTargetHasTags(true, targAs, targTagA); // 0
         checkTargetHasTags(true, targBs, targTagB);
@@ -652,7 +652,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
 
-        targetManagement.toggleTagAssignment(targAs, targTagA);
+        toggleTagAssignment(targAs, targTagA);
 
         assertThat(targetManagement.findTargetsByControllerIDsWithTags(
                 targAs.stream().map(Target::getControllerId).collect(Collectors.toList()))).as("Target count is wrong")
@@ -690,7 +690,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
-        targetManagement.toggleTagAssignment(targAs, targTagA);
+        toggleTagAssignment(targAs, targTagA);
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
