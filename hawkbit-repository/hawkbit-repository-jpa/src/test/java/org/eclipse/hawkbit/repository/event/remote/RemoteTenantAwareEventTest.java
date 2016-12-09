@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -17,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
-import org.springframework.messaging.converter.MessageConversionException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -26,19 +24,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("RemoteTenantAwareEvent Tests")
 public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
-
-    @Test
-    @Description("Verifies that a immutable header is not work")
-    public void testMessageWithImmutableHeader() {
-        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 3L, "Node");
-
-        try {
-            createMessageWithImmutableHeader(downloadProgressEvent);
-            fail("MessageConversionException should happen");
-        } catch (final MessageConversionException e) {
-            // ok
-        }
-    }
 
     @Test
     @Description("Verifies that the download progress reloading by remote events works")
