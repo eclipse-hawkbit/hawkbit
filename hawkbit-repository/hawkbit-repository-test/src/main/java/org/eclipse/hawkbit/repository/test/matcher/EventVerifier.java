@@ -75,11 +75,16 @@ public class EventVerifier implements TestRule {
             verifyRightCountOfEvents(expectedEvents);
             verifyAllEventsCounted(expectedEvents);
         } finally {
-            final ApplicationEventMulticaster aem = TestContextProvider.getContext().getBean(
+            final ConfigurableApplicationContext context = TestContextProvider.getContext();
+            if (context instanceof AbstractApplicationContext) {
+                ((AbstractApplicationContext) context).getApplicationListeners().remove(eventCaptor);
+            }
+            final ApplicationEventMulticaster aem = context.getBean(
                     AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
                     ApplicationEventMulticaster.class);
             aem.removeApplicationListener(eventCaptor);
         }
+        eventCaptor = null;
     }
 
     private void verifyRightCountOfEvents(final Expect[] expectedEvents) {
