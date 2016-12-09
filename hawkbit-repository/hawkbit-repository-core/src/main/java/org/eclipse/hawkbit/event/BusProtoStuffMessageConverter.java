@@ -61,11 +61,10 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
             final Object conversionHint) {
         final Object objectPayload = message.getPayload();
         if (objectPayload instanceof byte[]) {
-            final byte[] payload = (byte[]) objectPayload;
-            final byte[] clazzHeader = new byte[EVENT_TYPE_LENGTH];
-            final byte[] content = new byte[payload.length - EVENT_TYPE_LENGTH];
 
-            splitClazzHeaderAndContent(payload, clazzHeader, content);
+            final byte[] payload = (byte[]) objectPayload;
+            final byte[] clazzHeader = extractClazzHeader(payload);
+            final byte[] content = extraxtContent(payload);
 
             final EventType eventType = readClassHeader(clazzHeader);
             return readContent(eventType, content);
@@ -81,11 +80,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
         final byte[] writeContent = writeContent(payload);
 
-        final byte[] body = new byte[clazzHeader.length + writeContent.length];
-
-        mergeClassHeaderAndContent(clazzHeader, writeContent, body);
-
-        return body;
+        return mergeClassHeaderAndContent(clazzHeader, writeContent);
     }
 
     private static Object readContent(final EventType eventType, final byte[] content) {
@@ -101,16 +96,23 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
         return deserializeEvent;
     }
 
-    private static void mergeClassHeaderAndContent(final byte[] clazzHeader, final byte[] writeContent,
-            final byte[] body) {
+    private static byte[] mergeClassHeaderAndContent(final byte[] clazzHeader, final byte[] writeContent) {
+        final byte[] body = new byte[clazzHeader.length + writeContent.length];
         System.arraycopy(clazzHeader, 0, body, 0, clazzHeader.length);
         System.arraycopy(writeContent, 0, body, clazzHeader.length, writeContent.length);
+        return body;
     }
 
-    private static void splitClazzHeaderAndContent(final byte[] payload, final byte[] clazzHeader,
-            final byte[] content) {
-        System.arraycopy(payload, 0, clazzHeader, 0, clazzHeader.length);
-        System.arraycopy(payload, clazzHeader.length, content, 0, content.length);
+    private static byte[] extractClazzHeader(final byte[] payload) {
+        final byte[] clazzHeader = new byte[EVENT_TYPE_LENGTH];
+        System.arraycopy(payload, 0, clazzHeader, 0, EVENT_TYPE_LENGTH);
+        return clazzHeader;
+    }
+
+    private static byte[] extraxtContent(final byte[] payload) {
+        final byte[] content = new byte[payload.length - EVENT_TYPE_LENGTH];
+        System.arraycopy(payload, EVENT_TYPE_LENGTH, content, 0, content.length);
+        return content;
     }
 
     private static EventType readClassHeader(final byte[] typeInformation) {

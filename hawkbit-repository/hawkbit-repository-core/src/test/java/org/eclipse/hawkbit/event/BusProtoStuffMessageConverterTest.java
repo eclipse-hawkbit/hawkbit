@@ -46,7 +46,7 @@ public class BusProtoStuffMessageConverterTest {
     }
 
     @Test
-    @Description("Verifies that the TargetCreatedEvent can be successfully seriaized and deserialized")
+    @Description("Verifies that the TargetCreatedEvent can be successfully serialized and deserialized")
     public void successfullySerializeAndDeserializeEvent() {
         final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock, "1");
         // serialize
