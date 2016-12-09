@@ -79,8 +79,6 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -96,11 +94,6 @@ import com.google.common.collect.Lists;
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
-// destroy the context after each test class because otherwise we get problem
-// when context is
-// refreshed we e.g. get two instances of CacheManager which leads to very
-// strange test failures.
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
