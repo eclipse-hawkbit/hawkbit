@@ -25,6 +25,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
+import javax.persistence.criteria.PluralJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
@@ -161,7 +162,6 @@ public final class RSQLUtility {
 
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-
             final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
@@ -298,7 +298,7 @@ public final class RSQLUtility {
 
                 final String fieldNameSplit = split[i];
                 fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
-                if (fieldPath instanceof SetJoin) {
+                if (fieldPath instanceof PluralJoin) {
                     final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
                     final From<?, Object> joinParent = join.getParent();
                     joinParent.getJoins().remove(join);

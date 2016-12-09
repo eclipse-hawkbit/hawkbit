@@ -95,6 +95,8 @@
     text-decoration: none;
   }
 
+
+
   .groups-pie-chart {
     float: right;
 
@@ -143,6 +145,11 @@
   }
 
   .rollout-groups {
+
+    .v-button {
+      margin: 0 3px 3px 3px;
+    }
+
     .rollout-group-name {
       border-left: 5px solid #000000;
     }
