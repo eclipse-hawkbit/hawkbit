@@ -27,6 +27,7 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -70,8 +71,15 @@ public class EventVerifier implements TestRule {
     }
 
     private void afterTest(final Expect[] expectedEvents) {
-        verifyRightCountOfEvents(expectedEvents);
-        verifyAllEventsCounted(expectedEvents);
+        try {
+            verifyRightCountOfEvents(expectedEvents);
+            verifyAllEventsCounted(expectedEvents);
+        } finally {
+            final ApplicationEventMulticaster aem = TestContextProvider.getContext().getBean(
+                    AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
+                    ApplicationEventMulticaster.class);
+            aem.removeApplicationListener(eventCaptor);
+        }
     }
 
     private void verifyRightCountOfEvents(final Expect[] expectedEvents) {
