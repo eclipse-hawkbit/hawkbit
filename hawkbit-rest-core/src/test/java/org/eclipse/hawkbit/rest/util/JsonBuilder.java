@@ -183,7 +183,7 @@ public abstract class JsonBuilder {
 
     public static String deploymentActionFeedback(final String id, final String execution, final String finished,
             final String message) throws JSONException {
-        final List<String> messages = new ArrayList<String>();
+        final List<String> messages = new ArrayList<>();
         messages.add(message);
 
         return new JSONObject().put("id", id).put("time", "20140511T121314")
@@ -344,7 +344,8 @@ public abstract class JsonBuilder {
         }).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
-                .put("version", set.getVersion()).toString();
+                .put("version", set.getVersion()).put("requiredMigrationStep", set.isRequiredMigrationStep())
+                .toString();
 
     }
 
@@ -399,13 +400,13 @@ public abstract class JsonBuilder {
     }
 
     public static String rollout(final String name, final String description, final int groupSize,
-                                 final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-                                 final List<RolloutGroup> groups) {
+            final List<RolloutGroup> groups) {
         final JSONObject json = new JSONObject();
         json.put("name", name);
         json.put("description", description);
@@ -435,35 +436,35 @@ public abstract class JsonBuilder {
             errorAction.put("expression", conditions.getErrorActionExp());
         }
 
-        if(groups != null) {
+        if (groups != null) {
             final JSONArray jsonGroups = new JSONArray();
 
-            for (RolloutGroup group : groups) {
+            for (final RolloutGroup group : groups) {
                 final JSONObject jsonGroup = new JSONObject();
                 jsonGroup.put("name", group.getName());
                 jsonGroup.put("description", group.getDescription());
                 jsonGroup.put("targetFilterQuery", group.getTargetFilterQuery());
                 jsonGroup.put("targetPercentage", group.getTargetPercentage());
 
-                if(group.getSuccessCondition() != null) {
+                if (group.getSuccessCondition() != null) {
                     final JSONObject successCondition = new JSONObject();
                     jsonGroup.put("successCondition", successCondition);
                     successCondition.put("condition", group.getSuccessCondition().toString());
                     successCondition.put("expression", group.getSuccessConditionExp());
                 }
-                if(group.getSuccessAction() != null) {
+                if (group.getSuccessAction() != null) {
                     final JSONObject successAction = new JSONObject();
                     jsonGroup.put("successAction", successAction);
                     successAction.put("action", group.getSuccessAction().toString());
                     successAction.put("expression", group.getSuccessActionExp());
                 }
-                if(group.getErrorCondition() != null) {
+                if (group.getErrorCondition() != null) {
                     final JSONObject errorCondition = new JSONObject();
                     jsonGroup.put("errorCondition", errorCondition);
                     errorCondition.put("condition", group.getErrorCondition().toString());
                     errorCondition.put("expression", group.getErrorConditionExp());
                 }
-                if(group.getErrorAction() != null) {
+                if (group.getErrorAction() != null) {
                     final JSONObject errorAction = new JSONObject();
                     jsonGroup.put("errorAction", errorAction);
                     errorAction.put("action", group.getErrorAction().toString());
@@ -487,7 +488,7 @@ public abstract class JsonBuilder {
 
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        final List<String> messages = new ArrayList<String>();
+        final List<String> messages = new ArrayList<>();
         messages.add(message);
         return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",

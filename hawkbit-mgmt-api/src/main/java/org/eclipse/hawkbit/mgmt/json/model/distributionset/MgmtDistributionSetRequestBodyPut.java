@@ -30,6 +30,9 @@ public class MgmtDistributionSetRequestBodyPut {
     @JsonProperty
     private String version;
 
+    @JsonProperty
+    private Boolean requiredMigrationStep;
+
     /**
      * @return the name
      */
@@ -45,6 +48,25 @@ public class MgmtDistributionSetRequestBodyPut {
      */
     public MgmtDistributionSetRequestBodyPut setName(final String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * @return the requiredMigrationStep
+     */
+    public Boolean isRequiredMigrationStep() {
+        return requiredMigrationStep;
+    }
+
+    /**
+     * @param requiredMigrationStep
+     *            the requiredMigrationStep to set
+     *
+     * @return updated body
+     */
+    public MgmtDistributionSetRequestBodyPut setRequiredMigrationStep(final Boolean requiredMigrationStep) {
+        this.requiredMigrationStep = requiredMigrationStep;
+
         return this;
     }
 
