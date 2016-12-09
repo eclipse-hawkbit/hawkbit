@@ -133,6 +133,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         final HorizontalLayout viewHeadercontent = new HorizontalLayout();
         contentVerticalLayout.addComponent(viewHeadercontent);
         viewHeadercontent.setWidth("100%");
+        viewHeadercontent.setHeight("43px");
         viewHeadercontent.addStyleName("view-header-layout");
 
         final Label viewHeader = new Label();

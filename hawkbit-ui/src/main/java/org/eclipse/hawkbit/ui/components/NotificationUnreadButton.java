@@ -41,6 +41,7 @@ public class NotificationUnreadButton extends Button {
     private static final String STYLE = "notifications-unread";
     private static final String STYLE_UNREAD_COUNTER = "unread";
     private static final String STYLE_POPUP = "notifications-unread-popup";
+    private static final String STYLE_NO_CLOSEBOX = "no-closebox";
 
     private int unreadNotificationCounter;
     private AbstractNotificationView currentView;
@@ -66,7 +67,7 @@ public class NotificationUnreadButton extends Button {
         setHtmlContentAllowed(true);
         setEnabled(false);
         createNotificationWindow();
-        addClickListener(event -> toggleWindow(event));
+        addClickListener(this::toggleWindow);
     }
 
     private void createUnreadMessagesLayout() {
@@ -87,6 +88,7 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow = new Window();
         notificationsWindow.setWidth(300.0F, Unit.PIXELS);
         notificationsWindow.addStyleName(STYLE_POPUP);
+        notificationsWindow.addStyleName(STYLE_NO_CLOSEBOX);
         notificationsWindow.setClosable(true);
         notificationsWindow.setResizable(false);
         notificationsWindow.setDraggable(false);
