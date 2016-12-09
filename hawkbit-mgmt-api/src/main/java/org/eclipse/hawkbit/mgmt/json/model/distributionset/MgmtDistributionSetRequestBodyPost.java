@@ -41,9 +41,6 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
     private List<MgmtSoftwareModuleAssigment> modules;
 
     @JsonProperty
-    private Boolean requiredMigrationStep;
-
-    @JsonProperty
     private String type;
 
     /**
@@ -98,25 +95,6 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
      */
     public MgmtDistributionSetRequestBodyPost setApplication(final MgmtSoftwareModuleAssigment application) {
         this.application = application;
-
-        return this;
-    }
-
-    /**
-     * @return the requiredMigrationStep
-     */
-    public Boolean isRequiredMigrationStep() {
-        return requiredMigrationStep;
-    }
-
-    /**
-     * @param requiredMigrationStep
-     *            the requiredMigrationStep to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetRequestBodyPost setRequiredMigrationStep(final Boolean requiredMigrationStep) {
-        this.requiredMigrationStep = requiredMigrationStep;
 
         return this;
     }

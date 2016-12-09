@@ -140,9 +140,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            eventContainer.getEvents().stream().map(event -> event.getEntity())
-                    .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
-                    .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
+            eventContainer.getEvents().stream()
+                    .filter(event -> visibleItemIds.contains(new TargetIdName(event.getEntityId(), null, null)))
+                    .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
         }
         // workaround until push is available for action
         // history, re-select
@@ -690,6 +690,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (size != 0) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
         }
+        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
+    }
+
+    @Override
+    public void refreshContainer() {
+        super.refreshContainer();
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
