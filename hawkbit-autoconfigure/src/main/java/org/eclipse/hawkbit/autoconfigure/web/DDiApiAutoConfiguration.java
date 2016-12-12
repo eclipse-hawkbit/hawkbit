@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.web;
 
-import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
+import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

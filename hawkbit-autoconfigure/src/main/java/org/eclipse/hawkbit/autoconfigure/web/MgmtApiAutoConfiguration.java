@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.web;
 
-import org.eclipse.hawkbit.mgmt.MgmtApiConfiguration;
+import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

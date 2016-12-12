@@ -23,6 +23,6 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnMissingBean(ArtifactRepository.class)
 @ConditionalOnClass({ ArtifactFilesystemConfiguration.class })
 @Import(ArtifactFilesystemConfiguration.class)
-public class ArtifactStoreAutoConfiguration {
+public class ArtifactFilesystemAutoConfiguration {
 
 }

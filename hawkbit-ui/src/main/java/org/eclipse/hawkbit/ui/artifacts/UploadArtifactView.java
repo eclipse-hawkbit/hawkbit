@@ -92,7 +92,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
-            final MultipartConfigElement spInfo, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -104,8 +104,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement);
-        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo,
-                artifactManagement);
+        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
+                multipartConfigElement, artifactManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareManagement, uploadViewClientCriterion);
     }

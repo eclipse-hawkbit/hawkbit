@@ -23,13 +23,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
-import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
+import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
-import org.eclipse.hawkbit.mgmt.MgmtApiConfiguration;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -101,9 +101,6 @@ public class SecurityManagedConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
     @Autowired
-    private HawkbitSecurityProperties securityProperties;
-
-    @Autowired
     private AuthenticationConfiguration configuration;
 
     /**
@@ -163,7 +160,7 @@ public class SecurityManagedConfiguration {
          * @param securityProperties
          *            for filter configuration
          *
-         * @return he spring filter registration bean for registering an denial
+         * @return the spring filter registration bean for registering a denial
          *         of service protection filter in the filter chain
          */
         @Bean
@@ -252,7 +249,7 @@ public class SecurityManagedConfiguration {
      * @param securityProperties
      *            for filter configuration
      *
-     * @return he spring filter registration bean for registering an denial of
+     * @return the spring filter registration bean for registering a denial of
      *         service protection filter in the filter chain
      */
     @Bean
@@ -326,7 +323,7 @@ public class SecurityManagedConfiguration {
          * @param securityProperties
          *            for filter configuration
          *
-         * @return he spring filter registration bean for registering an denial
+         * @return the spring filter registration bean for registering a denial
          *         of service protection filter in the filter chain
          */
         @Bean

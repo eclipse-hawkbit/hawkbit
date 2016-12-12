@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi;
+package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Controller;
 /**
  * Enable {@link ComponentScan} in the resource package to setup all
  * {@link Controller} annotated classes and setup the REST-Resources for the
- * Direct Device Integration API.
+ * Management API.
  */
 @Configuration
-@ComponentScan("org.eclipse.hawkbit.ddi.rest.resource")
+@ComponentScan
 @Import(RestConfiguration.class)
-public class DdiApiConfiguration {
+public class MgmtApiConfiguration {
 
 }

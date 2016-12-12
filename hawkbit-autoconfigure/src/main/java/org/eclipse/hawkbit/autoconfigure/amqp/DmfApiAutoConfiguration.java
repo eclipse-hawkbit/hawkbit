@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.util.ErrorHandler;
 
 /**
- * The AMQP 0.9 based evice Management Federation API (DMF) autoconfiguration.
+ * The AMQP 0.9 based device Management Federation API (DMF) auto configuration.
  */
 @Configuration
 @ConditionalOnClass(DmfApiConfiguration.class)

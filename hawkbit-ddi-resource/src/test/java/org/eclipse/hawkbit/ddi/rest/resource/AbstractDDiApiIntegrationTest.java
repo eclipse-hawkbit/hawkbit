@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import org.eclipse.hawkbit.ddi.DdiApiConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 

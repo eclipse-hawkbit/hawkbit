@@ -34,8 +34,8 @@ public interface ArtifactRepository {
      *            the content type of the artifact
      * @return the stored artifact
      * 
-     * @throw MethodNotSupported is implementation does not support the
-     *        operation
+     * @throws MethodNotSupportedException
+     *             if implementation does not support the operation
      * @throws ArtifactStoreException
      *             in case storing of the artifact was not successful
      */
@@ -55,8 +55,8 @@ public interface ArtifactRepository {
      *            artifact, might be {@code null}
      * @return the stored artifact
      * 
-     * @throw MethodNotSupported is implementation does not support the
-     *        operation
+     * @throws MethodNotSupportedException
+     *             if implementation does not support the operation
      * @throws ArtifactStoreException
      *             in case storing of the artifact was not successful
      * @throws HashNotMatchException
@@ -72,8 +72,8 @@ public interface ArtifactRepository {
      * @param sha1Hash
      *            the sha1-hash of the artifact to delete
      * 
-     * @throw MethodNotSupported is implementation does not support the
-     *        operation
+     * @throws MethodNotSupportedException
+     *             if implementation does not support the operation
      */
     void deleteBySha1(final String sha1Hash);
 
@@ -84,8 +84,8 @@ public interface ArtifactRepository {
      *            the sha1-hash of the file to lookup.
      * @return The artifact file object or {@code null} if no file exists.
      * 
-     * @throw MethodNotSupported is implementation does not support the
-     *        operation
+     * @throws MethodNotSupportedException
+     *             if implementation does not support the operation
      */
     DbArtifact getArtifactBySha1(String sha1Hash);
 }

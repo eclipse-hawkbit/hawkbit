@@ -90,7 +90,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient MultipartConfigElement spInfo;
+    private final transient MultipartConfigElement multipartConfigElement;
 
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
@@ -118,14 +118,14 @@ public class UploadLayout extends VerticalLayout {
     private final transient ArtifactManagement artifactManagement;
 
     public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final MultipartConfigElement spInfo,
+            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
-        this.spInfo = spInfo;
+        this.multipartConfigElement = multipartConfigElement;
         this.artifactManagement = artifactManagement;
 
         createComponents();
@@ -174,8 +174,8 @@ public class UploadLayout extends VerticalLayout {
     private void buildLayout() {
 
         final Upload upload = new Upload();
-        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, spInfo.getMaxFileSize(), upload, null,
-                null);
+        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
+                upload, null, null);
         upload.setButtonCaption(i18n.get("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -282,8 +282,8 @@ public class UploadLayout extends VerticalLayout {
         }
 
         private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
-            return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this, spInfo.getMaxFileSize(),
-                    null, file.getType(), selectedSw);
+            return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
+                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw);
         }
 
         private boolean isDirectory(final Html5File file) {
