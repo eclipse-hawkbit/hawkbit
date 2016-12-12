@@ -97,6 +97,17 @@ public interface RolloutManagement {
     void checkStartingRollouts(long delayBetweenChecks);
 
     /**
+     * Checking Rollouts that are currently ready for an auto start.
+     *
+     * @param delayBetweenChecks
+     *            the time in milliseconds of the delay between the further and
+     *            this check. This check is only applied if the last check is
+     *            less than (lastcheck-delay).
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void checkReadyRollouts(long delayBetweenChecks);
+
+    /**
      * Counts all {@link Rollout}s in the repository.
      *
      * @return number of roll outs

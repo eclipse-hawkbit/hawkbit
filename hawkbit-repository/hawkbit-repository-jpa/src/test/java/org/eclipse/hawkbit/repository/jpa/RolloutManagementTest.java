@@ -1096,7 +1096,64 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
+
+        rolloutManagement.checkReadyRollouts(0);
+
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
+
         rolloutManagement.startRollout(myRollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.checkStartingRollouts(0);
+
+        final SuccessConditionRolloutStatus conditionRolloutTargetCount = new SuccessConditionRolloutStatus(
+                RolloutStatus.RUNNING);
+        assertThat(MultipleInvokeHelper.doWithTimeout(new RolloutStatusCallable(myRollout.getId()),
+                conditionRolloutTargetCount, 15000, 500)).as("Rollout status").isNotNull();
+
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
+        final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 100L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 400L);
+        validateRolloutActionStatus(myRollout.getId(), expectedTargetCountStatus);
+    }
+
+    @Test
+    @Description("Verify the creation and the automatic start of a rollout.")
+    public void createAndAutoStartRollout() throws Exception {
+
+        final int amountTargetsForRollout = 500;
+        final int amountGroups = 5;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final String rolloutName = "rolloutTest8";
+        final String targetPrefixName = rolloutName;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+
+        Rollout myRollout = createRolloutByVariables(rolloutName, "desc", amountGroups,
+                "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
+
+        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
+
+        // schedule rollout auto start into the future
+        rolloutManagement.updateRollout(
+                entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis() + 60000));
+        rolloutManagement.checkReadyRollouts(0);
+
+        // rollout should not have been started
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
+
+        // schedule to now
+        rolloutManagement.updateRollout(
+                entityFactory.rollout().update(myRollout.getId()).startAt(System.currentTimeMillis()));
+        rolloutManagement.checkReadyRollouts(0);
+
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.STARTING);
 
         // Run here, because scheduler is disabled during tests
         rolloutManagement.checkStartingRollouts(0);

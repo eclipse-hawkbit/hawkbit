@@ -66,4 +66,11 @@ public interface RolloutUpdate {
      */
     RolloutUpdate forcedTime(Long forcedTime);
 
+    /**
+     * @param startAt
+     *            for {@link Rollout#getStartAt()}
+     * @return updated builder instance
+     */
+    RolloutUpdate startAt(Long startAt);
+
 }

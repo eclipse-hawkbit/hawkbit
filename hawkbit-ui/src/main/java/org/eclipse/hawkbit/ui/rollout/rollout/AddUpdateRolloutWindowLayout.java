@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -94,6 +95,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
+    private final AutoStartOptionGroupLayout autoStartOptionGroupLayout;
+
     private final transient RolloutManagement rolloutManagement;
 
     private final transient TargetManagement targetManagement;
@@ -154,6 +157,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final I18N i18n, final UIEventBus eventBus, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        this.autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
         this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
@@ -250,6 +254,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         removeComponent(1, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
         actionTypeOptionGroupLayout.selectDefaultOption();
+        autoStartOptionGroupLayout.selectDefaultOption();
         totalTargetsCount = 0L;
         rollout = null;
         groupsDefinitionTabs.setVisible(true);
@@ -299,6 +304,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         addComponent(getMandatoryLabel("caption.rollout.action.type"), 0, 4);
         addComponent(actionTypeOptionGroupLayout, 1, 4, 3, 4);
+
+        addComponent(getMandatoryLabel("caption.rollout.start.type"), 0, 5);
+        addComponent(autoStartOptionGroupLayout, 1, 5, 3, 5);
 
         addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
 
@@ -353,8 +361,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         actionTypeOptionGroupLayout.selectDefaultOption();
+        autoStartOptionGroupLayout.selectDefaultOption();
         targetFilterQuery = createTargetFilterQuery();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
+        autoStartOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
         groupsDefinitionTabs = createGroupDefinitionTabs();
 
@@ -590,13 +600,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
 
-        final Rollout updatedRollout = rolloutManagement.updateRollout(entityFactory.rollout()
-                .update(rollout.getId())
-                .name(rolloutName.getValue())
-                .description(description.getValue())
-                .set(distributionSetIdName.getId())
-                .actionType(getActionType())
-                .forcedTime(getForcedTimeStamp()));
+        RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId()).name(rolloutName.getValue())
+                .description(description.getValue()).set(distributionSetIdName.getId()).actionType(getActionType())
+                .forcedTime(getForcedTimeStamp());
+
+        if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+            rolloutUpdate.startAt(System.currentTimeMillis());
+        }
+        if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+            rolloutUpdate.startAt(getScheduledStartTime());
+        }
+
+        final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutUpdate);
 
         uiNotification.displaySuccess(i18n.get("message.update.success", updatedRollout.getName()));
         eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
@@ -616,6 +631,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return ActionTypeOption.AUTO_FORCED.equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
                 ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                 : RepositoryModelConstants.NO_FORCE_TIME;
+    }
+
+    private Long getScheduledStartTime() {
+        return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
+                ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+    }
+
+    private AutoStartOptionGroupLayout.AutoStartOption getAutoStartOption() {
+        return (AutoStartOptionGroupLayout.AutoStartOption) autoStartOptionGroupLayout.getAutoStartOptionGroup()
+                .getValue();
     }
 
     private ActionType getActionType() {
@@ -644,9 +669,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 .description(description.getValue()).set(distributionSetIdName.getId())
                 .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp());
 
-        if(isNumberOfGroups()) {
+        if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+            rolloutCreate.startAt(System.currentTimeMillis());
+        }
+        if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+            rolloutCreate.startAt(getScheduledStartTime());
+        }
+
+        if (isNumberOfGroups()) {
             return rolloutManagement.createRollout(rolloutCreate, amountGroup, conditions);
-        } else if(isGroupsDefinition()) {
+        } else if (isGroupsDefinition()) {
             List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
             return rolloutManagement.createRollout(rolloutCreate, groups, conditions);
         }
@@ -835,6 +867,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         description.setValue(rollout.getDescription());
         distributionSet.setValue(DistributionSetIdName.generate(rollout.getDistributionSet()));
         setActionType(rollout);
+        setAutoStartType(rollout);
 
         if (copy) {
             rolloutName.setValue(i18n.get("textfield.rollout.copied.name", rollout.getName()));
@@ -873,9 +906,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         distributionSet.setEnabled(false);
         errorThreshold.setEnabled(false);
         triggerThreshold.setEnabled(false);
-        actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(false);
         errorThresholdOptionGroup.setEnabled(false);
+        actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(false);
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
+        autoStartOptionGroupLayout.getAutoStartOptionGroup().setEnabled(false);
+        autoStartOptionGroupLayout.addStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
     }
 
     private void enableFields() {
@@ -884,6 +919,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         triggerThreshold.setEnabled(true);
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(true);
         actionTypeOptionGroupLayout.removeStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
+        autoStartOptionGroupLayout.getAutoStartOptionGroup().setEnabled(true);
+        autoStartOptionGroupLayout.removeStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
         noOfGroups.setEnabled(true);
         targetFilterQueryCombo.setEnabled(true);
         errorThresholdOptionGroup.setEnabled(true);
@@ -899,6 +936,21 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 actionTypeOptionGroupLayout.getForcedTimeDateField().setValue(new Date(rollout.getForcedTime()));
                 break;
             }
+        }
+    }
+
+    private void setAutoStartType(final Rollout rollout) {
+        if (rollout.getStartAt() == null) {
+            autoStartOptionGroupLayout.getAutoStartOptionGroup()
+                    .setValue(AutoStartOptionGroupLayout.AutoStartOption.MANUAL);
+        } else if (rollout.getStartAt() < System.currentTimeMillis()) {
+            autoStartOptionGroupLayout.getAutoStartOptionGroup()
+                    .setValue(AutoStartOptionGroupLayout.AutoStartOption.AUTO_START);
+            autoStartOptionGroupLayout.getStartAtDateField().setValue(new Date(rollout.getStartAt()));
+        } else {
+            autoStartOptionGroupLayout.getAutoStartOptionGroup()
+                    .setValue(AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED);
+            autoStartOptionGroupLayout.getStartAtDateField().setValue(new Date(rollout.getStartAt()));
         }
     }
 

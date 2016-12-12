@@ -21,6 +21,7 @@ import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -114,6 +115,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private RolloutGroupManagement rolloutGroupManagement;
+
+    @Autowired
+    private DistributionSetManagement distributionSetManagement;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -497,6 +501,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
         checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
+        rollout.setLastCheck(0);
         return rolloutRepository.save(rollout);
     }
 
@@ -634,19 +639,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkRunningRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.RUNNING);
-
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
-                    lastCheck + delayBetweenChecks);
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.RUNNING);
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                RolloutStatus.RUNNING);
         LOGGER.info("Found {} running rollouts to check", rolloutsToCheck.size());
 
         for (final JpaRollout rollout : rolloutsToCheck) {
@@ -796,18 +793,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkCreatingRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.CREATING);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts creating check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
+        final List<Long> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.CREATING)
+                .stream().map(Rollout::getId).collect(Collectors.toList());
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<Long> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck, RolloutStatus.CREATING)
-                .stream().map(Rollout::getId).collect(Collectors.toList());
         LOGGER.info("Found {} creating rollouts to check", rolloutsToCheck.size());
 
         rolloutsToCheck.forEach(this::fillRolloutGroupsWithTargets);
@@ -818,18 +809,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkStartingRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.STARTING);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts starting check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks,
+                RolloutStatus.STARTING);
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                RolloutStatus.STARTING);
         LOGGER.info("Found {} starting rollouts to check", rolloutsToCheck.size());
 
         rolloutsToCheck.forEach(rollout -> {
@@ -837,6 +822,42 @@ public class JpaRolloutManagement implements RolloutManagement {
                 startFirstRolloutGroup(rollout);
             }
         });
+
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Modifying
+    public void checkReadyRollouts(final long delayBetweenChecks) {
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.READY);
+        if (rolloutsToCheck.isEmpty()) {
+            return;
+        }
+
+        LOGGER.info("Found {} ready rollouts to check", rolloutsToCheck.size());
+
+        final long now = System.currentTimeMillis();
+
+        rolloutsToCheck.forEach(rollout -> {
+            if (rollout.getStartAt() != null && rollout.getStartAt() <= now) {
+                startRollout(rollout.getId());
+            }
+        });
+
+    }
+
+    private List<JpaRollout> getRolloutsToCheckForStatus(final long delayBetweenChecks, final RolloutStatus status) {
+        final long lastCheck = System.currentTimeMillis();
+        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, status);
+        if (updated == 0) {
+            // nothing to check, maybe another instance already checked in
+            // between
+            LOGGER.debug("No rollouts starting check necessary for current scheduled check {}, next check at {}",
+                    lastCheck, lastCheck + delayBetweenChecks);
+            return Collections.emptyList();
+        }
+
+        return rolloutRepository.findByLastCheckAndStatus(lastCheck, status);
 
     }
 
@@ -883,6 +904,16 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
+        update.getActionType().ifPresent(rollout::setActionType);
+        update.getForcedTime().ifPresent(rollout::setForcedTime);
+        update.getStartAt().ifPresent(rollout::setStartAt);
+        update.getSet().ifPresent(setId -> {
+            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId);
+            if (set == null) {
+                throw new EntityNotFoundException("Distribution set cannot be set as it does not exists" + setId);
+            }
+            rollout.setDistributionSet(set);
+        });
 
         return rolloutRepository.save(rollout);
     }

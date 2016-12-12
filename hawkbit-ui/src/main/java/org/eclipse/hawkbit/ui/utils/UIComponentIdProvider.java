@@ -162,6 +162,21 @@ public final class UIComponentIdProvider {
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
 
     /**
+     * Start type of rollout manual radio button
+     */
+    public static final String ROLLOUT_START_MANUAL_ID = "rollout.start.manual.radio";
+
+    /**
+     * Start type of rollout auto start radio button
+     */
+    public static final String ROLLOUT_START_AUTO_ID = "rollout.start.auto.radio";
+
+    /**
+     * Start type of rollout scheduled start radio button
+     */
+    public static final String ROLLOUT_START_SCHEDULED_ID = "rollout.start.scheduled.start.radio";
+
+    /**
      * ID - Label.
      */
     public static final String ACTION_LABEL = "save.actions.popup.actionMsg";
