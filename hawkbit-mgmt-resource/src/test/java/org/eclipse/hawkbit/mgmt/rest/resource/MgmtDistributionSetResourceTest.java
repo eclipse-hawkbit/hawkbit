@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -659,17 +660,44 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
-                .hasSize(1);
+        assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
 
-        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content("{\"version\":\"anotherVersion\"}")
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId())
+                .content("{\"version\":\"anotherVersion\",\"requiredMigrationStep\":\"true\"}")
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true)
-                .getContent().get(0).getVersion()).isEqualTo("anotherVersion");
-        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true)
-                .getContent().get(0).getName()).isEqualTo(set.getName());
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+
+        assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
+        assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
+        assertThat(setupdated.getName()).isEqualTo(set.getName());
+    }
+
+    @Test
+    @Description("Ensures that DS property update on requiredMigrationStep fails if DS is assigned to a target.")
+    public void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
+
+        // prepare test data
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
+
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        deploymentManagement.assignDistributionSet(set.getId(),
+                Lists.newArrayList(new TargetWithActionType(testdataFactory.createTarget().getControllerId())));
+
+        assertThat(distributionSetManagement.countDistributionSetsAll()).isEqualTo(1);
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId())
+                .content("{\"version\":\"anotherVersion\",\"requiredMigrationStep\":\"true\"}")
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+
+        assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(false);
+        assertThat(setupdated.getVersion()).isEqualTo(set.getVersion());
+        assertThat(setupdated.getName()).isEqualTo(set.getName());
     }
 
     @Test

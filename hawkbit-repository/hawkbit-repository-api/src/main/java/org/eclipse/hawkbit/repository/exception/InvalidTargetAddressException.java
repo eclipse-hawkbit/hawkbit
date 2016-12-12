@@ -15,10 +15,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * Exception which is thrown when trying to set an invalid target address.
  */
 public class InvalidTargetAddressException extends AbstractServerRtException {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     /**

@@ -106,7 +106,7 @@
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
-      <spring-amqp.version>1.6.3.RELEASE</spring-amqp.version>
+      <spring-amqp.version>1.6.5.RELEASE</spring-amqp.version>
       <spring-security.version>4.1.2.RELEASE</spring-security.version>
       <spring.version>4.3.3.RELEASE</spring.version>
       <spring-integration.version>4.3.2.RELEASE</spring-integration.version>
@@ -298,6 +298,11 @@
 
       <pluginManagement>
          <plugins>
+            <plugin>
+               <groupId>org.sonarsource.scanner.maven</groupId>
+               <artifactId>sonar-maven-plugin</artifactId>
+               <version>3.1.1</version>
+            </plugin>
             <plugin>
                <groupId>org.eclipse.m2e</groupId>
                <artifactId>lifecycle-mapping</artifactId>

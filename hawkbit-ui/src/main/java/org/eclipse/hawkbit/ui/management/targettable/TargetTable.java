@@ -170,9 +170,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            eventContainer.getEvents().stream().map(event -> event.getEntity())
-                    .filter(target -> visibleItemIds.contains(target.getTargetIdName()))
-                    .forEach(target -> updateVisibleItemOnEvent(target.getTargetInfo()));
+            eventContainer.getEvents().stream()
+                    .filter(event -> visibleItemIds.contains(new TargetIdName(event.getEntityId(), null, null)))
+                    .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
             targetContainer.commit();
         }
 
