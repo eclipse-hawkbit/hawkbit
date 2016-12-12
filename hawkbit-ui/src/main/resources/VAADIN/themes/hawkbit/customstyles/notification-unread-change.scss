@@ -39,8 +39,8 @@
     &:after {
       content: "";
       position: absolute;
-      top: -14px;
-      right: (2 * $v-unit-size - round($v-unit-size / 3)) - 57px !important;
+      top: -12px;
+      right: (2 * $v-unit-size - round($v-unit-size / 3)) - 55px !important;
       border: 7px solid transparent;
       width: 0;
       height: 0;
