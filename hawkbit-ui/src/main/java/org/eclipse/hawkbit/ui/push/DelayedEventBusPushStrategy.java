@@ -50,8 +50,9 @@ import com.vaadin.ui.UI;
 /**
  * An {@link EventPushStrategy} implementation which retrieves events from
  * {@link com.google.common.eventbus.EventBus} and store them first in a queue
- * where they will dispatched every 2 seconds to the {@link EventBus} in a
- * Vaadin access thread {@link UI#access(Runnable)}.
+ * where they will dispatched every x (default is 2 can be configured with the
+ * property) seconds to the {@link EventBus} in a Vaadin access thread
+ * {@link UI#access(Runnable)}.
  *
  * This strategy avoids blocking UIs when too many events are fired and
  * dispatched to the UI thread. The UI will freeze in the time. To avoid that
@@ -72,17 +73,30 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private int uiid = -1;
 
     private final ScheduledExecutorService executorService;
-
-    private final transient EventBus.UIEventBus eventBus;
-
+    private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
+    private final int delay;
 
+    /**
+     * Constructor.
+     * 
+     * @param executorService
+     *            the general scheduler service
+     * @param eventBus
+     *            the ui event bus
+     * @param eventProvider
+     *            the event provider
+     * @param delay
+     *            the delay for the event forwarding. Every delay millisecond
+     *            the events are forwarded by this strategy
+     */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider) {
+            final UIEventProvider eventProvider, final int delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
+        this.delay = delay;
     }
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
@@ -98,7 +112,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
-                10_000, 1_000, TimeUnit.MILLISECONDS);
+                10_000, delay, TimeUnit.MILLISECONDS);
     }
 
     @Override

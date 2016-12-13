@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.ui;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
@@ -62,7 +63,14 @@ public class UIAutoConfiguration {
      * 
      * @param applicationContext
      *            the context to add the listener
-     * 
+     * @param executorService
+     *            the general scheduler service
+     * @param eventBus
+     *            the ui event bus
+     * @param eventProvider
+     *            the event provider
+     * @param uiProperties
+     *            the ui properties
      * @return the provider bean
      */
     @Bean
@@ -70,9 +78,9 @@ public class UIAutoConfiguration {
     @UIScope
     public EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext,
             final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider) {
+            final UIEventProvider eventProvider, final UiProperties uiProperties) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,
-                eventBus, eventProvider);
+                eventBus, eventProvider, uiProperties.getEvent().getPush().getDelay());
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);
         return delayedEventBusPushStrategy;
     }
