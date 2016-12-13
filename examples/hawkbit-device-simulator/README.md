@@ -70,7 +70,7 @@ Example: for 10 simulated devices that start with the name prefix "activeSim":
 http://localhost:8083/start?amount=10&name=activeSim
 ```
 
-Example: for 5 simulated devices that start with the name prefix "ddi" using the Direct Device Integration API (http):
+Example: for 5 simulated devices that start with the name prefix "ddi" using the Direct Device Integration API (http) authenticated by given gateway token, a pool interval of 10 seconds and a custom port for the DDI service.:
 ```
-http://localhost:8083/start?amount=5&name=ddi?api=ddi
+http://localhost:8083/start?amount=5&name=ddi&api=ddi&gatewaytoken=d5F2mmlARiMuMOquRmLlxW4xZFHy4mEV&polldelay=10&endpoint=http://localhost:8085
 ```
