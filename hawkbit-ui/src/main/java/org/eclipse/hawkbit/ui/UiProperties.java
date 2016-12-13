@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.ui;
 import java.io.Serializable;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Properties for Management UI customization.
  *
  */
-@Component
 @ConfigurationProperties("hawkbit.server.ui")
 public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
