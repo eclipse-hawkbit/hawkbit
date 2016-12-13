@@ -18,8 +18,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A {@link TargetTag} is used to describe Target attributes and use them also
@@ -30,7 +35,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 @Table(name = "sp_target_tag", indexes = {
         @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_targ_tag"))
-public class JpaTargetTag extends JpaTag implements TargetTag {
+public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @ManyToMany(mappedBy = "tags", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
@@ -71,6 +76,26 @@ public class JpaTargetTag extends JpaTag implements TargetTag {
         }
 
         return Collections.unmodifiableList(assignedToTargets);
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetTagUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTagDeletedEvent(getTenant(),
+                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+
     }
 
 }
