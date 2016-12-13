@@ -6,11 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.repository.test;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
@@ -29,7 +31,9 @@ import org.eclipse.hawkbit.repository.test.util.TestContextProvider;
 import org.eclipse.hawkbit.repository.test.util.TestRepositoryManagement;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -56,20 +60,27 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.util.AntPathMatcher;
 
-
 /**
  * Spring context configuration required for Dev.Environment.
- *
- *
- *
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
-        ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class })
+        ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class, HawkbitSecurityProperties.class,
+        ControllerPollProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Bean
+    public SecurityTokenGenerator securityTokenGenerator() {
+        return new SecurityTokenGenerator();
+    }
+
+    @Bean
+    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
+        return new SystemSecurityContext(tenantAware);
+    }
 
     @Bean
     public ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {

@@ -11,18 +11,12 @@ package org.eclipse.hawkbit.security;
 import java.security.SecureRandom;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.stereotype.Service;
 
 /**
  * A security token generator service which can be used to generate security
  * tokens for e.g. target or gateway tokens which are valid for authenticates
  * against SP.
- * 
- *
- *
- *
  */
-@Service
 public class SecurityTokenGenerator {
 
     private static final boolean LETTERS_GENERATION = true;

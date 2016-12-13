@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.push;
+package org.eclipse.hawkbit.ui;
 
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.atmosphere.cpr.ApplicationConfig;
@@ -23,9 +23,6 @@ import com.vaadin.spring.boot.internal.VaadinServletConfigurationProperties;
  * {@link VaadinServletConfiguration} that sets the context path for
  * {@link JSR356AsyncSupport} that registers
  * {@link SpringSecurityAtmosphereInterceptor} for spring security integration.
- *
- *
- *
  */
 @Configuration
 @EnableConfigurationProperties(VaadinServletConfigurationProperties.class)

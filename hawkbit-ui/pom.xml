@@ -130,7 +130,7 @@
                            <pluginExecutionFilter>
                               <groupId>com.vaadin</groupId>
                               <artifactId>vaadin-maven-plugin</artifactId>
-                              <versionRange>[7.6.3,)</versionRange>
+                              <versionRange>[7.7.3,)</versionRange>
                               <goals>
                                  <goal>compile-theme</goal>
                               </goals>

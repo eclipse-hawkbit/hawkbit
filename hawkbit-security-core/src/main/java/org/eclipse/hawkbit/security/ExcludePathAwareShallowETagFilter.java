@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.security;
 
 import java.io.IOException;
 
@@ -23,10 +23,6 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
  * where no ETag header should be generated due that calculating the ETag is an
  * expensive operation and the response output need to be copied in memory which
  * should be excluded in case of artifact downloads which could be big of size.
- * 
- *
- *
- *
  */
 public class ExcludePathAwareShallowETagFilter extends ShallowEtagHeaderFilter {
 
@@ -41,14 +37,6 @@ public class ExcludePathAwareShallowETagFilter extends ShallowEtagHeaderFilter {
         this.antMatcher = new AntPathMatcher();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.web.filter.ShallowEtagHeaderFilter#doFilterInternal(
-     * javax.servlet.http .HttpServletRequest,
-     * javax.servlet.http.HttpServletResponse, javax.servlet.FilterChain)
-     */
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain filterChain) throws ServletException, IOException {

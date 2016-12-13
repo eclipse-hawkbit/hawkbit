@@ -10,13 +10,14 @@ package org.eclipse.hawkbit.ui.artifacts;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -30,7 +31,6 @@ import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.util.SPInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -92,7 +92,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final TagManagement tagManagement, final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final UploadViewClientCriterion uploadViewClientCriterion,
-            final SPInfo spInfo, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -104,8 +104,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 eventBus, softwareManagement, entityFactory, uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement);
-        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState, spInfo,
-                artifactManagement);
+        this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
+                multipartConfigElement, artifactManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareManagement, uploadViewClientCriterion);
     }

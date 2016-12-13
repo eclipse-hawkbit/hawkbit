@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Management API")
 @Stories("Download Resource")
-public class MgmtDownloadResourceTest extends AbstractRestIntegrationTest {
+public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Autowired
     private DownloadIdCache downloadIdCache;
@@ -44,7 +43,7 @@ public class MgmtDownloadResourceTest extends AbstractRestIntegrationTest {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");
         final SoftwareModule softwareModule = distributionSet.getModules().stream().findFirst().get();
-   final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findFirst().get();
+        final Artifact artifact = testdataFactory.createArtifacts(softwareModule.getId()).stream().findFirst().get();
 
         downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
     }

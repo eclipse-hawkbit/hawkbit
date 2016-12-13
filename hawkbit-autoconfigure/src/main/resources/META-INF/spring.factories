@@ -5,11 +5,14 @@ org.eclipse.hawkbit.autoconfigure.ui.UIAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.url.PropertyHostnameResolverAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.web.WebMvcAutoConfiguration,\
+org.eclipse.hawkbit.autoconfigure.web.DDiApiAutoConfiguration,\
+org.eclipse.hawkbit.autoconfigure.web.MgmtApiAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.cache.CacheAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.cache.DownloadIdCacheAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.event.EventPublisherAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.amqp.AmqpAutoConfiguration,\
+org.eclipse.hawkbit.autoconfigure.amqp.DmfApiAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementConfiguration,\
-org.eclipse.hawkbit.autoconfigure.repository.ArtifactStoreAutoConfiguration
+org.eclipse.hawkbit.autoconfigure.repository.ArtifactFilesystemAutoConfiguration,\
+org.eclipse.hawkbit.autoconfigure.repository.JpaRepositoryAutoConfiguration

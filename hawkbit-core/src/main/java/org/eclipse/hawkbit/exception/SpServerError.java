@@ -169,7 +169,12 @@ public enum SpServerError {
     /**
      *
      */
-    SP_ROLLOUT_VERIFICATION_FAILED("hawkbit.server.error.rollout.verificationFailed", "The rollout configuration could not be verified successfully");
+    SP_ROLLOUT_VERIFICATION_FAILED("hawkbit.server.error.rollout.verificationFailed", "The rollout configuration could not be verified successfully"),
+
+    /**
+    *
+    */
+    SP_REPO_OPERATION_NOT_SUPPORTED("hawkbit.server.error.operation.notSupported", "Operation or method is (no longer) supported by service.");
 
     private final String key;
     private final String message;

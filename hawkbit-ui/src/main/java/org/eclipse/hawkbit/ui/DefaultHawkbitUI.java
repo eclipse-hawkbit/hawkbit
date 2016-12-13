@@ -16,10 +16,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Abstract class for the ui to set widgetset and theme.
- *
- *
- *
- *
  */
 @SuppressWarnings("serial")
 @Widgetset(value = HawkbitTheme.WIDGET_SET_NAME)

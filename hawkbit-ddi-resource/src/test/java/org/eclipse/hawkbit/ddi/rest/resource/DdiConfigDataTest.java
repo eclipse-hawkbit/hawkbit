@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
@@ -40,7 +39,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Config Data Resource")
-public class DdiConfigDataTest extends AbstractRestIntegrationTest {
+public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
