@@ -1,0 +1,1 @@
+[Spring Boot Starter](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter) for the [Direct Device Integration API](https://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html).

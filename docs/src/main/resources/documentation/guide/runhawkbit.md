@@ -9,7 +9,7 @@ title: Run hawkBit
 
 In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is based on the _hawkBit_ example modules. We call these _examples_ as we expect that developers who intend to create a _hawkBit_ based IoT application on their own will create a custom [Spring Boot](http://projects.spring.io/spring-boot/) app based on _hawkBit_ as demonstrated with the [hawkBit example app](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app).
 
-Note: the example app can in fact be run [stand alone](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app). However, only with an embedded H2, no [Device Management Federation API](https://github.com/eclipse/hawkbit/wiki/Device-Management-Federation-API) and no artifact storage.
+Note: the example app can in fact be run [stand alone](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-example-app). However, only with an embedded H2, no [Device Management Federation API](../interfaces/dmf-api.html) and no artifact storage.
 
 This guide will focus on a complete setup that includes all _hawkBit_ features.
 
@@ -99,6 +99,6 @@ However, this is not done by _DMF_ which is in fact used by the device simulator
 
 see [device simulator](https://github.com/eclipse/hawkbit/tree/master/examples/hawkbit-device-simulator)
 
-## Enjoy hawkBit with a real database, artifact storage and all [interfaces](https://github.com/eclipse/hawkbit/wiki/Interfaces) available.
+## Enjoy hawkBit with a real database, artifact storage and all [interfaces](../interfaces/interfaces.html) available.
 
 ![](../images/gettingStartedResult.png){:width="100%"}

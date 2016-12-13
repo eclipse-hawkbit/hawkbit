@@ -112,10 +112,6 @@ public class ConfigurableScenario {
             runRollouts(scenario);
         }
 
-        if (scenario.isRunRollouts()) {
-            runRollouts(scenario);
-        }
-
         if (scenario.isRunSemiAutomaticRollouts() && !scenario.getDeviceGroups().isEmpty()) {
             runSemiAutomaticRollouts(scenario);
         }
@@ -217,7 +213,7 @@ public class ConfigurableScenario {
         // start the created Rollout
         rolloutResource.start(rolloutResponseBody.getRolloutId());
 
-        waitUntilRolloutIsComplete(scenario);
+        waitUntilRolloutIsComplete(rolloutResponseBody.getRolloutId());
         LOGGER.info("Run rollout for set {} -> Done", set.getDsId());
     }
 
@@ -256,20 +252,19 @@ public class ConfigurableScenario {
         // start the created Rollout
         rolloutResource.start(rolloutResponseBody.getRolloutId());
 
-        waitUntilRolloutIsComplete(scenario);
+        waitUntilRolloutIsComplete(rolloutResponseBody.getRolloutId());
         LOGGER.info("Run rollout for set {} -> Done", set.getDsId());
     }
 
-    private void waitUntilRolloutIsComplete(final Scenario scenario) {
+    private void waitUntilRolloutIsComplete(final Long id) {
         do {
             try {
-                TimeUnit.SECONDS.sleep(35);
+                TimeUnit.SECONDS.sleep(5);
             } catch (final InterruptedException e) {
                 LOGGER.warn("Interrupted!");
                 Thread.currentThread().interrupt();
             }
-        } while (targetResource.getTargets(0, 1, null, "updateStatus==IN_SYNC").getBody().getTotal() < scenario
-                .getTargets());
+        } while (!"FINISHED".equalsIgnoreCase(rolloutResource.getRollout(id).getBody().getStatus()));
     }
 
     private void waitUntilRolloutIsReady(final Long id) {

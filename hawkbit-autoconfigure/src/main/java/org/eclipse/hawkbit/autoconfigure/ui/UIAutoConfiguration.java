@@ -11,14 +11,17 @@ package org.eclipse.hawkbit.autoconfigure.ui;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
+import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
 import org.eclipse.hawkbit.ui.push.UIEventProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.annotation.EnableEventBus;
@@ -33,6 +36,8 @@ import com.vaadin.spring.annotation.UIScope;
 @EnableVaadinSecurity
 @EnableVaadinExtensions
 @EnableEventBus
+@ConditionalOnClass(MgmtUiConfiguration.class)
+@Import(MgmtUiConfiguration.class)
 public class UIAutoConfiguration {
 
     /**

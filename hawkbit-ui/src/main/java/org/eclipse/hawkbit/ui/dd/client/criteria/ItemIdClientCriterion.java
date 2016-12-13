@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.dd.client.criteria;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.COMPONENT_COUNT;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.MODE;
-import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.STRICT_MODE;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.PREFIX_MODE;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.STRICT_MODE;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

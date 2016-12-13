@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.push;
+package org.eclipse.hawkbit.ui;
 
 import org.atmosphere.config.service.AtmosphereInterceptorService;
 import org.atmosphere.cpr.Action;
@@ -23,20 +23,10 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
  * {@link SecurityContextHolder}. This is necessary due that websocket requests
  * are not going through the spring security filter chain and the
  * {@link SecurityContext} will not be present in the current Thread.
- *
- *
- *
- *
  */
 @AtmosphereInterceptorService
 public class SpringSecurityAtmosphereInterceptor extends AtmosphereInterceptorAdapter {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.atmosphere.cpr.AtmosphereInterceptor#inspect(org.atmosphere.cpr.
-     * AtmosphereResource)
-     */
     @Override
     public Action inspect(final AtmosphereResource r) {
         final SecurityContext context = (SecurityContext) r.getRequest().getSession()

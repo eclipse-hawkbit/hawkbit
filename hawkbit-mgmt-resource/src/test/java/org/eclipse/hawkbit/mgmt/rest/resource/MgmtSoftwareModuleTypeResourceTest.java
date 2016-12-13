@@ -28,7 +28,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONException;
@@ -50,7 +49,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Software Module Type Resource")
-public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationTest {
+public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)

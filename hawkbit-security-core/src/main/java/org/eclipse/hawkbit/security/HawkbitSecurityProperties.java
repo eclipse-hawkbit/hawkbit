@@ -9,13 +9,11 @@
 package org.eclipse.hawkbit.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Security related hawkbit configuration.
  *
  */
-@Component
 @ConfigurationProperties("hawkbit.server.security")
 public class HawkbitSecurityProperties {
 

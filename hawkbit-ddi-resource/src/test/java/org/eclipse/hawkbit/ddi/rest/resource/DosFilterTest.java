@@ -18,7 +18,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -40,7 +39,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - REST Security")
 @Stories("Denial of Service protection filter")
-public class DosFilterTest extends AbstractRestIntegrationTest {
+public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that clients that are on the blacklist are forbidded ")
