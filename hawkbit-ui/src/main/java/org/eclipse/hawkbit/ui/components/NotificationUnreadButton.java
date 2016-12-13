@@ -98,7 +98,6 @@ public class NotificationUnreadButton extends Button {
 
     private void toggleWindow(final ClickEvent event) {
         if (notificationsWindow.isAttached()) {
-            notificationsWindow.close();
             getUI().removeWindow(notificationsWindow);
             return;
         }
