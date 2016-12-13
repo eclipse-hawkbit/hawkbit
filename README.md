@@ -9,7 +9,7 @@ Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](
 
 # Documentation
 
-see [hawkBit Wiki](https://github.com/eclipse/hawkbit/wiki)
+see [hawkBit Documentation](https://www.eclipse.org/hawkbit/documentation/overview/introduction.html)
 
 # Contact us
 

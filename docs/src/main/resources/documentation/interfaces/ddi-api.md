@@ -12,7 +12,7 @@ The _hawkbit_ [update server](https://github.com/eclipse/hawkbit) provides REST 
 Note: in DDI the target is identified using a  **controllerId**. Controller is used as a term for the actual service/client on the device. That allows users to have in some cases even multiple clients on the same target for different tasks, e.g. Firmware update and App management.
 
 # State Machine Mapping
-For historical reasons the DDI has a different state machine and status messages than the [Target State Machine](https://github.com/eclipse/hawkbit/wiki/Target-State-Machine) of the _hawkBit_ update server.
+For historical reasons the DDI has a different state machine and status messages than the [Target State Machine](../architecture/targetstate.html) of the _hawkBit_ update server.
 
 This is kept in order to ensure that _DDI_ stays compatible for devices out there in the field. A future version "2" of _DDI_ might change that. _DDI_ also defines more states than the update server, e.g. multiple DDI states are currently mapped by the _DDI_ implementation to _RUNNING_ state. It is possible that in the future _hawkBit_ will fully leverage these additional states.
 
