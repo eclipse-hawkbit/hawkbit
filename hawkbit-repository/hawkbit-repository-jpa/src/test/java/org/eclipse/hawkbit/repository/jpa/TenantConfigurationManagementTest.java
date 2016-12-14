@@ -35,12 +35,12 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")
     public void storeTenantSpecificConfigurationAsString() {
         final String envPropertyDefault = environment
-                .getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.name");
+                .getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.key");
         assertThat(envPropertyDefault).isNotNull();
 
         // get the configuration from the system management
         final TenantConfigurationValue<String> defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class);
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
         assertThat(defaultConfigValue.isGlobal()).isEqualTo(true);
         assertThat(defaultConfigValue.getValue()).isEqualTo(envPropertyDefault);
@@ -49,11 +49,11 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         final String newConfigurationValue = "thisIsAnotherTokenName";
         assertThat(newConfigurationValue).isNotEqualTo(defaultConfigValue.getValue());
         tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, newConfigurationValue);
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue);
 
         // verify that new configuration value is used
         final TenantConfigurationValue<String> updatedConfigurationValue = tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME,
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
                         String.class);
 
         assertThat(updatedConfigurationValue.isGlobal()).isEqualTo(false);
@@ -64,7 +64,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that the tenant specific configuration can be updated")
     public void updateTenantSpecifcConfiguration() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
         final String value1 = "firstValue";
         final String value2 = "secondValue";
 
@@ -139,7 +139,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Test that an Exception is thrown, when an integer is stored  but a string expected.")
     public void storesIntegerWhenStringIsExpected() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
         final Integer wrongDataype = 123;
         try {
             tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
