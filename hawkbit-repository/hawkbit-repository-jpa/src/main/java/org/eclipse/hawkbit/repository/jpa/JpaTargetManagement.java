@@ -141,6 +141,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Target findTargetById(final Long id) {
+        return targetRepository.findOne(id);
+    }
+
+    @Override
     public Long countTargetsAll() {
         return targetRepository.count();
     }

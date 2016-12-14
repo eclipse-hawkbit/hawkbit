@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEven
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -87,6 +88,8 @@ public class EventType {
 
         // download
         TYPES.put(20, DownloadProgressEvent.class);
+
+        TYPES.put(30, TargetPollEvent.class);
     }
 
     private int value;

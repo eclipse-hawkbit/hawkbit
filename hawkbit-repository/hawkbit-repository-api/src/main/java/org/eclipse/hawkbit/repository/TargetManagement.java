@@ -644,4 +644,11 @@ public interface TargetManagement {
             + SpringEvalExpressions.IS_CONTROLLER)
     Target updateTarget(TargetUpdate update);
 
+    /**
+     * @param id
+     * @return
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Target findTargetById(Long id);
+
 }
