@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.security;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         this.configurationKeyTenantRunner = new SecurityConfigurationKeyTenantRunner();
     }
 
-    protected abstract TenantConfigurationKey getTenantConfigurationKey();
+    protected abstract String getTenantConfigurationKey();
 
     @Override
     public boolean isEnable(final TenantSecurityToken secruityToken) {

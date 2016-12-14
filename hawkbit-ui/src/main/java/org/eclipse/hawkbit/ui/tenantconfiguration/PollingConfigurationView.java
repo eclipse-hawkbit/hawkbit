@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.I18N;
 
@@ -105,7 +105,7 @@ public class PollingConfigurationView extends BaseConfigurationView
         }
     }
 
-    private void saveDurationConfigurationValue(final TenantConfigurationKey key, final Duration duration) {
+    private void saveDurationConfigurationValue(final String key, final Duration duration) {
         if (duration == null) {
             tenantConfigurationManagement.deleteConfiguration(key);
         } else {

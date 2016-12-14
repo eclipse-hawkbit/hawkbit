@@ -102,7 +102,7 @@ import com.google.common.collect.Lists;
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
 

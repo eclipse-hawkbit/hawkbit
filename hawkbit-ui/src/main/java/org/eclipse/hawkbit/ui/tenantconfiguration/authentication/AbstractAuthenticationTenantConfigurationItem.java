@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
 
@@ -28,7 +27,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
 
     private final I18N i18n;
 
-    private final TenantConfigurationKey configurationKey;
+    private final String configurationKey;
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
     private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
@@ -40,7 +39,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      *            the tenant configuration management to retrieve the
      *            configuration value
      */
-    public AbstractAuthenticationTenantConfigurationItem(final TenantConfigurationKey configurationKey,
+    public AbstractAuthenticationTenantConfigurationItem(final String configurationKey,
             final TenantConfigurationManagement tenantConfigurationManagement, final I18N i18n) {
         this.configurationKey = configurationKey;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
@@ -70,7 +69,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
     /**
      * @return the configurationKey
      */
-    protected TenantConfigurationKey getConfigurationKey() {
+    protected String getConfigurationKey() {
         return configurationKey;
     }
 

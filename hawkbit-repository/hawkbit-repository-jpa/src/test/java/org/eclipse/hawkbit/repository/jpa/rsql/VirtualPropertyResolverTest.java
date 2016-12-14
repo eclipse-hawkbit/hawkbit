@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +41,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class VirtualPropertyResolverTest {
 
     @Spy
-    private VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
+    private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
 
     @Mock
     private TenantConfigurationManagement confMgmt;
@@ -59,66 +59,65 @@ public class VirtualPropertyResolverTest {
     public void before() {
         nowTestTime = Instant.now().toEpochMilli();
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
-            .thenReturn(TEST_POLLING_TIME_INTERVAL);
+                .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
-            .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
+                .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
 
         mockStatic(TimestampCalculator.class);
         when(TimestampCalculator.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
-        substitutor = new StrSubstitutor(resolverUnderTest,
-                StrSubstitutor.DEFAULT_PREFIX,
+        substitutor = new StrSubstitutor(resolverUnderTest, StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
-     }
+    }
 
     @Test
     @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
     public void resolveNowTimestampPlaceholder() {
-        String placeholder = "${NOW_TS}";
-        String testString = "lhs=lt=" + placeholder;
+        final String placeholder = "${NOW_TS}";
+        final String testString = "lhs=lt=" + placeholder;
 
-        String resolvedPlaceholders = substitutor.replace(testString);
+        final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat("NOW_TS has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
     @Description("Tests resolution of OVERDUE_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
     public void resolveOverdueTimestampPlaceholder() {
-        String placeholder = "${OVERDUE_TS}";
-        String testString = "lhs=lt=" + placeholder;
+        final String placeholder = "${OVERDUE_TS}";
+        final String testString = "lhs=lt=" + placeholder;
 
-        String resolvedPlaceholders = substitutor.replace(testString);
+        final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat("OVERDUE_TS has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
     @Description("Tests case insensititity of VirtualPropertyResolver.")
     public void resolveOverdueTimestampPlaceholderLowerCase() {
-        String placeholder = "${overdue_ts}";
-        String testString = "lhs=lt=" + placeholder;
+        final String placeholder = "${overdue_ts}";
+        final String testString = "lhs=lt=" + placeholder;
 
-        String resolvedPlaceholders = substitutor.replace(testString);
+        final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat("overdue_ts has to be resolved!", resolvedPlaceholders, not(containsString(placeholder)));
     }
 
     @Test
     @Description("Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.")
     public void handleUnknownPlaceholder() {
-        String placeholder = "${unknown}";
-        String testString = "lhs=lt=" + placeholder;
+        final String placeholder = "${unknown}";
+        final String testString = "lhs=lt=" + placeholder;
 
-        String resolvedPlaceholders = substitutor.replace(testString);
+        final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat("unknown should not be resolved!", resolvedPlaceholders, containsString(placeholder));
     }
 
     @Test
     @Description("Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).")
     public void handleEscapedPlaceholder() {
-        String placeholder = "${OVERDUE_TS}";
-        String escaptedPlaceholder = StrSubstitutor.DEFAULT_ESCAPE + placeholder;
-        String testString = "lhs=lt=" + escaptedPlaceholder;
+        final String placeholder = "${OVERDUE_TS}";
+        final String escaptedPlaceholder = StrSubstitutor.DEFAULT_ESCAPE + placeholder;
+        final String testString = "lhs=lt=" + escaptedPlaceholder;
 
-        String resolvedPlaceholders = substitutor.replace(testString);
+        final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat("Escaped OVERDUE_TS should not be resolved!", resolvedPlaceholders, containsString(placeholder));
     }
 }
