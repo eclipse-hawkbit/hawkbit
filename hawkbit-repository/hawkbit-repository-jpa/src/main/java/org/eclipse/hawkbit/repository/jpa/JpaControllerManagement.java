@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -217,14 +218,17 @@ public class JpaControllerManagement implements ControllerManagement {
         if (lastTargetQuery != null) {
             mtargetInfo.setLastTargetQuery(lastTargetQuery);
         }
-        if (address != null) {
-            mtargetInfo.setAddress(address.toString());
-        }
 
         if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             afterCommit.afterCommit(() -> eventPublisher
                     .publishEvent(new TargetUpdatedEvent(mtargetInfo.getTarget(), applicationContext.getId())));
+        }
+
+        if (address != null) {
+            mtargetInfo.setAddress(address.toString());
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetPollEvent(mtargetInfo.getTarget(), applicationContext.getId())));
         }
 
         return targetInfoRepository.save(mtargetInfo);
