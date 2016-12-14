@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationV
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemRestApi;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,15 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(MgmtSystemResource.class);
 
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final TenantConfigurationProperties tenantConfigurationProperties;
+
     @Autowired
-    private TenantConfigurationManagement tenantConfigurationManagement;
+    MgmtSystemResource(final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationProperties tenantConfigurationProperties) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.tenantConfigurationProperties = tenantConfigurationProperties;
+    }
 
     @Override
     public ResponseEntity<ResourceSupport> getSystem() {
@@ -53,7 +60,9 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
      */
     @Override
     public ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getSystemConfiguration() {
-        return new ResponseEntity<>(MgmtSystemMapper.toResponse(tenantConfigurationManagement), HttpStatus.OK);
+        return new ResponseEntity<>(
+                MgmtSystemMapper.toResponse(tenantConfigurationManagement, tenantConfigurationProperties),
+                HttpStatus.OK);
     }
 
     /**
@@ -69,9 +78,7 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
     @Override
     public ResponseEntity<Void> deleteConfigurationValue(@PathVariable("keyName") final String keyName) {
 
-        final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
-
-        tenantConfigurationManagement.deleteConfiguration(configKey);
+        tenantConfigurationManagement.deleteConfiguration(keyName);
 
         LOG.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -91,11 +98,10 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
     public ResponseEntity<MgmtSystemTenantConfigurationValue> getConfigurationValue(
             @PathVariable("keyName") final String keyName) {
 
-        final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
-
         LOG.debug("{} config value getted, return status {}", keyName, HttpStatus.OK);
-        return new ResponseEntity<>(MgmtSystemMapper.toResponse(configKey.getKeyName(),
-                tenantConfigurationManagement.getConfigurationValue(configKey)), HttpStatus.OK);
+        return new ResponseEntity<>(
+                MgmtSystemMapper.toResponse(keyName, tenantConfigurationManagement.getConfigurationValue(keyName)),
+                HttpStatus.OK);
     }
 
     /**
@@ -115,10 +121,8 @@ public class MgmtSystemResource implements MgmtSystemRestApi {
             @PathVariable("keyName") final String keyName,
             @RequestBody final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
 
-        final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
-
         final TenantConfigurationValue<? extends Serializable> updatedValue = tenantConfigurationManagement
-                .addOrUpdateConfiguration(configKey, configurationValueRest.getValue());
+                .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
         return new ResponseEntity<>(MgmtSystemMapper.toResponse(keyName, updatedValue), HttpStatus.OK);
     }
 

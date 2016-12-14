@@ -10,9 +10,7 @@ package org.eclipse.hawkbit;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.EnvironmentAware;
 
 /**
  * Defines global configuration for the controllers/clients on the provisioning
@@ -20,8 +18,7 @@ import org.springframework.context.EnvironmentAware;
  * 
  * 
  * Note: many of the controller related properties can be overridden on tenant
- * level. As a result they are not defined here but in
- * {@link TenantConfigurationKey} and injected using {@link EnvironmentAware}.
+ * level.
  * 
  */
 @ConfigurationProperties(prefix = "hawkbit.controller")
@@ -29,8 +26,8 @@ public class ControllerPollProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Maximum polling time that can be configured by a tenant in HH:MM:SS
-     * notation.
+     * Maximum polling time that can be configured system wide and by tenant in
+     * HH:MM:SS notation.
      */
     private String maxPollingTime = "23:59:59";
 
@@ -39,6 +36,34 @@ public class ControllerPollProperties implements Serializable {
      * notation.
      */
     private String minPollingTime = "00:00:30";
+
+    /**
+     * Controller polling time that can be configured system wide and by tenant
+     * in HH:MM:SS notation.
+     */
+    private String pollingTime = "00:05:00";
+
+    /**
+     * Controller polling overdue time that can be configured system wide and by
+     * tenant in HH:MM:SS notation.
+     */
+    private String pollingOverdueTime = "00:05:00";
+
+    public String getPollingTime() {
+        return pollingTime;
+    }
+
+    public void setPollingTime(final String pollingTime) {
+        this.pollingTime = pollingTime;
+    }
+
+    public String getPollingOverdueTime() {
+        return pollingOverdueTime;
+    }
+
+    public void setPollingOverdueTime(final String pollingOverdueTime) {
+        this.pollingOverdueTime = pollingOverdueTime;
+    }
 
     public String getMaxPollingTime() {
         return maxPollingTime;

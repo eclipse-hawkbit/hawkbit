@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -67,7 +68,7 @@ import org.springframework.util.AntPathMatcher;
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
         ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class, HawkbitSecurityProperties.class,
-        ControllerPollProperties.class })
+        ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 public class TestConfiguration implements AsyncConfigurer {

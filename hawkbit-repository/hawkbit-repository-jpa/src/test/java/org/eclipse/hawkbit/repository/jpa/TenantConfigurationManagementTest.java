@@ -13,13 +13,12 @@ import static org.junit.Assert.fail;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,13 +34,13 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")
     public void storeTenantSpecificConfigurationAsString() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
-        final String envPropertyDefault = environment.getProperty(configKey.getDefaultKeyName());
+        final String envPropertyDefault = environment
+                .getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.name");
         assertThat(envPropertyDefault).isNotNull();
 
         // get the configuration from the system management
-        final TenantConfigurationValue<String> defaultConfigValue = tenantConfigurationManagement
-                .getConfigurationValue(configKey, String.class);
+        final TenantConfigurationValue<String> defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class);
 
         assertThat(defaultConfigValue.isGlobal()).isEqualTo(true);
         assertThat(defaultConfigValue.getValue()).isEqualTo(envPropertyDefault);
@@ -49,11 +48,13 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         // update the tenant specific configuration
         final String newConfigurationValue = "thisIsAnotherTokenName";
         assertThat(newConfigurationValue).isNotEqualTo(defaultConfigValue.getValue());
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, newConfigurationValue);
+        tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, newConfigurationValue);
 
         // verify that new configuration value is used
         final TenantConfigurationValue<String> updatedConfigurationValue = tenantConfigurationManagement
-                .getConfigurationValue(configKey, String.class);
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME,
+                        String.class);
 
         assertThat(updatedConfigurationValue.isGlobal()).isEqualTo(false);
         assertThat(updatedConfigurationValue.getValue()).isEqualTo(newConfigurationValue);
@@ -63,7 +64,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that the tenant specific configuration can be updated")
     public void updateTenantSpecifcConfiguration() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
         final String value1 = "firstValue";
         final String value2 = "secondValue";
 
@@ -81,7 +82,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that the configuration value can be converted from String to Integer automatically")
     public void storeAndUpdateTenantSpecificConfigurationAsBoolean() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
         final Boolean value1 = true;
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey, value1);
         assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, Boolean.class).getValue())
@@ -95,7 +96,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that the get configuration throws exception in case the value cannot be automatically converted from String to Boolean")
     public void wrongTenantConfigurationValueTypeThrowsException() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
         final String value1 = "thisIsNotABoolean";
 
         // add value as String
@@ -110,13 +111,13 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests that a deletion of a tenant specific configuration deletes it from the database.")
     public void deleteConfigurationReturnNullConfiguration() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
 
         // gateway token does not have default value so no configuration value
-        // is should be available
+        // should be available
         final String defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(configKey, String.class)
                 .getValue();
-        assertThat(defaultConfigValue).isNull();
+        assertThat(defaultConfigValue).isEmpty();
 
         // update the tenant specific configuration
         final String newConfigurationValue = "thisIsAnotherValueForPolling";
@@ -131,14 +132,14 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         // delete the tenant specific configuration
         tenantConfigurationManagement.deleteConfiguration(configKey);
         // ensure that now gateway token is set again, because is deleted and
-        // must be null now
-        assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue()).isNull();
+        // must be empty now
+        assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue()).isEmpty();
     }
 
     @Test
     @Description("Test that an Exception is thrown, when an integer is stored  but a string expected.")
     public void storesIntegerWhenStringIsExpected() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
         final Integer wrongDataype = 123;
         try {
             tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
@@ -151,7 +152,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Test that an Exception is thrown, when an integer is stored but a boolean expected.")
     public void storesIntegerWhenBooleanIsExpected() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
         final Integer wrongDataype = 123;
         try {
             tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
@@ -164,7 +165,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Test that an Exception is thrown, when an integer is stored as PollingTime.")
     public void storesIntegerWhenPollingIntervalIsExpected() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
         final Integer wrongDataype = 123;
         try {
             tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
@@ -177,7 +178,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Test that an Exception is thrown, when an invalid formatted string is stored as PollingTime.")
     public void storesWrongFormattedStringAsPollingInterval() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
         final String wrongFormatted = "wrongFormatted";
         try {
             tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongFormatted);
@@ -190,7 +191,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Test that an Exception is thrown, when an invalid formatted string is stored as PollingTime.")
     public void storesTooSmallDurationAsPollingInterval() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
         final String tooSmallDuration = DurationHelper
                 .durationToFormattedString(DurationHelper.getDurationByTimeValues(0, 0, 1));
@@ -205,7 +206,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Stores a correct formatted PollignTime and reads it again.")
     public void storesCorrectDurationAsPollingInterval() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
         final Duration duration = DurationHelper.getDurationByTimeValues(1, 2, 0);
         assertThat(duration).isEqualTo(Duration.ofHours(1).plusMinutes(2));
@@ -233,9 +234,9 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Verifies that every TenenatConfiguraationKeyName exists only once")
     public void verifyThatAllKeysAreDifferent() {
-        final Map<String, Void> keynames = new HashMap<String, Void>();
+        final Map<String, Void> keynames = new HashMap<>();
 
-        Arrays.stream(TenantConfigurationKey.values()).forEach(key -> {
+        tenantConfigurationProperties.getConfigurationKeys().forEach(key -> {
 
             if (keynames.containsKey(key.getKeyName())) {
                 throw new IllegalStateException("The key names are not unique");
@@ -248,9 +249,9 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Get TenantConfigurationKeyByName")
     public void getTenantConfigurationKeyByName() {
-        final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
-        assertThat(TenantConfigurationKey.fromKeyName(configKey.getKeyName())).isEqualTo(configKey);
+        assertThat(tenantConfigurationProperties.fromKeyName(configKey).getKeyName()).isEqualTo(configKey);
     }
 
 }

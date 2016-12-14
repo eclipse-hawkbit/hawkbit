@@ -13,11 +13,11 @@ import java.time.Instant;
 
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
- * Calculates non-persistent timestamps , e.g. the point a time a
- * target is declared as overdue.<br>
+ * Calculates non-persistent timestamps , e.g. the point a time a target is
+ * declared as overdue.<br>
  * Therefore tenant specific configuration may be considered.
  *
  */
@@ -43,11 +43,11 @@ public final class TimestampCalculator {
                 - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
     }
 
-    private static Duration getDurationForKey(TenantConfigurationKey key) {
+    private static Duration getDurationForKey(final String key) {
         return DurationHelper.formattedStringToDuration(getRawStringForKey(key));
     }
 
-    private static String getRawStringForKey(TenantConfigurationKey key) {
+    private static String getRawStringForKey(final String key) {
         return getTenantConfigurationManagement().getConfigurationValue(key, String.class).getValue();
     }
 

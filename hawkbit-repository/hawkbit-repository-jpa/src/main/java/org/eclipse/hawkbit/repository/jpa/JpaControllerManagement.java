@@ -49,11 +49,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,14 +126,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public String getPollingTime() {
-        final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
-        final Class<String> propertyType = String.class;
-        JpaTenantConfigurationManagement.validateTenantConfigurationDataType(configurationKey, propertyType);
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
-
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue());
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
     }
 
     @Override
