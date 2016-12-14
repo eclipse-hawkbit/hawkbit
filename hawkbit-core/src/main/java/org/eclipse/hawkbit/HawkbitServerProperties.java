@@ -22,10 +22,41 @@ public class HawkbitServerProperties {
      */
     private String url = "http://localhost:8080";
 
+    private final Anonymous anonymous = new Anonymous();
+
     private final Build build = new Build();
+
+    public Anonymous getAnonymous() {
+        return anonymous;
+    }
 
     public Build getBuild() {
         return build;
+    }
+
+    public static class Anonymous {
+        private final Download download = new Download();
+
+        public Download getDownload() {
+            return download;
+        }
+
+        public static class Download {
+
+            /**
+             * Unauthenticated artifact download possible if true.
+             */
+            private boolean enabled;
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
+
+        }
     }
 
     /**

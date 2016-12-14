@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.HawkbitServerProperties.Anonymous.Download;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
@@ -27,10 +29,16 @@ public class TenantConfigurationProperties {
 
     private final Map<String, TenantConfigurationKey> configuration = new HashMap<>();
 
+    /**
+     * @return full map of all configured tenant properties
+     */
     public Map<String, TenantConfigurationKey> getConfiguration() {
         return configuration;
     }
 
+    /**
+     * @return full list of {@link TenantConfigurationKey}s
+     */
     public Collection<TenantConfigurationKey> getConfigurationKeys() {
         return configuration.values();
     }
@@ -46,15 +54,51 @@ public class TenantConfigurationProperties {
                         "The given configuration key " + keyName + " does not exist."));
     }
 
+    /**
+     * Tenant specific configurations which can be configured for each tenant
+     * separately by means of override of the system defaults.
+     *
+     */
     public static class TenantConfigurationKey {
+        /**
+         * Header based authentication enabled.
+         */
         public static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
+
+        /**
+         * Header based authentication authority name.
+         */
         public static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
+        /**
+         * Target token based authentication enabled.
+         */
         public static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
+
+        /**
+         * Gateway token based authentication enabled.
+         */
         public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
-        public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME = "authentication.gatewaytoken.name";
+
+        /**
+         * Gateway token value.
+         */
         public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
+
+        /**
+         * See system default in
+         * {@link ControllerPollProperties#getPollingTime()}.
+         */
         public static final String POLLING_TIME_INTERVAL = "pollingTime";
+
+        /**
+         * See system default in
+         * {@link ControllerPollProperties#getPollingOverdueTime()}.
+         */
         public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";
+
+        /**
+         * See system default {@link Download#isEnabled()}.
+         */
         public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
 
         private String keyName;

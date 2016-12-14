@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.utils.I18N;
 
@@ -56,7 +57,10 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
 
     @Override
     public boolean isConfigEnabled() {
-        return tenantConfigurationManagement.getConfigurationValue(configurationKey, Boolean.class).getValue();
+        final TenantConfigurationValue<Boolean> enabled = tenantConfigurationManagement
+                .getConfigurationValue(configurationKey, Boolean.class);
+
+        return enabled.getValue() && !enabled.isGlobal();
     }
 
     /**
@@ -74,7 +78,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
     }
 
     protected void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
+        configurationChangeListeners.forEach(ConfigurationItemChangeListener::configurationHasChanged);
     }
 
     @Override
