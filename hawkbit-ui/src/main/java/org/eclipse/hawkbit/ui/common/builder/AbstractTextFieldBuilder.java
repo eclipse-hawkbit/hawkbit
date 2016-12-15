@@ -27,6 +27,8 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     private String id;
     private boolean immediate;
     private boolean required;
+    private boolean readOnly;
+    private boolean enabled;
     private int maxLengthAllowed;
 
     /**
@@ -66,6 +68,26 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
      */
     public AbstractTextFieldBuilder<E> required(final boolean required) {
         this.required = required;
+        return this;
+    }
+
+    /**
+     * @param readOnly
+     *            the readOnly to set
+     * @return the builder
+     */
+    public AbstractTextFieldBuilder<E> readOnly(final boolean readOnly) {
+        this.readOnly = readOnly;
+        return this;
+    }
+
+    /**
+     * @param enabled
+     *            the enabled to set
+     * @return the builder
+     */
+    public AbstractTextFieldBuilder<E> enabled(final boolean enabled) {
+        this.enabled = enabled;
         return this;
     }
 
@@ -119,6 +141,8 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
 
         textComponent.setRequired(required);
         textComponent.setImmediate(immediate);
+        textComponent.setReadOnly(readOnly);
+        textComponent.setEnabled(enabled);
 
         if (StringUtils.isNotEmpty(caption)) {
             textComponent.setCaption(caption);
