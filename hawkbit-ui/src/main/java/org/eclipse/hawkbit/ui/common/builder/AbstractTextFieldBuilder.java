@@ -28,7 +28,7 @@ public abstract class AbstractTextFieldBuilder<E extends AbstractTextField> {
     private boolean immediate;
     private boolean required;
     private boolean readOnly;
-    private boolean enabled;
+    private boolean enabled = true;
     private int maxLengthAllowed;
 
     /**
