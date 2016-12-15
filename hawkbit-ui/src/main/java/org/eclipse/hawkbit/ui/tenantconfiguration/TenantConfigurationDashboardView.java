@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -99,7 +100,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {
-            configurationViews.addAll(customConfigurationViews);
+            configurationViews.addAll(
+                    customConfigurationViews.stream().filter(ConfigurationGroup::show).collect(Collectors.toList()));
         }
 
         final Panel rootPanel = new Panel();

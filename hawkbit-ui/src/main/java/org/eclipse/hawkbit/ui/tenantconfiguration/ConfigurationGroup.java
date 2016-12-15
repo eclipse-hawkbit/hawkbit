@@ -25,4 +25,12 @@ public interface ConfigurationGroup extends Component, ConfigurationItem {
      * called to rollback any configuration changes.
      */
     void undo();
+
+    /**
+     * @return <code>true</code> if view can be shown (e.g. sufficient
+     *         permissions).
+     */
+    default boolean show() {
+        return true;
+    }
 }
