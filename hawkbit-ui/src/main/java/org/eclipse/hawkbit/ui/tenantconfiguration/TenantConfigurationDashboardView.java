@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -68,6 +69,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private final List<ConfigurationGroup> configurationViews = Lists.newArrayListWithExpectedSize(3);
 
+    @Autowired(required = false)
+    private Collection<ConfigurationGroup> customConfigurationViews;
+
     @Autowired
     TenantConfigurationDashboardView(final I18N i18n, final UiProperties uiProperties,
             final UINotification uINotification, final SystemManagement systemManagement,
@@ -94,6 +98,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         configurationViews.add(defaultDistributionSetTypeLayout);
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
+        if (customConfigurationViews != null) {
+            configurationViews.addAll(customConfigurationViews);
+        }
 
         final Panel rootPanel = new Panel();
         rootPanel.setStyleName("tenantconfig-root");
