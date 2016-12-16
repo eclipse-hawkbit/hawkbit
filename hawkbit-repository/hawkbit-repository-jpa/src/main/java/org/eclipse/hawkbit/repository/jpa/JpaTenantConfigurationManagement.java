@@ -163,7 +163,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @CacheEvict(value = "tenantConfiguration", key = "#name")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void deleteConfiguration(final String configurationKey) {
-        tenantConfigurationRepository.deleteByKey(configurationKey);
+    public void deleteConfiguration(final String name) {
+        tenantConfigurationRepository.deleteByKey(name);
     }
 }
