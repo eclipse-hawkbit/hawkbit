@@ -197,10 +197,15 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
-                    .description("Plug and Play target: " + controllerId).name(controllerId)
+            final Target result = targetManagement.createTarget(entityFactory.target().create()
+                    .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
+
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
+
+            return result;
         }
 
         return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
