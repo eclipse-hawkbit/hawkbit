@@ -20,7 +20,12 @@ public class SPUICheckBox extends CheckBox {
 
     SPUICheckBox(final String caption, final String style, final String styleName, final boolean required,
             final String data) {
-        decorate(caption, style, styleName, required, data);
+        decorate(null, caption, style, styleName, required, data);
+    }
+
+    SPUICheckBox(final String id, final String caption, final String style, final String styleName,
+            final boolean required, final String data) {
+        decorate(id, caption, style, styleName, required, data);
     }
 
     /**
@@ -37,11 +42,14 @@ public class SPUICheckBox extends CheckBox {
      * @param promt
      *            inputpromt of the CheckBox
      */
-    private void decorate(final String caption, final String style, final String styleName, final boolean required,
-            final String data) {
+    private void decorate(final String id, final String caption, final String style, final String styleName,
+            final boolean required, final String data) {
         // Default settings
         setRequired(required);
         addStyleName(ValoTheme.CHECKBOX_SMALL);
+        if (null != id) {
+            setId(id);
+        }
         if (null != caption) {
             setCaption(caption);
         }
