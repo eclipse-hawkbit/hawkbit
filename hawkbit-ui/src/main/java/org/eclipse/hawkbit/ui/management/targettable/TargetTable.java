@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -130,7 +131,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
+        publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -144,16 +145,14 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .filter(event -> visibleItemIds.contains(new TargetIdName(event.getEntityId(), null, null)))
                     .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
         }
-        // workaround until push is available for action
-        // history, re-select
-        // the updated target so the action history gets
-        // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
+        publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
-    private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
-        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
-                target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
+    private void publishTargetSelectedEntityForRefresh(
+            final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
+        targetEntityEventStream.filter(event -> isLastSelectedTarget(new TargetIdName(event.getEntityId(), null, null)))
+                .findAny().ifPresent(event -> eventBus.publish(this,
+                        new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
