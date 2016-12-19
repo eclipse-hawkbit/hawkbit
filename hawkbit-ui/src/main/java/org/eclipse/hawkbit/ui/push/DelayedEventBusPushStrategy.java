@@ -50,8 +50,8 @@ import com.vaadin.ui.UI;
 /**
  * An {@link EventPushStrategy} implementation which retrieves events from
  * {@link com.google.common.eventbus.EventBus} and store them first in a queue
- * where they will dispatched every x (default is 2 can be configured with the
- * property) seconds to the {@link EventBus} in a Vaadin access thread
+ * where they will dispatched every x (default is 2 and can be configured with
+ * the property) seconds to the {@link EventBus} in a Vaadin access thread
  * {@link UI#access(Runnable)}.
  *
  * This strategy avoids blocking UIs when too many events are fired and

@@ -277,6 +277,11 @@ public class UiProperties implements Serializable {
     public static class Event implements Serializable {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * 
+         * Configuration of the UI push.
+         *
+         */
         public static class Push implements Serializable {
             private static final long serialVersionUID = 1L;
 

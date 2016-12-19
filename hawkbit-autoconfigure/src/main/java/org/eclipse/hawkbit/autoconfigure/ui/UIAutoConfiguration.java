@@ -76,7 +76,7 @@ public class UIAutoConfiguration {
      *            the event provider
      * @param uiProperties
      *            the ui properties
-     * @return the provider bean
+     * @return the push strategy bean
      */
     @Bean
     @ConditionalOnMissingBean
