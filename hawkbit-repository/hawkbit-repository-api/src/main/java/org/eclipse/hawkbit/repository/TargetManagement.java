@@ -643,12 +643,4 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
     Target updateTarget(TargetUpdate update);
-
-    /**
-     * @param id
-     * @return
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetById(Long id);
-
 }
