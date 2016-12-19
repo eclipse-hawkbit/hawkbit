@@ -32,10 +32,13 @@ public class TargetTagDeletedEvent extends RemoteIdEvent {
      *            the tenant
      * @param entityId
      *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
-        super(entityId, tenant, applicationId);
+    public TargetTagDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 }

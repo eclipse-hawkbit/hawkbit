@@ -53,11 +53,35 @@ public final class DeleteActionsLayoutHelper {
         if (source instanceof DragAndDropWrapper) {
             final String wrapperData = ((DragAndDropWrapper) source).getData().toString();
             final String id = wrapperData.replace(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON, "");
-            if (wrapperData.contains(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON) && !id.trim().isEmpty()) {
-                return true;
-            }
+            return wrapperData.contains(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON) && !id.trim().isEmpty();
         }
         return false;
+    }
+
+    /**
+     * Extract the ds tag id by the drag and drop component
+     * 
+     * @param source
+     *            the source
+     * @return the ds tag id
+     */
+    public static Long getDistributionTagId(final DragAndDropWrapper source) {
+        final String wrapperData = source.getData().toString();
+        final String id = wrapperData.replace(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON, "");
+        return Long.valueOf(id.trim());
+    }
+
+    /**
+     * Extract the target tag id by the drag and drop component
+     * 
+     * @param source
+     *            the source
+     * @return the target tag id
+     */
+    public static Long getTargetTagId(final DragAndDropWrapper source) {
+        final String wrapperData = source.getData().toString();
+        final String id = wrapperData.replace(SPUIDefinitions.TARGET_TAG_BUTTON, "");
+        return Long.valueOf(id.trim());
     }
 
     /**
@@ -90,10 +114,7 @@ public final class DeleteActionsLayoutHelper {
      * @return true if component can be deleted
      */
     public static Boolean isComponentDeletable(final Component source) {
-        if (isTargetTable(source) || isDistributionTable(source) || isTargetTag(source) || isDistributionTag(source)) {
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
+        return isTargetTable(source) || isDistributionTable(source) || isTargetTag(source) || isDistributionTag(source);
     }
 
 }

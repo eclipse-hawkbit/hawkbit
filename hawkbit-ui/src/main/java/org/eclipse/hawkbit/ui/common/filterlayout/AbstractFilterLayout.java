@@ -51,6 +51,14 @@ public abstract class AbstractFilterLayout extends VerticalLayout {
         }
     }
 
+    protected AbstractFilterButtons getFilterButtons() {
+        return filterButtons;
+    }
+
+    protected AbstractFilterHeader getFilterHeader() {
+        return filterHeader;
+    }
+
     /**
      * On load, software module type filter is cloaed.
      * 

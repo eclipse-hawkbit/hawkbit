@@ -150,7 +150,7 @@ public class RolloutListGrid extends AbstractGrid {
         case CREATE_ROLLOUT:
         case UPDATE_ROLLOUT:
         case SHOW_ROLLOUTS:
-            refreshGrid();
+            refreshContainer();
             break;
         default:
             return;
@@ -178,7 +178,7 @@ public class RolloutListGrid extends AbstractGrid {
         final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
-            refreshGrid();
+            refreshContainer();
             return;
         }
         item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
@@ -429,10 +429,6 @@ public class RolloutListGrid extends AbstractGrid {
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
-    }
-
-    private void refreshGrid() {
-        ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
     private String getDescription(final CellReference cell) {

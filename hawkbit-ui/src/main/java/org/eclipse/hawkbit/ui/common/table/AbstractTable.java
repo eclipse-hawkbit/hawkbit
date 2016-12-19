@@ -19,12 +19,14 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -50,7 +52,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * @param <I>
  *            i is the id of the table
  */
-public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
+public abstract class AbstractTable<E extends NamedEntity, I> extends Table implements RefreshableContainer {
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
@@ -202,19 +204,6 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         selectRow();
     }
 
-    /**
-     * Add new software module to table.
-     *
-     * @param baseEntity
-     *            new software module
-     */
-    protected Item addEntity(final E baseEntity) {
-        final Object addItem = addItem();
-        final Item item = getItem(addItem);
-        updateEntity(baseEntity, item);
-        return item;
-    }
-
     @SuppressWarnings("unchecked")
     protected void updateEntity(final E baseEntity, final Item item) {
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(baseEntity.getName());
@@ -236,8 +225,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
             UI.getCurrent().access(this::applyMinTableSettings);
         } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             UI.getCurrent().access(this::applyMaxTableSettings);
-        } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
-            UI.getCurrent().access(() -> addEntity(event.getEntity()));
+        } else if (BaseEntityEventType.ADD_ENTITY == event.getEventType()
+                || BaseEntityEventType.REMOVE_ENTITY == event.getEventType()) {
+            UI.getCurrent().access(this::refreshContainer);
         }
     }
 
@@ -437,6 +427,18 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Refresh the container.
+     */
+    @Override
+    public void refreshContainer() {
+        final Container container = getContainerDataSource();
+        if (!(container instanceof LazyQueryContainer)) {
+            return;
+        }
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
     protected abstract boolean hasDropPermission();

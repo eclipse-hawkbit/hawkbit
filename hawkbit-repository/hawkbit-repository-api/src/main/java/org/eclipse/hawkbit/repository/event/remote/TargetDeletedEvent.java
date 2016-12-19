@@ -32,11 +32,14 @@ public class TargetDeletedEvent extends RemoteIdEvent {
      *            the tenant
      * @param entityId
      *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    public TargetDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
-        super(entityId, tenant, applicationId);
+    public TargetDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 
 }

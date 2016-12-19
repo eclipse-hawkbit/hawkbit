@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.distributions;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -23,6 +24,9 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
+import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
@@ -31,17 +35,20 @@ import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.google.common.collect.Maps;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -49,21 +56,18 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.VerticalLayout;
 
 /**
  * Manage distributions and distributions type view.
  */
 @UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = HawkbitUI.class)
-public class DistributionsView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "distributions";
     private static final long serialVersionUID = 3887435076372276300L;
 
     private final SpPermissionChecker permChecker;
-
-    private final transient EventBus.UIEventBus eventBus;
 
     private final I18N i18n;
 
@@ -81,6 +85,8 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
 
     private final ManageDistUIState manageDistUIState;
 
+    private final DistributionsViewMenuItem distributionsViewMenuItem;
+
     private GridLayout mainLayout;
 
     @Autowired
@@ -90,9 +96,10 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
             final TargetManagement targetManagement, final EntityFactory entityFactory,
             final TagManagement tagManagement, final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
-            final ArtifactManagement artifactManagement) {
+            final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
+            final DistributionsViewMenuItem distributionsViewMenuItem) {
+        super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
-        this.eventBus = eventBus;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
@@ -110,6 +117,7 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
                 systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
                 softwareManagement);
         this.manageDistUIState = manageDistUIState;
+        this.distributionsViewMenuItem = distributionsViewMenuItem;
     }
 
     @PostConstruct
@@ -118,14 +126,13 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
-        eventBus.subscribe(this);
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
+    @Override
+    protected DashboardMenuItem getDashboardMenuItem() {
+        return distributionsViewMenuItem;
     }
 
     private void restoreState() {
@@ -251,8 +258,16 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
     }
 
     @Override
-    public void enter(final ViewChangeEvent event) {
-        // This view is constructed in the init() method()
+    protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(2);
+
+        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayout.getTable());
+        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayout.getTable());
+
+        supportedEvents.put(SoftwareModuleCreatedEventContainer.class, softwareModuleTableLayout.getTable());
+        supportedEvents.put(SoftwareModuleDeletedEventContainer.class, softwareModuleTableLayout.getTable());
+
+        return supportedEvents;
     }
 
 }
