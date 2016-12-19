@@ -18,8 +18,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * from Spring because it will truncate the dot in a REST URL which leads to
  * problem in case a controllerId contains dots and is a path parameter or
  * filename ending.
- * 
- *
  */
 @Configuration
 public class WebMvcAutoConfiguration extends WebMvcConfigurerAdapter {

@@ -196,7 +196,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             final boolean overrideExisting) {
         return createArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);
     }
-    
+
     @Override
     public Long countArtifactsAll() {
         return localArtifactRepository.count();

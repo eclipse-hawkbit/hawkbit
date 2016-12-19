@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;

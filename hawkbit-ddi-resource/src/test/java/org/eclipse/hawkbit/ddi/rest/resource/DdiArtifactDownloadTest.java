@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -63,7 +62,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
 @SpringApplicationConfiguration(classes = DownloadTestConfiguration.class)
-public class DdiArtifactDownloadTest extends AbstractRestIntegrationTest {
+public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
 

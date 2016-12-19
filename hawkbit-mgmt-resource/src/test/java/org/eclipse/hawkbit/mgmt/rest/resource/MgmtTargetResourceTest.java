@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -73,7 +72,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Target Resource")
-public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
+public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
 

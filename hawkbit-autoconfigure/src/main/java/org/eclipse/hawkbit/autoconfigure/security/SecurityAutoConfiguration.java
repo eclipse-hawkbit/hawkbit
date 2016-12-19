@@ -10,8 +10,11 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,12 +25,9 @@ import org.springframework.data.domain.AuditorAware;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for security.
- * 
- *
- *
  */
 @Configuration
-@EnableConfigurationProperties(DdiSecurityProperties.class)
+@EnableConfigurationProperties({ DdiSecurityProperties.class, HawkbitSecurityProperties.class })
 public class SecurityAutoConfiguration {
 
     /**
@@ -60,6 +60,26 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
         return new SpringSecurityAuditorAware();
+    }
+
+    /**
+     * @param tenantAware
+     *            singleton bean
+     * @return tenantAware {@link SystemSecurityContext}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
+        return new SystemSecurityContext(tenantAware);
+    }
+
+    /**
+     * @return {@link SecurityTokenGenerator} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SecurityTokenGenerator securityTokenGenerator() {
+        return new SecurityTokenGenerator();
     }
 
 }

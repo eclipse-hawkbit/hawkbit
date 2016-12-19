@@ -6,12 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutProperties;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -35,21 +37,6 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
-import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
-import org.eclipse.hawkbit.repository.jpa.JpaReportManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaRolloutGroupManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaRolloutManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaSoftwareManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaSystemManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaTagManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaTargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaTargetManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -78,6 +65,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
@@ -106,7 +94,7 @@ import com.google.common.collect.Maps;
 @EnableAspectJAutoProxy
 @Configuration
 @ComponentScan
-@EnableConfigurationProperties(RepositoryProperties.class)
+@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, RolloutProperties.class })
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
@@ -525,6 +513,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     public AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware,
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
             final AutoAssignChecker autoAssignChecker) {

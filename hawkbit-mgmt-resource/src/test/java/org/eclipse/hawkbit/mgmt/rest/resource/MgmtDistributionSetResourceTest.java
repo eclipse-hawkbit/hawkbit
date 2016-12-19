@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
@@ -59,7 +58,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Management API")
 @Stories("Distribution Set Resource")
-public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest {
+public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("This test verifies the call of all Software Modules that are assiged to a Distribution Set through the RESTful API.")

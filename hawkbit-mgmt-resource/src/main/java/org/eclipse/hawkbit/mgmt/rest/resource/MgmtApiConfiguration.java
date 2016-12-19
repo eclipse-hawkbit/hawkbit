@@ -6,27 +6,22 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Controller;
 
 /**
- * Annotation to enable {@link ComponentScan} in the resource package to setup
- * all {@link Controller} annotated classes and setup the REST-Resources for the
+ * Enable {@link ComponentScan} in the resource package to setup all
+ * {@link Controller} annotated classes and setup the REST-Resources for the
  * Management API.
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 @Configuration
-@Import(RepositoryApplicationConfiguration.class)
-public @interface EnableJpaRepository {
+@ComponentScan
+@Import(RestConfiguration.class)
+public class MgmtApiConfiguration {
 
 }

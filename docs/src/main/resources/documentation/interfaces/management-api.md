@@ -46,7 +46,7 @@ For all requests an `Authorization` header has to be set.
 * Username: `Tenant\username`
 * Password: `password`
 
-Also have a look to the [Security](https://github.com/eclipse/hawkbit/wiki/Security) chapter.
+Also have a look to the [Security](../security/security.html) chapter.
 
 In addition, for POST and PUT requests the `Content-Type` header has to be set. Accepted content-types are.
 
