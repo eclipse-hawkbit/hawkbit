@@ -61,6 +61,10 @@ public abstract class AbstractTargetTagFilterLayout extends VerticalLayout {
         }
     }
 
+    protected MultipleTargetFilter getMultipleFilterTabs() {
+        return multipleFilterTabs;
+    }
+
     /**
      * On load, software module type filter is cloaed.
      * 

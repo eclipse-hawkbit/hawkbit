@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -23,11 +25,33 @@ public class DistributionTableEvent extends BaseUIEntityEvent<DistributionSet> {
      * 
      * @param eventType
      *            the event type
+     */
+    public DistributionTableEvent(final BaseEntityEventType eventType) {
+        super(eventType, null);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param eventType
+     *            the event type
      * @param entity
      *            the distribution set
      */
     public DistributionTableEvent(final BaseEntityEventType eventType, final DistributionSet entity) {
         super(eventType, entity);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param eventType
+     *            the event type
+     * @param entityIds
+     *            the entity ids
+     */
+    public DistributionTableEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, DistributionSet.class);
     }
 
 }

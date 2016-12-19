@@ -216,8 +216,8 @@ public class JpaTargetManagement implements TargetManagement {
     public void deleteTargets(final Collection<Long> targetIDs) {
         targetRepository.deleteByIdIn(targetIDs);
 
-        targetIDs.forEach(targetId -> eventPublisher.publishEvent(
-                new TargetDeletedEvent(tenantAware.getCurrentTenant(), targetId, applicationContext.getId())));
+        targetIDs.forEach(targetId -> eventPublisher.publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(),
+                targetId, JpaTarget.class.getName(), applicationContext.getId())));
     }
 
     @Override

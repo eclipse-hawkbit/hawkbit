@@ -12,22 +12,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Menu item for deplyoment.
- * 
- *
  *
  */
-@Component
+@SpringComponent
+@UIScope
 @Order(100)
-public class DeploymentViewMenuItem implements DashboardMenuItem {
+public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     private static final long serialVersionUID = 6112540239655168995L;
 
@@ -56,4 +55,5 @@ public class DeploymentViewMenuItem implements DashboardMenuItem {
         return Arrays.asList(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY, SpPermission.CREATE_TARGET,
                 SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.UPDATE_REPOSITORY);
     }
+
 }

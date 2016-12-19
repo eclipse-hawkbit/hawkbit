@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -206,13 +207,16 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
-        final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name, version,
-                vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-        if (newBaseSoftwareModule != null) {
-            /* display success message */
+        final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
+                .type(softwareManagement.findSoftwareModuleTypeByName(type)).name(name).version(version)
+                .description(description).vendor(vendor);
+
+        final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
+
+        if (newSoftwareModule != null) {
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
-                    new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
+                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
         }
     }
 

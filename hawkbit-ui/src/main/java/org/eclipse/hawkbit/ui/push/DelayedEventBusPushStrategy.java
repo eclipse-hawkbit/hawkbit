@@ -70,13 +70,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final int BLOCK_SIZE = 10_000;
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
-    private int uiid = -1;
 
     private final ScheduledExecutorService executorService;
     private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
     private final long delay;
+    private UI vaadinUI;
 
     /**
      * Constructor.
@@ -105,10 +105,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void init(final UI vaadinUI) {
-        uiid = vaadinUI.getUIId();
-        LOG.info("Initialize delayed event push strategy for UI {}", uiid);
+        this.vaadinUI = vaadinUI;
+        LOG.info("Initialize delayed event push strategy for UI {}", vaadinUI.getUIId());
         if (vaadinUI.getSession() == null) {
-            LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
+            LOG.error("Vaadin session of UI {} is null! Event push disabled!", vaadinUI.getUIId());
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
@@ -117,7 +117,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void clean() {
-        LOG.info("Cleanup delayed event push strategy for UI", uiid);
+        LOG.info("Cleanup delayed event push strategy for UI", vaadinUI.getUIId());
         jobHandle.cancel(true);
         queue.clear();
     }

@@ -123,10 +123,10 @@ public abstract class AbstractFilterButtons extends Table {
         bsmBtnWrapper.addStyleName(ValoTheme.DRAG_AND_DROP_WRAPPER_NO_HORIZONTAL_DRAG_HINTS);
         bsmBtnWrapper.addStyleName(SPUIStyleDefinitions.FILTER_BUTTON_WRAPPER);
         if (getButtonWrapperData() != null) {
-            if (id != null) {
-                bsmBtnWrapper.setData(getButtonWrapperData().concat(id.toString()));
-            } else {
+            if (id == null) {
                 bsmBtnWrapper.setData(getButtonWrapperData());
+            } else {
+                bsmBtnWrapper.setData(getButtonWrapperData().concat("" + id));
             }
         }
         bsmBtnWrapper.setId(getButttonWrapperIdPrefix().concat(name));
@@ -169,7 +169,7 @@ public abstract class AbstractFilterButtons extends Table {
         return button;
     }
 
-    private String prepareFilterButtonCaption(final String name, final String color) {
+    private static String prepareFilterButtonCaption(final String name, final String color) {
         final StringBuilder caption = new StringBuilder();
         caption.append("<span style=\"color: ").append(color).append(" !important;\">");
         caption.append(FontAwesome.CIRCLE.getHtml());

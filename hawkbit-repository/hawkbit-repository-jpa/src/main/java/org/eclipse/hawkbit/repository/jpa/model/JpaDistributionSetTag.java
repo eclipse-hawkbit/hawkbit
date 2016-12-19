@@ -18,8 +18,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A {@link DistributionSetTag} is used to describe DistributionSet attributes
@@ -30,7 +35,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 @Table(name = "sp_distributionset_tag", indexes = {
         @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_ds_tag"))
-public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag {
+public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
@@ -74,5 +79,25 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag 
         }
 
         return Collections.unmodifiableList(assignedToDistributionSet);
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new DistributionSetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new DistributionSetTagUpdateEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+
     }
 }

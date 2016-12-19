@@ -16,13 +16,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.fest.assertions.api.Assertions;
 import org.junit.Before;
@@ -108,6 +112,42 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
                 1, TimeUnit.SECONDS);
         assertThat(dsDeletedEvent).isNotNull();
         assertThat(dsDeletedEvent.getEntityId()).isEqualTo(createDistributionSet.getId());
+    }
+
+    @Test
+    @Description("Verifies that the software module created event is published when a software module has been created")
+    public void softwareModuleCreatedEventIsPublished() throws InterruptedException {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
+
+        final SoftwareModuleCreatedEvent softwareModuleCreatedEvent = eventListener
+                .waitForEvent(SoftwareModuleCreatedEvent.class, 1, TimeUnit.SECONDS);
+        assertThat(softwareModuleCreatedEvent).isNotNull();
+        assertThat(softwareModuleCreatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
+    }
+
+    @Test
+    @Description("Verifies that the software module update event is published when a software module has been updated")
+    public void softwareModuleUpdateEventIsPublished() throws InterruptedException {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
+        softwareManagement
+                .updateSoftwareModule(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
+
+        final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
+                .waitForEvent(SoftwareModuleUpdatedEvent.class, 1, TimeUnit.SECONDS);
+        assertThat(softwareModuleUpdatedEvent).isNotNull();
+        assertThat(softwareModuleUpdatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
+    }
+
+    @Test
+    @Description("Verifies that the software module deleted event is published when a software module has been deleted")
+    public void softwareModuleDeletedEventIsPublished() throws InterruptedException {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
+        softwareManagement.deleteSoftwareModule(softwareModule.getId());
+
+        final SoftwareModuleDeletedEvent softwareModuleDeletedEvent = eventListener
+                .waitForEvent(SoftwareModuleDeletedEvent.class, 1, TimeUnit.SECONDS);
+        assertThat(softwareModuleDeletedEvent).isNotNull();
+        assertThat(softwareModuleDeletedEvent.getEntityId()).isEqualTo(softwareModule.getId());
     }
 
     public static class RepositoryTestConfiguration {

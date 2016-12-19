@@ -8,13 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -55,8 +51,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private final transient EntityFactory entityFactory;
 
-    private final TargetTable targetTable;
-
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
@@ -66,13 +60,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private CommonDialogWindow window;
 
     TargetAddUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
-            final UINotification uINotification, final EntityFactory entityFactory, final TargetTable targetTable) {
+            final UINotification uINotification, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
         this.uINotification = uINotification;
         this.entityFactory = entityFactory;
-        this.targetTable = targetTable;
         createRequiredComponents();
         buildLayout();
         setCompositionRoot(formLayout);
@@ -143,15 +136,11 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
-        /* save new target */
         final Target newTarget = targetManagement.createTarget(
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
 
-        final Set<TargetIdName> s = new HashSet<>();
-        s.add(newTarget.getTargetIdName());
-        targetTable.setValue(s);
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
 
-        /* display success msg */
         uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 

@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.servlet.http.Cookie;
 
 import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
+import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -39,10 +40,12 @@ import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -76,10 +79,11 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     @Autowired
     private DashboardMenu dashboardMenu;
 
-    private HorizontalLayout content;
-
     @Autowired
     private ErrorView errorview;
+
+    @Autowired
+    private NotificationUnreadButton notificationUnreadButton;
 
     /**
      * Constructor taking the push strategy.
@@ -126,10 +130,25 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         rootLayout.addComponent(dashboardMenu);
         rootLayout.addComponent(contentVerticalLayout);
 
-        content = new HorizontalLayout();
+        final HorizontalLayout viewHeadercontent = new HorizontalLayout();
+        contentVerticalLayout.addComponent(viewHeadercontent);
+        viewHeadercontent.setWidth("100%");
+        viewHeadercontent.setHeight("43px");
+        viewHeadercontent.addStyleName("view-header-layout");
+
+        final Label viewHeader = new Label();
+        viewHeader.setWidth("100%");
+        viewHeader.setStyleName("header-content");
+        viewHeadercontent.addComponent(viewHeader);
+
+        viewHeadercontent.addComponent(notificationUnreadButton);
+        viewHeadercontent.setComponentAlignment(notificationUnreadButton, Alignment.MIDDLE_RIGHT);
+
+        final HorizontalLayout content = new HorizontalLayout();
         contentVerticalLayout.addComponent(content);
         content.setStyleName("view-content");
         content.setSizeFull();
+
         rootLayout.setExpandRatio(contentVerticalLayout, 1.0F);
         contentVerticalLayout.setStyleName("main-content");
         contentVerticalLayout.setExpandRatio(content, 1.0F);
@@ -157,10 +176,11 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
                 final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
                 dashboardMenu.postViewChange(new PostViewChangeEvent(view));
                 if (view == null) {
-                    content.setCaption(null);
+                    viewHeader.setCaption(null);
                     return;
                 }
-                content.setCaption(view.getDashboardCaptionLong());
+                viewHeader.setCaption(view.getDashboardCaptionLong());
+                notificationUnreadButton.setCurrentView(event.getNewView());
             }
         });
 

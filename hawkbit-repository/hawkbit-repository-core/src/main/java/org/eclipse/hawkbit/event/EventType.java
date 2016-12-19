@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
@@ -28,6 +29,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateE
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
@@ -87,6 +90,10 @@ public class EventType {
 
         // download
         TYPES.put(20, DownloadProgressEvent.class);
+
+        TYPES.put(21, SoftwareModuleCreatedEvent.class);
+        TYPES.put(22, SoftwareModuleDeletedEvent.class);
+        TYPES.put(23, SoftwareModuleUpdatedEvent.class);
     }
 
     private int value;
