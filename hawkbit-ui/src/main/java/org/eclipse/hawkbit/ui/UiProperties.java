@@ -288,13 +288,13 @@ public class UiProperties implements Serializable {
             /**
              * The delay for the ui event forwarding.
              */
-            private int delay = (int) TimeUnit.SECONDS.toMillis(2);
+            private long delay = TimeUnit.SECONDS.toMillis(2);
 
-            public int getDelay() {
+            public long getDelay() {
                 return delay;
             }
 
-            public void setDelay(final int delay) {
+            public void setDelay(final long delay) {
                 this.delay = delay;
             }
         }

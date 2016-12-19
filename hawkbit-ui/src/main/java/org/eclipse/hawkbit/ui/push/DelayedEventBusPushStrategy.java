@@ -76,7 +76,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
-    private final int delay;
+    private final long delay;
 
     /**
      * Constructor.
@@ -92,7 +92,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      *            the events are forwarded by this strategy
      */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider, final int delay) {
+            final UIEventProvider eventProvider, final long delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
