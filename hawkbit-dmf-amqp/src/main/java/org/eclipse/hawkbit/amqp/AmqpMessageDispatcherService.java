@@ -156,6 +156,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
             final URI address) {
+        if (!IpUtil.isAmqpUri(address)) {
+            return;
+        }
+
         final Message message = getMessageConverter().toMessage(actionId,
                 createConnectorMessageProperties(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
