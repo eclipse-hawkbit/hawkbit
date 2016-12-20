@@ -409,6 +409,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
+        target.getTargetInfo();
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
