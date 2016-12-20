@@ -131,10 +131,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        return new ResponseEntity<>(
-                DataConversionHelper.fromTarget(target, controllerManagement.findOldestActiveActionByTarget(target),
-                        controllerManagement.getPollingTime(), tenantAware),
-                HttpStatus.OK);
+        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
+                controllerManagement.findOldestActiveActionByTarget(controllerId),
+                controllerManagement.getPollingTime(), tenantAware), HttpStatus.OK);
     }
 
     @Override
@@ -158,7 +157,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact);
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getId());
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -254,7 +253,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
 
-            controllerManagement.registerRetrieved(action, RepositoryConstants.SERVER_MESSAGE_PREFIX
+            controllerManagement.registerRetrieved(action.getId(), RepositoryConstants.SERVER_MESSAGE_PREFIX
                     + "Target retrieved update action and should start now the download.");
 
             return new ResponseEntity<>(base, HttpStatus.OK);
@@ -388,7 +387,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", controllerId, cancel);
 
-            controllerManagement.registerRetrieved(action, RepositoryConstants.SERVER_MESSAGE_PREFIX
+            controllerManagement.registerRetrieved(action.getId(), RepositoryConstants.SERVER_MESSAGE_PREFIX
                     + "Target retrieved cancel action and should start now the cancelation.");
 
             return new ResponseEntity<>(cancel, HttpStatus.OK);

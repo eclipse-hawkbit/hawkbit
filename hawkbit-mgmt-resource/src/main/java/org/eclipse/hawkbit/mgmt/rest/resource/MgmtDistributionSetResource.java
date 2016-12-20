@@ -137,10 +137,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
-        final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
-        distributionSetManagement.deleteDistributionSet(set);
-
+        distributionSetManagement.deleteDistributionSet(distributionSetId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -340,7 +337,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
 
         distributionSetManagement.assignSoftwareModules(distributionSetId,
-                softwareModuleIDs.stream().map(module -> module.getId()).collect(Collectors.toList()));
+                softwareModuleIDs.stream().map(MgmtSoftwareModuleAssigment::getId).collect(Collectors.toList()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -193,15 +193,6 @@ public interface TargetManagement {
     void deleteTarget(@NotEmpty String controllerID);
 
     /**
-     * finds all {@link Target#getControllerId()} which are currently in the
-     * database.
-     *
-     * @return all IDs of all {@link Target} in the system
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIds();
-
-    /**
      * Finds all targets for all the given parameters but returns not the full
      * target but {@link TargetIdName}.
      *
@@ -537,7 +528,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findTargetsAll(@NotNull Long targetFilterQueryId, @NotNull Pageable pageable);
+    Slice<Target> findTargetsByTargetFilterQuery(@NotNull Long targetFilterQueryId, @NotNull Pageable pageable);
 
     /**
      * method retrieves all {@link Target}s from the repo in the following
@@ -647,6 +638,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Target updateTarget(TargetUpdate update);
+    Target updateTarget(@NotNull TargetUpdate update);
 
 }

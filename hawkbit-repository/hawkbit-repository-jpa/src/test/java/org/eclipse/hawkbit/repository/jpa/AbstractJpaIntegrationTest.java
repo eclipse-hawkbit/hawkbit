@@ -16,8 +16,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -25,7 +27,6 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,13 +87,17 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);
+        return actionRepository.findByRolloutIdAndStatus(rollout.getId(), actionStatus);
     }
 
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {
         return targetManagement.toggleTagAssignment(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), tag.getName());
+    }
+
+    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
+            final DistributionSetTag tag) {
+        return distributionSetManagement.toggleTagAssignment(
+                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getName());
     }
 }

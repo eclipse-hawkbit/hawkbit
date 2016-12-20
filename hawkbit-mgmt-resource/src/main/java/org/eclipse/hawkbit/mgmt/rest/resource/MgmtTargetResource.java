@@ -157,7 +157,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        final Target foundTarget = findTargetWithExceptionIfNotFound(controllerId);
+        findTargetWithExceptionIfNotFound(controllerId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -167,11 +167,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Action> activeActions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, foundTarget, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, controllerId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, controllerId);
         } else {
-            activeActions = this.deploymentManagement.findActionsByTarget(foundTarget, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(controllerId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(controllerId);
         }
 
         return new ResponseEntity<>(
@@ -183,11 +183,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
+        if (!action.getTarget().getControllerId().equals(controllerId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -214,13 +213,17 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
+        if (!action.getTarget().getControllerId().equals(controllerId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         if (force) {
-            this.deploymentManagement.forceQuitAction(action);
+            this.deploymentManagement.forceQuitAction(actionId);
         } else {
-            this.deploymentManagement.cancelAction(action, target);
+            this.deploymentManagement.cancelAction(actionId);
         }
         // both functions will throw an exception, when action is in wrong
         // state, which is mapped by MgmtResponseExceptionHandler.
@@ -248,7 +251,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
         final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByActionWithMessages(
-                new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action);
+                new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action.getId());
 
         return new ResponseEntity<>(
                 new PagedList<>(MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent()),

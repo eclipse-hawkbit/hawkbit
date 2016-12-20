@@ -348,7 +348,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(disSet, Lists.newArrayList(target));
 
         // [STEP4]: Delete the DistributionSet
-        distributionSetManagement.deleteDistributionSet(disSet);
+        distributionSetManagement.deleteDistributionSet(disSet.getId());
 
         // [STEP5]: Delete the assigned SoftwareModule
         softwareManagement.deleteSoftwareModule(assignedModule.getId());

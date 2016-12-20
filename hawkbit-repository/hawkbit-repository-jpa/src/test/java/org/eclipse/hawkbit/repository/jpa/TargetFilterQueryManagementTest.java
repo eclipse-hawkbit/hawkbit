@@ -152,7 +152,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet);
+        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if auto assign distribution set is null
         tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
@@ -181,7 +181,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet);
+        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if distribution set is still in the database with deleted flag
         assertTrue("Distribution set should be deleted",

@@ -120,7 +120,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
         } else if (null != targetFilterQuery) {
-            targetBeans = getTargetManagement().findTargetsAll(targetFilterQuery.getId(),
+            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQuery.getId(),
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement().findTargetsAll(

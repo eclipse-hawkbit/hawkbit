@@ -180,7 +180,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> actionOptional = controllerManagement.findOldestActiveActionByTarget(target);
+        final Optional<Action> actionOptional = controllerManagement
+                .findOldestActiveActionByTarget(target.getControllerId());
         if (!actionOptional.isPresent()) {
             return;
         }
@@ -286,7 +287,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void updateLastPollTime(final Target target) {
-        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
+        controllerManagement.updateLastTargetQuery(target.getControllerId(), null);
     }
 
     private static String convertCorrelationId(final Message message) {

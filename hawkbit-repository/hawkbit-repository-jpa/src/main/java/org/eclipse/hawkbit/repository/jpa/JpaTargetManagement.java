@@ -162,7 +162,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findTargetsAll(final Long targetFilterQueryId, final Pageable pageable) {
+    public Slice<Target> findTargetsByTargetFilterQuery(final Long targetFilterQueryId, final Pageable pageable) {
         final TargetFilterQuery targetFilterQuery = Optional
                 .ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId))
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -505,16 +505,6 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Long countTargetByInstalledDistributionSet(final Long distId) {
         return targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
-    }
-
-    @Override
-    public List<TargetIdName> findAllTargetIds() {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<TargetIdName> query = cb.createQuery(TargetIdName.class);
-        final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
-        return entityManager.createQuery(query.multiselect(targetRoot.get(JpaTarget_.id),
-                targetRoot.get(JpaTarget_.controllerId), targetRoot.get(JpaTarget_.name))).getResultList();
-
     }
 
     @Override

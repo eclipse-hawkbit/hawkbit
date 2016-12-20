@@ -106,7 +106,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     public void distributionSetDeletedEventIsPublished() throws InterruptedException {
         final DistributionSet createDistributionSet = testdataFactory.createDistributionSet();
 
-        distributionSetManagement.deleteDistributionSet(createDistributionSet);
+        distributionSetManagement.deleteDistributionSet(createDistributionSet.getId());
 
         final DistributionSetDeletedEvent dsDeletedEvent = eventListener.waitForEvent(DistributionSetDeletedEvent.class,
                 1, TimeUnit.SECONDS);

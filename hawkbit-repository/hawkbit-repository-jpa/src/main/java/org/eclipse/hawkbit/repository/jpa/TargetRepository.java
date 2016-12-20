@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -195,5 +194,5 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByActionsRolloutGroup(JpaRolloutGroup rolloutGroup, Pageable page);
+    Page<Target> findByActionsRolloutGroupId(Long rolloutGroup, Pageable page);
 }

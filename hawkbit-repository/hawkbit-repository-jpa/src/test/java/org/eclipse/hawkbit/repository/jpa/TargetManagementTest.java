@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -669,21 +668,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test the optimized quere for retrieving all ID/name pairs of targets.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 25) })
-    public void findAllTargetIdNamePaiss() {
-        final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
-        final String[] createdTargetIds = targAs.stream().map(Target::getControllerId)
-                .toArray(size -> new String[size]);
-
-        final List<TargetIdName> findAllTargetIdNames = targetManagement.findAllTargetIds();
-        final List<String> findAllTargetIds = findAllTargetIdNames.stream().map(TargetIdName::getControllerId)
-                .collect(Collectors.toList());
-
-        assertThat(findAllTargetIds).as("Target list has wrong content").containsOnly(createdTargetIds);
-    }
-
-    @Test
     @Description("Test that NO TAG functionality which gives all targets with no tag assigned.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 50),
@@ -700,7 +684,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetsListWithNoTag = targetManagement
                 .findTargetByFilters(pageReq, null, null, null, null, Boolean.TRUE, tagNames).getContent();
 
-        assertThat(50).as("Total targets").isEqualTo(targetManagement.findAllTargetIds().size());
+        assertThat(50L).as("Total targets").isEqualTo(targetManagement.countTargetsAll());
         assertThat(25).as("Targets with no tag").isEqualTo(targetsListWithNoTag.size());
 
     }

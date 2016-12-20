@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -44,7 +45,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -141,12 +141,10 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateLastTargetQuery(final String controllerId, final URI address) {
-        final Target target = targetRepository.findByControllerId(controllerId);
-        if (target == null) {
-            throw new EntityNotFoundException(controllerId);
-        }
+        final Target target = Optional.ofNullable(targetRepository.findByControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException("Target with given ID " + controllerId + " not found"));
 
-        return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
+        return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
     }
 
     @Override
@@ -164,7 +162,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final String controllerId, final Artifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final String controllerId, final Long localArtifact) {
         final Target target = targetRepository.findByControllerId(controllerId);
         if (target == null) {
             return false;
@@ -173,7 +171,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final Artifact localArtifact) {
+    public boolean hasTargetArtifactAssigned(final Long targetId, final Long localArtifact) {
         final Target target = targetRepository.findOne(targetId);
         if (target == null) {
             return false;
@@ -182,10 +180,11 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findOldestActiveActionByTarget(final Target target) {
+    public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
-        return actionRepository.findFirstByTargetAndActive(new Sort(Direction.ASC, "id"), (JpaTarget) target, true);
+        return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
+                true);
     }
 
     @Override
@@ -209,13 +208,10 @@ public class JpaControllerManagement implements ControllerManagement {
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
         }
 
-        return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
+        return updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), address).getTarget();
     }
 
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetInfo updateTargetStatus(final TargetInfo targetInfo, final TargetUpdateStatus status,
+    private TargetInfo updateTargetStatus(final TargetInfo targetInfo, final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
         final JpaTargetInfo mtargetInfo = (JpaTargetInfo) entityManager.merge(targetInfo);
         if (status != null) {
@@ -429,22 +425,24 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public Action registerRetrieved(final Action action, final String message) {
-        return handleRegisterRetrieved((JpaAction) action, message);
+    public Action registerRetrieved(final Long actionId, final String message) {
+        return handleRegisterRetrieved(actionId, message);
     }
 
     /**
      * Registers retrieved status for given {@link Target} and {@link Action} if
      * it does not exist yet.
      *
-     * @param action
+     * @param actionId
      *            to the handle status for
      * @param message
      *            for the status
      * @return the updated action in case the status has been changed to
      *         {@link Status#RETRIEVED}
      */
-    private Action handleRegisterRetrieved(final JpaAction action, final String message) {
+    private Action handleRegisterRetrieved(final Long actionId, final String message) {
+        final JpaAction action = Optional.ofNullable(actionRepository.findById(actionId)).orElseThrow(
+                () -> new EntityNotFoundException("Actionw ith given ID " + actionId + " doesn not exist."));
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra
         // count query made by spring-data when using pageable requests, we
@@ -456,7 +454,7 @@ public class JpaControllerManagement implements ControllerManagement {
         final Root<JpaActionStatus> actionStatusRoot = queryActionStatus.from(JpaActionStatus.class);
         final CriteriaQuery<Object[]> query = queryActionStatus
                 .multiselect(actionStatusRoot.get(JpaActionStatus_.id), actionStatusRoot.get(JpaActionStatus_.status))
-                .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action), action))
+                .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(JpaAction_.id), actionId))
                 .orderBy(cb.desc(actionStatusRoot.get(JpaActionStatus_.id)));
         final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1)
                 .getResultList();
@@ -478,9 +476,8 @@ public class JpaControllerManagement implements ControllerManagement {
             // we modify the action status and the controller won't get the
             // cancel job anymore.
             if (!action.isCancelingOrCanceled()) {
-                final JpaAction actionMerge = entityManager.merge(action);
-                actionMerge.setStatus(Status.RETRIEVED);
-                return actionRepository.save(actionMerge);
+                action.setStatus(Status.RETRIEVED);
+                return actionRepository.save(action);
             }
         }
         return action;
@@ -506,13 +503,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
-    }
-
-    @Override
     public void downloadProgress(final Long statusId, final Long requestedBytes, final Long shippedBytesSinceLast,
             final Long shippedBytesOverall) {
         eventPublisher.publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), shippedBytesSinceLast,
@@ -525,7 +515,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Target findByTargetId(final long targetId) {
+    public Target findByTargetId(final Long targetId) {
         return targetRepository.findOne(targetId);
     }
 

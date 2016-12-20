@@ -163,7 +163,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // binary
         try (InputStream fileInputStream = artifactManagement
-                .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
+                .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getId())
                 .getFileInputStream()) {
             assertTrue("Wrong artifact content",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));

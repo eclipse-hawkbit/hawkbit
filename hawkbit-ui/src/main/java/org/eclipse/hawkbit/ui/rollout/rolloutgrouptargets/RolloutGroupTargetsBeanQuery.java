@@ -84,8 +84,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         }
 
         return rolloutGroup.map(group -> getProxyRolloutGroupTargetsList(getRolloutGroupManagement()
-                .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), group).getContent()))
-                .orElse(Collections.emptyList());
+                .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), group.getId())
+                .getContent())).orElse(Collections.emptyList());
     }
 
     private static List<ProxyTarget> getProxyRolloutGroupTargetsList(
@@ -136,7 +136,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
         if (rolloutGroup.isPresent()) {
             firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get());
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup.get().getId());
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
