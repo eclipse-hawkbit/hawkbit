@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -26,7 +26,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * DistributionSet table layout
  */
-public class DistributionSetTableLayout extends AbstractTableLayout {
+public class DistributionSetTableLayout extends AbstractTableLayout<DistributionSetTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 

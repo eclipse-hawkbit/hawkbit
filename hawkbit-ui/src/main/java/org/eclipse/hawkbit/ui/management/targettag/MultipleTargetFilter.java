@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -73,6 +73,10 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         this.i18n = i18n;
         this.eventBus = eventBus;
         buildComponents();
+    }
+
+    public TargetTagFilterButtons getFilterByButtons() {
+        return filterByButtons;
     }
 
     /**

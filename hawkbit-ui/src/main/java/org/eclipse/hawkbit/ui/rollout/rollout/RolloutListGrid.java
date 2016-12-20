@@ -37,12 +37,12 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -150,7 +150,7 @@ public class RolloutListGrid extends AbstractGrid {
         case CREATE_ROLLOUT:
         case UPDATE_ROLLOUT:
         case SHOW_ROLLOUTS:
-            refreshGrid();
+            refreshContainer();
             break;
         default:
             return;
@@ -178,7 +178,7 @@ public class RolloutListGrid extends AbstractGrid {
         final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
-            refreshGrid();
+            refreshContainer();
             return;
         }
         item.getItemProperty(VAR_STATUS).setValue(rollout.getStatus());
@@ -429,10 +429,6 @@ public class RolloutListGrid extends AbstractGrid {
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
-    }
-
-    private void refreshGrid() {
-        ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
     private String getDescription(final CellReference cell) {

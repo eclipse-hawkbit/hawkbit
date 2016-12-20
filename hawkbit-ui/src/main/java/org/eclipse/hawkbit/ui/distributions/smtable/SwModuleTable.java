@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -130,6 +132,31 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent event) {
         onBaseEntityEvent(event);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
+
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
+
+        handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
+
+        eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
+
+    }
+
+    private void handleSelectedAndUpdatedSoftwareModules(final List<SoftwareModuleUpdatedEvent> events) {
+        manageDistUIState.getSelectedBaseSwModuleId()
+                .ifPresent(lastSelectedModuleId -> events.stream()
+                        .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).findFirst()
+                        .ifPresent(lastEvent -> eventBus.publish(this,
+                                new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
+    }
+
+    private void updateSoftwareModuleInTable(final SoftwareModule editedSm) {
+        final Item item = getContainerDataSource().getItem(editedSm.getId());
+        updateEntity(editedSm, item);
     }
 
     @Override
@@ -337,17 +364,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
         return name + "." + version;
-    }
-
-    @Override
-    protected Item addEntity(final SoftwareModule baseEntity) {
-        final Item item = super.addEntity(baseEntity);
-
-        if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {
-            manageDistUIState.getSelectedSoftwareModules().stream().forEach(this::unselect);
-        }
-        select(baseEntity.getId());
-        return item;
     }
 
     @Override

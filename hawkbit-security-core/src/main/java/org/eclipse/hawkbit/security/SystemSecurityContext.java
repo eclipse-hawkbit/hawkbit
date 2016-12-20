@@ -17,21 +17,18 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.stereotype.Service;
 
 import com.google.common.base.Throwables;
 
 /**
  * A Service which provide to run system code.
  */
-@Service
 public class SystemSecurityContext {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemSecurityContext.class);
@@ -44,7 +41,6 @@ public class SystemSecurityContext {
      * @param tenantAware
      *            the tenant aware bean to retrieve the current tenant
      */
-    @Autowired
     public SystemSecurityContext(final TenantAware tenantAware) {
         this.tenantAware = tenantAware;
     }

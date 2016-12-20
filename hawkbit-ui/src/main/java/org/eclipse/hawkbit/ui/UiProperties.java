@@ -9,15 +9,14 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Properties for Management UI customization.
  *
  */
-@Component
 @ConfigurationProperties("hawkbit.server.ui")
 public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -272,11 +271,48 @@ public class UiProperties implements Serializable {
         }
     }
 
+    /**
+     * Configuration of the UI event bus.
+     */
+    public static class Event implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 
+         * Configuration of the UI push.
+         *
+         */
+        public static class Push implements Serializable {
+            private static final long serialVersionUID = 1L;
+
+            /**
+             * The delay for the ui event forwarding.
+             */
+            private long delay = TimeUnit.SECONDS.toMillis(2);
+
+            public long getDelay() {
+                return delay;
+            }
+
+            public void setDelay(final long delay) {
+                this.delay = delay;
+            }
+        }
+
+        private final Push push = new Push();
+
+        public Push getPush() {
+            return push;
+        }
+    }
+
     private final Links links = new Links();
 
     private final Login login = new Login();
 
     private final Demo demo = new Demo();
+
+    private final Event event = new Event();
 
     public Demo getDemo() {
         return demo;
@@ -288,6 +324,10 @@ public class UiProperties implements Serializable {
 
     public Login getLogin() {
         return login;
+    }
+
+    public Event getEvent() {
+        return event;
     }
 
 }

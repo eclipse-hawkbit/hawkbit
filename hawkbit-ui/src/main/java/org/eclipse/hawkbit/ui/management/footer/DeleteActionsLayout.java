@@ -8,23 +8,27 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -39,6 +43,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
@@ -61,12 +66,12 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     private final ManangementConfirmationWindowLayout manangementConfirmationWindowLayout;
 
     private final CountMessageLabel countMessageLabel;
-    
+
     public DeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final TagManagement tagManagementService,
-            final ManagementViewClientCriterion managementViewClientCriterion, final ManagementUIState managementUIState,
-            final TargetManagement targetManagement, final TargetTable targetTable,
-            final DeploymentManagement deploymentManagement,
+            final ManagementViewClientCriterion managementViewClientCriterion,
+            final ManagementUIState managementUIState, final TargetManagement targetManagement,
+            final TargetTable targetTable, final DeploymentManagement deploymentManagement,
             final DistributionSetManagement distributionSetManagement) {
         super(i18n, permChecker, eventBus, notification);
         this.tagManagementService = tagManagementService;
@@ -230,6 +235,13 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             notification.displayValidationError(i18n.get("message.tag.delete", new Object[] { tagName }));
         } else {
             tagManagementService.deleteDistributionSetTag(tagName);
+
+            if (source instanceof DragAndDropWrapper) {
+                final Long id = DeleteActionsLayoutHelper.getDistributionTagId((DragAndDropWrapper) source);
+                eventBus.publish(this,
+                        new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
+            }
+
             notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));
         }
     }
@@ -240,6 +252,12 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             notification.displayValidationError(i18n.get("message.tag.delete", new Object[] { tagName }));
         } else {
             tagManagementService.deleteTargetTag(tagName);
+
+            if (source instanceof DragAndDropWrapper) {
+                final Long id = DeleteActionsLayoutHelper.getTargetTagId((DragAndDropWrapper) source);
+                eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, Arrays.asList(id)));
+            }
+
             notification.displaySuccess(i18n.get("message.delete.success", new Object[] { tagName }));
         }
     }

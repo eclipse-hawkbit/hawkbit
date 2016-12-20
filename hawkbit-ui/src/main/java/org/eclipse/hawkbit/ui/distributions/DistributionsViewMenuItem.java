@@ -12,12 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Menu item for distributions view.
@@ -25,9 +26,10 @@ import com.vaadin.server.Resource;
  *
  * 
  */
-@Component
+@SpringComponent
+@UIScope
 @Order(400)
-public class DistributionsViewMenuItem implements DashboardMenuItem {
+public class DistributionsViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     private static final long serialVersionUID = -4048522766974227222L;
 

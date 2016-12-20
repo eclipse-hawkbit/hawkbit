@@ -28,8 +28,11 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -380,7 +383,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void deleteAllDistributions(final ConfirmationTab tab) {
         final Set<Long> deletedIds = new HashSet<>();
         managementUIState.getDeletedDistributionList().forEach(distIdName -> deletedIds.add(distIdName.getId()));
+
         distributionSetManagement.deleteDistributionSet(deletedIds.toArray(new Long[deletedIds.size()]));
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, deletedIds));
+
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.dist.deleted", managementUIState.getDeletedDistributionList().size()));
 
@@ -473,19 +479,17 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final List<Long> targetIds = itemIds.stream().map(t -> t.getTargetId()).collect(Collectors.toList());
 
         targetManagement.deleteTargets(targetIds);
+        
+         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, targetIds));
+        
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.deleted", targetIds.size()));
         removeCurrentTab(tab);
         setActionMessage(i18n.get("message.target.delete.success"));
-        // TobeDone change eventing convention
-
         removeDeletedTargetsFromAssignmentTab();
 
-        /*
-         * On delete of pinned target ,unpin refresh both target table and DS
-         */
         managementUIState.getDistributionTableFilters().getPinnedTargetId().ifPresent(this::unPinDeletedTarget);
-        eventBus.publish(this, SaveActionWindowEvent.DELETED_TARGETS);
+        eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
         managementUIState.getDeletedTargetList().clear();
 
     }

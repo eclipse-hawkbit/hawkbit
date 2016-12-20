@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.eclipse.hawkbit.ui.SpringSecurityAtmosphereInterceptor;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;

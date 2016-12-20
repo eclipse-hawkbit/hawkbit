@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -24,7 +24,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Implementation of software module Layout
  */
-public class SwModuleTableLayout extends AbstractTableLayout {
+public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 

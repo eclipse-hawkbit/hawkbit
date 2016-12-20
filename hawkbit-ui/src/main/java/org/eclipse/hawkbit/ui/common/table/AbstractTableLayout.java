@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.ShortCutModifierUtils;
 
 import com.vaadin.event.Action;
@@ -21,18 +22,22 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for table layout.
+ * 
+ *
+ * @param <T>
+ *            type of the concrete table
  */
-public abstract class AbstractTableLayout extends VerticalLayout {
+public abstract class AbstractTableLayout<T extends AbstractTable<?, ?>> extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
     private AbstractTableHeader tableHeader;
 
-    private AbstractTable<?, ?> table;
+    private T table;
 
     private AbstractTableDetailsLayout<?> detailsLayout;
 
-    protected void init(final AbstractTableHeader tableHeader, final AbstractTable<?, ?> table,
+    protected void init(final AbstractTableHeader tableHeader, final T table,
             final AbstractTableDetailsLayout<?> detailsLayout) {
         this.tableHeader = tableHeader;
         this.table = table;
@@ -104,6 +109,10 @@ public abstract class AbstractTableLayout extends VerticalLayout {
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);
+    }
+
+    public RefreshableContainer getTable() {
+        return table;
     }
 
     private class TableShortCutHandler implements Handler {

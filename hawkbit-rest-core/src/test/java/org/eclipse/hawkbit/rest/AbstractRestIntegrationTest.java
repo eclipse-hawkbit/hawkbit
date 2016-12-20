@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.rest;
 
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
-import org.eclipse.hawkbit.rest.configuration.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -18,8 +18,7 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 /**
  * Abstract Test for Rest tests.
  */
-@SpringApplicationConfiguration(classes = { RestConfiguration.class,
-        org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
+@SpringApplicationConfiguration(classes = { RestConfiguration.class, RepositoryApplicationConfiguration.class })
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired

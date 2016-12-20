@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintDeclarationException;
 
@@ -91,9 +90,6 @@ public class JpaRolloutManagement implements RolloutManagement {
      * transaction.
      */
     private static final int TRANSACTION_TARGETS = 1000;
-
-    @Autowired
-    private EntityManager entityManager;
 
     @Autowired
     private RolloutRepository rolloutRepository;

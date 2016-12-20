@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.MultipartConfigElement;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -40,7 +42,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.util.SPInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -89,7 +90,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient SPInfo spInfo;
+    private final transient MultipartConfigElement multipartConfigElement;
 
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
@@ -117,14 +118,14 @@ public class UploadLayout extends VerticalLayout {
     private final transient ArtifactManagement artifactManagement;
 
     public UploadLayout(final I18N i18n, final UINotification uiNotification, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final SPInfo spInfo,
+            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement) {
         this.uploadInfoWindow = new UploadStatusInfoWindow(eventBus, artifactUploadState, i18n);
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.eventBus = eventBus;
         this.artifactUploadState = artifactUploadState;
-        this.spInfo = spInfo;
+        this.multipartConfigElement = multipartConfigElement;
         this.artifactManagement = artifactManagement;
 
         createComponents();
@@ -173,8 +174,8 @@ public class UploadLayout extends VerticalLayout {
     private void buildLayout() {
 
         final Upload upload = new Upload();
-        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, spInfo.getMaxArtifactFileSize(), upload,
-                null, null);
+        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, multipartConfigElement.getMaxFileSize(),
+                upload, null, null);
         upload.setButtonCaption(i18n.get("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -282,7 +283,7 @@ public class UploadLayout extends VerticalLayout {
 
         private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    spInfo.getMaxArtifactFileSize(), null, file.getType(), selectedSw);
+                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -645,13 +646,6 @@ public class UploadLayout extends VerticalLayout {
      */
     I18N getI18n() {
         return i18n;
-    }
-
-    /**
-     * @return
-     */
-    SPInfo getSPInfo() {
-        return spInfo;
     }
 
     void setCurrentUploadConfirmationwindow(final UploadConfirmationWindow currentUploadConfirmationwindow) {

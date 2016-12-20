@@ -20,10 +20,6 @@ import com.vaadin.util.CurrentInstance;
 /**
  * A {@link Runnable} implementation for the {@link UI#access(Runnable)} to
  * dispatch events to the UI in the UI thread.
- * 
- *
- *
- *
  */
 public class DispatcherRunnable implements Runnable {
 
@@ -51,11 +47,6 @@ public class DispatcherRunnable implements Runnable {
         this.event = event;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Runnable#run()
-     */
     @Override
     public void run() {
         CurrentInstance.setCurrent(session.getUIs().iterator().next());

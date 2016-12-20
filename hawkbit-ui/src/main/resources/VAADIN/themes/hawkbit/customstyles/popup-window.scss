@@ -166,4 +166,9 @@
   	margin-top: 30px;
   	margin-bottom: 10px;
   }
+  
+  .v-window-no-closebox .v-window-closebox:before { 
+    height: 0px !important;
+    content: "" !important;
+   }
 }
