@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.fest.assertions.api.Assertions.fail;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.junit.Assert;
@@ -254,4 +255,15 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         assertThat(tenantConfigurationProperties.fromKeyName(configKey).getKeyName()).isEqualTo(configKey);
     }
 
+    @Test
+    @Description("Tenant configuration which is not declared throws exception")
+    public void storeTenantConfigurationWhichIsNotDeclaredThrowsException() {
+        final String configKeyWhichDoesNotExists = "configKeyWhichDoesNotExists";
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKeyWhichDoesNotExists, "value");
+            fail("Expected InvalidTenantConfigurationKeyException for tenant configuration key which is not declared");
+        } catch (final InvalidTenantConfigurationKeyException e) {
+            // expected exception
+        }
+    }
 }
