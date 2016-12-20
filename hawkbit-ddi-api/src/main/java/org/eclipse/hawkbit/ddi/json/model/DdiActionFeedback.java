@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -40,6 +41,7 @@ public class DdiActionFeedback {
     private final String time;
 
     @NotNull
+    @Valid
     private final DdiStatus status;
 
     /**
