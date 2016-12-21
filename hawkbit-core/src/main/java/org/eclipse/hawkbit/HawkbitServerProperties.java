@@ -34,6 +34,10 @@ public class HawkbitServerProperties {
         return build;
     }
 
+    /**
+     * Properties for anonymous API access by Devices/Controllers.
+     *
+     */
     public static class Anonymous {
         private final Download download = new Download();
 
@@ -41,6 +45,11 @@ public class HawkbitServerProperties {
             return download;
         }
 
+        /**
+         * Properties for artifact download under anonymous API access by
+         * Devices/Controllers.
+         *
+         */
         public static class Download {
 
             /**

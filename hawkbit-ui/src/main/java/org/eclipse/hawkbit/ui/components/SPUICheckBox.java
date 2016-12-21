@@ -47,22 +47,22 @@ public class SPUICheckBox extends CheckBox {
         // Default settings
         setRequired(required);
         addStyleName(ValoTheme.CHECKBOX_SMALL);
-        if (null != id) {
+        if (id != null) {
             setId(id);
         }
-        if (null != caption) {
+        if (caption != null) {
             setCaption(caption);
         }
         // Add style
-        if (null != style) {
+        if (style != null) {
             setStyleName(style);
         }
         // Add style Name
-        if (null != styleName) {
+        if (styleName != null) {
             addStyleName(styleName);
         }
         // Set Data
-        if (null != data) {
+        if (data != null) {
             setData(data);
         }
     }

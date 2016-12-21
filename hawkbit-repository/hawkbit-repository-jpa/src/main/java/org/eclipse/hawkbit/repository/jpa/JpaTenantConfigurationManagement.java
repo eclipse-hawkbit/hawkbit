@@ -48,10 +48,10 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     @Override
     @Cacheable(value = "tenantConfiguration", key = "#name")
-    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String name,
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName,
             final Class<T> propertyType) {
 
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(name);
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
         validateTenantConfigurationDataType(configurationKey, propertyType);
 
@@ -101,16 +101,17 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String name) {
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(name);
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
+            final String configurationKeyName) {
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
-        return getConfigurationValue(name, configurationKey.getDataType());
+        return getConfigurationValue(configurationKeyName, configurationKey.getDataType());
     }
 
     @Override
-    public <T> T getGlobalConfigurationValue(final String configurationKey, final Class<T> propertyType) {
+    public <T> T getGlobalConfigurationValue(final String configurationKeyName, final Class<T> propertyType) {
 
-        final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKey);
+        final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
         if (!key.getDataType().isAssignableFrom(propertyType)) {
             throw new TenantConfigurationValidatorException(String.format(
@@ -124,10 +125,10 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @CacheEvict(value = "tenantConfiguration", key = "#name")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(final String name,
-            final T value) {
+    public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
+            final String configurationKeyName, final T value) {
 
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(name);
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
         if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
             throw new TenantConfigurationValidatorException(String.format(
@@ -163,7 +164,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @CacheEvict(value = "tenantConfiguration", key = "#name")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void deleteConfiguration(final String name) {
-        tenantConfigurationRepository.deleteByKey(name);
+    public void deleteConfiguration(final String configurationKeyName) {
+        tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }
 }
