@@ -102,7 +102,7 @@ public class TenantConfigurationProperties {
         public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
 
         private String keyName;
-        private String defaultValue;
+        private String defaultValue = "";
         private Class<?> dataType = String.class;
         private Class<? extends TenantConfigurationValidator> validator = TenantConfigurationStringValidator.class;
 
