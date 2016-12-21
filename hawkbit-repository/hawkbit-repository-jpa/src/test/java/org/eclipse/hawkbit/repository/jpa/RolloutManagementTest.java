@@ -922,14 +922,14 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
 
         float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0));
+                myRollout.getRolloutGroups().get(0).getId());
         assertThat(percent).isEqualTo(40);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
         rolloutManagement.checkRunningRollouts(0);
 
         percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0));
+                myRollout.getRolloutGroups().get(0).getId());
         assertThat(percent).isEqualTo(100);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
@@ -937,7 +937,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.checkRunningRollouts(0);
 
         percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(1));
+                myRollout.getRolloutGroups().get(1).getId());
         assertThat(percent).isEqualTo(80);
     }
 

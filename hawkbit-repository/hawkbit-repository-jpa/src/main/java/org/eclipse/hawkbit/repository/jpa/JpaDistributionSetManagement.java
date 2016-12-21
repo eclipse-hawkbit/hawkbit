@@ -884,6 +884,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSet(final Long setId) {
+        if (!distributionSetRepository.exists(setId)) {
+            throw new EntityNotFoundException("DistributionSet with given ID " + setId + " does not exist.");
+        }
+
         deleteDistributionSet(Lists.newArrayList(setId));
     }
 

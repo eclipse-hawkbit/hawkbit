@@ -175,22 +175,25 @@ public interface SoftwareManagement {
     /**
      * Deletes or marks as delete in case the type is in use.
      *
-     * @param type
+     * @param typeId
      *            to delete
+     * 
+     * @throws EntityNotFoundException
+     *             not found is type with giben ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void deleteSoftwareModuleType(@NotNull SoftwareModuleType type);
+    void deleteSoftwareModuleType(@NotNull Long typeId);
 
     /**
      * @param pageable
      *            the page request to page the result set
-     * @param set
+     * @param setId
      *            to search for
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findSoftwareModuleByAssignedTo(@NotNull Pageable pageable, @NotNull DistributionSet set);
+    Page<SoftwareModule> findSoftwareModuleByAssignedTo(@NotNull Pageable pageable, @NotNull Long setId);
 
     /**
      * Filter {@link SoftwareModule}s with given
@@ -238,13 +241,13 @@ public interface SoftwareManagement {
      *            of the {@link SoftwareModule}
      * @param version
      *            of the {@link SoftwareModule}
-     * @param type
+     * @param typeId
      *            of the {@link SoftwareModule}
      * @return the found {@link SoftwareModule} or <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     SoftwareModule findSoftwareModuleByNameAndVersion(@NotEmpty String name, @NotEmpty String version,
-            @NotNull SoftwareModuleType type);
+            @NotNull Long typeId);
 
     /**
      * finds a single software module meta data by its id.
@@ -433,12 +436,8 @@ public interface SoftwareManagement {
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
      *
-     * @param moduleId
-     *            to update
-     * @param description
-     *            to update or <code>null</code>
-     * @param vendor
-     *            to update or <code>null</code>
+     * @param update
+     *            contains properties to update
      * 
      * @throws EntityNotFoundException
      *             if given module does not exist

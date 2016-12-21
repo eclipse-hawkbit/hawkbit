@@ -947,7 +947,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
+    public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
+        final RolloutGroup rolloutGroup = Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rollout group with given ID " + rolloutGroupId + " not found."));
+
         final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);

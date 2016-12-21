@@ -357,13 +357,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        findDistributionSetWithExceptionIfNotFound(distributionSetId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<SoftwareModule> softwaremodules = softwareManagement.findSoftwareModuleByAssignedTo(pageable,
-                foundDs);
+                distributionSetId);
         return new ResponseEntity<>(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()), HttpStatus.OK);
     }
