@@ -148,10 +148,12 @@ public class AmqpMessageHandlerServiceTest {
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
+        final Target targetMock = mock(Target.class);
+
         final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
-                uriCaptor.capture())).thenReturn(null);
+                uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
@@ -325,9 +327,13 @@ public class AmqpMessageHandlerServiceTest {
 
         // mock
         final Artifact localArtifactMock = mock(Artifact.class);
+        final Long mockedArtifactId = 1L;
+        when(localArtifactMock.getId()).thenReturn(mockedArtifactId);
+
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
         when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
-        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), 1L)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), mockedArtifactId))
+                .thenReturn(true);
         when(artifactManagementMock.loadArtifactBinary(anyLong())).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
