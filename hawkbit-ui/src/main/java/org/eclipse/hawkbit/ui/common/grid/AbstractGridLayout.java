@@ -36,7 +36,7 @@ public abstract class AbstractGridLayout extends VerticalLayout {
     }
 
     protected void buildLayout() {
-        setSizeFull();
+        setSizeUndefined();
         setSpacing(true);
         setMargin(false);
         setStyleName("group");
