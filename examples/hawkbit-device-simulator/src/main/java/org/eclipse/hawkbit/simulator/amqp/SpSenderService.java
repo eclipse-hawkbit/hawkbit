@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.simulator.amqp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -18,6 +19,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
+import org.eclipse.hawkbit.simulator.SimulationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -36,17 +38,23 @@ public class SpSenderService extends SenderService {
 
     private final String spExchange;
 
+    private final SimulationProperties simulationProperties;
+
     /**
      *
      * @param rabbitTemplate
      *            the rabbit template
      * @param amqpProperties
      *            the amqp properties
+     * @param simulationProperties
+     *            for attributes update class
      */
     @Autowired
-    public SpSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
+    public SpSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
+            final SimulationProperties simulationProperties) {
         super(rabbitTemplate, amqpProperties);
         this.spExchange = AmqpSettings.DMF_EXCHANGE;
+        this.simulationProperties = simulationProperties;
     }
 
     /**
@@ -173,8 +181,8 @@ public class SpSenderService extends SenderService {
         messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
         final AttributeUpdate attributeUpdate = new AttributeUpdate();
 
-        // FIXME take from configuration
-        attributeUpdate.getAttributes().put("isoCode", "DE");
+        attributeUpdate.getAttributes().putAll(simulationProperties.getAttributes().stream().collect(
+                Collectors.toMap(SimulationProperties.Attribute::getKey, SimulationProperties.Attribute::getValue)));
 
         return convertMessage(attributeUpdate, messagePropertiesForSP);
     }

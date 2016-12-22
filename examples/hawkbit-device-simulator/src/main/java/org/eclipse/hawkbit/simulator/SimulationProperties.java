@@ -10,12 +10,16 @@ package org.eclipse.hawkbit.simulator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Splitter;
 
 /**
  * General simulator service properties.
@@ -24,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.device.simulator")
 public class SimulationProperties {
+    private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
+    private static final Random RANDOM = new Random();
 
     /**
      * List of tenants where the simulator should auto start simulations after
@@ -31,8 +37,49 @@ public class SimulationProperties {
      */
     private final List<Autostart> autostarts = new ArrayList<>();
 
+    private final List<Attribute> attributes = new ArrayList<>();
+
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
+
     public List<Autostart> getAutostarts() {
         return this.autostarts;
+    }
+
+    public static class Attribute {
+        private String key;
+        private String value;
+        private String random;
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return Optional.ofNullable(value).orElseGet(this::getRandomElement);
+        }
+
+        public void setKey(final String key) {
+            this.key = key;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+
+        public void setRandom(final String random) {
+            this.random = random;
+        }
+
+        public String getRandom() {
+            return random;
+        }
+
+        private String getRandomElement() {
+            final List<String> options = SPLITTER.splitToList(random);
+            return options.get(RANDOM.nextInt(options.size()));
+        }
     }
 
     /**
