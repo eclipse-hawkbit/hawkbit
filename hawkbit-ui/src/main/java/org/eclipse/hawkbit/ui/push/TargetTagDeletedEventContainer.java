@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
  *
  */
 public class TargetTagDeletedEventContainer implements EventContainer<TargetTagDeletedEvent> {
+    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "target.tag.deleted.event.container.notifcation.message";
     private final List<TargetTagDeletedEvent> events;
 
     TargetTagDeletedEventContainer(final List<TargetTagDeletedEvent> events) {
@@ -26,6 +27,11 @@ public class TargetTagDeletedEventContainer implements EventContainer<TargetTagD
     @Override
     public List<TargetTagDeletedEvent> getEvents() {
         return events;
+    }
+
+    @Override
+    public String getUnreadNotificationMessageKey() {
+        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

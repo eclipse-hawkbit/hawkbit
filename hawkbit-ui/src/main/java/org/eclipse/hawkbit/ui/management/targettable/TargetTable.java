@@ -19,7 +19,6 @@ import static org.eclipse.hawkbit.ui.management.event.TargetFilterEvent.REMOVE_F
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +28,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -53,8 +52,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -77,7 +74,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -130,41 +126,16 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onTargetDeletedEvents(final TargetDeletedEventContainer eventContainer) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        boolean shouldRefreshTargets = false;
-        for (final TargetDeletedEvent deletedEvent : eventContainer.getEvents()) {
-            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getEntityId(), null, null);
-            if (visibleItemIds.contains(targetIdName)) {
-                targetContainer.removeItem(targetIdName);
-            } else {
-                shouldRefreshTargets = true;
-                break;
-            }
-        }
-        if (shouldRefreshTargets) {
-            refreshOnDelete();
-        } else {
-            targetContainer.commit();
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
-        }
-        reSelectItemsAfterDeletionEvent();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
     void onCancelTargetAssignmentEvents(final CancelTargetAssignmentEventContainer eventContainer) {
         // workaround until push is available for action
         // history, re-select
         // the updated target so the action history gets
         // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
+        publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
 
         if (isFilterEnabled()) {
@@ -173,24 +144,15 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
             eventContainer.getEvents().stream()
                     .filter(event -> visibleItemIds.contains(new TargetIdName(event.getEntityId(), null, null)))
                     .forEach(event -> updateVisibleItemOnEvent(event.getEntity().getTargetInfo()));
-            targetContainer.commit();
         }
-
-        // workaround until push is available for action
-        // history, re-select
-        // the updated target so the action history gets
-        // refreshed.
-        reselectTargetIfSelectedInStream(eventContainer.getEvents().stream().map(event -> event.getEntity()));
+        publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
-    private void reselectTargetIfSelectedInStream(final Stream<Target> targets) {
-        targets.filter(target -> isLastSelectedTarget(target.getTargetIdName())).findAny().ifPresent(
-                target -> eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, target)));
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onTargetCreatedEvents(final TargetCreatedEventContainer holder) {
-        refreshTargets();
+    private void publishTargetSelectedEntityForRefresh(
+            final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
+        targetEntityEventStream.filter(event -> isLastSelectedTarget(new TargetIdName(event.getEntityId(), null, null)))
+                .findAny().ifPresent(event -> eventBus.publish(this,
+                        new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -237,14 +199,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
-            refreshTablecontainer();
+            refreshContainer();
         }
-    }
-
-    private void refreshTablecontainer() {
-        final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
-        tableContainer.refresh();
-        selectRow();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -335,33 +291,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     @Override
     public AcceptCriterion getDropAcceptCriterion() {
         return managementViewClientCriterion;
-    }
-
-    private void reSelectItemsAfterDeletionEvent() {
-        Set<Object> values;
-        if (isMultiSelect()) {
-            values = new HashSet<>((Set<?>) getValue());
-        } else {
-            values = Sets.newHashSetWithExpectedSize(1);
-            values.add(getValue());
-        }
-        unSelectAll();
-
-        for (final Object value : values) {
-            if (getVisibleItemIds().contains(value)) {
-                select(value);
-            }
-        }
-    }
-
-    private void refreshOnDelete() {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final int size = targetContainer.size();
-        refreshTablecontainer();
-        if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
-        }
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
@@ -650,13 +579,17 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
     public void updateTarget(final Target updatedTarget) {
         if (updatedTarget != null) {
             final Item item = getItem(updatedTarget.getTargetIdName());
-            /* Update the new Name, Description and poll date */
-            item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(updatedTarget.getName());
-
             // TO DO update SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER
             // &
             // SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER
 
+            /*
+             * Update the status which will trigger the value change lister
+             * registered for the target update status. That listener will
+             * update the new status icon showing for this target in the table.
+             */
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
+                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
             /*
              * Update the last query which will trigger the value change lister
              * registered for the target last query column. That listener will
@@ -671,13 +604,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());
 
-            /*
-             * Update the status which will trigger the value change lister
-             * registered for the target update status. That listener will
-             * update the new status icon showing for this target in the table.
-             */
-            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
-                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
+            /* Update the new Name, Description and poll date */
+            item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(updatedTarget.getName());
+
         }
     }
 
@@ -750,7 +679,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final int size = targetContainer.size();
         if (size < SPUIDefinitions.MAX_TABLE_ENTRIES) {
-            refreshTablecontainer();
+            super.refreshContainer();
         } else {
             // If table is not refreshed , explicitly target total count and
             // truncated count has to be updated
@@ -760,7 +689,12 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         if (size != 0) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
         }
+        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
+    }
 
+    @Override
+    public void refreshContainer() {
+        super.refreshContainer();
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
@@ -772,10 +706,10 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
 
+        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
                 .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
-        item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
@@ -798,13 +732,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> {
         // As Vaadin Table only returns the current ItemIds which are visible
         // you don't need to search explicit for them.
         setValue(getItemIds());
-    }
-
-    /**
-     * Clear all selections in the table.
-     */
-    private void unSelectAll() {
-        setValue(null);
     }
 
     @Override

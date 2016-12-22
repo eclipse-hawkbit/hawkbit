@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
  *
  */
 public class DistributionDeletedEventContainer implements EventContainer<DistributionSetDeletedEvent> {
+    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "distribution.deleted.event.container.notifcation.message";
     private final List<DistributionSetDeletedEvent> events;
 
     DistributionDeletedEventContainer(final List<DistributionSetDeletedEvent> events) {
@@ -26,6 +27,11 @@ public class DistributionDeletedEventContainer implements EventContainer<Distrib
     @Override
     public List<DistributionSetDeletedEvent> getEvents() {
         return events;
+    }
+
+    @Override
+    public String getUnreadNotificationMessageKey() {
+        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

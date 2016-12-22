@@ -34,7 +34,8 @@ public class DistributionSetDeletedEvent extends RemoteIdEvent {
      * @param applicationId
      *            the origin application id
      */
-    public DistributionSetDeletedEvent(final String tenant, final Long entityId, final String applicationId) {
-        super(entityId, tenant, applicationId);
+    public DistributionSetDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 }

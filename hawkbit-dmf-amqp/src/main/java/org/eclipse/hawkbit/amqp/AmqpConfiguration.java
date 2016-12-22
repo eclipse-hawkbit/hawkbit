@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -81,7 +82,7 @@ public class AmqpConfiguration {
 
     /**
      * Register the bean for the custom error handler.
-     * 
+     *
      * @return custom error handler
      */
     @Bean
@@ -109,18 +110,25 @@ public class AmqpConfiguration {
         /**
          * {@link ConnectionFactory} with enabled publisher confirms and
          * heartbeat.
-         * 
+         *
          * @param config
          *            with standard {@link RabbitProperties}
          * @return {@link ConnectionFactory}
+         * @throws GeneralSecurityException
+         *             in case of problems with enabled SSL connections
          */
         @Bean
-        public ConnectionFactory rabbitConnectionFactory(final RabbitProperties config) {
+        public ConnectionFactory rabbitConnectionFactory(final RabbitProperties config)
+                throws GeneralSecurityException {
             final CachingConnectionFactory factory = new CachingConnectionFactory();
             factory.setRequestedHeartBeat(amqpProperties.getRequestedHeartBeat());
             factory.setExecutor(threadPoolExecutor);
             factory.getRabbitConnectionFactory().setHeartbeatExecutor(scheduledExecutorService);
             factory.setPublisherConfirms(true);
+
+            if (config.getSsl().isEnabled()) {
+                factory.getRabbitConnectionFactory().useSslProtocol();
+            }
 
             final String addresses = config.getAddresses();
             factory.setAddresses(addresses);
@@ -144,7 +152,7 @@ public class AmqpConfiguration {
     /**
      * Create a {@link RabbitAdmin} and ignore declaration exceptions.
      * {@link RabbitAdmin#setIgnoreDeclarationExceptions(boolean)}
-     * 
+     *
      * @return the bean
      */
     @Bean
@@ -276,7 +284,7 @@ public class AmqpConfiguration {
 
     /**
      * Create AMQP handler service bean.
-     * 
+     *
      * @param rabbitTemplate
      *            for converting messages
      * @param amqpMessageDispatcherService
@@ -298,7 +306,7 @@ public class AmqpConfiguration {
 
     /**
      * Create AMQP handler service bean for authentication messages.
-     * 
+     *
      * @param rabbitTemplate
      *            for converting messages
      * @param authenticationManager
@@ -335,7 +343,7 @@ public class AmqpConfiguration {
 
     /**
      * Returns the Listener factory.
-     * 
+     *
      * @param errorHandler
      *            the error hander
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
@@ -349,7 +357,7 @@ public class AmqpConfiguration {
 
     /**
      * create the authentication bean for controller over amqp.
-     * 
+     *
      * @param systemManagement
      *            the systemManagement
      * @param controllerManagement
@@ -376,7 +384,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the dispatcher bean.
-     * 
+     *
      * @param rabbitTemplate
      *            the rabbitTemplate
      * @param amqpSenderService

@@ -23,8 +23,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  * Distribution table header.
@@ -33,13 +31,9 @@ import com.vaadin.ui.Window;
 public class DistributionTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 7597766804650170127L;
 
-    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
     DistributionTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
-            final ManagementUIState managementUIState,
-            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
+            final ManagementUIState managementUIState) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
-        this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -126,13 +120,13 @@ public class DistributionTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
@@ -153,10 +147,7 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(null);
-        newDistWindow.setCaption(i18n.get("caption.add.new.dist"));
-        UI.getCurrent().addWindow(newDistWindow);
-        newDistWindow.setVisible(Boolean.TRUE);
+        // is okay and not supported
     }
 
     @Override

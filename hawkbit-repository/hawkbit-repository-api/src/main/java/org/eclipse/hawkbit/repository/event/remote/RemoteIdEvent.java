@@ -18,6 +18,8 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     private Long entityId;
 
+    private String entityClass;
+
     /**
      * Default constructor.
      */
@@ -32,12 +34,23 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
      *            the entity Id
      * @param tenant
      *            the tenant
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    protected RemoteIdEvent(final Long entityId, final String tenant, final String applicationId) {
+    protected RemoteIdEvent(final Long entityId, final String tenant, final String entityClass,
+            final String applicationId) {
         super(entityId, tenant, applicationId);
+        this.entityClass = entityClass;
         this.entityId = entityId;
+    }
+
+    /**
+     * @return the entityClass
+     */
+    public String getEntityClass() {
+        return entityClass;
     }
 
     public Long getEntityId() {

@@ -38,6 +38,8 @@ $v-grid-cell-horizontal-border: 0px ;
 $v-grid-cell-focused-border: 0px ;
 $v-grid-cell-padding-horizontal:6px;
 
+$v-animations-enabled: true;
+
 @import '../valo/valo';
 @import 'customstyles/table';
 @import 'customstyles/filter-status';
@@ -62,7 +64,7 @@ $v-grid-cell-padding-horizontal:6px;
 @import 'customstyles/target-filter-query';
 @import 'customstyles/statusprogressbar';
 @import 'customstyles/rollout';
-
+@import 'customstyles/notification-unread-change';
 
 // Optimize the CSS output
 $v-included-components: remove($v-included-components, calendar);
@@ -95,11 +97,10 @@ $v-included-components: remove($v-included-components, form);
   @include table-header-common;
   @include footer-common;
   @include popup-common;
-  @include valo-menu-responsive;
   @include target-filter-query;
   @include statusprogressbar;
   @include rollout;
-  
+  @include notification-unread-change;  
   
   .v-app-loading {
     background-color: rgba(0, 0, 0, 0);

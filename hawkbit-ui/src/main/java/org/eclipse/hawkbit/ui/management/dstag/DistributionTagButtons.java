@@ -15,14 +15,12 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -32,8 +30,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
@@ -42,7 +38,7 @@ import com.vaadin.event.dd.DropHandler;
  *
  *
  */
-public class DistributionTagButtons extends AbstractFilterButtons {
+public class DistributionTagButtons extends AbstractFilterButtons implements RefreshableContainer {
 
     private static final String NO_TAG = "NO TAG";
     private static final long serialVersionUID = 1L;
@@ -63,27 +59,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         this.entityFactory = entityFactory;
 
         addNewTag(entityFactory.tag().create().name(NO_TAG).build());
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedEventContainer eventContainer) {
-        refreshTagTable();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
-        refreshTagTable();
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    // Exception squid:S1172 - event not needed
-    @SuppressWarnings({ "squid:S1172" })
-    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        refreshTagTable();
     }
 
     @Override
@@ -130,13 +105,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         return SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS;
     }
 
-    private void refreshTagTable() {
-        ((LazyQueryContainer) getContainerDataSource()).refresh();
-        removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
-        addColumn();
-    }
-
     private void addNewTag(final Tag daTag) {
         final LazyQueryContainer targetTagContainer = (LazyQueryContainer) getContainerDataSource();
         final Object addItem = targetTagContainer.addItem();
@@ -147,5 +115,13 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(daTag.getDescription());
         item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(daTag.getColour());
         item.getItemProperty("tagIdName").setValue(new TagIdName(daTag.getName(), daTag.getId()));
+    }
+
+    @Override
+    public void refreshContainer() {
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
+        removeGeneratedColumn(FILTER_BUTTON_COLUMN);
+        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+        addColumn();
     }
 }
