@@ -46,6 +46,7 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -144,10 +145,10 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         viewHeadercontent.addComponent(notificationUnreadButton);
         viewHeadercontent.setComponentAlignment(notificationUnreadButton, Alignment.MIDDLE_RIGHT);
 
-        final HorizontalLayout content = new HorizontalLayout();
-        contentVerticalLayout.addComponent(content);
-        content.setStyleName("view-content");
+        final Panel content = new Panel();
         content.setSizeFull();
+        content.setStyleName("view-content");
+        contentVerticalLayout.addComponent(content);
 
         rootLayout.setExpandRatio(contentVerticalLayout, 1.0F);
         contentVerticalLayout.setStyleName("main-content");
