@@ -410,12 +410,12 @@ public final class UIComponentIdProvider {
     public static final String SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX = "default.disset.combobox";
 
     /**
-     * Button save id.
+     * Polling system configuration.
      */
     public static final String SYSTEM_CONFIGURATION_POLLING = "system.configuration.polling";
 
     /**
-     * Button save id.
+     * Overdue system configuration.
      */
     public static final String SYSTEM_CONFIGURATION_OVERDUE = "system.configuration.ovderdue";
 
