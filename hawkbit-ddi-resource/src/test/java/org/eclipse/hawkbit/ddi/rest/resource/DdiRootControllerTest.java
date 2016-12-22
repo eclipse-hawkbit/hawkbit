@@ -182,7 +182,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = ActionCreatedEvent.class, count = 2) })
+            @Expect(type = ActionCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
