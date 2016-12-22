@@ -33,6 +33,8 @@ public final class MgmtSystemMapper {
     /**
      * @param tenantConfigurationManagement
      *            instance of TenantConfigurationManagement
+     * @param tenantConfigurationProperties
+     *            to get defined keys
      * @return a map of all existing configuration values
      */
     public static Map<String, MgmtSystemTenantConfigurationValue> toResponse(

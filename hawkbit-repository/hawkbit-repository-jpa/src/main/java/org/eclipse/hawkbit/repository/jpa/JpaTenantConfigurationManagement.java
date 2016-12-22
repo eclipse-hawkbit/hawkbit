@@ -47,7 +47,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     private static final ConfigurableConversionService conversionService = new DefaultConversionService();
 
     @Override
-    @Cacheable(value = "tenantConfiguration", key = "#name")
+    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName,
             final Class<T> propertyType) {
 
@@ -122,7 +122,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#name")
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
@@ -161,7 +161,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#name")
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void deleteConfiguration(final String configurationKeyName) {
