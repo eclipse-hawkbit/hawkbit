@@ -181,7 +181,7 @@ public interface TargetFilterQueryManagement {
      * @param queryId
      *            to be updated
      * @param dsId
-     *            to be updated or <code>null</code>
+     *            to be updated or <code>null</code> in order to remove it
      * @return the updated {@link TargetFilterQuery}
      * 
      * @throws EntityNotFoundException
@@ -189,6 +189,6 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateTargetFilterQueryAutoAssignDS(@NotNull Long queryId, @NotNull Long dsId);
+    TargetFilterQuery updateTargetFilterQueryAutoAssignDS(@NotNull Long queryId, Long dsId);
 
 }
