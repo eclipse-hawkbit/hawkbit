@@ -412,6 +412,16 @@ public final class UIComponentIdProvider {
     /**
      * Button save id.
      */
+    public static final String SYSTEM_CONFIGURATION_POLLING = "system.configuration.polling";
+
+    /**
+     * Button save id.
+     */
+    public static final String SYSTEM_CONFIGURATION_OVERDUE = "system.configuration.ovderdue";
+
+    /**
+     * Button save id.
+     */
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
