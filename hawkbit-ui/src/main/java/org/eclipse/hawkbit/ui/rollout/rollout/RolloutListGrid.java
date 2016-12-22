@@ -83,6 +83,9 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  */
 public class RolloutListGrid extends AbstractGrid {
 
+    // necessary for customizing the space to the right border of the table
+    private static final String PLACEHOLDER = "placeholder";
+
     private static final long serialVersionUID = 4060904914954370524L;
 
     private static final String UPDATE_OPTION = "Update";
@@ -230,6 +233,8 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
         }
+
+        rolloutGridContainer.addContainerProperty(PLACEHOLDER, String.class, "", false, false);
     }
 
     @Override
@@ -261,7 +266,11 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setMaximumWidth(25);
         }
 
+        getColumn(PLACEHOLDER).setMinimumWidth(25);
+        getColumn(PLACEHOLDER).setMaximumWidth(25);
+
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
+        // getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMaximumWidth(1000);
 
         setFrozenColumnCount(getColumns().size());
     }
@@ -290,7 +299,9 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
         }
 
-        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
+        getColumn(PLACEHOLDER).setHeaderCaption(PLACEHOLDER);
+
+        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, PLACEHOLDER);
         join.setText(i18n.get("header.action"));
     }
 
@@ -318,6 +329,8 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
         }
+
+        columnList.add(PLACEHOLDER);
 
         columnList.add(VAR_CREATED_DATE);
         columnList.add(VAR_CREATED_USER);
