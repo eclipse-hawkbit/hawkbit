@@ -219,21 +219,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        final DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<TargetFilterQuery> targetFilterQueries;
-        if (rsqlParam != null) {
-            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
-                    distributionSet, rsqlParam);
-        } else {
-            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
-                    distributionSet);
-        }
+        final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
+                .findTargetFilterQueryByAutoAssignDS(pageable, distributionSetId, rsqlParam);
 
         return new ResponseEntity<>(
                 new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
