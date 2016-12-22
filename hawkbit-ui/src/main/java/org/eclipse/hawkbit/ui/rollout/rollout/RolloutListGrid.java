@@ -83,9 +83,6 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  */
 public class RolloutListGrid extends AbstractGrid {
 
-    // necessary for customizing the space to the right border of the table
-    private static final String PLACEHOLDER = "placeholder";
-
     private static final long serialVersionUID = 4060904914954370524L;
 
     private static final String UPDATE_OPTION = "Update";
@@ -163,8 +160,8 @@ public class RolloutListGrid extends AbstractGrid {
     /**
      * Handles the RolloutChangeEvent to refresh the item in the grid.
      *
-     * @param rolloutChangeEvent
-     *            the event which contains the rollout which has been changed
+     * @param eventContainer
+     *            container which holds the rollout change event
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -233,8 +230,6 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
         }
-
-        rolloutGridContainer.addContainerProperty(PLACEHOLDER, String.class, "", false, false);
     }
 
     @Override
@@ -263,16 +258,12 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
-            getColumn(UPDATE_OPTION).setMaximumWidth(25);
+            getColumn(UPDATE_OPTION).setMaximumWidth(40);
+        } else {
+            getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
 
-        getColumn(PLACEHOLDER).setMinimumWidth(25);
-        getColumn(PLACEHOLDER).setMaximumWidth(25);
-
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
-        // getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMaximumWidth(1000);
-
-        setFrozenColumnCount(getColumns().size());
     }
 
     @Override
@@ -299,9 +290,12 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
         }
 
-        getColumn(PLACEHOLDER).setHeaderCaption(PLACEHOLDER);
-
-        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, PLACEHOLDER);
+        HeaderCell join;
+        if (permissionChecker.hasRolloutUpdatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
+        } else {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
+        }
         join.setText(i18n.get("header.action"));
     }
 
@@ -329,8 +323,6 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
         }
-
-        columnList.add(PLACEHOLDER);
 
         columnList.add(VAR_CREATED_DATE);
         columnList.add(VAR_CREATED_USER);
