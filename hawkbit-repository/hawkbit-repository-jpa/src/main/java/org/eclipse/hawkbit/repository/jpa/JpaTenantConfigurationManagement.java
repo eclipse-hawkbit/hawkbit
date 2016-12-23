@@ -14,16 +14,15 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,22 +33,26 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-public class JpaTenantConfigurationManagement implements EnvironmentAware, TenantConfigurationManagement {
+public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
+
+    @Autowired
+    private TenantConfigurationProperties tenantConfigurationProperties;
 
     @Autowired
     private ApplicationContext applicationContext;
 
     private static final ConfigurableConversionService conversionService = new DefaultConversionService();
 
-    private Environment environment;
-
     @Override
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
-            final TenantConfigurationKey configurationKey, final Class<T> propertyType) {
+    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName,
+            final Class<T> propertyType) {
+
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
         validateTenantConfigurationDataType(configurationKey, propertyType);
 
         final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
@@ -69,6 +72,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
      */
     static <T> void validateTenantConfigurationDataType(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) {
+
         if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
             throw new TenantConfigurationValidatorException(
                     String.format("Cannot parse the database value of type %s into the type %s.",
@@ -87,46 +91,44 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
                     .lastModifiedBy(tenantConfiguration.getLastModifiedBy())
                     .value(conversionService.convert(tenantConfiguration.getValue(), propertyType)).build();
 
-        } else if (configurationKey.getDefaultKeyName() != null) {
+        } else if (configurationKey.getDefaultValue() != null) {
 
             return TenantConfigurationValue.<T> builder().global(true).createdBy(null).createdAt(null)
                     .lastModifiedAt(null).lastModifiedBy(null)
-                    .value(getGlobalConfigurationValue(configurationKey, propertyType)).build();
+                    .value(getGlobalConfigurationValue(configurationKey.getKeyName(), propertyType)).build();
         }
         return null;
     }
 
     @Override
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
-            final TenantConfigurationKey configurationKey) {
-        return getConfigurationValue(configurationKey, configurationKey.getDataType());
+            final String configurationKeyName) {
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
+        return getConfigurationValue(configurationKeyName, configurationKey.getDataType());
     }
 
     @Override
-    public <T> T getGlobalConfigurationValue(final TenantConfigurationKey configurationKey,
-            final Class<T> propertyType) {
+    public <T> T getGlobalConfigurationValue(final String configurationKeyName, final Class<T> propertyType) {
 
-        if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
-            throw new TenantConfigurationValidatorException(
-                    String.format("Cannot parse the database value of type %s into the type %s.",
-                            configurationKey.getDataType(), propertyType));
+        final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
+        if (!key.getDataType().isAssignableFrom(propertyType)) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
         }
 
-        final T valueInProperties = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
-
-        if (valueInProperties == null) {
-            return conversionService.convert(configurationKey.getDefaultValue(), propertyType);
-        }
-
-        return valueInProperties;
+        return conversionService.convert(key.getDefaultValue(), propertyType);
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
-            final TenantConfigurationKey configurationKey, final T value) {
+            final String configurationKeyName, final T value) {
+
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
         if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
             throw new TenantConfigurationValidatorException(String.format(
@@ -159,15 +161,10 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public void deleteConfiguration(final TenantConfigurationKey configurationKey) {
-        tenantConfigurationRepository.deleteByKey(configurationKey.getKeyName());
-    }
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
+    public void deleteConfiguration(final String configurationKeyName) {
+        tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ApiType;
+import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.URLPlaceholder;
 import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
@@ -216,7 +217,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
                                 localArtifact.getId(), localArtifact.getSha1Hash())),
                         ApiType.DMF)
-                .stream().collect(Collectors.toMap(e -> e.getProtocol(), e -> e.getRef())));
+                .stream().collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef)));
 
         artifact.setFilename(localArtifact.getFilename());
         artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));

@@ -13,20 +13,18 @@ import java.io.Serializable;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Bean which contains all SP permissions.
  *
  */
-@Service
 public class SpPermissionChecker implements Serializable {
     private static final long serialVersionUID = 2757865286212875704L;
 
-    private transient PermissionService permissionService;
+    protected transient PermissionService permissionService;
 
     @Autowired
-    SpPermissionChecker(final PermissionService permissionService) {
+    protected SpPermissionChecker(final PermissionService permissionService) {
         this.permissionService = permissionService;
     }
 
