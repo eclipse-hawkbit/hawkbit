@@ -27,6 +27,8 @@ import com.google.common.base.Splitter;
  */
 @Component
 @ConfigurationProperties("hawkbit.device.simulator")
+// Exception for squid:S2245 : not security relevant random number generation
+@SuppressWarnings("squid:S2245")
 public class SimulationProperties {
     private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
     private static final Random RANDOM = new Random();
