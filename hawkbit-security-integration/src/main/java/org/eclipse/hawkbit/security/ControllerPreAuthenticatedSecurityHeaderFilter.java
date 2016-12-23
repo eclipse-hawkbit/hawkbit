@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,10 +108,11 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
             controllerId = secruityToken.getHeader(caCommonNameHeader);
         }
 
-        List<String> knownHashes = splitMultiHashBySemicolon(authorityNameConfigurationValue);
+        final List<String> knownHashes = splitMultiHashBySemicolon(authorityNameConfigurationValue);
 
         final String cntlId = controllerId;
-        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(cntlId, hashItem)).collect(Collectors.toSet());
+        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(cntlId, hashItem))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -122,7 +123,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      */
     private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHashes) {
         // there may be several knownIssuerHashes configured for the tenant
-        List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
+        final List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
 
         // iterate over the headers until we get a null header.
         int iHeader = 1;
@@ -143,7 +144,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    protected TenantConfigurationKey getTenantConfigurationKey() {
+    protected String getTenantConfigurationKey() {
         return TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
     }
 
@@ -155,7 +156,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         }
     }
 
-    private static List<String> splitMultiHashBySemicolon(String knownIssuerHashes) {
+    private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
         return Arrays.asList(knownIssuerHashes.split(";"));
     }
 }

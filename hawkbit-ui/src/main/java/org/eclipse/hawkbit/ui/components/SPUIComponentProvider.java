@@ -97,6 +97,28 @@ public final class SPUIComponentProvider {
     }
 
     /**
+     * Get Label UI component.
+     *
+     * @param id
+     *            id of the checkbox
+     * @param caption
+     *            as caption
+     * @param style
+     *            combo style to add
+     * @param styleName
+     *            combo style to set
+     * @param required
+     *            signifies if combo is mandatory
+     * @param data
+     *            combo box data
+     * @return ComboBox
+     */
+    public static CheckBox getCheckBox(final String id, final String caption, final String style,
+            final String styleName, final boolean required, final String data) {
+        return new SPUICheckBox(id, caption, style, styleName, required, data);
+    }
+
+    /**
      * Get Button - Factory Approach for decoration.
      *
      * @param id

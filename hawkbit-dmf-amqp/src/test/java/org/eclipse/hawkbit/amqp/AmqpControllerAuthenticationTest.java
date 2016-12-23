@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.Anonymo
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

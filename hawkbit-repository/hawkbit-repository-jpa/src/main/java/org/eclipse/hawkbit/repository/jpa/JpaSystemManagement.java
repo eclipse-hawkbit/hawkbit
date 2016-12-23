@@ -244,7 +244,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager")
+    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
     // set transaction to not supported, due we call this in
     // BaseEntity#prePersist methods
     // and it seems that JPA committing the transaction when executing this

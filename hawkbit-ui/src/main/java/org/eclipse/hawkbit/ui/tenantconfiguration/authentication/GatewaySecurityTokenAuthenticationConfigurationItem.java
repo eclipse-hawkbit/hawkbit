@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -21,7 +21,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -35,14 +34,10 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     private final transient SecurityTokenGenerator securityTokenGenerator;
 
-    private final TextField gatewayTokenNameTextField;
-
     private final Label gatewayTokenkeyLabel;
 
     private boolean configurationEnabled;
     private boolean configurationEnabledChange;
-
-    private boolean keyNameChanged;
 
     private boolean keyChanged;
 
@@ -61,10 +56,6 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
         detailLayout = new VerticalLayout();
         detailLayout.setImmediate(true);
-        gatewayTokenNameTextField = new TextFieldBuilder().immediate(true).buildTextComponent();
-        // hide text field until we support multiple gateway tokens for a tenan
-        gatewayTokenNameTextField.setVisible(false);
-        gatewayTokenNameTextField.addTextChangeListener(event -> doKeyNameChanged());
 
         final Button gatewaytokenBtn = SPUIComponentProvider.getButton("TODO-ID", "Regenerate Key", "",
                 ValoTheme.BUTTON_TINY + " " + "redicon", true, null, SPUIButtonStyleSmall.class);
@@ -80,22 +71,15 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         keyGenerationLayout.setSpacing(true);
         keyGenerationLayout.setImmediate(true);
 
-        keyGenerationLayout.addComponent(gatewayTokenNameTextField);
         keyGenerationLayout.addComponent(gatewayTokenkeyLabel);
         keyGenerationLayout.addComponent(gatewaytokenBtn);
 
         detailLayout.addComponent(keyGenerationLayout);
 
         if (isConfigEnabled()) {
-            gatewayTokenNameTextField.setValue(getSecurityTokenName());
             gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
             setDetailVisible(true);
         }
-    }
-
-    private void doKeyNameChanged() {
-        keyNameChanged = true;
-        notifyConfigurationChanged();
     }
 
     private void setDetailVisible(final boolean visible) {
@@ -122,20 +106,11 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         configurationEnabled = true;
         setDetailVisible(true);
         String gatewayTokenKey = getSecurityTokenKey();
-        String gatewayTokenName = getSecurityTokenName();
-        if (gatewayTokenKey == null) {
-            gatewayTokenName = "GeneratedToken";
-            keyNameChanged = true;
+        if (StringUtils.isEmpty(gatewayTokenKey)) {
             gatewayTokenKey = securityTokenGenerator.generateToken();
             keyChanged = true;
         }
-        gatewayTokenNameTextField.setValue(gatewayTokenName);
         gatewayTokenkeyLabel.setValue(gatewayTokenKey);
-    }
-
-    private String getSecurityTokenName() {
-        return getTenantConfigurationManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class).getValue();
     }
 
     private String getSecurityTokenKey() {
@@ -159,11 +134,6 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, configurationEnabled);
         }
 
-        if (keyNameChanged) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME,
-                    gatewayTokenNameTextField.getValue());
-        }
         if (keyChanged) {
             getTenantConfigurationManagement().addOrUpdateConfiguration(
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
@@ -174,9 +144,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     @Override
     public void undo() {
         configurationEnabledChange = false;
-        keyNameChanged = false;
         keyChanged = false;
-        gatewayTokenNameTextField.setValue(getSecurityTokenName());
         gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
     }
 

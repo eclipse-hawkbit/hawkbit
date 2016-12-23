@@ -228,11 +228,11 @@ public final class SpPermission {
         /*
          * Spring security eval expressions.
          */
-        private static final String BRACKET_OPEN = "(";
-        private static final String BRACKET_CLOSE = ")";
-        private static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
-        private static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
-        private static final String HAS_AUTH_AND = " and ";
+        public static final String BRACKET_OPEN = "(";
+        public static final String BRACKET_CLOSE = ")";
+        public static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
+        public static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
+        public static final String HAS_AUTH_AND = " and ";
 
         /**
          * The role which contains in the spring security context in case an

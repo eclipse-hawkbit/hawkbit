@@ -399,8 +399,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
+        loadLazyTargetInfo(target);
         afterCommit.afterCommit(() -> eventPublisher
                 .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
+    }
+
+    private static void loadLazyTargetInfo(final Target target) {
+        target.getTargetInfo();
     }
 
     @Override

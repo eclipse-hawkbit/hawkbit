@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.transaction.annotation.Isolation;
@@ -84,6 +85,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
+
+    @Autowired
+    protected TenantConfigurationProperties tenantConfigurationProperties;
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {

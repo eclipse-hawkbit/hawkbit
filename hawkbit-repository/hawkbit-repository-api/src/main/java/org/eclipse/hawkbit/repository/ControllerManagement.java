@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 

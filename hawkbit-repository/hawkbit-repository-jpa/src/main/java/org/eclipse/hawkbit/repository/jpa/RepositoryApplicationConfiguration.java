@@ -65,6 +65,7 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -95,7 +96,8 @@ import com.google.common.collect.Maps;
 @EnableAspectJAutoProxy
 @Configuration
 @ComponentScan
-@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, RolloutProperties.class })
+@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, RolloutProperties.class,
+        TenantConfigurationProperties.class })
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {

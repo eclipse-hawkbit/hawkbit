@@ -639,5 +639,4 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
     Target updateTarget(@NotNull TargetUpdate update);
-
 }

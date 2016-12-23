@@ -125,7 +125,7 @@ public final class DashboardMenu extends CustomComponent {
         return dashboardMenuLayout;
     }
 
-    private VerticalLayout getMenuLayout() {
+    private static VerticalLayout getMenuLayout() {
         final VerticalLayout menuContent = new VerticalLayout();
         menuContent.addStyleName(ValoTheme.MENU_PART);
         menuContent.addStyleName("sidebar");
@@ -197,7 +197,7 @@ public final class DashboardMenu extends CustomComponent {
 
     }
 
-    private Component buildUserMenu() {
+    private static Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
