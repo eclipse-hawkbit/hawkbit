@@ -18,12 +18,14 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
+import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Holder of the base attributes common to all entities.
@@ -86,12 +88,28 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @CreatedBy
     public void setCreatedBy(final String createdBy) {
+        if (isController()) {
+            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
+            return;
+        }
+
         this.createdBy = createdBy;
     }
 
     @LastModifiedBy
     public void setLastModifiedBy(final String lastModifiedBy) {
+        if (isController()) {
+            return;
+        }
+
         this.lastModifiedBy = lastModifiedBy;
+    }
+
+    private boolean isController() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getDetails() instanceof TenantAwareAuthenticationDetails
+                && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails()).isController();
     }
 
     @CreatedDate
@@ -101,6 +119,10 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedDate
     public void setLastModifiedAt(final Long lastModifiedAt) {
+        if (isController()) {
+            return;
+        }
+
         this.lastModifiedAt = lastModifiedAt;
     }
 

@@ -58,4 +58,10 @@ public class TenantAwareAuthenticationDetails implements Serializable {
     public boolean isController() {
         return controller;
     }
+
+    @Override
+    public String toString() {
+        return "TenantAwareAuthenticationDetails [tenant=" + tenant + ", controller=" + controller + "]";
+    }
+
 }

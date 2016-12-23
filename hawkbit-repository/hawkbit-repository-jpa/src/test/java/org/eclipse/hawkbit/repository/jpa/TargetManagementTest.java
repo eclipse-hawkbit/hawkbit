@@ -12,6 +12,7 @@ import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -62,6 +63,39 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
+
+    @Test
+    @Description("Ensures that an anonymous target update is not monitored by auditing.")
+    @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
+            SpPermission.CREATE_TARGET }, allSpPermissions = false)
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    public void controllerAccessDoesNotChangeAuditData() throws Exception {
+        // create target first with "knownPrincipal" user and audit data
+        final String knownTargetControllerId = "target1";
+        final String knownCreatedBy = "knownPrincipal";
+        testdataFactory.createTarget(knownTargetControllerId);
+        targetManagement.updateTarget(entityFactory.target().update("target1").description("updated1"));
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
+        assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
+        assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
+        assertThat(findTargetByControllerID.getLastModifiedBy()).isEqualTo(knownCreatedBy);
+        assertThat(findTargetByControllerID.getLastModifiedAt()).isNotNull();
+
+        // make a poll, audit information should not be changed, run as
+        // controller principal!
+        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            targetManagement.updateTarget(entityFactory.target().update("target1").description("updated2"));
+            return null;
+        });
+
+        // verify that audit information has not changed
+        final Target targetVerify = targetManagement.findTargetByControllerID(knownTargetControllerId);
+        assertThat(targetVerify.getCreatedBy()).isEqualTo(findTargetByControllerID.getCreatedBy());
+        assertThat(targetVerify.getCreatedAt()).isEqualTo(findTargetByControllerID.getCreatedAt());
+        assertThat(targetVerify.getLastModifiedBy()).isEqualTo(findTargetByControllerID.getLastModifiedBy());
+        assertThat(targetVerify.getLastModifiedAt()).isEqualTo(findTargetByControllerID.getLastModifiedAt());
+    }
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
