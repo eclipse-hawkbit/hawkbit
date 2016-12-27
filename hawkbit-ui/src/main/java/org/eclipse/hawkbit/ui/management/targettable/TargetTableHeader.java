@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -35,6 +37,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -70,11 +73,13 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private boolean isComplexFilterViewDisplayed;
 
+    private final transient DistributionSetManagement distributionSetManagement;
+
     TargetTableHeader(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement) {
+            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement, DistributionSetManagement distributionSetManagement) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -82,7 +87,7 @@ public class TargetTableHeader extends AbstractTableHeader {
                 entityFactory);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
                 managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement);
-
+        this.distributionSetManagement = distributionSetManagement;
         onLoadRestoreState();
     }
 
@@ -270,7 +275,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected void addNewItem(final ClickEvent event) {
         targetAddUpdateWindow.resetComponents();
-        final Window addTargetWindow = targetAddUpdateWindow.getWindow();
+        final Window addTargetWindow = targetAddUpdateWindow.createNewWindow();
         addTargetWindow.setCaption(i18n.get("caption.add.new.target"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
@@ -323,14 +328,22 @@ public class TargetTableHeader extends AbstractTableHeader {
         if (doValidations(event)) {
             final TableTransferable tableTransferable = (TableTransferable) event.getTransferable();
             final Table source = tableTransferable.getSourceComponent();
-            if (source.getId().equals(UIComponentIdProvider.DIST_TABLE_ID)) {
-                final Set<DistributionSetIdName> distributionIdSet = getDropppedDistributionDetails(tableTransferable);
-                if (distributionIdSet != null && !distributionIdSet.isEmpty()) {
-                    final DistributionSetIdName distributionSetIdName = distributionIdSet.iterator().next();
-                    managementUIState.getTargetTableFilters().setDistributionSet(distributionSetIdName);
-                    addFilterTextField(distributionSetIdName);
-                }
+            if (!UIComponentIdProvider.DIST_TABLE_ID.equals(source.getId())) {
+                return;
             }
+            final Set<Long> distributionIdSet = getDropppedDistributionDetails(tableTransferable);
+            if (CollectionUtils.isEmpty(distributionIdSet)) {
+                return;
+            }
+            final Long distributionSetId = distributionIdSet.iterator().next();
+            DistributionSet distributionSet =distributionSetManagement.findDistributionSetById(distributionSetId);
+            if(distributionSet == null){
+                notification.displayWarning(i18n.get("distributionset.not.exists"));
+                return;
+            }
+            DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+            managementUIState.getTargetTableFilters().setDistributionSet(distributionSetIdName);
+            addFilterTextField(distributionSetIdName);
         }
     }
 
@@ -363,9 +376,9 @@ public class TargetTableHeader extends AbstractTableHeader {
         return isValid;
     }
 
-    private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
+    private static Set<Long>  getDropppedDistributionDetails(final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable
+        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) transferable
                 .getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }

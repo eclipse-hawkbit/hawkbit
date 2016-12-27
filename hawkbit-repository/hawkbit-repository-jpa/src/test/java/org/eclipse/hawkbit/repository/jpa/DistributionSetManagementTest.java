@@ -750,4 +750,23 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
+    @Test
+    @Description("Verify that the find all by ids contains the entities which are looking for")
+    public void verifyFindDistributionSetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createDistributionSet("ds-4").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-5").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createDistributionSet("test" + i);
+        }
+
+        final List<DistributionSet> foundDs = distributionSetManagement.findDistributionSetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
+    }
+
 }

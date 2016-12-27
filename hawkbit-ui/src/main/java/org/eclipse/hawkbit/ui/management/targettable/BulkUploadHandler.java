@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
@@ -312,11 +311,11 @@ public class BulkUploadHandler extends CustomComponent
             final long forcedTimeStamp = new Date().getTime();
             final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
             final List<String> targetsList = targetBulkUpload.getTargetsCreated();
-            final DistributionSetIdName dsSelected = (DistributionSetIdName) comboBox.getValue();
-            if (distributionSetManagement.findDistributionSetById(dsSelected.getId()) == null) {
+            final Long dsSelected = (Long) comboBox.getValue();
+            if (distributionSetManagement.findDistributionSetById(dsSelected) == null) {
                 return i18n.get("message.bulk.upload.assignment.failed");
             }
-            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
+            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
                     forcedTimeStamp, targetsList);
             return null;
         }

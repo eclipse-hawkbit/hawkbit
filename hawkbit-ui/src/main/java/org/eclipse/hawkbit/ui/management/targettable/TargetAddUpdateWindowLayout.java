@@ -144,7 +144,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 
-    public Window getWindow() {
+    public Window createNewWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
                 .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
                 .buildCommonDialogWindow();
@@ -156,12 +156,18 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * Returns Target Update window based on the selected Entity Id in the
      * target table.
      * 
-     * @param entityId
-     * @return window
+     * @param controllerId
+     *            the target controller id
+     * @return window or {@code null} if target is not exists.
      */
-    public Window getWindow(final String entityId) {
-        populateValuesOfTarget(entityId);
-        getWindow();
+    public Window getWindow(final String controllerId) {
+        final Target target = targetManagement.findTargetByControllerID(controllerId);
+        if (target == null) {
+            uINotification.displayWarning(i18n.get("target.not.exists", new Object[] { controllerId }));
+            return null;
+        }
+        populateValuesOfTarget(target);
+        createNewWindow();
         window.addStyleName("target-update-window");
         return window;
     }
@@ -192,14 +198,11 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     }
 
-    /**
-     * @param controllerId
-     */
-    private void populateValuesOfTarget(final String controllerId) {
+    private void populateValuesOfTarget(final Target target) {
         resetComponents();
-        this.controllerId = controllerId;
+        this.controllerId = target.getControllerId();
         editTarget = Boolean.TRUE;
-        final Target target = targetManagement.findTargetByControllerID(controllerId);
+
         controllerIDTextField.setValue(target.getControllerId());
         controllerIDTextField.setEnabled(Boolean.FALSE);
         nameTextField.setValue(target.getName());

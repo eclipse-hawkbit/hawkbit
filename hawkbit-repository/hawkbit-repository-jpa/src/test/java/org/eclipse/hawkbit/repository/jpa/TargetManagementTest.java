@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -43,7 +44,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -669,21 +669,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test the optimized quere for retrieving all ID/name pairs of targets.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 25) })
-    public void findAllTargetIdNamePaiss() {
-        final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
-        final String[] createdTargetIds = targAs.stream().map(Target::getControllerId)
-                .toArray(size -> new String[size]);
-
-        final List<TargetIdName> findAllTargetIdNames = targetManagement.findAllTargetIds();
-        final List<String> findAllTargetIds = findAllTargetIdNames.stream().map(TargetIdName::getControllerId)
-                .collect(Collectors.toList());
-
-        assertThat(findAllTargetIds).as("Target list has wrong content").containsOnly(createdTargetIds);
-    }
-
-    @Test
     @Description("Test that NO TAG functionality which gives all targets with no tag assigned.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 50),
@@ -700,7 +685,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetsListWithNoTag = targetManagement
                 .findTargetByFilters(pageReq, null, null, null, null, Boolean.TRUE, tagNames).getContent();
 
-        assertThat(50).as("Total targets").isEqualTo(targetManagement.findAllTargetIds().size());
+        assertThat(50).as("Total targets")
+                .isEqualTo(targetManagement.findTargetsAll(new OffsetBasedPageRequest(0, 400)).getNumberOfElements());
         assertThat(25).as("Targets with no tag").isEqualTo(targetsListWithNoTag.size());
 
     }
@@ -720,5 +706,24 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             return null;
         });
 
+    }
+
+    @Test
+    @Description("Verify that the find all by ids contains the entities which are looking for")
+    public void verifyFindTargetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createTarget("target-4").getId());
+        searchIds.add(testdataFactory.createTarget("target-5").getId());
+        searchIds.add(testdataFactory.createTarget("target-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createTarget("test" + i);
+        }
+
+        final List<Target> foundDs = targetManagement.findTargetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(Target::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
     }
 }
