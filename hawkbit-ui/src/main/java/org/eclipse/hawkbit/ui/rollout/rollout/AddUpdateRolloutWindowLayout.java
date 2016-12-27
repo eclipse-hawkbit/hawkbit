@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -459,12 +458,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresoldPercent))
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
+        final Long distributionSetId = (Long) distributionSet.getValue();
 
         return rolloutManagement.createRollout(entityFactory.rollout().create().name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionSetIdName.getId())
-                .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp()),
-                amountGroup, conditions);
+                .description(description.getValue()).set(distributionSetId).targetFilterQuery(getTargetFilterQuery())
+                .actionType(getActionType()).forcedTime(getForcedTimeStamp()), amountGroup, conditions);
     }
 
     private String getTargetFilterQuery() {
@@ -562,8 +560,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private TextField createRolloutNameField() {
@@ -644,7 +641,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rolloutForEdit = rolloutManagement.findRolloutById(rolloutId);
         rolloutName.setValue(rolloutForEdit.getName());
         description.setValue(rolloutForEdit.getDescription());
-        distributionSet.setValue(DistributionSetIdName.generate(rolloutForEdit.getDistributionSet()));
+        distributionSet.setValue(rolloutForEdit.getDistributionSet().getId());
         final List<RolloutGroup> rolloutGroups = rolloutForEdit.getRolloutGroups();
         setThresholdValues(rolloutGroups);
         setActionType(rolloutForEdit);

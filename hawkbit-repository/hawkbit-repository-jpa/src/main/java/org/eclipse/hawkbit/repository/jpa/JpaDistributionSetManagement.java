@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -113,9 +112,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
     private TenantAware tenantAware;

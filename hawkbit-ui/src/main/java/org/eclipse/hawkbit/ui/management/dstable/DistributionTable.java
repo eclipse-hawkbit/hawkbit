@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,11 +22,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateE
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
@@ -39,6 +37,7 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -71,7 +70,7 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
-public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
+public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 
     private static final long serialVersionUID = -1928335256399519494L;
 
@@ -108,7 +107,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
 
-        final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         if (allOfThemAffectCompletedSetsThatAreNotVisible(eventContainer.getEvents(), visibleItemIds)) {
             refreshContainer();
@@ -116,47 +115,37 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 visibleItemIds)) {
             updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         }
+        final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
+        eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
+                .findFirst().ifPresent(event -> eventBus.publish(this,
+                        new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
 
-        final DistributionSetIdName lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
-        // refresh the details tabs only if selected ds is updated
-        if (lastSelectedDsIdName != null) {
-            final Optional<DistributionSet> selectedSetUpdated = eventContainer.getEvents().stream()
-                    .map(event -> event.getEntity()).filter(set -> set.getId().equals(lastSelectedDsIdName.getId()))
-                    .findFirst();
-
-            if (selectedSetUpdated.isPresent()) {
-                // update table row+details layout
-                eventBus.publish(this,
-                        new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated.get()));
-            }
-        }
     }
 
     private static boolean allOfThemAffectCompletedSetsThatAreNotVisible(final List<DistributionSetUpdateEvent> events,
-            final List<DistributionSetIdName> visibleItemIds) {
-        return events.stream().map(event -> event.getEntity())
-                .allMatch(set -> set.isComplete() && !visibleItemIds.contains(DistributionSetIdName.generate(set)));
+            final List<Long> visibleItemIds) {
+        return events.stream()
+                .allMatch(event -> !visibleItemIds.contains(event.getEntityId()) && event.getEntity().isComplete());
     }
 
     private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
-            final List<DistributionSetIdName> visibleItemIds) {
-        events.stream().filter(event -> event.getEntity().isComplete())
-                .filter(event -> visibleItemIds.contains(DistributionSetIdName.generate(event.getEntity())))
+            final List<Long> visibleItemIds) {
+        events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .filter(event -> event.getEntity().isComplete())
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
     private boolean checkAndHandleIfVisibleDsSwitchesFromCompleteToIncomplete(
-            final List<DistributionSetUpdateEvent> events, final List<DistributionSetIdName> visibleItemIds) {
-        final List<DistributionSet> setsThatAreVisibleButNotCompleteAnymore = events.stream()
-                .map(event -> event.getEntity()).filter(set -> !set.isComplete())
-                .filter(set -> visibleItemIds.contains(DistributionSetIdName.generate(set)))
+            final List<DistributionSetUpdateEvent> events, final List<Long> visibleItemIds) {
+        final List<Long> setsThatAreVisibleButNotCompleteAnymore = events.stream()
+                .filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .filter(event -> !event.getEntity().isComplete()).map(event -> event.getEntityId())
                 .collect(Collectors.toList());
 
         if (!setsThatAreVisibleButNotCompleteAnymore.isEmpty()) {
             refreshContainer();
             if (setsThatAreVisibleButNotCompleteAnymore.stream()
-                    .anyMatch(set -> set.getId().equals(managementUIState.getLastSelectedDsIdName().getId()))) {
-                managementUIState.setLastSelectedDistribution(null);
+                    .anyMatch(id -> id.equals(managementUIState.getLastSelectedDsIdName()))) {
                 managementUIState.setLastSelectedEntity(null);
             }
 
@@ -164,6 +153,27 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         return false;
+    }
+
+    private String getDistributionVersion(final Long itemId) {
+        return (String) getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_VERSION)
+                .getValue();
+    }
+
+    private String getDistributionName(final Long itemId) {
+        return (String) getContainerDataSource().getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_NAME)
+                .getValue();
+    }
+
+    /**
+     * Creates a distribution id name by the given item id.
+     * 
+     * @param itemId
+     *            the table item id
+     * @return the distribution id name
+     */
+    public DistributionSetIdName createDistributionSetIdName(final Long itemId) {
+        return new DistributionSetIdName(itemId, getDistributionName(itemId), getDistributionVersion(itemId));
     }
 
     /**
@@ -238,15 +248,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
         return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
         final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(4);
         managementUIState.getDistributionTableFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-        managementUIState.getDistributionTableFilters().getPinnedTargetId()
+        managementUIState.getDistributionTableFilters().getPinnedTarget()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_PINNED_TARGET, value));
         final List<String> list = new ArrayList<>();
         queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG,
@@ -314,16 +323,15 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final DistributionSetIdName lastSelectedId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId.getId());
+    protected DistributionSet findEntityByTableValue(final Long lastSelectedId) {
+        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId);
     }
 
     @Override
     protected void publishEntityAfterValueChange(final DistributionSet selectedLastEntity) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
         if (selectedLastEntity != null) {
-            managementUIState.setLastSelectedDistribution(new DistributionSetIdName(selectedLastEntity.getId(),
-                    selectedLastEntity.getName(), selectedLastEntity.getVersion()));
+            managementUIState.setLastSelectedEntity(selectedLastEntity.getId());
         }
     }
 
@@ -417,28 +425,24 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void assignTargetToDs(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final AbstractTable<?, TargetIdName> source = (AbstractTable<?, TargetIdName>) transferable
-                .getSourceComponent();
-        final Set<TargetIdName> targetDetailsList = source.getDeletedEntityByTransferable(transferable);
+        final TargetTable targetTable = (TargetTable) transferable.getSourceComponent();
+        final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<TargetIdName> targetIdNames = targetIdSet.stream()
+                .map(targetId -> targetTable.createTargetIdName(targetId)).collect(Collectors.toSet());
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        assignTargetToDs(getItem(distItemId), targetDetailsList);
+        assignTargetToDs(getItem(distItemId), targetIdNames);
 
     }
 
     private void assignTargetToDs(final Item item, final Set<TargetIdName> targetDetailsList) {
         if (item != null && item.getItemProperty("id") != null && item.getItemProperty("name") != null) {
             final Long distId = (Long) item.getItemProperty("id").getValue();
-            final String distName = (String) item.getItemProperty("name").getValue();
-            final String distVersion = (String) item.getItemProperty("version").getValue();
-            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distId, distName,
-                    distVersion);
-            showOrHidePopupAndNotification(validate(targetDetailsList, distributionSetIdName));
+            showOrHidePopupAndNotification(validate(targetDetailsList, distId));
         }
     }
 
@@ -473,14 +477,15 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return false;
     }
 
-    private String validate(final Set<TargetIdName> targetDetailsList,
-            final DistributionSetIdName distributionSetIdName) {
+    private String validate(final Set<TargetIdName> targetDetailsList, final Long distId) {
         String pendingActionMessage = null;
+        final DistributionSetIdName distributionSetIdName = createDistributionSetIdName(distId);
+
         for (final TargetIdName trgtNameId : targetDetailsList) {
             if (null != trgtNameId) {
                 if (managementUIState.getAssignedList().keySet().contains(trgtNameId)
                         && managementUIState.getAssignedList().get(trgtNameId).equals(distributionSetIdName)) {
-                    pendingActionMessage = getPendingActionMessage(pendingActionMessage, trgtNameId.getControllerId(),
+                    pendingActionMessage = getPendingActionMessage(pendingActionMessage, trgtNameId,
                             HawkbitCommonUtil.getDistributionNameAndVersion(distributionSetIdName.getName(),
                                     distributionSetIdName.getVersion()));
                 } else {
@@ -491,10 +496,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return pendingActionMessage;
     }
 
-    private String getPendingActionMessage(final String message, final String targId, final String distNameVersion) {
+    private String getPendingActionMessage(final String message, final TargetIdName targId,
+            final String distNameVersion) {
         String pendActionMsg = i18n.get("message.target.assigned.pending");
         if (null == message) {
-            pendActionMsg = i18n.get("message.dist.pending.action", new Object[] { targId, distNameVersion });
+            pendActionMsg = i18n.get("message.dist.pending.action",
+                    new Object[] { targId.getControllerId(), distNameVersion });
         }
         return pendActionMsg;
     }
@@ -509,8 +516,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {
-        final Item item = getContainerDataSource()
-                .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        final Item item = getContainerDataSource().getItem(editedDs.getId());
         if (item == null) {
             return;
         }
@@ -530,12 +536,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void styleDistributionTableOnPinning() {
-        if (!managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()) {
+        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
             return;
         }
 
         final Target targetObj = targetService.findTargetByControllerIDWithDetails(
-                managementUIState.getDistributionTableFilters().getPinnedTargetId().get());
+                managementUIState.getDistributionTableFilters().getPinnedTarget().get().getControllerId());
 
         if (targetObj != null) {
             final DistributionSet assignedDistribution = targetObj.getAssignedDistributionSet();
@@ -566,12 +572,11 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private Object getPinButton(final Object itemId) {
-        final DistributionSetIdName dist = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
-        final Button pinBtn = getPinBtn(itemId, dist.getName(), dist.getVersion());
+        final Button pinBtn = getPinBtn(itemId, getDistributionName((Long) itemId),
+                getDistributionVersion((Long) itemId));
         saveDistributionPinnedBtn(pinBtn);
         pinBtn.addClickListener(this::addPinClickListener);
-        rePinDistribution(pinBtn, dist.getId());
+        rePinDistribution(pinBtn, (Long) itemId);
         return pinBtn;
     }
 
@@ -626,7 +631,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void pinDitribution(final Button eventBtn) {
 
         /* if distribution set is pinned ,unpin target if pinned */
-        managementUIState.getDistributionTableFilters().setPinnedTargetId(null);
+        managementUIState.getDistributionTableFilters().setPinnedTarget(null);
         /* Dist table restyle */
         eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         applyPinStyle(eventBtn);
@@ -715,9 +720,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void showMetadataDetails(final Object itemId) {
-        final DistributionSetIdName distIdName = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
-        final DistributionSet ds = distributionSetManagement.findDistributionSetById(distIdName.getId());
+        final DistributionSet ds = distributionSetManagement.findDistributionSetById((Long) itemId);
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

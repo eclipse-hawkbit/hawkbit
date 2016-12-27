@@ -16,9 +16,9 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -54,7 +54,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private final ManageDistUIState manageDistUIState;
 
     private final DistributionsConfirmationWindowLayout distConfirmationWindowLayout;
-  
+
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
     public DSDeleteActionsLayout(final I18N i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
@@ -179,32 +179,14 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> table = (AbstractTable<?, DistributionSetIdName>) sourceTable;
-        final Set<DistributionSetIdName> distributionIdNameSet = table.getDeletedEntityByTransferable(transferable);
-        /*
-         * Flags to identify whether all dropped distributions are already in
-         * the deleted list (or) some distributions are already in the deleted
-         * distribution list.
-         */
+        final Set<DistributionSetIdName> distributionIdNameSet = HawkbitCommonUtil
+                .mapSourceTableToDistributionSetIdName(sourceTable, transferable);
         final int existingDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
         final int newDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-            /*
-             * No new distributions are added, all distributions dropped now are
-             * already available in the delete list. Hence display warning
-             * message accordingly.
-             */
-
             notification.displayValidationError(i18n.get("message.targets.already.deleted"));
         } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-            /*
-             * Not the all distributions dropped now are added to the delete
-             * list. There are some distributions are already there in the
-             * delete list. Hence display warning message accordingly.
-             */
-
             notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
 

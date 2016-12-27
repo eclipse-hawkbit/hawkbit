@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -25,6 +24,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -199,19 +199,14 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
 
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
-                .getSourceComponent();
-
-        final Set<TargetIdName> targetSelected = targetTable.getDeletedEntityByTransferable(transferable);
-
-        final Set<String> targetList = targetSelected.stream().map(t -> t.getControllerId())
-                .collect(Collectors.toSet());
-
+        final TargetTable targetTable = (TargetTable) transferable.getSourceComponent();
+        final Set<Long> targetList = targetTable.getDeletedEntityByTransferable(transferable);
         final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 
-        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+        final Set<String> controllerIds = targetList.stream()
+                .map(id -> targetTable.createTargetIdName(id).getControllerId()).collect(Collectors.toSet());
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(controllerIds, targTagName);
         notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
         publishAssignTargetTagEvent(result);

@@ -10,14 +10,15 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -264,19 +265,20 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) sourceTable;
-        final Set<DistributionSetIdName> distributionIdNameSet = distTable.getDeletedEntityByTransferable(transferable);
+        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) sourceTable;
+        final Set<Long> ids = distTable.getDeletedEntityByTransferable(transferable);
 
         final DistributionSetIdName dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload()
                 .getDsNameAndVersion();
-        if (isDsInUseInBulkUpload(distributionIdNameSet, dsInBulkUpload)) {
-            distributionIdNameSet.remove(dsInBulkUpload);
+        if (isDsInUseInBulkUpload(ids, dsInBulkUpload)) {
+            ids.remove(dsInBulkUpload.getId());
         }
 
-        if (distributionIdNameSet.isEmpty()) {
+        if (ids.isEmpty()) {
             return;
         }
-        checkDeletedDistributionSets(distributionIdNameSet);
+        checkDeletedDistributionSets(
+                HawkbitCommonUtil.mapSourceTableToDistributionSetIdName(sourceTable, transferable));
     }
 
     private void checkDeletedDistributionSets(final Set<DistributionSetIdName> distributionIdNameSet) {
@@ -307,9 +309,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         notification.displayValidationError(i18n.get(messageKey));
     }
 
-    private boolean isDsInUseInBulkUpload(final Set<DistributionSetIdName> distributionIdNameSet,
+    private boolean isDsInUseInBulkUpload(final Set<Long> distributionIdNameSet,
             final DistributionSetIdName dsInBulkUpload) {
-        if (distributionIdNameSet.contains(dsInBulkUpload)) {
+        if (distributionIdNameSet.contains(dsInBulkUpload.getId())) {
             notification.displayValidationError(i18n.get("message.tag.use.bulk.upload",
                     HawkbitCommonUtil.getFormattedNameVersion(dsInBulkUpload.getName(), dsInBulkUpload.getVersion())));
             return true;
@@ -319,21 +321,22 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
-        final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
-
-        checkDeletedTargets(targetIdNameSet);
+        final TargetTable targetTable = (TargetTable) sourceTable;
+        final Set<Long> targetIdSet = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<TargetIdName> targetIdNames = targetIdSet.stream()
+                .map(targetId -> targetTable.createTargetIdName(targetId)).collect(Collectors.toSet());
+        checkDeletedTargets(targetIdNames);
     }
 
-    private void checkDeletedTargets(final Set<TargetIdName> targetIdNameSet) {
+    private void checkDeletedTargets(final Set<TargetIdName> targetIdSet) {
         final int existingDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
-        managementUIState.getDeletedTargetList().addAll(targetIdNameSet);
+        managementUIState.getDeletedTargetList().addAll(targetIdSet);
         final int newDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
 
         showAlreadyDeletedDistributionSetNotfication(existingDeletedTargetsSize, newDeletedTargetsSize,
                 "message.targets.already.deleted");
 
-        showPendingDeletedNotifaction(targetIdNameSet, existingDeletedTargetsSize, newDeletedTargetsSize,
+        showPendingDeletedNotifaction(targetIdSet, existingDeletedTargetsSize, newDeletedTargetsSize,
                 "message.target.deleted.pending");
     }
 

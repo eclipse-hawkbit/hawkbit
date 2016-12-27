@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -182,62 +181,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargets(@NotEmpty Collection<Long> targetIDs);
-
-    /**
-     * finds all {@link Target#getControllerId()} which are currently in the
-     * database.
-     *
-     * @return all IDs of all {@link Target} in the system
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIds();
-
-    /**
-     * Finds all targets for all the given parameters but returns not the full
-     * target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * @param filterByStatus
-     *            find targets having this {@link TargetUpdateStatus}s. Set to
-     *            <code>null</code> in case this is not required.
-     * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
-     * @param filterBySearchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param filterByTagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIdsByFilters(@NotNull Pageable pageRequest,
-            Collection<TargetUpdateStatus> filterByStatus, Boolean overdueState, String filterBySearchText,
-            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... filterByTagNames);
-
-    /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and returns not the full target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * @param targetFilterQuery
-     *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIdsByTargetFilterQuery(@NotNull Pageable pageRequest,
-            @NotNull TargetFilterQuery targetFilterQuery);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
@@ -643,4 +586,16 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
     Target updateTarget(TargetUpdate update);
+
+    /**
+     * Find {@link Target} based on given ID returns found Target without
+     * details, i.e. NO {@link Target#getTags()} and {@link Target#getActions()}
+     * possible.
+     *
+     * @param id
+     *            to look for.
+     * @return {@link Target} or <code>null</code> if it does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Target findTargetById(Long id);
 }
