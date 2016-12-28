@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -178,7 +179,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         targets = assignDistributionSet(cancelDs, targets).getAssignedEntity();
         targets = assignDistributionSet(cancelDs2, targets).getAssignedEntity();
 
-        targetManagement.findAllTargetIds().forEach(targetIdName -> {
+        targetManagement.findTargetsAll(new OffsetBasedPageRequest(0, 50)).forEach(targetIdName -> {
             assertThat(deploymentManagement.findActiveActionsByTarget(
                     targetManagement.findTargetByControllerID(targetIdName.getControllerId())))
                             .as("active action has wrong size").hasSize(2);

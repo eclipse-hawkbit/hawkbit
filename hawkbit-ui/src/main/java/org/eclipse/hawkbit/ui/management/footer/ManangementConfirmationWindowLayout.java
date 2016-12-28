@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,10 +25,10 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
@@ -46,7 +47,6 @@ import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
 
@@ -126,8 +126,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         // Add the discard action column
         assignmnetTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardAssignment(
-                    (TargetIdName) ((Button) event.getComponent()).getData(), assignmnetTab);
+            final ClickListener clickListener = event -> discardAssignment((TargetIdName) itemId, assignmnetTab);
             return createDiscardButton(itemId, clickListener);
         });
 
@@ -157,7 +156,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
+        final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
 
         int successAssignmentCount = 0;
         int duplicateAssignmentCount = 0;
@@ -171,10 +170,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                 targetIdSetList = new ArrayList<>();
             }
             targetIdSetList.add(itemId);
-            saveAssignedList.put(distId, (ArrayList<TargetIdName>) targetIdSetList);
+            saveAssignedList.put(distId, targetIdSetList);
         }
 
-        for (final Map.Entry<Long, ArrayList<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
+        for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
             tempIdList = saveAssignedList.get(mapEntry.getKey());
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
                     .assignDistributionSet(mapEntry.getKey(), actionType, forcedTimeStamp,
@@ -206,20 +205,14 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     }
 
-    private void resfreshPinnedDetails(final Map<Long, ArrayList<TargetIdName>> saveAssignedList) {
-        /**
-         * If pinned Ds id is there in saved assignment list then refresh the
-         * pinning
-         */
+    private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
         if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
             if (saveAssignedList.keySet().contains(managementUIState.getTargetTableFilters().getPinnedDistId().get())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
-        } else if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()) {
-            final Set<TargetIdName> targetIdNameList = managementUIState.getAssignedList().keySet();
-            final List<String> assignedTargetIds = targetIdNameList.stream()
-                    .map(targetIdName -> targetIdName.getControllerId()).collect(Collectors.toList());
-            if (assignedTargetIds.contains(managementUIState.getDistributionTableFilters().getPinnedTargetId().get())) {
+        } else if (managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
+            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
+            if (assignedTargetIds.contains(managementUIState.getDistributionTableFilters().getPinnedTarget().get())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
             }
         }
@@ -243,9 +236,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
 
-    private void discardAssignment(final TargetIdName targetIdName, final ConfirmationTab tab) {
-        tab.getTable().getContainerDataSource().removeItem(targetIdName);
-        managementUIState.getAssignedList().remove(targetIdName);
+    private void discardAssignment(final TargetIdName targetId, final ConfirmationTab tab) {
+        tab.getTable().getContainerDataSource().removeItem(targetId);
+        managementUIState.getAssignedList().remove(targetId);
         final int assigCount = tab.getTable().getContainerDataSource().size();
         if (0 == assigCount) {
             removeCurrentTab(tab);
@@ -259,20 +252,19 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
         contactContainer.addContainerProperty(DISTRIBUTION_NAME, String.class, "");
-        contactContainer.addContainerProperty(TARGET_ID, String.class, "");
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
         contactContainer.addContainerProperty(DIST_ID, Long.class, "");
-        Item saveTblitem;
         final Map<TargetIdName, DistributionSetIdName> assignedList = managementUIState.getAssignedList();
 
         for (final Map.Entry<TargetIdName, DistributionSetIdName> entry : assignedList.entrySet()) {
-            saveTblitem = contactContainer.addItem(entry.getKey());
+            final Item saveTblitem = contactContainer.addItem(entry.getKey());
 
-            saveTblitem.getItemProperty(TARGET_NAME).setValue(entry.getKey().getName());
+            saveTblitem.getItemProperty(TARGET_NAME).setValue(entry.getKey().getTargetName());
 
             saveTblitem.getItemProperty(DISTRIBUTION_NAME).setValue(HawkbitCommonUtil
                     .getDistributionNameAndVersion(entry.getValue().getName(), entry.getValue().getVersion()));
 
-            saveTblitem.getItemProperty(TARGET_ID).setValue(entry.getKey().getControllerId());
+            saveTblitem.getItemProperty(TARGET_ID).setValue(entry.getKey().getTargetId());
             saveTblitem.getItemProperty(DIST_ID).setValue(entry.getValue().getId());
         }
         return contactContainer;
@@ -295,8 +287,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         /* Add the discard action column */
         tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardTargetDelete(
-                    (TargetIdName) ((Button) event.getComponent()).getData(), itemId, tab);
+            final ClickListener clickListener = event -> discardTargetDelete((TargetIdName) itemId, tab);
             return createDiscardButton(itemId, clickListener);
 
         });
@@ -328,8 +319,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         /* Add the discard action column */
         tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final ClickListener clickListener = event -> discardDSDelete(
-                    (DistributionSetIdName) ((Button) event.getComponent()).getData(), itemId, tab);
+            final ClickListener clickListener = event -> discardDSDelete((DistributionSetIdName) itemId, tab);
             return createDiscardButton(itemId, clickListener);
 
         });
@@ -343,11 +333,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         return tab;
     }
 
-    private void discardDSDelete(final DistributionSetIdName discardDsIdName, final Object itemId,
-            final ConfirmationTab tab) {
+    private void discardDSDelete(final DistributionSetIdName discardDsIdName, final ConfirmationTab tab) {
         managementUIState.getDeletedDistributionList().remove(discardDsIdName);
-        tab.getTable().getContainerDataSource().removeItem(itemId);
-        tab.getTable().getContainerDataSource().removeItem(itemId);
+        tab.getTable().getContainerDataSource().removeItem(discardDsIdName);
         final int deleteCount = tab.getTable().size();
         if (0 == deleteCount) {
             removeCurrentTab(tab);
@@ -401,12 +389,10 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
     }
 
-    private void unPinDeletedTarget(final String pinnedTargetId) {
+    private void unPinDeletedTarget(final TargetIdName pinnedTarget) {
         final Set<TargetIdName> deletedTargets = managementUIState.getDeletedTargetList();
-        final List<String> deletedTargetsControllerIds = deletedTargets.stream().map(t -> t.getControllerId())
-                .collect(Collectors.toList());
-        if (deletedTargetsControllerIds.contains(pinnedTargetId)) {
-            managementUIState.getDistributionTableFilters().setPinnedTargetId(null);
+        if (deletedTargets.contains(pinnedTarget)) {
+            managementUIState.getDistributionTableFilters().setPinnedTarget(null);
             eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
         }
     }
@@ -433,28 +419,28 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
     }
 
-    private void removeFromAssignmentTab(final Map.Entry entry, final DistributionSetIdName value) {
+    private void removeFromAssignmentTab(final Entry<TargetIdName, DistributionSetIdName> entry,
+            final DistributionSetIdName value) {
         if (Objects.equals(entry.getValue(), value)) {
-            assignmnetTab.getTable().removeItem(entry.getKey());
+            assignmnetTab.getTable().removeItem(entry.getKey().getTargetId());
         }
     }
 
     private IndexedContainer getTargetModuleTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
-        contactContainer.addContainerProperty(TARGET_ID, String.class, "");
+        contactContainer.addContainerProperty(TARGET_ID, Long.class, "");
         contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
         Item item;
         for (final TargetIdName targteId : managementUIState.getDeletedTargetList()) {
             item = contactContainer.addItem(targteId);
-            item.getItemProperty(TARGET_ID).setValue(targteId.getControllerId());
-            item.getItemProperty(TARGET_NAME).setValue(targteId.getName());
+            item.getItemProperty(TARGET_ID).setValue(targteId.getTargetId());
+            item.getItemProperty(TARGET_NAME).setValue(targteId.getTargetName());
         }
         return contactContainer;
     }
 
-    private void discardTargetDelete(final TargetIdName discardTargetIdName, final Object itemId,
-            final ConfirmationTab tab) {
-        managementUIState.getDeletedTargetList().remove(discardTargetIdName);
+    private void discardTargetDelete(final TargetIdName itemId, final ConfirmationTab tab) {
+        managementUIState.getDeletedTargetList().remove(itemId);
         tab.getTable().getContainerDataSource().removeItem(itemId);
 
         final int assigCount = tab.getTable().getContainerDataSource().size();
@@ -475,8 +461,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void deleteAllTargets(final ConfirmationTab tab) {
-        final Set<TargetIdName> itemIds = managementUIState.getDeletedTargetList();
-        final List<Long> targetIds = itemIds.stream().map(t -> t.getTargetId()).collect(Collectors.toList());
+        final Set<TargetIdName> targetIdNames = managementUIState.getDeletedTargetList();
+
+        final Set<Long> targetIds = targetIdNames.stream().map(TargetIdName::getTargetId).collect(Collectors.toSet());
 
         targetManagement.deleteTargets(targetIds);
 
@@ -488,7 +475,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         setActionMessage(i18n.get("message.target.delete.success"));
         removeDeletedTargetsFromAssignmentTab();
 
-        managementUIState.getDistributionTableFilters().getPinnedTargetId().ifPresent(this::unPinDeletedTarget);
+        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);
         eventBus.publish(this, SaveActionWindowEvent.SHOW_HIDE_TAB);
         managementUIState.getDeletedTargetList().clear();
 
@@ -498,7 +485,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         for (final TargetIdName targetNameId : managementUIState.getDeletedTargetList()) {
             if (managementUIState.getAssignedList().containsKey(targetNameId)) {
                 managementUIState.getAssignedList().remove(targetNameId);
-                assignmnetTab.getTable().removeItem(targetNameId);
+                assignmnetTab.getTable().removeItem(targetNameId.getTargetId());
             }
         }
     }

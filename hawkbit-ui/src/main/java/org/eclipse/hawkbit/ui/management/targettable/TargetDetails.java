@@ -128,7 +128,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected Boolean onLoadIsTableRowSelected() {
-        return managementUIState.getLastSelectedTargetIdName() != null;
+        return managementUIState.getLastSelectedTargetId() != null;
     }
 
     @Override

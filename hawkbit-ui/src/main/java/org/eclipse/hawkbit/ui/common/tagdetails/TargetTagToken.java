@@ -125,19 +125,17 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
-            return assignmentResult.getAssignedEntity().stream().map(t -> t.getControllerId())
-                    .anyMatch(controllerId -> controllerId
-                            .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));
+        if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedTargetId() != null) {
+            return assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
+                    .anyMatch(controllerId -> controllerId.equals(managementUIState.getLastSelectedTargetId()));
         }
         return false;
     }
 
     protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
-        if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedTargetIdName() != null) {
-            return assignmentResult.getUnassignedEntity().stream().map(t -> t.getControllerId())
-                    .anyMatch(controllerId -> controllerId
-                            .equals(managementUIState.getLastSelectedTargetIdName().getControllerId()));
+        if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedTargetId() != null) {
+            return assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
+                    .anyMatch(controllerId -> controllerId.equals(managementUIState.getLastSelectedTargetId()));
         }
         return false;
     }

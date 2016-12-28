@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -189,7 +188,7 @@ public class SoftwareModuleDetailsTable extends Table {
         } else {
             final DistributionSet newDistributionSet = distributionSetManagement
                     .unassignSoftwareModule(distributionSet.getId(), unAssignedSw.getId());
-            manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
+            manageDistUIState.setLastSelectedEntity(newDistributionSet.getId());
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
             eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
             uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
