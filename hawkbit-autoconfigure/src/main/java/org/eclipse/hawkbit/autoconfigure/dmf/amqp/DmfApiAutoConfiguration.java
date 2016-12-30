@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.autoconfigure.amqp;
+package org.eclipse.hawkbit.autoconfigure.dmf.amqp;
 
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
