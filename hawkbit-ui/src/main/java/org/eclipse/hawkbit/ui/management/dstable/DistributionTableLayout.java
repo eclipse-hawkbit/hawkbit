@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
@@ -25,7 +25,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Software module table layout.
  */
-public class DistributionTableLayout extends AbstractTableLayout {
+public class DistributionTableLayout extends AbstractTableLayout<DistributionTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 
@@ -46,10 +46,7 @@ public class DistributionTableLayout extends AbstractTableLayout {
                 notification, managementUIState, managementViewClientCriterion, targetService, dsMetadataPopupLayout,
                 distributionSetManagement);
 
-        super.init(
-                new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState,
-                        distributionAddUpdateWindowLayout),
-                distributionTable,
+        super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
                         dsMetadataPopupLayout, entityFactory, notification, tagManagement,
                         distributionAddUpdateWindowLayout));

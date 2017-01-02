@@ -30,12 +30,17 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
@@ -52,7 +57,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule {
+public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
@@ -189,6 +194,24 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         }
 
         return Collections.unmodifiableList(assignedTo);
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new SoftwareModuleCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new SoftwareModuleUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(getTenant(),
+                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
 }

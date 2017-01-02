@@ -14,15 +14,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
@@ -39,7 +35,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
 
 /**
  * Common util class.
@@ -312,31 +307,6 @@ public final class HawkbitCommonUtil {
      */
     public static String getFormattedNameVersion(final String name, final String version) {
         return name + ":" + version;
-    }
-
-    /**
-     * Add new base software module.
-     *
-     * @param bsname
-     *            base software module name
-     * @param bsversion
-     *            base software module version
-     * @param bsvendor
-     *            base software module vendor
-     * @param bstype
-     *            base software module type
-     * @param description
-     *            base software module description
-     * @param entityFactory
-     *            the entity factory to create new entity instances
-     * @return BaseSoftwareModule new base software module
-     */
-    public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
-            final String bsversion, final String bsvendor, final SoftwareModuleType bstype, final String description) {
-        final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-
-        return swMgmtService.createSoftwareModule(entityFactory.softwareModule().create().type(bstype).name(bsname)
-                .version(bsversion).description(description).vendor(bsvendor));
     }
 
     /**

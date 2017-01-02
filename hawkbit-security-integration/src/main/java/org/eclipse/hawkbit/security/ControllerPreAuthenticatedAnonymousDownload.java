@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -58,7 +58,7 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
     }
 
     @Override
-    protected TenantConfigurationKey getTenantConfigurationKey() {
+    protected String getTenantConfigurationKey() {
         return TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED;
     }
 

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
@@ -22,7 +22,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Software module table layout. (Upload Management)
  */
-public class SoftwareModuleTableLayout extends AbstractTableLayout {
+public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModuleTable> {
 
     private static final long serialVersionUID = 6464291374980641235L;
 

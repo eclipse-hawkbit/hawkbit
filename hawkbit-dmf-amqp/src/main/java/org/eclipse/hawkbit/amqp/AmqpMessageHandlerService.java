@@ -28,8 +28,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -138,8 +136,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             }
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
-        } catch (final TenantNotExistException | TooManyStatusEntriesException e) {
-            throw new AmqpRejectAndDontRequeueException(e);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }

@@ -10,10 +10,9 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
@@ -126,7 +125,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getTabSheetId() {
-        return UIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
+        return UIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
     }
 
     @Override
@@ -189,13 +188,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected Boolean isMetadataIconToBeDisplayed() {
         return true;
-    }
-
-    private boolean isDistributionSetSelected(final DistributionSet ds) {
-        final DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent()
-                ? managementUIState.getLastSelectedDistribution().get() : null;
-        return ds != null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
-                && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
     }
 
     @Override

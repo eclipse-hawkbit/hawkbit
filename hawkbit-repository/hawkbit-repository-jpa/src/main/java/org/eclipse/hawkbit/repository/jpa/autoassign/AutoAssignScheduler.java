@@ -50,8 +50,8 @@ public class AutoAssignScheduler {
      * @param autoAssignChecker
      *            to run a check as tenant
      */
-    public AutoAssignScheduler(TenantAware tenantAware, SystemManagement systemManagement,
-            SystemSecurityContext systemSecurityContext, AutoAssignChecker autoAssignChecker) {
+    public AutoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker) {
         this.tenantAware = tenantAware;
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;

@@ -135,7 +135,7 @@
   }
 
   .margin-top-style {
-    margin-top: 10px;
+    margin-top: 10px !important;
   }
 
   //confimation dialogue popup - Content margin adjustment
@@ -166,4 +166,9 @@
   	margin-top: 30px;
   	margin-bottom: 10px;
   }
+  
+  .v-window-no-closebox .v-window-closebox:before { 
+    height: 0px !important;
+    content: "" !important;
+   }
 }

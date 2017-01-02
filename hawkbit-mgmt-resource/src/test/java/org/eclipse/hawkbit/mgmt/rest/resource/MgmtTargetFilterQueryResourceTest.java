@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -42,7 +41,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Target Filter Query Resource")
-public class MgmtTargetFilterQueryResourceTest extends AbstractRestIntegrationTest {
+public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String JSON_PATH_ROOT = "$";
 

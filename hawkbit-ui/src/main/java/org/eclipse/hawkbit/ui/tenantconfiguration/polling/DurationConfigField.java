@@ -34,7 +34,7 @@ public final class DurationConfigField extends GridLayout implements Configurati
     private final DurationField durationField = new DurationField();
     private Duration globalDuration;
 
-    private DurationConfigField() {
+    private DurationConfigField(final String id) {
         super(2, 2);
 
         this.addStyleName("duration-config-field");
@@ -42,6 +42,8 @@ public final class DurationConfigField extends GridLayout implements Configurati
         this.setImmediate(true);
         this.setColumnExpandRatio(1, 1.0F);
 
+        durationField.setId(id + ".field");
+        checkBox.setId(id + ".checkbox");
         this.addComponent(checkBox, 0, 0);
         this.setComponentAlignment(checkBox, Alignment.MIDDLE_LEFT);
 
@@ -135,8 +137,8 @@ public final class DurationConfigField extends GridLayout implements Configurati
      * 
      * @return the builder
      */
-    public static DurationConfigFieldBuilder builder() {
-        return new DurationConfigFieldBuilder();
+    public static DurationConfigFieldBuilder builder(final String id) {
+        return new DurationConfigFieldBuilder(id);
     }
 
     /**
@@ -149,8 +151,8 @@ public final class DurationConfigField extends GridLayout implements Configurati
         private Duration globalDuration;
         private Duration tenantDuration;
 
-        private DurationConfigFieldBuilder() {
-            field = new DurationConfigField();
+        private DurationConfigFieldBuilder(final String id) {
+            field = new DurationConfigField(id);
         }
 
         /**

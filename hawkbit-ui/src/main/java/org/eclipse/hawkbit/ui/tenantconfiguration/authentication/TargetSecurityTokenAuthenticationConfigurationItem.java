@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.utils.I18N;
 
 /**

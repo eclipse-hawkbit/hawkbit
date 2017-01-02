@@ -130,7 +130,7 @@
                            <pluginExecutionFilter>
                               <groupId>com.vaadin</groupId>
                               <artifactId>vaadin-maven-plugin</artifactId>
-                              <versionRange>[7.6.3,)</versionRange>
+                              <versionRange>[7.7.3,)</versionRange>
                               <goals>
                                  <goal>compile-theme</goal>
                               </goals>
@@ -247,6 +247,7 @@
          <groupId>org.vaadin.addons</groupId>
          <artifactId>contextmenu</artifactId>
       </dependency>
+
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-configuration-processor</artifactId>

@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
-import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -54,8 +52,10 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
@@ -102,7 +102,7 @@ import com.google.common.collect.Lists;
 // strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable pageReq = new PageRequest(0, 400);
 

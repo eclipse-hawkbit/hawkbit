@@ -19,27 +19,16 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -70,18 +59,6 @@ public class JpaTagManagement implements TagManagement {
     private DistributionSetRepository distributionSetRepository;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
-
-    @Autowired
-    private TenantAware tenantAware;
-
-    @Autowired
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
@@ -100,12 +77,7 @@ public class JpaTagManagement implements TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        final TargetTag save = targetTagRepository.save(targetTag);
-
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new TargetTagCreatedEvent(save, applicationContext.getId())));
-
-        return save;
+        return targetTagRepository.save(targetTag);
     }
 
     @Override
@@ -115,11 +87,8 @@ public class JpaTagManagement implements TagManagement {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTagCreate> targetTags = (Collection) tt;
 
-        final List<TargetTag> save = Collections.unmodifiableList(targetTags.stream()
+        return Collections.unmodifiableList(targetTags.stream()
                 .map(ttc -> targetTagRepository.save(ttc.buildTargetTag())).collect(Collectors.toList()));
-        afterCommit.afterCommit(() -> save.forEach(
-                tag -> eventPublisher.publishEvent(new TargetTagCreatedEvent(tag, applicationContext.getId()))));
-        return save;
     }
 
     @Override
@@ -135,9 +104,6 @@ public class JpaTagManagement implements TagManagement {
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
-
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new TargetTagDeletedEvent(tenantAware.getCurrentTenant(), tag.getId(), applicationContext.getId())));
 
     }
 
@@ -180,10 +146,7 @@ public class JpaTagManagement implements TagManagement {
         update.getDescription().ifPresent(tag::setDescription);
         update.getColour().ifPresent(tag::setColour);
 
-        final TargetTag save = targetTagRepository.save(tag);
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new TargetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
-        return save;
+        return targetTagRepository.save(tag);
     }
 
     @Override
@@ -200,10 +163,7 @@ public class JpaTagManagement implements TagManagement {
         update.getDescription().ifPresent(tag::setDescription);
         update.getColour().ifPresent(tag::setColour);
 
-        final DistributionSetTag save = distributionSetTagRepository.save(tag);
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                new DistributionSetTagUpdateEvent(save, EventPublisherHolder.getInstance().getApplicationId())));
-        return save;
+        return distributionSetTagRepository.save(tag);
     }
 
     @Override
@@ -223,11 +183,7 @@ public class JpaTagManagement implements TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
-
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new DistributionSetTagCreatedEvent(save, applicationContext.getId())));
-        return save;
+        return distributionSetTagRepository.save(distributionSetTag);
     }
 
     @Override
@@ -238,12 +194,9 @@ public class JpaTagManagement implements TagManagement {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final Collection<JpaTagCreate> creates = (Collection) dst;
 
-        final List<DistributionSetTag> save = Collections.unmodifiableList(
+        return Collections.unmodifiableList(
                 creates.stream().map(create -> distributionSetTagRepository.save(create.buildDistributionSetTag()))
                         .collect(Collectors.toList()));
-        afterCommit.afterCommit(() -> save.forEach(tag -> eventPublisher
-                .publishEvent(new DistributionSetTagCreatedEvent(tag, applicationContext.getId()))));
-        return save;
     }
 
     @Override
@@ -258,10 +211,6 @@ public class JpaTagManagement implements TagManagement {
         });
 
         distributionSetTagRepository.deleteByName(tagName);
-
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new DistributionSetTagDeletedEvent(tenantAware.getCurrentTenant(),
-                        tag.getId(), applicationContext.getId())));
     }
 
     @Override

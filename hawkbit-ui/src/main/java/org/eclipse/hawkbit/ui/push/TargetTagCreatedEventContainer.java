@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
  *
  */
 public class TargetTagCreatedEventContainer implements EventContainer<TargetTagCreatedEvent> {
+    private static final String I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE = "target.tag.created.event.container.notifcation.message";
     private final List<TargetTagCreatedEvent> events;
 
     TargetTagCreatedEventContainer(final List<TargetTagCreatedEvent> events) {
@@ -26,6 +27,11 @@ public class TargetTagCreatedEventContainer implements EventContainer<TargetTagC
     @Override
     public List<TargetTagCreatedEvent> getEvents() {
         return events;
+    }
+
+    @Override
+    public String getUnreadNotificationMessageKey() {
+        return I18N_UNREAD_NOTIFICATION_UNREAD_MESSAGE;
     }
 
 }

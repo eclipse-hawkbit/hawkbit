@@ -41,6 +41,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -124,7 +125,7 @@ public final class DashboardMenu extends CustomComponent {
         return dashboardMenuLayout;
     }
 
-    private VerticalLayout getMenuLayout() {
+    private static VerticalLayout getMenuLayout() {
         final VerticalLayout menuContent = new VerticalLayout();
         menuContent.addStyleName(ValoTheme.MENU_PART);
         menuContent.addStyleName("sidebar");
@@ -196,7 +197,7 @@ public final class DashboardMenu extends CustomComponent {
 
     }
 
-    private Component buildUserMenu() {
+    private static Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
         settings.setHtmlContentAllowed(true);
@@ -241,9 +242,32 @@ public final class DashboardMenu extends CustomComponent {
         for (final DashboardMenuItem view : accessibleViews) {
             final ValoMenuItemButton menuItemComponent = new ValoMenuItemButton(view);
             menuButtons.add(menuItemComponent);
-            menuItemsLayout.addComponent(menuItemComponent);
+            menuItemsLayout.addComponent(buildLabelWrapper(menuItemComponent, view.getNotificationUnreadLabel()));
         }
         return menuItemsLayout;
+    }
+
+    /**
+     * Creates the wrapper which contains the menu item and the adjacent label
+     * for displaying the occurred events
+     * 
+     * @param menuItemButton
+     *            the menu item
+     * @param notificationLabel
+     *            the label for displaying the occurred events
+     * @return Component of type CssLayout
+     */
+    private static Component buildLabelWrapper(final ValoMenuItemButton menuItemButton,
+            final Component notificationLabel) {
+        final CssLayout dashboardWrapper = new CssLayout(menuItemButton);
+        dashboardWrapper.addStyleName("labelwrapper");
+        dashboardWrapper.addStyleName(ValoTheme.MENU_ITEM);
+        notificationLabel.addStyleName(ValoTheme.MENU_BADGE);
+        notificationLabel.setWidthUndefined();
+        notificationLabel.setVisible(false);
+        notificationLabel.setId(UIComponentIdProvider.NOTIFICATION_MENU_ID + menuItemButton.getCaption().toLowerCase());
+        dashboardWrapper.addComponent(notificationLabel);
+        return dashboardWrapper;
     }
 
     /**
@@ -373,6 +397,7 @@ public final class DashboardMenu extends CustomComponent {
             setIcon(view.getDashboardIcon());
             setCaption(view.getDashboardCaption());
             setDescription(view.getDashboardCaptionLong());
+            setId(view.getDashboardCaption().toLowerCase());
             /* Avoid double click */
             setDisableOnClick(true);
             addClickListener(event -> event.getComponent().getUI().getNavigator().navigateTo(view.getViewName()));

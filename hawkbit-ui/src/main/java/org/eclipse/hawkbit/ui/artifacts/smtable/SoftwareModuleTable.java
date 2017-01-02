@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -174,15 +175,19 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         }
     }
 
-    @Override
-    protected Item addEntity(final SoftwareModule baseEntity) {
-        final Item item = super.addEntity(baseEntity);
-        if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
-            artifactUploadState.getSelectedSoftwareModules().stream().forEach(this::unselect);
-        }
-        select(baseEntity.getId());
-        return item;
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
 
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
+
+        eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .forEach(event -> updateSoftwareModuleInTable(event.getEntity()));
+
+    }
+
+    private void updateSoftwareModuleInTable(final SoftwareModule editedSm) {
+        final Item item = getContainerDataSource().getItem(editedSm.getId());
+        updateEntity(editedSm, item);
     }
 
     @SuppressWarnings("unchecked")
@@ -258,4 +263,5 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         /* display the window */
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
+
 }

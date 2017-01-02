@@ -25,7 +25,7 @@ public abstract class BaseConfigurationView extends CustomComponent implements C
     private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     protected void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
+        configurationChangeListeners.forEach(ConfigurationItemChangeListener::configurationHasChanged);
     }
 
     @Override

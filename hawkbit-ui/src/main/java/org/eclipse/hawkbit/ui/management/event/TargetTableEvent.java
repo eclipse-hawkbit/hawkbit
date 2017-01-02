@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 
 /**
- * Class which contains the TenantAwareEvent when selecting all entries of the target table
+ * Class which contains the TenantAwareEvent when selecting all entries of the
+ * target table
  */
 public class TargetTableEvent extends BaseUIEntityEvent<Target> {
 
@@ -28,7 +31,17 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
     private TargetComponentEvent targetComponentEvent;
 
     /**
-     * Constructor.
+     * Constrcutor.
+     * 
+     * @param eventType
+     *            the event type.
+     */
+    public TargetTableEvent(final BaseEntityEventType eventType) {
+        super(eventType, null);
+    }
+
+    /**
+     * Constrcutor .
      * 
      * @param eventType
      *            the event type.
@@ -37,6 +50,18 @@ public class TargetTableEvent extends BaseUIEntityEvent<Target> {
      */
     public TargetTableEvent(final BaseEntityEventType eventType, final Target entity) {
         super(eventType, entity);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param eventType
+     *            the event type
+     * @param entityIds
+     *            the entity ids
+     */
+    public TargetTableEvent(final BaseEntityEventType eventType, final Collection<Long> entityIds) {
+        super(eventType, entityIds, Target.class);
     }
 
     /**

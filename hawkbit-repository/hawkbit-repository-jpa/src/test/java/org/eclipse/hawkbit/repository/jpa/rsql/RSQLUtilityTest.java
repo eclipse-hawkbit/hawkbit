@@ -40,7 +40,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -61,7 +61,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RSQLUtilityTest {
 
     @Spy
-    private VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
+    private final VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
 
     @Mock
     private TenantConfigurationManagement confMgmt;
@@ -78,9 +78,9 @@ public class RSQLUtilityTest {
     private Attribute attribute;
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
-            .<String>builder().value("00:05:00").build();
+            .<String> builder().value("00:05:00").build();
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
-            .<String>builder().value("00:07:37").build();
+            .<String> builder().value("00:07:37").build();
 
     @Test
     public void wrongRsqlSyntaxThrowSyntaxException() {
@@ -111,8 +111,7 @@ public class RSQLUtilityTest {
         String wrongRSQL = TargetFields.ATTRIBUTE + "==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null).toPredicate(baseSoftwareModuleRootMock,
-                    criteriaQueryMock,
-                    criteriaBuilderMock);
+                    criteriaQueryMock, criteriaBuilderMock);
             fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
@@ -120,8 +119,7 @@ public class RSQLUtilityTest {
         wrongRSQL = TargetFields.ATTRIBUTE + ".unkwon.wrong==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null).toPredicate(baseSoftwareModuleRootMock,
-                    criteriaQueryMock,
-                    criteriaBuilderMock);
+                    criteriaQueryMock, criteriaBuilderMock);
             fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
@@ -141,8 +139,7 @@ public class RSQLUtilityTest {
         String wrongRSQL = TargetFields.ASSIGNEDDS + "==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null).toPredicate(baseSoftwareModuleRootMock,
-                    criteriaQueryMock,
-                    criteriaBuilderMock);
+                    criteriaQueryMock, criteriaBuilderMock);
             fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
@@ -150,8 +147,7 @@ public class RSQLUtilityTest {
         wrongRSQL = TargetFields.ASSIGNEDDS + ".unknownField==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null).toPredicate(baseSoftwareModuleRootMock,
-                    criteriaQueryMock,
-                    criteriaBuilderMock);
+                    criteriaQueryMock, criteriaBuilderMock);
             fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
@@ -159,8 +155,7 @@ public class RSQLUtilityTest {
         wrongRSQL = TargetFields.ASSIGNEDDS + ".unknownField.ToMuch==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null).toPredicate(baseSoftwareModuleRootMock,
-                    criteriaQueryMock,
-                    criteriaBuilderMock);
+                    criteriaQueryMock, criteriaBuilderMock);
             fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
@@ -174,7 +169,7 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("version")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
 
         // test
@@ -192,7 +187,7 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
@@ -213,7 +208,7 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
@@ -234,7 +229,7 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         // test
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null).toPredicate(baseSoftwareModuleRootMock,
@@ -255,8 +250,7 @@ public class RSQLUtilityTest {
 
         // test
         RSQLUtility.parse(correctRsql, TestFieldEnum.class, null).toPredicate(baseSoftwareModuleRootMock,
-                criteriaQueryMock,
-                criteriaBuilderMock);
+                criteriaQueryMock, criteriaBuilderMock);
 
         // verfication
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
@@ -291,16 +285,17 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>lessThanOrEqualTo(any(Expression.class), eq(overduePropPlaceholder)))
+        when(criteriaBuilderMock.<String> lessThanOrEqualTo(any(Expression.class), eq(overduePropPlaceholder)))
                 .thenReturn(mock(Predicate.class));
 
         // test
-        RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
-                .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup()).toPredicate(baseSoftwareModuleRootMock,
+                criteriaQueryMock, criteriaBuilderMock);
 
         // verification
         verify(macroResolver).lookup(overdueProp);
-        // the macro is already replaced when passed to #lessThanOrEqualTo -> the method is never invoked with the
+        // the macro is already replaced when passed to #lessThanOrEqualTo ->
+        // the method is never invoked with the
         // placeholder:
         verify(criteriaBuilderMock, never()).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq(overduePropPlaceholder));
@@ -316,16 +311,17 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String>lessThanOrEqualTo(any(Expression.class), eq(overduePropPlaceholder)))
+        when(criteriaBuilderMock.<String> lessThanOrEqualTo(any(Expression.class), eq(overduePropPlaceholder)))
                 .thenReturn(mock(Predicate.class));
 
         // test
-        Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
+        final Predicate result = RSQLUtility.parse(correctRsql, TestFieldEnum.class, setupMacroLookup())
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
         // verification
         verify(macroResolver).lookup(overdueProp);
-        // the macro is unknown and hence never replaced -> #lessThanOrEqualTo is invoked with the placeholder:
+        // the macro is unknown and hence never replaced -> #lessThanOrEqualTo
+        // is invoked with the placeholder:
         verify(criteriaBuilderMock).lessThanOrEqualTo(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq(overduePropPlaceholder));
     }
@@ -353,7 +349,9 @@ public class RSQLUtilityTest {
         /*
          * (non-Javadoc)
          *
-         * @see org.eclipse.hawkbit.server.rest.resource.model.FieldNameProvider# getFieldName()
+         * @see
+         * org.eclipse.hawkbit.server.rest.resource.model.FieldNameProvider#
+         * getFieldName()
          */
         @Override
         public String getFieldName() {

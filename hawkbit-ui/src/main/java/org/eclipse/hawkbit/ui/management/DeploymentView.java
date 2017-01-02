@@ -8,20 +8,24 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
+import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
@@ -36,17 +40,26 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
 import org.eclipse.hawkbit.ui.management.targettag.CreateUpdateTargetTagLayoutWindow;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.push.DistributionCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.google.common.collect.Maps;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -55,20 +68,16 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 /**
- * Target status and deployment management view.
- *
+ * Target status and deployment management view
  */
 @UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = HawkbitUI.class)
-public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DeploymentView extends AbstractNotificationView implements BrowserWindowResizeListener {
 
     public static final String VIEW_NAME = "deployment";
     private static final long serialVersionUID = 1847434723456644998L;
-
-    private final transient EventBus.UIEventBus eventbus;
 
     private final SpPermissionChecker permChecker;
 
@@ -92,6 +101,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
 
     private GridLayout mainLayout;
 
+    private final DeploymentViewMenuItem deploymentViewMenuItem;
+
     @Autowired
     DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final I18N i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
@@ -100,8 +111,10 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiproperties,
             final ManagementViewClientCriterion managementViewClientCriterion, final TagManagement tagManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement) {
-        this.eventbus = eventbus;
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
+            final NotificationUnreadButton notificationUnreadButton,
+            final DeploymentViewMenuItem deploymentViewMenuItem) {
+        super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
@@ -129,6 +142,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 tagManagement, managementViewClientCriterion, managementUIState, targetManagement, targetTable,
                 deploymentManagement, distributionSetManagement);
+
+        this.deploymentViewMenuItem = deploymentViewMenuItem;
     }
 
     @PostConstruct
@@ -136,15 +151,14 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         buildLayout();
         restoreState();
         checkNoDataAvaialble();
-        eventbus.subscribe(this);
         Page.getCurrent().addBrowserWindowResizeListener(this);
         showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
-        eventbus.publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
+        getEventBus().publish(this, ManagementUIEvent.SHOW_COUNT_MESSAGE);
     }
 
-    @PreDestroy
-    void destroy() {
-        eventbus.unsubscribe(this);
+    @Override
+    protected DashboardMenuItem getDashboardMenuItem() {
+        return deploymentViewMenuItem;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -360,8 +374,24 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
     }
 
     @Override
-    public void enter(final ViewChangeEvent event) {
-        // This view is constructed in the init() method()
+    protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
+        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(10);
+
+        supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
+        supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());
+
+        supportedEvents.put(DistributionCreatedEventContainer.class, distributionTableLayoutNew.getTable());
+        supportedEvents.put(DistributionDeletedEventContainer.class, distributionTableLayoutNew.getTable());
+
+        supportedEvents.put(TargetTagCreatedEventContainer.class, targetTagFilterLayout);
+        supportedEvents.put(TargetTagDeletedEventContainer.class, targetTagFilterLayout);
+        supportedEvents.put(TargetTagUpdatedEventContainer.class, targetTagFilterLayout);
+
+        supportedEvents.put(DistributionSetTagCreatedEventContainer.class, distributionTagLayout);
+        supportedEvents.put(DistributionSetTagDeletedEventContainer.class, distributionTagLayout);
+        supportedEvents.put(DistributionSetTagUpdatedEventContainer.class, distributionTagLayout);
+
+        return supportedEvents;
     }
 
 }

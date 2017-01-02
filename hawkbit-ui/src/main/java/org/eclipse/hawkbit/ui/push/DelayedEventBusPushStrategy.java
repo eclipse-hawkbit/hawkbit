@@ -50,8 +50,9 @@ import com.vaadin.ui.UI;
 /**
  * An {@link EventPushStrategy} implementation which retrieves events from
  * {@link com.google.common.eventbus.EventBus} and store them first in a queue
- * where they will dispatched every 2 seconds to the {@link EventBus} in a
- * Vaadin access thread {@link UI#access(Runnable)}.
+ * where they will dispatched every x (default is 2 and can be configured with
+ * the property) seconds to the {@link EventBus} in a Vaadin access thread
+ * {@link UI#access(Runnable)}.
  *
  * This strategy avoids blocking UIs when too many events are fired and
  * dispatched to the UI thread. The UI will freeze in the time. To avoid that
@@ -69,20 +70,33 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final int BLOCK_SIZE = 10_000;
     private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
             BLOCK_SIZE);
-    private int uiid = -1;
 
     private final ScheduledExecutorService executorService;
-
-    private final transient EventBus.UIEventBus eventBus;
-
+    private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private ScheduledFuture<?> jobHandle;
+    private final long delay;
+    private UI vaadinUI;
 
+    /**
+     * Constructor.
+     * 
+     * @param executorService
+     *            the general scheduler service
+     * @param eventBus
+     *            the ui event bus
+     * @param eventProvider
+     *            the event provider
+     * @param delay
+     *            the delay for the event forwarding. Every delay millisecond
+     *            the events are forwarded by this strategy
+     */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider) {
+            final UIEventProvider eventProvider, final long delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
+        this.delay = delay;
     }
 
     private boolean isEventProvided(final org.eclipse.hawkbit.repository.event.TenantAwareEvent event) {
@@ -91,19 +105,19 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void init(final UI vaadinUI) {
-        uiid = vaadinUI.getUIId();
-        LOG.info("Initialize delayed event push strategy for UI {}", uiid);
+        this.vaadinUI = vaadinUI;
+        LOG.info("Initialize delayed event push strategy for UI {}", vaadinUI.getUIId());
         if (vaadinUI.getSession() == null) {
-            LOG.error("Vaadin session of UI {} is null! Event push disabled!", uiid);
+            LOG.error("Vaadin session of UI {} is null! Event push disabled!", vaadinUI.getUIId());
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
-                10_000, 1_000, TimeUnit.MILLISECONDS);
+                10_000, delay, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void clean() {
-        LOG.info("Cleanup delayed event push strategy for UI", uiid);
+        LOG.info("Cleanup delayed event push strategy for UI", vaadinUI.getUIId());
         jobHandle.cancel(true);
         queue.clear();
     }

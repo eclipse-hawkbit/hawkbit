@@ -289,7 +289,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetDeletedEvent(getTenant(), getId(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetDeletedEvent(getTenant(), getId(),
+                getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

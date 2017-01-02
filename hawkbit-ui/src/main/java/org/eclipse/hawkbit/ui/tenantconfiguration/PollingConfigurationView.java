@@ -14,9 +14,10 @@ import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -74,13 +75,15 @@ public class PollingConfigurationView extends BaseConfigurationView
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
-        fieldPollTime = DurationConfigField.builder().caption(i18n.get("configuration.polling.time"))
+        fieldPollTime = DurationConfigField.builder(UIComponentIdProvider.SYSTEM_CONFIGURATION_POLLING)
+                .caption(i18n.get("configuration.polling.time"))
                 .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalPollTime).tenantDuration(tenantPollTime).build();
         fieldPollTime.addChangeListener(this);
         vLayout.addComponent(fieldPollTime);
 
-        fieldPollingOverdueTime = DurationConfigField.builder().caption(i18n.get("configuration.polling.overduetime"))
+        fieldPollingOverdueTime = DurationConfigField.builder(UIComponentIdProvider.SYSTEM_CONFIGURATION_OVERDUE)
+                .caption(i18n.get("configuration.polling.overduetime"))
                 .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalOverdueTime).tenantDuration(tenantOverdueTime).build();
         fieldPollingOverdueTime.addChangeListener(this);
@@ -105,7 +108,7 @@ public class PollingConfigurationView extends BaseConfigurationView
         }
     }
 
-    private void saveDurationConfigurationValue(final TenantConfigurationKey key, final Duration duration) {
+    private void saveDurationConfigurationValue(final String key, final Duration duration) {
         if (duration == null) {
             tenantConfigurationManagement.deleteConfiguration(key);
         } else {

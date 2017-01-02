@@ -18,12 +18,14 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
+@SpringApplicationConfiguration(classes = {
+        org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     @PersistenceContext
@@ -76,6 +78,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
+
+    @Autowired
+    protected TenantConfigurationProperties tenantConfigurationProperties;
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {

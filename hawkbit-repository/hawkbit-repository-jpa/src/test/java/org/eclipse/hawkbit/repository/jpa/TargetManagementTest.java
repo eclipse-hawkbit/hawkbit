@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
@@ -261,7 +262,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
     public void findTargetByControllerIDWithDetails() {
         final DistributionSet set = testdataFactory.createDistributionSet("test");
         final DistributionSet set2 = testdataFactory.createDistributionSet("test2");

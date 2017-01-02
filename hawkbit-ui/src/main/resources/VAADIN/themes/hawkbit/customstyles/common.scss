@@ -9,18 +9,25 @@
 // scss-lint:disable ImportantRule, PropertySortOrder
 @include keyframes(animate-in-scale-up) {
   0% {
-
+    @include transform(scale(0));
   }
 }
+
 @mixin dashboard-common {
-  .v-ui {
 
     //View caption style
-    .v-caption-view-content {
+    .v-caption-header-content {
       padding-left: 20px;
       color: $widget-caption-color;
-      font: $view-caption-font-style;
+      font: $view-caption-font-style !important;
     }
+    
+    .view-header-layout{
+       width: 100%;
+       padding-right: 20px;
+    }
+    
+  .v-ui {
 
     //Menu style
     .valo-menu {
@@ -32,6 +39,11 @@
         position: relative;
         padding-bottom: 20px;
       }
+      
+      .labelwrapper {
+        position: relative;
+        padding: 0 !important;
+      }
     }
 
     // View main content.When view content width and height is less than min-width and min-height ,scroll bars are displayed
@@ -40,6 +52,9 @@
       padding-left: 20px;
       min-width: 1000px;
       min-height: 400px;
+	  border: 0px;   
+	  background-color: transparent;   
+	  box-shadow: none;
     }
 
     //View background styles
@@ -113,6 +128,15 @@
     height: 100%;
     font-size: 14px;
     font-weight: 400;
+  }
+  
+  .valo-menu .valo-menu-badge,
+  .dashboard-view .notifications.unread .v-button-caption {
+    @include valo-badge-style;
+    position: absolute;
+    right: round($v-unit-size/3);
+    font-size: round($v-font-size * 0.9);
+    pointer-events: none;
   }
 
   //Menu item - white border is displayed after each menu item

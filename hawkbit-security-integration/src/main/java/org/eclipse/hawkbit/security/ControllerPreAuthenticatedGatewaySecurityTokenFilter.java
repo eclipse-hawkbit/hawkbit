@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.security;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     }
 
     @Override
-    protected TenantConfigurationKey getTenantConfigurationKey() {
+    protected String getTenantConfigurationKey() {
         return TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
     }
 

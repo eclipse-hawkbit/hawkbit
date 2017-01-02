@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
@@ -49,11 +50,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,14 +127,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public String getPollingTime() {
-        final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
-        final Class<String> propertyType = String.class;
-        JpaTenantConfigurationManagement.validateTenantConfigurationDataType(configurationKey, propertyType);
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
-
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue());
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
     }
 
     @Override
@@ -203,10 +197,15 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId)
-                    .description("Plug and Play target: " + controllerId).name(controllerId)
+            final Target result = targetManagement.createTarget(entityFactory.target().create()
+                    .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)));
+
+            afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
+
+            return result;
         }
 
         return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
@@ -224,14 +223,17 @@ public class JpaControllerManagement implements ControllerManagement {
         if (lastTargetQuery != null) {
             mtargetInfo.setLastTargetQuery(lastTargetQuery);
         }
-        if (address != null) {
-            mtargetInfo.setAddress(address.toString());
-        }
 
         if (mtargetInfo.getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             mtargetInfo.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             afterCommit.afterCommit(() -> eventPublisher
                     .publishEvent(new TargetUpdatedEvent(mtargetInfo.getTarget(), applicationContext.getId())));
+        }
+
+        if (address != null) {
+            mtargetInfo.setAddress(address.toString());
+            afterCommit.afterCommit(() -> eventPublisher
+                    .publishEvent(new TargetPollEvent(mtargetInfo.getTarget(), applicationContext.getId())));
         }
 
         return targetInfoRepository.save(mtargetInfo);

@@ -1,0 +1,81 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+@mixin notification-unread-change {
+
+   .notifications-unread{
+    width: 37px !important;
+    height: 37px !important;
+    padding-left: 10px !important;
+   }
+
+  .notifications-unread-popup.v-window {
+    overflow: visible !important;
+    // top: 3 * $v-unit-size !important;
+    right: $view-padding;
+    left: auto !important;
+    max-width: 90%;
+
+    $window-outline: $v-overlay-shadow;
+    @if list-of-lists($window-outline) {
+      $window-outline: last($v-overlay-shadow);
+    }
+    $window-outline: flatten-list(valo-bevel-and-shadow($bevel: null, $shadow: $window-outline));
+    $outline-width: nth($window-outline, length($window-outline) - 1);
+    $outline-color: last($window-outline);
+
+    @include transform-origin(296px - (2 * $v-unit-size - round($v-unit-size / 3)) -7px);
+
+    &.v-window-animate-in {
+      @include animation(animate-in-scale-up 260ms cubic-bezier(.68,.37,.51,1.37));
+    }
+
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      right: (2 * $v-unit-size - round($v-unit-size / 3)) - 55px !important;
+      border: 7px solid transparent;
+      width: 0;
+      height: 0;
+      border-bottom-color: $v-window-background-color;
+    }
+
+
+    &:before {
+      @if type-of($outline-width) == number and $outline-width > 0 {
+        top: -15px - 2 * $outline-width;
+        margin-right: -$outline-width;
+        border-width: 7px + $outline-width;
+        border-bottom-width: 8px;
+        border-bottom-color: $outline-color;
+      } @else {
+        content: none;
+      }
+    }
+
+    .v-window-header {
+      color: $v-selection-color;
+    }
+
+    .notification-item {
+      font-size: round($v-font-size * 0.9);
+    }
+
+  }
+
+  // Need to use normal media queries because Responsive doesn't work for overlay elements just yet
+  @media screen and (max-width: 480px) {
+    .notifications-unread-popup.v-window {
+      right: round($view-padding / 2);
+    }
+  }
+
+
+}
