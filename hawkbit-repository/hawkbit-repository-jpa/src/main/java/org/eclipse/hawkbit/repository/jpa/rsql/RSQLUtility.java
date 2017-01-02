@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.PluralJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.SetJoin;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
@@ -302,7 +302,13 @@ public final class RSQLUtility {
                     final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
                     final From<?, Object> joinParent = join.getParent();
                     joinParent.getJoins().remove(join);
-                    fieldPath = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                    Optional<Join<Object, ?>> existingJoin = joinParent.getJoins().stream()
+                            .filter(j -> join.getJavaType().equals(j.getJavaType())).findFirst();
+                    if(existingJoin.isPresent()) {
+                        fieldPath = (Path<Object>) existingJoin.get();
+                    } else {
+                        fieldPath = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                    }
                 }
             }
             return fieldPath;
