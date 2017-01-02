@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
@@ -107,7 +108,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected void populateDetailsWidget() {
-        String maxAssign = HawkbitCommonUtil.SP_STRING_EMPTY;
+        String maxAssign = StringUtils.EMPTY;
         if (getSelectedBaseEntity() != null) {
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
@@ -117,8 +118,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
             updateSoftwareModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
-            updateSoftwareModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
-                    maxAssign);
+            updateSoftwareModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, maxAssign);
         }
 
         populateMetadataDetails();

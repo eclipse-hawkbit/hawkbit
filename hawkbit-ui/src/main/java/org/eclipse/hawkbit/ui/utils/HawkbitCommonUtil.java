@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -41,14 +42,6 @@ import com.vaadin.ui.Table;
  */
 public final class HawkbitCommonUtil {
     public static final String SP_STRING_PIPE = " | ";
-    /**
-     * Define spaced string.
-     */
-    public static final String SP_STRING_SPACE = " ";
-    /**
-     * Define empty string.
-     */
-    public static final String SP_STRING_EMPTY = "";
     /**
      * Html span.
      */
@@ -124,7 +117,7 @@ public final class HawkbitCommonUtil {
      *         null.
      */
     public static String concatStrings(final String delimiter, final String... texts) {
-        final String delim = delimiter == null ? SP_STRING_EMPTY : delimiter;
+        final String delim = delimiter == null ? StringUtils.EMPTY : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
         if (null != texts) {
             for (final String text : texts) {
@@ -159,7 +152,8 @@ public final class HawkbitCommonUtil {
      * Get Label for Artifact Details.
      *
      * @param name
-     * @return
+     *            artifact name
+     * @return ArtifactoryDetailsLabelId
      */
     public static String getArtifactoryDetailsLabelId(final String name) {
         return new StringBuilder()
@@ -174,7 +168,7 @@ public final class HawkbitCommonUtil {
      *            as caption of the details
      * @param name
      *            as name
-     * @return
+     * @return SoftwareModuleName
      */
     public static String getSoftwareModuleName(final String caption, final String name) {
         return new StringBuilder()
@@ -186,7 +180,7 @@ public final class HawkbitCommonUtil {
      * Get Label for Action History Details.
      *
      * @param name
-     * @return
+     * @return ActionHistoryLabelId
      */
     public static String getActionHistoryLabelId(final String name) {
         return new StringBuilder()
@@ -199,7 +193,7 @@ public final class HawkbitCommonUtil {
      *
      * @param pollStatus
      * @param i18N
-     * @return
+     * @return PollStatusToolTip
      */
     public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
@@ -312,7 +306,7 @@ public final class HawkbitCommonUtil {
     /**
      * @param distName
      * @param distVersion
-     * @return
+     * @return DistributionNameAndVersion
      */
     public static String getDistributionNameAndVersion(final String distName, final String distVersion) {
         return new StringBuilder(distName).append(':').append(distVersion).toString();

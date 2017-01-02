@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -73,6 +74,20 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private FormLayout formLayout;
 
+    /**
+     * Constructor for SoftwareModule
+     * 
+     * @param i18n
+     *            I18N
+     * @param uiNotifcation
+     *            UINotification
+     * @param eventBus
+     *            UIEventBus
+     * @param softwareManagement
+     *            SoftwareManagement
+     * @param entityFactory
+     *            EntityFactory
+     */
     public SoftwareModuleAddUpdateWindow(final I18N i18n, final UINotification uiNotifcation, final UIEventBus eventBus,
             final SoftwareManagement softwareManagement, final EntityFactory entityFactory) {
         this.i18n = i18n;
@@ -137,10 +152,12 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
         vendorTextField.setRequired(false);
+        vendorTextField.setNullRepresentation(StringUtils.EMPTY);
 
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
                 .buildTextComponent();
+        descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", null, null, true, null,
                 i18n.get("upload.swmodule.type"));
@@ -262,9 +279,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModle.getName());
         versionTextField.setValue(swModle.getVersion());
-        vendorTextField.setValue(swModle.getVendor() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
+
+        vendorTextField.setValue(swModle.getVendor() == null ? StringUtils.EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
-        descTextArea.setValue(swModle.getDescription() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
+        descTextArea.setValue(swModle.getDescription() == null ? StringUtils.EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
 
         if (swModle.getType().isDeleted()) {

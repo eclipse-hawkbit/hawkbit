@@ -137,6 +137,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
 
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
@@ -196,7 +197,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_VERSION, String.class, null, false, false);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, null, false, true);
-        lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_VENDOR, String.class, null, false, true);
+        lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_VENDOR, String.class, "", false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false, true);
@@ -308,7 +309,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     }
 
-    private String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
+    private static String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
         if (isAssigned) {
             addTypeStyle(typeId, color);
             return "distribution-upload-type-" + typeId;
@@ -316,7 +317,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         return null;
     }
 
-    private void addTypeStyle(final Long tagId, final String color) {
+    private static void addTypeStyle(final Long tagId, final String color) {
         final JavaScript javaScript = UI.getCurrent().getPage().getJavaScript();
         UI.getCurrent()
                 .access(() -> javaScript.execute(
