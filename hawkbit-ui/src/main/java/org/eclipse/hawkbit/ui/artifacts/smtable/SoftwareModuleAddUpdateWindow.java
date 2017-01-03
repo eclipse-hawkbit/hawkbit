@@ -75,7 +75,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private FormLayout formLayout;
 
     /**
-     * Constructor for SoftwareModule
+     * Constructor for SoftwareModuleAddUpdateWindow
      * 
      * @param i18n
      *            I18N
@@ -276,19 +276,16 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
-        nameTextField.setValue(swModle.getName());
-        versionTextField.setValue(swModle.getVersion());
+        final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
+        nameTextField.setValue(swModule.getName());
+        versionTextField.setValue(swModule.getVersion());
+        vendorTextField.setValue(swModule.getVendor());
+        descTextArea.setValue(swModule.getDescription());
 
-        vendorTextField.setValue(swModle.getVendor() == null ? StringUtils.EMPTY
-                : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
-        descTextArea.setValue(swModle.getDescription() == null ? StringUtils.EMPTY
-                : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
-
-        if (swModle.getType().isDeleted()) {
-            typeComboBox.addItem(swModle.getType().getName());
+        if (swModule.getType().isDeleted()) {
+            typeComboBox.addItem(swModule.getType().getName());
         }
-        typeComboBox.setValue(swModle.getType().getName());
+        typeComboBox.setValue(swModule.getType().getName());
     }
 
     public FormLayout getFormLayout() {

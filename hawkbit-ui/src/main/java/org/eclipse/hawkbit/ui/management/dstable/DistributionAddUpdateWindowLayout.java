@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -142,7 +143,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation("");
+        descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
@@ -288,9 +289,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setValue(distSet.getType().getId());
 
         reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
-        if (distSet.getDescription() != null) {
-            descTextArea.setValue(distSet.getDescription());
-        }
+        descTextArea.setValue(distSet.getDescription());
     }
 
     /**

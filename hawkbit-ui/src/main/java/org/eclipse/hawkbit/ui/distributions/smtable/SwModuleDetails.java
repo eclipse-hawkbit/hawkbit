@@ -145,8 +145,8 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     private void populateDetails() {
-        String maxAssign = StringUtils.EMPTY;
         if (getSelectedBaseEntity() != null) {
+            String maxAssign;
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
             } else {
@@ -155,7 +155,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
             updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
-            updateSwModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, maxAssign);
+            updateSwModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
         }
     }
 

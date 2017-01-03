@@ -204,9 +204,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.setValue(target.getControllerId());
         controllerIDTextField.setEnabled(Boolean.FALSE);
         nameTextField.setValue(target.getName());
-        if (target.getDescription() != null) {
-            descTextArea.setValue(target.getDescription());
-        }
+        nameTextField.setRequired(true);
+        descTextArea.setValue(target.getDescription());
     }
 
     public FormLayout getFormLayout() {

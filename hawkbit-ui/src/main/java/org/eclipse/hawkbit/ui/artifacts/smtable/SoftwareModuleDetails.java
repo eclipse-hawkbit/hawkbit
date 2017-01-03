@@ -108,8 +108,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected void populateDetailsWidget() {
-        String maxAssign = StringUtils.EMPTY;
         if (getSelectedBaseEntity() != null) {
+            String maxAssign;
             if (getSelectedBaseEntity().getType().getMaxAssignments() == 1) {
                 maxAssign = getI18n().get("label.singleAssign.type");
             } else {
@@ -118,9 +118,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
             updateSoftwareModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
                     getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
-            updateSoftwareModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, maxAssign);
+            updateSoftwareModuleDetailsLayout(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
         }
-
         populateMetadataDetails();
     }
 

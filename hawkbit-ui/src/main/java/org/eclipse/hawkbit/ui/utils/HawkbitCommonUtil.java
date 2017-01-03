@@ -95,11 +95,11 @@ public final class HawkbitCommonUtil {
      *         the text is not empty.
      */
     public static String trimAndNullIfEmpty(final String text) {
-        String emptyStr = null;
-        if (null != text && !text.trim().isEmpty()) {
-            emptyStr = text.trim();
+        String resultStr = null;
+        if (text != null && !text.trim().isEmpty()) {
+            resultStr = text.trim();
         }
-        return emptyStr;
+        return resultStr;
     }
 
     /**

@@ -238,13 +238,13 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout<Softw
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final String assignValue = (String) assignOptiongroup.getValue();
-        if (null != assignValue && assignValue.equalsIgnoreCase(singleAssignStr)) {
+        if (assignValue != null && assignValue.equalsIgnoreCase(singleAssignStr)) {
             assignNumber = 1;
-        } else if (null != assignValue && assignValue.equalsIgnoreCase(multiAssignStr)) {
+        } else if (assignValue != null && assignValue.equalsIgnoreCase(multiAssignStr)) {
             assignNumber = Integer.MAX_VALUE;
         }
 
-        if (null != typeNameValue && null != typeKeyValue) {
+        if (typeNameValue != null && typeKeyValue != null) {
             final SoftwareModuleType newSWType = swTypeManagementService.createSoftwareModuleType(
                     entityFactory.softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
