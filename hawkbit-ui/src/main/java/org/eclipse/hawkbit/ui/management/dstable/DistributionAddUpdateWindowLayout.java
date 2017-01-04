@@ -302,9 +302,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener())
-                .buildCommonDialogWindow();
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnCloseDialogListener()).buildCommonDialogWindow();
     }
 
     /**

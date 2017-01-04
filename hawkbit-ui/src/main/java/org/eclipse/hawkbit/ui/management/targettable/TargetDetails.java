@@ -116,7 +116,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void openWindow() {
         final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
