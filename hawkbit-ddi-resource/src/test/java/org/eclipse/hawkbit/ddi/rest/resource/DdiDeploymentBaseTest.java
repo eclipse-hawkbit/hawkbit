@@ -939,14 +939,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Various bad requests due to invalid feedback body. "
-            + "Ensures correct answering behaviour as expected to these kind of errors.")
+    @Description("Ensures that an invalid id in feedback body returns a bad request.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
-    public void invalidRequestFormat() throws Exception {
-
+    public void invalidIdInFeedbackReturnsBadRequest() throws Exception {
         final Target target = testdataFactory.createTarget("1080");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -957,7 +955,21 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 tenantAware.getCurrentTenant()).content(JsonBuilder.deploymentActionInProgressFeedback("AAAA"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
 
+    @Test
+    @Description("Ensures that a missing feedback result in feedback body returns a bad request.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void missingResultAttributeInFeedbackReturnsBadRequest() throws Exception {
+
+        final Target target = testdataFactory.createTarget("1080");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        assignDistributionSet(ds.getId(), "1080");
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
         final String missingResultInFeedback = JsonBuilder.missingResultInFeedback(action.getId().toString(), "closed",
                 "test");
         mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
@@ -965,6 +977,21 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
+    }
+
+    @Test
+    @Description("Ensures that a missing finished result in feedback body returns a bad request.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void missingFinishedAttributeInFeedbackReturnsBadRequest() throws Exception {
+
+        final Target target = testdataFactory.createTarget("1080");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        assignDistributionSet(ds.getId(), "1080");
+
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
         final String missingFinishedResultInFeedback = JsonBuilder
                 .missingFinishedResultInFeedback(action.getId().toString(), "closed", "test");
         mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
