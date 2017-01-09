@@ -279,8 +279,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModule.getName());
         versionTextField.setValue(swModule.getVersion());
-        vendorTextField.setValue(swModule.getVendor());
-        descTextArea.setValue(swModule.getDescription());
+        vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));
+        descTextArea.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getDescription()));
 
         if (swModule.getType().isDeleted()) {
             typeComboBox.addItem(swModule.getType().getName());
