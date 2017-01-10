@@ -61,12 +61,12 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     /**
      * Finds {@link Target}s by assigned {@link Tag}.
      *
-     * @param tag
+     * @param tagId
      *            to be found
      * @return list of found targets
      */
     @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
-    List<JpaTarget> findByTag(@Param("tag") final Long tag);
+    List<JpaTarget> findByTag(@Param("tag") final Long tagId);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
@@ -188,11 +188,11 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * Finds all targets related to a target rollout group stored for a specific
      * rollout.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            the rollout group the targets should belong to
      * @param page
      *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByActionsRolloutGroupId(Long rolloutGroup, Pageable page);
+    Page<Target> findByActionsRolloutGroupId(Long rolloutGroupId, Pageable page);
 }

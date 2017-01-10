@@ -431,10 +431,11 @@ public class JpaTargetManagement implements TargetManagement {
     public Target unAssignTag(final String controllerID, final Long targetTagId) {
         final List<Target> allTargets = Collections.unmodifiableList(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
-        final List<Target> unAssignTag = unAssignTag(allTargets,
-                Optional.ofNullable(targetTagRepository.findOne(targetTagId))
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "TargetTag with given ID " + targetTagId + " does not exist.")));
+
+        final TargetTag tag = Optional.ofNullable(targetTagRepository.findOne(targetTagId)).orElseThrow(
+                () -> new EntityNotFoundException("TargetTag with given ID " + targetTagId + " does not exist."));
+
+        final List<Target> unAssignTag = unAssignTag(allTargets, tag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
 

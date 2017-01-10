@@ -251,6 +251,9 @@ public interface DistributionSetManagement {
      *
      * @param typeId
      *            to delete
+     * 
+     * @throws EntityNotFoundException
+     *             if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void deleteDistributionSetType(@NotNull Long typeId);
