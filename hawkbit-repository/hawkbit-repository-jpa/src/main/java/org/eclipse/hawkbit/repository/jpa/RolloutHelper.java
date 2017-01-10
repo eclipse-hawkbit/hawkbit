@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -227,32 +228,73 @@ final class RolloutHelper {
         if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
             return "";
         }
-        return "(" + groups.stream().map(RolloutGroup::getTargetFilterQuery).collect(Collectors.joining("),(")) + ")";
+
+        return "(" + groups.stream().map(RolloutGroup::getTargetFilterQuery).distinct().sorted()
+                .collect(Collectors.joining("),(")) + ")";
     }
 
     /**
      * Creates an RSQL Filter that matches all targets that are in the provided
      * group and in the provided groups.
      *
+     * @param baseFilter
+     *            the base filter from the rollout
      * @param groups
      *            the rollout groups
      * @param group
-     *            the group
+     *            the target group
      * @return RSQL string without base filter of the Rollout. Can be an empty
      *         string.
      */
-    static String getOverlappingWithGroupsTargetFilter(final List<RolloutGroup> groups, final RolloutGroup group) {
+    static String getOverlappingWithGroupsTargetFilter(final String baseFilter, final List<RolloutGroup> groups,
+            final RolloutGroup group) {
+        final String groupFilter = group.getTargetFilterQuery();
+        // when any previous group has the same filter as the target group the
+        // overlap is 100%
+        if (isTargetFilterInGroups(groupFilter, groups)) {
+            return concatTargetFilters(";", baseFilter, groupFilter);
+        }
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
-        if (StringUtils.isNotEmpty(previousGroupFilters) && StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return "(" + group.getTargetFilterQuery() + ");(" + previousGroupFilters + ")";
-        } else if (StringUtils.isNotEmpty(previousGroupFilters)) {
-            return "(" + previousGroupFilters + ")";
-        } else if (StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return "(" + group.getTargetFilterQuery() + ")";
+        if (StringUtils.isNotEmpty(previousGroupFilters)) {
+            if(StringUtils.isNotEmpty(groupFilter)) {
+                return concatTargetFilters(";", baseFilter, groupFilter, previousGroupFilters);
+            } else {
+                return concatTargetFilters(";", baseFilter, previousGroupFilters);
+            }
+        }
+        if(StringUtils.isNotEmpty(groupFilter)) {
+            return concatTargetFilters(";", baseFilter, groupFilter);
         } else {
-            return "";
+            return baseFilter;
         }
     }
+
+    private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
+        return StringUtils.isNotEmpty(groupFilter)
+                && groups.stream().anyMatch(prevGroup -> StringUtils.isNotEmpty(prevGroup.getTargetFilterQuery())
+                && prevGroup.getTargetFilterQuery().equals(groupFilter));
+    }
+
+    private static String concatTargetFilters(String operator, String... filters) {
+        return "(" + Arrays.stream(filters).collect(Collectors.joining(")" + operator + "(")) + ")";
+    }
+
+    /**
+     * @param baseFilter
+     *            the base filter from the rollout
+     * @param group
+     *            group for which the filter string should be created
+     * @return the final target filter query for a rollout group
+     */
+    static String getGroupTargetFilter(final String baseFilter, final RolloutGroup group) {
+        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
+            return baseFilter;
+        } else {
+            return "(" + baseFilter + ");(" + group.getTargetFilterQuery() + ")";
+        }
+    }
+
+
 
     /**
      * Verifies that no targets are left

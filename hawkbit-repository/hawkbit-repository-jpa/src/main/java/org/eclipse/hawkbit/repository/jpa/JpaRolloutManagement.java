@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
@@ -433,17 +434,22 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
-                                                            final long totalTargets) {
+            final long totalTargets) {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
+        final Map<String, Long> targetFilterCounts = groups.stream()
+                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct().collect(Collectors
+                        .toMap(Function.identity(), filter -> targetManagement.countTargetByTargetFilterQuery(filter)));
 
         long unusedTargetsCount = 0;
 
         for (int i = 0; i < groups.size(); i++) {
             final RolloutGroup group = groups.get(i);
+            String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
             RolloutHelper.verifyRolloutGroupTargetPercentage(group.getTargetPercentage());
 
-            final long targetsInGroupFilter = countTargetsOfGroup(baseFilter, totalTargets, group);
-            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i);
+            final long targetsInGroupFilter = targetFilterCounts.get(groupTargetFilter);
+            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i,
+                    targetFilterCounts);
 
             final long realTargetsInGroup;
             // Assume that targets which were not used in the previous groups
@@ -465,28 +471,23 @@ public class JpaRolloutManagement implements RolloutManagement {
         return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
     }
 
-    private long countTargetsOfGroup(final String baseFilter, final long baseFilterCount, final RolloutGroup group) {
-        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
-            return baseFilterCount;
-        } else {
-            return targetManagement.countTargetByTargetFilterQuery(baseFilter + ";" + group.getTargetFilterQuery());
-        }
-    }
-
     private long countOverlappingTargetsWithPreviousGroups(final String baseFilter, final List<RolloutGroup> groups,
-            final RolloutGroup group, final int groupIndex) {
+            final RolloutGroup group, final int groupIndex, final Map<String, Long> targetFilterCounts) {
         // there can't be overlapping targets in the first group
         if (groupIndex == 0) {
             return 0;
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
-        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(previousGroups, group);
-        if (StringUtils.isEmpty(overlappingTargetsFilter)) {
-            overlappingTargetsFilter = baseFilter;
+        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter, previousGroups,
+                group);
+
+        if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
+            return targetFilterCounts.get(overlappingTargetsFilter);
         } else {
-            overlappingTargetsFilter = "(" + baseFilter + ");" + overlappingTargetsFilter;
+            final long overlappingTargets = targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
+            targetFilterCounts.put(overlappingTargetsFilter, overlappingTargets);
+            return overlappingTargets;
         }
-        return targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
     }
 
     @Override

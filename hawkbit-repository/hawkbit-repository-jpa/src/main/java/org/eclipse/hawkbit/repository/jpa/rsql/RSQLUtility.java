@@ -13,7 +13,10 @@ import static org.eclipse.hawkbit.repository.FieldNameProvider.SUB_ATTRIBUTE_SEP
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -196,6 +199,9 @@ public final class RSQLUtility {
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
+        private int level;
+        private boolean isOrLevel;
+        private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
 
         private final SimpleTypeConverter simpleTypeConverter;
 
@@ -208,9 +214,41 @@ public final class RSQLUtility {
             simpleTypeConverter = new SimpleTypeConverter();
         }
 
+        private void beginLevel(boolean isOr) {
+            level++;
+            isOrLevel = isOr;
+            joinsInLevel.put(level, new HashSet<>(2));
+        }
+
+        private void endLevel() {
+            joinsInLevel.remove(level);
+            level--;
+            isOrLevel = false;
+        }
+
+        private Set<Join<Object, Object>> getCurrentJoins() {
+            if(level > 0) {
+                return joinsInLevel.get(level);
+            }
+            return Collections.emptySet();
+        }
+
+        private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class type) {
+            return getCurrentJoins().stream()
+                    .filter(j -> type.equals(j.getJavaType())).findFirst();
+        }
+
+        private void addCurrentJoin(Join<Object, Object> join) {
+            if(level > 0) {
+                getCurrentJoins().add(join);
+            }
+        }
+
         @Override
         public List<Predicate> visit(final AndNode node, final String param) {
+            beginLevel(false);
             final List<Predicate> childs = acceptChilds(node);
+            endLevel();
             if (!childs.isEmpty()) {
                 return toSingleList(cb.and(childs.toArray(new Predicate[childs.size()])));
             }
@@ -219,7 +257,9 @@ public final class RSQLUtility {
 
         @Override
         public List<Predicate> visit(final OrNode node, final String param) {
+            beginLevel(true);
             final List<Predicate> childs = acceptChilds(node);
+            endLevel();
             if (!childs.isEmpty()) {
                 return toSingleList(cb.or(childs.toArray(new Predicate[childs.size()])));
             }
@@ -301,14 +341,16 @@ public final class RSQLUtility {
                 if (fieldPath instanceof PluralJoin) {
                     final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
                     final From<?, Object> joinParent = join.getParent();
-                    joinParent.getJoins().remove(join);
-                    Optional<Join<Object, ?>> existingJoin = joinParent.getJoins().stream()
-                            .filter(j -> join.getJavaType().equals(j.getJavaType())).findFirst();
-                    if(existingJoin.isPresent()) {
-                        fieldPath = (Path<Object>) existingJoin.get();
+                    Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
+                    if(currentJoinOfType.isPresent() && isOrLevel) {
+                        joinParent.getJoins().remove(join);
+                        fieldPath = currentJoinOfType.get();
                     } else {
-                        fieldPath = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                        Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                        addCurrentJoin(newJoin);
+                        fieldPath = newJoin;
                     }
+
                 }
             }
             return fieldPath;
