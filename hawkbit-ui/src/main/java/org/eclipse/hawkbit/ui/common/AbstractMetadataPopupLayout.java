@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
@@ -233,7 +234,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final TextField keyField = new TextFieldBuilder().caption(i18n.get("textfield.key")).required(true)
                 .prompt(i18n.get("textfield.key")).immediate(true).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID)
                 .maxLengthAllowed(128).buildTextComponent();
-        keyField.addTextChangeListener(event -> onKeyChange(event));
+        keyField.addTextChangeListener(this::onKeyChange);
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
         return keyField;
@@ -243,10 +244,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea = new TextAreaBuilder().caption(i18n.get("textfield.value")).required(true)
                 .prompt(i18n.get("textfield.value")).immediate(true).id(UIComponentIdProvider.METADATA_VALUE_ID)
                 .maxLengthAllowed(4000).buildTextComponent();
-        valueTextArea.setNullRepresentation("");
+        valueTextArea.setNullRepresentation(StringUtils.EMPTY);
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
-        valueTextArea.addTextChangeListener(event -> onValueChange(event));
+        valueTextArea.addTextChangeListener(this::onValueChange);
         valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
         return valueTextArea;
     }
@@ -264,9 +265,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.getColumn(KEY).setHeaderCaption(i18n.get("header.key"));
         metadataGrid.getColumn(VALUE).setHeaderCaption(i18n.get("header.value"));
         metadataGrid.getColumn(VALUE).setHidden(true);
-        metadataGrid.addSelectionListener(event -> onRowClick(event));
+        metadataGrid.addSelectionListener(this::onRowClick);
         metadataGrid.getColumn(DELETE_BUTTON).setHeaderCaption("");
-        metadataGrid.getColumn(DELETE_BUTTON).setRenderer(new HtmlButtonRenderer(event -> onDelete(event)));
+        metadataGrid.getColumn(DELETE_BUTTON).setRenderer(new HtmlButtonRenderer(this::onDelete));
         metadataGrid.getColumn(DELETE_BUTTON).setWidth(50);
         metadataGrid.getColumn(KEY).setExpandRatio(1);
         return metadataGrid;

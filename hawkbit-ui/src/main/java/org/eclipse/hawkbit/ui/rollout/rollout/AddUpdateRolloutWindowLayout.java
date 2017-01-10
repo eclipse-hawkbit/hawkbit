@@ -286,7 +286,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createIntegerTextField(final String in18Key, final String id) {
         final TextField textField = createTextField(in18Key, id);
-        textField.setNullRepresentation("");
+        textField.setNullRepresentation(StringUtils.EMPTY);
         textField.setConverter(new StringToIntegerConverter());
         textField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         textField.setSizeUndefined();

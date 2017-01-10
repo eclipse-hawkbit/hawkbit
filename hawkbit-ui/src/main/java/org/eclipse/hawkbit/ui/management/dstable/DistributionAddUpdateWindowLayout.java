@@ -76,6 +76,24 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private FormLayout formLayout;
 
+    /**
+     * Constructor for DistributionAddUpdateWindowLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param notificationMessage
+     *            UINotification
+     * @param eventBus
+     *            UIEventBus
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     * @param systemManagement
+     *            SystemManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param distributionSetTable
+     *            DistributionSetTable
+     */
     public DistributionAddUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
             final SystemManagement systemManagement, final EntityFactory entityFactory,
@@ -154,7 +172,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.get(in18Key)).required(true)
                 .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
-        buildTextField.setNullRepresentation("");
+        buildTextField.setNullRepresentation(StringUtils.EMPTY);
         return buildTextField;
     }
 
