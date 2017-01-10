@@ -607,7 +607,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(final List<Long> groups,
+    public Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(final Collection<Long> groups,
             final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer);
