@@ -594,6 +594,10 @@
                   <groupId>org.hibernate</groupId>
                   <artifactId>hibernate-entitymanager</artifactId>
                </exclusion>
+                <exclusion>
+                  <groupId>org.hibernate</groupId>
+                  <artifactId>hibernate-core</artifactId>
+               </exclusion>
                <exclusion>
                   <groupId>org.springframework.boot</groupId>
                   <artifactId>spring-boot-starter-logging</artifactId>
