@@ -296,7 +296,7 @@ public interface TargetManagement {
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotEmpty List<Long> groups,
+    Long countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(@NotEmpty Collection<Long> groups,
             @NotNull String rsqlParam);
 
     /**
