@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.ui.UI;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -88,7 +89,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private transient ValidationListener validationListener;
 
-    private boolean lastGroupValid = true;
+    private ValidationStatus validationStatus = ValidationStatus.VALID;
 
     private transient RolloutGroupsValidation groupsValidation;
 
@@ -198,7 +199,7 @@ public class DefineGroupsLayout extends GridLayout {
      */
     public void resetComponents() {
 
-        lastGroupValid = true;
+        validationStatus = ValidationStatus.VALID;
         groupsCount = 0;
 
         removeAllRows();
@@ -231,23 +232,29 @@ public class DefineGroupsLayout extends GridLayout {
      * @return whether the groups definition form is valid
      */
     public boolean isValid() {
-        if (groupRows.isEmpty() || !lastGroupValid) {
+        if (groupRows.isEmpty() || validationStatus != ValidationStatus.VALID) {
             return false;
         }
         return groupRows.stream().allMatch(GroupRow::isValid);
     }
 
     private void updateValidation() {
-        lastGroupValid = true;
-        boolean valid = isValid();
-        if (valid) {
+        validationStatus = ValidationStatus.VALID;
+        if (isValid()) {
+            setValidationStatus(ValidationStatus.LOADING);
             savedRolloutGroups = getGroupsFromRows();
-            valid = lastGroupValid = validateRemainingTargets();
+            validateRemainingTargets();
+
         } else {
             resetRemainingTargetsError();
+            setValidationStatus(ValidationStatus.INVALID);
         }
+    }
+
+    private void setValidationStatus(final ValidationStatus status) {
+        validationStatus = status;
         if (validationListener != null) {
-            validationListener.validation(valid);
+            validationListener.validation(status);
         }
     }
 
@@ -255,20 +262,32 @@ public class DefineGroupsLayout extends GridLayout {
         groupRows.forEach(GroupRow::hideLastGroupError);
     }
 
-    private boolean validateRemainingTargets() {
+    private void validateRemainingTargets() {
         resetRemainingTargetsError();
         if (targetFilter == null) {
-            return false;
+            return;
         }
-        final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
-        groupsValidation = rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis());
 
-        if (groupsValidation.isValid()) {
+        final UI ui = UI.getCurrent();
+
+        rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis())
+                .addCallback(validation -> ui.access(() -> this.setGroupsValidation(validation)),
+                        throwable -> ui.access(() -> this.setGroupsValidation(null)));
+
+    }
+
+    private void setGroupsValidation(RolloutGroupsValidation validation) {
+        groupsValidation = validation;
+        final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
+        if (groupsValidation != null && groupsValidation.isValid() && isValid()) {
             lastRow.hideLastGroupError();
+            setValidationStatus(ValidationStatus.VALID);
+
         } else {
             lastRow.markWithLastGroupError();
+            setValidationStatus(ValidationStatus.INVALID);
         }
-        return groupsValidation.isValid();
+
     }
 
     private List<RolloutGroupCreate> getGroupsFromRows() {
@@ -277,6 +296,15 @@ public class DefineGroupsLayout extends GridLayout {
 
     public void setValidationListener(final ValidationListener validationListener) {
         this.validationListener = validationListener;
+    }
+
+    /**
+     * Status of the groups validation
+     */
+    public enum ValidationStatus {
+        VALID,
+        INVALID,
+        LOADING
     }
 
     /**
@@ -291,8 +319,9 @@ public class DefineGroupsLayout extends GridLayout {
          * @param isValid
          *            whether the input of the group rows is valid
          */
-        void validation(boolean isValid);
+        void validation(ValidationStatus isValid);
     }
+
 
     private class GroupRow {
 

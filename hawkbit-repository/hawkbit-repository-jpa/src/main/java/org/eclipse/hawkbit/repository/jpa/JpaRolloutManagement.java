@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -70,6 +71,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -79,6 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -420,7 +424,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroupCreate> groups,
+    @Async
+    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
@@ -429,8 +434,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        return validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
-                baseFilter, totalTargets);
+        return new AsyncResult<>(validateTargetsInGroups(
+                groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
     }
 
     private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,

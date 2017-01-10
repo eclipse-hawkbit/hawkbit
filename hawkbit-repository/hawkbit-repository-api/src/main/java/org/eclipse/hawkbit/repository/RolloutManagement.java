@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming
@@ -208,7 +210,8 @@ public interface RolloutManagement {
      *             thrown when no targets are targeted by the rollout
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    RolloutGroupsValidation validateTargetsInGroups(List<RolloutGroupCreate> groups, String targetFilter, Long createdAt);
+    ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(List<RolloutGroupCreate> groups,
+            String targetFilter, Long createdAt);
 
     /**
      * Can be called on a Rollout in {@link RolloutStatus#CREATING} to

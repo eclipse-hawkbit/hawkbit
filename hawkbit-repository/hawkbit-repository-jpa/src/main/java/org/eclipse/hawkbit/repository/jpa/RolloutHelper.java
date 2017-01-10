@@ -290,7 +290,7 @@ final class RolloutHelper {
         if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         } else {
-            return "(" + baseFilter + ");(" + group.getTargetFilterQuery() + ")";
+            return concatTargetFilters(";", baseFilter, group.getTargetFilterQuery());
         }
     }
 
