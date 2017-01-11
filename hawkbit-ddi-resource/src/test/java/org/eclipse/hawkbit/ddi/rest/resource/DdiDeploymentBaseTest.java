@@ -30,6 +30,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -947,6 +948,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that an invalid id in feedback body returns a bad request.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void invalidIdInFeedbackReturnsBadRequest() throws Exception {
@@ -967,6 +969,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that a missing feedback result in feedback body returns a bad request.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void missingResultAttributeInFeedbackReturnsBadRequest() throws Exception {
@@ -990,6 +993,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that a missing finished result in feedback body returns a bad request.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void missingFinishedAttributeInFeedbackReturnsBadRequest() throws Exception {
