@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -92,6 +93,10 @@ public class DefineGroupsLayout extends GridLayout {
     private ValidationStatus validationStatus = ValidationStatus.VALID;
 
     private transient RolloutGroupsValidation groupsValidation;
+
+    private transient ListenableFuture<RolloutGroupsValidation> runningValidation;
+
+    private boolean validationRequested;
 
     DefineGroupsLayout(I18N i18n, EntityFactory entityFactory, RolloutManagement rolloutManagement,
             TargetFilterQueryManagement targetFilterQueryManagement) {
@@ -264,20 +269,30 @@ public class DefineGroupsLayout extends GridLayout {
 
     private void validateRemainingTargets() {
         resetRemainingTargetsError();
-        if (targetFilter == null) {
+        if (targetFilter == null || (runningValidation != null && !runningValidation.isDone())) {
+            validationRequested = true;
             return;
         }
 
+        validationRequested = false;
+
         final UI ui = UI.getCurrent();
 
-        rolloutManagement.validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis())
-                .addCallback(validation -> ui.access(() -> this.setGroupsValidation(validation)),
-                        throwable -> ui.access(() -> this.setGroupsValidation(null)));
+        runningValidation = rolloutManagement
+                .validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis());
+        runningValidation.addCallback(validation -> ui.access(() -> this.setGroupsValidation(validation)),
+                throwable -> ui.access(() -> this.setGroupsValidation(null)));
 
     }
 
     private void setGroupsValidation(RolloutGroupsValidation validation) {
         groupsValidation = validation;
+
+        if(validationRequested) {
+            validateRemainingTargets();
+            return;
+        }
+
         final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
         if (groupsValidation != null && groupsValidation.isValid() && validationStatus != ValidationStatus.INVALID) {
             lastRow.hideLastGroupError();
