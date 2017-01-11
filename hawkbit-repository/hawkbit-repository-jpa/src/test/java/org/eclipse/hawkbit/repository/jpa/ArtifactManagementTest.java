@@ -214,7 +214,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result).getFileInputStream()) {
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getId()).getFileInputStream()) {
             assertTrue("The stored binary matches the given binary",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
         }
@@ -225,7 +225,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         try {
-            artifactManagement.loadArtifactBinary(new JpaArtifact());
+            artifactManagement.loadArtifactBinary(1L);
             fail("Should not have worked with missing permission.");
         } catch (final InsufficientPermissionException e) {
 

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
@@ -104,10 +105,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Artifact existing) {
+    public boolean clearArtifactBinary(final Long existing) {
+        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
+                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
+    }
 
-        for (final Artifact lArtifact : localArtifactRepository
-                .findByGridFsFileName(((JpaArtifact) existing).getGridFsFileName())) {
+    private boolean clearArtifactBinary(final JpaArtifact existing) {
+
+        for (final Artifact lArtifact : localArtifactRepository.findByGridFsFileName(existing.getGridFsFileName())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
                     && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
                 return false;
@@ -115,8 +120,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", ((JpaArtifact) existing).getGridFsFileName());
-            artifactRepository.deleteBySha1(((JpaArtifact) existing).getGridFsFileName());
+            LOG.debug("deleting artifact from repository {}", existing.getGridFsFileName());
+            artifactRepository.deleteBySha1(existing.getGridFsFileName());
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -166,10 +171,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public DbArtifact loadArtifactBinary(final Artifact artifact) {
-        final DbArtifact result = artifactRepository.getArtifactBySha1(((JpaArtifact) artifact).getGridFsFileName());
+    public DbArtifact loadArtifactBinary(final Long artifactId) {
+        final JpaArtifact artifact = Optional.ofNullable(localArtifactRepository.findOne(artifactId))
+                .orElseThrow(() -> new EntityNotFoundException("Artifact with given id " + artifactId + " not found."));
+
+        final DbArtifact result = artifactRepository.getArtifactBySha1(artifact.getGridFsFileName());
         if (result == null) {
-            throw new GridFSDBFileNotFoundException(((JpaArtifact) artifact).getGridFsFileName());
+            throw new GridFSDBFileNotFoundException(artifact.getGridFsFileName());
         }
 
         return result;

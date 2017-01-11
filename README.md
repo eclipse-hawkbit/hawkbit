@@ -27,6 +27,12 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](https://github.com/eclipse/hawkbit/wiki/Run-hawkBit) for setting up a complete landscape.
 
+# API stability
+
+hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
+
+However, the external APIs (i.e. [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api), [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api), [DDI Artifact Download API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-dl-api) and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf-api) are on major version 'v1' and will be kept stable.
+
 # hawkBit (Spring boot) starters
 
 Next to the [Example Application](examples/hawkbit-example-app) we are also providing a set of [Spring Boot Starters](hawkbit-starters) to quick start your own [Spring Boot](https://projects.spring.io/spring-boot/) based application.

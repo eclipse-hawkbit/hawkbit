@@ -87,10 +87,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     @Override
     public ResponseEntity<Void> deleteSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-        final SoftwareModuleType module = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
-
-        softwareManagement.deleteSoftwareModuleType(module);
-
+        softwareManagement.deleteSoftwareModuleType(softwareModuleTypeId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -137,10 +137,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
-        final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
-        distributionSetManagement.deleteDistributionSet(set);
-
+        distributionSetManagement.deleteDistributionSet(distributionSetId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -222,21 +219,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        final DistributionSet distributionSet = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<TargetFilterQuery> targetFilterQueries;
-        if (rsqlParam != null) {
-            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
-                    distributionSet, rsqlParam);
-        } else {
-            targetFilterQueries = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(pageable,
-                    distributionSet);
-        }
+        final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
+                .findTargetFilterQueryByAutoAssignDS(pageable, distributionSetId, rsqlParam);
 
         return new ResponseEntity<>(
                 new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
@@ -340,7 +329,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
 
         distributionSetManagement.assignSoftwareModules(distributionSetId,
-                softwareModuleIDs.stream().map(module -> module.getId()).collect(Collectors.toList()));
+                softwareModuleIDs.stream().map(MgmtSoftwareModuleAssigment::getId).collect(Collectors.toList()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -360,13 +349,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        findDistributionSetWithExceptionIfNotFound(distributionSetId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<SoftwareModule> softwaremodules = softwareManagement.findSoftwareModuleByAssignedTo(pageable,
-                foundDs);
+                distributionSetId);
         return new ResponseEntity<>(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()), HttpStatus.OK);
     }

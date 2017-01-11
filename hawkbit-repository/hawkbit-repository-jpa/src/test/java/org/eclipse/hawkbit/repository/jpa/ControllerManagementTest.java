@@ -59,7 +59,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final JpaAction savedAction = (JpaAction) deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+        final JpaAction savedAction = (JpaAction) deploymentManagement
+                .findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
 
         assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
@@ -75,7 +76,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction).getNumberOfElements())
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction.getId()).getNumberOfElements())
                 .isEqualTo(3);
     }
 
@@ -105,7 +106,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Target savedTarget = testdataFactory.createTarget();
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
 
         // test and verify
         savedAction = controllerManagament.addUpdateActionStatus(
@@ -153,7 +154,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
+                .isEqualTo(3);
     }
 
     @Test
@@ -170,7 +172,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action).getNumberOfElements()).isEqualTo(4);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
+                .isEqualTo(4);
     }
 
 }

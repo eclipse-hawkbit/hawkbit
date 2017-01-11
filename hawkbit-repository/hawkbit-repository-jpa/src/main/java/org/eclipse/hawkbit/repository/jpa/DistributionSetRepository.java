@@ -11,10 +11,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -89,7 +87,7 @@ public interface DistributionSetRepository
      * @return list of {@link DistributionSet#getId()}
      */
     @Query("select ac.distributionSet.id from JpaAction ac where ac.distributionSet.id in :ids")
-    List<Long> findAssignedToTargetDistributionSetsById(@Param("ids") Long... ids);
+    List<Long> findAssignedToTargetDistributionSetsById(@Param("ids") Collection<Long> ids);
 
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to
@@ -100,7 +98,7 @@ public interface DistributionSetRepository
      * @return list of {@link DistributionSet#getId()}
      */
     @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
-    List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Long... ids);
+    List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Collection<Long> ids);
 
     /**
      * Finds the distribution set for a specific action.
@@ -109,17 +107,17 @@ public interface DistributionSetRepository
      *            the action associated with the distribution set to find
      * @return the distribution set associated with the given action
      */
-    @Query("select DISTINCT d from JpaDistributionSet d join fetch d.modules m join d.actions a where a = :action")
-    JpaDistributionSet findByAction(@Param("action") JpaAction action);
+    @Query("select DISTINCT d from JpaDistributionSet d join fetch d.modules m join d.actions a where a.id = :action")
+    JpaDistributionSet findByActionId(@Param("action") Long action);
 
     /**
      * Counts {@link DistributionSet} instances of given type in the repository.
      *
-     * @param type
+     * @param typeId
      *            to search for
      * @return number of found {@link DistributionSet}s
      */
-    long countByType(JpaDistributionSetType type);
+    long countByTypeId(Long typeId);
 
     /**
      * Counts {@link DistributionSet} with given

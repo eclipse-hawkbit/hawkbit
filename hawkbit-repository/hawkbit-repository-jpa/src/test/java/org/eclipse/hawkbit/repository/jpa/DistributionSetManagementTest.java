@@ -149,7 +149,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(hardDelete);
-        distributionSetManagement.deleteDistributionSetType(hardDelete);
+        distributionSetManagement.deleteDistributionSetType(hardDelete.getId());
 
         assertThat(distributionSetTypeRepository.findAll()).doesNotContain(hardDelete);
     }
@@ -165,7 +165,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createDistributionSet(
                 entityFactory.distributionSet().create().name("softdeleted").version("1").type(softDelete.getKey()));
 
-        distributionSetManagement.deleteDistributionSetType(softDelete);
+        distributionSetManagement.deleteDistributionSetType(softDelete.getId());
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
 
@@ -430,14 +430,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         dsDeleted.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList())));
 
         assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
-        distributionSetManagement.deleteDistributionSet(dsDeleted);
+        distributionSetManagement.deleteDistributionSet(dsDeleted.getId());
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
+        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
+        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group2 = distributionSetManagement.toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
+        ds100Group2 = toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
 
         // check setup
@@ -722,7 +722,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // delete assigned ds
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        distributionSetManagement.deleteDistributionSet(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId());
+        distributionSetManagement
+                .deleteDistributionSet(Lists.newArrayList(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId()));
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);

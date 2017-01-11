@@ -249,7 +249,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 appType, type);
 
         // delete unassigned
-        softwareManagement.deleteSoftwareModuleType(type);
+        softwareManagement.deleteSoftwareModuleType(type.getId());
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
                 appType);
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains((JpaSoftwareModuleType) osType,
@@ -265,7 +265,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.softwareModule().create().type(type).name("Test SM").version("1.0"));
 
         // delete assigned
-        softwareManagement.deleteSoftwareModuleType(type);
+        softwareManagement.deleteSoftwareModuleType(type.getId());
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
                 appType);
 
@@ -348,7 +348,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(disSet, Lists.newArrayList(target));
 
         // [STEP4]: Delete the DistributionSet
-        distributionSetManagement.deleteDistributionSet(disSet);
+        distributionSetManagement.deleteDistributionSet(disSet.getId());
 
         // [STEP5]: Delete the assigned SoftwareModule
         softwareManagement.deleteSoftwareModule(assignedModule.getId());
@@ -694,7 +694,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .create().name("set").version("1").modules(Lists.newArrayList(one.getId(), deleted.getId())));
         softwareManagement.deleteSoftwareModule(deleted.getId());
 
-        assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set).getContent())
+        assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set.getId()).getContent())
                 .as("Found this number of modules").hasSize(2);
     }
 

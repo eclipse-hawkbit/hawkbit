@@ -188,8 +188,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
-        final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -198,11 +196,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam != null) {
-            rolloutGroupTargets = this.rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup, rsqlParam,
-                    pageable);
+            rolloutGroupTargets = this.rolloutGroupManagement.findRolloutGroupTargets(groupId, rsqlParam, pageable);
         } else {
-            final Page<Target> pageTargets = this.rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup,
-                    pageable);
+            final Page<Target> pageTargets = this.rolloutGroupManagement.findRolloutGroupTargets(groupId, pageable);
             rolloutGroupTargets = pageTargets;
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
