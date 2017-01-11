@@ -27,6 +27,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -37,6 +42,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.fest.assertions.core.Condition;
@@ -62,7 +69,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
 
-    @Test()
+    @Test
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
     public void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
@@ -72,7 +79,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
-    @Test()
+    @Test
     @Description("Ensures that artifacts are found, when software module exists.")
     public void artifactsExists() throws Exception {
         final Target target = testdataFactory.createTarget();
@@ -596,7 +603,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // action1 done
 
         long current = System.currentTimeMillis();
-        long lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action1.getId().toString(), "closed"))
@@ -605,11 +611,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         myT = targetManagement.findTargetByControllerIDWithDetails("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
-        // assertThat( myT.getLastModifiedAt() ).isEqualTo( lastModified );
-
-        final long timeDiff = Math
-                .abs(myT.getTargetInfo().getLastTargetQuery() - myT.getTargetInfo().getInstallationDate());
-
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(2);
         assertThat(myT.getTargetInfo().getInstalledDistributionSet().getId()).isEqualTo(ds1.getId());
@@ -622,7 +623,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // action2 done
         current = System.currentTimeMillis();
-        lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed"))
@@ -643,7 +643,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // action3 done
         current = System.currentTimeMillis();
-        lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action3.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action3.getId().toString(), "closed"))
@@ -678,7 +677,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByDistributionSet(pageReq, ds).getContent().get(0);
 
         long current = System.currentTimeMillis();
-        long lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure",
@@ -710,7 +708,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds, toAssign);
         final Action action2 = deploymentManagement.findActiveActionsByTarget(myT).get(0);
         current = System.currentTimeMillis();
-        lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
 
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
@@ -920,12 +917,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         savedTarget = assignDistributionSet(savedSet, toAssign).getAssignedEntity().iterator().next();
         assignDistributionSet(savedSet2, toAssign2);
 
-        // wrong format
-        mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/AAAA/feedback", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.deploymentActionInProgressFeedback("AAAA")).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
-
         final Action updateAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         // action exists but is not assigned to this target
@@ -945,6 +936,68 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(delete("/{tenant}/controller/v1/4712/deploymentBase/2/feedback", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
 
+    }
+
+    @Test
+    @Description("Ensures that an invalid id in feedback body returns a bad request.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void invalidIdInFeedbackReturnsBadRequest() throws Exception {
+        final Target target = testdataFactory.createTarget("1080");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        assignDistributionSet(ds.getId(), "1080");
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
+
+        mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
+                tenantAware.getCurrentTenant()).content(JsonBuilder.deploymentActionInProgressFeedback("AAAA"))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Ensures that a missing feedback result in feedback body returns a bad request.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void missingResultAttributeInFeedbackReturnsBadRequest() throws Exception {
+
+        final Target target = testdataFactory.createTarget("1080");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        assignDistributionSet(ds.getId(), "1080");
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
+        final String missingResultInFeedback = JsonBuilder.missingResultInFeedback(action.getId().toString(), "closed",
+                "test");
+        mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
+                tenantAware.getCurrentTenant()).content(missingResultInFeedback).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    @Description("Ensures that a missing finished result in feedback body returns a bad request.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void missingFinishedAttributeInFeedbackReturnsBadRequest() throws Exception {
+
+        final Target target = testdataFactory.createTarget("1080");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        assignDistributionSet(ds.getId(), "1080");
+
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
+        final String missingFinishedResultInFeedback = JsonBuilder
+                .missingFinishedResultInFeedback(action.getId().toString(), "closed", "test");
+        mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
+                tenantAware.getCurrentTenant()).content(missingFinishedResultInFeedback)
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
     }
 
     private class ActionStatusCondition extends Condition<ActionStatus> {
