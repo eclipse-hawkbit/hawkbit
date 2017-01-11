@@ -53,9 +53,11 @@ import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
@@ -240,6 +242,54 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(10);
         targetManagement.deleteTargets(targets);
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
+    }
+
+    @Test
+    @Description("Ensures that target attribute update is reflected by the repository.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3) })
+    public void updateTargetAttributes() {
+        final String controllerId = "test123";
+        testdataFactory.createTarget(controllerId);
+        addAttributeAndVerify(controllerId);
+        addSecondAttributeAndVerify(controllerId);
+        updateAttributeAndVerify(controllerId);
+    }
+
+    @Step
+    private void addAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
+        testData.put("test1", "testdata1");
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void addSecondAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        testData.put("test2", "testdata20");
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        testData.put("test1", "testdata1");
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void updateAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        testData.put("test1", "testdata12");
+
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        testData.put("test2", "testdata20");
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
     }
 
     private Target createTargetWithAttributes(final String controllerId) {

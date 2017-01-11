@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -94,6 +95,11 @@ public class NotificationUnreadButton extends Button {
         notificationsWindow.setDraggable(false);
         notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_id);
         notificationsWindow.addCloseListener(event -> refreshCaption());
+        notificationsWindow.addBlurListener(this::closeWindow);
+    }
+
+    private void closeWindow(final BlurEvent event) {
+        getUI().removeWindow((Window) event.getComponent());
     }
 
     private void toggleWindow(final ClickEvent event) {

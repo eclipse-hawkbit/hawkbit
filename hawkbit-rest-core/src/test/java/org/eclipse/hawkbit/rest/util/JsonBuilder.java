@@ -194,7 +194,48 @@ public abstract class JsonBuilder {
                                                 new JSONObject().put("cnt", 2).put("of", 5)))
                                 .put("details", messages))
                 .toString();
+    }
 
+    /**
+     * Build an invalid request body with missing result for feedback message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        final List<String> messages = new ArrayList<>();
+        messages.add(message);
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status", new JSONObject().put("execution", execution).put("details", messages)).toString();
+    }
+
+    /**
+     * Build an invalid request body with missing finished result for feedback
+     * message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingFinishedResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        final List<String> messages = new ArrayList<>();
+        messages.add(message);
+        return new JSONObject().put("id", id).put("time", "20140511T121314").put("status",
+                new JSONObject().put("execution", execution).put("result", new JSONObject()).put("details", messages))
+                .toString();
     }
 
     /**
