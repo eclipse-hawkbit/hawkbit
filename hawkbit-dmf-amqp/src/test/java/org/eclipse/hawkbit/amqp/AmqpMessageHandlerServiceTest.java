@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -49,9 +50,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.junit.Before;
 import org.junit.Test;
@@ -149,10 +148,12 @@ public class AmqpMessageHandlerServiceTest {
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
+        final Target targetMock = mock(Target.class);
+
         final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
-                uriCaptor.capture())).thenReturn(null);
+                uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(Matchers.any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
@@ -326,11 +327,14 @@ public class AmqpMessageHandlerServiceTest {
 
         // mock
         final Artifact localArtifactMock = mock(Artifact.class);
+        final Long mockedArtifactId = 1L;
+        when(localArtifactMock.getId()).thenReturn(mockedArtifactId);
+
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
         when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
-        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), localArtifactMock))
+        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), mockedArtifactId))
                 .thenReturn(true);
-        when(artifactManagementMock.loadArtifactBinary(localArtifactMock)).thenReturn(dbArtifactMock);
+        when(artifactManagementMock.loadArtifactBinary(anyLong())).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
         when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash("sha1", "md5"));
@@ -377,8 +381,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
         // verify
-        verify(controllerManagementMock).updateTargetStatus(Matchers.any(TargetInfo.class),
-                Matchers.isNull(TargetUpdateStatus.class), Matchers.isNotNull(Long.class), Matchers.isNull(URI.class));
+        verify(controllerManagementMock).updateLastTargetQuery(Matchers.any(String.class), Matchers.isNull(URI.class));
 
         final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);

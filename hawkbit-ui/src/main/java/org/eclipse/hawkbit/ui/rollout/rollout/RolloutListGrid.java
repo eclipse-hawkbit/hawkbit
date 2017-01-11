@@ -165,7 +165,7 @@ public class RolloutListGrid extends AbstractGrid {
      * Handles the RolloutChangeEvent to refresh the item in the grid.
      *
      * @param eventContainer
-     *            the event which contains the rollout which has been changed
+     *            container which holds the rollout change event
      */
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -266,7 +266,9 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
-            getColumn(UPDATE_OPTION).setMaximumWidth(25);
+            getColumn(UPDATE_OPTION).setMaximumWidth(40);
+        } else {
+            getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setMinimumWidth(25);
@@ -274,8 +276,6 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
-
-        setFrozenColumnCount(getColumns().size());
     }
 
     @Override
@@ -305,7 +305,12 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
         }
 
-        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION);
+        HeaderCell join;
+        if (permissionChecker.hasRolloutUpdatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION);
+        } else {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
+        }
         join.setText(i18n.get("header.action"));
     }
 

@@ -163,7 +163,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // binary
         try (InputStream fileInputStream = artifactManagement
-                .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0))
+                .loadArtifactBinary(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getId())
                 .getFileInputStream()) {
             assertTrue("Wrong artifact content",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
@@ -689,9 +689,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("[1].createdAt", not(equalTo(0)))).andReturn();
 
         final SoftwareModule osCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name1", "version1",
-                osType);
+                osType.getId());
         final SoftwareModule appCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name3", "version3",
-                appType);
+                appType.getId());
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())

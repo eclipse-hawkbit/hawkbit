@@ -406,7 +406,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
                 .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-        if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
+        if (distributionSetManagement.countDistributionSetsByType(existingType.getId()) <= 0 && null != itemIds
                 && !itemIds.isEmpty()) {
 
             update.mandatory(itemIds.stream().filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
@@ -509,7 +509,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag) <= 0) {
+            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
             } else {

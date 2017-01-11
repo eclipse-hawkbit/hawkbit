@@ -227,7 +227,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
         final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type));
+                swMgmtService.findSoftwareModuleTypeByName(type).getId());
 
         if (swModule != null) {
             uiNotifcation.displayValidationError(

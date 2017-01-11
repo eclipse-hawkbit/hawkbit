@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -49,15 +48,13 @@ public final class ActionSpecifications {
      *            assigned
      * @return a specification to use with spring JPA
      */
-    public static Specification<JpaAction> hasTargetAssignedArtifact(final Target target,
-            final Artifact localArtifact) {
+    public static Specification<JpaAction> hasTargetAssignedArtifact(final Target target, final Long localArtifact) {
         return (actionRoot, query, criteriaBuilder) -> {
             final Join<JpaAction, JpaDistributionSet> dsJoin = actionRoot.join(JpaAction_.distributionSet);
             final SetJoin<JpaDistributionSet, JpaSoftwareModule> modulesJoin = dsJoin.join(JpaDistributionSet_.modules);
             final ListJoin<JpaSoftwareModule, JpaArtifact> artifactsJoin = modulesJoin
                     .join(JpaSoftwareModule_.artifacts);
-            return criteriaBuilder.and(
-                    criteriaBuilder.equal(artifactsJoin.get(JpaArtifact_.filename), localArtifact.getFilename()),
+            return criteriaBuilder.and(criteriaBuilder.equal(artifactsJoin.get(JpaArtifact_.id), localArtifact),
                     criteriaBuilder.equal(actionRoot.get(JpaAction_.target), target));
         };
     }

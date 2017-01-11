@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -51,13 +52,13 @@ public interface RolloutGroupManagement {
      * 
      * @param pageRequest
      *            the page request to sort and limit the result
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @return {@link TargetWithActionStatus} target with action status
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull PageRequest pageRequest,
-            @NotNull RolloutGroup rolloutGroup);
+            @NotNull Long rolloutGroupId);
 
     /**
      * Retrieves a single {@link RolloutGroup} by its ID.
@@ -109,20 +110,23 @@ public interface RolloutGroupManagement {
     /**
      * Get targets of specified rollout group.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @param page
      *            the page request to sort and limit the result
      * 
      * @return Page<Target> list of targets of a rollout group
+     * 
+     * @throws EntityNotFoundException
+     *             if group with ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull Pageable page);
+    Page<Target> findRolloutGroupTargets(@NotNull Long rolloutGroupId, @NotNull Pageable page);
 
     /**
      * Get targets of specified rollout group.
      * 
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            rollout group
      * @param rsqlParam
      *            the specification for filtering the targets of a rollout group
@@ -138,7 +142,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull String rsqlParam,
+    Page<Target> findRolloutGroupTargets(@NotNull Long rolloutGroupId, @NotNull String rsqlParam,
             @NotNull Pageable pageable);
 
     /**

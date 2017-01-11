@@ -61,11 +61,11 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *
      * @param pageable
      *            page parameters
-     * @param ds
+     * @param dsId
      *            the {@link DistributionSet} on which will be filtered
      * @return the found {@link Action}s
      */
-    Page<Action> findByDistributionSet(final Pageable pageable, final JpaDistributionSet ds);
+    Page<Action> findByDistributionSetId(final Pageable pageable, final Long dsId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -73,11 +73,11 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *
      * @param pageable
      *            page parameters
-     * @param target
+     * @param controllerId
      *            the target to find assigned actions
      * @return the found {@link Action}s
      */
-    Slice<Action> findByTarget(Pageable pageable, JpaTarget target);
+    Slice<Action> findByTargetControllerId(Pageable pageable, String controllerId);
 
     /**
      * Retrieves all {@link Action}s which are active and referring to the given
@@ -97,7 +97,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * 
      * @param sort
      *            order
-     * @param target
+     * @param controllerId
      *            the target to find assigned actions
      * @param active
      *            the action active flag
@@ -105,7 +105,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Optional<Action> findFirstByTargetAndActive(final Sort sort, final JpaTarget target, boolean active);
+    Optional<Action> findFirstByTargetControllerIdAndActive(final Sort sort, final String controllerId, boolean active);
 
     /**
      * Retrieves latest {@link Action} for given target and
@@ -162,8 +162,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return a list of actions ordered by action ID
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    @Query("Select a from JpaAction a where a.target = :target and a.active= :active order by a.id")
-    List<Action> findByActiveAndTarget(@Param("target") JpaTarget target, @Param("active") boolean active);
+    @Query("Select a from JpaAction a where a.target.controllerId = :target and a.active= :active order by a.id")
+    List<Action> findByActiveAndTarget(@Param("target") String target, @Param("active") boolean active);
 
     /**
      * Switches the status of actions from one specific status into another,
@@ -203,11 +203,11 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Counts all {@link Action}s referring to the given target.
      *
-     * @param target
+     * @param controllerId
      *            the target to count the {@link Action}s
      * @return the count of actions referring to the given target
      */
-    Long countByTarget(JpaTarget target);
+    Long countByTargetControllerId(String controllerId);
 
     /**
      * Counts all {@link Action}s referring to the given DistributionSet.
@@ -216,7 +216,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            DistributionSet to count the {@link Action}s from
      * @return the count of actions referring to the given distributionSet
      */
-    Long countByDistributionSet(JpaDistributionSet distributionSet);
+    Long countByDistributionSetId(Long distributionSet);
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup which
@@ -303,13 +303,13 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout the actions beglong to
      * @param actionStatus
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
-    List<Action> findByRolloutAndStatus(JpaRollout rollout, Status actionStatus);
+    List<Action> findByRolloutIdAndStatus(Long rolloutId, Status actionStatus);
 
     /**
      * Get list of objects which has details of status and count of targets in

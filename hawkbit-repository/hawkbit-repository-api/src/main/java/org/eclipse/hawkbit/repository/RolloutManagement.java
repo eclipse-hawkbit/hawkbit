@@ -322,12 +322,12 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            the ID of the {@link Rollout}
-     * @param rolloutGroup
+     * @param rolloutGroupId
      *            the ID of the {@link RolloutGroup}
      * @return percentage finished
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    float getFinishedPercentForRunningGroup(@NotNull Long rolloutId, @NotNull RolloutGroup rolloutGroup);
+    float getFinishedPercentForRunningGroup(@NotNull Long rolloutId, @NotNull Long rolloutGroupId);
 
     /**
      * Pauses a rollout which is currently running. The Rollout switches
@@ -345,10 +345,11 @@ public interface RolloutManagement {
      *            the rollout to be paused.
      *
      * @throws EntityNotFoundException
-     *             if rollout with given ID does not exist
+     *             if rollout or group with given ID does not exist
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void pauseRollout(@NotNull Long rollout);

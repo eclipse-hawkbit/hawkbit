@@ -167,10 +167,8 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-
         final List<DistributionSet> assignedDs = this.distributionSetManagement
-                .assignTag(findDistributionSetIds(assignedDSRequestBodies), tag);
+                .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
         LOG.debug("Assignd DistributionSet {}", assignedDs.size());
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs), HttpStatus.OK);
     }
@@ -179,14 +177,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<Void> unassignDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         LOG.debug("Unassign all DS for ds tag {}", distributionsetTagId);
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-        if (tag.getAssignedToDistributionSet() == null) {
-            LOG.debug("No assigned ds founded");
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
 
         final List<DistributionSet> distributionSets = this.distributionSetManagement
-                .unAssignAllDistributionSetsByTag(tag);
+                .unAssignAllDistributionSetsByTag(distributionsetTagId);
         LOG.debug("Unassigned ds {}", distributionSets.size());
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -196,8 +189,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @PathVariable("distributionsetId") final Long distributionsetId) {
         LOG.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-        this.distributionSetManagement.unAssignTag(distributionsetId, tag);
+        this.distributionSetManagement.unAssignTag(distributionsetId, distributionsetTagId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

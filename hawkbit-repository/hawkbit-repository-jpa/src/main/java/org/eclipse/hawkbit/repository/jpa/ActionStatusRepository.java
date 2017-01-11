@@ -44,11 +44,11 @@ public interface ActionStatusRepository
      * 
      * @param pageReq
      *            parameters
-     * @param action
+     * @param actionId
      *            of the status entries
      * @return pages list of {@link ActionStatus} entries
      */
-    Page<ActionStatus> findByAction(Pageable pageReq, JpaAction action);
+    Page<ActionStatus> findByActionId(Pageable pageReq, Long actionId);
 
     /**
      * Finds all status updates for the defined action and target including
@@ -58,11 +58,11 @@ public interface ActionStatusRepository
      *            for page configuration
      * @param target
      *            to look for
-     * @param action
+     * @param actionId
      *            to look for
      * @return Page with found targets
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByAction(Pageable pageReq, JpaAction action);
+    Page<ActionStatus> getByActionId(Pageable pageReq, Long actionId);
 
 }

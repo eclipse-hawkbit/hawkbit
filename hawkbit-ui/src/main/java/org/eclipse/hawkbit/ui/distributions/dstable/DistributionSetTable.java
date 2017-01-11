@@ -345,7 +345,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             return false;
         }
 
-        if (distributionSetManagement.isDistributionSetInUse(ds)) {
+        if (distributionSetManagement.isDistributionSetInUse(ds.getId())) {
             notification.displayValidationError(
                     i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;

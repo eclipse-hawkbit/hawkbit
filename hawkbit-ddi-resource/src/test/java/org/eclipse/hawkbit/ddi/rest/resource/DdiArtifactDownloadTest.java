@@ -379,13 +379,15 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
         // one (update) action
-        assertThat(deploymentManagement.findActionsByTarget(target)).hasSize(1);
-        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
+        assertThat(deploymentManagement.countActionsByTarget(target.getControllerId())).isEqualTo(1);
+        final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), pageReq).getContent()
+                .get(0);
 
         // one status - download
         assertThat(action.getActionStatus()).hasSize(2);
-        assertThat(deploymentManagement.findActionStatusByAction(new PageRequest(0, 400, Direction.DESC, "id"), action)
-                .getContent().get(0).getStatus()).isEqualTo(Status.DOWNLOAD);
+        assertThat(deploymentManagement
+                .findActionStatusByAction(new PageRequest(0, 400, Direction.DESC, "id"), action.getId()).getContent()
+                .get(0).getStatus()).isEqualTo(Status.DOWNLOAD);
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);

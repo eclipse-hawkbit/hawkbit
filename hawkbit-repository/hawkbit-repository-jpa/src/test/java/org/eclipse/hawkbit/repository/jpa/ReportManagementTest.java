@@ -139,8 +139,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             final Target createTarget = testdataFactory.createTarget("t" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(
-                    deploymentManagement.findActionWithDetails(result.getActions().get(0)),
+            controllerManagament.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
         DataReportSeries<LocalDate> feedbackReceivedOverTime = reportManagement
@@ -161,8 +160,7 @@ public class ReportManagementTest extends AbstractJpaIntegrationTest {
             final Target createTarget = testdataFactory.createTarget("t2" + month);
             final DistributionSetAssignmentResult result = assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(
-                    deploymentManagement.findActionWithDetails(result.getActions().get(0)),
+            controllerManagament.registerRetrieved(result.getActions().get(0),
                     "Controller retrieved update action and should start now the download.");
         }
         feedbackReceivedOverTime = reportManagement.feedbackReceivedOverTime(DateTypes.perMonth(), from, to);

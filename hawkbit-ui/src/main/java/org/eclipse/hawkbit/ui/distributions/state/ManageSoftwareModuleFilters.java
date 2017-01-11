@@ -34,7 +34,7 @@ public class ManageSoftwareModuleFilters implements Serializable {
      * @return the softwareModuleType
      */
     public Optional<SoftwareModuleType> getSoftwareModuleType() {
-        return softwareModuleType == null ? Optional.empty() : Optional.of(softwareModuleType);
+        return Optional.ofNullable(softwareModuleType);
     }
 
     /**
@@ -49,7 +49,7 @@ public class ManageSoftwareModuleFilters implements Serializable {
      * @return the searchText
      */
     public Optional<String> getSearchText() {
-        return searchText == null ? Optional.empty() : Optional.of(searchText);
+        return Optional.ofNullable(searchText);
     }
 
     /**

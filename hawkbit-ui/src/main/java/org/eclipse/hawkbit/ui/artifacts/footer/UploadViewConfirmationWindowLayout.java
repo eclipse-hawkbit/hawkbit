@@ -239,8 +239,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         final int deleteSWModuleTypeCount = artifactUploadState.getSelectedDeleteSWModuleTypes().size();
         for (final String swModuleTypeName : artifactUploadState.getSelectedDeleteSWModuleTypes()) {
 
-            softwareManagement
-                    .deleteSoftwareModuleType(softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName));
+            softwareManagement.deleteSoftwareModuleType(
+                    softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName).getId());
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));

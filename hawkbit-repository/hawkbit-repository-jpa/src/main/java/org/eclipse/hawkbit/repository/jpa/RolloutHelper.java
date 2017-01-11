@@ -189,11 +189,11 @@ final class RolloutHelper {
      *            the group to add
      * @return list of groups
      */
-    static List<RolloutGroup> getGroupsByStatusIncludingGroup(final Rollout rollout,
+    static List<Long> getGroupsByStatusIncludingGroup(final Rollout rollout,
             final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
         return rollout.getRolloutGroups().stream()
                 .filter(innerGroup -> innerGroup.getStatus().equals(status) || innerGroup.equals(group))
-                .collect(Collectors.toList());
+                .map(RolloutGroup::getId).collect(Collectors.toList());
     }
 
     /**
