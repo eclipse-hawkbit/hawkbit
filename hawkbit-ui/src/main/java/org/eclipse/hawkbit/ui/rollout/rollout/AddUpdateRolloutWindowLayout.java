@@ -176,7 +176,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         createRequiredComponents();
         buildLayout();
 
-        defineGroupsLayout.setValidationListener(isValid -> validateGroups());
+        defineGroupsLayout.setValidationListener(this::displayValidationStatus);
         defineGroupsLayout.setDefaultErrorThreshold(defaultRolloutGroupConditions.getErrorConditionExp());
         defineGroupsLayout.setDefaultTriggerThreshold(defaultRolloutGroupConditions.getSuccessConditionExp());
     }
@@ -370,11 +370,19 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         groupsPieChart = new GroupsPieChart();
         groupsPieChart.setWidth(260, Unit.PIXELS);
-        groupsPieChart.setHeight(200, Unit.PIXELS);
+        groupsPieChart.setHeight(220, Unit.PIXELS);
         groupsPieChart.setStyleName(SPUIStyleDefinitions.ROLLOUT_GROUPS_CHART);
 
         groupsLegendLayout = new GroupsLegendLayout(i18n);
 
+    }
+
+    private void displayValidationStatus(DefineGroupsLayout.ValidationStatus status) {
+        if(status == DefineGroupsLayout.ValidationStatus.LOADING) {
+            groupsLegendLayout.displayLoading();
+        } else {
+            validateGroups();
+        }
     }
 
     private TabSheet createGroupDefinitionTabs() {

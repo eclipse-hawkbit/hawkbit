@@ -33,6 +33,8 @@ public class GroupsLegendLayout extends VerticalLayout {
 
     private Label totalTargetsLabel;
 
+    private Label loadingLabel;
+
     private Label unassignedTargetsLabel;
 
     private VerticalLayout groupsLegend;
@@ -49,15 +51,15 @@ public class GroupsLegendLayout extends VerticalLayout {
     private void init() {
 
         totalTargetsLabel = createTotalTargetsLabel();
-        groupsLegend = new VerticalLayout();
-        groupsLegend.setStyleName("groups-legend");
-
         unassignedTargetsLabel = createUnassignedTargetsLabel();
+        loadingLabel = createLoadingLabel();
+        loadingLabel.setVisible(false);
 
         groupsLegend = new VerticalLayout();
         groupsLegend.setStyleName("groups-legend");
 
         addComponent(totalTargetsLabel);
+        addComponent(loadingLabel);
         addComponent(unassignedTargetsLabel);
         addComponent(groupsLegend);
         for (int i = 0; i < 8; i++) {
@@ -82,6 +84,15 @@ public class GroupsLegendLayout extends VerticalLayout {
         return label;
     }
 
+    private Label createLoadingLabel() {
+        final Label label = new LabelBuilder().visible(false).name("").buildLabel();
+        label.addStyleName("rollout-target-count-loading");
+        label.setImmediate(true);
+        label.setSizeUndefined();
+        label.setValue(i18n.get("label.rollout.calculating"));
+        return label;
+    }
+
     private static Label createUnassignedTargetsLabel() {
         final Label label = new LabelBuilder().visible(false).name("").buildLabel();
         label.addStyleName("rollout-group-unassigned");
@@ -98,6 +109,15 @@ public class GroupsLegendLayout extends VerticalLayout {
 
     private String getTotalTargetMessage(final long totalTargetsCount) {
         return i18n.get("label.target.filter.count") + totalTargetsCount;
+    }
+
+    /**
+     * Display an indication that the legend is being calculated.
+     * When the loading process is done one of the populate methods should be called.
+     */
+    public void displayLoading() {
+        populateGroupsLegendByTargetCounts(Collections.emptyList());
+        loadingLabel.setVisible(true);
     }
 
     /**
@@ -124,6 +144,8 @@ public class GroupsLegendLayout extends VerticalLayout {
      *            list of target counts
      */
     public void populateGroupsLegendByTargetCounts(final List<Long> targetsPerGroup) {
+        loadingLabel.setVisible(false);
+
         for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
             final Component component = groupsLegend.getComponent(i);
             final Label label = (Label) component;
@@ -157,6 +179,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      *            List of groups with their name
      */
     public void populateGroupsLegendByValidation(final RolloutGroupsValidation validation, final List<RolloutGroupCreate> groups) {
+        loadingLabel.setVisible(false);
         if (validation == null) {
             return;
         }
@@ -196,6 +219,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      *            List of groups with their name
      */
     public void populateGroupsLegendByGroups(final List<RolloutGroup> groups) {
+        loadingLabel.setVisible(false);
 
         for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
             final Component component = groupsLegend.getComponent(i);

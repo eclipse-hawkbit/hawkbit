@@ -279,7 +279,7 @@ public class DefineGroupsLayout extends GridLayout {
     private void setGroupsValidation(RolloutGroupsValidation validation) {
         groupsValidation = validation;
         final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
-        if (groupsValidation != null && groupsValidation.isValid() && isValid()) {
+        if (groupsValidation != null && groupsValidation.isValid() && validationStatus != ValidationStatus.INVALID) {
             lastRow.hideLastGroupError();
             setValidationStatus(ValidationStatus.VALID);
 
