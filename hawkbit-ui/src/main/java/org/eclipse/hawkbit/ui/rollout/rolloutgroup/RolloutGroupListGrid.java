@@ -173,8 +173,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setMaximumWidth(100);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
-
-        setFrozenColumnCount(7);
     }
 
     @Override
