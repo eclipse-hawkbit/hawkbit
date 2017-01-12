@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -83,15 +84,17 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        if (isNotEmpty(getTagNameValue())) {
+        final String tagNameValueTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
+        final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
+        if (isNotEmpty(tagNameValueTrimmed)) {
 
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (isNotEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 
-            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(
-                    entityFactory.tag().create().name(tagNameValue).description(tagDescValue).colour(colour));
+            final DistributionSetTag newDistTag = tagManagement.createDistributionSetTag(entityFactory.tag().create()
+                    .name(tagNameValueTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
             displaySuccess(newDistTag.getName());
             resetDistTagValues();

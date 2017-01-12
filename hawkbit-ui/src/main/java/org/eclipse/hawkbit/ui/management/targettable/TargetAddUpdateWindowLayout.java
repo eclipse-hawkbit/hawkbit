@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -100,7 +101,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        descTextArea.setNullRepresentation(StringUtils.EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String id) {
@@ -145,9 +146,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     }
 
     public Window getWindow() {
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
-                .buildCommonDialogWindow();
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         return window;
     }
@@ -203,9 +204,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.setValue(target.getControllerId());
         controllerIDTextField.setEnabled(Boolean.FALSE);
         nameTextField.setValue(target.getName());
-        if (target.getDescription() != null) {
-            descTextArea.setValue(target.getDescription());
-        }
+        nameTextField.setRequired(true);
+        descTextArea.setValue(target.getDescription());
     }
 
     public FormLayout getFormLayout() {

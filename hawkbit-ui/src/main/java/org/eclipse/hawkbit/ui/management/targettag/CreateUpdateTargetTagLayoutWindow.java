@@ -22,12 +22,12 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- *
  * Class for Create / Update Tag Layout of target
  */
 public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout<TargetTag>
@@ -35,6 +35,22 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     private static final long serialVersionUID = 2446682350481560235L;
 
+    /**
+     * Constructor for CreateUpdateTargetTagLayoutWindow
+     * 
+     * @param i18n
+     *            I18N
+     * @param tagManagement
+     *            TagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public CreateUpdateTargetTagLayoutWindow(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
@@ -68,7 +84,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
         final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
-        if (null != selectedTargetTag) {
+        if (selectedTargetTag != null) {
             tagDesc.setValue(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
@@ -100,14 +116,16 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     protected void createNewTag() {
         super.createNewTag();
-        if (isNotEmpty(getTagNameValue())) {
+        final String tagNameTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagNameValue);
+        final String tagDescriptionTrimmed = HawkbitCommonUtil.trimAndNullIfEmpty(tagDescValue);
+        if (isNotEmpty(tagNameTrimmed)) {
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (isNotEmpty(getColorPicked())) {
                 colour = getColorPicked();
             }
 
-            final TargetTag newTargetTag = tagManagement.createTargetTag(
-                    entityFactory.tag().create().name(getTagNameValue()).description(getTagDescValue()).colour(colour));
+            final TargetTag newTargetTag = tagManagement.createTargetTag(entityFactory.tag().create()
+                    .name(tagNameTrimmed).description(tagDescriptionTrimmed).colour(colour));
             eventBus.publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());
         } else {
