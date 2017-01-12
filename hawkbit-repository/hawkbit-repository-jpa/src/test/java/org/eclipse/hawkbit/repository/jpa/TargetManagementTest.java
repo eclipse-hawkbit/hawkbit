@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
@@ -496,7 +495,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         firstList = firstList.stream()
                 .map(t -> targetManagement.updateTarget(
                         entityFactory.target().update(t.getControllerId()).name(t.getName().concat("\tchanged"))))
-                .collect(Collectors.toList());
+                .collect(toList());
 
         // verify that all entries are found
         _founds: for (final Target foundTarget : allFound) {
@@ -707,14 +706,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         toggleTagAssignment(targAs, targTagA);
 
         assertThat(targetManagement.findTargetsByControllerIDsWithTags(
-                targAs.stream().map(Target::getControllerId).collect(Collectors.toList()))).as("Target count is wrong")
+                targAs.stream().map(Target::getControllerId).collect(toList()))).as("Target count is wrong")
                         .hasSize(25);
 
         // no lazy loading exception and tag correctly assigned
         assertThat(targetManagement
                 .findTargetsByControllerIDsWithTags(
-                        targAs.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .stream().map(target -> target.getTags().contains(targTagA)).collect(Collectors.toList()))
+                        targAs.stream().map(Target::getControllerId).collect(toList()))
+                .stream().map(target -> target.getTags().contains(targTagA)).collect(toList()))
                         .as("Tags not correctly assigned").containsOnly(true);
     }
 
@@ -763,7 +762,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
         final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
-                .map(Target::getControllerId).collect(Collectors.toList());
+                .map(Target::getControllerId).collect(toList());
         targetManagement.toggleTagAssignment(targAs, targTagA.getName());
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
