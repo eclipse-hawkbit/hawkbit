@@ -105,9 +105,7 @@
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
-      <!-- Newer versions needed than defined in Boot -->
-      <!-- Known security constraints -->
-      <tomcat.version>8.5.9</tomcat.version>
+      <!-- Newer versions needed than defined in Boot -->      
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
