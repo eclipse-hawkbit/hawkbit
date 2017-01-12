@@ -150,9 +150,9 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Lists.newArrayList(target);
 
         final Iterable<Target> saved = assignDistributionSet(ds, toAssign).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(target)).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(target.getControllerId())).hasSize(1);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(target).get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(target.getControllerId()).get(0);
 
         return uaction.getId();
     }

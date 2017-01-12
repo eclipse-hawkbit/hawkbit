@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 import java.util.Collections;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,9 +24,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public class DdiStatus {
 
     @NotNull
+    @Valid
     private final ExecutionStatus execution;
 
     @NotNull
+    @Valid
     private final DdiResult result;
 
     private final List<String> details;
@@ -60,8 +63,8 @@ public class DdiStatus {
     public List<String> getDetails() {
         if (details == null) {
             return Collections.emptyList();
-        }        
-        
+        }
+
         return Collections.unmodifiableList(details);
     }
 

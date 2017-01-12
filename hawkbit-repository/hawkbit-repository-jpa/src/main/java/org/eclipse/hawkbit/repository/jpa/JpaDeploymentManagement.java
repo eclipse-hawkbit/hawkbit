@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -85,7 +87,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -178,20 +179,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
 
         return assignDistributionSetToTargets(set, targets, null, null, actionMessage);
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
-            final Collection<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
-        final JpaDistributionSet set = distributoinSetRepository.findOne(dsID);
-        if (set == null) {
-            throw new EntityNotFoundException(
-                    String.format("no %s with id %d found", DistributionSet.class.getSimpleName(), dsID));
-        }
-
-        return assignDistributionSetToTargets(set, targets, (JpaRollout) rollout, (JpaRolloutGroup) rolloutGroup, null);
     }
 
     /**
@@ -375,22 +362,25 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action cancelAction(final Action action, final Target target) {
-        LOG.debug("cancelAction({}, {})", action, target);
+    public Action cancelAction(final Long actionId) {
+        LOG.debug("cancelAction({})", actionId);
+
+        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
+
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
         }
-        final JpaAction myAction = (JpaAction) entityManager.merge(action);
 
-        if (myAction.isActive()) {
+        if (action.isActive()) {
             LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
-            myAction.setStatus(Status.CANCELING);
+            action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(myAction, Status.CANCELING, System.currentTimeMillis(),
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     "manual cancelation requested"));
-            final Action saveAction = actionRepository.save(myAction);
-            cancelAssignDistributionSetEvent(target, myAction.getId());
+            final Action saveAction = actionRepository.save(action);
+            cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
             return saveAction;
         } else {
@@ -421,15 +411,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action forceQuitAction(final Action action) {
-        final JpaAction mergedAction = (JpaAction) entityManager.merge(action);
+    public Action forceQuitAction(final Long actionId) {
+        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with given ID " + actionId + " not found"));
 
-        if (!mergedAction.isCancelingOrCanceled()) {
+        if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(
                     "Action [id: " + action.getId() + "] is not canceled yet and cannot be force quit");
         }
 
-        if (!mergedAction.isActive()) {
+        if (!action.isActive()) {
             throw new ForceQuitActionNotAllowedException(
                     "Action [id: " + action.getId() + "] is not active and cannot be force quit");
         }
@@ -437,39 +428,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         LOG.warn("action ({}) was still activ and has been force quite.", action);
 
         // document that the status has been retrieved
-        actionStatusRepository.save(new JpaActionStatus(mergedAction, Status.CANCELED, System.currentTimeMillis(),
+        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                 "A force quit has been performed."));
 
-        DeploymentHelper.successCancellation(mergedAction, actionRepository, targetRepository, targetInfoRepository,
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository, targetInfoRepository,
                 entityManager);
 
-        return actionRepository.save(mergedAction);
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
-            final ActionType actionType, final Long forcedTime, final Rollout rollout,
-            final RolloutGroup rolloutGroup) {
-        // cancel all current scheduled actions for this target. E.g. an action
-        // is already scheduled and a next action is created then cancel the
-        // current scheduled action to cancel. E.g. a new scheduled action is
-        // created.
-        final List<Long> targetIds = targets.stream().map(t -> t.getId()).collect(Collectors.toList());
-        actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
-        targets.forEach(target -> {
-            final JpaAction action = new JpaAction();
-            action.setTarget(target);
-            action.setActive(false);
-            action.setDistributionSet(distributionSet);
-            action.setActionType(actionType);
-            action.setForcedTime(forcedTime);
-            action.setStatus(Status.SCHEDULED);
-            action.setRollout(rollout);
-            action.setRolloutGroup(rolloutGroup);
-            actionRepository.save(action);
-        });
+        return actionRepository.save(action);
     }
 
     @Override
@@ -515,14 +480,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return actionRepository.findByRolloutAndRolloutGroupParentAndStatus(pageRequest, jpaRollout,
                     jpaRolloutGroup, Action.Status.SCHEDULED);
         }
-    }
-
-    @Override
-    @Modifying
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
-    public Action startScheduledAction(final Long actionId) {
-        final JpaAction action = actionRepository.findById(actionId);
-        return startScheduledAction(action);
     }
 
     private Action startScheduledAction(final JpaAction action) {
@@ -595,17 +552,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Slice<Action> findActionsByTarget(final Pageable pageable, final Target target) {
-        return actionRepository.findByTarget(pageable, (JpaTarget) target);
+    public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
+        return actionRepository.findByTargetControllerId(pageable, controllerId);
     }
 
     @Override
-    public List<Action> findActionsByTarget(final Target target) {
-        return Collections.unmodifiableList(actionRepository.findByTarget(target));
-    }
-
-    @Override
-    public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final Target target) {
+    public List<ActionWithStatusCount> findActionsWithStatusCountByTargetOrderByIdDesc(final String controllerId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<JpaActionWithStatusCount> query = cb.createQuery(JpaActionWithStatusCount.class);
         final Root<JpaAction> actionRoot = query.from(JpaAction.class);
@@ -621,24 +573,25 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 actionDsJoin.get(JpaDistributionSet_.id), actionDsJoin.get(JpaDistributionSet_.name),
                 actionDsJoin.get(JpaDistributionSet_.version), cb.count(actionStatusJoin),
                 actionRolloutJoin.get(JpaRollout_.name));
-        multiselect.where(cb.equal(actionRoot.get(JpaAction_.target), target));
+        multiselect.where(cb.equal(actionRoot.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
         multiselect.orderBy(cb.desc(actionRoot.get(JpaAction_.id)));
         multiselect.groupBy(actionRoot.get(JpaAction_.id));
         return Collections.unmodifiableList(entityManager.createQuery(multiselect).getResultList());
     }
 
     @Override
-    public Page<Action> findActionsByTarget(final String rsqlParam, final Target target, final Pageable pageable) {
+    public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
+            final Pageable pageable) {
 
-        final Specification<JpaAction> byTargetSpec = createSpecificationFor(target, rsqlParam);
+        final Specification<JpaAction> byTargetSpec = createSpecificationFor(controllerId, rsqlParam);
         final Page<JpaAction> actions = actionRepository.findAll(byTargetSpec, pageable);
         return convertAcPage(actions, pageable);
     }
 
-    private Specification<JpaAction> createSpecificationFor(final Target target, final String rsqlParam) {
+    private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
         final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class, virtualPropertyReplacer);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
-                cb.equal(root.get(JpaAction_.target), target));
+                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
     }
 
     private static Page<Action> convertAcPage(final Page<JpaAction> findAll, final Pageable pageable) {
@@ -646,28 +599,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Slice<Action> findActionsByTarget(final Target foundTarget, final Pageable pageable) {
-        return actionRepository.findByTarget(pageable, (JpaTarget) foundTarget);
+    public List<Action> findActiveActionsByTarget(final String controllerId) {
+        return actionRepository.findByActiveAndTarget(controllerId, true);
     }
 
     @Override
-    public List<Action> findActiveActionsByTarget(final Target target) {
-        return actionRepository.findByActiveAndTarget((JpaTarget) target, true);
+    public List<Action> findInActiveActionsByTarget(final String controllerId) {
+        return actionRepository.findByActiveAndTarget(controllerId, false);
     }
 
     @Override
-    public List<Action> findInActiveActionsByTarget(final Target target) {
-        return actionRepository.findByActiveAndTarget((JpaTarget) target, false);
+    public Long countActionsByTarget(final String controllerId) {
+        return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
-    public Long countActionsByTarget(final Target target) {
-        return actionRepository.countByTarget((JpaTarget) target);
-    }
-
-    @Override
-    public Long countActionsByTarget(final String rsqlParam, final Target target) {
-        return actionRepository.count(createSpecificationFor(target, rsqlParam));
+    public Long countActionsByTarget(final String rsqlParam, final String controllerId) {
+        return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
     }
 
     @Override
@@ -683,18 +631,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action) {
-        return actionStatusRepository.findByAction(pageReq, (JpaAction) action);
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Long actionId) {
+        return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Action action) {
-        return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
-    }
-
-    @Override
-    public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return actionRepository.findByRolloutAndStatus((JpaRollout) rollout, actionStatus);
+    public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Long actionId) {
+        return actionStatusRepository.getByActionId(pageReq, actionId);
     }
 
     @Override
@@ -717,8 +660,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final DistributionSet ds) {
-        return actionRepository.findByDistributionSet(pageable, (JpaDistributionSet) ds);
+    public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final Long dsId) {
+        return actionRepository.findByDistributionSetId(pageable, dsId);
     }
 
     @Override

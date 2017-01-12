@@ -202,13 +202,13 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Step("Finish three actions of the rollout group and delete two targets")
     private void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
         // finish group one by finishing targets and deleting targets
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
                 Status.RUNNING);
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
-        targetManagement.deleteTargets(runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId());
+        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(3).getTarget().getId(),
+                runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups, second group should be in running status")
@@ -223,22 +223,22 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Step("Finish one action of the rollout group and delete four targets")
     private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
                 Status.RUNNING);
         finishAction(runningActions.get(0));
-        targetManagement.deleteTargets(runningActions.get(1).getTarget().getId(),
-                runningActions.get(2).getTarget().getId(), runningActions.get(3).getTarget().getId(),
-                runningActions.get(4).getTarget().getId());
+        targetManagement.deleteTargets(
+                Lists.newArrayList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                        runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
 
     }
 
     @Step("Delete all targets of the rollout group")
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
-        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
                 Status.SCHEDULED);
-        targetManagement.deleteTargets(runningActions.get(0).getTarget().getId(),
+        targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
-                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId());
+                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
     }
 
     @Step("Check the status of the rollout groups and the rollout")
@@ -549,7 +549,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // 5 targets are in the group and the DS has been assigned
         final List<RolloutGroup> rolloutGroups = createdRollout.getRolloutGroups();
-        final Page<Target> targets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0),
+        final Page<Target> targets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(),
                 new OffsetBasedPageRequest(0, 20, new Sort(Direction.ASC, "id")));
         final List<Target> targetList = targets.getContent();
         assertThat(targetList.size()).isEqualTo(5);
@@ -922,14 +922,14 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
 
         float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0));
+                myRollout.getRolloutGroups().get(0).getId());
         assertThat(percent).isEqualTo(40);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
         rolloutManagement.checkRunningRollouts(0);
 
         percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(0));
+                myRollout.getRolloutGroups().get(0).getId());
         assertThat(percent).isEqualTo(100);
 
         changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
@@ -937,7 +937,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.checkRunningRollouts(0);
 
         percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout.getId(),
-                myRollout.getRolloutGroups().get(1));
+                myRollout.getRolloutGroups().get(1).getId());
         assertThat(percent).isEqualTo(80);
     }
 
@@ -966,19 +966,19 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
         final List<RolloutGroup> rolloutGroups = myRollout.getRolloutGroups();
 
-        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0), rsqlParam,
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
+        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0).getId(),
+                rsqlParam, new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
         final List<Target> targetlistGroup1 = targetPage.getContent();
         assertThat(targetlistGroup1.size()).isEqualTo(5);
         assertThat(targetlistGroup1.get(0).getControllerId()).isEqualTo("MyRollout--00000");
 
-        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1), rsqlParam,
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1).getId(), rsqlParam,
                 new OffsetBasedPageRequest(0, 100, new Sort(Direction.DESC, "controllerId")));
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2.size()).isEqualTo(5);
         assertThat(targetlistGroup2.get(0).getControllerId()).isEqualTo("MyRollout--00009");
 
-        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2), rsqlParam,
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2).getId(), rsqlParam,
                 new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
         final List<Target> targetlistGroup3 = targetPage.getContent();
         assertThat(targetlistGroup3.size()).isEqualTo(5);

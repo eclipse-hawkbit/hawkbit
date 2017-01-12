@@ -116,46 +116,43 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      * 
      * @param secruityToken
      *            the security token which holds the target ID to check on
-     * @param artifact
+     * @param artifactId
      *            the artifact to verify if the given target is allowed to
      *            download it
      */
-    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
-            final org.eclipse.hawkbit.repository.model.Artifact artifact) {
+    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken, final Long artifactId) {
 
         if (secruityToken.getControllerId() != null) {
-            checkByControllerId(artifact, secruityToken.getControllerId());
+            checkByControllerId(artifactId, secruityToken.getControllerId());
         } else if (secruityToken.getTargetId() != null) {
-            checkByTargetId(artifact, secruityToken.getTargetId());
+            checkByTargetId(artifactId, secruityToken.getTargetId());
         } else {
-            LOG.info("anonymous download no authentication check for artifact {}", artifact);
+            LOG.info("anonymous download no authentication check for artifact {}", artifactId);
             return;
         }
 
     }
 
-    private void checkByTargetId(final org.eclipse.hawkbit.repository.model.Artifact localArtifact,
-            final Long targetId) {
+    private void checkByTargetId(final Long artifactId, final Long targetId) {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}", targetId,
-                localArtifact);
-        if (!controllerManagement.hasTargetArtifactAssigned(targetId, localArtifact)) {
+                artifactId);
+        if (!controllerManagement.hasTargetArtifactAssigned(targetId, artifactId)) {
             LOG.info("target {} tried to download artifact {} which is not assigned to the target", targetId,
-                    localArtifact);
+                    artifactId);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", targetId, localArtifact);
+        LOG.info("download security check for target {} and artifact {} granted", targetId, artifactId);
     }
 
-    private void checkByControllerId(final org.eclipse.hawkbit.repository.model.Artifact localArtifact,
-            final String controllerId) {
+    private void checkByControllerId(final Long artifactId, final String controllerId) {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
-                controllerId, localArtifact);
-        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
+                controllerId, artifactId);
+        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, artifactId)) {
             LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
-                    localArtifact);
+                    artifactId);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", controllerId, localArtifact);
+        LOG.info("download security check for target {} and artifact {} granted", controllerId, artifactId);
     }
 
     private org.eclipse.hawkbit.repository.model.Artifact findArtifactByFileResource(final FileResource fileResource) {
@@ -201,9 +198,9 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
                 throw new EntityNotFoundException();
             }
 
-            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact);
+            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact.getId());
 
-            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(localArtifact));
+            final Artifact artifact = convertDbArtifact(artifactManagement.loadArtifactBinary(localArtifact.getId()));
             if (artifact == null) {
                 throw new EntityNotFoundException();
             }

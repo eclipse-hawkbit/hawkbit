@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -365,13 +366,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
+     * 
+     * @param targetFilterQueryRepository
+     *            to query entity access
+     * @param virtualPropertyReplacer
+     *            for RSQL handling
+     * @param distributionSetManagement
+     *            for auto assign DS access
      *
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
     @ConditionalOnMissingBean
-    public TargetFilterQueryManagement targetFilterQueryManagement() {
-        return new JpaTargetFilterQueryManagement();
+    public TargetFilterQueryManagement targetFilterQueryManagement(
+            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final DistributionSetManagement distributionSetManagement) {
+        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, virtualPropertyReplacer,
+                distributionSetManagement);
     }
 
     /**

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -41,6 +43,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditio
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -336,8 +339,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
-        final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
-                RolloutGroupStatus.READY, group);
+        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout, RolloutGroupStatus.READY,
+                group);
 
         final long targetsInGroupFilter = targetManagement
                 .countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter);
@@ -383,7 +386,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-            final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
+            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement
                     .findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
@@ -558,13 +561,54 @@ public class JpaRolloutManagement implements RolloutManagement {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest, group);
+            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest,
+                    groupId);
             if (targets.getTotalElements() > 0) {
-                deploymentManagement.createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime,
-                        rollout, group);
+                createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
 
             return targets.getNumberOfElements();
+        });
+    }
+
+    /**
+     * Creates an action entry into the action repository. In case of existing
+     * scheduled actions the scheduled actions gets canceled. A scheduled action
+     * is created in-active.
+     *
+     * @param targets
+     *            the targets to create scheduled actions for
+     * @param distributionSet
+     *            the distribution set for the actions
+     * @param actionType
+     *            the action type for the action
+     * @param forcedTime
+     *            the forcedTime of the action
+     * @param rollout
+     *            the roll out for this action
+     * @param rolloutGroup
+     *            the roll out group for this action
+     */
+    private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
+            final ActionType actionType, final Long forcedTime, final Rollout rollout,
+            final RolloutGroup rolloutGroup) {
+        // cancel all current scheduled actions for this target. E.g. an action
+        // is already scheduled and a next action is created then cancel the
+        // current scheduled action to cancel. E.g. a new scheduled action is
+        // created.
+        final List<Long> targetIds = targets.stream().map(t -> t.getId()).collect(Collectors.toList());
+        actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
+        targets.forEach(target -> {
+            final JpaAction action = new JpaAction();
+            action.setTarget(target);
+            action.setActive(false);
+            action.setDistributionSet(distributionSet);
+            action.setActionType(actionType);
+            action.setForcedTime(forcedTime);
+            action.setStatus(Status.SCHEDULED);
+            action.setRollout(rollout);
+            action.setRolloutGroup(rolloutGroup);
+            actionRepository.save(action);
         });
     }
 
@@ -903,7 +947,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
+    public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
+        final RolloutGroup rolloutGroup = Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rollout group with given ID " + rolloutGroupId + " not found."));
+
         final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);
