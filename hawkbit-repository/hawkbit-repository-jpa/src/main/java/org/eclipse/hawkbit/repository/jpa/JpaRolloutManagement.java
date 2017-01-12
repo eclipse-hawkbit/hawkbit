@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,6 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
@@ -68,7 +66,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -97,8 +94,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
 
     /**
-     * Maximum amount of targets that are assigned to a Rollout Group in one
-     * transaction.
+     * Max amount of targets that are handled in one transaction.
      */
     private static final int TRANSACTION_TARGETS = 1000;
 
@@ -146,15 +142,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable) {
-        return convertPage(rolloutRepository.findAll(pageable), pageable);
-    }
-
-    private static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    private static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
+        return RolloutHelper.convertPage(rolloutRepository.findAll(pageable), pageable);
     }
 
     @Override
@@ -164,7 +152,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 virtualPropertyReplacer);
 
         final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, pageable);
-        return convertPage(findAll, pageable);
+        return RolloutHelper.convertPage(findAll, pageable);
     }
 
     @Override
@@ -504,7 +492,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout startRollout(final Long rolloutId) {
         final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
                 .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
-        checkIfRolloutCanStarted(rollout, rollout);
+        RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
         rollout.setLastCheck(0);
         return rolloutRepository.save(rollout);
@@ -749,10 +737,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         final long updatedTargetCount = jpaRollout.getTotalTargets()
                 - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
         jpaRollout.setTotalTargets(updatedTargetCount);
-        final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
-        jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
+        rolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
         rolloutRepository.save(jpaRollout);
-        rolloutGroupRepository.save(jpaRolloutGroup);
+        rolloutGroupRepository.save(rolloutGroup);
     }
 
     private long countTargetsFrom(final JpaRolloutGroup rolloutGroup) {
@@ -914,25 +901,15 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Long countRolloutsAllByFilters(final String searchText) {
-        return rolloutRepository.count(likeNameOrDescription(searchText));
-    }
-
-    private static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
-        return (rolloutRoot, query, criteriaBuilder) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
-                            searchTextToLower));
-        };
+        return rolloutRepository.count(RolloutHelper.likeNameOrDescription(searchText));
     }
 
     @Override
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText) {
-        final Specification<JpaRollout> specs = likeNameOrDescription(searchText);
+        final Specification<JpaRollout> specs = RolloutHelper.likeNameOrDescription(searchText);
         final Slice<JpaRollout> findAll = criteriaNoCountDao.findAll(specs, pageable, JpaRollout.class);
         setRolloutStatusDetails(findAll);
-        return convertPage(findAll, pageable);
+        return RolloutHelper.convertPage(findAll, pageable);
     }
 
     @Override
@@ -968,7 +945,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable) {
         final Page<JpaRollout> rollouts = rolloutRepository.findAll(pageable);
         setRolloutStatusDetails(rollouts);
-        return convertPage(rollouts, pageable);
+        return RolloutHelper.convertPage(rollouts, pageable);
 
     }
 
@@ -998,13 +975,6 @@ public class JpaRolloutManagement implements RolloutManagement {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
             ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
-        }
-    }
-
-    private static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
-        if (!(RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
-            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
-                    + rollout.getStatus().name().toLowerCase());
         }
     }
 

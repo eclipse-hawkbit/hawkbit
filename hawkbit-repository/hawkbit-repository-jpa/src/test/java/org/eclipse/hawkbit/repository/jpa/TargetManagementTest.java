@@ -762,14 +762,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     public void findTargetsWithTagOrId() {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
         final TargetTag targTagA = tagManagement.createTargetTag(entityFactory.tag().create().name("Targ-A-Tag"));
-        final List<Target> targAs = testdataFactory.createTargets(25, "target-id-A", "first description");
-        targetManagement.toggleTagAssignment(targAs, targTagA);
+        final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
+                .map(Target::getControllerId).collect(Collectors.toList());
+        targetManagement.toggleTagAssignment(targAs, targTagA.getName());
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
         Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
 
-        assertThat(targetManagement.findAllTargetIds().size()).as("Total targets").isEqualTo(50);
+        assertThat(targetManagement.findTargetsAll(new PageRequest(0, 100)).getNumberOfElements()).as("Total targets")
+                .isEqualTo(50);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
 
     }

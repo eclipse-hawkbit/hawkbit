@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +19,19 @@ import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * A collection of static helper methods for the {@link JpaRolloutManagement}
@@ -294,8 +305,6 @@ final class RolloutHelper {
         }
     }
 
-
-
     /**
      * Verifies that no targets are left
      * 
@@ -311,5 +320,35 @@ final class RolloutHelper {
             throw new ConstraintViolationException("Rollout groups target count verification failed");
         }
     }
+
+    /**
+     * @param searchText search string
+     * @return criteria specification with a query for name or description of a rollout
+     */
+    static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
+        return (rolloutRoot, query, criteriaBuilder) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
+                            searchTextToLower));
+        };
+    }
+
+    static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
+        if (!(Rollout.RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
+            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
+                    + rollout.getStatus().name().toLowerCase());
+        }
+    }
+
+    static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
+    }
+    
 
 }
