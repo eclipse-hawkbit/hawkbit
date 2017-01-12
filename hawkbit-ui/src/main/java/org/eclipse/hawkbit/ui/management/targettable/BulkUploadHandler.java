@@ -193,11 +193,11 @@ public class BulkUploadHandler extends CustomComponent
 
         private void readFileStream(final InputStream tempStream) {
             String line;
+            final long totalNumberOfLines = getTotalNumberOfLines();
             try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(tempStream, Charset.defaultCharset()))) {
                 LOG.info("Bulk file upload started");
                 long innerCounter = 0;
-                final double totalFileSize = getTotalNumberOfLines();
 
                 /**
                  * Once control is in upload succeeded method automatically
@@ -207,7 +207,7 @@ public class BulkUploadHandler extends CustomComponent
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
                 while ((line = reader.readLine()) != null) {
                     innerCounter++;
-                    readEachLine(line, innerCounter, totalFileSize);
+                    readEachLine(line, innerCounter, totalNumberOfLines);
                 }
 
             } catch (final IOException e) {
@@ -217,7 +217,7 @@ public class BulkUploadHandler extends CustomComponent
             } finally {
                 deleteFile();
             }
-            syncCountAfterUpload();
+            syncCountAfterUpload(totalNumberOfLines);
             doAssignments();
             eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
             // Clearing after assignments are done
@@ -225,21 +225,20 @@ public class BulkUploadHandler extends CustomComponent
             resetCounts();
         }
 
-        private void syncCountAfterUpload() {
-            if (managementUIState.getTargetTableFilters().getBulkUpload()
-                    .getSucessfulUploadCount() != successfullTargetCount) {
+        private void syncCountAfterUpload(final long totalNumberOfLines) {
+            if ((successfullTargetCount + failedTargetCount) != totalNumberOfLines) {
+                // something went wrong due to runtimeexception etc.
+                final long syncedFailedTargetCount = totalNumberOfLines - successfullTargetCount;
                 managementUIState.getTargetTableFilters().getBulkUpload()
                         .setSucessfulUploadCount(successfullTargetCount);
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
-            }
-            if (managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != failedTargetCount) {
-                managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(failedTargetCount);
+                managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(syncedFailedTargetCount);
             }
         }
 
-        private double getTotalNumberOfLines() {
+        private long getTotalNumberOfLines() {
 
-            double totalFileSize = 0;
+            long totalFileSize = 0;
             try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(tempFile),
                     Charset.defaultCharset())) {
                 try (BufferedReader readerForSize = new BufferedReader(inputStreamReader)) {
