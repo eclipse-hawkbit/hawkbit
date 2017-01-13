@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -120,7 +121,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         return new ResponseEntity<>(
-                DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement),
+                DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement,
+                        new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest())),
                 HttpStatus.OK);
     }
 
@@ -244,7 +246,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         if (!action.isCancelingOrCanceled()) {
 
             final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
-                    systemManagement);
+                    systemManagement,
+                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()));
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -15,7 +16,6 @@ import java.util.List;
  * URLs to specific artifacts.
  *
  */
-@FunctionalInterface
 public interface ArtifactUrlHandler {
 
     /**
@@ -30,4 +30,20 @@ public interface ArtifactUrlHandler {
      * @return an URL for the given artifact parameters in a given protocol
      */
     List<ArtifactUrl> getUrls(URLPlaceholder placeholder, ApiType api);
+
+    /**
+     * Returns a generated download URL for a given artifact parameters for a
+     * specific protocol.
+     *
+     * @param placeholder
+     *            data for URL generation
+     * @param api
+     *            given protocol that URL needs to support
+     * @param requestUri
+     *            of the request that allows the handler to align the generated
+     *            URL to the original request.
+     * 
+     * @return an URL for the given artifact parameters in a given protocol
+     */
+    List<ArtifactUrl> getUrls(URLPlaceholder placeholder, ApiType api, URI requestUri);
 }
