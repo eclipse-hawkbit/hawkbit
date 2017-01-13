@@ -233,6 +233,7 @@ public class BulkUploadHandler extends CustomComponent
                         .setSucessfulUploadCount(successfullTargetCount);
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
                 managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(syncedFailedTargetCount);
+                managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(1);
             }
         }
 
