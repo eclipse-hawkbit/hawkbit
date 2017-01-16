@@ -10,11 +10,14 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -29,9 +32,11 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Default DistributionSet Panel.
  */
-public class DefaultDistributionSetTypeLayout extends BaseConfigurationView implements ConfigurationGroup {
+public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
 
-    private static final long serialVersionUID = 17896542758L;
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDistributionSetTypeLayout.class);
 
     private final transient SystemManagement systemManagement;
 
@@ -41,13 +46,23 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
 
     private TenantMetaData tenantMetaData;
 
-    private final ComboBox combobox;
+    final ComboBox combobox;
 
-    private final Label changeIcon;
+    final Label changeIcon;
 
     DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
             final DistributionSetManagement distributionSetManagement, final I18N i18n) {
         this.systemManagement = systemManagement;
+        combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
+        changeIcon = new Label();
+        Iterable<DistributionSetType> distributionSetTypeCollection = null;
+        final Pageable pageReq = new PageRequest(0, 100);
+        try {
+            distributionSetTypeCollection = distributionSetManagement.findDistributionSetTypesAll(pageReq);
+        } catch (final InsufficientPermissionException ex) {
+            LOGGER.info("Logged-in user does not have any REPOSITORY permission.");
+            return;
+        }
 
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();
@@ -71,11 +86,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         hlayout.addComponent(configurationLabel);
         hlayout.setComponentAlignment(configurationLabel, Alignment.MIDDLE_LEFT);
 
-        final Pageable pageReq = new PageRequest(0, 100);
-        final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetManagement
-                .findDistributionSetTypesAll(pageReq);
-
-        combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
         combobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);
         for (final DistributionSetType distributionSetType : distributionSetTypeCollection) {
@@ -91,7 +101,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         combobox.addValueChangeListener(event -> selectDistributionSetValue());
         hlayout.addComponent(combobox);
 
-        changeIcon = new Label();
         changeIcon.setIcon(FontAwesome.CHECK);
         hlayout.addComponent(changeIcon);
         changeIcon.setVisible(false);
@@ -99,7 +108,6 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         vlayout.addComponent(hlayout);
         rootPanel.setContent(vlayout);
         setCompositionRoot(rootPanel);
-
     }
 
     private DistributionSetType getCurrentDistributionSetType() {

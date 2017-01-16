@@ -96,7 +96,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
      */
     @PostConstruct
     public void init() {
-        configurationViews.add(defaultDistributionSetTypeLayout);
+        if (defaultDistributionSetTypeLayout.getComponentCount() > 0) {
+            configurationViews.add(defaultDistributionSetTypeLayout);
+        }
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {
