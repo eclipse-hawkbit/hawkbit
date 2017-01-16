@@ -18,11 +18,11 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
@@ -172,12 +172,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public DbArtifact loadArtifactBinary(final String sha1Hash) {
-        final DbArtifact result = artifactRepository.getArtifactBySha1(sha1Hash);
-        if (result == null) {
-            throw new GridFSDBFileNotFoundException(sha1Hash);
-        }
-
-        return result;
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash))
+                .orElseThrow(() -> new ArtifactBinaryNotFoundException(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

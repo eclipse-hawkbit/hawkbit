@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
  *
  *
  */
-public final class GridFSDBFileNotFoundException extends AbstractServerRtException {
+public final class ArtifactBinaryNotFoundException extends AbstractServerRtException {
 
     /**
     *
@@ -27,7 +27,7 @@ public final class GridFSDBFileNotFoundException extends AbstractServerRtExcepti
      * Creates a new FileUploadFailedException with
      * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
      */
-    public GridFSDBFileNotFoundException() {
+    public ArtifactBinaryNotFoundException() {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED);
     }
 
@@ -35,7 +35,7 @@ public final class GridFSDBFileNotFoundException extends AbstractServerRtExcepti
      * @param cause
      *            for the exception
      */
-    public GridFSDBFileNotFoundException(final Throwable cause) {
+    public ArtifactBinaryNotFoundException(final Throwable cause) {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
     }
 
@@ -43,7 +43,7 @@ public final class GridFSDBFileNotFoundException extends AbstractServerRtExcepti
      * @param message
      *            of the error
      */
-    public GridFSDBFileNotFoundException(final String message) {
+    public ArtifactBinaryNotFoundException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);
     }
 }
