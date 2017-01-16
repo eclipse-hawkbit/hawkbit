@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * System usage stats element for a tenant.
  *
@@ -19,6 +22,7 @@ public class TenantUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
+    private final Map<String, String> customData;
 
     /**
      * Constructor.
@@ -28,80 +32,64 @@ public class TenantUsage {
     public TenantUsage(final String tenantName) {
         super();
         this.tenantName = tenantName;
+        customData = new HashMap<>();
     }
 
-    /**
-     * @return name of the tenant
-     */
     public String getTenantName() {
         return tenantName;
     }
 
-    /**
-     * @return number of targets of the tenant
-     */
     public long getTargets() {
         return targets;
     }
 
-    /**
-     * @param targets
-     *            of the tenant
-     * @return updated tenant stats element
-     */
     public TenantUsage setTargets(final long targets) {
         this.targets = targets;
         return this;
     }
 
-    /**
-     * @return number of undeleted artifacts of the tenant
-     */
     public long getArtifacts() {
         return artifacts;
     }
 
-    /**
-     * @param artifacts
-     *            of tenant
-     * @return updated tenant stats element
-     */
+    public Map<String, String> getCustomData() {
+        return customData;
+    }
+
     public TenantUsage setArtifacts(final long artifacts) {
         this.artifacts = artifacts;
         return this;
     }
 
-    /**
-     * @return current overallArtifactVolumeInBytes
-     */
     public long getOverallArtifactVolumeInBytes() {
         return overallArtifactVolumeInBytes;
     }
 
-    /**
-     * @param overallArtifactVolumeInBytes
-     *            of the tenant in bytes
-     * @return updated tenant stats element
-     */
     public TenantUsage setOverallArtifactVolumeInBytes(final long overallArtifactVolumeInBytes) {
         this.overallArtifactVolumeInBytes = overallArtifactVolumeInBytes;
         return this;
     }
 
-    /**
-     * @return number of actions of tenant
-     */
     public long getActions() {
         return actions;
     }
 
-    /**
-     * @param actions
-     *            of the tenant
-     * @return updated tenant stats element
-     */
     public TenantUsage setActions(final long actions) {
         this.actions = actions;
+        return this;
+    }
+
+    /**
+     * Add a key and value as additional data to the system usage stats.
+     * 
+     * @param key
+     *            the key to set
+     * @param value
+     *            the value to set
+     * @return updated tenant stats element
+     */
+    public TenantUsage setCustomData(final String key, final String value) {
+        customData.put(key, value);
         return this;
     }
 
@@ -154,7 +142,8 @@ public class TenantUsage {
     @Override
     public String toString() {
         return "TenantUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
-                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes + "]";
+                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes
+                + ", customData=" + customData + "]";
     }
 
 }
