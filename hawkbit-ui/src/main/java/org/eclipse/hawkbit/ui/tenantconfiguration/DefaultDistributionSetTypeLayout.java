@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -35,8 +33,6 @@ import com.vaadin.ui.VerticalLayout;
 public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
 
     private static final long serialVersionUID = 1L;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDistributionSetTypeLayout.class);
 
     private final transient SystemManagement systemManagement;
 
