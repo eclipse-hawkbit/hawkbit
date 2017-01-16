@@ -86,7 +86,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description(".")
+    @Description("Verifies that assignement verfication works based on SHA1 hash. By design it is not important which artifact "
+            + "is actually used for the check as long as they have an identical binary, i.e. same SHA1 hash. ")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
