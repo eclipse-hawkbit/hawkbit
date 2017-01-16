@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Map of {@link Target} atrributes.
+ * Map of {@link Target} attributes.
  *
  */
 @JsonInclude(Include.NON_NULL)

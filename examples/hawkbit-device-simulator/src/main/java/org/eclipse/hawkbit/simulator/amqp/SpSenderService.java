@@ -76,8 +76,8 @@ public class SpSenderService extends SenderService {
      *
      * @param update
      *            the simulated update object
-     * @param messageDescription
-     *            a description according the update process
+     * @param updateResultMessages
+     *            list of messages for error
      */
     public void finishUpdateProcessWithError(final SimulatedUpdate update, final List<String> updateResultMessages) {
         sendErrorgMessage(update, updateResultMessages);
@@ -147,7 +147,7 @@ public class SpSenderService extends SenderService {
     }
 
     /**
-     * Create new attribute update message and send to udpate server.
+     * Create new attribute update message and send to update server.
      *
      * @param tenant
      *            the tenant to create the target
@@ -157,7 +157,7 @@ public class SpSenderService extends SenderService {
     public void updateAttributesOfThing(final String tenant, final String targetId) {
         sendMessage(spExchange, attributeUpdateMessage(tenant, targetId));
 
-        LOGGER.debug("Send update attributes message and send to update server for Thing \"{}\"", targetId);
+        LOGGER.debug("Create update attributes message and send to update server for Thing \"{}\"", targetId);
     }
 
     private Message thingCreatedMessage(final String tenant, final String targetId) {

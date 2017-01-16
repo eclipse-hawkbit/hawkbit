@@ -49,6 +49,10 @@ public class SimulationProperties {
         return this.autostarts;
     }
 
+    /**
+     * Properties for target attributes set as part of simulation.
+     *
+     */
     public static class Attribute {
         private String key;
         private String value;
