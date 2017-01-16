@@ -58,6 +58,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -114,6 +115,12 @@ public class AmqpMessageHandlerServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Captor
+    private ArgumentCaptor<Map<String, String>> attributesCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> targetIdCaptor;
 
     @Before
     public void before() throws Exception {
@@ -177,9 +184,6 @@ public class AmqpMessageHandlerServiceTest {
 
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
                 messageProperties);
-
-        final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
-        final ArgumentCaptor<Map> attributesCaptor = ArgumentCaptor.forClass(Map.class);
 
         when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture()))
                 .thenReturn(null);
