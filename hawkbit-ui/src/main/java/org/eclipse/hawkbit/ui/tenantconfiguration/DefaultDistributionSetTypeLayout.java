@@ -60,7 +60,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         try {
             distributionSetTypeCollection = distributionSetManagement.findDistributionSetTypesAll(pageReq);
         } catch (final InsufficientPermissionException ex) {
-            LOGGER.info("Logged-in user does not have any REPOSITORY permission.");
+            LOGGER.warn("Logged-in user does not have any REPOSITORY permission.", ex);
             return;
         }
 
