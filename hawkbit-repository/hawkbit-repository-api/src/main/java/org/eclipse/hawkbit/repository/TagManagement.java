@@ -151,12 +151,6 @@ public interface TagManagement {
     Page<DistributionSetTag> findAllDistributionSetTags(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
-     * @return all {@link TargetTag}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetTag> findAllTargetTags();
-
-    /**
      * returns all {@link TargetTag}s.
      * 
      * @param pageable

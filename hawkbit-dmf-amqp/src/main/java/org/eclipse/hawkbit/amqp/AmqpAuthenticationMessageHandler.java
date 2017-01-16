@@ -157,17 +157,16 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
 
     private org.eclipse.hawkbit.repository.model.Artifact findArtifactByFileResource(final FileResource fileResource) {
         if (fileResource.getSha1() != null) {
-            return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1());
+            return artifactManagement.findFirstArtifactBySHA1(fileResource.getSha1()).orElse(null);
         } else if (fileResource.getFilename() != null) {
-            return artifactManagement.findArtifactByFilename(fileResource.getFilename()).stream().findFirst()
-                    .orElse(null);
+            return artifactManagement.findArtifactByFilename(fileResource.getFilename()).orElse(null);
         } else if (fileResource.getArtifactId() != null) {
-            return artifactManagement.findArtifact(fileResource.getArtifactId());
+            return artifactManagement.findArtifact(fileResource.getArtifactId()).orElse(null);
         } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
             return artifactManagement
                     .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
                             fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
-                    .stream().findFirst().orElse(null);
+                    .orElse(null);
         }
         return null;
     }

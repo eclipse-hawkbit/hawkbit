@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -629,11 +630,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
-        DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         distributionSetManagement.deleteDistributionSet(dsA.getId());
-        dsA = distributionSetManagement.findDistributionSetById(dsA.getId());
-        assertThat(dsA).as("ds should be null").isNull();
+        try {
+            distributionSetManagement.findDistributionSetById(dsA.getId());
+            fail("ds should be null");
+        } catch (final EntityNotFoundException notFound) {
+
+        }
 
         // // verify that the ds is not physically deleted
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {

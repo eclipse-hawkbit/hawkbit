@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -156,8 +157,8 @@ public class AmqpControllerAuthenticationTest {
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
         testArtifact.setId(1L);
 
-        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(testArtifact);
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(testArtifact);
+        when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);

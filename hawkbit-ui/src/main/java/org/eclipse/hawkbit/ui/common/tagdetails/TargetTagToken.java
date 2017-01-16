@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -35,6 +36,8 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;
+
+    private static final int MAX_TAGS = 500;
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
@@ -106,7 +109,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAllTargetTags()) {
+        for (final TargetTag tag : tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
     }

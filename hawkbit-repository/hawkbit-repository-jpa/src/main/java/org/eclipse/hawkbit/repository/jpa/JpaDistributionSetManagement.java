@@ -126,12 +126,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
-        return distributionSetRepository.findOne(DistributionSetSpecification.byId(distid));
+        return Optional.ofNullable(distributionSetRepository.findOne(DistributionSetSpecification.byId(distid)))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet with given ID " + distid + " does not exist"));
     }
 
     @Override
     public DistributionSet findDistributionSetById(final Long distid) {
-        return distributionSetRepository.findOne(distid);
+        return Optional.ofNullable(distributionSetRepository.findOne(distid)).orElseThrow(
+                () -> new EntityNotFoundException("DistributionSet with given ID " + distid + " does not exist"));
     }
 
     @Override
@@ -207,13 +210,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
-
-        final DistributionSetType module = findDistributionSetTypeByKey(distributionSetTypekey);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
-        }
-        return module;
+        return findDistributionSetTypeByKey(distributionSetTypekey).orElseThrow(() -> new EntityNotFoundException(
+                "DistributionSetType with key {" + distributionSetTypekey + "} does not exist"));
     }
 
     private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final Long setId) {
@@ -545,10 +543,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public DistributionSet findDistributionSetByNameAndVersion(final String distributionName, final String version) {
+    public Optional<DistributionSet> findDistributionSetByNameAndVersion(final String distributionName,
+            final String version) {
         final Specification<JpaDistributionSet> spec = DistributionSetSpecification
                 .equalsNameAndVersionIgnoreCase(distributionName, version);
-        return distributionSetRepository.findOne(spec);
+        return Optional.ofNullable(distributionSetRepository.findOne(spec));
 
     }
 
@@ -571,18 +570,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public DistributionSetType findDistributionSetTypeByName(final String name) {
-        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byName(name));
+    public Optional<DistributionSetType> findDistributionSetTypeByName(final String name) {
+        return Optional
+                .ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byName(name)));
     }
 
     @Override
-    public DistributionSetType findDistributionSetTypeById(final Long id) {
-        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byId(id));
+    public DistributionSetType findDistributionSetTypeById(final Long typeId) {
+        return Optional.ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byId(typeId)))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Type with given ID " + typeId + " does not exist"));
     }
 
     @Override
-    public DistributionSetType findDistributionSetTypeByKey(final String key) {
-        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byKey(key));
+    public Optional<DistributionSetType> findDistributionSetTypeByKey(final String key) {
+        return Optional.ofNullable(distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byKey(key)));
     }
 
     @Override
@@ -711,17 +713,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public DistributionSetMetadata findDistributionSetMetadata(final Long distributionSet, final String key) {
-        final DistributionSetMetadata findOne = distributionSetMetadataRepository
-                .findOne(new DsMetadataCompositeKey(distributionSet, key));
-        if (findOne == null) {
-            throw new EntityNotFoundException("Metadata with key '" + key + "' does not exist");
-        }
-        return findOne;
+        return Optional
+                .ofNullable(distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(distributionSet, key)))
+                .orElseThrow(() -> new EntityNotFoundException("Metadata with key '" + key + "' does not exist"));
     }
 
     @Override
     public DistributionSet findDistributionSetByAction(final Long actionId) {
-        return distributionSetRepository.findByActionId(actionId);
+        return Optional.ofNullable(distributionSetRepository.findByActionId(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with id '" + actionId + "' does not exist"));
     }
 
     @Override

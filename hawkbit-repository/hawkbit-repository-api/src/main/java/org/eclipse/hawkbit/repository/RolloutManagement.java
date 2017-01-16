@@ -258,6 +258,9 @@ public interface RolloutManagement {
      *            the ID of the rollout to retrieve
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Rollout findRolloutById(@NotNull Long rolloutId);
@@ -279,6 +282,9 @@ public interface RolloutManagement {
      * @param rolloutId
      *            rollout id
      * @return rollout details of targets count for different statuses
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)

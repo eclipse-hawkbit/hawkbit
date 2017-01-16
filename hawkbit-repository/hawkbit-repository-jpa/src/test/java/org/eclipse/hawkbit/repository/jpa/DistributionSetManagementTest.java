@@ -60,25 +60,29 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void updateUnassignedDistributionSetTypeModules() {
         DistributionSetType updatableType = distributionSetManagement.createDistributionSetType(
                 entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .isEmpty();
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .isEmpty();
 
         // add OS
         updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(osType.getId()));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .containsOnly(osType);
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .containsOnly(osType);
 
         // add JVM
         updatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Sets.newHashSet(runtimeType.getId()));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .containsOnly(osType, runtimeType);
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .containsOnly(osType, runtimeType);
 
         // remove OS
         updatableType = distributionSetManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .containsOnly(runtimeType);
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .containsOnly(runtimeType);
     }
 
     @Test
@@ -86,17 +90,18 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void updateAssignedDistributionSetTypeMetaData() {
         final DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(entityFactory
                 .distributionSetType().create().key("updatableType").name("to be deleted").colour("test123"));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .isEmpty();
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .isEmpty();
         distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
         distributionSetManagement.updateDistributionSetType(
                 entityFactory.distributionSetType().update(nonUpdatableType.getId()).description("a new description"));
 
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getDescription())
+        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getDescription())
                 .isEqualTo("a new description");
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getColour())
+        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getColour())
                 .isEqualTo("test123");
     }
 
@@ -105,8 +110,9 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void addModuleToAssignedDistributionSetTypeFails() {
         final DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(
                 entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .isEmpty();
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .isEmpty();
         distributionSetManagement.createDistributionSet(entityFactory.distributionSet().create().name("newtypesoft")
                 .version("1").type(nonUpdatableType.getKey()));
 
@@ -125,8 +131,9 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetManagement.createDistributionSetType(
                 entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("updatableType").getMandatoryModuleTypes())
-                .isEmpty();
+        assertThat(
+                distributionSetManagement.findDistributionSetTypeByKey("updatableType").get().getMandatoryModuleTypes())
+                        .isEmpty();
 
         nonUpdatableType = distributionSetManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
                 Sets.newHashSet(osType.getId()));
@@ -166,7 +173,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.distributionSet().create().name("softdeleted").version("1").type(softDelete.getKey()));
 
         distributionSetManagement.deleteDistributionSetType(softDelete.getId());
-        assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
+        assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").get().isDeleted())
+                .isEqualTo(true);
     }
 
     @Test
@@ -651,11 +659,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Deltes a DS that is no in use. Expected behaviour is a hard delete on the database.")
     public void deleteUnassignedDistributionSet() {
-        DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
-        DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
-
-        ds1 = distributionSetManagement.findDistributionSetByNameAndVersion(ds1.getName(), ds1.getVersion());
-        ds2 = distributionSetManagement.findDistributionSetByNameAndVersion(ds2.getName(), ds2.getVersion());
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
+        testdataFactory.createDistributionSet("ds-2");
 
         // delete a ds
         assertThat(distributionSetRepository.findAll()).hasSize(2);
@@ -703,17 +708,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Deletes a DS that is in use by either target assignment or rollout. Expected behaviour is a soft delete on the database, i.e. only marked as "
             + "deleted, kept as reference but unavailable for future use..")
     public void deleteAssignedDistributionSet() {
-        DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
-        DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
-        DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+        testdataFactory.createDistributionSet("ds-1");
+        testdataFactory.createDistributionSet("ds-2");
+        final DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
         final DistributionSet dsToRolloutAssigned = testdataFactory.createDistributionSet("ds-4");
 
-        ds1 = distributionSetManagement.findDistributionSetByNameAndVersion(ds1.getName(), ds1.getVersion());
-        ds2 = distributionSetManagement.findDistributionSetByNameAndVersion(ds2.getName(), ds2.getVersion());
-
         // create assigned DS
-        dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
-                dsToTargetAssigned.getVersion());
         final Target savedTarget = testdataFactory.createTarget();
         assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
 
@@ -735,11 +735,9 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify that the DistributionSetAssignmentResult not contains already assigned targets.")
     public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
-        DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+        final DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
 
         // create assigned DS
-        dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
-                dsToTargetAssigned.getVersion());
         final Target savedTarget = testdataFactory.createTarget();
         DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
                 savedTarget.getControllerId());

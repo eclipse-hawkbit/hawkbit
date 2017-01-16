@@ -170,10 +170,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         }
 
         // hashes
-        assertThat(artifactManagement.findArtifactByFilename("origFilename").get(0).getSha1Hash()).as("Wrong sha1 hash")
+        assertThat(artifactManagement.findArtifactByFilename("origFilename").get().getSha1Hash()).as("Wrong sha1 hash")
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
 
-        assertThat(artifactManagement.findArtifactByFilename("origFilename").get(0).getMd5Hash()).as("Wrong md5 hash")
+        assertThat(artifactManagement.findArtifactByFilename("origFilename").get().getMd5Hash()).as("Wrong md5 hash")
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
@@ -239,8 +239,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
 
         // hashes
-        assertThat(artifactManagement.findArtifactByFilename("customFilename")).as("Local artifact is wrong")
-                .hasSize(1);
+        assertThat(artifactManagement.findArtifactByFilename("customFilename").isPresent())
+                .as("Local artifact is wrong").isTrue();
     }
 
     @Test

@@ -302,7 +302,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         final Artifact localArtifactMock = mock(Artifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
+        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
                 .thenThrow(EntityNotFoundException.class);
 
@@ -331,7 +331,7 @@ public class AmqpMessageHandlerServiceTest {
         when(localArtifactMock.getId()).thenReturn(mockedArtifactId);
 
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
+        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), mockedArtifactId))
                 .thenReturn(true);
         when(artifactManagementMock.loadArtifactBinary(anyLong())).thenReturn(dbArtifactMock);

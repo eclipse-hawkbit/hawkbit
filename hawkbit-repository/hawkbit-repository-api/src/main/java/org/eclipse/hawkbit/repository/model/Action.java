@@ -12,10 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Operations to be executed by the target. Usually a software update. Other
- * supported actions are the cancellation of a running update action or a
- * refresh request for target attributes.
- *
+ * Update operations to be executed by the target.
  */
 public interface Action extends TenantAwareBaseEntity {
 

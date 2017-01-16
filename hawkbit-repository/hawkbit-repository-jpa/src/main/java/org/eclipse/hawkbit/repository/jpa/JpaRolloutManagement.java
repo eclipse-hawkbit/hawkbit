@@ -158,7 +158,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Rollout findRolloutById(final Long rolloutId) {
-        return rolloutRepository.findOne(rolloutId);
+        return Optional.ofNullable(rolloutRepository.findOne(rolloutId)).orElseThrow(
+                () -> new EntityNotFoundException("Rollout with given ID " + rolloutId + " does not exist."));
     }
 
     @Override

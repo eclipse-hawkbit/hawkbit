@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -264,6 +265,9 @@ public interface DistributionSetManagement {
      * @param actionId
      *            the action associated with the distribution set
      * @return the distribution set which is associated with the action
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet findDistributionSetByAction(@NotNull Long actionId);
@@ -274,7 +278,10 @@ public interface DistributionSetManagement {
      *
      * @param distid
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             if set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet findDistributionSetById(@NotNull Long distid);
@@ -288,7 +295,10 @@ public interface DistributionSetManagement {
      *
      * @param distid
      *            to look for.
-     * @return {@link DistributionSet} or <code>null</code> if it does not exist
+     * @return {@link DistributionSet}
+     * 
+     * @throws EntityNotFoundException
+     *             if set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet findDistributionSetByIdWithDetails(@NotNull Long distid);
@@ -303,7 +313,8 @@ public interface DistributionSetManagement {
      * @return the page with the found {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSet findDistributionSetByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
+    Optional<DistributionSet> findDistributionSetByNameAndVersion(@NotEmpty String distributionName,
+            @NotEmpty String version);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -461,7 +472,7 @@ public interface DistributionSetManagement {
      */
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeByKey(@NotEmpty String key);
+    Optional<DistributionSetType> findDistributionSetTypeByKey(@NotEmpty String key);
 
     /**
      * @param name
@@ -469,7 +480,7 @@ public interface DistributionSetManagement {
      * @return {@link DistributionSetType} if found or <code>null</code> if not
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DistributionSetType findDistributionSetTypeByName(@NotEmpty String name);
+    Optional<DistributionSetType> findDistributionSetTypeByName(@NotEmpty String name);
 
     /**
      * @param pageable

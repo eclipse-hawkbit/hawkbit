@@ -556,12 +556,12 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                         contains(three.findFirstModuleByType(osType).getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
 
-        one = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("one", "one").getId());
-        two = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("two", "two").getId());
-        three = distributionSetManagement.findDistributionSetByIdWithDetails(
-                distributionSetManagement.findDistributionSetByNameAndVersion("three", "three").getId());
+        one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==one", pageReq, false).getContent().get(0).getId());
+        two = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==two", pageReq, false).getContent().get(0).getId());
+        three = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
+                .findDistributionSetsAll("name==three", pageReq, false).getContent().get(0).getId());
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())

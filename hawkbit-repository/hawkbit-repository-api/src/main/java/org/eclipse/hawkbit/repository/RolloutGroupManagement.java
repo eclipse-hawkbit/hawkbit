@@ -67,6 +67,9 @@ public interface RolloutGroupManagement {
      *            the ID of the rollout group to find
      * @return the found {@link RolloutGroup} by its ID or {@code null} if it
      *         does not exists
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupById(@NotNull Long rolloutGroupId);
@@ -151,6 +154,9 @@ public interface RolloutGroupManagement {
      * @param rolloutGroupId
      *            rollout group id
      * @return rolloutGroup with details of targets count for different statuses
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);

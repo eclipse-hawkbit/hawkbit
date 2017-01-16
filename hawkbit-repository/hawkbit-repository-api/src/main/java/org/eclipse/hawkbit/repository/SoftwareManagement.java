@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -227,8 +228,11 @@ public interface SoftwareManagement {
      *
      * @param id
      *            to search for
-     * @return the found {@link SoftwareModule}s or <code>null</code> if not
-     *         found.
+     * @return the found {@link SoftwareModule}s
+     * 
+     * @throws EntityNotFoundException
+     *             of software module with given ID does not exist
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -246,7 +250,7 @@ public interface SoftwareManagement {
      * @return the found {@link SoftwareModule} or <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModule findSoftwareModuleByNameAndVersion(@NotEmpty String name, @NotEmpty String version,
+    Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty String name, @NotEmpty String version,
             @NotNull Long typeId);
 
     /**
@@ -381,6 +385,9 @@ public interface SoftwareManagement {
      *            to search for
      * @return {@link SoftwareModuleType} in the repository with given
      *         {@link SoftwareModuleType#getId()}
+     * 
+     * @throws EntityNotFoundException
+     *             if module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     SoftwareModuleType findSoftwareModuleTypeById(@NotNull Long id);
@@ -393,7 +400,7 @@ public interface SoftwareManagement {
      *         {@link SoftwareModuleType#getKey()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleType findSoftwareModuleTypeByKey(@NotEmpty String key);
+    Optional<SoftwareModuleType> findSoftwareModuleTypeByKey(@NotEmpty String key);
 
     /**
      *
@@ -403,7 +410,7 @@ public interface SoftwareManagement {
      *         {@link SoftwareModuleType#getName()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleType findSoftwareModuleTypeByName(@NotNull String name);
+    Optional<SoftwareModuleType> findSoftwareModuleTypeByName(@NotNull String name);
 
     /**
      * @param pageable

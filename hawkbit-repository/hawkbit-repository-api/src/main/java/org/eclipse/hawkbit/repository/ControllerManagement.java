@@ -131,6 +131,9 @@ public interface ControllerManagement {
      * @param actionId
      *            to be id of the action
      * @return the corresponding {@link Action}
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link Action} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action findActionWithDetails(@NotNull Long actionId);

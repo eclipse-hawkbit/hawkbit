@@ -543,12 +543,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Action findAction(final Long actionId) {
-        return actionRepository.findOne(actionId);
+        return Optional.ofNullable(actionRepository.findOne(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
     }
 
     @Override
     public Action findActionWithDetails(final Long actionId) {
-        return actionRepository.findById(actionId);
+        return Optional.ofNullable(actionRepository.findById(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
     }
 
     @Override

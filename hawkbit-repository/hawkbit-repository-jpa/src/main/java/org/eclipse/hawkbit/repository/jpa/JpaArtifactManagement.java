@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -146,23 +145,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findArtifact(final Long id) {
-        return localArtifactRepository.findOne(id);
+    public Optional<Artifact> findArtifact(final Long id) {
+        return Optional.ofNullable(localArtifactRepository.findOne(id));
     }
 
     @Override
-    public List<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
-        return localArtifactRepository.findByFilenameAndSoftwareModuleId(filename, softwareModuleId);
+    public Optional<Artifact> findByFilenameAndSoftwareModule(final String filename, final Long softwareModuleId) {
+        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
     }
 
     @Override
-    public Artifact findFirstArtifactBySHA1(final String sha1) {
+    public Optional<Artifact> findFirstArtifactBySHA1(final String sha1) {
         return localArtifactRepository.findFirstByGridFsFileName(sha1);
     }
 
     @Override
-    public List<Artifact> findArtifactByFilename(final String filename) {
-        return localArtifactRepository.findByFilename(filename);
+    public Optional<Artifact> findArtifactByFilename(final String filename) {
+        return localArtifactRepository.findFirstByFilename(filename);
     }
 
     @Override

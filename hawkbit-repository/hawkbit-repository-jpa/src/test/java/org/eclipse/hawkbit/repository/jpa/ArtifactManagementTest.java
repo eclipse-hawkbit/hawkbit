@@ -91,9 +91,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result).isNotEqualTo(result2);
         assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
 
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getSha1Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
-        assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getMd5Hash())
+        assertThat(artifactManagement.findArtifactByFilename("file1").get().getMd5Hash())
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         assertThat(artifactRepository.findAll()).hasSize(4);
@@ -203,7 +203,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        assertThat(artifactManagement.findArtifact(result.getId())).isEqualTo(result);
+        assertThat(artifactManagement.findArtifact(result.getId()).get()).isEqualTo(result);
     }
 
     @Test
@@ -250,12 +250,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findByFilenameAndSoftwareModule() {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isFalse();
 
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file1", false);
         artifactManagement.createArtifact(new RandomGeneratedInputStream(5 * 1024), sm.getId(), "file2", false);
 
-        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).hasSize(1);
+        assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId()).isPresent()).isTrue();
 
     }
 }

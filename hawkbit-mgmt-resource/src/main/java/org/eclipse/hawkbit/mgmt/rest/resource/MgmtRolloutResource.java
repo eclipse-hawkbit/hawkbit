@@ -94,7 +94,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout findRolloutById = findRolloutOrThrowException(rolloutId);
+        final Rollout findRolloutById = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
         return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById, true), HttpStatus.OK);
     }
 
@@ -175,8 +175,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId) {
-        findRolloutOrThrowException(rolloutId);
-        final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
+        rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(groupId);
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
     }
 
@@ -187,7 +187,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        findRolloutOrThrowException(rolloutId);
+        rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -203,23 +203,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
         return new ResponseEntity<>(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
-    }
-
-    private Rollout findRolloutOrThrowException(final Long rolloutId) {
-        final Rollout rollout = this.rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
-        if (rollout == null) {
-            throw new EntityNotFoundException("Rollout with Id {" + rolloutId + DOES_NOT_EXIST);
-        }
-        return rollout;
-    }
-
-    private RolloutGroup findRolloutGroupOrThrowException(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = this.rolloutGroupManagement
-                .findRolloutGroupWithDetailedStatus(rolloutGroupId);
-        if (rolloutGroup == null) {
-            throw new EntityNotFoundException("Group with Id {" + rolloutGroupId + DOES_NOT_EXIST);
-        }
-        return rolloutGroup;
     }
 
     private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {

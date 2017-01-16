@@ -47,14 +47,9 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
-
-        final DistributionSetType module = distributionSetManagement
-                .findDistributionSetTypeByKey(distributionSetTypekey);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
-        }
-        return module;
+        return distributionSetManagement.findDistributionSetTypeByKey(distributionSetTypekey)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSetType with key {" + distributionSetTypekey + "} does not exist"));
     }
 
     private Collection<SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(

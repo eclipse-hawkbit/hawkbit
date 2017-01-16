@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -25,6 +23,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -34,6 +33,8 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
         implements RefreshableContainer {
 
     private static final long serialVersionUID = 2446682350481560235L;
+
+    private static final int MAX_TAGS = 500;
 
     /**
      * Constructor for CreateUpdateTargetTagLayoutWindow
@@ -69,8 +70,8 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void populateTagNameCombo() {
         tagNameComboBox.removeAllItems();
-        final List<TargetTag> trgTagNameList = tagManagement.findAllTargetTags();
-        trgTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
+        tagManagement.findAllTargetTags(new PageRequest(0, MAX_TAGS))
+                .forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
     /**

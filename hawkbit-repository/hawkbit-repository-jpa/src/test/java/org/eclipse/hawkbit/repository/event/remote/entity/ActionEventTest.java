@@ -44,6 +44,7 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         generateAction.setActionType(ActionType.FORCED);
         final Target target = testdataFactory.createTarget("Test");
         generateAction.setTarget(target);
+        generateAction.setDistributionSet(testdataFactory.createDistributionSet());
         return actionRepository.save(generateAction);
     }
 

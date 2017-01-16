@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -152,11 +153,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected Color getColorForColorPicker() {
-        final DistributionSetType existedDistType = distributionSetManagement
+        final Optional<DistributionSetType> existedDistType = distributionSetManagement
                 .findDistributionSetTypeByName(tagNameComboBox.getValue().toString());
-        if (null != existedDistType) {
-            return existedDistType.getColour() != null
-                    ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
+        if (existedDistType.isPresent()) {
+            return existedDistType.get().getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(existedDistType.get().getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
         }
         return ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR);
@@ -522,12 +523,10 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
      */
     @Override
     protected void setTagDetails(final String distSetTypeSelected) {
-
         tagName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
-        final DistributionSetType selectedTypeTag = fetchDistributionSetType(distSetTypeSelected);
-        if (null != selectedTypeTag) {
+        distributionSetManagement.findDistributionSetTypeByName(distSetTypeSelected).ifPresent(selectedTypeTag -> {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
@@ -541,20 +540,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
             }
 
             createOriginalSelectedTableContainer();
-            for (final SoftwareModuleType swModuleType : selectedTypeTag.getOptionalModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, false);
-            }
-
-            for (final SoftwareModuleType swModuleType : selectedTypeTag.getMandatoryModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, true);
-            }
+            selectedTypeTag.getOptionalModuleTypes()
+                    .forEach(swModuleType -> addTargetTableforUpdate(swModuleType, false));
+            selectedTypeTag.getMandatoryModuleTypes()
+                    .forEach(swModuleType -> addTargetTableforUpdate(swModuleType, true));
             setColorPickerComponentsColor(selectedTypeTag.getColour());
-        }
-    }
-
-    private DistributionSetType fetchDistributionSetType(final String distTypeName) {
-
-        return distributionSetManagement.findDistributionSetTypeByName(distTypeName);
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -591,12 +582,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     @Override
     protected DistributionSetType findEntityByKey() {
-        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue());
+        return distributionSetManagement.findDistributionSetTypeByKey(typeKey.getValue()).get();
     }
 
     @Override
     protected DistributionSetType findEntityByName() {
-        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue());
+        return distributionSetManagement.findDistributionSetTypeByName(tagName.getValue()).get();
     }
 
     @Override

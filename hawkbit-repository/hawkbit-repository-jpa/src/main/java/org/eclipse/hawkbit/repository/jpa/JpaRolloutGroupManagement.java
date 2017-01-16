@@ -79,7 +79,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public RolloutGroup findRolloutGroupById(final Long rolloutGroupId) {
-        return rolloutGroupRepository.findOne(rolloutGroupId);
+        return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rollout group with given ID " + rolloutGroupId + " does not exist."));
     }
 
     @Override

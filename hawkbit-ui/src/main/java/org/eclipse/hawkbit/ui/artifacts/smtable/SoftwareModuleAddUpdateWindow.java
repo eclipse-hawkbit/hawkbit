@@ -225,7 +225,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
         final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
-                .type(softwareManagement.findSoftwareModuleTypeByName(type)).name(name).version(version)
+                .type(softwareManagement.findSoftwareModuleTypeByName(type).get()).name(name).version(version)
                 .description(description).vendor(vendor);
 
         final SoftwareModule newSoftwareModule = softwareManagement.createSoftwareModule(softwareModule);
@@ -243,10 +243,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
 
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByName(type).getId());
 
-        if (swModule != null) {
+        if (swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type).get().getId()).isPresent()) {
             uiNotifcation.displayValidationError(
                     i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             return true;

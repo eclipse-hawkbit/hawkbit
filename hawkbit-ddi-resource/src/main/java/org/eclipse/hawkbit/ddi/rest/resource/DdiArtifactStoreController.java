@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -72,18 +72,15 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     @Override
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final Object principal) {
-        final List<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
+        final Optional<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
 
-        if (foundArtifacts.isEmpty()) {
+        if (!foundArtifacts.isPresent()) {
             LOG.warn("Software artifact with name {} could not be found.", fileName);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (foundArtifacts.size() > 1) {
-            LOG.warn("Software artifact name {} is not unique. We will use the first entry.", fileName);
-        }
         ResponseEntity<InputStream> result;
-        final Artifact artifact = foundArtifacts.get(0);
+        final Artifact artifact = foundArtifacts.get();
 
         final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -115,18 +112,16 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     @Override
     public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("tenant") final String tenant,
             @PathVariable("fileName") final String fileName) {
-        final List<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
+        final Optional<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
 
-        if (foundArtifacts.isEmpty()) {
-            LOG.warn("Softeare artifact with name {} could not be found.", fileName);
+        if (!foundArtifacts.isPresent()) {
+            LOG.warn("Software artifact with name {} could not be found.", fileName);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else if (foundArtifacts.size() > 1) {
-            LOG.error("Softeare artifact name {} is not unique.", fileName);
         }
 
         try {
             DataConversionHelper.writeMD5FileResponse(fileName, requestResponseContextHolder.getHttpServletResponse(),
-                    foundArtifacts.get(0));
+                    foundArtifacts.get());
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -252,18 +253,19 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         final String name = distNameTextField.getValue();
         final String version = distVersionTextField.getValue();
 
-        final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
+        final Optional<DistributionSet> existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name,
+                version);
         /*
          * Distribution should not exists with the same name & version. Display
          * error message, when the "existingDs" is not null and it is add window
          * (or) when the "existingDs" is not null and it is edit window and the
          * distribution Id of the edit window is different then the "existingDs"
          */
-        if (existingDs != null && !existingDs.getId().equals(editDistId)) {
+        if (existingDs.isPresent() && !existingDs.get().getId().equals(editDistId)) {
             distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
             distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
-            notificationMessage.displayValidationError(
-                    i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
+            notificationMessage.displayValidationError(i18n.get("message.duplicate.dist",
+                    new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
 
             return true;
         }

@@ -555,15 +555,9 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black"));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")));
     }
 
     /**
@@ -583,17 +577,11 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        final DistributionSetType findDistributionSetTypeByname = distributionSetManagement
-                .findDistributionSetTypeByKey(dsTypeKey);
-
-        if (findDistributionSetTypeByname != null) {
-            return findDistributionSetTypeByname;
-        }
-
-        return distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType().create()
-                .key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
-                .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
-                .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList())));
+        return distributionSetManagement.findDistributionSetTypeByKey(dsTypeKey)
+                .orElseGet(() -> distributionSetManagement.createDistributionSetType(entityFactory.distributionSetType()
+                        .create().key(dsTypeKey).name(dsTypeName).description(LOREM.words(10)).colour("black")
+                        .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
+                        .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
     }
 
     /**

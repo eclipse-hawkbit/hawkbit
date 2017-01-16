@@ -138,21 +138,12 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
-        final JpaSoftwareModuleType type = findSoftwareModuleTypeAndThrowExceptionIfNotFound(update.getId());
+        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId());
 
         update.getDescription().ifPresent(type::setDescription);
         update.getColour().ifPresent(type::setColour);
 
         return softwareModuleTypeRepository.save(type);
-    }
-
-    private JpaSoftwareModuleType findSoftwareModuleTypeAndThrowExceptionIfNotFound(final Long smTypeid) {
-        final JpaSoftwareModuleType set = softwareModuleTypeRepository.findOne(smTypeid);
-
-        if (set == null) {
-            throw new EntityNotFoundException("Software module type cannot be updated as it does not exixt" + smTypeid);
-        }
-        return set;
     }
 
     @Override
@@ -198,14 +189,15 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public SoftwareModule findSoftwareModuleById(final Long id) {
-        return softwareModuleRepository.findOne(id);
+        return Optional.ofNullable(softwareModuleRepository.findOne(id)).orElseThrow(
+                () -> new EntityNotFoundException("Sofwtare module with given ID " + id + " does not exist."));
     }
 
     @Override
-    public SoftwareModule findSoftwareModuleByNameAndVersion(final String name, final String version,
+    public Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(final String name, final String version,
             final Long typeId) {
 
-        return softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId);
+        return Optional.ofNullable(softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId));
     }
 
     private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
@@ -470,8 +462,10 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    public SoftwareModuleType findSoftwareModuleTypeById(final Long id) {
-        return softwareModuleTypeRepository.findOne(id);
+    public SoftwareModuleType findSoftwareModuleTypeById(final Long smTypeId) {
+        return Optional.ofNullable(softwareModuleTypeRepository.findOne(smTypeId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Software module type with given ID " + smTypeId + " does not exist."));
     }
 
     @Override
