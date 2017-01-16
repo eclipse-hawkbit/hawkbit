@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -79,9 +80,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SecurityTokenGenerator securityTokenGenerator,
-            final ControllerPollProperties controllerPollProperties) {
+            final ControllerPollProperties controllerPollProperties, final SpPermissionChecker permChecker) {
         this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
-                distributionSetManagement, i18n);
+                distributionSetManagement, i18n, permChecker);
         this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
                 securityTokenGenerator);
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,

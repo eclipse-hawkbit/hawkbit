@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -51,16 +51,13 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
     final Label changeIcon;
 
     DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
-            final DistributionSetManagement distributionSetManagement, final I18N i18n) {
+            final DistributionSetManagement distributionSetManagement, final I18N i18n,
+            final SpPermissionChecker permChecker) {
         this.systemManagement = systemManagement;
         combobox = SPUIComponentProvider.getComboBox(null, "330", null, null, false, "", "label.combobox.tag");
         changeIcon = new Label();
-        Iterable<DistributionSetType> distributionSetTypeCollection = null;
-        final Pageable pageReq = new PageRequest(0, 100);
-        try {
-            distributionSetTypeCollection = distributionSetManagement.findDistributionSetTypesAll(pageReq);
-        } catch (final InsufficientPermissionException ex) {
-            LOGGER.warn("Logged-in user does not have any REPOSITORY permission.", ex);
+
+        if (!permChecker.hasReadDistributionPermission()) {
             return;
         }
 
@@ -85,6 +82,10 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         final Label configurationLabel = new Label(i18n.get("configuration.defaultdistributionset.select.label"));
         hlayout.addComponent(configurationLabel);
         hlayout.setComponentAlignment(configurationLabel, Alignment.MIDDLE_LEFT);
+
+        final Pageable pageReq = new PageRequest(0, 100);
+        final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetManagement
+                .findDistributionSetTypesAll(pageReq);
 
         combobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);
