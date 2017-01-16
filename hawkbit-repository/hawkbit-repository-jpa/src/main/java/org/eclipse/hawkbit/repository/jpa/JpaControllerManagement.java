@@ -156,21 +156,21 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final String controllerId, final Long localArtifact) {
+    public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
         final Target target = targetRepository.findByControllerId(controllerId);
         if (target == null) {
             return false;
         }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, localArtifact)) > 0;
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, sha1Hash)) > 0;
     }
 
     @Override
-    public boolean hasTargetArtifactAssigned(final Long targetId, final Long localArtifact) {
+    public boolean hasTargetArtifactAssigned(final Long targetId, final String sha1Hash) {
         final Target target = targetRepository.findOne(targetId);
         if (target == null) {
             return false;
         }
-        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, localArtifact)) > 0;
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, sha1Hash)) > 0;
     }
 
     @Override

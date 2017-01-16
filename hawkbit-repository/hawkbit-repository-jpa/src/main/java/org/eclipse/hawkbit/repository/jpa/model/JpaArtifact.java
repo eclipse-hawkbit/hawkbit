@@ -30,6 +30,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  */
 @Table(name = "sp_artifact", indexes = { @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),
+        @Index(name = "sp_idx_artifact_02", columnList = "tenant,sha1_hash"),
         @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
@@ -38,10 +39,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "gridfs_file_name", length = 40)
+    @Column(name = "sha1_hash", length = 40, nullable = false, updatable = false)
     @Size(max = 40)
     @NotEmpty
-    private String gridFsFileName;
+    private String sha1Hash;
 
     @Column(name = "provided_file_name", length = 256)
     @Size(max = 256)
@@ -51,9 +52,6 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
     private JpaSoftwareModule softwareModule;
-
-    @Column(name = "sha1_hash", length = 40, nullable = true)
-    private String sha1Hash;
 
     @Column(name = "md5_hash", length = 32, nullable = true)
     private String md5Hash;
@@ -71,17 +69,17 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     /**
      * Constructs artifact.
      *
-     * @param gridFsFileName
+     * @param sha1Hash
      *            that is the link to the {@link DbArtifact} entity.
      * @param filename
      *            that is used by {@link DbArtifact} store.
      * @param softwareModule
      *            of this artifact
      */
-    public JpaArtifact(@NotNull final String gridFsFileName, @NotNull final String filename,
+    public JpaArtifact(@NotEmpty final String sha1Hash, @NotNull final String filename,
             final SoftwareModule softwareModule) {
         setSoftwareModule(softwareModule);
-        this.gridFsFileName = gridFsFileName;
+        this.sha1Hash = sha1Hash;
         this.filename = filename;
     }
 
@@ -120,10 +118,6 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     public final void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = (JpaSoftwareModule) softwareModule;
         this.softwareModule.addArtifact(this);
-    }
-
-    public String getGridFsFileName() {
-        return gridFsFileName;
     }
 
     @Override

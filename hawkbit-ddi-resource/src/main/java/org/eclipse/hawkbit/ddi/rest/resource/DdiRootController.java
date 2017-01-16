@@ -157,7 +157,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getId());
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {

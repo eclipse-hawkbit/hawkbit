@@ -186,7 +186,7 @@ public interface ArtifactManagement {
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
-     * @param artifactId
+     * @param sha1Hash
      *            to search for
      * @return loaded {@link DbArtifact}
      *
@@ -198,6 +198,6 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadArtifactBinary(@NotNull Long artifactId);
+    DbArtifact loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

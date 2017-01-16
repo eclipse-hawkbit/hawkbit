@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -76,9 +75,10 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
+    private static final String SHA1 = "12345";
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 123L;
-    private static String CONTROLLLER_ID = "123";
+    private static final String CONTROLLLER_ID = "123";
     private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
@@ -327,17 +327,16 @@ public class AmqpMessageHandlerServiceTest {
 
         // mock
         final Artifact localArtifactMock = mock(Artifact.class);
-        final Long mockedArtifactId = 1L;
-        when(localArtifactMock.getId()).thenReturn(mockedArtifactId);
+        when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
 
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(localArtifactMock);
-        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), mockedArtifactId))
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(localArtifactMock);
+        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
-        when(artifactManagementMock.loadArtifactBinary(anyLong())).thenReturn(dbArtifactMock);
+        when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
-        when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash("sha1", "md5"));
+        when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash(SHA1, "md5"));
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
@@ -349,7 +348,7 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
-        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo("sha1");
+        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo(SHA1);
         assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
         assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
                 .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
