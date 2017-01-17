@@ -271,7 +271,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     protected void addNewItem(final ClickEvent event) {
         targetAddUpdateWindow.resetComponents();
         final Window addTargetWindow = targetAddUpdateWindow.getWindow();
-        addTargetWindow.setCaption(i18n.get("caption.add.new.target"));
+        addTargetWindow.setCaption(i18n.get(UIComponentIdProvider.TARGET_ADD_CAPTION));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }

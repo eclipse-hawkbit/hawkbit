@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
@@ -110,6 +111,22 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
     protected String tagNameValue;
     protected String tagDescValue;
 
+    /**
+     * Constructor for AbstractCreateUpdateTagLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param tagManagement
+     *            TagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public AbstractCreateUpdateTagLayout(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
@@ -192,7 +209,7 @@ public abstract class AbstractCreateUpdateTagLayout<E extends NamedEntity> exten
                 .prompt(i18n.get("textfield.description")).immediate(true).id(SPUIDefinitions.NEW_TARGET_TAG_DESC)
                 .buildTextComponent();
 
-        tagDesc.setNullRepresentation("");
+        tagDesc.setNullRepresentation(StringUtils.EMPTY);
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", null, null, false, "",
                 i18n.get("label.combobox.tag"));

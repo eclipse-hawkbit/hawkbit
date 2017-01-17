@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -26,7 +27,6 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -139,7 +139,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         closeButton = getCloseButton();
     }
 
-    private ProgressBar creatreProgressBar() {
+    private static ProgressBar creatreProgressBar() {
         final ProgressBar progressBarIndicator = new ProgressBar(0F);
         progressBarIndicator.addStyleName("bulk-upload-label");
         progressBarIndicator.setSizeFull();
@@ -171,7 +171,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         return bulkUploadHandler;
     }
 
-    private Label getStatusCountLabel() {
+    private static Label getStatusCountLabel() {
         final Label countLabel = new Label();
         countLabel.setImmediate(true);
         countLabel.addStyleName("bulk-upload-label");
@@ -185,7 +185,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TextArea description = new TextAreaBuilder().caption(i18n.get("textfield.description"))
                 .style("text-area-style").prompt(i18n.get("textfield.description")).immediate(true)
                 .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
-        description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        description.setNullRepresentation(StringUtils.EMPTY);
         description.setWidth("100%");
         return description;
     }
@@ -244,12 +244,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(
+        return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
-
-        return distributionContainer;
-
     }
 
     private void buildLayout() {

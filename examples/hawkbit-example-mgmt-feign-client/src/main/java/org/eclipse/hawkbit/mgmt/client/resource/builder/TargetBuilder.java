@@ -86,8 +86,6 @@ public class TargetBuilder {
      * 
      * @param count
      *            the amount of target bodies which should be created
-     * @param offset
-     *            for
      * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtTargetRequestBody> buildAsList(final int count) {

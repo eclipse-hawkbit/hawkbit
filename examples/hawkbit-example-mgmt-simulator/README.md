@@ -10,13 +10,13 @@ Run getting started example
 
 
 
-    $ java -jar hawkbit-example-mgmt-simulator-#version#.jar
+    $ java -jar hawkbit-example-mgmt-simulator-#version#-exec.jar
 
 
 Run create and start rollout example
 
 
-    $ java -jar hawkbit-example-mgmt-simulator-#version#.jar --createrollout
+    $ java -jar hawkbit-example-mgmt-simulator-#version#-exec.jar --createrollout
 
 
 ## This example shows

@@ -31,8 +31,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- *
- *
+ * Layout for Custom Filter view
  */
 public class TargetFilterHeader extends VerticalLayout {
 
@@ -52,6 +51,16 @@ public class TargetFilterHeader extends VerticalLayout {
 
     private SPUIButton searchResetIcon;
 
+    /**
+     * Constructor for TargetFilterHeader
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param filterManagementUIState
+     *            FilterManagementUIState
+     * @param permissionChecker
+     *            SpPermissionChecker
+     */
     public TargetFilterHeader(final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
             final SpPermissionChecker permissionChecker) {
         this.eventBus = eventBus;
@@ -69,7 +78,7 @@ public class TargetFilterHeader extends VerticalLayout {
         createfilterButton = createAddButton();
     }
 
-    private Label createHeaderCaption() {
+    private static Label createHeaderCaption() {
         return new LabelBuilder().name(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION).buildCaptionLabel();
     }
 
@@ -89,7 +98,7 @@ public class TargetFilterHeader extends VerticalLayout {
 
     }
 
-    private HorizontalLayout createHeaderFilterIconLayout() {
+    private static HorizontalLayout createHeaderFilterIconLayout() {
         final HorizontalLayout titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         titleFilterIconsLayout.setSpacing(false);
@@ -125,8 +134,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private SPUIButton createSearchResetIcon() {
-        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "", "", null,
-                false, FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
+                UIComponentIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID, "", "", null, false, FontAwesome.SEARCH,
+                SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         return button;
     }
@@ -159,10 +169,6 @@ public class TargetFilterHeader extends VerticalLayout {
         searchResetIcon.setData(Boolean.FALSE);
         resetSearchText();
 
-    }
-
-    private String getSearchRestIconId() {
-        return UIComponentIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID;
     }
 
     protected void resetSearchText() {

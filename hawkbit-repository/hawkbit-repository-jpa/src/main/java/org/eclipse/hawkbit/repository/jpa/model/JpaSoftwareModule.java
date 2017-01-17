@@ -144,7 +144,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     /**
      * @param artifact
-     *            is removed from the assigned {@link LocalArtifact}s.
+     *            is removed from the assigned {@link Artifact}s.
      */
     public void removeArtifact(final Artifact artifact) {
         if (artifacts != null) {
