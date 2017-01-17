@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.Collections;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -75,6 +76,24 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private FormLayout formLayout;
 
+    /**
+     * Constructor for DistributionAddUpdateWindowLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param notificationMessage
+     *            UINotification
+     * @param eventBus
+     *            UIEventBus
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     * @param systemManagement
+     *            SystemManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param distributionSetTable
+     *            DistributionSetTable
+     */
     public DistributionAddUpdateWindowLayout(final I18N i18n, final UINotification notificationMessage,
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
             final SystemManagement systemManagement, final EntityFactory entityFactory,
@@ -142,7 +161,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.DIST_ADD_DESC)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation("");
+        descTextArea.setNullRepresentation(StringUtils.EMPTY);
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
@@ -153,7 +172,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private TextField createTextField(final String in18Key, final String id) {
         final TextField buildTextField = new TextFieldBuilder().caption(i18n.get(in18Key)).required(true)
                 .prompt(i18n.get(in18Key)).immediate(true).id(id).buildTextComponent();
-        buildTextField.setNullRepresentation("");
+        buildTextField.setNullRepresentation(StringUtils.EMPTY);
         return buildTextField;
     }
 
@@ -288,9 +307,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setValue(distSet.getType().getId());
 
         reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
-        if (distSet.getDescription() != null) {
-            descTextArea.setValue(distSet.getDescription());
-        }
+        descTextArea.setValue(distSet.getDescription());
     }
 
     /**
@@ -303,9 +320,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.dist"))
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnCloseDialogListener())
-                .buildCommonDialogWindow();
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get(UIComponentIdProvider.DIST_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnCloseDialogListener()).buildCommonDialogWindow();
     }
 
     /**

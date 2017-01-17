@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -330,7 +331,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField createIntegerTextField(final String in18Key, final String id) {
         final TextField textField = createTextField(in18Key, id);
-        textField.setNullRepresentation("");
+        textField.setNullRepresentation(StringUtils.EMPTY);
         textField.setConverter(new StringToIntegerConverter());
         textField.setConversionError(i18n.get(MESSAGE_ENTER_NUMBER));
         textField.setSizeUndefined();
@@ -457,7 +458,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
 
         filterField.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
-        filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        filterField.setNullRepresentation(StringUtils.EMPTY);
         filterField.setEnabled(false);
         filterField.setSizeUndefined();
         return filterField;
@@ -731,7 +732,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
                 .prompt(i18n.get("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
                 .buildTextComponent();
-        descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        descriptionField.setNullRepresentation(StringUtils.EMPTY);
         descriptionField.setSizeUndefined();
         return descriptionField;
     }

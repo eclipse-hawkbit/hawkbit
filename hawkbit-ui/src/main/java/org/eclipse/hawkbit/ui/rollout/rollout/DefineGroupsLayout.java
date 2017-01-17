@@ -454,7 +454,7 @@ public class DefineGroupsLayout extends GridLayout {
                     .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
                     .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
 
-            filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+            filterField.setNullRepresentation(StringUtils.EMPTY);
             filterField.setEnabled(false);
             filterField.setSizeUndefined();
             return filterField;
