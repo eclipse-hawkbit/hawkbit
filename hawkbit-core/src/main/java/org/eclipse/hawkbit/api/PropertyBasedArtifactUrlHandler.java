@@ -8,15 +8,19 @@
  */
 package org.eclipse.hawkbit.api;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.net.UrlEscapers;
 
@@ -46,6 +50,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String IP_PLACEHOLDER = "ip";
     private static final String PORT_PLACEHOLDER = "port";
     private static final String HOSTNAME_PLACEHOLDER = "hostname";
+    private static final String HOSTNAME_REQUEST_PLACEHOLDER = "hostnameRequest";
+    private static final String PORT_REQUEST_PLACEHOLDER = "portRequest";
+    private static final String HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER = "domainRequest";
     private static final String ARTIFACT_FILENAME_PLACEHOLDER = "artifactFileName";
     private static final String ARTIFACT_SHA1_PLACEHOLDER = "artifactSHA1";
     private static final String ARTIFACT_ID_BASE10_PLACEHOLDER = "artifactId";
@@ -68,18 +75,24 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     @Override
     public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api) {
+        return getUrls(placeholder, api, null);
+    }
+
+    @Override
+    public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api, final URI requestUri) {
 
         return urlHandlerProperties.getProtocols().entrySet().stream()
                 .filter(entry -> entry.getValue().getSupports().contains(api))
                 .filter(entry -> entry.getValue().isEnabled())
                 .map(entry -> new ArtifactUrl(entry.getValue().getProtocol().toUpperCase(), entry.getValue().getRel(),
-                        generateUrl(entry.getValue(), placeholder)))
+                        generateUrl(entry.getValue(), placeholder, requestUri)))
                 .collect(Collectors.toList());
 
     }
 
-    private static String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder) {
-        final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder).entrySet();
+    private static String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder,
+            final URI requestUri) {
+        final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder, requestUri).entrySet();
 
         String urlPattern = protocol.getRef();
 
@@ -94,15 +107,21 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         return urlPattern;
     }
 
-    private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder) {
+    private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
+            final URI requestUri) {
         final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
+
+        replaceMap.put(HOSTNAME_REQUEST_PLACEHOLDER, getRequestHost(protocol, requestUri));
+        replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
+        replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
+
         replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
                 UrlEscapers.urlFragmentEscaper().escape(placeholder.getSoftwareData().getFilename()));
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
-        replaceMap.put(PORT_PLACEHOLDER, protocol.getPort() == null ? null : String.valueOf(protocol.getPort()));
+        replaceMap.put(PORT_PLACEHOLDER, getPort(protocol));
         replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
         replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
         replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
@@ -117,6 +136,50 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
         return replaceMap;
+    }
+
+    private static String getRequestPort(final UrlProtocol protocol, final URI requestUri) {
+        if (requestUri == null) {
+            return getPort(protocol);
+        }
+
+        return requestUri.getPort() > 0 ? String.valueOf(requestUri.getPort()) : getPort(protocol);
+    }
+
+    private static String getRequestHost(final UrlProtocol protocol, final URI requestUri) {
+        if (requestUri == null) {
+            return protocol.getHostname();
+        }
+
+        return Optional.ofNullable(requestUri.getHost()).orElse(protocol.getHostname());
+    }
+
+    private static String getPort(final UrlProtocol protocol) {
+        return protocol.getPort() == null ? null : String.valueOf(protocol.getPort());
+    }
+
+    private static String computeHostWithRequestDomain(final UrlProtocol protocol, final URI requestUri) {
+
+        if (requestUri == null) {
+            return protocol.getHostname();
+        }
+
+        if (!protocol.getHostname().contains(".")) {
+            return protocol.getHostname();
+        }
+
+        final String host = Splitter.on('.').trimResults().omitEmptyStrings().splitToList(protocol.getHostname())
+                .get(0);
+
+        final List<String> domainElements = Splitter.on('.').trimResults().omitEmptyStrings()
+                .splitToList(requestUri.getHost());
+        final String domain = Joiner.on(".").join(domainElements.subList(1, domainElements.size()));
+
+        if (Strings.isNullOrEmpty(domain)) {
+            return protocol.getHostname();
+        }
+
+        return host + "." + domain;
     }
 
 }
