@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 /**
  * System usage stats element for a tenant.
@@ -22,7 +23,7 @@ public class TenantUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
-    private final Map<String, String> customData;
+    private Map<String, String> customData;
 
     /**
      * Constructor.
@@ -32,7 +33,6 @@ public class TenantUsage {
     public TenantUsage(final String tenantName) {
         super();
         this.tenantName = tenantName;
-        customData = new HashMap<>();
     }
 
     public String getTenantName() {
@@ -80,7 +80,7 @@ public class TenantUsage {
     }
 
     /**
-     * Add a key and value as additional data to the system usage stats.
+     * Add a key and value as custom data to the system usage stats.
      * 
      * @param key
      *            the key to set
@@ -89,6 +89,9 @@ public class TenantUsage {
      * @return updated tenant stats element
      */
     public TenantUsage setCustomData(final String key, final String value) {
+        if (customData == null) {
+            customData = Maps.newHashMap();
+        }
         customData.put(key, value);
         return this;
     }

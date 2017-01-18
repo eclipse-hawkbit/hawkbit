@@ -78,8 +78,8 @@ public class MgmtSystemTenantServiceUsage {
         return customData;
     }
 
-    public void setCustomData(final Map<String, String> additionalTenantData) {
-        this.customData = additionalTenantData;
+    public void setCustomData(final Map<String, String> customData) {
+        this.customData = customData;
     }
 
 }
