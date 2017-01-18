@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -66,9 +67,12 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -82,6 +86,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.google.common.collect.Maps;
@@ -101,6 +106,12 @@ import com.google.common.collect.Maps;
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
+
+    @Autowired
+    RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties jpaProperties,
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
+        super(dataSource, jpaProperties, jtaTransactionManagerProvider);
+    }
 
     @Bean
     @ConditionalOnMissingBean

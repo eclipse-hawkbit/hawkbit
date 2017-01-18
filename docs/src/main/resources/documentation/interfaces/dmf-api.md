@@ -57,6 +57,38 @@ All messages have to be sent to the exchange **dmf.exchange**.
 | type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lwm2m   | content\_type=application/json <br /> reply_to (optional) =sp.connector.replyTo  
 
 
+### Message to update target attributes
+
+| Message Header                      | Description                      | Type                                | Mandatory                                                    
+|-----------------------------|----------------------------------|-------------------------------------|----------------
+| type          | Type of the message              | Fixed string "EVENT"       | true
+| topic         | Topic to handle events different | Fixed string "UPDATE_ATTRIBUTES" | true
+| thingId       | The ID of the registered thing   | String                              | true
+| tenant        | The tenant this thing belongs to | String                              | false
+
+
+| Message Properties                      | Description                      | Type                                | Mandatory                                                    
+|-----------------------------|----------------------------------|-------------------------------------|----------------
+| content_type                 | The content type of the payload  | String                              | true
+
+
+**Example Header and Payload**
+
+| Headers                               | MessageProperties               |                                                              
+|---------------------------------------|---------------------------------|
+| type=EVENT <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=UPDATE\_ATTRIBUTES | content\_type=application/json <br /> 
+
+Payload Template
+
+```json
+{
+	"attributes": {
+		"exampleKey1" : "exampleValue1",
+		"exampleKey2" : "exampleValue2"
+	}
+}
+```
+
 ### Message to send an action status event to _hawkBit_
 
 The Java representation is ActionUpdateStatus:
