@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.api;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,7 @@ import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.google.common.net.UrlEscapers;
 
 /**
@@ -109,7 +109,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
             final URI requestUri) {
-        final Map<String, String> replaceMap = new HashMap<>();
+        final Map<String, String> replaceMap = Maps.newHashMapWithExpectedSize(19);
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
 
