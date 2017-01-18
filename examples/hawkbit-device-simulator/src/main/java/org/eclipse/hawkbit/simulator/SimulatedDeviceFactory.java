@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.simulator;
 
 import java.net.URL;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
@@ -31,6 +33,9 @@ public class SimulatedDeviceFactory {
 
     @Autowired
     private SpSenderService spSenderService;
+
+    @Autowired
+    private ScheduledExecutorService threadPool;
 
     /**
      * Creating a simulated device.
@@ -84,6 +89,9 @@ public class SimulatedDeviceFactory {
         if (pollImmediatly) {
             spSenderService.createOrUpdateThing(tenant, id);
         }
+
+        threadPool.schedule(() -> spSenderService.updateAttributesOfThing(tenant, id), 2_000, TimeUnit.MILLISECONDS);
+
         return device;
     }
 

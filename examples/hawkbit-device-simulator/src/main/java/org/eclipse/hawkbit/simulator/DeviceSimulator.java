@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,6 +39,14 @@ public class DeviceSimulator {
     @Bean
     public EventBus eventBus() {
         return new AsyncEventBus(Executors.newFixedThreadPool(4));
+    }
+
+    /**
+     * @return central ScheduledExecutorService
+     */
+    @Bean
+    public ScheduledExecutorService threadPool() {
+        return newScheduledThreadPool(8);
     }
 
     /**
