@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.simulator.amqp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -17,6 +18,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
+import org.eclipse.hawkbit.simulator.SimulationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -35,17 +38,23 @@ public class SpSenderService extends SenderService {
 
     private final String spExchange;
 
+    private final SimulationProperties simulationProperties;
+
     /**
      *
      * @param rabbitTemplate
      *            the rabbit template
      * @param amqpProperties
      *            the amqp properties
+     * @param simulationProperties
+     *            for attributes update class
      */
     @Autowired
-    public SpSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
+    public SpSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
+            final SimulationProperties simulationProperties) {
         super(rabbitTemplate, amqpProperties);
         this.spExchange = AmqpSettings.DMF_EXCHANGE;
+        this.simulationProperties = simulationProperties;
     }
 
     /**
@@ -53,7 +62,7 @@ public class SpSenderService extends SenderService {
      *
      * @param update
      *            the simulated update object
-     * @param description
+     * @param updateResultMessages
      *            a description according the update process
      */
     public void finishUpdateProcess(final SimulatedUpdate update, final List<String> updateResultMessages) {
@@ -67,8 +76,8 @@ public class SpSenderService extends SenderService {
      *
      * @param update
      *            the simulated update object
-     * @param messageDescription
-     *            a description according the update process
+     * @param updateResultMessages
+     *            list of messages for error
      */
     public void finishUpdateProcessWithError(final SimulatedUpdate update, final List<String> updateResultMessages) {
         sendErrorgMessage(update, updateResultMessages);
@@ -81,7 +90,7 @@ public class SpSenderService extends SenderService {
      *
      * @param tenant
      *            the tenant
-     * @param messageDescription
+     * @param updateResultMessages
      *            the error message description to send
      * @param actionId
      *            the ID of the action for the error message
@@ -96,7 +105,7 @@ public class SpSenderService extends SenderService {
      *
      * @param update
      *            the simulated update object
-     * @param warningMessage
+     * @param updateResultMessages
      *            a warning description
      */
     public void sendWarningMessage(final SimulatedUpdate update, final List<String> updateResultMessages) {
@@ -111,7 +120,7 @@ public class SpSenderService extends SenderService {
      *            the tenant
      * @param actionStatus
      *            the action status
-     * @param actionMessage
+     * @param updateResultMessages
      *            the message to get send
      * @param actionId
      *            the cached value
@@ -124,7 +133,7 @@ public class SpSenderService extends SenderService {
     }
 
     /**
-     * Create new thing created message and send to SP.
+     * Create new thing created message and send to udpate server.
      *
      * @param tenant
      *            the tenant to create the target
@@ -132,7 +141,26 @@ public class SpSenderService extends SenderService {
      *            the ID of the target to create or update
      */
     public void createOrUpdateThing(final String tenant, final String targetId) {
+        sendMessage(spExchange, thingCreatedMessage(tenant, targetId));
 
+        LOGGER.debug("Created thing created message and send to update server for Thing \"{}\"", targetId);
+    }
+
+    /**
+     * Create new attribute update message and send to update server.
+     *
+     * @param tenant
+     *            the tenant to create the target
+     * @param targetId
+     *            the ID of the target to create or update
+     */
+    public void updateAttributesOfThing(final String tenant, final String targetId) {
+        sendMessage(spExchange, attributeUpdateMessage(tenant, targetId));
+
+        LOGGER.debug("Create update attributes message and send to update server for Thing \"{}\"", targetId);
+    }
+
+    private Message thingCreatedMessage(final String tenant, final String targetId) {
         final MessageProperties messagePropertiesForSP = new MessageProperties();
         messagePropertiesForSP.setHeader(MessageHeaderKey.TYPE, MessageType.THING_CREATED.name());
         messagePropertiesForSP.setHeader(MessageHeaderKey.TENANT, tenant);
@@ -140,9 +168,23 @@ public class SpSenderService extends SenderService {
         messagePropertiesForSP.setHeader(MessageHeaderKey.SENDER, "simulator");
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
-        final Message convertedMessage = new Message(null, messagePropertiesForSP);
-        sendMessage(spExchange, convertedMessage);
-        LOGGER.debug("Created thing created message and send to SP for Thing \"{}\"", targetId);
+        return new Message(null, messagePropertiesForSP);
+    }
+
+    private Message attributeUpdateMessage(final String tenant, final String targetId) {
+        final MessageProperties messagePropertiesForSP = new MessageProperties();
+        messagePropertiesForSP.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT.name());
+        messagePropertiesForSP.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ATTRIBUTES);
+        messagePropertiesForSP.setHeader(MessageHeaderKey.TENANT, tenant);
+        messagePropertiesForSP.setHeader(MessageHeaderKey.THING_ID, targetId);
+        messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
+        final AttributeUpdate attributeUpdate = new AttributeUpdate();
+
+        attributeUpdate.getAttributes().putAll(simulationProperties.getAttributes().stream().collect(
+                Collectors.toMap(SimulationProperties.Attribute::getKey, SimulationProperties.Attribute::getValue)));
+
+        return convertMessage(attributeUpdate, messagePropertiesForSP);
     }
 
     /**
