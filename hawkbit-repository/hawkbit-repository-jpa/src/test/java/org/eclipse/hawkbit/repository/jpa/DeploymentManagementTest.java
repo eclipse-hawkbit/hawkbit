@@ -100,7 +100,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-        @Test
+    @Test
     @Description("Test verifies that actions of a target are found by using id-based search.")
     public void findActionByTargetId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",

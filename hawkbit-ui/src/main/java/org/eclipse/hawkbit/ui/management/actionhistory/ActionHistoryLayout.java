@@ -177,6 +177,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
      */
     class ActionHistoryHeaderMaxSupport extends AbstractHeaderMaximizeSupport {
 
+        private final DefaultGridHeader abstractGridHeader;
+
         /**
          * Constructor.
          *
@@ -185,6 +187,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          */
         protected ActionHistoryHeaderMaxSupport(DefaultGridHeader abstractGridHeader, String maximizeButtonId) {
             abstractGridHeader.super(maximizeButtonId);
+            this.abstractGridHeader = abstractGridHeader;
         }
 
         @Override
@@ -196,6 +199,15 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         @Override
         protected void minimize() {
             eventBus.publish(this, ManagementUIEvent.MIN_ACTION_HISTORY);
+        }
+
+        /**
+         * Gets the grid header the maximize support is for.
+         *
+         * @return grid header
+         */
+        protected DefaultGridHeader getGridHeader() {
+            return abstractGridHeader;
         }
     }
 }
