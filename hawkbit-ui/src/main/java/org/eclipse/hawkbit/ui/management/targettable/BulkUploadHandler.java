@@ -269,7 +269,7 @@ public class BulkUploadHandler extends CustomComponent
             tempFile = null;
         }
 
-        private void readEachLine(final String line, final double innerCounter, final double totalNumberOfLines) {
+        private void readEachLine(final String line, final long innerCounter, final long totalNumberOfLines) {
             final String csvDelimiter = ",";
             final String[] targets = line.split(csvDelimiter);
             if (targets.length == 2) {
@@ -281,7 +281,7 @@ public class BulkUploadHandler extends CustomComponent
             }
             final float current = managementUIState.getTargetTableFilters().getBulkUpload()
                     .getProgressBarCurrentValue();
-            final float next = (float) (innerCounter / totalNumberOfLines);
+            final float next = innerCounter / totalNumberOfLines;
             if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.05
                     || Math.abs(next - 1) < 0.00001) {
                 managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(next);
