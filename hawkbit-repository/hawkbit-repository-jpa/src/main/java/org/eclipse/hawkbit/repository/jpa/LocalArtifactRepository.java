@@ -48,20 +48,20 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     /**
      * Searches for a {@link Artifact} based on given gridFsFileName.
      *
-     * @param gridFsFileName
+     * @param sha1Hash
      *            to search
      * @return list of {@link Artifact}s.
      */
-    List<Artifact> findByGridFsFileName(String gridFsFileName);
+    List<Artifact> findBySha1Hash(String sha1Hash);
 
     /**
      * Searches for a {@link Artifact} based on given gridFsFileName.
      *
-     * @param gridFsFileName
+     * @param sha1Hash
      *            to search
      * @return {@link Artifact} the first in the result list
      */
-    JpaArtifact findFirstByGridFsFileName(String gridFsFileName);
+    JpaArtifact findFirstBySha1Hash(String sha1Hash);
 
     /**
      * Searches for a {@link Artifact} based user provided filename at upload.

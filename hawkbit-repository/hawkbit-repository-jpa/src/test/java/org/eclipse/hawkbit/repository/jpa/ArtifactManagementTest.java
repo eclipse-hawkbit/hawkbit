@@ -87,9 +87,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
         assertThat(result2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
         assertThat(((JpaArtifact) result).getFilename()).isEqualTo("file1");
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isNotNull();
+        assertThat(((JpaArtifact) result).getSha1Hash()).isNotNull();
         assertThat(result).isNotEqualTo(result2);
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
         assertThat(artifactManagement.findArtifactByFilename("file1").get(0).getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
@@ -148,19 +148,18 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaArtifact) result).getGridFsFileName())
-                .isNotEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isNotEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result.getId());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result2).getSha1Hash())).isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
     }
@@ -187,14 +186,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(2);
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((JpaArtifact) result).getGridFsFileName()).isEqualTo(((JpaArtifact) result2).getGridFsFileName());
+        assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
 
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
         artifactManagement.deleteArtifact(result.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNotNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNotNull();
 
         artifactManagement.deleteArtifact(result2.getId());
-        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getGridFsFileName())).isNull();
+        assertThat(binaryArtifactRepository.getArtifactBySha1(((JpaArtifact) result).getSha1Hash())).isNull();
     }
 
     @Test
@@ -214,7 +213,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final Artifact result = artifactManagement.createArtifact(new ByteArrayInputStream(random),
                 testdataFactory.createSoftwareModuleOs().getId(), "file1", false);
 
-        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getId()).getFileInputStream()) {
+        try (InputStream fileInputStream = artifactManagement.loadArtifactBinary(result.getSha1Hash())
+                .getFileInputStream()) {
             assertTrue("The stored binary matches the given binary",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
         }
@@ -225,7 +225,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         try {
-            artifactManagement.loadArtifactBinary(1L);
+            artifactManagement.loadArtifactBinary("123");
             fail("Should not have worked with missing permission.");
         } catch (final InsufficientPermissionException e) {
 

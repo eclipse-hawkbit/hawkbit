@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -186,18 +186,15 @@ public interface ArtifactManagement {
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
-     * @param artifactId
+     * @param sha1Hash
      *            to search for
      * @return loaded {@link DbArtifact}
      *
-     * @throws GridFSDBFileNotFoundException
+     * @throws ArtifactBinaryNotFoundException
      *             if file could not be found in store
-     * 
-     * @throws EntityNotFoundException
-     *             is artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadArtifactBinary(@NotNull Long artifactId);
+    DbArtifact loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }
