@@ -37,15 +37,6 @@ public interface RolloutUpdate {
     RolloutUpdate description(String description);
 
     /**
-     * @param set
-     *            for {@link Rollout#getDistributionSet()}
-     * @return updated builder instance
-     */
-    default RolloutUpdate set(final DistributionSet set) {
-        return set(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
-    }
-
-    /**
      * @param setId
      *            for {@link Rollout#getDistributionSet()}
      * @return updated builder instance

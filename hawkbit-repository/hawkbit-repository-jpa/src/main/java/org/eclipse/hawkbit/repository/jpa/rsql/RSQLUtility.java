@@ -233,7 +233,7 @@ public final class RSQLUtility {
             return Collections.emptySet();
         }
 
-        private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class type) {
+        private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class<?> type) {
             return getCurrentJoins().stream()
                     .filter(j -> type.equals(j.getJavaType())).findFirst();
         }
@@ -326,6 +326,25 @@ public final class RSQLUtility {
                     new Exception());
         }
 
+        /**
+         * Resolves the Path for a field in the persistence layer and joins the
+         * required models. This operation is part of a tree traversal through
+         * an RSQL expression. It creates for every field that is not part of
+         * the root model a join to the foreign model. This behavior is
+         * optimized when several joins happen directly under an OR node in the
+         * traversed tree. The same foreign model is only joined once.
+         *
+         * Example: tags.name==M;(tags.name==A,tags.name==B,tags.name==C) This
+         * example joins the tags model only twice, because for the OR node in
+         * brackets only one join is used.
+         *
+         * @param enumField
+         *            field from a FieldNameProvider to resolve on the
+         *            persistence layer
+         * @param finalProperty
+         *            dot notated field path
+         * @return the Path for a field
+         */
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
             final String[] split = finalProperty.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
@@ -343,6 +362,7 @@ public final class RSQLUtility {
                     final From<?, Object> joinParent = join.getParent();
                     Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
                     if(currentJoinOfType.isPresent() && isOrLevel) {
+                        // remove the additional join and use the existing one
                         joinParent.getJoins().remove(join);
                         fieldPath = currentJoinOfType.get();
                     } else {

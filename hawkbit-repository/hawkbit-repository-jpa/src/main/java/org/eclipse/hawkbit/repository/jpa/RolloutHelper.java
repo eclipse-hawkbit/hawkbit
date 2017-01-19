@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +29,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.EntityNotFoundException;
 
 /**
  * A collection of static helper methods for the {@link JpaRolloutManagement}
@@ -263,18 +260,18 @@ final class RolloutHelper {
         // when any previous group has the same filter as the target group the
         // overlap is 100%
         if (isTargetFilterInGroups(groupFilter, groups)) {
-            return concatTargetFilters(";", baseFilter, groupFilter);
+            return concatAndTargetFilters(baseFilter, groupFilter);
         }
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
         if (StringUtils.isNotEmpty(previousGroupFilters)) {
-            if(StringUtils.isNotEmpty(groupFilter)) {
-                return concatTargetFilters(";", baseFilter, groupFilter, previousGroupFilters);
+            if (StringUtils.isNotEmpty(groupFilter)) {
+                return concatAndTargetFilters(baseFilter, groupFilter, previousGroupFilters);
             } else {
-                return concatTargetFilters(";", baseFilter, previousGroupFilters);
+                return concatAndTargetFilters(baseFilter, previousGroupFilters);
             }
         }
-        if(StringUtils.isNotEmpty(groupFilter)) {
-            return concatTargetFilters(";", baseFilter, groupFilter);
+        if (StringUtils.isNotEmpty(groupFilter)) {
+            return concatAndTargetFilters(baseFilter, groupFilter);
         } else {
             return baseFilter;
         }
@@ -283,11 +280,11 @@ final class RolloutHelper {
     private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
         return StringUtils.isNotEmpty(groupFilter)
                 && groups.stream().anyMatch(prevGroup -> StringUtils.isNotEmpty(prevGroup.getTargetFilterQuery())
-                && prevGroup.getTargetFilterQuery().equals(groupFilter));
+                        && prevGroup.getTargetFilterQuery().equals(groupFilter));
     }
 
-    private static String concatTargetFilters(String operator, String... filters) {
-        return "(" + Arrays.stream(filters).collect(Collectors.joining(")" + operator + "(")) + ")";
+    private static String concatAndTargetFilters(String... filters) {
+        return "(" + Arrays.stream(filters).collect(Collectors.joining(");(")) + ")";
     }
 
     /**
@@ -301,7 +298,7 @@ final class RolloutHelper {
         if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         } else {
-            return concatTargetFilters(";", baseFilter, group.getTargetFilterQuery());
+            return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
         }
     }
 
@@ -322,8 +319,10 @@ final class RolloutHelper {
     }
 
     /**
-     * @param searchText search string
-     * @return criteria specification with a query for name or description of a rollout
+     * @param searchText
+     *            search string
+     * @return criteria specification with a query for name or description of a
+     *         rollout
      */
     static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
         return (rolloutRoot, query, criteriaBuilder) -> {
@@ -349,6 +348,5 @@ final class RolloutHelper {
     static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
-    
 
 }

@@ -27,6 +27,15 @@ public class RolloutGroupsValidation {
      */
     private List<Long> targetsPerGroup;
 
+    /**
+     * Instantiates a new validation result
+     * 
+     * @param totalTargets
+     *            The total amount of targets in a {@link Rollout}
+     * @param targetsPerGroup
+     *            A list containing the count of targets for each
+     *            {@link RolloutGroup}
+     */
     public RolloutGroupsValidation(final long totalTargets, @NotNull final List<Long> targetsPerGroup) {
         this.totalTargets = totalTargets;
         this.targetsPerGroup = targetsPerGroup;
