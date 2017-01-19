@@ -523,6 +523,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsPieChart.setChartState(targetsPerGroup, validation.getTotalTargets());
         }
 
+        totalTargetsCount = validation.getTotalTargets();
+        groupsLegendLayout.populateTotalTargets(validation.getTotalTargets());
         groupsLegendLayout.populateGroupsLegendByValidation(validation, defineGroupsLayout.getSavedRolloutGroups());
 
     }
