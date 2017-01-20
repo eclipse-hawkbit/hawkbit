@@ -23,7 +23,7 @@ public class TenantUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
-    private Map<String, String> customData;
+    private Map<String, String> usageData;
 
     /**
      * Constructor.
@@ -52,8 +52,8 @@ public class TenantUsage {
         return artifacts;
     }
 
-    public Map<String, String> getCustomData() {
-        return customData;
+    public Map<String, String> getUsageData() {
+        return usageData;
     }
 
     public TenantUsage setArtifacts(final long artifacts) {
@@ -80,19 +80,19 @@ public class TenantUsage {
     }
 
     /**
-     * Add a key and value as custom data to the system usage stats.
+     * Add a key and value as usage data to the system usage stats.
      * 
      * @param key
      *            the key to set
      * @param value
      *            the value to set
-     * @return updated tenant stats element
+     * @return tenant stats element with new usage added
      */
-    public TenantUsage setCustomData(final String key, final String value) {
-        if (customData == null) {
-            customData = Maps.newHashMap();
+    public TenantUsage addUsageData(final String key, final String value) {
+        if (usageData == null) {
+            usageData = Maps.newHashMap();
         }
-        customData.put(key, value);
+        usageData.put(key, value);
         return this;
     }
 
@@ -146,7 +146,7 @@ public class TenantUsage {
     public String toString() {
         return "TenantUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
                 + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes
-                + ", customData=" + customData + "]";
+                + ", usageData=" + usageData + "]";
     }
 
 }

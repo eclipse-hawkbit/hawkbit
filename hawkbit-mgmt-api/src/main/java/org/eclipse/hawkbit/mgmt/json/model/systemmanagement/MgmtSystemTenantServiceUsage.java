@@ -27,7 +27,7 @@ public class MgmtSystemTenantServiceUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
-    private Map<String, String> customData;
+    private Map<String, String> usageData;
 
     /**
      * Constructor.
@@ -74,12 +74,12 @@ public class MgmtSystemTenantServiceUsage {
         return tenantName;
     }
 
-    public Map<String, String> getCustomData() {
-        return customData;
+    public Map<String, String> getUsageData() {
+        return usageData;
     }
 
-    public void setCustomData(final Map<String, String> customData) {
-        this.customData = customData;
+    public void setUsageData(final Map<String, String> usageData) {
+        this.usageData = usageData;
     }
 
 }
