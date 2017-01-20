@@ -672,8 +672,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final long current = System.currentTimeMillis();
 
         final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/softwaremodules/").content(JsonBuilder.softwareModules(modules))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .perform(post("/rest/v1/softwaremodules/").accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                        .content(JsonBuilder.softwareModules(modules)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo("name1")))
@@ -815,8 +815,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(jsonArray.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+        mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
@@ -844,8 +845,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
         mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 

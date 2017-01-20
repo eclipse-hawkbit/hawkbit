@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
 
@@ -100,12 +101,12 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        return targets.stream().map(target -> {
+        return new ResponseList<>(targets.stream().map(target -> {
             final MgmtTarget response = toResponse(target);
             addPollStatus(target, response);
             addTargetLinks(response);
             return response;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()));
     }
 
     /**
@@ -120,7 +121,7 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        return targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList()));
     }
 
     /**

@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -79,7 +80,8 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 
     static List<MgmtMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
@@ -160,6 +162,7 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
     }
 }

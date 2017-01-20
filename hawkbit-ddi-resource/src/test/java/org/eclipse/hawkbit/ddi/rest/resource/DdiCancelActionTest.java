@@ -108,7 +108,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
-                TestdataFactory.DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                TestdataFactory.DEFAULT_CONTROLLER_ID).accept(APPLICATION_JSON_HAL_UTF))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",

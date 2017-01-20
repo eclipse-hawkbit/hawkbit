@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpRequest;
@@ -76,9 +77,9 @@ public final class DataConversionHelper {
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request) {
 
-        return module.getArtifacts().stream()
+        return new ResponseList<>(module.getArtifacts().stream()
                 .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement, request))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
