@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +53,8 @@ public interface MgmtDistributionSetTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -68,8 +70,8 @@ public interface MgmtDistributionSetTypeRestApi {
      *
      * @return a single softwareModule with status OK.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
 
@@ -94,8 +96,9 @@ public interface MgmtDistributionSetTypeRestApi {
      *            the module type to be updated.
      * @return status OK if update is successful
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetTypeId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetTypeId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
@@ -111,8 +114,9 @@ public interface MgmtDistributionSetTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
@@ -125,7 +129,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return Unpaged list of module types and OK in case of success.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { "application/hal+json",
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
@@ -142,7 +146,7 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
@@ -159,7 +163,7 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
@@ -173,7 +177,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return Unpaged list of module types and OK in case of success.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { "application/hal+json",
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
@@ -190,8 +194,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return OK if the request was successful
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeMandatoryModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
 
@@ -207,8 +210,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return OK if the request was successful
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeOptionalModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId);
 
@@ -224,9 +226,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return OK if the request was successful
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, consumes = { "application/hal+json",
-                    MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json",
-                            MediaType.APPLICATION_JSON_VALUE })
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             final MgmtId smtId);
 
@@ -242,9 +243,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return OK if the request was successful
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, consumes = { "application/hal+json",
-                    MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json",
-                            MediaType.APPLICATION_JSON_VALUE })
+            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             final MgmtId smtId);
 

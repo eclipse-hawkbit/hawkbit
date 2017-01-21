@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -147,7 +148,8 @@ public final class MgmtDistributionSetMapper {
             return Collections.emptyList();
         }
 
-        return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList()));
     }
 
     static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {

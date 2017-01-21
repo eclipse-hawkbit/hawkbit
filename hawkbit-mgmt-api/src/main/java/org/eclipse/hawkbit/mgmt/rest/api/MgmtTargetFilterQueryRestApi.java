@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,7 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return a single target with status OK.
      */
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{filterId}", produces = { "application/hal+json",
+    @RequestMapping(method = RequestMethod.GET, value = "/{filterId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") final Long filterId);
 
@@ -59,7 +60,8 @@ public interface MgmtTargetFilterQueryRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
 
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -77,8 +79,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *         is returned. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody final MgmtTargetFilterQueryRequestBody filter);
 
     /**
@@ -95,8 +98,9 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return the updated target filter response which contains all fields
      *         including fields which have not been updated
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{filterId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.PUT, value = "/{filterId}", consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") final Long filterId,
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest);
 
@@ -109,7 +113,7 @@ public interface MgmtTargetFilterQueryRestApi {
      *         OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{filterId}", produces = { "application/hal+json",
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{filterId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId);
 
@@ -122,8 +126,8 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return the assigned distribution set with status OK, if none is assigned
      *         than {@code null} content (e.g. "{}")
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{filterId}/autoAssignDS", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, value = "/{filterId}/autoAssignDS", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") final Long filterId);
 
     /**
@@ -137,8 +141,8 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return http status
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{filterId}/autoAssignDS", consumes = {
-            "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") final Long filterId,
             @RequestBody final MgmtId dsId);
 

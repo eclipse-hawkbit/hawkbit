@@ -768,7 +768,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId())
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -799,8 +799,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
         mvc.perform(put("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
