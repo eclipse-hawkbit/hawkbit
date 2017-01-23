@@ -47,14 +47,9 @@ public class TargetFilterQueryBuilder {
      * @return a single entry of {@link MgmtTargetFilterQueryRequestBody}
      */
     public MgmtTargetFilterQueryRequestBody build() {
-        return doBuild("");
-    }
-
-    private MgmtTargetFilterQueryRequestBody doBuild(final String suffix) {
         final MgmtTargetFilterQueryRequestBody body = new MgmtTargetFilterQueryRequestBody();
-        body.setName(suffix + name);
+        body.setName(name);
         body.setQuery(query);
         return body;
     }
-
 }
