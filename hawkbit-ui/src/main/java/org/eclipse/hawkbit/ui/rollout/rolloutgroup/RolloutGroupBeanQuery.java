@@ -137,7 +137,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     private String calculateFinishedPercentage(final RolloutGroup rolloutGroup) {
         return HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup, getRolloutManagement()
-                .getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup));
+                .getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup.getId()));
     }
 
     @Override

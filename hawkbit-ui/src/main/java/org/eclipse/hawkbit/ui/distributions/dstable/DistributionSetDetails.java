@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -244,7 +245,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         final VerticalLayout verticalLayout = new VerticalLayout();
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
-        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
         final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
         softwareModule.setValue(softwareModuleName);
         softwareModule.setDescription(softwareModuleName);
@@ -310,7 +311,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
-        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.DIST_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }

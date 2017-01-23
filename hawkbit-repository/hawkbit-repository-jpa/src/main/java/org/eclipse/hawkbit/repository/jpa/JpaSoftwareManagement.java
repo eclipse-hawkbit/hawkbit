@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecifica
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -204,9 +203,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     @Override
     public SoftwareModule findSoftwareModuleByNameAndVersion(final String name, final String version,
-            final SoftwareModuleType type) {
+            final Long typeId) {
 
-        return softwareModuleRepository.findOneByNameAndVersionAndType(name, version, (JpaSoftwareModuleType) type);
+        return softwareModuleRepository.findOneByNameAndVersionAndTypeId(name, version, typeId);
     }
 
     private boolean isUnassigned(final JpaSoftwareModule bsmMerged) {
@@ -225,7 +224,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
         for (final Artifact localArtifact : swModule.getArtifacts()) {
-            artifactManagement.clearArtifactBinary(localArtifact);
+            artifactManagement.clearArtifactBinary(localArtifact.getId());
         }
     }
 
@@ -492,22 +491,23 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteSoftwareModuleType(final SoftwareModuleType ty) {
-        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) ty;
+    public void deleteSoftwareModuleType(final Long typeId) {
+        final JpaSoftwareModuleType toDelete = Optional.ofNullable(softwareModuleTypeRepository.findOne(typeId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Software Module Type with giben ID " + typeId + " does not exist."));
 
-        if (softwareModuleRepository.countByType(type) > 0
-                || distributionSetTypeRepository.countByElementsSmType(type) > 0) {
-            final JpaSoftwareModuleType toDelete = entityManager.merge(type);
+        if (softwareModuleRepository.countByType(toDelete) > 0
+                || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
             toDelete.setDeleted(true);
             softwareModuleTypeRepository.save(toDelete);
         } else {
-            softwareModuleTypeRepository.delete(type.getId());
+            softwareModuleTypeRepository.delete(toDelete);
         }
     }
 
     @Override
-    public Page<SoftwareModule> findSoftwareModuleByAssignedTo(final Pageable pageable, final DistributionSet set) {
-        return softwareModuleRepository.findByAssignedTo(pageable, (JpaDistributionSet) set);
+    public Page<SoftwareModule> findSoftwareModuleByAssignedTo(final Pageable pageable, final Long setId) {
+        return softwareModuleRepository.findByAssignedToId(pageable, setId);
     }
 
     @Override

@@ -67,7 +67,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         }
 
         final Artifact artifact = module.getArtifact(artifactId).get();
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact);
+        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {

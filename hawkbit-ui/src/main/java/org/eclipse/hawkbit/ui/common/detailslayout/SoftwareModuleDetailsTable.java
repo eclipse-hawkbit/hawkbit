@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -88,6 +89,8 @@ public class SoftwareModuleDetailsTable extends Table {
      *            SessionEventBus
      * @param manageDistUIState
      *            ManageDistUIState
+     * @param uiNotification
+     *            UINotification for displaying error and success notifications
      */
     public SoftwareModuleDetailsTable(final I18N i18n, final boolean isUnassignSoftModAllowed,
             final SpPermissionChecker permissionChecker, final DistributionSetManagement distributionSetManagement,
@@ -110,7 +113,7 @@ public class SoftwareModuleDetailsTable extends Table {
         setContainerDataSource(getSwModuleContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addSWModuleTableHeader();
-        setSizeFull(); // check if this style is required
+        setSizeFull();
         addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
     }
 
@@ -182,7 +185,7 @@ public class SoftwareModuleDetailsTable extends Table {
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
         final SoftwareModule unAssignedSw = getSoftwareModule(event.getButton().getId(), alreadyAssignedSwModules);
-        if (distributionSetManagement.isDistributionSetInUse(distributionSet)) {
+        if (distributionSetManagement.isDistributionSetInUse(distributionSet.getId())) {
             uiNotification.displayValidationError(i18n.get("message.error.notification.ds.target.assigned",
                     distributionSet.getName(), distributionSet.getVersion()));
         } else {
@@ -215,7 +218,7 @@ public class SoftwareModuleDetailsTable extends Table {
             if (swModType.getKey().equals(sw.getType().getKey())) {
                 final HorizontalLayout horizontalLayout = new HorizontalLayout();
                 horizontalLayout.setSizeFull();
-                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+                final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
                 final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
                         FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
                 reassignSoftModule

@@ -199,7 +199,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(ds.getId(), "4711");
 
-        final Action updateAction = deploymentManagement.findActiveActionsByTarget(target).get(0);
+        final Action updateAction = deploymentManagement.findActiveActionsByTarget(target.getControllerId()).get(0);
         final String etagWithFirstUpdate = mvc
                 .perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                         .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
@@ -232,7 +232,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(ds2.getId(), "4711");
 
-        final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target).get(0);
+        final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target.getControllerId()).get(0);
 
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                 .header("If-None-Match", etagWithFirstUpdate).accept(MediaType.APPLICATION_JSON))
@@ -319,7 +319,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))

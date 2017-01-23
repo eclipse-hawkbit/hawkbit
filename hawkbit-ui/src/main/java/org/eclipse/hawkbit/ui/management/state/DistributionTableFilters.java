@@ -62,7 +62,7 @@ public class DistributionTableFilters implements Serializable {
     }
 
     public Optional<Long> getDistId() {
-        return distId == null ? Optional.empty() : Optional.of(distId);
+        return Optional.ofNullable(distId);
     }
 
     public void setDistId(final Long distId) {
@@ -70,7 +70,7 @@ public class DistributionTableFilters implements Serializable {
     }
 
     public Optional<TargetIdName> getPinnedTarget() {
-        return pinnedTarget == null ? Optional.empty() : Optional.of(pinnedTarget);
+        return Optional.ofNullable(pinnedTarget);
     }
 
     public void setPinnedTarget(final TargetIdName pinnedTarget) {
@@ -78,7 +78,7 @@ public class DistributionTableFilters implements Serializable {
     }
 
     public Optional<String> getSearchText() {
-        return searchText == null ? Optional.empty() : Optional.of(searchText);
+        return Optional.ofNullable(searchText);
     }
 
     public void setSearchText(final String searchText) {

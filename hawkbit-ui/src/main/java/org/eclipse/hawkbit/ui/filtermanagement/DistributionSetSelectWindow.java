@@ -233,7 +233,7 @@ public class DistributionSetSelectWindow
             setContent(layout);
 
             final Long targetsCount = targetManagement.countTargetsByTargetFilterQueryAndNonDS(distributionSetId,
-                    targetFilterQuery);
+                    targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {
                 mainTextLabel = new Label(i18n.get("message.confirm.assign.consequences.none"));

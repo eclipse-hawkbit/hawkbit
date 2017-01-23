@@ -24,10 +24,8 @@ import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -116,12 +114,15 @@ public interface ControllerManagement {
      * Retrieves oldest {@link Action} that is active and assigned to a
      * {@link Target}.
      *
-     * @param target
-     *            the target to retrieve the actions from
+     * @param controllerId
+     *            identifies the target to retrieve the actions from
      * @return a list of actions assigned to given target which are active
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findOldestActiveActionByTarget(@NotNull Target target);
+    Optional<Action> findOldestActiveActionByTarget(@NotNull String controllerId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy
@@ -177,15 +178,15 @@ public interface ControllerManagement {
      * 
      * @param controllerId
      *            the ID of the target to check
-     * @param localArtifact
-     *            the artifact to verify if the given target had even been
+     * @param sha1Hash
+     *            of the artifact to verify if the given target had even been
      *            assigned to
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull String controllerId, @NotNull Artifact localArtifact);
+    boolean hasTargetArtifactAssigned(@NotEmpty String controllerId, @NotEmpty String sha1Hash);
 
     /**
      * Checks if a given target has currently or has even been assigned to the
@@ -196,29 +197,32 @@ public interface ControllerManagement {
      * 
      * @param targetId
      *            the ID of the target to check
-     * @param localArtifact
-     *            the artifact to verify if the given target had even been
+     * @param sha1Hash
+     *            of the artifact to verify if the given target had even been
      *            assigned to
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotNull Artifact localArtifact);
+    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotEmpty String sha1Hash);
 
     /**
      * Registers retrieved status for given {@link Target} and {@link Action} if
      * it does not exist yet.
      *
-     * @param action
+     * @param actionId
      *            to the handle status for
      * @param message
      *            for the status
      * @return the update action in case the status has been changed to
      *         {@link Status#RETRIEVED}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action registerRetrieved(@NotNull Action action, String message);
+    Action registerRetrieved(@NotNull Long actionId, String message);
 
     /**
      * Updates attributes of the controller.
@@ -256,40 +260,6 @@ public interface ControllerManagement {
     Target updateLastTargetQuery(@NotEmpty String controllerId, URI address);
 
     /**
-     * Refreshes the time of the last time the controller has been connected to
-     * the server.
-     *
-     * @param target
-     *            to update
-     * @param address
-     *            the client address of the target, might be {@code null}
-     * @return the updated target
-     *
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    TargetInfo updateLastTargetQuery(@NotNull TargetInfo target, @NotNull URI address);
-
-    /**
-     * Update selective the target status of a given {@code target}.
-     *
-     * @param targetInfo
-     *            the target to update the target status
-     * @param status
-     *            the status to be set of the target. Might be {@code null} if
-     *            the target status should not be updated
-     * @param lastTargetQuery
-     *            the last target query to be set of the target. Might be
-     *            {@code null} if the target lastTargetQuery should not be
-     *            updated
-     * @param address
-     *            the client address of the target, might be {@code null}
-     * @return the updated TargetInfo
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    TargetInfo updateTargetStatus(@NotNull TargetInfo targetInfo, TargetUpdateStatus status, Long lastTargetQuery,
-            URI address);
-
-    /**
      * Finds {@link Target} based on given controller ID returns found Target
      * without details, i.e. NO {@link Target#getTags()} and
      * {@link Target#getActions()} possible.
@@ -301,7 +271,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Target findByControllerId(@NotEmpty final String controllerId);
+    Target findByControllerId(@NotEmpty String controllerId);
 
     /**
      * Finds {@link Target} based on given ID returns found Target without
@@ -315,6 +285,6 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Target findByTargetId(final long targetId);
+    Target findByTargetId(@NotNull Long targetId);
 
 }

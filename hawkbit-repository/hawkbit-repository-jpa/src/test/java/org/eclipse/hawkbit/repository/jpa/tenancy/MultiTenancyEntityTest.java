@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.jpa.tenancy;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -18,6 +20,8 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -122,12 +126,12 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         final Target createTargetForTenant = createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // ensure target cannot be deleted by 'mytenant'
-        targetManagement.deleteTargets(createTargetForTenant.getId());
+        targetManagement.deleteTargets(Lists.newArrayList(createTargetForTenant.getId()));
         Slice<Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(1);
 
         // ensure another tenant can delete the target
-        deleteTargetsForTenant(anotherTenant, createTargetForTenant.getId());
+        deleteTargetsForTenant(anotherTenant, Lists.newArrayList(createTargetForTenant.getId()));
         targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(0);
     }
@@ -165,7 +169,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
                 () -> targetManagement.findTargetsAll(pageReq));
     }
 
-    private void deleteTargetsForTenant(final String tenant, final Long... targetIds) throws Exception {
+    private void deleteTargetsForTenant(final String tenant, final Collection<Long> targetIds) throws Exception {
         securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), () -> {
             targetManagement.deleteTargets(targetIds);
             return null;

@@ -101,8 +101,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> deleteDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
 
-        final DistributionSetType module = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
-        distributionSetManagement.deleteDistributionSetType(module);
+        distributionSetManagement.deleteDistributionSetType(distributionSetTypeId);
 
         return ResponseEntity.ok().build();
     }

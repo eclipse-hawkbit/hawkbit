@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -369,10 +368,11 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void deleteAllDistributions(final ConfirmationTab tab) {
-        final Set<Long> deletedIds = new HashSet<>();
-        managementUIState.getDeletedDistributionList().forEach(distIdName -> deletedIds.add(distIdName.getId()));
 
-        distributionSetManagement.deleteDistributionSet(deletedIds.toArray(new Long[deletedIds.size()]));
+        final Collection<Long> deletedIds = managementUIState.getDeletedDistributionList().stream()
+                .map(DistributionSetIdName::getId).collect(Collectors.toList());
+
+        distributionSetManagement.deleteDistributionSet(deletedIds);
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, deletedIds));
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -397,7 +397,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         }
     }
 
-    private void unPinDeletedDS(final Set<Long> deletedDsIds, final Long pinnedDsId) {
+    private void unPinDeletedDS(final Collection<Long> deletedDsIds, final Long pinnedDsId) {
         if (deletedDsIds.contains(pinnedDsId)) {
             managementUIState.getTargetTableFilters().setPinnedDistId(null);
             eventBus.publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);

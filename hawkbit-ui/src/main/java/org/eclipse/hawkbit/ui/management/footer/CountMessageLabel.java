@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -48,6 +49,20 @@ public class CountMessageLabel extends Label {
 
     private final TargetTable targetTable;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param targetManagement
+     *            TargetManagement
+     * @param i18n
+     *            I18N
+     * @param managementUIState
+     *            ManagementUIState
+     * @param targetTable
+     *            TargetTable
+     */
     public CountMessageLabel(final UIEventBus eventBus, final TargetManagement targetManagement, final I18N i18n,
             final ManagementUIState managementUIState, final TargetTable targetTable) {
         this.targetManagement = targetManagement;
@@ -127,17 +142,14 @@ public class CountMessageLabel extends Label {
             final String dists = i18n.get("label.filter.dist");
             final String custom = i18n.get("label.filter.custom");
             final StringBuilder filterMesgBuf = new StringBuilder(i18n.get("label.filter"));
-            filterMesgBuf.append(HawkbitCommonUtil.SP_STRING_SPACE);
+            filterMesgBuf.append(StringUtils.SPACE);
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
             filterMesgBuf.append(getOverdueStateMsg(targFilParams.isOverdueFilterEnabled(), overdue));
             filterMesgBuf
                     .append(getTagsMsg(targFilParams.isNoTagSelected(), targFilParams.getClickedTargetTags(), tags));
-            filterMesgBuf.append(
-                    targFilParams.getSearchText().map(search -> text).orElse(HawkbitCommonUtil.SP_STRING_SPACE));
-            filterMesgBuf.append(
-                    targFilParams.getDistributionSet().map(set -> dists).orElse(HawkbitCommonUtil.SP_STRING_SPACE));
-            filterMesgBuf.append(targFilParams.getTargetFilterQuery().map(query -> custom)
-                    .orElse(HawkbitCommonUtil.SP_STRING_SPACE));
+            filterMesgBuf.append(targFilParams.getSearchText().map(search -> text).orElse(StringUtils.SPACE));
+            filterMesgBuf.append(targFilParams.getDistributionSet().map(set -> dists).orElse(StringUtils.SPACE));
+            filterMesgBuf.append(targFilParams.getTargetFilterQuery().map(query -> custom).orElse(StringUtils.SPACE));
             final String filterMesageChk = filterMesgBuf.toString().trim();
             String filterMesage = filterMesageChk;
             if (filterMesage.endsWith(",")) {
@@ -199,7 +211,7 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getStatusMsg(final List<TargetUpdateStatus> status, final String param) {
-        return status.isEmpty() ? HawkbitCommonUtil.SP_STRING_SPACE : param;
+        return status.isEmpty() ? StringUtils.SPACE : param;
     }
 
     /**
@@ -210,7 +222,7 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getOverdueStateMsg(final boolean overdueState, final String param) {
-        return !overdueState ? HawkbitCommonUtil.SP_STRING_SPACE : param;
+        return !overdueState ? StringUtils.SPACE : param;
     }
 
     /**
@@ -223,6 +235,6 @@ public class CountMessageLabel extends Label {
      */
     private static String getTagsMsg(final Boolean noTargetTagSelected, final List<String> tags, final String param) {
         return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue())
-                ? HawkbitCommonUtil.SP_STRING_SPACE : param;
+                ? StringUtils.SPACE : param;
     }
 }

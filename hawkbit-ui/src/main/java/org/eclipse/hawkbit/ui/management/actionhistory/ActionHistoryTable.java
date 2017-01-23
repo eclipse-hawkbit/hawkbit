@@ -220,7 +220,7 @@ public class ActionHistoryTable extends TreeTable {
         if (target != null) {
             /* service method to create action history for target */
             final List<ActionWithStatusCount> actionHistory = deploymentManagement
-                    .findActionsWithStatusCountByTargetOrderByIdDesc(target);
+                    .findActionsWithStatusCountByTargetOrderByIdDesc(target.getControllerId());
 
             addDetailsToContainer(actionHistory);
         }
@@ -437,9 +437,9 @@ public class ActionHistoryTable extends TreeTable {
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList;
             if (managementUIState.isActionHistoryMaximized()) {
-                actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
+                actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, actionId);
             } else {
-                actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
+                actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, actionId);
             }
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
@@ -793,9 +793,8 @@ public class ActionHistoryTable extends TreeTable {
     // service call to cancel the active action
     private boolean cancelActiveAction(final Long actionId) {
         if (actionId != null) {
-            final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.cancelAction(activeAction, target);
+                deploymentManagement.cancelAction(actionId);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Cancel action not allowed exception :{}", e);
@@ -808,9 +807,8 @@ public class ActionHistoryTable extends TreeTable {
     // service call to cancel the active action
     private boolean forceQuitActiveAction(final Long actionId) {
         if (actionId != null) {
-            final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.forceQuitAction(activeAction);
+                deploymentManagement.forceQuitAction(actionId);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Force Cancel action not allowed exception :{}", e);
