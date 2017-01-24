@@ -42,9 +42,11 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
@@ -90,6 +92,8 @@ public class RolloutListGrid extends AbstractGrid {
     private static final String PAUSE_OPTION = "Pause";
 
     private static final String RUN_OPTION = "Run";
+
+    private static final String DELETE_OPTION = "Delete";
 
     private static final String DS_TYPE = "type";
 
@@ -229,7 +233,11 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
+            // TODO Permission?
+            rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
+                    false);
         }
+
     }
 
     @Override
@@ -258,7 +266,9 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
-            getColumn(UPDATE_OPTION).setMaximumWidth(40);
+            getColumn(UPDATE_OPTION).setMaximumWidth(25);
+            getColumn(DELETE_OPTION).setMinimumWidth(25);
+            getColumn(DELETE_OPTION).setMaximumWidth(40);
         } else {
             getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
@@ -288,11 +298,12 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
+            getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
         }
 
         HeaderCell join;
         if (permissionChecker.hasRolloutUpdatePermission()) {
-            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, DELETE_OPTION);
         } else {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
         }
@@ -322,6 +333,7 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
+            columnList.add(DELETE_OPTION);
         }
 
         columnList.add(VAR_CREATED_DATE);
@@ -376,6 +388,8 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())));
+            getColumn(DELETE_OPTION)
+                    .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
         }
 
     }
@@ -434,6 +448,29 @@ public class RolloutListGrid extends AbstractGrid {
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
+    }
+
+    private void deleteRollout(final Long rolloutId) {
+        final String formattedConfirmationQuestion = getConfirmationQuestion(rolloutId);
+        final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
+                formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                    if (ok) {
+                        eventBus.publish(this, RolloutEvent.DELETE_ROLLOUT);
+                    }
+                });
+        UI.getCurrent().addWindow(confirmationDialog.getWindow());
+        confirmationDialog.getWindow().bringToFront();
+    }
+
+    private String getConfirmationQuestion(final Long rolloutId) {
+        final Rollout rolloutData = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final Map<Status, Long> statusTotalCount = rolloutData.getTotalTargetCountStatus().getStatusTotalCountMap();
+        Long scheduledActions = statusTotalCount.get(Status.SCHEDULED);
+        if (scheduledActions == null) {
+            scheduledActions = 0L;
+        }
+        return i18n.get("message.delete.rollout", rolloutData.getName(), statusTotalCount.get(Status.RUNNING),
+                scheduledActions);
     }
 
     private String getDescription(final CellReference cell) {
