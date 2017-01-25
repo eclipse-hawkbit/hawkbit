@@ -155,4 +155,39 @@ public class RolloutScheduler {
             return null;
         });
     }
+
+    /**
+     * Scheduler method called by the spring-async mechanism. Retrieves all
+     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenant the {@link RolloutManagement#checkCreatingRollouts(long)} in the
+     * {@link SystemSecurityContext}.
+     */
+    @Scheduled(initialDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER)
+    public void deletingRolloutScheduler() {
+        if (!rolloutProperties.getCreatingScheduler().isEnabled()) {
+            return;
+        }
+
+        LOGGER.debug("rollout deleting schedule checker has been triggered.");
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
+        systemSecurityContext.runAsSystem(() -> {
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multitenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+            final List<String> tenants = systemManagement.findTenants();
+            LOGGER.info("Checking deleting rollouts for {} tenants", tenants.size());
+            for (final String tenant : tenants) {
+                tenantAware.runAsTenant(tenant, () -> {
+                    final long fixedDelay = rolloutProperties.getDeletingScheduler().getFixedDelay();
+                    rolloutManagement.checkDeletingRollouts(fixedDelay);
+                    return null;
+                });
+            }
+            return null;
+        });
+    }
 }

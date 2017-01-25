@@ -75,6 +75,22 @@ public interface RolloutGroupRepository
             @Param("status2") RolloutGroupStatus rolloutGroupStatus2);
 
     /**
+     * 
+     * Counts all rollout-groups refering to a given {@link Rollout} by its ID
+     * and groups which not having the given status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout refering the groups
+     * @param status
+     *            the status which the groups should not have
+     * @return count of rollout-groups referning a rollout and not in the given
+     *         states
+     */
+    @Query("SELECT COUNT(r.id) FROM JpaRolloutGroup r WHERE r.rollout.id = :rolloutId AND r.status NOT IN :status")
+    long countByRolloutIdAndStatusNotIn(@Param("rolloutId") long rolloutId,
+            @Param("status") List<JpaRolloutGroup.RolloutGroupStatus> status);
+
+    /**
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
      * status. Retrieves the child rolloutgroup for a specific status.
      * 
@@ -123,5 +139,9 @@ public interface RolloutGroupRepository
      * @return a page of found {@link RolloutGroup} or {@code empty}.
      */
     Page<JpaRolloutGroup> findByRolloutId(final Long rolloutId, Pageable page);
+
+    @Modifying
+    @Query("DELETE FROM JpaRolloutGroup g where g.id in :rolloutGroupIds")
+    void deleteByIds(@Param("rolloutGroupIds") List<Long> rolloutGroups);
 
 }

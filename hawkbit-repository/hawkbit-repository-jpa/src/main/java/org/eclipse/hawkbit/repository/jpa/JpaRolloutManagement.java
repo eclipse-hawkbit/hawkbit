@@ -80,6 +80,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
+import com.google.common.collect.Lists;
+
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
@@ -93,6 +95,11 @@ public class JpaRolloutManagement implements RolloutManagement {
      * transaction.
      */
     private static final int TRANSACTION_TARGETS = 1000;
+
+    /**
+     * Maximum amount of actions that are deleted in one transaction.
+     */
+    private static final int TRANSACTION_ACTIONS = 1000;
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -632,13 +639,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void deleteRollout(final Long rolloutId) {
-
-    }
-
-    @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void resumeRollout(final Long rolloutId) {
@@ -860,6 +860,99 @@ public class JpaRolloutManagement implements RolloutManagement {
             }
         });
 
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Modifying
+    public void checkDeletingRollouts(final long delayBetweenChecks) {
+        final long lastCheck = System.currentTimeMillis();
+        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.DELETING);
+        if (updated == 0) {
+            // nothing to check, maybe another instance already checked in
+            // between
+            LOGGER.debug("No rollouts deleting check necessary for current scheduled check {}, next check at {}",
+                    lastCheck, lastCheck + delayBetweenChecks);
+            return;
+        }
+
+        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
+                RolloutStatus.DELETING);
+        LOGGER.info("Found {} deleting rollouts to check", rolloutsToCheck.size());
+
+        rolloutsToCheck.forEach(rollout -> {
+            doDeleteRollout(rollout);
+        });
+
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Modifying
+    public void deleteRollout(final long rolloutId) {
+        final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
+        jpaRollout.setStatus(RolloutStatus.DELETING);
+        rolloutRepository.save(jpaRollout);
+    }
+
+    private void doDeleteRollout(final JpaRollout rollout) {
+
+        // clean up all scheduled actions
+        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
+        deleteScheduledActions(rollout, scheduledActions);
+
+        // avoid another scheduler round and re-check if all scheduled actions
+        // has been cleaned up
+        final boolean hasScheduledActionsLeft = findScheduledActionsByRollout(rollout).getNumberOfElements() > 0;
+        if (hasScheduledActionsLeft) {
+            return;
+        }
+
+        // hard delete groups if all groups are either READY or SCHEDULED state,
+        // so the never ran before.
+        final long countRolloutGroupsNotInScheduled = rolloutGroupRepository.countByRolloutIdAndStatusNotIn(
+                rollout.getId(), Lists.newArrayList(RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED));
+        // if all groups are in schedule state, we hard delete all groups, in
+        // case one rolloutgroup has another state we keep the revision of all
+        // groups of the rollout (soft-delete)
+        final boolean hardDeleteRolloutGroups = countRolloutGroupsNotInScheduled == 0;
+        if (hardDeleteRolloutGroups) {
+            hardDeleteRollout(rollout);
+            return;
+        }
+
+        // set soft delete
+        rollout.setStatus(RolloutStatus.DELETED);
+        rolloutRepository.save(rollout);
+    }
+
+    private void hardDeleteRollout(final JpaRollout rollout) {
+        try {
+            final List<Long> rolloutGroupIds = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).stream()
+                    .map(group -> group.getId()).collect(Collectors.toList());
+            rolloutTargetGroupRepository.deleteByRolloutGroupIds(rolloutGroupIds);
+            rolloutGroupRepository.deleteByIds(rolloutGroupIds);
+            rolloutRepository.delete(rollout);
+        } catch (final RuntimeException e) {
+            LOGGER.error("Exception during deletion of rollout-groups of rollout {}", rollout, e);
+        }
+    }
+
+    private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {
+        final boolean hasScheduledActions = scheduledActions.getNumberOfElements() > 0;
+
+        if (hasScheduledActions) {
+            try {
+                actionRepository.delete(scheduledActions);
+            } catch (final RuntimeException e) {
+                LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
+            }
+        }
+    }
+
+    private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {
+        return actionRepository.findByRolloutIdAndStatus(new PageRequest(0, TRANSACTION_ACTIONS), rollout.getId(),
+                Status.SCHEDULED);
     }
 
     @Override

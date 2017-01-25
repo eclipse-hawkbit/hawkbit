@@ -96,6 +96,13 @@ public interface RolloutManagement {
     void checkStartingRollouts(long delayBetweenChecks);
 
     /**
+     * TODO: lazy michael, time for you to write javadoc!
+     * 
+     * @param delayBetweenChecks
+     */
+    void checkDeletingRollouts(long delayBetweenChecks);
+
+    /**
      * Counts all {@link Rollout}s in the repository.
      *
      * @return number of roll outs
@@ -323,18 +330,6 @@ public interface RolloutManagement {
     void pauseRollout(@NotNull Long rollout);
 
     /**
-     * Deletes a rollout. The Rollout switches {@link RolloutStatus#DELETING}.
-     *
-     * @param rollout
-     *            the rollout to be paused.
-     *
-     * @throws EntityNotFoundException
-     *             if rollout with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void deleteRollout(@NotNull Long rolloutId);
-
-    /**
      * Resumes a paused rollout. The rollout switches back to
      * {@link RolloutStatus#RUNNING} state which is then picked up again by the
      * {@link #checkRunningRollouts(long)}.
@@ -387,4 +382,14 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull RolloutUpdate update);
 
+    /**
+     * Deletes a rollout. A rollout might be deleted asynchronously by
+     * indicating the rollout by {@link RolloutStatus#DELETING}
+     * 
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void deleteRollout(long rolloutId);
 }

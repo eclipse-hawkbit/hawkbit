@@ -25,6 +25,9 @@ public class RolloutProperties {
     // used by @Scheduled annotation which needs constant
     public static final String PROP_STARTING_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.startingScheduler.fixedDelay:2000}";
 
+    // used by @Scheduled annotation which needs constant
+    public static final String PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.deletingScheduler.fixedDelay:2000}";
+
     /**
      * Rollout scheduler configuration.
      */
@@ -65,6 +68,8 @@ public class RolloutProperties {
 
     private final Scheduler startingScheduler = new Scheduler(2000L);
 
+    private final Scheduler deletingScheduler = new Scheduler(2000L);
+
     public Scheduler getScheduler() {
         return scheduler;
     }
@@ -75,5 +80,9 @@ public class RolloutProperties {
 
     public Scheduler getStartingScheduler() {
         return startingScheduler;
+    }
+
+    public Scheduler getDeletingScheduler() {
+        return deletingScheduler;
     }
 }

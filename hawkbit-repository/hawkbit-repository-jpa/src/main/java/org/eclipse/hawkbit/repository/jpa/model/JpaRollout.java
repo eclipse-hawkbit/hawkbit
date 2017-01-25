@@ -35,6 +35,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -49,6 +51,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
+@ObjectTypeConverter(name = "rollouttatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
+        @ConversionValue(objectValue = "READY", dataValue = "0"),
+        @ConversionValue(objectValue = "PAUSED", dataValue = "1"),
+        @ConversionValue(objectValue = "STARTING", dataValue = "2"),
+        @ConversionValue(objectValue = "STOPPED", dataValue = "3"),
+        @ConversionValue(objectValue = "RUNNING", dataValue = "4"),
+        @ConversionValue(objectValue = "FINISHED", dataValue = "5"),
+        @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "6"),
+        @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "7"),
+        @ConversionValue(objectValue = "DELETING", dataValue = "8"),
+        @ConversionValue(objectValue = "DELETED", dataValue = "9") })
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     private static final long serialVersionUID = 1L;

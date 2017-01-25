@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.utils.MultipleInvokeHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.SuccessCondition;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -202,8 +203,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Step("Finish three actions of the rollout group and delete two targets")
     private void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
         // finish group one by finishing targets and deleting targets
-        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
-                Status.RUNNING);
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(pageReq,
+                createdRollout.getId(), Status.RUNNING);
+        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
         finishAction(runningActions.get(0));
         finishAction(runningActions.get(1));
         finishAction(runningActions.get(2));
@@ -223,8 +225,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Step("Finish one action of the rollout group and delete four targets")
     private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
-        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
-                Status.RUNNING);
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(pageReq,
+                createdRollout.getId(), Status.RUNNING);
+        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
         finishAction(runningActions.get(0));
         targetManagement.deleteTargets(
                 Lists.newArrayList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
@@ -234,8 +237,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Step("Delete all targets of the rollout group")
     private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
-        final List<Action> runningActions = actionRepository.findByRolloutIdAndStatus(createdRollout.getId(),
-                Status.SCHEDULED);
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(pageReq,
+                createdRollout.getId(), Status.SCHEDULED);
+        final List<JpaAction> runningActions = Lists.newArrayList(runningActionsSlice.iterator());
         targetManagement.deleteTargets(Lists.newArrayList(runningActions.get(0).getTarget().getId(),
                 runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
                 runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
@@ -1271,6 +1275,62 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         } catch (final RolloutIllegalStateException e) {
             // OK
         }
+
+    }
+
+    @Test
+    public void deleteRolloutWhichHasNeverStartedIsHardDeleted() {
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 5;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
+
+        // test
+        rolloutManagement.deleteRollout(createdRollout.getId());
+        rolloutManagement.checkDeletingRollouts(0);
+
+        // verify
+        final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
+        assertThat(deletedRollout).isNull();
+    }
+
+    @Test
+    public void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 5;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
+
+        // start the rollout, so it has active running actions and a group which
+        // has been started
+        rolloutManagement.startRollout(createdRollout.getId());
+        rolloutManagement.checkStartingRollouts(0);
+
+        rolloutRepository.findOne(createdRollout.getId());
+        // verify we have scheduled actions
+        assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, createdRollout.getId(), Status.SCHEDULED)
+                .getNumberOfElements()).isGreaterThan(8);
+
+        // test
+        rolloutManagement.deleteRollout(createdRollout.getId());
+        rolloutManagement.checkDeletingRollouts(0);
+
+        // verify
+        final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
+        assertThat(deletedRollout).isNotNull();
+        assertThat(deletedRollout.getStatus()).isEqualTo(RolloutStatus.DELETED);
+        // verify that all scheduled actions are deleted
+        assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, deletedRollout.getId(), Status.SCHEDULED)
+                .getNumberOfElements()).isEqualTo(0);
+        // verify that all running actions keep running
+        assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, deletedRollout.getId(), Status.RUNNING)
+                .getNumberOfElements()).isEqualTo(2);
 
     }
 

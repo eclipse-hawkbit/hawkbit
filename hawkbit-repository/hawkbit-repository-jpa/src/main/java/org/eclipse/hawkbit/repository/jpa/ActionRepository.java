@@ -302,14 +302,16 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-     *
+     * 
+     * @param pageable
+     *            page parameters
      * @param rolloutId
      *            the rollout the actions beglong to
      * @param actionStatus
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
-    List<Action> findByRolloutIdAndStatus(Long rolloutId, Status actionStatus);
+    Slice<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
 
     /**
      * Get list of objects which has details of status and count of targets in
@@ -354,5 +356,4 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
-
 }
