@@ -906,10 +906,9 @@ public class JpaRolloutManagement implements RolloutManagement {
             return;
         }
 
-        // hard delete groups if all groups are either READY or SCHEDULED state,
-        // so the never ran before.
-        final long countRolloutGroupsNotInScheduled = rolloutGroupRepository.countByRolloutIdAndStatusNotAndStatusNot(
-                rollout.getId(), RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED);
+        // hard delete groups if all groups are either CREATING, READY or
+        // SCHEDULED state, so the never ran before.
+        final long countRolloutGroupsNotInScheduled = countRolloutGroupsWereRunningBefore(rollout);
         // if all groups are in schedule state, we hard delete all groups, in
         // case one rolloutgroup has another state we keep the revision of all
         // groups of the rollout (soft-delete)
@@ -922,6 +921,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         // set soft delete
         rollout.setStatus(RolloutStatus.DELETED);
         rolloutRepository.save(rollout);
+    }
+
+    private long countRolloutGroupsWereRunningBefore(final JpaRollout rollout) {
+        return rolloutGroupRepository.countByRolloutIdAndStatusNotAndStatusNotAndStatusNot(rollout.getId(),
+                RolloutGroupStatus.CREATING, RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED);
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {

@@ -85,12 +85,15 @@ public interface RolloutGroupRepository
      *            the status which the groups should not have
      * @param status2
      *            the status which the groups should not have
+     * @param status2
+     *            the status which the groups should not have
      * @return count of rollout-groups referning a rollout and not in the given
      *         states
      */
-    long countByRolloutIdAndStatusNotAndStatusNot(@Param("rolloutId") long rolloutId,
+    long countByRolloutIdAndStatusNotAndStatusNotAndStatusNot(@Param("rolloutId") long rolloutId,
             @Param("status1") JpaRolloutGroup.RolloutGroupStatus status1,
-            @Param("status2") JpaRolloutGroup.RolloutGroupStatus status2);
+            @Param("status2") JpaRolloutGroup.RolloutGroupStatus status2,
+            @Param("status3") JpaRolloutGroup.RolloutGroupStatus status3);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
