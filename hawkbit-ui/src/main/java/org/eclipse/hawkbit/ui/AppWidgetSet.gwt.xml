@@ -33,6 +33,7 @@
 
    <inherits name="org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet" />
    <inherits name="org.eclipse.hawkbit.ui.filtermanagement.TextFieldSuggestionBox" />
+   <inherits name="org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart" />
    <inherits name="org.eclipse.hawkbit.ui.dd.CustomAcceptCriteria" />
 
     

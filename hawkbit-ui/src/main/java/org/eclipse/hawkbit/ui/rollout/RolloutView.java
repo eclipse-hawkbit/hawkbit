@@ -14,6 +14,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -65,10 +66,10 @@ public class RolloutView extends VerticalLayout implements View {
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final I18N i18n) {
+            final I18N i18n, final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.permChecker = permissionChecker;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, i18n);
+                targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);
         this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);
