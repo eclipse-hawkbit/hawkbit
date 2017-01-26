@@ -80,8 +80,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
@@ -910,8 +908,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         // hard delete groups if all groups are either READY or SCHEDULED state,
         // so the never ran before.
-        final long countRolloutGroupsNotInScheduled = rolloutGroupRepository.countByRolloutIdAndStatusNotIn(
-                rollout.getId(), Lists.newArrayList(RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED));
+        final long countRolloutGroupsNotInScheduled = rolloutGroupRepository.countByRolloutIdAndStatusNotAndStatusNot(
+                rollout.getId(), RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED);
         // if all groups are in schedule state, we hard delete all groups, in
         // case one rolloutgroup has another state we keep the revision of all
         // groups of the rollout (soft-delete)
