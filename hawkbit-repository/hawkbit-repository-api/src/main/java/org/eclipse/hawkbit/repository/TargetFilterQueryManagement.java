@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -159,7 +161,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
+    Optional<TargetFilterQuery> findTargetFilterQueryById(@NotNull Long targetFilterQueryId);
 
     /**
      * Find target filter query by name.
@@ -170,7 +172,7 @@ public interface TargetFilterQueryManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    TargetFilterQuery findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
+    Optional<TargetFilterQuery> findTargetFilterQueryByName(@NotNull String targetFilterQueryName);
 
     /**
      * updates the {@link TargetFilterQuery}.

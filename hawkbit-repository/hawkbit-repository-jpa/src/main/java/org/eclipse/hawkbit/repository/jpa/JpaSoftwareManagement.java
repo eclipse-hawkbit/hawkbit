@@ -138,7 +138,9 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public SoftwareModuleType updateSoftwareModuleType(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 
-        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId());
+        final JpaSoftwareModuleType type = (JpaSoftwareModuleType) findSoftwareModuleTypeById(update.getId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "SoftwareModuleType with given ID " + update.getId() + " does not exist!"));
 
         update.getDescription().ifPresent(type::setDescription);
         update.getColour().ifPresent(type::setColour);
@@ -188,9 +190,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    public SoftwareModule findSoftwareModuleById(final Long id) {
-        return Optional.ofNullable(softwareModuleRepository.findOne(id)).orElseThrow(
-                () -> new EntityNotFoundException("Sofwtare module with given ID " + id + " does not exist."));
+    public Optional<SoftwareModule> findSoftwareModuleById(final Long id) {
+        return Optional.ofNullable(softwareModuleRepository.findOne(id));
     }
 
     @Override
@@ -457,19 +458,17 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    public SoftwareModuleType findSoftwareModuleTypeByKey(final String key) {
+    public Optional<SoftwareModuleType> findSoftwareModuleTypeByKey(final String key) {
         return softwareModuleTypeRepository.findByKey(key);
     }
 
     @Override
-    public SoftwareModuleType findSoftwareModuleTypeById(final Long smTypeId) {
-        return Optional.ofNullable(softwareModuleTypeRepository.findOne(smTypeId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Software module type with given ID " + smTypeId + " does not exist."));
+    public Optional<SoftwareModuleType> findSoftwareModuleTypeById(final Long smTypeId) {
+        return Optional.ofNullable(softwareModuleTypeRepository.findOne(smTypeId));
     }
 
     @Override
-    public SoftwareModuleType findSoftwareModuleTypeByName(final String name) {
+    public Optional<SoftwareModuleType> findSoftwareModuleTypeByName(final String name) {
         return softwareModuleTypeRepository.findByName(name);
     }
 
@@ -542,8 +541,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(final Long moduleId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaSoftwareModuleMetadata metadata = findSoftwareModuleMetadata(
-                new SwMetadataCompositeKey(moduleId, md.getKey()));
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findSoftwareModuleMetadata(moduleId,
+                md.getKey()).orElseThrow(() -> new EntityNotFoundException("MetaData with given ID does not exist!"));
         metadata.setValue(md.getValue());
 
         touch(moduleId);
@@ -610,16 +609,8 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     }
 
     @Override
-    public SoftwareModuleMetadata findSoftwareModuleMetadata(final Long moduleId, final String key) {
-        return findSoftwareModuleMetadata(new SwMetadataCompositeKey(moduleId, key));
-    }
-
-    private JpaSoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
-        final JpaSoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
-        if (findOne == null) {
-            throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");
-        }
-        return findOne;
+    public Optional<SoftwareModuleMetadata> findSoftwareModuleMetadata(final Long moduleId, final String key) {
+        return Optional.ofNullable(softwareModuleMetadataRepository.findOne(new SwMetadataCompositeKey(moduleId, key)));
     }
 
     private void checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(final SwMetadataCompositeKey metadataId) {

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -136,7 +137,10 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                 IpUtil.getClientIpFromRequest(request, securityProperties));
 
         final Action action = controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
+                        artifact.getSoftwareModule().getId())
+                .orElseThrow(() -> new EntityNotFoundException("No assigment found for module "
+                        + artifact.getSoftwareModule().getId() + " to target " + target.getControllerId()));
         final String range = request.getHeader("Range");
 
         String message;

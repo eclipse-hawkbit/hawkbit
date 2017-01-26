@@ -255,7 +255,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // assign target
         assignDistributionSet(ds.getId(), target.getControllerId());
-        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
+        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
 
         // not allowed as it is assigned now
         try {
@@ -307,19 +307,19 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // update data
         // legal update of module addition
         distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os.getId()));
-        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
+        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
         assertThat(ds.findFirstModuleByType(osType)).isEqualTo(os);
 
         // legal update of module removal
         distributionSetManagement.unassignSoftwareModule(ds.getId(), ds.findFirstModuleByType(appType).getId());
-        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
+        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
         assertThat(ds.findFirstModuleByType(appType)).isNull();
 
         // Update description
         distributionSetManagement
                 .updateDistributionSet(entityFactory.distributionSet().update(ds.getId()).name("a new name")
                         .description("a new description").version("a new version").requiredMigrationStep(true));
-        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId());
+        ds = distributionSetManagement.findDistributionSetByIdWithDetails(ds.getId()).get();
         assertThat(ds.getDescription()).isEqualTo("a new description");
         assertThat(ds.getName()).isEqualTo("a new name");
         assertThat(ds.getVersion()).isEqualTo("a new version");
@@ -342,7 +342,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // create an DS meta data entry
         createDistributionSetMetadata(ds.getId(), new JpaDistributionSetMetadata(knownKey, ds, knownValue));
 
-        DistributionSet changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId());
+        DistributionSet changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId()).get();
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
 
         Thread.sleep(100);
@@ -353,7 +353,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // we are updating the sw meta data so also modifying the base software
         // module so opt lock
         // revision must be three
-        changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId());
+        changedLockRevisionDS = distributionSetManagement.findDistributionSetById(ds.getId()).get();
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(3);
         assertThat(changedLockRevisionDS.getLastModifiedAt()).isGreaterThan(0L);
 
@@ -439,14 +439,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
         distributionSetManagement.deleteDistributionSet(dsDeleted.getId());
-        dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
+        dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId()).get();
 
         ds100Group1 = toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
-        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
+        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
         ds100Group1 = toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
-        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
+        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
         ds100Group2 = toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
-        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
+        dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
 
         // check setup
         assertThat(distributionSetRepository.findAll()).hasSize(203);

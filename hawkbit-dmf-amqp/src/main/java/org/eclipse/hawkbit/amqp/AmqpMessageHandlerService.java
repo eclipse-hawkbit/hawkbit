@@ -327,12 +327,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         try {
-            final Action findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
-            if (findActionWithDetails == null) {
+            final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
+            if (!findActionWithDetails.isPresent()) {
                 logAndThrowMessageError(message,
                         "Got intermediate notification about action " + actionId + " but action does not exist");
             }
-            return findActionWithDetails;
+            return findActionWithDetails.get();
         } catch (@SuppressWarnings("squid:S1166") final EntityNotFoundException e) {
             logAndThrowMessageError(message,
                     "Got intermediate notification about action " + actionId + " but action does not exist");

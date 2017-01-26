@@ -156,9 +156,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Rollout findRolloutById(final Long rolloutId) {
-        return Optional.ofNullable(rolloutRepository.findOne(rolloutId)).orElseThrow(
-                () -> new EntityNotFoundException("Rollout with given ID " + rolloutId + " does not exist."));
+    public Optional<Rollout> findRolloutById(final Long rolloutId) {
+        return Optional.ofNullable(rolloutRepository.findOne(rolloutId));
     }
 
     @Override
@@ -182,9 +181,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-        final JpaRollout existingRollout = rolloutRepository.findByName(rollout.getName());
-        if (existingRollout != null) {
-            throw new EntityAlreadyExistsException(existingRollout.getName());
+        final Optional<Rollout> existingRollout = rolloutRepository.findByName(rollout.getName());
+        if (existingRollout.isPresent()) {
+            throw new EntityAlreadyExistsException(existingRollout.get().getName());
         }
 
         final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
@@ -410,7 +409,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
+        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
 
         return totalTargets - validation.getTargetsInGroups();
     }
@@ -441,7 +440,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         for (int i = 0; i < groups.size(); i++) {
             final RolloutGroup group = groups.get(i);
-            String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
+            final String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
             RolloutHelper.verifyRolloutGroupTargetPercentage(group.getTargetPercentage());
 
             final long targetsInGroupFilter = targetFilterCounts.get(groupTargetFilter);
@@ -475,8 +474,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             return 0;
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
-        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter, previousGroups,
-                group);
+        final String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter,
+                previousGroups, group);
 
         if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
             return targetFilterCounts.get(overlappingTargetsFilter);
@@ -914,7 +913,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Rollout findRolloutByName(final String rolloutName) {
+    public Optional<Rollout> findRolloutByName(final String rolloutName) {
         return rolloutRepository.findByName(rolloutName);
     }
 
@@ -932,10 +931,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         update.getForcedTime().ifPresent(rollout::setForcedTime);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
-            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId);
-            if (set == null) {
-                throw new EntityNotFoundException("Distribution set cannot be set as it does not exists" + setId);
-            }
+            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId).orElseThrow(
+                    () -> new EntityNotFoundException("Distribution set cannot be set as it does not exists" + setId));
+
             rollout.setDistributionSet(set);
         });
 
@@ -951,13 +949,18 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Rollout findRolloutWithDetailedStatus(final Long rolloutId) {
-        final Rollout rollout = findRolloutById(rolloutId);
+    public Optional<Rollout> findRolloutWithDetailedStatus(final Long rolloutId) {
+        final Optional<Rollout> rollout = findRolloutById(rolloutId);
+
+        if (!rollout.isPresent()) {
+            return rollout;
+        }
+
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutId(rolloutId);
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.getTotalTargets());
-        ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
+                rollout.get().getTotalTargets());
+        ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
 

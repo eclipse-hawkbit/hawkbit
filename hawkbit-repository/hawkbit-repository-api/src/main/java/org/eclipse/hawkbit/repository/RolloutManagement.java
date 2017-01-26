@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -45,8 +45,8 @@ public interface RolloutManagement {
 
     /**
      * Checking running rollouts. Rollouts which are checked updating the
-     * lastCheck to indicate that the current instance
-     * is handling the specific rollout. This code should run as system-code.
+     * lastCheck to indicate that the current instance is handling the specific
+     * rollout. This code should run as system-code.
      *
      * <pre>
      * {@code
@@ -58,9 +58,8 @@ public interface RolloutManagement {
      *  }
      * </pre>
      *
-     * This method is intended to be called by a scheduler.
-     * And must be running in an transaction so it's
-     * splitted from the scheduler.
+     * This method is intended to be called by a scheduler. And must be running
+     * in an transaction so it's splitted from the scheduler.
      *
      * Rollouts which are currently running are investigated, by means the
      * error- and finish condition of running groups in this rollout are
@@ -290,12 +289,9 @@ public interface RolloutManagement {
      *            the ID of the rollout to retrieve
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
-     * 
-     * @throws EntityNotFoundException
-     *             if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutById(@NotNull Long rolloutId);
+    Optional<Rollout> findRolloutById(@NotNull Long rolloutId);
 
     /**
      * Retrieves a specific rollout by its name.
@@ -306,7 +302,7 @@ public interface RolloutManagement {
      *         does not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutByName(@NotNull String rolloutName);
+    Optional<Rollout> findRolloutByName(@NotNull String rolloutName);
 
     /**
      * Get count of targets in different status in rollout.
@@ -320,7 +316,7 @@ public interface RolloutManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId);
+    Optional<Rollout> findRolloutWithDetailedStatus(@NotNull Long rolloutId);
 
     /***
      * Get finished percentage details for a specified group which is in running
@@ -405,6 +401,10 @@ public interface RolloutManagement {
      *            rollout to be updated
      *
      * @return Rollout updated rollout
+     * 
+     * @throws EntityNotFoundException
+     *             if rollout or DS with given IDs do not exist
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull RolloutUpdate update);

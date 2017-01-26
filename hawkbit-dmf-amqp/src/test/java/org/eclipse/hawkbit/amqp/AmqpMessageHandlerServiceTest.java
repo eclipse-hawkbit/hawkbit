@@ -395,7 +395,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
-        when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
+        when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
         final ActionStatusCreate create = mock(ActionStatusCreate.class);

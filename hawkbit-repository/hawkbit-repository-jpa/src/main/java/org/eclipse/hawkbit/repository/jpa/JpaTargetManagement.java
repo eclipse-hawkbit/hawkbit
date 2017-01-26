@@ -114,23 +114,24 @@ public class JpaTargetManagement implements TargetManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    public Target findTargetByControllerID(final String controllerId) {
+    public Optional<Target> findTargetByControllerID(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
     @Override
-    public Target findTargetByControllerIDWithDetails(final String controllerId) {
-        final Target result = targetRepository.findByControllerId(controllerId);
+    public Optional<Target> findTargetByControllerIDWithDetails(final String controllerId) {
+        final Optional<Target> result = targetRepository.findByControllerId(controllerId);
         // load lazy relations
-        if (result != null) {
-            result.getTargetInfo().getControllerAttributes().size();
-            if (result.getTargetInfo() != null && result.getTargetInfo().getInstalledDistributionSet() != null) {
-                result.getTargetInfo().getInstalledDistributionSet().getName();
-                result.getTargetInfo().getInstalledDistributionSet().getModules().size();
+        if (result.isPresent()) {
+            result.get().getTargetInfo().getControllerAttributes().size();
+            if (result.get().getTargetInfo() != null
+                    && result.get().getTargetInfo().getInstalledDistributionSet() != null) {
+                result.get().getTargetInfo().getInstalledDistributionSet().getName();
+                result.get().getTargetInfo().getInstalledDistributionSet().getModules().size();
             }
-            if (result.getAssignedDistributionSet() != null) {
-                result.getAssignedDistributionSet().getName();
-                result.getAssignedDistributionSet().getModules().size();
+            if (result.get().getAssignedDistributionSet() != null) {
+                result.get().getAssignedDistributionSet().getName();
+                result.get().getAssignedDistributionSet().getModules().size();
             }
         }
         return result;
@@ -196,9 +197,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Target updateTarget(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
-        final JpaTarget target = Optional.ofNullable(targetRepository.findByControllerId(update.getControllerId()))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Target with ID " + update.getControllerId() + " not found."));
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId()).orElseThrow(
+                () -> new EntityNotFoundException("Target with ID " + update.getControllerId() + " not found."));
 
         target.setNew(false);
 
@@ -224,12 +224,10 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTarget(final String controllerID) {
-        final Long targetId = Optional.ofNullable(targetRepository.findByControllerId(controllerID))
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Target with given ID " + controllerID + " does not exist."))
-                .getId();
+        final Target target = targetRepository.findByControllerId(controllerID).orElseThrow(
+                () -> new EntityNotFoundException("Target with given ID " + controllerID + " does not exist."));
 
-        targetRepository.delete(targetId);
+        targetRepository.delete(target.getId());
     }
 
     @Override
@@ -356,7 +354,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> targetIds, final String tagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
+        final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
+                .orElseThrow(() -> new EntityNotFoundException("Tag with given name " + tagName + " does not exist!"));
         final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
                 targetIds);
         final List<JpaTarget> allTargets = targetRepository
@@ -637,7 +636,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget target = create.build();
 
-        if (targetRepository.findByControllerId(target.getControllerId()) != null) {
+        if (targetRepository.findByControllerId(target.getControllerId()).isPresent()) {
             throw new EntityAlreadyExistsException();
         }
 
@@ -660,8 +659,12 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<Target> findTargetsByTag(final String tagName) {
-        final JpaTargetTag tag = targetTagRepository.findByNameEquals(tagName);
-        return Collections.unmodifiableList(targetRepository.findByTag(tag.getId()));
+        final Optional<TargetTag> tag = targetTagRepository.findByNameEquals(tagName);
+        if (!tag.isPresent()) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(targetRepository.findByTag(tag.get().getId()));
     }
 
     @Override

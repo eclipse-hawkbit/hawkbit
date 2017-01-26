@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -372,7 +373,7 @@ public interface TargetManagement {
      * @return {@link Target} or <code>null</code> if it does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetByControllerID(@NotEmpty String controllerId);
+    Optional<Target> findTargetByControllerID(@NotEmpty String controllerId);
 
     /**
      * Find {@link Target} based on given ID returns found Target with details,
@@ -387,7 +388,7 @@ public interface TargetManagement {
      * @return {@link Target} or <code>null</code> if it does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Target findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
+    Optional<Target> findTargetByControllerIDWithDetails(@NotEmpty String controllerId);
 
     /**
      * Filter {@link Target}s for all the given parameters. If all parameters
@@ -593,6 +594,9 @@ public interface TargetManagement {
      * @param tagName
      *            to toggle
      * @return TagAssigmentResult with all meta data of the assignment outcome.
+     * 
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> targetIds, @NotEmpty String tagName);

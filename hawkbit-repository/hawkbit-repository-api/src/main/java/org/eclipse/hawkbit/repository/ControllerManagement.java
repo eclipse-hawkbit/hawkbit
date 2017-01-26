@@ -131,12 +131,9 @@ public interface ControllerManagement {
      * @param actionId
      *            to be id of the action
      * @return the corresponding {@link Action}
-     * 
-     * @throws EntityNotFoundException
-     *             if {@link Action} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action findActionWithDetails(@NotNull Long actionId);
+    Optional<Action> findActionWithDetails(@NotNull Long actionId);
 
     /**
      * register new target in the repository (plug-and-play).
@@ -152,19 +149,19 @@ public interface ControllerManagement {
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given
-     * module and target.
+     * module and target if exists and is not canceled.
      *
      * @param controllerId
      *            to look for
-     * @param module
-     *            that should be assigned to the target
+     * @param moduleId
+     *            of the the {@link SoftwareModule} that should be assigned to
+     *            the target
      * @return last {@link Action} for given combination
      *
-     * @throws EntityNotFoundException
-     *             if action for given combination could not be found
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId, @NotNull SoftwareModule module);
+    Optional<Action> getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId,
+            @NotNull Long moduleId);
 
     /**
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
@@ -274,7 +271,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Target findByControllerId(@NotEmpty String controllerId);
+    Optional<Target> findByControllerId(@NotEmpty String controllerId);
 
     /**
      * Finds {@link Target} based on given ID returns found Target without
@@ -288,6 +285,6 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Target findByTargetId(@NotNull Long targetId);
+    Optional<Target> findByTargetId(@NotNull Long targetId);
 
 }

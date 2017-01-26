@@ -76,7 +76,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         final JpaTargetFilterQuery query = create.build();
 
-        if (targetFilterQueryRepository.findByName(query.getName()) != null) {
+        if (targetFilterQueryRepository.findByName(query.getName()).isPresent()) {
             throw new EntityAlreadyExistsException(query.getName());
         }
         return targetFilterQueryRepository.save(query);
@@ -165,13 +165,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public TargetFilterQuery findTargetFilterQueryByName(final String targetFilterQueryName) {
+    public Optional<TargetFilterQuery> findTargetFilterQueryByName(final String targetFilterQueryName) {
         return targetFilterQueryRepository.findByName(targetFilterQueryName);
     }
 
     @Override
-    public TargetFilterQuery findTargetFilterQueryById(final Long targetFilterQueryId) {
-        return targetFilterQueryRepository.findOne(targetFilterQueryId);
+    public Optional<TargetFilterQuery> findTargetFilterQueryById(final Long targetFilterQueryId) {
+        return Optional.ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId));
     }
 
     @Override
@@ -201,13 +201,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement
-                .findDistributionSetByIdWithDetails(setId);
-
-        if (set == null) {
-            throw new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId);
-        }
-        return set;
+        return (JpaDistributionSet) distributionSetManagement.findDistributionSetByIdWithDetails(setId).orElseThrow(
+                () -> new EntityNotFoundException("Distribution set cannot be updated as it does not exixt" + setId));
     }
 
     private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {

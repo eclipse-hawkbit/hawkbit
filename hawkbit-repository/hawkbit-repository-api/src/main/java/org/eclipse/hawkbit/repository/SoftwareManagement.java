@@ -230,13 +230,10 @@ public interface SoftwareManagement {
      *            to search for
      * @return the found {@link SoftwareModule}s
      * 
-     * @throws EntityNotFoundException
-     *             of software module with given ID does not exist
-     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    SoftwareModule findSoftwareModuleById(@NotNull Long id);
+    Optional<SoftwareModule> findSoftwareModuleById(@NotNull Long id);
 
     /**
      * retrieves {@link SoftwareModule} by their name AND version AND type..
@@ -247,7 +244,7 @@ public interface SoftwareManagement {
      *            of the {@link SoftwareModule}
      * @param typeId
      *            of the {@link SoftwareModule}
-     * @return the found {@link SoftwareModule} or <code>null</code>
+     * @return the found {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty String name, @NotEmpty String version,
@@ -261,11 +258,9 @@ public interface SoftwareManagement {
      * @param key
      *            of the meta data element
      * @return the found SoftwareModuleMetadata or {@code null} if not exits
-     * @throws EntityNotFoundException
-     *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);
+    Optional<SoftwareModuleMetadata> findSoftwareModuleMetadata(@NotNull Long moduleId, @NotEmpty String key);
 
     /**
      * finds all meta data by the given software module id.
@@ -386,11 +381,9 @@ public interface SoftwareManagement {
      * @return {@link SoftwareModuleType} in the repository with given
      *         {@link SoftwareModuleType#getId()}
      * 
-     * @throws EntityNotFoundException
-     *             if module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleType findSoftwareModuleTypeById(@NotNull Long id);
+    Optional<SoftwareModuleType> findSoftwareModuleTypeById(@NotNull Long id);
 
     /**
      *
@@ -450,6 +443,9 @@ public interface SoftwareManagement {
      *             if given module does not exist
      *
      * @return the saved Entity.
+     * 
+     * @throws EntityNotFoundException
+     *             if fiven {@link SoftwareModule} does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModule updateSoftwareModule(@NotNull SoftwareModuleUpdate update);

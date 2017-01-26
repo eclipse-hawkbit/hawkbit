@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Optional;
+
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -68,11 +70,9 @@ public interface RolloutGroupManagement {
      * @return the found {@link RolloutGroup} by its ID or {@code null} if it
      *         does not exists
      * 
-     * @throws EntityNotFoundException
-     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    RolloutGroup findRolloutGroupById(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> findRolloutGroupById(@NotNull Long rolloutGroupId);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -155,11 +155,9 @@ public interface RolloutGroupManagement {
      *            rollout group id
      * @return rolloutGroup with details of targets count for different statuses
      * 
-     * @throws EntityNotFoundException
-     *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
+    Optional<RolloutGroup> findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
 
     /**
      * Count targets of rollout group.

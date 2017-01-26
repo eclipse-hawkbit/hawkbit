@@ -131,8 +131,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTestArtifact(final byte[] random) {
-        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
         artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);

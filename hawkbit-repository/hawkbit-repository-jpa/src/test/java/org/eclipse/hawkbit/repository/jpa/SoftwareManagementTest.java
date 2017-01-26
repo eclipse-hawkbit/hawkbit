@@ -187,11 +187,11 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
+        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTargetInfo()
+                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(
-                targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
-                        .isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getAssignedDistributionSet())
-                .isEqualTo(ds);
+                targetManagement.findTargetByControllerID(target.getControllerId()).get().getAssignedDistributionSet())
+                        .isEqualTo(ds);
         final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
         assertThat(action).isNotNull();
         return action;
@@ -315,7 +315,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId());
+        assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId()).get();
         assertTrue("The module should be flagged as deleted", assignedModule.isDeleted());
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
@@ -355,7 +355,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId());
+        assignedModule = softwareManagement.findSoftwareModuleById(assignedModule.getId()).get();
         assertTrue("The found module should be flagged deleted", assignedModule.isDeleted());
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
@@ -383,7 +383,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP3]: Create SoftwareModuleY and add the same ArtifactX
@@ -391,7 +391,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP5]: Delete SoftwareModuleX
@@ -425,14 +425,14 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
-        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         artifactManagement.createArtifact(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
-        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
@@ -450,8 +450,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         softwareManagement.deleteSoftwareModule(moduleY.getId());
 
         // [VERIFY EXPECTED RESULT]:
-        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId());
-        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId());
+        moduleX = softwareManagement.findSoftwareModuleById(moduleX.getId()).get();
+        moduleY = softwareManagement.findSoftwareModuleById(moduleY.getId()).get();
 
         // verify: SoftwareModuleX and SofwtareModule are marked as deleted
         assertThat(moduleX).isNotNull();
@@ -483,7 +483,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
-        softwareModule = softwareManagement.findSoftwareModuleById(softwareModule.getId());
+        softwareModule = softwareManagement.findSoftwareModuleById(softwareModule.getId()).get();
         assertThat(softwareModuleRepository.findAll()).hasSize((int) countSoftwareModule + 1);
 
         final List<Artifact> artifacts = softwareModule.getArtifacts();
@@ -623,7 +623,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         softwareManagement.createSoftwareModuleType(
                 entityFactory.softwareModuleType().create().key("thetype2").name("anothername"));
 
-        assertThat(softwareManagement.findSoftwareModuleTypeByName("thename")).as("Type with given name")
+        assertThat(softwareManagement.findSoftwareModuleTypeByName("thename").get()).as("Type with given name")
                 .isEqualTo(found);
     }
 
@@ -718,7 +718,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement
                 .createSoftwareModuleMetadata(ah.getId(), Lists.newArrayList(swMetadata1, swMetadata2));
 
-        final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
+        final SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         assertThat(softwareModuleMetadata).hasSize(2);
@@ -770,7 +770,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // base software module should have now the opt lock revision one
         // because we are modifying the
         // base software module
-        SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
+        SoftwareModule changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         // update the software module metadata
@@ -780,7 +780,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // we are updating the sw meta data so also modiying the base software
         // module so opt lock
         // revision must be two
-        changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId());
+        changedLockRevisionModule = softwareManagement.findSoftwareModuleById(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3);
 
         // verify updated meta data contains the updated value

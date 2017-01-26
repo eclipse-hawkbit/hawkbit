@@ -311,7 +311,7 @@ public class TestdataFactory {
 
         tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(Arrays.asList(set.getId()), tag.getName()));
 
-        return distributionSetManagement.findDistributionSetById(set.getId());
+        return distributionSetManagement.findDistributionSetById(set.getId()).get();
 
     }
 
@@ -524,7 +524,7 @@ public class TestdataFactory {
                 entityFactory.softwareModule().update(module.getId()).description("Updated " + DEFAULT_DESCRIPTION)));
 
         // load also lazy stuff
-        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+        return distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
     }
 
     /**
@@ -610,12 +610,9 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        final SoftwareModuleType findSoftwareModuleTypeByKey = softwareManagement.findSoftwareModuleTypeByKey(key);
-        if (findSoftwareModuleTypeByKey != null) {
-            return findSoftwareModuleTypeByKey;
-        }
-        return softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create().key(key)
-                .name(key).description(LOREM.words(10)).maxAssignments(maxAssignments));
+        return softwareManagement.findSoftwareModuleTypeByKey(key)
+                .orElseGet(() -> softwareManagement.createSoftwareModuleType(entityFactory.softwareModuleType().create()
+                        .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
     }
 
     /**

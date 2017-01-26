@@ -542,15 +542,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Action findAction(final Long actionId) {
-        return Optional.ofNullable(actionRepository.findOne(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+    public Optional<Action> findAction(final Long actionId) {
+        return Optional.ofNullable(actionRepository.findOne(actionId));
     }
 
     @Override
-    public Action findActionWithDetails(final Long actionId) {
-        return Optional.ofNullable(actionRepository.findById(actionId))
-                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+    public Optional<Action> findActionWithDetails(final Long actionId) {
+        return actionRepository.findById(actionId);
     }
 
     @Override
@@ -624,8 +622,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action forceTargetAction(final Long actionId) {
-        final JpaAction action = actionRepository.findOne(actionId);
-        if (action != null && !action.isForced()) {
+        final JpaAction action = Optional.ofNullable(actionRepository.findOne(actionId))
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+
+        if (!action.isForced()) {
             action.setActionType(ActionType.FORCED);
             return actionRepository.save(action);
         }

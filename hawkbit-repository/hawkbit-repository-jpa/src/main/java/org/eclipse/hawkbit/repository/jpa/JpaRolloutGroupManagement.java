@@ -78,10 +78,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    public RolloutGroup findRolloutGroupById(final Long rolloutGroupId) {
-        return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Rollout group with given ID " + rolloutGroupId + " does not exist."));
+    public Optional<RolloutGroup> findRolloutGroupById(final Long rolloutGroupId) {
+        return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId));
     }
 
     @Override
@@ -133,14 +131,21 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public RolloutGroup findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
-        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) findRolloutGroupById(rolloutGroupId);
+    public Optional<RolloutGroup> findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
+        final Optional<RolloutGroup> rolloutGroup = findRolloutGroupById(rolloutGroupId);
+
+        if (!rolloutGroup.isPresent()) {
+            return rolloutGroup;
+        }
+
+        final JpaRolloutGroup jpsRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
+
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupId);
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                Long.valueOf(rolloutGroup.getTotalTargets()));
-        rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
+                Long.valueOf(jpsRolloutGroup.getTotalTargets()));
+        jpsRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 
     }

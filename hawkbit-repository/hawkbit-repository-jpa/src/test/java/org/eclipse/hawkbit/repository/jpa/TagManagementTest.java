@@ -72,18 +72,18 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         toggleTagAssignment(dsBs, tagB);
         toggleTagAssignment(dsCs, tagC);
 
-        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagA.getName()));
-        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagB.getName()));
+        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsABs, tagManagement.findDistributionSetTag(tagB.getName()).get());
 
-        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagA.getName()));
-        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsACs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
-        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagB.getName()));
-        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagB.getName()).get());
+        toggleTagAssignment(dsBCs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
-        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagA.getName()));
-        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagB.getName()));
-        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagC.getName()));
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagA.getName()).get());
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagB.getName()).get());
+        toggleTagAssignment(dsABCs, tagManagement.findDistributionSetTag(tagC.getName()).get());
 
         DistributionSetFilterBuilder distributionSetFilterBuilder;
 
@@ -259,9 +259,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Tag tag = tagManagement
                 .createTargetTag(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
-        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
-        assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
-        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(targetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag ed")
+                .isEqualTo("kai2");
+        assertThat(tagManagement.findTargetTag("kai1").get().getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findTargetTagById(tag.getId()).get().getColour()).as("wrong tag found")
+                .isEqualTo("colour");
     }
 
     @Test
@@ -273,7 +275,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
+            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
                     .contains(toDelete);
         }
 
@@ -282,7 +284,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
+            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).get().getTags())
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
@@ -314,10 +316,11 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final Tag tag = tagManagement.createDistributionSetTag(
                 entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
-        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
+        assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
-        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).as("wrong tag found")
+        assertThat(tagManagement.findDistributionSetTag("kai1").get().getColour()).as("wrong tag found")
+                .isEqualTo("colour");
+        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 
@@ -337,7 +340,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
+            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
                     .as("Wrong tag found").contains(toDelete);
         }
 
@@ -348,7 +351,7 @@ public class TagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags after deletion").hasSize(19);
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
+            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get().getTags())
                     .as("Wrong found tags").doesNotContain(toDelete);
         }
     }

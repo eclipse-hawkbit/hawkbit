@@ -127,14 +127,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
-
-        final DistributionSetType module = distributionSetManagement.findDistributionSetTypeById(distributionSetTypeId);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with Id {" + distributionSetTypeId + "} does not exist");
-        }
-
-        return module;
+        return distributionSetManagement.findDistributionSetTypeById(distributionSetTypeId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Type with given ID " + distributionSetTypeId + " does not exist"));
     }
 
     @Override
@@ -224,12 +219,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
 
-        final SoftwareModuleType module = softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId);
-        if (module == null) {
-            throw new EntityNotFoundException(
-                    "SoftwareModuleType with Id {" + softwareModuleTypeId + "} does not exist");
-        }
-
-        return module;
+        return softwareManagement.findSoftwareModuleTypeById(softwareModuleTypeId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Software module type with given ID " + softwareModuleTypeId + " does not exist."));
     }
 }

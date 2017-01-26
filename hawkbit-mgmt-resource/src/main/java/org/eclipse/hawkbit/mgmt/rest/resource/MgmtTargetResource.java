@@ -184,7 +184,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId) {
 
-        final Action action = deploymentManagement.findAction(actionId);
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -213,7 +214,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
-        final Action action = deploymentManagement.findAction(actionId);
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+        ;
 
         if (!action.getTarget().getControllerId().equals(controllerId)) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);
@@ -240,7 +243,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
-        final Action action = deploymentManagement.findAction(actionId);
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException("Action with Id {" + actionId + "} does not exist"));
+
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -56,7 +56,7 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
                 10, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
-        return rolloutManagement.findRolloutById(entity.getId()).getRolloutGroups().get(0);
+        return rolloutManagement.findRolloutById(entity.getId()).get().getRolloutGroups().get(0);
     }
 
 }

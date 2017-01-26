@@ -67,18 +67,18 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final JpaAction savedAction = (JpaAction) deploymentManagement
                 .findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
 
-        assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
+        assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).get().getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         controllerManagament.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         controllerManagament.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction.getId()).getNumberOfElements())
@@ -152,13 +152,13 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // test and verify
         savedAction = controllerManagament.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         savedAction = controllerManagament.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.ERROR));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
 
         // try with disabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(true);
@@ -166,8 +166,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
 
         // test
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
 
         // try with enabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(false);
@@ -175,8 +175,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
 
         // test
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
 
     }
 
@@ -192,8 +192,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
                 .isEqualTo(3);
@@ -210,8 +210,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get()
+                .getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
                 .isEqualTo(4);

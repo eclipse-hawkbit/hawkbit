@@ -119,12 +119,13 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThatRepositoryContains400Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);
-        verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA, targetManagement.findTargetByControllerID(assignedC));
+        verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA,
+                targetManagement.findTargetByControllerID(assignedC).get());
         verifyThat0TargetsWithTagAndDescOrNameHasDS(targTagW, setA);
         verifyThat0TargetsWithNameOrdescAndDSHaveTag(targTagX, setA);
         verifyThat3TargetsHaveDSAssigned(setA,
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedA, assignedB, assignedC)));
-        verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.findTargetByControllerID(assignedA));
+        verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.findTargetByControllerID(assignedA).get());
         List<Target> expected = concat(targAs, targBs, targCs, targDs);
         expected.removeAll(
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedA, assignedB, assignedC)));
@@ -144,16 +145,16 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat3TargetsWithGivenDSAreInPending(setA, pending,
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedA, assignedB, assignedC)));
         verifyThat1TargetWithGivenNameOrDescAndDSIsInPending(setA, pending,
-                targetManagement.findTargetByControllerID(assignedA));
+                targetManagement.findTargetByControllerID(assignedA).get());
         verifyThat1TargetWithGivenNameOrDescAndTagAndDSIsInPending(targTagW, setA, pending,
-                targetManagement.findTargetByControllerID(assignedB));
+                targetManagement.findTargetByControllerID(assignedB).get());
         verifyThat2TargetsWithGivenTagAndDSIsInPending(targTagW, setA, pending,
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedB, assignedC)));
         verifyThat2TargetsWithGivenTagAreInPending(targTagW, pending,
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedB, assignedC)));
         verifyThat200targetsWithGivenTagAreInStatusPendingorUnknown(targTagW, both, concat(targBs, targCs));
         verfiyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
-                targetManagement.findTargetByControllerID(installedC));
+                targetManagement.findTargetByControllerID(installedC).get());
 
         expected = concat(targBs, targCs);
         expected.removeAll(targetManagement.findTargetByControllerID(Lists.newArrayList(assignedB, assignedC)));

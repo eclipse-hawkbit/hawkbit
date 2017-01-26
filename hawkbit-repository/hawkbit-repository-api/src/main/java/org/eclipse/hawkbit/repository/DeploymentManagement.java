@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -182,11 +183,9 @@ public interface DeploymentManagement {
      *            to be id of the action
      * @return the corresponding {@link Action}
      * 
-     * @throws EntityNotFoundException
-     *             of action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action findAction(@NotNull Long actionId);
+    Optional<Action> findAction(@NotNull Long actionId);
 
     /**
      * Retrieves all {@link Action}s from repository.
@@ -298,7 +297,7 @@ public interface DeploymentManagement {
      *             of action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Action findActionWithDetails(@NotNull Long actionId);
+    Optional<Action> findActionWithDetails(@NotNull Long actionId);
 
     /**
      * Retrieves all active {@link Action}s of a specific target ordered by
@@ -349,6 +348,9 @@ public interface DeploymentManagement {
      * @param actionId
      *            the ID of the action
      * @return the updated or the found {@link Action}
+     * 
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Action forceTargetAction(@NotNull Long actionId);

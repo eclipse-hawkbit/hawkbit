@@ -143,7 +143,7 @@ public class DistributionSetMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedDistSetId, final String metadataKey) {
-        final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
+        final DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId).get();
 
         /* display the window */
         UI.getCurrent()

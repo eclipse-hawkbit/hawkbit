@@ -62,7 +62,7 @@ public class JpaTagManagement implements TagManagement {
     private VirtualPropertyReplacer virtualPropertyReplacer;
 
     @Override
-    public TargetTag findTargetTag(final String name) {
+    public Optional<TargetTag> findTargetTag(final String name) {
         return targetTagRepository.findByNameEquals(name);
     }
 
@@ -73,7 +73,7 @@ public class JpaTagManagement implements TagManagement {
 
         final JpaTargetTag targetTag = create.buildTargetTag();
 
-        if (findTargetTag(targetTag.getName()) != null) {
+        if (findTargetTag(targetTag.getName()).isPresent()) {
             throw new EntityAlreadyExistsException();
         }
 
@@ -95,7 +95,8 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetTag(final String targetTagName) {
-        final JpaTargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
+        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName).orElseThrow(
+                () -> new EntityNotFoundException("Tag with given name " + targetTagName + " does not exist!"));
 
         targetRepository.findByTag(tag.getId()).forEach(set -> {
             set.removeTag(tag);
@@ -105,11 +106,6 @@ public class JpaTagManagement implements TagManagement {
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
 
-    }
-
-    @Override
-    public List<TargetTag> findAllTargetTags() {
-        return Collections.unmodifiableList(targetTagRepository.findAll());
     }
 
     @Override
@@ -167,7 +163,7 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    public DistributionSetTag findDistributionSetTag(final String name) {
+    public Optional<DistributionSetTag> findDistributionSetTag(final String name) {
         return distributionSetTagRepository.findByNameEquals(name);
     }
 
@@ -179,7 +175,7 @@ public class JpaTagManagement implements TagManagement {
 
         final JpaDistributionSetTag distributionSetTag = create.buildDistributionSetTag();
 
-        if (distributionSetTagRepository.findByNameEquals(distributionSetTag.getName()) != null) {
+        if (distributionSetTagRepository.findByNameEquals(distributionSetTag.getName()).isPresent()) {
             throw new EntityAlreadyExistsException();
         }
 
@@ -203,7 +199,8 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetTag(final String tagName) {
-        final JpaDistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
+        final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName)
+                .orElseThrow(() -> new EntityNotFoundException("Tag with given name " + tagName + " does not exist!"));
 
         distributionSetRepository.findByTag(tag).forEach(set -> {
             set.removeTag(tag);
@@ -219,13 +216,13 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    public TargetTag findTargetTagById(final Long id) {
-        return targetTagRepository.findOne(id);
+    public Optional<TargetTag> findTargetTagById(final Long id) {
+        return Optional.ofNullable(targetTagRepository.findOne(id));
     }
 
     @Override
-    public DistributionSetTag findDistributionSetTagById(final Long id) {
-        return distributionSetTagRepository.findOne(id);
+    public Optional<DistributionSetTag> findDistributionSetTagById(final Long id) {
+        return Optional.ofNullable(distributionSetTagRepository.findOne(id));
     }
 
     @Override

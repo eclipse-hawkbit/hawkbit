@@ -937,7 +937,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
 
-        return rolloutManagement.findRolloutById(rollout.getId());
+        return rolloutManagement.findRolloutById(rollout.getId()).get();
     }
 
     protected boolean success(final Rollout result) {
