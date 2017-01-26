@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.ConversionValue;
+import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -82,6 +83,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private JpaDistributionSet distributionSet;
 
     @Column(name = "status")
+    @Convert("rollouttatus")
     private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
