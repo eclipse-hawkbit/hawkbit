@@ -35,7 +35,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
  */
 @Configuration
 @ConditionalOnMissingBean(UserDetailsService.class)
-public class InMemoryUserManagementConfiguration extends GlobalAuthenticationConfigurerAdapter {
+public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
     @Autowired
     private SecurityProperties securityProperties;
