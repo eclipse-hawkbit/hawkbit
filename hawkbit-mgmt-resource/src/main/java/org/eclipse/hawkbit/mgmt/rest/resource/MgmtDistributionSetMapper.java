@@ -122,7 +122,7 @@ public final class MgmtDistributionSetMapper {
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId()))
-                .withRel("self"));
+                .withSelfRel());
 
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type"));

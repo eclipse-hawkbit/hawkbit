@@ -90,7 +90,7 @@ final class MgmtDistributionSetTypeMapper {
         result.setModuleId(type.getId());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES));

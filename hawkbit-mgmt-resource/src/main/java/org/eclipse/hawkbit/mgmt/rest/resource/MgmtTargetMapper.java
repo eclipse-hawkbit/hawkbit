@@ -90,26 +90,6 @@ public final class MgmtTargetMapper {
     }
 
     /**
-     * Create a response which includes links and pollstatus for all targets.
-     *
-     * @param targets
-     *            the targets
-     * @return the response
-     */
-    public static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
-        if (targets == null) {
-            return Collections.emptyList();
-        }
-
-        return new ResponseList<>(targets.stream().map(target -> {
-            final MgmtTarget response = toResponse(target);
-            addPollStatus(target, response);
-            addTargetLinks(response);
-            return response;
-        }).collect(Collectors.toList()));
-    }
-
-    /**
      * Create a response for targets.
      *
      * @param targets
@@ -168,7 +148,7 @@ public final class MgmtTargetMapper {
             targetRest.setInstalledAt(installationDate);
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withRel("self"));
+        targetRest.add(linkTo(methodOn(MgmtTargetResource.class).getTarget(target.getControllerId())).withSelfRel());
 
         return targetRest;
     }
@@ -211,7 +191,7 @@ public final class MgmtTargetMapper {
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
 
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withRel("self"));
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel());
 
         return result;
     }

@@ -73,7 +73,7 @@ public final class MgmtTargetFilterQueryMapper {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withRel("self"));
+        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
         targetRest.add(
                 linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).postAssignedDistributionSet(filter.getId(), null))
                         .withRel("autoAssignDS"));

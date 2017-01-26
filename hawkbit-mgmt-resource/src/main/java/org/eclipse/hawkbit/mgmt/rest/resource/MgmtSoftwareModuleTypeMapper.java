@@ -70,7 +70,7 @@ final class MgmtSoftwareModuleTypeMapper {
         result.setModuleId(type.getId());
 
         result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         return result;
     }

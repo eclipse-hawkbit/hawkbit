@@ -67,7 +67,7 @@ public final class MgmtSystemMapper {
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
 
-        restConfValue.add(linkTo(methodOn(MgmtSystemResource.class).getConfigurationValue(key)).withRel("self"));
+        restConfValue.add(linkTo(methodOn(MgmtSystemResource.class).getConfigurationValue(key)).withSelfRel());
 
         return restConfValue;
     }
