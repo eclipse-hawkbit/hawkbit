@@ -455,6 +455,8 @@ public class RolloutListGrid extends AbstractGrid {
         final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
                 formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
+                        rolloutManagement.deleteRollout(rolloutId);
+                        getContainerDataSource().removeItem(rolloutId);
                         eventBus.publish(this, RolloutEvent.DELETE_ROLLOUT);
                     }
                 });
