@@ -52,7 +52,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-@ObjectTypeConverter(name = "rollouttatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
+@ObjectTypeConverter(name = "rolloutstatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
         @ConversionValue(objectValue = "CREATING", dataValue = "0"),
         @ConversionValue(objectValue = "READY", dataValue = "1"),
         @ConversionValue(objectValue = "PAUSED", dataValue = "2"),
@@ -83,7 +83,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private JpaDistributionSet distributionSet;
 
     @Column(name = "status")
-    @Convert("rollouttatus")
+    @Convert("rolloutstatus")
     private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
