@@ -109,6 +109,18 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findTargetFilterQueryByFilter(@NotNull Pageable pageable, @NotNull String rsqlFilter);
 
     /**
+     * Retrieves all target filter query which have exactly the provided query.
+     *
+     * @param pageable
+     *            pagination parameter
+     * @param query
+     *            the query saved in the target filter query
+     * @return the page with the found {@link TargetFilterQuery}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetFilterQuery> findTargetFilterQueryByQuery(@NotNull Pageable pageable, String query);
+
+    /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
      *
      *

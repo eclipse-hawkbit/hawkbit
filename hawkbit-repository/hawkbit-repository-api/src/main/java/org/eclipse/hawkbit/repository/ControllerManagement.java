@@ -181,15 +181,15 @@ public interface ControllerManagement {
      * 
      * @param controllerId
      *            the ID of the target to check
-     * @param artifactId
-     *            the artifact to verify if the given target had even been
+     * @param sha1Hash
+     *            of the artifact to verify if the given target had even been
      *            assigned to
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull String controllerId, @NotNull Long artifactId);
+    boolean hasTargetArtifactAssigned(@NotEmpty String controllerId, @NotEmpty String sha1Hash);
 
     /**
      * Checks if a given target has currently or has even been assigned to the
@@ -200,15 +200,15 @@ public interface ControllerManagement {
      * 
      * @param targetId
      *            the ID of the target to check
-     * @param artifactId
-     *            the artifact to verify if the given target had even been
+     * @param sha1Hash
+     *            of the artifact to verify if the given target had even been
      *            assigned to
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotNull Long artifactId);
+    boolean hasTargetArtifactAssigned(@NotNull Long targetId, @NotEmpty String sha1Hash);
 
     /**
      * Registers retrieved status for given {@link Target} and {@link Action} if

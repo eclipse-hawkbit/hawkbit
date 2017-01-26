@@ -32,6 +32,7 @@
                   </goals>
                   <configuration>
                      <outputDirectory>${baseDir}</outputDirectory>
+                     <classifier>exec</classifier>
                      <addResources>false</addResources>
                      <mainClass>org.eclipse.hawkbit.mgmt.client.Application</mainClass>
                      <layout>JAR</layout>

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -23,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
@@ -56,6 +57,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -76,9 +78,10 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
+    private static final String SHA1 = "12345";
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 123L;
-    private static String CONTROLLLER_ID = "123";
+    private static final String CONTROLLLER_ID = "123";
     private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
@@ -112,6 +115,12 @@ public class AmqpMessageHandlerServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Captor
+    private ArgumentCaptor<Map<String, String>> attributesCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> targetIdCaptor;
 
     @Before
     public void before() throws Exception {
@@ -161,6 +170,32 @@ public class AmqpMessageHandlerServiceTest {
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
+
+    }
+
+    @Test
+    @Description("Tests the target attribute update by calling the same method that incoming RabbitMQ messages would access.")
+    public void updateAttributes() {
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
+        final AttributeUpdate attributeUpdate = new AttributeUpdate();
+        attributeUpdate.getAttributes().put("testKey1", "testValue1");
+        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+
+        final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
+                messageProperties);
+
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture()))
+                .thenReturn(null);
+
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+
+        // verify
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
+        assertThat(attributesCaptor.getValue()).as("Attributes is not right")
+                .isEqualTo(attributeUpdate.getAttributes());
 
     }
 
@@ -327,17 +362,16 @@ public class AmqpMessageHandlerServiceTest {
 
         // mock
         final Artifact localArtifactMock = mock(Artifact.class);
-        final Long mockedArtifactId = 1L;
-        when(localArtifactMock.getId()).thenReturn(mockedArtifactId);
+        when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
 
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
-        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), mockedArtifactId))
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(localArtifactMock);
+        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
-        when(artifactManagementMock.loadArtifactBinary(anyLong())).thenReturn(dbArtifactMock);
+        when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
-        when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash("sha1", "md5"));
+        when(dbArtifactMock.getHashes()).thenReturn(new DbArtifactHash(SHA1, "md5"));
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
@@ -349,7 +383,7 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
-        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo("sha1");
+        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo(SHA1);
         assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
         assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
                 .startsWith("http://localhost/api/v1/downloadserver/downloadId/");

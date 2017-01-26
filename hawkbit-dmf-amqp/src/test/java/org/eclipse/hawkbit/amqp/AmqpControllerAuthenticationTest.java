@@ -153,7 +153,7 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager.postConstruct();
 
-        final JpaArtifact testArtifact = new JpaArtifact("afilename", "afilename", new JpaSoftwareModule(
+        final JpaArtifact testArtifact = new JpaArtifact(SHA1, "afilename", new JpaSoftwareModule(
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
         testArtifact.setId(1L);
 
@@ -162,8 +162,8 @@ public class AmqpControllerAuthenticationTest {
 
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);
-        artifact.setHashes(new DbArtifactHash("sha1 test", "md5 test"));
-        when(artifactManagementMock.loadArtifactBinary(1L)).thenReturn(artifact);
+        artifact.setHashes(new DbArtifactHash(SHA1, "md5 test"));
+        when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(artifact);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
@@ -174,8 +174,8 @@ public class AmqpControllerAuthenticationTest {
 
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
-        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, 1L)).thenReturn(true);
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, 1L)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
     }
 
     @Test

@@ -43,18 +43,18 @@ public final class ActionSpecifications {
      * @param target
      *            the target to verfiy if the given artifact is currently
      *            assigned or had been assigned
-     * @param localArtifact
-     *            the local artifact to check wherever the target had ever been
-     *            assigned
+     * @param sha1Hash
+     *            of the local artifact to check wherever the target had ever
+     *            been assigned
      * @return a specification to use with spring JPA
      */
-    public static Specification<JpaAction> hasTargetAssignedArtifact(final Target target, final Long localArtifact) {
+    public static Specification<JpaAction> hasTargetAssignedArtifact(final Target target, final String sha1Hash) {
         return (actionRoot, query, criteriaBuilder) -> {
             final Join<JpaAction, JpaDistributionSet> dsJoin = actionRoot.join(JpaAction_.distributionSet);
             final SetJoin<JpaDistributionSet, JpaSoftwareModule> modulesJoin = dsJoin.join(JpaDistributionSet_.modules);
             final ListJoin<JpaSoftwareModule, JpaArtifact> artifactsJoin = modulesJoin
                     .join(JpaSoftwareModule_.artifacts);
-            return criteriaBuilder.and(criteriaBuilder.equal(artifactsJoin.get(JpaArtifact_.id), localArtifact),
+            return criteriaBuilder.and(criteriaBuilder.equal(artifactsJoin.get(JpaArtifact_.sha1Hash), sha1Hash),
                     criteriaBuilder.equal(actionRoot.get(JpaAction_.target), target));
         };
     }

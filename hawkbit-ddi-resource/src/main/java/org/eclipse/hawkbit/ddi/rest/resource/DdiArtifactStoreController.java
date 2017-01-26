@@ -86,7 +86,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getId());
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
 
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous
