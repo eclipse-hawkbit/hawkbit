@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -31,11 +32,12 @@ public class RolloutListView extends AbstractGridLayout {
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n) {
+            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n),
+                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement),
                 new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState,
-                        permissionChecker, targetManagement, entityFactory, uiProperties));
+                        permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement));
 
         buildLayout();
     }
