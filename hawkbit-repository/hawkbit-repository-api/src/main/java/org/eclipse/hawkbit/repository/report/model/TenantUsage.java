@@ -53,6 +53,9 @@ public class TenantUsage {
     }
 
     public Map<String, String> getUsageData() {
+        if (usageData == null) {
+            return Maps.newHashMap();
+        }
         return usageData;
     }
 
@@ -105,6 +108,7 @@ public class TenantUsage {
         result = prime * result + (int) (overallArtifactVolumeInBytes ^ (overallArtifactVolumeInBytes >>> 32));
         result = prime * result + (int) (targets ^ (targets >>> 32));
         result = prime * result + ((tenantName == null) ? 0 : tenantName.hashCode());
+        result = prime * result + ((usageData == null) ? 0 : usageData.hashCode());
         return result;
     }
 
@@ -130,6 +134,9 @@ public class TenantUsage {
             return false;
         }
         if (targets != other.targets) {
+            return false;
+        }
+        if (!this.getUsageData().equals(other.getUsageData())) {
             return false;
         }
         if (tenantName == null) {
