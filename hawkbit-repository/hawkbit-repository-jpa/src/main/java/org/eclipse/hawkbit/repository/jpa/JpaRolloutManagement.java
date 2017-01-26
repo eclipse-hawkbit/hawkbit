@@ -632,6 +632,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Modifying
+    public void deleteRollout(final Long rolloutId) {
+
+    }
+
+    @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void resumeRollout(final Long rolloutId) {

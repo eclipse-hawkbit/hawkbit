@@ -142,6 +142,12 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
+    public ResponseEntity<Void> delete(@PathVariable("rolloutId") final Long rolloutId) {
+        this.rolloutManagement.deleteRollout(rolloutId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<Void> resume(@PathVariable("rolloutId") final Long rolloutId) {
         this.rolloutManagement.resumeRollout(rolloutId);
         return ResponseEntity.ok().build();

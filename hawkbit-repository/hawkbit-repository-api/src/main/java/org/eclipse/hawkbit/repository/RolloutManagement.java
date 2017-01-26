@@ -323,6 +323,18 @@ public interface RolloutManagement {
     void pauseRollout(@NotNull Long rollout);
 
     /**
+     * Deletes a rollout. The Rollout switches {@link RolloutStatus#DELETING}.
+     *
+     * @param rollout
+     *            the rollout to be paused.
+     *
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void deleteRollout(@NotNull Long rolloutId);
+
+    /**
      * Resumes a paused rollout. The rollout switches back to
      * {@link RolloutStatus#RUNNING} state which is then picked up again by the
      * {@link #checkRunningRollouts(long)}.
