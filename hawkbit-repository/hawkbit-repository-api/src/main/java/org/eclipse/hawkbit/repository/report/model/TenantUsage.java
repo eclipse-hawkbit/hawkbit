@@ -93,7 +93,7 @@ public class TenantUsage {
      */
     public TenantUsage addUsageData(final String key, final String value) {
         if (usageData == null) {
-            usageData = Maps.newHashMap();
+            usageData = getUsageData();
         }
         usageData.put(key, value);
         return this;
