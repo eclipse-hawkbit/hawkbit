@@ -92,10 +92,7 @@ public class TenantUsage {
      * @return tenant stats element with new usage added
      */
     public TenantUsage addUsageData(final String key, final String value) {
-        if (usageData == null) {
-            usageData = getUsageData();
-        }
-        usageData.put(key, value);
+        getUsageData().put(key, value);
         return this;
     }
 
