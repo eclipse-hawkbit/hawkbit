@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -31,7 +32,6 @@ public class TenantUsage {
      * @param tenantName
      */
     public TenantUsage(final String tenantName) {
-        super();
         this.tenantName = tenantName;
     }
 
@@ -53,8 +53,12 @@ public class TenantUsage {
     }
 
     public Map<String, String> getUsageData() {
+        return Collections.unmodifiableMap(getLazyUsageData());
+    }
+
+    private Map<String, String> getLazyUsageData() {
         if (usageData == null) {
-            return Maps.newHashMap();
+            usageData = Maps.newHashMap();
         }
         return usageData;
     }
@@ -92,7 +96,7 @@ public class TenantUsage {
      * @return tenant stats element with new usage added
      */
     public TenantUsage addUsageData(final String key, final String value) {
-        getUsageData().put(key, value);
+        getLazyUsageData().put(key, value);
         return this;
     }
 
