@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.systemmanagement;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,6 +27,7 @@ public class MgmtSystemTenantServiceUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
+    private Map<String, String> usageData;
 
     /**
      * Constructor.
@@ -69,6 +72,14 @@ public class MgmtSystemTenantServiceUsage {
 
     public String getTenantName() {
         return tenantName;
+    }
+
+    public Map<String, String> getUsageData() {
+        return usageData;
+    }
+
+    public void setUsageData(final Map<String, String> usageData) {
+        this.usageData = usageData;
     }
 
 }
