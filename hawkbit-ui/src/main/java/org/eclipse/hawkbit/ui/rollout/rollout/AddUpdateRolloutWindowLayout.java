@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
@@ -378,7 +377,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     }
 
-    private void displayValidationStatus(DefineGroupsLayout.ValidationStatus status) {
+    private void displayValidationStatus(final DefineGroupsLayout.ValidationStatus status) {
         if (status == DefineGroupsLayout.ValidationStatus.LOADING) {
             groupsLegendLayout.displayLoading();
         } else {
@@ -529,7 +528,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     }
 
-    private void updateGroupsChart(final List<RolloutGroup> savedGroups, long totalTargetsCount) {
+    private void updateGroupsChart(final List<RolloutGroup> savedGroups, final long totalTargetsCount) {
         final List<Long> targetsPerGroup = savedGroups.stream().map(group -> (long) group.getTotalTargets())
                 .collect(Collectors.toList());
 
@@ -609,10 +608,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
+        final Long distributionSetId = (Long) distributionSet.getValue();
 
         final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId()).name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionSetIdName.getId()).actionType(getActionType())
+                .description(description.getValue()).set(distributionSetId).actionType(getActionType())
                 .forcedTime(getForcedTimeStamp());
 
         if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
