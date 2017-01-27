@@ -91,10 +91,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return permissionChecker;
     }
 
-    protected EventBus.UIEventBus getEventBus() {
-        return eventBus;
-    }
-
     protected I18N getI18n() {
         return i18n;
     }

@@ -31,10 +31,6 @@ public final class SpringContextHelper {
         SpringContextHelper.context = context;
     }
 
-    public static ApplicationContext getContext() {
-        return context;
-    }
-
     /**
      * method to return a certain bean by its name.
      * 

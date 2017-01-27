@@ -55,16 +55,6 @@ public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity 
         super(name, description, colour);
     }
 
-    /**
-     * Public constructor.
-     *
-     * @param name
-     *            of the {@link TargetTag}
-     **/
-    public JpaTargetTag(final String name) {
-        super(name, null, null);
-    }
-
     public JpaTargetTag() {
         // Default constructor for JPA.
     }

@@ -42,10 +42,7 @@ import com.vaadin.ui.Table;
  */
 public final class HawkbitCommonUtil {
     public static final String SP_STRING_PIPE = " | ";
-    /**
-     * Html span.
-     */
-    public static final String SPAN_CLOSE = "</span>";
+
     public static final String HTML_LI_CLOSE_TAG = "</li>";
     public static final String HTML_LI_OPEN_TAG = "<li>";
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
@@ -217,14 +214,7 @@ public final class HawkbitCommonUtil {
         return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
-    /**
-     * Find required extra width of software module.
-     *
-     * @param newBrowserWidth
-     *            new browser width
-     * @return float width of software module table
-     */
-    public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
+    private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
                 ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
     }
@@ -520,50 +510,11 @@ public final class HawkbitCommonUtil {
         }
     }
 
-    /**
-     * Set status progress bar value.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param statusName
-     *            status name
-     * @param count
-     *            target counts in a status
-     * @param index
-     *            bar part index
-     */
-    public static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
+    private static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
             final int index) {
         bar.setPartSize(index, count);
         bar.setPartTooltip(index, statusName);
         bar.setPartStyleName(index, "status-bar-part-" + statusName);
-    }
-
-    /**
-     * Initialize status progress bar with values and number of parts on load.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of a table
-     */
-    public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
-        final Long scheduledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
-        final Long errorTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
-        final Long finishedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
-        final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
-        if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
-                finishedTargetsCount, cancelledTargetsCount)) {
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0,
-                    0);
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
-                    1);
-        } else {
-            bar.setNumberOfParts(6);
-            setProgressBarDetails(bar, item);
-        }
     }
 
     /**
