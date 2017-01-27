@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -200,22 +201,22 @@ public class CreateOrUpdateFilterTable extends Table {
         label.setContentMode(ContentMode.HTML);
         if (targetStatus == TargetUpdateStatus.PENDING) {
             label.setDescription("Pending");
-            label.setStyleName("statusIconYellow");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             label.setValue(FontAwesome.ADJUST.getHtml());
         } else if (targetStatus == TargetUpdateStatus.REGISTERED) {
             label.setDescription("Registered");
-            label.setStyleName("statusIconLightBlue");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             label.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
         } else if (targetStatus == TargetUpdateStatus.ERROR) {
             label.setDescription(i18n.get("label.error"));
-            label.setStyleName("statusIconRed");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.IN_SYNC) {
-            label.setStyleName("statusIconGreen");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             label.setDescription("In-Synch");
             label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.UNKNOWN) {
-            label.setStyleName("statusIconBlue");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
             label.setDescription(i18n.get("label.unknown"));
             label.setValue(FontAwesome.QUESTION_CIRCLE.getHtml());
         }

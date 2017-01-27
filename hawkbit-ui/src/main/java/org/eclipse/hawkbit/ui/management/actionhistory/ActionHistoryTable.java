@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
@@ -512,10 +513,10 @@ public class ActionHistoryTable extends TreeTable {
             label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
         } else if (Action.Status.ERROR == status) {
             label.setDescription(i18n.get("label.error"));
-            label.setStyleName("statusIconRed");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else if (Action.Status.WARNING == status) {
-            label.setStyleName("statusIconOrange");
+            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_ORANGE);
             label.setDescription(i18n.get("label.warning"));
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else if (Action.Status.RUNNING == status) {
@@ -598,7 +599,7 @@ public class ActionHistoryTable extends TreeTable {
             label.setStyleName("statusIconActive");
         } else if (SPUIDefinitions.IN_ACTIVE.equals(activeValue)) {
             if (endedWithError) {
-                label.setStyleName("statusIconRed");
+                label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             } else {
                 label.setStyleName("statusIconNeutral");
             }

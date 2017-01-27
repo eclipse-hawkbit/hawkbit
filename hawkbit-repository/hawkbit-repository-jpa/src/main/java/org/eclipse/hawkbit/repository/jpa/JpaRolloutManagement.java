@@ -1015,6 +1015,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Rollout findRolloutWithDetailedStatus(final Long rolloutId) {
         final Rollout rollout = findRolloutById(rolloutId);
+        if (rollout == null || rollout.getStatus().equals(RolloutStatus.DELETING)) {
+            return null;
+        }
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
                 .getStatusCountByRolloutId(rolloutId);
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,

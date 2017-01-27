@@ -237,9 +237,19 @@ public final class SPUIStyleDefinitions {
     public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-spinner";
 
     /**
+     * Rollout deleting spinner for status column
+     */
+    public static final String ROLLOUT_DELETING_SPINNER = "rollout-deleting-spinner";
+
+    /**
      * Status icon style - red color.
      */
     public static final String STATUS_ICON_RED = "statusIconRed";
+
+    /**
+     * Status icon style - orange color.
+     */
+    public static final String STATUS_ICON_ORANGE = "statusIconOrange";
 
     /**
      * Status icon style - green color.
@@ -265,6 +275,11 @@ public final class SPUIStyleDefinitions {
      * Status icon spinner style - grey color.
      */
     public static final String STATUS_SPINNER_GREY = "greySpinner";
+
+    /**
+     * Status icon spinner style - red color.
+     */
+    public static final String STATUS_SPINNER_RED = "redSpinner";
 
     /**
      * Status icon spinner style - blue color.

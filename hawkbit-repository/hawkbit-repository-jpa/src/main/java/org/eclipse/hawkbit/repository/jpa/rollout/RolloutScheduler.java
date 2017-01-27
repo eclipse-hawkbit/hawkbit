@@ -159,7 +159,7 @@ public class RolloutScheduler {
     /**
      * Scheduler method called by the spring-async mechanism. Retrieves all
      * tenants from the {@link SystemManagement#findTenants()} and runs for each
-     * tenant the {@link RolloutManagement#checkCreatingRollouts(long)} in the
+     * tenant the {@link RolloutManagement#checkDeletingRollouts(long)} in the
      * {@link SystemSecurityContext}.
      */
     @Scheduled(initialDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER)
