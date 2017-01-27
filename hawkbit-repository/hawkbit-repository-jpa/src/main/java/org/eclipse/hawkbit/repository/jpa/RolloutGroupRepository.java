@@ -60,8 +60,8 @@ public interface RolloutGroupRepository
      * rollout-management to find out rolloutgroups which are in specific
      * states.
      * 
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
+     * @param rolloutId
+     *            the ID of the rollout the rolloutgroup belong to
      * @param rolloutGroupStatus1
      *            the status of the rollout groups
      * @param rolloutGroupStatus2
@@ -69,8 +69,8 @@ public interface RolloutGroupRepository
      * @return the count of rollout groups belonging to a rollout in specific
      *         status
      */
-    @Query("SELECT COUNT(r.id) FROM JpaRolloutGroup r WHERE r.rollout = :rollout and (r.status = :status1 or r.status = :status2)")
-    Long countByRolloutAndStatusOrStatus(@Param("rollout") JpaRollout rollout,
+    @Query("SELECT COUNT(r.id) FROM JpaRolloutGroup r WHERE r.rollout.id = :rolloutId and (r.status = :status1 or r.status = :status2)")
+    Long countByRolloutIdAndStatusOrStatus(@Param("rolloutId") long rolloutId,
             @Param("status1") RolloutGroupStatus rolloutGroupStatus1,
             @Param("status2") RolloutGroupStatus rolloutGroupStatus2);
 
@@ -99,13 +99,15 @@ public interface RolloutGroupRepository
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
      * status. Retrieves the child rolloutgroup for a specific status.
      * 
-     * @param rolloutGroup
-     *            the parent rolloutgroup
+     * @param rolloutGroupId
+     *            the rolloutgroupId to find the parents
      * @param status
      *            the status of the rolloutgroups
      * @return The child {@link RolloutGroup}s in a specific status
      */
-    List<JpaRolloutGroup> findByParentAndStatus(JpaRolloutGroup rolloutGroup, RolloutGroupStatus status);
+    @Query("SELECT g FROM JpaRolloutGroup g WHERE g.parent.id=:rolloutGroupId and g.status=:status")
+    List<JpaRolloutGroup> findByParentIdAndStatus(@Param("rolloutGroupId") long rolloutGroupId,
+            @Param("status") RolloutGroupStatus status);
 
     /**
      * Updates all {@link RolloutGroup#getStatus()} of children for given

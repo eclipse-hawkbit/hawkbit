@@ -1312,10 +1312,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.startRollout(createdRollout.getId());
         rolloutManagement.checkStartingRollouts(0);
 
-        rolloutRepository.findOne(createdRollout.getId());
-        // verify we have scheduled actions
-        assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, createdRollout.getId(), Status.SCHEDULED)
-                .getNumberOfElements()).isGreaterThan(8);
+        // verify we have running actions
+        assertThat(actionRepository.findByRolloutIdAndStatus(pageReq, createdRollout.getId(), Status.RUNNING)
+                .getNumberOfElements()).isEqualTo(2);
 
         // test
         rolloutManagement.deleteRollout(createdRollout.getId());

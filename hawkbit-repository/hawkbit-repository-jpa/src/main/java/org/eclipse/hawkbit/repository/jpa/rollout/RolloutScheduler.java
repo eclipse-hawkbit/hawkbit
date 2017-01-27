@@ -13,12 +13,16 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -78,7 +82,8 @@ public class RolloutScheduler {
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getScheduler().getFixedDelay();
-                    rolloutManagement.checkRunningRollouts(fixedDelay);
+                    callAndCatchConcurrentModificationException(
+                            () -> rolloutManagement.checkRunningRollouts(fixedDelay));
                     return null;
                 });
             }
@@ -113,7 +118,8 @@ public class RolloutScheduler {
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getStartingScheduler().getFixedDelay();
-                    rolloutManagement.checkStartingRollouts(fixedDelay);
+                    callAndCatchConcurrentModificationException(
+                            () -> rolloutManagement.checkStartingRollouts(fixedDelay));
                     return null;
                 });
             }
@@ -148,7 +154,8 @@ public class RolloutScheduler {
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getCreatingScheduler().getFixedDelay();
-                    rolloutManagement.checkCreatingRollouts(fixedDelay);
+                    callAndCatchConcurrentModificationException(
+                            () -> rolloutManagement.checkCreatingRollouts(fixedDelay));
                     return null;
                 });
             }
@@ -183,11 +190,56 @@ public class RolloutScheduler {
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     final long fixedDelay = rolloutProperties.getDeletingScheduler().getFixedDelay();
-                    rolloutManagement.checkDeletingRollouts(fixedDelay);
+                    callAndCatchConcurrentModificationException(
+                            () -> rolloutManagement.checkDeletingRollouts(fixedDelay));
                     return null;
                 });
             }
             return null;
         });
+    }
+
+    /**
+     * Helper method to prevent logging exception of concurrent modification
+     * exceptions which is based on the
+     * {@link OptimisticLockingFailureException}.
+     * 
+     * There are corner cases where an concurrent modification of an entity can
+     * happen.
+     * 
+     * E.g. during the starting of the first rollout-group, the actions are
+     * created and started for the first rollout-group. After this the rollout
+     * itself is set to {@link RolloutStatus#RUNNING}, but in the meantime the
+     * rollout itself could be set to {@link RolloutStatus#DELETING} or
+     * {@link RolloutStatus#DELETED} which will then fail into a
+     * {@link OptimisticLockingFailureException} when trying to read the
+     * rollout.
+     * 
+     * The scheduler are not locked, by means the state of the
+     * {@link JpaRollout} can be changed in the meantime a scheduler is
+     * currently working, e.g. starting, running next group etc. and the in case
+     * the {@link JpaRollout} status is changed in the meantime another
+     * scheduler will pick up the same rollout. This will lead maybe to
+     * {@link OptimisticLockingFailureException} due one scheduler writes an
+     * entity and the other scheduler just want to read the entity in another
+     * transaction.
+     * 
+     * Jpa's default behavior is flush the persistince-context on each
+     * find-statement. By means changing a entity in another transaction and
+     * query it with the entity-refernce in another, it will lead to an
+     * {@link OptimisticLockingFailureException}.
+     * 
+     * All in all this should not be a problem for the schedulers, because they
+     * will be re-scheduled and keep continuing on the rollout's current status.
+     * 
+     * @param runnable
+     *            the runnable to execute in a try-catch block
+     */
+    private static void callAndCatchConcurrentModificationException(final Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (final ConcurrentModificationException e) {
+            LOGGER.warn(e.getMessage(), e);
+        }
     }
 }

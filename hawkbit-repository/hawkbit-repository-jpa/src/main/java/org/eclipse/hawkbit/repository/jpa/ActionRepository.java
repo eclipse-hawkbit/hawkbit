@@ -266,6 +266,18 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByRolloutIdAndRolloutGroupIdAndStatus(Long rolloutId, Long rolloutGroupId, Action.Status status);
 
     /**
+     * Counts all actions referring to a given rollout and status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @param status
+     *            the status the actions should have
+     * @return the count of actions referring to a rollout and are in a given
+     *         status
+     */
+    Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
+
+    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
@@ -356,4 +368,16 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
+
+    /**
+     * Deletes all actions with the given IDs.
+     * 
+     * @param actionIDs
+     *            the IDs of the actions to be deleted.
+     */
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
+    void deleteByIdIn(final Collection<Long> actionIDs);
 }

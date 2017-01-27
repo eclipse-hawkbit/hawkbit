@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintDeclarationException;
 
@@ -140,6 +142,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final Boolean deleted) {
@@ -405,17 +410,18 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private int runInNewCountingTransaction(final String transactionName, final TransactionCallback<Integer> action) {
+    private int runInNewTransaction(final String transactionName, final TransactionCallback<Integer> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        def.setIsolationLevel(Isolation.READ_UNCOMMITTED.value());
         return new TransactionTemplate(txManager, def).execute(action);
     }
 
     private Integer assignTargetsToGroupInNewTransaction(final Rollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
-        return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
+        return runInNewTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
                     RolloutGroupStatus.READY, group);
@@ -512,10 +518,17 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("First Group is not the first group.");
         }
 
-        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
-
+        // set rollout-group running before create actions for it.
+        // the actions are created and committed in a new transaction and so
+        // otherwise we would create actions but the rollout-group are not
+        // set runnning yet. Don't set the rollout itself running yet, otherwise
+        // the #checkRunningRollout scheduler will pick it up and also tries to
+        // create actions.
         rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
         rolloutGroupRepository.save(rolloutGroup);
+        entityManager.flush();
+
+        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
 
         jpaRollout.setStatus(RolloutStatus.RUNNING);
         jpaRollout.setLastCheck(0);
@@ -580,7 +593,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private Integer createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
-        return runInNewCountingTransaction("createActionsForTargets", status -> {
+        return runInNewTransaction("createActionsForTargets", status -> {
             final PageRequest pageRequest = new PageRequest(0, limit);
             final Rollout rollout = rolloutRepository.findOne(rolloutId);
             final RolloutGroup group = rolloutGroupRepository.findOne(groupId);
@@ -779,7 +792,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
-        final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutAndStatusOrStatus(rollout,
+        final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rollout.getId(),
                 RolloutGroupStatus.RUNNING, RolloutGroupStatus.SCHEDULED);
         return groupsActiveLeft == 0;
     }
@@ -841,6 +854,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public void checkCreatingRollouts(final long delayBetweenChecks) {
         final long lastCheck = System.currentTimeMillis();
         final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.CREATING);
+
         if (updated == 0) {
             // nothing to check, maybe another instance already checked in
             // between
@@ -905,7 +919,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Modifying
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
@@ -968,7 +982,10 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         if (hasScheduledActions) {
             try {
-                actionRepository.delete(scheduledActions);
+                final Iterable<JpaAction> iterable = () -> scheduledActions.iterator();
+                final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false)
+                        .map(action -> action.getId()).collect(Collectors.toList());
+                actionRepository.deleteByIdIn(actionIds);
             } catch (final RuntimeException e) {
                 LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
             }

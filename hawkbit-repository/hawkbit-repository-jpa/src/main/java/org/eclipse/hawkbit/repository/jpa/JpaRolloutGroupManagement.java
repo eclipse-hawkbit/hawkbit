@@ -118,6 +118,12 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
+
+        if (rolloutGroupIds.isEmpty()) {
+            // groups might already deleted, so return empty list.
+            return new PageImpl<>(Collections.emptyList());
+        }
+
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
                 rolloutGroupIds);
 
