@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemCache;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatisticsRest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +42,7 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return system usage statistics
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/usage", produces = { "application/hal+json",
+    @RequestMapping(method = RequestMethod.GET, value = "/usage", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats();
 
@@ -50,7 +51,8 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of caches for all tenants
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/caches")
+    @RequestMapping(method = RequestMethod.GET, value = "/caches", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Collection<MgmtSystemCache>> getCaches();
 
     /**

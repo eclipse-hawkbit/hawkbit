@@ -102,7 +102,7 @@ final class MgmtRolloutMapper {
         return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
                 .set(distributionSet).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
-                .forcedTime(restRequest.getForcetime());
+                .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt());
     }
 
     static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {

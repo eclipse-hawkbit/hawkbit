@@ -24,7 +24,7 @@ public class TextAreaBuilder extends AbstractTextFieldBuilder<TextArea> {
      */
     public TextAreaBuilder() {
         maxLengthAllowed(TEXT_AREA_DEFAULT_MAX_LENGTH);
-        styleName(ValoTheme.TEXTAREA_TINY);
+        styleName(ValoTheme.TEXTAREA_SMALL);
     }
 
     @Override

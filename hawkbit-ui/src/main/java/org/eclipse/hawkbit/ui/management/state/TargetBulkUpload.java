@@ -12,8 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
-
 /**
  * Hold details for target bulk upload window.
  * 
@@ -22,7 +20,7 @@ public class TargetBulkUpload implements Serializable {
 
     private static final long serialVersionUID = -7697723122460382323L;
 
-    private DistributionSetIdName dsNameAndVersion;
+    private Long dsNameAndVersion;
 
     private String description;
 
@@ -53,7 +51,7 @@ public class TargetBulkUpload implements Serializable {
     /**
      * @return the dsNameAndVersion
      */
-    public DistributionSetIdName getDsNameAndVersion() {
+    public Long getDsNameAndVersion() {
         return dsNameAndVersion;
     }
 
@@ -76,7 +74,7 @@ public class TargetBulkUpload implements Serializable {
      * @param dsNameAndVersion
      *            the dsNameAndVersion to set
      */
-    public void setDsNameAndVersion(final DistributionSetIdName dsNameAndVersion) {
+    public void setDsNameAndVersion(final Long dsNameAndVersion) {
         this.dsNameAndVersion = dsNameAndVersion;
     }
 

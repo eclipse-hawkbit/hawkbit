@@ -247,6 +247,13 @@ public class CommonDialogWindow extends Window {
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
     }
 
+    /**
+     * Clears the original values in case no value changed check is wished
+     */
+    public final void clearOriginalValues() {
+        orginalValues.clear();
+    }
+
     protected void addCloseListenerForSaveButton() {
         saveButton.addClickListener(closeClickListener);
     }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.simulator;
 
-import static java.util.concurrent.Executors.newScheduledThreadPool;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -60,7 +58,8 @@ public class DeviceSimulatorUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceSimulatorUpdater.class);
 
-    private static final ScheduledExecutorService threadPool = newScheduledThreadPool(8);
+    @Autowired
+    private ScheduledExecutorService threadPool;
 
     @Autowired
     private SpSenderService spSenderService;
@@ -109,14 +108,14 @@ public class DeviceSimulatorUpdater {
         if (modules == null || modules.isEmpty()) {
             device.setSwversion(swVersion);
         } else {
-            device.setSwversion(modules.stream().map(sm -> sm.getModuleVersion()).collect(Collectors.joining(", ")));
+            device.setSwversion(
+                    modules.stream().map(SoftwareModule::getModuleVersion).collect(Collectors.joining(", ")));
         }
         device.setTargetSecurityToken(targetSecurityToken);
         eventbus.post(new InitUpdate(device));
 
-        threadPool.schedule(
-                new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback, modules), 2_000,
-                TimeUnit.MILLISECONDS);
+        threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, threadPool,
+                callback, modules), 2_000, TimeUnit.MILLISECONDS);
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
@@ -133,18 +132,20 @@ public class DeviceSimulatorUpdater {
         private final SpSenderService spSenderService;
         private final long actionId;
         private final EventBus eventbus;
+        private final ScheduledExecutorService threadPool;
         private final UpdaterCallback callback;
         private final List<SoftwareModule> modules;
 
         private DeviceSimulatorUpdateThread(final AbstractSimulatedDevice device, final SpSenderService spSenderService,
-                final long actionId, final EventBus eventbus, final UpdaterCallback callback,
-                final List<SoftwareModule> modules) {
+                final long actionId, final EventBus eventbus, final ScheduledExecutorService threadPool,
+                final UpdaterCallback callback, final List<SoftwareModule> modules) {
             this.device = device;
             this.spSenderService = spSenderService;
             this.actionId = actionId;
             this.eventbus = eventbus;
             this.callback = callback;
             this.modules = modules;
+            this.threadPool = threadPool;
         }
 
         @Override
@@ -163,9 +164,8 @@ public class DeviceSimulatorUpdater {
             final double newProgress = device.getProgress() + 0.2;
             device.setProgress(newProgress);
             if (newProgress < 1.0) {
-                threadPool.schedule(
-                        new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback, modules),
-                        rndSleep.nextInt(5_000), TimeUnit.MILLISECONDS);
+                threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus,
+                        threadPool, callback, modules), rndSleep.nextInt(5_000), TimeUnit.MILLISECONDS);
             } else {
                 callback.updateFinished(device, actionId);
             }

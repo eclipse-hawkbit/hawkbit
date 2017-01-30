@@ -97,7 +97,6 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    @ResponseBody
     public ResponseEntity<List<MgmtArtifact>> getArtifacts(
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
 

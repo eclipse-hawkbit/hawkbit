@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -20,15 +21,15 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -110,7 +111,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 eventBus, manageDistUIState, uiNotification);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
-                dsMetadataPopupLayout, entityFactory);
+                dsMetadataPopupLayout, entityFactory, uiNotification);
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
         addTabs(detailsTab);
@@ -142,7 +143,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
                 .getAssignedList();
         final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get().getId() : null;
+                ? manageDistUIState.getLastSelectedDistribution().get() : null;
         Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
 
         for (final Map.Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
@@ -185,7 +186,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if (getPermissionChecker().hasUpdateDistributionPermission()
                 && manageDistUIState.getLastSelectedDistribution().isPresent()
                 && targetManagement.countTargetByAssignedDistributionSet(
-                        manageDistUIState.getLastSelectedDistribution().get().getId()) <= 0) {
+                        manageDistUIState.getLastSelectedDistribution().get()) <= 0) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
@@ -244,7 +245,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         final VerticalLayout verticalLayout = new VerticalLayout();
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
-        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(HawkbitCommonUtil.SP_STRING_EMPTY);
+        final Label softwareModule = HawkbitCommonUtil.getFormatedLabel(StringUtils.EMPTY);
         final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
         softwareModule.setValue(softwareModuleName);
         softwareModule.setDescription(softwareModuleName);
@@ -310,7 +311,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
-        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.DIST_UPDATE_CAPTION));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.autoconfigure.url;
+package org.eclipse.hawkbit.autoconfigure;
 
 import java.net.MalformedURLException;
 import java.net.URL;

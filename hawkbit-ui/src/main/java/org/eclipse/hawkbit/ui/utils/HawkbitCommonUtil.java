@@ -10,12 +10,11 @@ package org.eclipse.hawkbit.ui.utils;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -42,14 +41,6 @@ import com.vaadin.ui.Table;
 public final class HawkbitCommonUtil {
     public static final String SP_STRING_PIPE = " | ";
     /**
-     * Define spaced string.
-     */
-    public static final String SP_STRING_SPACE = " ";
-    /**
-     * Define empty string.
-     */
-    public static final String SP_STRING_EMPTY = "";
-    /**
      * Html span.
      */
     public static final String SPAN_CLOSE = "</span>";
@@ -73,9 +64,6 @@ public final class HawkbitCommonUtil {
     private static final String PREVIEW_BUTTON_COLOR_CREATE_SCRIPT = "tagColorPreview = document.createElement('style'); tagColorPreview.id=\"tag-color-preview\";  document.head.appendChild(tagColorPreview); ";
     private static final String PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT = "var a = document.getElementById('tag-color-preview'); if(a) { document.head.removeChild(a); } ";
     private static final String PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT = "document.getElementById('tag-color-preview').innerHTML = tagColorPreviewStyle;";
-
-    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
-    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     private HawkbitCommonUtil() {
 
@@ -102,11 +90,11 @@ public final class HawkbitCommonUtil {
      *         the text is not empty.
      */
     public static String trimAndNullIfEmpty(final String text) {
-        String emptyStr = null;
-        if (null != text && !text.trim().isEmpty()) {
-            emptyStr = text.trim();
+        String resultStr = null;
+        if (text != null && !text.trim().isEmpty()) {
+            resultStr = text.trim();
         }
-        return emptyStr;
+        return resultStr;
     }
 
     /**
@@ -124,7 +112,7 @@ public final class HawkbitCommonUtil {
      *         null.
      */
     public static String concatStrings(final String delimiter, final String... texts) {
-        final String delim = delimiter == null ? SP_STRING_EMPTY : delimiter;
+        final String delim = delimiter == null ? StringUtils.EMPTY : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
         if (null != texts) {
             for (final String text : texts) {
@@ -159,7 +147,8 @@ public final class HawkbitCommonUtil {
      * Get Label for Artifact Details.
      *
      * @param name
-     * @return
+     *            artifact name
+     * @return ArtifactoryDetailsLabelId
      */
     public static String getArtifactoryDetailsLabelId(final String name) {
         return new StringBuilder()
@@ -174,7 +163,7 @@ public final class HawkbitCommonUtil {
      *            as caption of the details
      * @param name
      *            as name
-     * @return
+     * @return SoftwareModuleName
      */
     public static String getSoftwareModuleName(final String caption, final String name) {
         return new StringBuilder()
@@ -186,7 +175,7 @@ public final class HawkbitCommonUtil {
      * Get Label for Action History Details.
      *
      * @param name
-     * @return
+     * @return ActionHistoryLabelId
      */
     public static String getActionHistoryLabelId(final String name) {
         return new StringBuilder()
@@ -199,7 +188,7 @@ public final class HawkbitCommonUtil {
      *
      * @param pollStatus
      * @param i18N
-     * @return
+     * @return PollStatusToolTip
      */
     public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
@@ -312,7 +301,7 @@ public final class HawkbitCommonUtil {
     /**
      * @param distName
      * @param distVersion
-     * @return
+     * @return DistributionNameAndVersion
      */
     public static String getDistributionNameAndVersion(final String distName, final String distVersion) {
         return new StringBuilder(distName).append(':').append(distVersion).toString();
@@ -458,42 +447,6 @@ public final class HawkbitCommonUtil {
                 .append(color)
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
                 .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT).toString();
-    }
-
-    /**
-     * Add target table container properties.
-     *
-     * @param container
-     *            table container
-     */
-    public static void addTargetTableContainerProperties(final Container container) {
-        final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
-                TargetUpdateStatus.UNKNOWN, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
-
-        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
-        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
     }
 
     /**

@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.builder;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
+import java.util.Optional;
+
 /**
  * Create and update builder DTO.
  *
@@ -21,6 +23,7 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     protected String targetFilterQuery;
     protected ActionType actionType;
     protected Long forcedTime;
+    protected Long startAt;
 
     public T set(final long set) {
         this.set = set;
@@ -42,4 +45,24 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
         return (T) this;
     }
 
+    public T startAt(final Long startAt) {
+        this.startAt = startAt;
+        return (T) this;
+    }
+
+    public Optional<Long> getSet() {
+        return Optional.ofNullable(set);
+    }
+
+    public Optional<ActionType> getActionType() {
+        return Optional.ofNullable(actionType);
+    }
+
+    public Optional<Long> getForcedTime() {
+        return Optional.ofNullable(forcedTime);
+    }
+
+    public Optional<Long> getStartAt() {
+        return Optional.ofNullable(startAt);
+    }
 }

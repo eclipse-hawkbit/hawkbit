@@ -13,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
@@ -44,7 +43,7 @@ public class TargetTableFilters implements Serializable {
     /**
      * Custom target filter query use dto filter target table.
      */
-    private TargetFilterQuery targetFilterQuery;
+    private Long targetFilterQuery;
     /**
      * Flag for NO TAG button status.
      */
@@ -61,7 +60,7 @@ public class TargetTableFilters implements Serializable {
      * @return the progressBarCurrentValue
      */
     public Optional<Float> getProgressBarCurrentValue() {
-        return progressBarCurrentValue != null ? Optional.of(progressBarCurrentValue) : Optional.empty();
+        return Optional.ofNullable(progressBarCurrentValue);
     }
 
     /**
@@ -76,7 +75,7 @@ public class TargetTableFilters implements Serializable {
      * @return the targetsCreatedCount
      */
     public Optional<Long> getTargetsCreatedCount() {
-        return targetsCreatedCount != null ? Optional.of(targetsCreatedCount) : Optional.empty();
+        return Optional.ofNullable(targetsCreatedCount);
     }
 
     /**
@@ -96,15 +95,15 @@ public class TargetTableFilters implements Serializable {
     }
 
     public Optional<String> getSearchText() {
-        return searchText == null ? Optional.empty() : Optional.of(searchText);
+        return Optional.ofNullable(searchText);
     }
 
     public Optional<DistributionSetIdName> getDistributionSet() {
-        return distributionSet == null ? Optional.empty() : Optional.of(distributionSet);
+        return Optional.ofNullable(distributionSet);
     }
 
     public Optional<Long> getPinnedDistId() {
-        return pinnedDistId == null ? Optional.empty() : Optional.of(pinnedDistId);
+        return Optional.ofNullable(pinnedDistId);
     }
 
     public void setSearchText(final String searchText) {
@@ -151,15 +150,15 @@ public class TargetTableFilters implements Serializable {
     /**
      * @return the targetFilterQuery
      */
-    public Optional<TargetFilterQuery> getTargetFilterQuery() {
-        return targetFilterQuery == null ? Optional.empty() : Optional.of(targetFilterQuery);
+    public Optional<Long> getTargetFilterQuery() {
+        return Optional.ofNullable(targetFilterQuery);
     }
 
     /**
      * @param targetFilterQuery
      *            the targetFilterQuery to set
      */
-    public void setTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
+    public void setTargetFilterQuery(final Long targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
     }
 
@@ -167,7 +166,7 @@ public class TargetTableFilters implements Serializable {
         return isOverdueFilterEnabled;
     }
 
-    public void setOverdueFilterEnabled(boolean isOverdueFilterEnabled) {
+    public void setOverdueFilterEnabled(final boolean isOverdueFilterEnabled) {
         this.isOverdueFilterEnabled = isOverdueFilterEnabled;
     }
 

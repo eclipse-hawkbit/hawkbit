@@ -97,8 +97,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         styleTableOnDistSelection();
     }
 
-    /* All event Listeners */
-
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
@@ -137,6 +135,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     @EventBusListenerMethod(scope = EventScope.UI)
     void onSoftwareModuleUpdateEvents(final SoftwareModuleUpdatedEventContainer eventContainer) {
 
+        @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
 
         handleSelectedAndUpdatedSoftwareModules(eventContainer.getEvents());
@@ -183,7 +182,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
 
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+                .ifPresent(id -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, id));
 
         return queryConfig;
     }
@@ -308,7 +307,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     }
 
-    private String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
+    private static String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
         if (isAssigned) {
             addTypeStyle(typeId, color);
             return "distribution-upload-type-" + typeId;
@@ -316,7 +315,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         return null;
     }
 
-    private void addTypeStyle(final Long tagId, final String color) {
+    private static void addTypeStyle(final Long tagId, final String color) {
         final JavaScript javaScript = UI.getCurrent().getPage().getJavaScript();
         UI.getCurrent()
                 .access(() -> javaScript.execute(

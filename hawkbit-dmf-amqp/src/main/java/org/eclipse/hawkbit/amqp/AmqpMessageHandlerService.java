@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
+import org.eclipse.hawkbit.dmf.json.model.AttributeUpdate;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -180,7 +181,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void lookIfUpdateAvailable(final Target target) {
-        final Optional<Action> actionOptional = controllerManagement.findOldestActiveActionByTarget(target);
+        final Optional<Action> actionOptional = controllerManagement
+                .findOldestActiveActionByTarget(target.getControllerId());
         if (!actionOptional.isPresent()) {
             return;
         }
@@ -205,11 +207,26 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        if (EventTopic.UPDATE_ACTION_STATUS.equals(topic)) {
+
+        switch (topic) {
+        case UPDATE_ACTION_STATUS:
             updateActionStatus(message);
-            return;
+            break;
+        case UPDATE_ATTRIBUTES:
+            updateAttributes(message);
+            break;
+        default:
+            logAndThrowMessageError(message, "Got event without appropriate topic.");
+            break;
         }
-        logAndThrowMessageError(message, "Got event without appropriate topic.");
+
+    }
+
+    private void updateAttributes(final Message message) {
+        final AttributeUpdate attributeUpdate = convertMessage(message, AttributeUpdate.class);
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+
+        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes());
     }
 
     /**
@@ -286,7 +303,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void updateLastPollTime(final Target target) {
-        controllerManagement.updateTargetStatus(target.getTargetInfo(), null, System.currentTimeMillis(), null);
+        controllerManagement.updateLastTargetQuery(target.getControllerId(), null);
     }
 
     private static String convertCorrelationId(final Message message) {

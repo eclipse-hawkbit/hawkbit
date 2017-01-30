@@ -10,9 +10,6 @@ package org.eclipse.hawkbit.dmf.amqp.api;
 
 /**
  * The event topics for the message headers.
- * 
- *
- *
  */
 public enum EventTopic {
 
@@ -27,6 +24,10 @@ public enum EventTopic {
     /**
      * Topic when sending and receiving a cancel download task.
      */
-    CANCEL_DOWNLOAD;
+    CANCEL_DOWNLOAD,
+    /**
+     * Topic when updating device attributes.
+     */
+    UPDATE_ATTRIBUTES;
 
 }

@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
@@ -19,6 +22,7 @@ import javax.validation.ConstraintDeclarationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -32,15 +36,16 @@ import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -49,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -60,12 +66,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -75,6 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -86,8 +94,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
 
     /**
-     * Maximum amount of targets that are assigned to a Rollout Group in one
-     * transaction.
+     * Max amount of targets that are handled in one transaction.
      */
     private static final int TRANSACTION_TARGETS = 1000;
 
@@ -108,6 +115,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private RolloutGroupManagement rolloutGroupManagement;
+
+    @Autowired
+    private DistributionSetManagement distributionSetManagement;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -132,15 +142,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable) {
-        return convertPage(rolloutRepository.findAll(pageable), pageable);
-    }
-
-    private static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    private static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
+        return RolloutHelper.convertPage(rolloutRepository.findAll(pageable), pageable);
     }
 
     @Override
@@ -150,7 +152,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 virtualPropertyReplacer);
 
         final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, pageable);
-        return convertPage(findAll, pageable);
+        return RolloutHelper.convertPage(findAll, pageable);
     }
 
     @Override
@@ -243,7 +245,8 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .collect(Collectors.toList());
         groups.forEach(RolloutHelper::verifyRolloutGroupHasConditions);
 
-        verifyRolloutGroupTargetCounts(groups, savedRollout);
+        RolloutHelper.verifyRemainingTargets(
+                calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt()));
 
         // Persisting the groups
         RolloutGroup lastSavedGroup = null;
@@ -336,8 +339,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
-        final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
-                RolloutGroupStatus.READY, group);
+        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout, RolloutGroupStatus.READY,
+                group);
 
         final long targetsInGroupFilter = targetManagement
                 .countAllTargetsByTargetFilterQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter);
@@ -383,7 +386,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return runInNewCountingTransaction("assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
-            final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
+            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout,
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement
                     .findAllTargetsByTargetFilterQueryAndNotInRolloutGroups(pageRequest, readyGroups, targetFilter);
@@ -398,22 +401,51 @@ public class JpaRolloutManagement implements RolloutManagement {
         targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
 
-    private void verifyRolloutGroupTargetCounts(final List<RolloutGroup> groups, final JpaRollout rollout) {
-        final String baseFilter = RolloutHelper.getTargetFilterQuery(rollout);
+    private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
+            final Long createdAt) {
+        final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
         final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        long targetCount = totalTargets;
+        RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
+
+        return totalTargets - validation.getTargetsInGroups();
+    }
+
+    @Override
+    @Async
+    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
+            final String targetFilter, final Long createdAt) {
+
+        final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
+        final long totalTargets = targetManagement.countTargetByTargetFilterQuery(baseFilter);
+        if (totalTargets == 0) {
+            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
+        }
+
+        return new AsyncResult<>(validateTargetsInGroups(
+                groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
+    }
+
+    private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
+            final long totalTargets) {
+        final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
+        final Map<String, Long> targetFilterCounts = groups.stream()
+                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct().collect(Collectors
+                        .toMap(Function.identity(), filter -> targetManagement.countTargetByTargetFilterQuery(filter)));
+
         long unusedTargetsCount = 0;
 
         for (int i = 0; i < groups.size(); i++) {
             final RolloutGroup group = groups.get(i);
+            String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
             RolloutHelper.verifyRolloutGroupTargetPercentage(group.getTargetPercentage());
 
-            final long targetsInGroupFilter = countTargetsOfGroup(baseFilter, totalTargets, group);
-            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i);
+            final long targetsInGroupFilter = targetFilterCounts.get(groupTargetFilter);
+            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i,
+                    targetFilterCounts);
 
             final long realTargetsInGroup;
             // Assume that targets which were not used in the previous groups
@@ -427,37 +459,31 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             final long reducedTargetsInGroup = Math
                     .round(group.getTargetPercentage() / 100 * (double) realTargetsInGroup);
-            targetCount -= reducedTargetsInGroup;
+            groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
 
         }
 
-        RolloutHelper.verifyRemainingTargets(targetCount);
-
-    }
-
-    private long countTargetsOfGroup(final String baseFilter, final long baseFilterCount, final RolloutGroup group) {
-        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
-            return baseFilterCount;
-        } else {
-            return targetManagement.countTargetByTargetFilterQuery(baseFilter + ";" + group.getTargetFilterQuery());
-        }
+        return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
     }
 
     private long countOverlappingTargetsWithPreviousGroups(final String baseFilter, final List<RolloutGroup> groups,
-            final RolloutGroup group, final int groupIndex) {
+            final RolloutGroup group, final int groupIndex, final Map<String, Long> targetFilterCounts) {
         // there can't be overlapping targets in the first group
         if (groupIndex == 0) {
             return 0;
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
-        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(previousGroups, group);
-        if (StringUtils.isEmpty(overlappingTargetsFilter)) {
-            overlappingTargetsFilter = baseFilter;
+        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter, previousGroups,
+                group);
+
+        if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
+            return targetFilterCounts.get(overlappingTargetsFilter);
         } else {
-            overlappingTargetsFilter = baseFilter + ";" + overlappingTargetsFilter;
+            final long overlappingTargets = targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
+            targetFilterCounts.put(overlappingTargetsFilter, overlappingTargets);
+            return overlappingTargets;
         }
-        return targetManagement.countTargetByTargetFilterQuery(overlappingTargetsFilter);
     }
 
     @Override
@@ -466,8 +492,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout startRollout(final Long rolloutId) {
         final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
                 .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
-        checkIfRolloutCanStarted(rollout, rollout);
+        RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
+        rollout.setLastCheck(0);
         return rolloutRepository.save(rollout);
     }
 
@@ -558,13 +585,54 @@ public class JpaRolloutManagement implements RolloutManagement {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest, group);
+            final Page<Target> targets = targetManagement.findAllTargetsInRolloutGroupWithoutAction(pageRequest,
+                    groupId);
             if (targets.getTotalElements() > 0) {
-                deploymentManagement.createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime,
-                        rollout, group);
+                createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
 
             return targets.getNumberOfElements();
+        });
+    }
+
+    /**
+     * Creates an action entry into the action repository. In case of existing
+     * scheduled actions the scheduled actions gets canceled. A scheduled action
+     * is created in-active.
+     *
+     * @param targets
+     *            the targets to create scheduled actions for
+     * @param distributionSet
+     *            the distribution set for the actions
+     * @param actionType
+     *            the action type for the action
+     * @param forcedTime
+     *            the forcedTime of the action
+     * @param rollout
+     *            the roll out for this action
+     * @param rolloutGroup
+     *            the roll out group for this action
+     */
+    private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
+            final ActionType actionType, final Long forcedTime, final Rollout rollout,
+            final RolloutGroup rolloutGroup) {
+        // cancel all current scheduled actions for this target. E.g. an action
+        // is already scheduled and a next action is created then cancel the
+        // current scheduled action to cancel. E.g. a new scheduled action is
+        // created.
+        final List<Long> targetIds = targets.stream().map(t -> t.getId()).collect(Collectors.toList());
+        actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
+        targets.forEach(target -> {
+            final JpaAction action = new JpaAction();
+            action.setTarget(target);
+            action.setActive(false);
+            action.setDistributionSet(distributionSet);
+            action.setActionType(actionType);
+            action.setForcedTime(forcedTime);
+            action.setStatus(Status.SCHEDULED);
+            action.setRollout(rollout);
+            action.setRolloutGroup(rolloutGroup);
+            actionRepository.save(action);
         });
     }
 
@@ -605,19 +673,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkRunningRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.RUNNING);
-
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
-                    lastCheck + delayBetweenChecks);
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.RUNNING);
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                RolloutStatus.RUNNING);
         LOGGER.info("Found {} running rollouts to check", rolloutsToCheck.size());
 
         for (final JpaRollout rollout : rolloutsToCheck) {
@@ -677,10 +737,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         final long updatedTargetCount = jpaRollout.getTotalTargets()
                 - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
         jpaRollout.setTotalTargets(updatedTargetCount);
-        final JpaRolloutGroup jpaRolloutGroup = rolloutGroup;
-        jpaRolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
+        rolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
         rolloutRepository.save(jpaRollout);
-        rolloutGroupRepository.save(jpaRolloutGroup);
+        rolloutGroupRepository.save(rolloutGroup);
     }
 
     private long countTargetsFrom(final JpaRolloutGroup rolloutGroup) {
@@ -767,18 +826,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkCreatingRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.CREATING);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts creating check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
+        final List<Long> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.CREATING)
+                .stream().map(Rollout::getId).collect(Collectors.toList());
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<Long> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck, RolloutStatus.CREATING)
-                .stream().map(Rollout::getId).collect(Collectors.toList());
         LOGGER.info("Found {} creating rollouts to check", rolloutsToCheck.size());
 
         rolloutsToCheck.forEach(this::fillRolloutGroupsWithTargets);
@@ -789,18 +842,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkStartingRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.STARTING);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts starting check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks,
+                RolloutStatus.STARTING);
+        if (rolloutsToCheck.isEmpty()) {
             return;
         }
 
-        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                RolloutStatus.STARTING);
         LOGGER.info("Found {} starting rollouts to check", rolloutsToCheck.size());
 
         rolloutsToCheck.forEach(rollout -> {
@@ -812,31 +859,57 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
+    @Modifying
+    public void checkReadyRollouts(final long delayBetweenChecks) {
+        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.READY);
+        if (rolloutsToCheck.isEmpty()) {
+            return;
+        }
+
+        LOGGER.info("Found {} ready rollouts to check", rolloutsToCheck.size());
+
+        final long now = System.currentTimeMillis();
+
+        rolloutsToCheck.forEach(rollout -> {
+            if (rollout.getStartAt() != null && rollout.getStartAt() <= now) {
+                startRollout(rollout.getId());
+            }
+        });
+
+    }
+
+    private List<JpaRollout> getRolloutsToCheckForStatus(final long delayBetweenChecks, final RolloutStatus status) {
+        final long lastCheck = System.currentTimeMillis();
+        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, status);
+        if (updated == 0) {
+            // nothing to check, maybe another instance already checked in
+            // between
+            LOGGER.debug("No rollouts starting check necessary for current scheduled check {}, next check at {}",
+                    lastCheck, lastCheck + delayBetweenChecks);
+            return Collections.emptyList();
+        }
+
+        return rolloutRepository.findByLastCheckAndStatus(lastCheck, status);
+
+    }
+
+    @Override
     public Long countRolloutsAll() {
         return rolloutRepository.count();
     }
 
     @Override
     public Long countRolloutsAllByFilters(final String searchText) {
-        return rolloutRepository.count(likeNameOrDescription(searchText));
-    }
-
-    private static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
-        return (rolloutRoot, query, criteriaBuilder) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
-                            searchTextToLower));
-        };
+        return rolloutRepository.count(RolloutHelper.likeNameOrDescription(searchText));
     }
 
     @Override
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText) {
-        final Specification<JpaRollout> specs = likeNameOrDescription(searchText);
+        final Specification<JpaRollout> specs = RolloutHelper.likeNameOrDescription(searchText);
         final Slice<JpaRollout> findAll = criteriaNoCountDao.findAll(specs, pageable, JpaRollout.class);
         setRolloutStatusDetails(findAll);
-        return convertPage(findAll, pageable);
+        return RolloutHelper.convertPage(findAll, pageable);
     }
 
     @Override
@@ -854,6 +927,16 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
+        update.getActionType().ifPresent(rollout::setActionType);
+        update.getForcedTime().ifPresent(rollout::setForcedTime);
+        update.getStartAt().ifPresent(rollout::setStartAt);
+        update.getSet().ifPresent(setId -> {
+            final DistributionSet set = distributionSetManagement.findDistributionSetById(setId);
+            if (set == null) {
+                throw new EntityNotFoundException("Distribution set cannot be set as it does not exists" + setId);
+            }
+            rollout.setDistributionSet(set);
+        });
 
         return rolloutRepository.save(rollout);
     }
@@ -862,7 +945,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable) {
         final Page<JpaRollout> rollouts = rolloutRepository.findAll(pageable);
         setRolloutStatusDetails(rollouts);
-        return convertPage(rollouts, pageable);
+        return RolloutHelper.convertPage(rollouts, pageable);
 
     }
 
@@ -895,15 +978,12 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
-        if (!(RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
-            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
-                    + rollout.getStatus().name().toLowerCase());
-        }
-    }
-
     @Override
-    public float getFinishedPercentForRunningGroup(final Long rolloutId, final RolloutGroup rolloutGroup) {
+    public float getFinishedPercentForRunningGroup(final Long rolloutId, final Long rolloutGroupId) {
+        final RolloutGroup rolloutGroup = Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rollout group with given ID " + rolloutGroupId + " not found."));
+
         final long totalGroup = rolloutGroup.getTotalTargets();
         final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rolloutId,
                 rolloutGroup.getId(), Action.Status.FINISHED);

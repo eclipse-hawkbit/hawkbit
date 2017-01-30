@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -104,13 +104,13 @@ public interface ArtifactManagement {
      * Garbage collects local artifact binary file if only referenced by given
      * {@link Artifact} metadata object.
      *
-     * @param onlyByThisReferenced
+     * @param artifactId
      *            the related local artifact
      * 
      * @return <code>true</code> if an binary was actually garbage collected
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotNull Artifact onlyByThisReferenced);
+    boolean clearArtifactBinary(@NotNull Long artifactId);
 
     /**
      * Deletes {@link Artifact} based on given id.
@@ -186,15 +186,15 @@ public interface ArtifactManagement {
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
-     * @param artifact
+     * @param sha1Hash
      *            to search for
      * @return loaded {@link DbArtifact}
      *
-     * @throws GridFSDBFileNotFoundException
+     * @throws ArtifactBinaryNotFoundException
      *             if file could not be found in store
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
-    DbArtifact loadArtifactBinary(@NotNull Artifact artifact);
+    DbArtifact loadArtifactBinary(@NotEmpty String sha1Hash);
 
 }

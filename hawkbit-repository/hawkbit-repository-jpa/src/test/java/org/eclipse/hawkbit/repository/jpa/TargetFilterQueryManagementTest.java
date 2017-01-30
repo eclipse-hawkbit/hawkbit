@@ -152,7 +152,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet);
+        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if auto assign distribution set is null
         tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
@@ -181,7 +181,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryByName(filterName);
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
-        distributionSetManagement.deleteDistributionSet(distributionSet);
+        distributionSetManagement.deleteDistributionSet(distributionSet.getId());
 
         // Check if distribution set is still in the database with deleted flag
         assertTrue("Distribution set should be deleted",
@@ -225,7 +225,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         // check if find works
         Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500), distributionSet);
+                .findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500), distributionSet.getId(), null);
         assertThat(1L).as("Target filter query").isEqualTo(tfqList.getTotalElements());
 
         assertEquals("Returns correct target filter query", tfq.getId(), tfqList.iterator().next().getId());
@@ -234,7 +234,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         // check if find works for two
         tfqList = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500),
-                distributionSet);
+                distributionSet.getId(), null);
         assertThat(2L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
         Iterator<TargetFilterQuery> iterator = tfqList.iterator();
         assertEquals("Returns correct target filter query 1", tfq.getId(), iterator.next().getId());
@@ -242,7 +242,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         // check if find works with name filter
         tfqList = targetFilterQueryManagement.findTargetFilterQueryByAutoAssignDS(new PageRequest(0, 500),
-                distributionSet, "name==" + filterName);
+                distributionSet.getId(), "name==" + filterName);
         assertThat(1L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
 
         assertEquals("Returns correct target filter query", tfq2.getId(), tfqList.iterator().next().getId());

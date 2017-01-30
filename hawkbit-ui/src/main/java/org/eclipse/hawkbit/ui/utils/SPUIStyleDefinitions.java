@@ -213,6 +213,14 @@ public final class SPUIStyleDefinitions {
      */
     public static final String ERROR_ICON = "error-icon";
     /**
+     * Rollout groups
+     */
+    public static final String ROLLOUT_GROUPS = "rollout-groups";
+    /**
+     * Rollout groups pie chart
+     */
+    public static final String ROLLOUT_GROUPS_CHART = "groups-pie-chart";
+    /**
      * Rollout action type layout style.
      */
     public static final String ROLLOUT_ACTION_TYPE_LAYOUT = "rollout-action-type-layout";

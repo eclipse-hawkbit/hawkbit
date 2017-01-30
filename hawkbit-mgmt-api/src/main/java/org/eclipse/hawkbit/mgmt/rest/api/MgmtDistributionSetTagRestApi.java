@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedDistributionSetReques
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtDistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +50,8 @@ public interface MgmtDistributionSetTagRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -64,8 +66,8 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return a single distribution set tag with status OK.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{distributionsetTagId}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, value = "/{distributionsetTagId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId);
 
@@ -79,8 +81,9 @@ public interface MgmtDistributionSetTagRestApi {
      *         with status code 201 - Created. The Response Body are the created
      *         distribution set tags but without ResponseBody.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createDistributionSetTags(final List<MgmtTagRequestBodyPut> tags);
 
     /**
@@ -94,8 +97,9 @@ public interface MgmtDistributionSetTagRestApi {
      * @return status OK if update is successful and the updated distribution
      *         set tag.
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionsetTagId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionsetTagId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateDistributionSetTag(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             final MgmtTagRequestBodyPut restDSTagRest);
@@ -121,7 +125,8 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution sets.
      */
-    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
+    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId);
 
@@ -153,7 +158,9 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution set.
      */
-    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING, consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);

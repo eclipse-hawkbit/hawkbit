@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +54,8 @@ public interface MgmtDistributionSetRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -69,7 +71,7 @@ public interface MgmtDistributionSetRestApi {
      * @return a single DistributionSet with status OK.
      *
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}", produces = { "application/hal+json",
+    @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId);
@@ -85,8 +87,9 @@ public interface MgmtDistributionSetRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            "application/hal+json" }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
             final List<MgmtDistributionSetRequestBodyPost> sets);
 
@@ -112,8 +115,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if update as successful with updated content.
      *
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+    @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}", consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
+                    MediaTypes.HAL_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             final MgmtDistributionSetRequestBodyPut toUpdate);
@@ -141,7 +145,7 @@ public interface MgmtDistributionSetRestApi {
      *         targets
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/assignedTargets", produces = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -172,7 +176,7 @@ public interface MgmtDistributionSetRestApi {
      *         targets
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/installedTargets", produces = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -203,7 +207,7 @@ public interface MgmtDistributionSetRestApi {
      *         targets
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/autoAssignTargetFilters", produces = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -225,8 +229,8 @@ public interface MgmtDistributionSetRestApi {
      *         targets and the already assigned targets counters
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetId}/assignedTargets", consumes = {
-            "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") final Long distributionSetId,
             final List<MgmtTargetAssignmentRequestBody> targetIds);
@@ -252,7 +256,7 @@ public interface MgmtDistributionSetRestApi {
      *         meta data
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/metadata", produces = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -285,7 +289,7 @@ public interface MgmtDistributionSetRestApi {
      *         meta data result
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetId}/metadata/{metadataKey}", produces = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
             @PathVariable("metadataKey") final String metadataKey, final MgmtMetadata metadata);
 
@@ -314,7 +318,7 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetId}/metadata", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
-            "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
             final List<MgmtMetadata> metadataRest);
 
@@ -330,7 +334,7 @@ public interface MgmtDistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetId}/assignedSM", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
-            "application/hal+json" }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
             final List<MgmtSoftwareModuleAssigment> softwareModuleIDs);
 
@@ -368,7 +372,7 @@ public interface MgmtDistributionSetRestApi {
      *         with status OK, if none is assigned than {@code null}
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/assignedSM", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,

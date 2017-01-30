@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -36,9 +37,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
@@ -50,7 +49,6 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -113,9 +111,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
 
     @Autowired
     private TenantAware tenantAware;
@@ -195,14 +190,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
-            checkDistributionSetIsAssignedToTargets(set);
+            checkDistributionSetIsAssignedToTargets(update.getId());
             set.setRequiredMigrationStep(update.isRequiredMigrationStep());
         }
 
         if (update.getType() != null) {
             final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(update.getType());
             if (!type.getId().equals(set.getType().getId())) {
-                checkDistributionSetIsAssignedToTargets(set);
+                checkDistributionSetIsAssignedToTargets(update.getId());
 
                 set.setType(type);
             }
@@ -251,7 +246,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteDistributionSet(final Long... distributionSetIDs) {
+    public void deleteDistributionSet(final Collection<Long> distributionSetIDs) {
         final List<Long> assigned = distributionSetRepository
                 .findAssignedToTargetDistributionSetsById(distributionSetIDs);
         assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
@@ -264,7 +259,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         // mark the rest as hard delete
-        final List<Long> toHardDelete = Arrays.stream(distributionSetIDs).filter(setId -> !assigned.contains(setId))
+        final List<Long> toHardDelete = distributionSetIDs.stream().filter(setId -> !assigned.contains(setId))
                 .collect(Collectors.toList());
 
         // hard delete the rest if exists
@@ -274,10 +269,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        Arrays.stream(distributionSetIDs)
-                .forEach(dsId -> eventPublisher
-                        .publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId,
-                                JpaDistributionSet.class.getName(), applicationContext.getId())));
+        distributionSetIDs.forEach(
+                dsId -> eventPublisher.publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(),
+                        dsId, JpaDistributionSet.class.getName(), applicationContext.getId())));
     }
 
     @Override
@@ -316,7 +310,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException("Not all given software modules where found.");
         }
 
-        checkDistributionSetIsAssignedToTargets(set);
+        checkDistributionSetIsAssignedToTargets(setId);
 
         modules.forEach(set::addModule);
 
@@ -330,7 +324,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
-        checkDistributionSetIsAssignedToTargets(set);
+        checkDistributionSetIsAssignedToTargets(setId);
 
         set.removeModule(module);
 
@@ -349,7 +343,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         update.getColour().ifPresent(type::setColour);
 
         if (hasModules(update)) {
-            checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+            checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(update.getId());
 
             update.getMandatory().ifPresent(
                     mand -> softwareModuleTypeRepository.findByIdIn(mand).forEach(type::addMandatoryModuleType));
@@ -378,7 +372,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException("Not all given software module types where found.");
         }
 
-        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
 
         modules.forEach(type::addMandatoryModuleType);
 
@@ -399,18 +393,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException("Not all given software module types where found.");
         }
 
-        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
 
         modules.forEach(type::addOptionalModuleType);
 
         return distributionSetTypeRepository.save(type);
     }
 
-    private void checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(final JpaDistributionSetType type) {
-        if (distributionSetRepository.countByType(type) > 0) {
+    private void checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(final Long type) {
+        if (distributionSetRepository.countByTypeId(type) > 0) {
             throw new EntityReadOnlyException(String.format(
-                    "distribution set type %s is already assigned to distribution sets and cannot be changed",
-                    type.getName()));
+                    "distribution set type %s is already assigned to distribution sets and cannot be changed", type));
         }
 
     }
@@ -421,7 +414,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSetType unassignSoftwareModuleType(final Long dsTypeId, final Long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
 
-        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(type);
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
 
         type.removeModuleType(softwareModuleTypeId);
 
@@ -604,15 +597,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteDistributionSetType(final DistributionSetType ty) {
-        final JpaDistributionSetType type = (JpaDistributionSetType) ty;
+    public void deleteDistributionSetType(final Long typeId) {
 
-        if (distributionSetRepository.countByType(type) > 0) {
-            final JpaDistributionSetType toDelete = entityManager.merge(type);
+        final JpaDistributionSetType toDelete = Optional.ofNullable(distributionSetTypeRepository.findOne(typeId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Type with given ID " + typeId + " does not exist"));
+
+        if (distributionSetRepository.countByTypeId(typeId) > 0) {
             toDelete.setDeleted(true);
             distributionSetTypeRepository.save(toDelete);
         } else {
-            distributionSetTypeRepository.delete(type.getId());
+            distributionSetTypeRepository.delete(typeId);
         }
     }
 
@@ -725,13 +720,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public DistributionSet findDistributionSetByAction(final Action action) {
-        return distributionSetRepository.findByAction((JpaAction) action);
+    public DistributionSet findDistributionSetByAction(final Long actionId) {
+        return distributionSetRepository.findByActionId(actionId);
     }
 
     @Override
-    public boolean isDistributionSetInUse(final DistributionSet distributionSet) {
-        return actionRepository.countByDistributionSet((JpaDistributionSet) distributionSet) > 0;
+    public boolean isDistributionSetInUse(final Long setId) {
+        return actionRepository.countByDistributionSetId(setId) > 0;
     }
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
@@ -776,11 +771,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetIsAssignedToTargets(final JpaDistributionSet distributionSet) {
-        if (actionRepository.countByDistributionSet(distributionSet) > 0) {
-            throw new EntityReadOnlyException(
-                    String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
-                            distributionSet.getName(), distributionSet.getVersion()));
+    private void checkDistributionSetIsAssignedToTargets(final Long distributionSet) {
+        if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
+            throw new EntityReadOnlyException(String.format(
+                    "distribution set %s is already assigned to targets and cannot be changed", distributionSet));
         }
     }
 
@@ -822,10 +816,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSet> assignTag(final Collection<Long> dsIds, final DistributionSetTag tag) {
+    public List<DistributionSet> assignTag(final Collection<Long> dsIds, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
 
-        allDs.forEach(ds -> ds.addTag(tag));
+        final DistributionSetTag distributionSetTag = Optional
+                .ofNullable(tagManagement.findDistributionSetTagById(dsTagId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Tag with given ID " + dsTagId + " not found."));
+
+        allDs.forEach(ds -> ds.addTag(distributionSetTag));
 
         return Collections
                 .unmodifiableList(allDs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
@@ -834,19 +833,34 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSet> unAssignAllDistributionSetsByTag(final DistributionSetTag tag) {
+    public List<DistributionSet> unAssignAllDistributionSetsByTag(final Long dsTagId) {
+
+        final DistributionSetTag distributionSetTag = Optional
+                .ofNullable(tagManagement.findDistributionSetTagById(dsTagId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Tag with given ID " + dsTagId + " not found."));
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaDistributionSet> distributionSets = (Collection) tag.getAssignedToDistributionSet();
+        final Collection<JpaDistributionSet> distributionSets = (Collection) distributionSetTag
+                .getAssignedToDistributionSet();
 
-        return Collections.unmodifiableList(unAssignTag(distributionSets, tag));
+        return Collections.unmodifiableList(unAssignTag(distributionSets, distributionSetTag));
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSet unAssignTag(final Long dsId, final DistributionSetTag distributionSetTag) {
+    public DistributionSet unAssignTag(final Long dsId, final Long dsTagId) {
         final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
+
+        if (allDs.isEmpty()) {
+            throw new EntityNotFoundException("DistributionSet with given ID " + dsId + " not found.");
+        }
+
+        final DistributionSetTag distributionSetTag = Optional
+                .ofNullable(tagManagement.findDistributionSetTagById(dsTagId))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet Tag with given ID " + dsTagId + " not found."));
         final List<JpaDistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
@@ -869,22 +883,22 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteDistributionSet(final DistributionSet set) {
-        deleteDistributionSet(set.getId());
+    public void deleteDistributionSet(final Long setId) {
+        if (!distributionSetRepository.exists(setId)) {
+            throw new EntityNotFoundException("DistributionSet with given ID " + setId + " does not exist.");
+        }
+
+        deleteDistributionSet(Lists.newArrayList(setId));
     }
 
     @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
-            final DistributionSetTag tag) {
-        return toggleTagAssignment(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()),
-                tag.getName());
+    public Long countDistributionSetsByType(final Long typeId) {
+        return distributionSetRepository.countByTypeId(typeId);
     }
 
     @Override
-    public Long countDistributionSetsByType(final DistributionSetType type) {
-        return distributionSetRepository.countByType((JpaDistributionSetType) type);
+    public List<DistributionSet> findDistributionSetAllById(final Collection<Long> ids) {
+        return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
     }
 
 }

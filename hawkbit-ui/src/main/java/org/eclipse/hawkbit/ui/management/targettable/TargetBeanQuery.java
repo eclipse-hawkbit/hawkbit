@@ -120,7 +120,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(distributionId, status, overdueState, searchText, noTagClicked, targetTags));
         } else if (null != targetFilterQuery) {
-            targetBeans = getTargetManagement().findTargetsAll(targetFilterQuery,
+            targetBeans = getTargetManagement().findTargetsByTargetFilterQuery(targetFilterQuery.getId(),
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement().findTargetsAll(
@@ -132,7 +132,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
         for (final Target targ : targetBeans) {
             final ProxyTarget prxyTarget = new ProxyTarget();
-            prxyTarget.setTargetIdName(targ.getTargetIdName());
+            prxyTarget.setId(targ.getId());
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());
@@ -189,7 +189,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         final long totSize = getTargetManagement().countTargetsAll();
         long size;
         if (null != targetFilterQuery) {
-            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery);
+            size = getTargetManagement().countTargetByTargetFilterQuery(targetFilterQuery.getId());
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {

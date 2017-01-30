@@ -21,11 +21,11 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -69,7 +69,7 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
-public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
+public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, Long> {
 
     private static final long serialVersionUID = -7731776093470487988L;
 
@@ -112,25 +112,24 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetUpdateEvents(final DistributionSetUpdatedEventContainer eventContainer) {
 
-        final List<DistributionSetIdName> visibleItemIds = (List<DistributionSetIdName>) getVisibleItemIds();
-
+        final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
+        updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
         handleSelectedAndUpdatedDs(eventContainer.getEvents());
 
-        updateVisableTableEntries(eventContainer.getEvents(), visibleItemIds);
     }
 
     private void handleSelectedAndUpdatedDs(final List<DistributionSetUpdateEvent> events) {
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(lastSelectedDsIdName -> events.stream().map(DistributionSetUpdateEvent::getEntity)
-                        .filter(set -> set.getId().equals(lastSelectedDsIdName.getId())).findFirst()
-                        .ifPresent(selectedSetUpdated -> eventBus.publish(this,
-                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedSetUpdated))));
+                .ifPresent(lastSelectedDsIdName -> events.stream()
+                        .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findFirst()
+                        .ifPresent(event -> eventBus.publish(this,
+                                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
     }
 
     private void updateVisableTableEntries(final List<DistributionSetUpdateEvent> events,
-            final List<DistributionSetIdName> visibleItemIds) {
-        events.stream().filter(event -> event.getEntity().isComplete())
-                .filter(event -> visibleItemIds.contains(DistributionSetIdName.generate(event.getEntity())))
+            final List<Long> visibleItemIds) {
+        events.stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                .filter(event -> event.getEntity().isComplete())
                 .forEach(event -> updateDistributionInTable(event.getEntity()));
     }
 
@@ -147,8 +146,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         distributionQF.setQueryConfiguration(queryConfiguration);
         return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
@@ -186,8 +184,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    protected DistributionSet findEntityByTableValue(final DistributionSetIdName entityTableId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId.getId());
+    protected DistributionSet findEntityByTableValue(final Long entityTableId) {
+        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId);
     }
 
     @Override
@@ -200,8 +198,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
         if (distributionSet != null) {
-            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(),
-                    distributionSet.getName(), distributionSet.getVersion()));
+            manageDistUIState.setLastSelectedEntity(distributionSet.getId());
         }
     }
 
@@ -219,16 +216,13 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void onDropEventFromTable(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> source = (AbstractTable<SoftwareModule, Long>) transferable.getSourceComponent();
+        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
         final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
         final Object distItemId = dropData.getItemIdOver();
-        final Item item = getItem(distItemId);
-        if (item != null && item.getItemProperty("id") != null && item.getItemProperty("name") != null) {
-            handleDropEvent(source, softwareModulesIdList, item);
-        }
+        handleDropEvent(source, softwareModulesIdList, distItemId);
 
     }
 
@@ -247,11 +241,15 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return super.isDropValid(dragEvent);
     }
 
-    private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Item item) {
-        final Long distId = (Long) item.getItemProperty("id").getValue();
-        final String distName = (String) item.getItemProperty("name").getValue();
-        final String distVersion = (String) item.getItemProperty("version").getValue();
-        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distId, distName, distVersion);
+    private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
+        final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById((Long) distId);
+
+        if (distributionSet == null) {
+            notification.displayWarning(i18n.get("distributionset.not.exists"));
+            return;
+        }
+
+        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
 
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwarewList().containsKey(distributionSetIdName)) {
@@ -267,23 +265,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
             final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
-            if (validSoftwareModule(distId, softwareModule)) {
+            if (validSoftwareModule((Long) distId, softwareModule)) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
                         name.concat(":" + swVersion));
-                publishAssignEvent(distId, softwareModule);
-                /*
-                 * If software module type is software, means multiple softwares
-                 * can assigned to that type. Hence if multipe softwares belongs
-                 * to same type is drroped, then add to the list.
-                 */
+                publishAssignEvent((Long) distId, softwareModule);
                 handleSoftwareCase(map, softwareModule, softwareModuleIdName);
-
-                /*
-                 * If software module type is firmware, means single software
-                 * can be assigned to that type. Hence if multiple softwares
-                 * belongs to same type is dropped, then override with previous
-                 * one.
-                 */
                 handleFirmwareCase(map, softwareModule, softwareModuleIdName);
             } else {
                 return;
@@ -299,7 +285,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
         if (manageDistUIState.getLastSelectedDistribution().isPresent()
-                && manageDistUIState.getLastSelectedDistribution().get().getId().equals(distId)) {
+                && manageDistUIState.getLastSelectedDistribution().get().equals(distId)) {
             eventBus.publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
         }
@@ -345,7 +331,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             return false;
         }
 
-        if (distributionSetManagement.isDistributionSetInUse(ds)) {
+        if (distributionSetManagement.isDistributionSetInUse(ds.getId())) {
             notification.displayValidationError(
                     i18n.get("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;
@@ -479,8 +465,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn
-                        .addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
                 return manageMetaDataBtn;
             }
         });
@@ -517,8 +502,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {
-        final Item item = getContainerDataSource()
-                .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        final Item item = getContainerDataSource().getItem(editedDs.getId());
         updateEntity(editedDs, item);
     }
 

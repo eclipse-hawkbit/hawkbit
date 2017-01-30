@@ -42,13 +42,6 @@ public interface Target extends NamedEntity {
     List<Action> getActions();
 
     /**
-     * @return {@link TargetIdName} view of the {@link Target}.
-     */
-    default TargetIdName getTargetIdName() {
-        return new TargetIdName(getId(), getControllerId(), getName());
-    }
-
-    /**
      * @return the targetInfo object
      */
     TargetInfo getTargetInfo();

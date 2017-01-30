@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -100,7 +101,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         descTextArea = new TextAreaBuilder().caption(i18n.get("textfield.description")).style("text-area-style")
                 .prompt(i18n.get("textfield.description")).immediate(true).id(UIComponentIdProvider.TARGET_ADD_DESC)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        descTextArea.setNullRepresentation(StringUtils.EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String id) {
@@ -144,10 +145,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
     }
 
-    public Window getWindow() {
-        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.get("caption.add.new.target"))
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
-                .buildCommonDialogWindow();
+    public Window createNewWindow() {
+        window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
+                .caption(i18n.get(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
         return window;
     }
@@ -156,12 +157,18 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * Returns Target Update window based on the selected Entity Id in the
      * target table.
      * 
-     * @param entityId
-     * @return window
+     * @param controllerId
+     *            the target controller id
+     * @return window or {@code null} if target is not exists.
      */
-    public Window getWindow(final String entityId) {
-        populateValuesOfTarget(entityId);
-        getWindow();
+    public Window getWindow(final String controllerId) {
+        final Target target = targetManagement.findTargetByControllerID(controllerId);
+        if (target == null) {
+            uINotification.displayWarning(i18n.get("target.not.exists", new Object[] { controllerId }));
+            return null;
+        }
+        populateValuesOfTarget(target);
+        createNewWindow();
         window.addStyleName("target-update-window");
         return window;
     }
@@ -192,20 +199,16 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     }
 
-    /**
-     * @param controllerId
-     */
-    private void populateValuesOfTarget(final String controllerId) {
+    private void populateValuesOfTarget(final Target target) {
         resetComponents();
-        this.controllerId = controllerId;
+        this.controllerId = target.getControllerId();
         editTarget = Boolean.TRUE;
-        final Target target = targetManagement.findTargetByControllerID(controllerId);
+
         controllerIDTextField.setValue(target.getControllerId());
         controllerIDTextField.setEnabled(Boolean.FALSE);
         nameTextField.setValue(target.getName());
-        if (target.getDescription() != null) {
-            descTextArea.setValue(target.getDescription());
-        }
+        nameTextField.setRequired(true);
+        descTextArea.setValue(target.getDescription());
     }
 
     public FormLayout getFormLayout() {

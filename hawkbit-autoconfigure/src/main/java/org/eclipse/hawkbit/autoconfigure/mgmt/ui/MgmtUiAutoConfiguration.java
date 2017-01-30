@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.autoconfigure.ui;
+package org.eclipse.hawkbit.autoconfigure.mgmt.ui;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -39,7 +39,7 @@ import com.vaadin.spring.annotation.UIScope;
 @EnableEventBus
 @ConditionalOnClass(MgmtUiConfiguration.class)
 @Import(MgmtUiConfiguration.class)
-public class UIAutoConfiguration {
+public class MgmtUiAutoConfiguration {
 
     /**
      * A message source bean to add distributed message sources.

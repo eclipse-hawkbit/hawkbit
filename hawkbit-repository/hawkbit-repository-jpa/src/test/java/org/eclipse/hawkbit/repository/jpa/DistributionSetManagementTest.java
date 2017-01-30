@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -34,6 +36,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.fest.assertions.core.Condition;
 import org.junit.Test;
@@ -149,7 +153,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(hardDelete);
-        distributionSetManagement.deleteDistributionSetType(hardDelete);
+        distributionSetManagement.deleteDistributionSetType(hardDelete.getId());
 
         assertThat(distributionSetTypeRepository.findAll()).doesNotContain(hardDelete);
     }
@@ -165,7 +169,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createDistributionSet(
                 entityFactory.distributionSet().create().name("softdeleted").version("1").type(softDelete.getKey()));
 
-        distributionSetManagement.deleteDistributionSetType(softDelete);
+        distributionSetManagement.deleteDistributionSetType(softDelete.getId());
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
 
@@ -430,14 +434,14 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         dsDeleted.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList())));
 
         assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
-        distributionSetManagement.deleteDistributionSet(dsDeleted);
+        distributionSetManagement.deleteDistributionSet(dsDeleted.getId());
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
+        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
+        ds100Group1 = toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group2 = distributionSetManagement.toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
+        ds100Group2 = toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
 
         // check setup
@@ -722,7 +726,8 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // delete assigned ds
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        distributionSetManagement.deleteDistributionSet(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId());
+        distributionSetManagement
+                .deleteDistributionSet(Lists.newArrayList(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId()));
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
@@ -748,6 +753,27 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
 
         assertThat(distributionSetRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @Description("Verify that the find all by ids contains the entities which are looking for")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 12),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 36) })
+    public void verifyFindDistributionSetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createDistributionSet("ds-4").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-5").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createDistributionSet("test" + i);
+        }
+
+        final List<DistributionSet> foundDs = distributionSetManagement.findDistributionSetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
     }
 
 }

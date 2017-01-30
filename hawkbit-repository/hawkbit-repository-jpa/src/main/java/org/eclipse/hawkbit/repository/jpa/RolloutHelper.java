@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,10 +18,17 @@ import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * A collection of static helper methods for the {@link JpaRolloutManagement}
@@ -69,7 +78,7 @@ final class RolloutHelper {
      * In case the given group is missing conditions or actions, they will be
      * set from the supplied default conditions.
      * 
-     * @param group
+     * @param create
      *            group to check
      * @param conditions
      *            default conditions and actions
@@ -144,10 +153,22 @@ final class RolloutHelper {
      * @return resulting target filter query
      */
     static String getTargetFilterQuery(final Rollout rollout) {
-        if (rollout.getCreatedAt() != null) {
-            return rollout.getTargetFilterQuery() + ";createdat=le=" + rollout.getCreatedAt().toString();
+        return getTargetFilterQuery(rollout.getTargetFilterQuery(), rollout.getCreatedAt());
+    }
+
+    /**
+     * @param targetFilter
+     *            the target filter tp be extended
+     * @param createdAt
+     *            timestamp
+     * @return a target filter query that only matches targets that were created
+     *         after the provided timestamp.
+     */
+    static String getTargetFilterQuery(final String targetFilter, final Long createdAt) {
+        if (createdAt != null) {
+            return targetFilter + ";createdat=le=" + createdAt.toString();
         }
-        return rollout.getTargetFilterQuery();
+        return targetFilter;
     }
 
     /**
@@ -176,11 +197,11 @@ final class RolloutHelper {
      *            the group to add
      * @return list of groups
      */
-    static List<RolloutGroup> getGroupsByStatusIncludingGroup(final Rollout rollout,
+    static List<Long> getGroupsByStatusIncludingGroup(final Rollout rollout,
             final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
         return rollout.getRolloutGroups().stream()
                 .filter(innerGroup -> innerGroup.getStatus().equals(status) || innerGroup.equals(group))
-                .collect(Collectors.toList());
+                .map(RolloutGroup::getId).collect(Collectors.toList());
     }
 
     /**
@@ -215,30 +236,69 @@ final class RolloutHelper {
         if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
             return "";
         }
-        return groups.stream().map(RolloutGroup::getTargetFilterQuery).collect(Collectors.joining(","));
+
+        return "(" + groups.stream().map(RolloutGroup::getTargetFilterQuery).distinct().sorted()
+                .collect(Collectors.joining("),(")) + ")";
     }
 
     /**
      * Creates an RSQL Filter that matches all targets that are in the provided
      * group and in the provided groups.
      *
+     * @param baseFilter
+     *            the base filter from the rollout
      * @param groups
      *            the rollout groups
      * @param group
-     *            the group
+     *            the target group
      * @return RSQL string without base filter of the Rollout. Can be an empty
      *         string.
      */
-    static String getOverlappingWithGroupsTargetFilter(final List<RolloutGroup> groups, final RolloutGroup group) {
+    static String getOverlappingWithGroupsTargetFilter(final String baseFilter, final List<RolloutGroup> groups,
+            final RolloutGroup group) {
+        final String groupFilter = group.getTargetFilterQuery();
+        // when any previous group has the same filter as the target group the
+        // overlap is 100%
+        if (isTargetFilterInGroups(groupFilter, groups)) {
+            return concatAndTargetFilters(baseFilter, groupFilter);
+        }
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
-        if (StringUtils.isNotEmpty(previousGroupFilters) && StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return group.getTargetFilterQuery() + ";(" + previousGroupFilters + ")";
-        } else if (StringUtils.isNotEmpty(previousGroupFilters)) {
-            return "(" + previousGroupFilters + ")";
-        } else if (StringUtils.isNotEmpty(group.getTargetFilterQuery())) {
-            return group.getTargetFilterQuery();
+        if (StringUtils.isNotEmpty(previousGroupFilters)) {
+            if (StringUtils.isNotEmpty(groupFilter)) {
+                return concatAndTargetFilters(baseFilter, groupFilter, previousGroupFilters);
+            } else {
+                return concatAndTargetFilters(baseFilter, previousGroupFilters);
+            }
+        }
+        if (StringUtils.isNotEmpty(groupFilter)) {
+            return concatAndTargetFilters(baseFilter, groupFilter);
         } else {
-            return "";
+            return baseFilter;
+        }
+    }
+
+    private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
+        return StringUtils.isNotEmpty(groupFilter)
+                && groups.stream().anyMatch(prevGroup -> StringUtils.isNotEmpty(prevGroup.getTargetFilterQuery())
+                        && prevGroup.getTargetFilterQuery().equals(groupFilter));
+    }
+
+    private static String concatAndTargetFilters(String... filters) {
+        return "(" + Arrays.stream(filters).collect(Collectors.joining(");(")) + ")";
+    }
+
+    /**
+     * @param baseFilter
+     *            the base filter from the rollout
+     * @param group
+     *            group for which the filter string should be created
+     * @return the final target filter query for a rollout group
+     */
+    static String getGroupTargetFilter(final String baseFilter, final RolloutGroup group) {
+        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
+            return baseFilter;
+        } else {
+            return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
         }
     }
 
@@ -256,6 +316,37 @@ final class RolloutHelper {
         if (targetCount != 0) {
             throw new ConstraintViolationException("Rollout groups target count verification failed");
         }
+    }
+
+    /**
+     * @param searchText
+     *            search string
+     * @return criteria specification with a query for name or description of a
+     *         rollout
+     */
+    static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
+        return (rolloutRoot, query, criteriaBuilder) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
+                            searchTextToLower));
+        };
+    }
+
+    static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
+        if (!(Rollout.RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
+            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
+                    + rollout.getStatus().name().toLowerCase());
+        }
+    }
+
+    static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
 }

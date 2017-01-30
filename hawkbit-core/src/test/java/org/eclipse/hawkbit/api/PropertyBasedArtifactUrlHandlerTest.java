@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.api;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
@@ -120,5 +122,73 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL,
                 TEST_PROTO + "://127.0.0.1:5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)),
                 urls);
+    }
+
+    @Test
+    @Description("Verfies that the full qualified host of the statically defined hostname is replaced with the host of the request.")
+    public void urlGenerationWithHostFromRequest() throws URISyntaxException {
+        final String testHost = "ddi.host.com";
+
+        final UrlProtocol proto = new UrlProtocol();
+        proto.setIp("127.0.0.1");
+        proto.setPort(5683);
+        proto.setProtocol(TEST_PROTO);
+        proto.setRel(TEST_REL);
+        proto.setSupports(Lists.newArrayList(ApiType.DDI));
+        proto.setRef("{protocol}://{hostnameRequest}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
+        properties.getProtocols().put("ftp", proto);
+
+        final List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
+                new URI("https://" + testHost));
+
+        assertEquals(Lists.newArrayList(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL, TEST_PROTO + "://"
+                + testHost + ":5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62)), urls);
+    }
+
+    @Test
+    @Description("Verfies that the port of the statically defined hostname is replaced with the port of the request.")
+    public void urlGenerationWithPortFromRequest() throws URISyntaxException {
+        final UrlProtocol proto = new UrlProtocol();
+        proto.setRef(
+                "{protocol}://{hostname}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
+
+        properties.getProtocols().put("download-http", proto);
+
+        final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
+                new URI("http://anotherHost.com:8083"));
+        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+                "http://localhost:8083/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
+                ddiUrls);
+
+        final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
+        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+                "http://localhost:8080/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
+                dmfUrls);
+    }
+
+    @Test
+    @Description("Verfies that the domain of the statically defined hostname is replaced with the domain of the request.")
+    public void urlGenerationWithDomainFromRequest() throws URISyntaxException {
+        final UrlProtocol proto = new UrlProtocol();
+        proto.setHostname("host.bumlux.net");
+        proto.setRef(
+                "{protocol}://{domainRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
+
+        properties.getProtocols().put("download-http", proto);
+
+        final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
+                new URI("http://anotherHost.com:8083"));
+        assertEquals(Lists.newArrayList(
+                new ArtifactUrl("http".toUpperCase(), "download-http", "http://host.com/" + TENANT + "/controller/v1/"
+                        + CONTROLLER_ID + "/softwaremodules/" + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
+                ddiUrls);
+
+        final List<ArtifactUrl> dmfUrls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DMF);
+        assertEquals(Lists.newArrayList(new ArtifactUrl("http".toUpperCase(), "download-http",
+                "http://host.bumlux.net/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME)),
+                dmfUrls);
     }
 }

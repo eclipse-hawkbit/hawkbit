@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
@@ -17,11 +18,11 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
@@ -104,10 +105,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public boolean clearArtifactBinary(final Artifact existing) {
+    public boolean clearArtifactBinary(final Long existing) {
+        return clearArtifactBinary(Optional.ofNullable(localArtifactRepository.findOne(existing))
+                .orElseThrow(() -> new EntityNotFoundException("Artifact with given ID" + existing + " not found.")));
+    }
 
-        for (final Artifact lArtifact : localArtifactRepository
-                .findByGridFsFileName(((JpaArtifact) existing).getGridFsFileName())) {
+    private boolean clearArtifactBinary(final JpaArtifact existing) {
+
+        for (final Artifact lArtifact : localArtifactRepository.findBySha1Hash(existing.getSha1Hash())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
                     && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
                 return false;
@@ -115,8 +120,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         try {
-            LOG.debug("deleting artifact from repository {}", ((JpaArtifact) existing).getGridFsFileName());
-            artifactRepository.deleteBySha1(((JpaArtifact) existing).getGridFsFileName());
+            LOG.debug("deleting artifact from repository {}", existing.getSha1Hash());
+            artifactRepository.deleteBySha1(existing.getSha1Hash());
             return true;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactDeleteFailedException(e);
@@ -151,8 +156,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Artifact findFirstArtifactBySHA1(final String sha1) {
-        return localArtifactRepository.findFirstByGridFsFileName(sha1);
+    public Artifact findFirstArtifactBySHA1(final String sha1Hash) {
+        return localArtifactRepository.findFirstBySha1Hash(sha1Hash);
     }
 
     @Override
@@ -166,13 +171,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public DbArtifact loadArtifactBinary(final Artifact artifact) {
-        final DbArtifact result = artifactRepository.getArtifactBySha1(((JpaArtifact) artifact).getGridFsFileName());
-        if (result == null) {
-            throw new GridFSDBFileNotFoundException(((JpaArtifact) artifact).getGridFsFileName());
-        }
-
-        return result;
+    public DbArtifact loadArtifactBinary(final String sha1Hash) {
+        return Optional.ofNullable(artifactRepository.getArtifactBySha1(sha1Hash))
+                .orElseThrow(() -> new ArtifactBinaryNotFoundException(sha1Hash));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

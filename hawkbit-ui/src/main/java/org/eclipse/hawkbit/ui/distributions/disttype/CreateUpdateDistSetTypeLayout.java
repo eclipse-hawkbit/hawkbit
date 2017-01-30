@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -81,6 +82,26 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
 
     private IndexedContainer originalSelectedTableContainer;
 
+    /**
+     * Constructor for CreateUpdateDistSetTypeLayout
+     * 
+     * @param i18n
+     *            I18N
+     * @param tagManagement
+     *            TagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareManagement
+     *            SoftwareManagement
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     */
     public CreateUpdateDistSetTypeLayout(final I18N i18n, final TagManagement tagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final SoftwareManagement softwareManagement,
@@ -105,7 +126,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC)
                 .prompt(i18n.get("textfield.description")).immediate(true)
                 .id(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC).buildTextComponent();
-        tagDesc.setNullRepresentation("");
+        tagDesc.setNullRepresentation(StringUtils.EMPTY);
     }
 
     private TextField createTextField(final String in18Key, final String styleName, final String id) {
@@ -406,7 +427,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         final DistributionSetTypeUpdate update = entityFactory.distributionSetType().update(existingType.getId())
                 .description(tagDesc.getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
-        if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
+        if (distributionSetManagement.countDistributionSetsByType(existingType.getId()) <= 0 && null != itemIds
                 && !itemIds.isEmpty()) {
 
             update.mandatory(itemIds.stream().filter(itemId -> isMandatoryModuleType(selectedTable.getItem(itemId)))
@@ -509,7 +530,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout<Distri
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag) <= 0) {
+            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag.getId()) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
             } else {

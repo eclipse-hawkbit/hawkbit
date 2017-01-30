@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -153,16 +152,17 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager.postConstruct();
 
-        final Artifact testArtifact = new JpaArtifact("afilename", "afilename", new JpaSoftwareModule(
+        final JpaArtifact testArtifact = new JpaArtifact(SHA1, "afilename", new JpaSoftwareModule(
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
+        testArtifact.setId(1L);
 
         when(artifactManagementMock.findArtifact(ARTIFACT_ID)).thenReturn(testArtifact);
         when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(testArtifact);
 
         final DbArtifact artifact = new DbArtifact();
         artifact.setSize(ARTIFACT_SIZE);
-        artifact.setHashes(new DbArtifactHash("sha1 test", "md5 test"));
-        when(artifactManagementMock.loadArtifactBinary(testArtifact)).thenReturn(artifact);
+        artifact.setHashes(new DbArtifactHash(SHA1, "md5 test"));
+        when(artifactManagementMock.loadArtifactBinary(SHA1)).thenReturn(artifact);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
@@ -173,8 +173,8 @@ public class AmqpControllerAuthenticationTest {
 
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
-        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, testArtifact)).thenReturn(true);
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, testArtifact)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
+        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
     }
 
     @Test

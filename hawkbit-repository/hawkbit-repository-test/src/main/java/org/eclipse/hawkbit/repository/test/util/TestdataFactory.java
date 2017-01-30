@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Lists;
 
@@ -307,10 +309,7 @@ public class TestdataFactory {
 
         final DistributionSet set = createDistributionSet(prefix, version, false);
 
-        final List<DistributionSet> sets = new ArrayList<>();
-        sets.add(set);
-
-        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(sets, tag));
+        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(Arrays.asList(set.getId()), tag.getName()));
 
         return distributionSetManagement.findDistributionSetById(set.getId());
 
@@ -900,7 +899,8 @@ public class TestdataFactory {
             final Collection<String> msgs) {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
-            final List<Action> findByTarget = deploymentManagement.findActionsByTarget(target);
+            final List<Action> findByTarget = deploymentManagement
+                    .findActionsByTarget(target.getControllerId(), new PageRequest(0, 400)).getContent();
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, msgs));
             }
