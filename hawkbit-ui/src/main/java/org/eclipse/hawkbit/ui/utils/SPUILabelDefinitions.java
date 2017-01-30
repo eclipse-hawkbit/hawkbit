@@ -21,10 +21,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public final class SPUILabelDefinitions {
 
     /**
-     * Label - Message hint.
-     */
-    public static final String SP_LABEL_MESSAGE_HINT = "Label-message-hint";
-    /**
      * Style - Message.
      */
     public static final String SP_LABEL_MESSAGE_STYLE = "count-msg-box";

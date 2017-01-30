@@ -186,56 +186,56 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static RolloutGroupErrorCondition mapErrorCondition(final Condition condition) {
+    private static RolloutGroupErrorCondition mapErrorCondition(final Condition condition) {
         if (Condition.THRESHOLD.equals(condition)) {
             return RolloutGroupErrorCondition.THRESHOLD;
         }
         throw new IllegalArgumentException(createIllegalArgumentLiteral(condition));
     }
 
-    static RolloutGroupSuccessCondition mapFinishCondition(final Condition condition) {
+    private static RolloutGroupSuccessCondition mapFinishCondition(final Condition condition) {
         if (Condition.THRESHOLD.equals(condition)) {
             return RolloutGroupSuccessCondition.THRESHOLD;
         }
         throw new IllegalArgumentException(createIllegalArgumentLiteral(condition));
     }
 
-    static Condition map(final RolloutGroupSuccessCondition rolloutCondition) {
+    private static Condition map(final RolloutGroupSuccessCondition rolloutCondition) {
         if (RolloutGroupSuccessCondition.THRESHOLD.equals(rolloutCondition)) {
             return Condition.THRESHOLD;
         }
         throw new IllegalArgumentException("Rollout group condition " + rolloutCondition + NOT_SUPPORTED);
     }
 
-    static Condition map(final RolloutGroupErrorCondition rolloutCondition) {
+    private static Condition map(final RolloutGroupErrorCondition rolloutCondition) {
         if (RolloutGroupErrorCondition.THRESHOLD.equals(rolloutCondition)) {
             return Condition.THRESHOLD;
         }
         throw new IllegalArgumentException("Rollout group condition " + rolloutCondition + NOT_SUPPORTED);
     }
 
-    static RolloutGroupErrorAction map(final ErrorAction action) {
+    private static RolloutGroupErrorAction map(final ErrorAction action) {
         if (ErrorAction.PAUSE.equals(action)) {
             return RolloutGroupErrorAction.PAUSE;
         }
         throw new IllegalArgumentException("Error Action " + action + NOT_SUPPORTED);
     }
 
-    static RolloutGroupSuccessAction map(final SuccessAction action) {
+    private static RolloutGroupSuccessAction map(final SuccessAction action) {
         if (SuccessAction.NEXTGROUP.equals(action)) {
             return RolloutGroupSuccessAction.NEXTGROUP;
         }
         throw new IllegalArgumentException("Success Action " + action + NOT_SUPPORTED);
     }
 
-    static SuccessAction map(final RolloutGroupSuccessAction successAction) {
+    private static SuccessAction map(final RolloutGroupSuccessAction successAction) {
         if (RolloutGroupSuccessAction.NEXTGROUP.equals(successAction)) {
             return SuccessAction.NEXTGROUP;
         }
         throw new IllegalArgumentException("Rollout group success action " + successAction + NOT_SUPPORTED);
     }
 
-    static ErrorAction map(final RolloutGroupErrorAction errorAction) {
+    private static ErrorAction map(final RolloutGroupErrorAction errorAction) {
         if (RolloutGroupErrorAction.PAUSE.equals(errorAction)) {
             return ErrorAction.PAUSE;
         }

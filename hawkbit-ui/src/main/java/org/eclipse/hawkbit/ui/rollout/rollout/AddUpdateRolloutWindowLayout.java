@@ -203,16 +203,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
     }
 
-    /**
-     * Get the window.
-     *
-     * @param rolloutId
-     *            the rollout id
-     * @param copy
-     *            whether the rollout should be copied
-     * @return the window
-     */
-    public CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
+    CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
         resetComponents();
         window = createWindow();
         populateData(rolloutId, copy);
@@ -238,7 +229,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     /**
      * Reset the field values.
      */
-    public void resetComponents() {
+    private void resetComponents() {
         defineGroupsLayout.resetComponents();
         editRolloutEnabled = false;
         rolloutName.clear();

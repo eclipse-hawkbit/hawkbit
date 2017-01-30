@@ -36,7 +36,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
 
     private final I18N i18n;
 
-    public RolloutGroupTargetsCountLabelMessage(final RolloutUIState rolloutUIState,
+    RolloutGroupTargetsCountLabelMessage(final RolloutUIState rolloutUIState,
             final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid, final I18N i18n, final UIEventBus eventBus) {
         this.rolloutUIState = rolloutUIState;
         this.rolloutGroupTargetsListGrid = rolloutGroupTargetsListGrid;
@@ -53,16 +53,12 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
      * @param event
      */
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final RolloutEvent event) {
+    void onEvent(final RolloutEvent event) {
         if (event == RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS_COUNT) {
             displayRolloutGroupTargetMessage();
-
         }
     }
 
-    /**
-     * 
-     */
     private void applyStyle() {
         /* Create label for Targets count message displaying below the table */
         addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);

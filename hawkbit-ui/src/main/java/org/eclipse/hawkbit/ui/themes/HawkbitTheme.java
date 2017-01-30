@@ -22,8 +22,6 @@ public final class HawkbitTheme {
 
     public static final String LOGIN_UI_PATH = "/login";
 
-    public static final String HAWKBIT_UI_PATH = "";
-
     /**
      * private constructor, utility class.
      */

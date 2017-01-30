@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.amqp;
 
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
+import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +42,7 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
 
     @Override
     protected boolean isUserCauseFatal(final Throwable cause) {
-        if (cause instanceof TenantNotExistException || cause instanceof TooManyStatusEntriesException
-                || cause instanceof InvalidTargetAddressException) {
+        if (invalidMessage(cause)) {
             return true;
         }
 
@@ -55,5 +56,14 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
         }
 
         return false;
+    }
+
+    private boolean invalidMessage(final Throwable cause) {
+        return doesNotExist(cause) || cause instanceof TooManyStatusEntriesException
+                || cause instanceof InvalidTargetAddressException || cause instanceof ToManyAttributeEntriesException;
+    }
+
+    private boolean doesNotExist(final Throwable cause) {
+        return cause instanceof TenantNotExistException || cause instanceof EntityNotFoundException;
     }
 }

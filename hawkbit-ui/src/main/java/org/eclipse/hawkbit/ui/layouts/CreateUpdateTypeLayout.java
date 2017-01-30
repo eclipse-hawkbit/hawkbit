@@ -42,7 +42,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
 
     protected TextField typeKey;
 
-    public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
+    private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
     public CreateUpdateTypeLayout(final I18N i18n, final TagManagement tagManagement, final EntityFactory entityFactory,
@@ -94,7 +94,7 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
      * @param tagDesc
      * @param taregtTagColor
      */
-    protected void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
+    private void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
             final TextArea typeDesc, final String typeTagColor) {
 
         tagName.removeStyleName(SPUIDefinitions.TYPE_NAME);

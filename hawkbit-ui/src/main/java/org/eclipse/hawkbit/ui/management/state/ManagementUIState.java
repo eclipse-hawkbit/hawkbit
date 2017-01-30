@@ -240,23 +240,6 @@ public class ManagementUIState implements ManagmentEntityState<Long>, Serializab
         this.targetsCountAll.set(targetsCountAll);
     }
 
-    /**
-     * increments the targets all counter.
-     */
-    public void incrementTargetsCountAll() {
-        targetsCountAll.incrementAndGet();
-    }
-
-    /**
-     * decrement the targets all counter.
-     */
-    public void decrementTargetsCountAll() {
-        final long decrementAndGet = targetsCountAll.decrementAndGet();
-        if (decrementAndGet < 0) {
-            targetsCountAll.set(0);
-        }
-    }
-
     public boolean isDsTableMaximized() {
         return dsTableMaximized;
     }

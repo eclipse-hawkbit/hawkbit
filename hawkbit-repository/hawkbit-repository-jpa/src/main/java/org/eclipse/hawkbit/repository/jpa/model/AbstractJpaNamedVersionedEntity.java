@@ -41,7 +41,7 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
      *            of the entity
      * @param description
      */
-    public AbstractJpaNamedVersionedEntity(final String name, final String version, final String description) {
+    AbstractJpaNamedVersionedEntity(final String name, final String version, final String description) {
         super(name, description);
         this.version = version;
     }

@@ -47,7 +47,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
      * entities.
      */
     @PrePersist
-    public void prePersist() {
+    void prePersist() {
         // before persisting the entity check the current ID of the tenant by
         // using the TenantAware
         // service

@@ -35,27 +35,13 @@ public final class MgmtTargetFilterQueryMapper {
         // Utility class
     }
 
-    /**
-     * Create a response for target filter queries.
-     *
-     * @param filters
-     *            list of targets
-     * @return the response
-     */
-    public static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters) {
+    static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
         return filters.stream().map(MgmtTargetFilterQueryMapper::toResponse).collect(Collectors.toList());
     }
 
-    /**
-     * Create a response for target filter query.
-     *
-     * @param filter
-     *            the target
-     * @return the response
-     */
     static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());

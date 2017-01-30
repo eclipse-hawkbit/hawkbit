@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.login;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.hawkbit.ui.DefaultHawkbitUI;
 import org.eclipse.hawkbit.ui.HawkbitUI;
@@ -70,12 +71,13 @@ public class HawkbitLoginUI extends DefaultHawkbitUI {
         rootLayout.setExpandRatio(content, 2.0F);
         final Resource resource = context
                 .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
-        try {
-            final CustomLayout customLayout = new CustomLayout(resource.getInputStream());
+
+        try (InputStream resourceStream = resource.getInputStream()) {
+            final CustomLayout customLayout = new CustomLayout(resourceStream);
             customLayout.setSizeUndefined();
             rootLayout.addComponent(customLayout);
         } catch (final IOException ex) {
-            LOG.error("Footer file is missing", ex);
+            LOG.error("Footer file cannot be loaded", ex);
         }
         setContent(rootLayout);
 

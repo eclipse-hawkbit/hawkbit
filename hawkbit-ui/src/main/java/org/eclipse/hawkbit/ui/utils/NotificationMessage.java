@@ -42,7 +42,7 @@ public class NotificationMessage extends Notification {
      * @param autoClose
      *            flag to indicate enable close option
      */
-    public void showNotification(final String styleName, final String caption, final String description,
+    void showNotification(final String styleName, final String caption, final String description,
             final Boolean autoClose) {
         decorate(styleName, caption, description, autoClose);
         this.show(Page.getCurrent());

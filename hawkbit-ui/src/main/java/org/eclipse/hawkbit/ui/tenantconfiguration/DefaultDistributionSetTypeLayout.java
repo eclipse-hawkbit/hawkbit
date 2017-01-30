@@ -42,9 +42,9 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
 
     private TenantMetaData tenantMetaData;
 
-    final ComboBox combobox;
+    private final ComboBox combobox;
 
-    final Label changeIcon;
+    private final Label changeIcon;
 
     DefaultDistributionSetTypeLayout(final SystemManagement systemManagement,
             final DistributionSetManagement distributionSetManagement, final I18N i18n,
@@ -131,7 +131,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
     /**
      * Method that is called when combobox event is performed.
      */
-    public void selectDistributionSetValue() {
+    private void selectDistributionSetValue() {
         selectedDefaultDisSetType = (Long) combobox.getValue();
         if (!selectedDefaultDisSetType.equals(currentDefaultDisSetType)) {
             changeIcon.setVisible(true);

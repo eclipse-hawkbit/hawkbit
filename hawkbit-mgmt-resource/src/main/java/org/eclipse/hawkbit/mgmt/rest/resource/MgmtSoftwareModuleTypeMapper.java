@@ -45,7 +45,7 @@ final class MgmtSoftwareModuleTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
         return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
