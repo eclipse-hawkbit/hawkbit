@@ -132,9 +132,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private NoCountPagingRepository criteriaNoCountDao;
-
-    @Autowired
     private PlatformTransactionManager txManager;
 
     @Autowired
@@ -262,7 +259,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup);
-
         }
 
         savedRollout.setRolloutGroupsCreated(amountOfGroups);
@@ -466,11 +462,8 @@ public class JpaRolloutManagement implements RolloutManagement {
                     .round(group.getTargetPercentage() / 100 * (double) realTargetsInGroup);
             targetCount -= reducedTargetsInGroup;
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
-
         }
-
         RolloutHelper.verifyRemainingTargets(targetCount);
-
     }
 
     private long countTargetsOfGroup(final String baseFilter, final long baseFilterCount, final RolloutGroup group) {
@@ -907,10 +900,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 RolloutStatus.DELETING);
         LOGGER.info("Found {} deleting rollouts to check", rolloutsToCheck.size());
 
-        rolloutsToCheck.forEach(rollout -> {
-            doDeleteRollout(rollout);
-        });
-
+        rolloutsToCheck.forEach(this::doDeleteRollout);
     }
 
     @Override
@@ -1083,11 +1073,11 @@ public class JpaRolloutManagement implements RolloutManagement {
                 rolloutIds);
 
         if (allStatesForRollout != null) {
-            for (final Rollout rollout : rollouts) {
+            rollouts.forEach(rollout -> {
                 final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                         allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
-                ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
-            }
+                rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+            });
         }
     }
 

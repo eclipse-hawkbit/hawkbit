@@ -187,7 +187,7 @@ public class RolloutListGrid extends AbstractGrid {
             final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
-            if (item == null) {
+            if (item == null || rollout.getStatus().equals(RolloutStatus.DELETED)) {
                 refreshContainer();
                 return;
             }
@@ -600,21 +600,18 @@ public class RolloutListGrid extends AbstractGrid {
             if (RUN_OPTION.equals(cellReference.getPropertyId())) {
                 return getStatus(cellReference, RolloutStatus.READY, RolloutStatus.PAUSED);
             }
-
             if (PAUSE_OPTION.equals(cellReference.getPropertyId())) {
                 return getStatus(cellReference, RolloutStatus.RUNNING);
             }
-
             if (UPDATE_OPTION.equals(cellReference.getPropertyId())) {
                 return getStatus(cellReference, RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
-                        RolloutStatus.ERROR_STARTING, RolloutStatus.FINISHED, RolloutStatus.PAUSED, RolloutStatus.READY,
-                        RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+                        RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
+                        RolloutStatus.STARTING, RolloutStatus.STOPPED);
             }
-
             if (DELETE_OPTION.equals(cellReference.getPropertyId())) {
                 return getStatus(cellReference, RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
-                        RolloutStatus.ERROR_STARTING, RolloutStatus.FINISHED, RolloutStatus.PAUSED, RolloutStatus.READY,
-                        RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+                        RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
+                        RolloutStatus.STARTING, RolloutStatus.STOPPED);
             }
 
             return null;
