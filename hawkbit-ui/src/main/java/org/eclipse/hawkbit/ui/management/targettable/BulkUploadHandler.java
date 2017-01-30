@@ -84,7 +84,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    protected File tempFile;
+    private File tempFile;
     private Upload upload;
 
     private final ProgressBar progressBar;
@@ -101,7 +101,7 @@ public class BulkUploadHandler extends CustomComponent
     private transient EntityFactory entityFactory;
     private final UI uiInstance;
 
-    BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
+    public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
         this.uiInstance = uiInstance;
@@ -121,10 +121,7 @@ public class BulkUploadHandler extends CustomComponent
         entityFactory = SpringContextHelper.getBean(EntityFactory.class);
     }
 
-    /**
-     * Intialize layout.
-     */
-    public void buildLayout() {
+    void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
         upload.setEnabled(false);
@@ -162,20 +159,10 @@ public class BulkUploadHandler extends CustomComponent
 
     @Override
     public void uploadSucceeded(final SucceededEvent event) {
-        executor.execute(new UploadAsync(event));
+        executor.execute(new UploadAsync());
     }
 
     class UploadAsync implements Runnable {
-
-        final SucceededEvent event;
-
-        /**
-         *
-         * @param event
-         */
-        public UploadAsync(final SucceededEvent event) {
-            this.event = event;
-        }
 
         @Override
         public void run() {

@@ -46,16 +46,6 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
      *
      * @param name
      *            of the {@link DistributionSetTag}
-     **/
-    public JpaDistributionSetTag(final String name) {
-        super(name, null, null);
-    }
-
-    /**
-     * Public constructor.
-     *
-     * @param name
-     *            of the {@link DistributionSetTag}
      * @param description
      *            of the {@link DistributionSetTag}
      * @param colour

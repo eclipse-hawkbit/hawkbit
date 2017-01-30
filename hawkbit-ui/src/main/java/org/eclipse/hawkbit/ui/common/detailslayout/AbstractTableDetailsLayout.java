@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
@@ -47,8 +46,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private static final long serialVersionUID = 4862529368471627190L;
 
     private final I18N i18n;
-
-    private final transient EventBus.UIEventBus eventBus;
 
     private final SpPermissionChecker permissionChecker;
 
@@ -75,7 +72,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected AbstractTableDetailsLayout(final I18N i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
-        this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
         detailsLayout = getTabLayout();
@@ -89,10 +85,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected SpPermissionChecker getPermissionChecker() {
         return permissionChecker;
-    }
-
-    protected EventBus.UIEventBus getEventBus() {
-        return eventBus;
     }
 
     protected I18N getI18n() {

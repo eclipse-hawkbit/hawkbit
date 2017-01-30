@@ -51,7 +51,7 @@ public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseE
      * @param description
      *            of the {@link NamedEntity}
      */
-    public AbstractJpaNamedEntity(final String name, final String description) {
+    AbstractJpaNamedEntity(final String name, final String description) {
         this.name = name;
         this.description = description;
     }

@@ -61,7 +61,7 @@ public final class MgmtDistributionSetMapper {
      *            to convert
      * @return converted {@link DistributionSet}
      */
-    static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
+    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
             final EntityFactory entityFactory) {
 
         final List<Long> modules = new ArrayList<>();
@@ -97,14 +97,7 @@ public final class MgmtDistributionSetMapper {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Create a response for distribution set.
-     * 
-     * @param distributionSet
-     *            the ds set
-     * @return the response
-     */
-    public static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
+    static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
         if (distributionSet == null) {
             return null;
         }
