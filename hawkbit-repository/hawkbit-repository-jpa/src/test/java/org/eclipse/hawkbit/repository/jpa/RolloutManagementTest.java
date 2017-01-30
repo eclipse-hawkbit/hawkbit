@@ -791,8 +791,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         changeStatusForAllRunningActions(rolloutD, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        final Page<Rollout> rolloutPage = rolloutManagement
-                .findAllRolloutsWithDetailedStatus(new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        final Page<Rollout> rolloutPage = rolloutManagement.findAllRolloutsWithDetailedStatus(
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")), false);
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
         // validate rolloutA -> 6 running and 6 ready
@@ -878,7 +878,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Slice<Rollout> rollout = rolloutManagement.findRolloutWithDetailedStatusByFilters(
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")), "Rollout%");
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")), "Rollout%", false);
         final List<Rollout> rolloutList = rollout.getContent();
         assertThat(rolloutList.size()).isEqualTo(5);
         int i = 1;

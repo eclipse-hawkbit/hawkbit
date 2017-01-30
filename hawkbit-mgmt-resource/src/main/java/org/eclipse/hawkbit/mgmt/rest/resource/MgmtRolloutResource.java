@@ -83,9 +83,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = this.rolloutManagement.findAllByPredicate(rsqlParam, pageable);
+            findModulesAll = this.rolloutManagement.findAllByPredicate(rsqlParam, pageable, false);
         } else {
-            findModulesAll = this.rolloutManagement.findAll(pageable);
+            findModulesAll = this.rolloutManagement.findAll(pageable, false);
         }
 
         final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findModulesAll.getContent());

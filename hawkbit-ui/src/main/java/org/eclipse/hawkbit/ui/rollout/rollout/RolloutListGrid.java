@@ -182,6 +182,7 @@ public class RolloutListGrid extends AbstractGrid {
         }
         final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
+        // rollout is null if rollout was deleted
         if (rollout != null) {
             final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();

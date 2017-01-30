@@ -103,6 +103,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
@@ -220,6 +223,14 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         // there is no rollout deletion event
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
     }
 
 }
