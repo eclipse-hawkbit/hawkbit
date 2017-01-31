@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -34,6 +36,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.matcher.Expect;
+import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.fest.assertions.core.Condition;
 import org.junit.Test;
@@ -749,6 +753,27 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
 
         assertThat(distributionSetRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @Description("Verify that the find all by ids contains the entities which are looking for")
+    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 12),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 36) })
+    public void verifyFindDistributionSetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createDistributionSet("ds-4").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-5").getId());
+        searchIds.add(testdataFactory.createDistributionSet("ds-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createDistributionSet("test" + i);
+        }
+
+        final List<DistributionSet> foundDs = distributionSetManagement.findDistributionSetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
     }
 
 }

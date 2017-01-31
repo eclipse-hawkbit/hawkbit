@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
+
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 
@@ -31,7 +33,7 @@ public class DistributionTableFilters implements Serializable {
 
     private Long distId;
 
-    private String pinnedTargetId;
+    private TargetIdName pinnedTarget;
 
     private final List<String> distSetTags = new ArrayList<>();
 
@@ -67,12 +69,12 @@ public class DistributionTableFilters implements Serializable {
         this.distId = distId;
     }
 
-    public Optional<String> getPinnedTargetId() {
-        return Optional.ofNullable(pinnedTargetId);
+    public Optional<TargetIdName> getPinnedTarget() {
+        return Optional.ofNullable(pinnedTarget);
     }
 
-    public void setPinnedTargetId(final String pinnedTargetId) {
-        this.pinnedTargetId = pinnedTargetId;
+    public void setPinnedTarget(final TargetIdName pinnedTarget) {
+        this.pinnedTarget = pinnedTarget;
     }
 
     public Optional<String> getSearchText() {

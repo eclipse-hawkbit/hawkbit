@@ -131,4 +131,9 @@ public interface DistributionSetRepository
      * @return number of found {@link DistributionSet}s
      */
     long countByNameAndVersion(String name, String version);
+
+    @Override
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")
+    List<JpaDistributionSet> findAll(Iterable<Long> ids);
 }

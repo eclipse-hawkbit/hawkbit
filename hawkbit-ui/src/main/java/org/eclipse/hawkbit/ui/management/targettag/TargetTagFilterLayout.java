@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
@@ -36,11 +35,10 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(new TargetTagFilterHeader(i18n, createUpdateTargetTagLayout, managementUIState, permChecker, eventBus),
                 new MultipleTargetFilter(createUpdateTargetTagLayout, permChecker, managementUIState, i18n, eventBus,
-                        managementViewClientCriterion, notification, entityFactory, targetManagement,
-                        targetFilterQueryManagement),
+                        managementViewClientCriterion, notification, entityFactory, targetFilterQueryManagement),
                 managementUIState);
         this.createUpdateTargetTagLayout = createUpdateTargetTagLayout;
         eventBus.subscribe(this);

@@ -119,14 +119,6 @@ public final class SPUILabelDefinitions {
      * CONT ID.
      */
     public static final String VAR_CONT_ID = "controllerId";
-    /**
-     * CONT ID AND NAME = ItemId.
-     */
-    public static final String VAR_CONT_ID_NAME = "targetIdName";
-    /**
-     * Distribution set ID and Name= ItemId.
-     */
-    public static final String VAR_DIST_ID_NAME = "distributionSetIdName";
 
     /**
      * Distribution set ID.
@@ -146,6 +138,10 @@ public final class SPUILabelDefinitions {
      * DESC.
      */
     public static final String VAR_DESC = "description";
+
+    public static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+
+    public static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     /**
      * VERSION.

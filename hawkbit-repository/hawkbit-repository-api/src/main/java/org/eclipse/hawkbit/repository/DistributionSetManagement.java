@@ -126,8 +126,8 @@ public interface DistributionSetManagement {
      * @return the new persisted {@link DistributionSet}
      *
      * @throws EntityNotFoundException
-     *             if a provided linked entity does not exists
-     *             ({@link DistributionSet#getModules()} or
+     *             if a provided linked entity does not exists (
+     *             {@link DistributionSet#getModules()} or
      *             {@link DistributionSet#getType()})
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
@@ -163,8 +163,8 @@ public interface DistributionSetManagement {
      *            to be created
      * @return the new {@link DistributionSet}s
      * @throws EntityNotFoundException
-     *             if a provided linked entity does not exists
-     *             ({@link DistributionSet#getModules()} or
+     *             if a provided linked entity does not exists (
+     *             {@link DistributionSet#getModules()} or
      *             {@link DistributionSet#getType()})
      * @throws DistributionSetCreationFailedMissingMandatoryModuleException
      *             is {@link DistributionSet} does not contain mandatory
@@ -181,8 +181,8 @@ public interface DistributionSetManagement {
      * @return created entity
      * 
      * @throws EntityNotFoundException
-     *             if a provided linked entity does not exists
-     *             ({@link DistributionSetType#getMandatoryModuleTypes()} or
+     *             if a provided linked entity does not exists (
+     *             {@link DistributionSetType#getMandatoryModuleTypes()} or
      *             {@link DistributionSetType#getOptionalModuleTypes()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
@@ -196,8 +196,8 @@ public interface DistributionSetManagement {
      * @return created entity
      * 
      * @throws EntityNotFoundException
-     *             if a provided linked entity does not exists
-     *             ({@link DistributionSetType#getMandatoryModuleTypes()} or
+     *             if a provided linked entity does not exists (
+     *             {@link DistributionSetType#getMandatoryModuleTypes()} or
      *             {@link DistributionSetType#getOptionalModuleTypes()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
@@ -426,7 +426,7 @@ public interface DistributionSetManagement {
      * @param distributionSetFilterBuilder
      *            has details of filters to be applied
      * @param assignedOrInstalled
-     *            the controllerID of the Target to be ordered by
+     *            the id of the Target to be ordered by
      * @return {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -706,5 +706,15 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType assignMandatorySoftwareModuleTypes(@NotNull Long dsTypeId,
             @NotEmpty Collection<Long> softwareModuleTypes);
+
+    /**
+     * Retrieves all distribution set without details.
+     *
+     * @param ids
+     *            the ids to for
+     * @return the found {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<DistributionSet> findDistributionSetAllById(@NotNull Collection<Long> ids);
 
 }

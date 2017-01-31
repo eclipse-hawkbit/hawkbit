@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
@@ -60,9 +59,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             final SpPermissionChecker permChecker, final ManagementUIState managementUIState, final I18N i18n,
             final UIEventBus eventBus, final ManagementViewClientCriterion managementViewClientCriterion,
             final UINotification notification, final EntityFactory entityFactory,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.filterByButtons = new TargetTagFilterButtons(eventBus, managementUIState, managementViewClientCriterion,
-                i18n, notification, permChecker, entityFactory, targetManagement);
+                i18n, notification, permChecker, entityFactory);
         this.targetFilterQueryButtonsTab = new TargetFilterQueryButtons(managementUIState, eventBus);
         this.filterByStatusFotter = new FilterByStatusLayout(i18n, eventBus, managementUIState);
         this.customTargetTagFilterButtonClick = new CustomTargetTagFilterButtonClick(eventBus, managementUIState,

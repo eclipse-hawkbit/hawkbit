@@ -441,6 +441,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
+    protected UINotification getNotification() {
+        return notification;
+    }
+
     protected abstract boolean hasDropPermission();
 
     protected abstract boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource);

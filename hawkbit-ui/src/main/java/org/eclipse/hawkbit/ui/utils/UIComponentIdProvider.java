@@ -6,11 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.eclipse.hawkbit.ui.utils;
 
 /**
  * Interface to provide the unchanged constants.
  */
+// Disable sonar "Files should not have too many lines" rule for constant class
+@SuppressWarnings("squid:S00104")
 public final class UIComponentIdProvider {
     /**
      * ID-Target.
@@ -994,9 +997,6 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
-    /**
-     * Distribution set select enable checkbox id
-     */
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";

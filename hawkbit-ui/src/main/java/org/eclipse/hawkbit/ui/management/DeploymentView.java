@@ -134,14 +134,15 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
                 i18n, tagManagement, entityFactory, eventBus, permChecker, uiNotification);
         this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
-                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory, targetManagement,
+                managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
                 targetFilterQueryManagement);
         final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
-                managementUIState, permChecker, managementViewClientCriterion);
+                managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
+                tagManagement);
 
         this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
                 eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                uiproperties, permChecker, uiNotification, tagManagement);
+                uiproperties, permChecker, uiNotification, tagManagement, distributionSetManagement);
 
         this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker, eventBus,
                 tagManagement, entityFactory, uiNotification, distFilterParameters, distributionSetManagement,

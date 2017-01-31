@@ -77,7 +77,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType()
                 && targetUIEvent.getEntityIds()
-                        .contains(managementUIState.getLastSelectedTargetIdName().getTargetId())) {
+                        .contains(managementUIState.getLastSelectedTargetId())) {
             setData(SPUIDefinitions.NO_DATA);
             UI.getCurrent().access(this::populateActionHistoryDetails);
          }

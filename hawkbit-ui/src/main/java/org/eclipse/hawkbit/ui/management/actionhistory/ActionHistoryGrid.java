@@ -386,15 +386,13 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Pinning.
      */
     private void updateDistributionTableStyle() {
-        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
-                && null != managementUIState.getDistributionTableFilters().getPinnedTargetId().get()) {
-            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTargetId()
-                    .get();
-            // if the current target is pinned publish a pin event again
-            if (null != alreadyPinnedControllerId
-                    && alreadyPinnedControllerId.equals(selectedTarget.getControllerId())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
-            }
+        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
+            return;
+        }
+        final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
+                .getTargetId();
+        if (alreadyPinnedControllerId.equals(selectedTarget.getControllerId())) {
+            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
 

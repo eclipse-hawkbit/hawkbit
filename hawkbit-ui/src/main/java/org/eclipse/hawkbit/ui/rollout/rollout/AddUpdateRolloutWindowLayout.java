@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.builder.ComboBoxBuilder;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -157,8 +156,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final I18N i18n, final UIEventBus eventBus, final TargetFilterQueryManagement targetFilterQueryManagement) {
-        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
-        this.autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
+        actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
         this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
@@ -168,7 +167,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
 
-        this.defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement,
+        defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement,
                 targetFilterQueryManagement);
 
         defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
@@ -600,10 +599,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
+        final Long distributionSetId = (Long) distributionSet.getValue();
 
         final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId()).name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionSetIdName.getId()).actionType(getActionType())
+                .description(description.getValue()).set(distributionSetId).actionType(getActionType())
                 .forcedTime(getForcedTimeStamp());
 
         if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
@@ -656,7 +655,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private Rollout saveRollout() {
 
-        final DistributionSetIdName distributionSetIdName = (DistributionSetIdName) distributionSet.getValue();
+        final Long distributionId = (Long) distributionSet.getValue();
 
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
         final int errorThresholdPercent = getErrorThresholdPercentage(amountGroup);
@@ -667,8 +666,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
-                .description(description.getValue()).set(distributionSetIdName.getId())
-                .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType()).forcedTime(getForcedTimeStamp());
+                .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
+                .actionType(getActionType()).forcedTime(getForcedTimeStamp());
 
         if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
             rolloutCreate.startAt(System.currentTimeMillis());
@@ -785,8 +784,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private TextField createRolloutNameField() {
@@ -851,13 +849,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
     }
 
-    /**
-     *
-     * Populate rollout details.
-     *
-     * @param rolloutId
-     *            rollout id
-     */
     private void populateData(final Long rolloutId, final boolean copy) {
         if (rolloutId == null) {
             return;
@@ -865,7 +856,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         rollout = rolloutManagement.findRolloutById(rolloutId);
         description.setValue(rollout.getDescription());
-        distributionSet.setValue(DistributionSetIdName.generate(rollout.getDistributionSet()));
+        distributionSet.setValue(rollout.getDistributionSet().getId());
         setActionType(rollout);
         setAutoStartType(rollout);
 
@@ -960,7 +951,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         String value;
 
         ERRORTHRESOLDOPTIONS(final String val) {
-            this.value = val;
+            value = val;
         }
 
         /**

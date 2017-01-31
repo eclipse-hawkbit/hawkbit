@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -44,7 +45,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
     private Sort sort = new Sort(Direction.ASC, "id");
     private Collection<String> distributionTags;
     private String searchText;
-    private String pinnedControllerId;
+    private TargetIdName pinnedTarget;
     private transient DistributionSetManagement distributionSetManagement;
     private transient Page<DistributionSet> firstPageDistributionSets;
     private Boolean noTagClicked = Boolean.FALSE;
@@ -69,7 +70,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distributionTags = (Collection<String>) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG);
             searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
             noTagClicked = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG);
-            pinnedControllerId = (String) queryConfig.get(SPUIDefinitions.ORDER_BY_PINNED_TARGET);
+            pinnedTarget = (TargetIdName) queryConfig.get(SPUIDefinitions.ORDER_BY_PINNED_TARGET);
             if (!Strings.isNullOrEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
@@ -100,14 +101,14 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
-        } else if (pinnedControllerId != null) {
+        } else if (pinnedTarget != null) {
             final DistributionSetFilterBuilder distributionSetFilterBuilder = new DistributionSetFilterBuilder()
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
                     .setSelectDSWithNoTag(noTagClicked).setTagNames(distributionTags);
 
             distBeans = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
                     new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilterBuilder,
-                    pinnedControllerId);
+                    pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
@@ -140,7 +141,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
     @Override
     public int size() {
-        if (pinnedControllerId != null) {
+        if (pinnedTarget != null) {
 
             final DistributionSetFilterBuilder distributionSetFilterBuilder = new DistributionSetFilterBuilder()
                     .setIsDeleted(false).setIsComplete(true).setSearchText(searchText)
@@ -148,7 +149,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAllOrderedByLinkTarget(
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
-                    pinnedControllerId);
+                    pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(

@@ -17,9 +17,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -32,7 +32,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @VaadinSessionScope
 @SpringComponent
-public class ManagementUIState implements ManagmentEntityState<DistributionSetIdName>, Serializable {
+public class ManagementUIState implements ManagmentEntityState<Long>, Serializable {
 
     private static final long serialVersionUID = 7301409196969723794L;
 
@@ -52,10 +52,8 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
 
     private Boolean distTagLayoutVisible = Boolean.FALSE;
 
-    // Contains ID and NAme of last selected target
-    private TargetIdName lastSelectedTargetIdName;
-    // Contains list of ID and Names of all the selected Targets
-    private Set<TargetIdName> selectedTargetIdName = Collections.emptySet();
+    private Long lastSelectedTargetId;
+    private Set<Long> selectedTargetId = Collections.emptySet();
 
     private boolean targetTagFilterClosed;
 
@@ -67,10 +65,9 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
 
     private boolean dsTableMaximized;
 
-    // Contains ID and NAme of last selected target
-    private DistributionSetIdName lastSelectedDsIdName;
-    // Contains list of ID and Names of all the selected Targets
-    private Set<DistributionSetIdName> selectedDsIdName = Collections.emptySet();
+    private Long lastSelectedDsIdName;
+
+    private Set<Long> selectedDsIdName = Collections.emptySet();
 
     private boolean targetTableMaximized;
 
@@ -86,24 +83,11 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
 
     private boolean bulkUploadWindowMinimised;
 
-    private DistributionSetIdName lastSelectedDistribution;
-
     @Autowired
     ManagementUIState(final DistributionTableFilters distributionTableFilters,
             final TargetTableFilters targetTableFilters) {
         this.distributionTableFilters = distributionTableFilters;
         this.targetTableFilters = targetTableFilters;
-    }
-
-    /**
-     * @return the lastSelectedDistribution
-     */
-    public Optional<DistributionSetIdName> getLastSelectedDistribution() {
-        return Optional.ofNullable(lastSelectedDistribution);
-    }
-
-    public void setLastSelectedDistribution(final DistributionSetIdName value) {
-        this.lastSelectedDistribution = value;
     }
 
     /**
@@ -180,20 +164,20 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
         return deletedTargetList;
     }
 
-    public TargetIdName getLastSelectedTargetIdName() {
-        return lastSelectedTargetIdName;
+    public Long getLastSelectedTargetId() {
+        return lastSelectedTargetId;
     }
 
-    public void setLastSelectedTargetIdName(final TargetIdName lastSelectedTargetIdName) {
-        this.lastSelectedTargetIdName = lastSelectedTargetIdName;
+    public void setLastSelectedTargetId(final Long lastSelectedTargetId) {
+        this.lastSelectedTargetId = lastSelectedTargetId;
     }
 
-    public Optional<Set<TargetIdName>> getSelectedTargetIdName() {
-        return Optional.ofNullable(selectedTargetIdName);
+    public Optional<Set<Long>> getSelectedTargetId() {
+        return Optional.ofNullable(selectedTargetId);
     }
 
-    public void setSelectedTargetIdName(final Set<TargetIdName> selectedTargetIdName) {
-        this.selectedTargetIdName = selectedTargetIdName;
+    public void setSelectedTargetId(final Set<Long> selectedTargetId) {
+        this.selectedTargetId = selectedTargetId;
     }
 
     /**
@@ -264,22 +248,22 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
         this.dsTableMaximized = isDsTableMaximized;
     }
 
-    public DistributionSetIdName getLastSelectedDsIdName() {
+    public Long getLastSelectedDsIdName() {
         return lastSelectedDsIdName;
     }
 
     @Override
-    public void setLastSelectedEntity(final DistributionSetIdName value) {
+    public void setLastSelectedEntity(final Long value) {
         this.lastSelectedDsIdName = value;
     }
 
     @Override
-    public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
+    public void setSelectedEnitities(final Set<Long> values) {
         this.selectedDsIdName = values;
 
     }
 
-    public Optional<Set<DistributionSetIdName>> getSelectedDsIdName() {
+    public Optional<Set<Long>> getSelectedDsIdName() {
         return Optional.ofNullable(selectedDsIdName);
     }
 
