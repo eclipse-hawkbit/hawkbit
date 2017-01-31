@@ -66,7 +66,7 @@ public class DistributionSetTypeElement implements Serializable {
      *            to <code>true</code> if the {@link SoftwareModuleType} if
      *            mandatory element in the {@link DistributionSet}.
      */
-    public DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
+    DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
             final boolean mandatory) {
         super();
         key = new DistributionSetTypeElementCompositeKey(dsType, smType);
@@ -75,7 +75,7 @@ public class DistributionSetTypeElement implements Serializable {
         this.mandatory = mandatory;
     }
 
-    public DistributionSetTypeElement setMandatory(final boolean mandatory) {
+    DistributionSetTypeElement setMandatory(final boolean mandatory) {
         this.mandatory = mandatory;
         return this;
     }

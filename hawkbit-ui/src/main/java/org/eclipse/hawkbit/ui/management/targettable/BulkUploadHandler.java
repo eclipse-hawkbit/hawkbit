@@ -84,7 +84,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    protected File tempFile;
+    private File tempFile;
     private Upload upload;
 
     private final ProgressBar progressBar;
@@ -101,7 +101,7 @@ public class BulkUploadHandler extends CustomComponent
     private transient EntityFactory entityFactory;
     private final UI uiInstance;
 
-    BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
+    public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
         this.uiInstance = uiInstance;
@@ -121,10 +121,7 @@ public class BulkUploadHandler extends CustomComponent
         entityFactory = SpringContextHelper.getBean(EntityFactory.class);
     }
 
-    /**
-     * Intialize layout.
-     */
-    public void buildLayout() {
+    void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
         upload.setEnabled(false);
@@ -162,20 +159,10 @@ public class BulkUploadHandler extends CustomComponent
 
     @Override
     public void uploadSucceeded(final SucceededEvent event) {
-        executor.execute(new UploadAsync(event));
+        executor.execute(new UploadAsync());
     }
 
     class UploadAsync implements Runnable {
-
-        final SucceededEvent event;
-
-        /**
-         *
-         * @param event
-         */
-        public UploadAsync(final SucceededEvent event) {
-            this.event = event;
-        }
 
         @Override
         public void run() {
@@ -193,11 +180,11 @@ public class BulkUploadHandler extends CustomComponent
 
         private void readFileStream(final InputStream tempStream) {
             String line;
+            final long totalNumberOfLines = getTotalNumberOfLines();
             try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(tempStream, Charset.defaultCharset()))) {
                 LOG.info("Bulk file upload started");
                 long innerCounter = 0;
-                final double totalFileSize = getTotalNumberOfLines();
 
                 /**
                  * Once control is in upload succeeded method automatically
@@ -207,7 +194,7 @@ public class BulkUploadHandler extends CustomComponent
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
                 while ((line = reader.readLine()) != null) {
                     innerCounter++;
-                    readEachLine(line, innerCounter, totalFileSize);
+                    readEachLine(line, innerCounter, totalNumberOfLines);
                 }
 
             } catch (final IOException e) {
@@ -217,7 +204,7 @@ public class BulkUploadHandler extends CustomComponent
             } finally {
                 deleteFile();
             }
-            syncCountAfterUpload();
+            syncCountAfterUpload(totalNumberOfLines);
             doAssignments();
             eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
             // Clearing after assignments are done
@@ -225,21 +212,21 @@ public class BulkUploadHandler extends CustomComponent
             resetCounts();
         }
 
-        private void syncCountAfterUpload() {
-            if (managementUIState.getTargetTableFilters().getBulkUpload()
-                    .getSucessfulUploadCount() != successfullTargetCount) {
+        private void syncCountAfterUpload(final long totalNumberOfLines) {
+            if ((successfullTargetCount + failedTargetCount) != totalNumberOfLines) {
+                // something went wrong due to runtimeexception etc.
+                final long syncedFailedTargetCount = totalNumberOfLines - successfullTargetCount;
                 managementUIState.getTargetTableFilters().getBulkUpload()
                         .setSucessfulUploadCount(successfullTargetCount);
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
-            }
-            if (managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != failedTargetCount) {
-                managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(failedTargetCount);
+                managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(syncedFailedTargetCount);
+                managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(1);
             }
         }
 
-        private double getTotalNumberOfLines() {
+        private long getTotalNumberOfLines() {
 
-            double totalFileSize = 0;
+            long totalFileSize = 0;
             try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(tempFile),
                     Charset.defaultCharset())) {
                 try (BufferedReader readerForSize = new BufferedReader(inputStreamReader)) {
@@ -269,7 +256,7 @@ public class BulkUploadHandler extends CustomComponent
             tempFile = null;
         }
 
-        private void readEachLine(final String line, final double innerCounter, final double totalFileSize) {
+        private void readEachLine(final String line, final long innerCounter, final long totalNumberOfLines) {
             final String csvDelimiter = ",";
             final String[] targets = line.split(csvDelimiter);
             if (targets.length == 2) {
@@ -281,7 +268,7 @@ public class BulkUploadHandler extends CustomComponent
             }
             final float current = managementUIState.getTargetTableFilters().getBulkUpload()
                     .getProgressBarCurrentValue();
-            final float next = (float) (innerCounter / totalFileSize);
+            final float next = innerCounter / totalNumberOfLines;
             if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.05
                     || Math.abs(next - 1) < 0.00001) {
                 managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(next);

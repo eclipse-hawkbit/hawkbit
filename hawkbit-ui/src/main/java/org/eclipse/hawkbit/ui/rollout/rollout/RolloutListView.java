@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -32,6 +33,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final transient RolloutManagement rolloutManagement;
     private final transient TargetManagement targetManagement;
     private final transient EntityFactory entityFactory;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private final SpPermissionChecker permissionChecker;
     private final RolloutUIState rolloutUIState;
@@ -42,7 +44,8 @@ public class RolloutListView extends AbstractGridComponentLayout {
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n) {
+            final UiProperties uiProperties, final EntityFactory entityFactory, final I18N i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(i18n, eventBus);
         this.permissionChecker = permissionChecker;
         this.rolloutUIState = rolloutUIState;
@@ -51,19 +54,21 @@ public class RolloutListView extends AbstractGridComponentLayout {
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
         this.entityFactory = entityFactory;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+
         init();
     }
 
     @Override
     public AbstractOrderedLayout createGridHeader() {
         return new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n);
+                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
         return new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState, permissionChecker,
-                targetManagement, entityFactory, uiProperties);
+                targetManagement, entityFactory, uiProperties, targetFilterQueryManagement);
     }
 
 }

@@ -680,7 +680,10 @@ public class JpaTargetManagement implements TargetManagement {
     public Long countTargetByTargetFilterQuery(final String targetFilterQuery) {
         final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer);
-        return targetRepository.count(specs);
+        return targetRepository.count((root, query, cb) -> {
+            query.distinct(true);
+            return specs.toPredicate(root, query, cb);
+        });
     }
 
     private List<Object[]> getTargetIdNameResultSet(final Pageable pageRequest, final CriteriaBuilder cb,

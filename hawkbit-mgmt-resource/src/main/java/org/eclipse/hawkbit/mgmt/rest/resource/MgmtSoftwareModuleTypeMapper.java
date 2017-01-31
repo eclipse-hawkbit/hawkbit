@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -44,7 +45,7 @@ final class MgmtSoftwareModuleTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
         return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
@@ -56,7 +57,8 @@ final class MgmtSoftwareModuleTypeMapper {
             return Collections.emptyList();
         }
 
-        return types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList()));
     }
 
     static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {

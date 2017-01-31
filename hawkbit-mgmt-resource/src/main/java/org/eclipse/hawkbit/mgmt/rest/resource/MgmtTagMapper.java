@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -47,7 +48,7 @@ final class MgmtTagMapper {
 
             tagsRest.add(response);
         }
-        return tagsRest;
+        return new ResponseList<>(tagsRest);
     }
 
     static MgmtTag toResponse(final TargetTag targetTag) {
@@ -77,7 +78,7 @@ final class MgmtTagMapper {
 
             tagsRest.add(response);
         }
-        return tagsRest;
+        return new ResponseList<>(tagsRest);
     }
 
     static MgmtTag toResponse(final DistributionSetTag distributionSetTag) {

@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -71,7 +71,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
 
     @Override
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("tenant") final String tenant,
-            @PathVariable("fileName") final String fileName, @AuthenticationPrincipal final Object principal) {
+            @PathVariable("fileName") final String fileName) {
+        final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         final List<Artifact> foundArtifacts = artifactManagement.findArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
@@ -89,7 +90,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getId());
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash());
 
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous

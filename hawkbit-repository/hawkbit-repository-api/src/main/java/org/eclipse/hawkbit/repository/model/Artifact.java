@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+
 import com.google.common.io.BaseEncoding;
 
 /**
@@ -34,7 +36,7 @@ public interface Artifact extends TenantAwareBaseEntity {
 
     /**
      * @return SHA-1 hash of the artifact in {@link BaseEncoding#base16()}
-     *         format.
+     *         format that identifies the {@link DbArtifact} in the system.
      */
     String getSha1Hash();
 

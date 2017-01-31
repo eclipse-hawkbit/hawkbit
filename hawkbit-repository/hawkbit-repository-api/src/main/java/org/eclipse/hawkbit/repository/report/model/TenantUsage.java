@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
+import java.util.Collections;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+
 /**
  * System usage stats element for a tenant.
  *
@@ -19,6 +24,7 @@ public class TenantUsage {
     private long artifacts;
     private long actions;
     private long overallArtifactVolumeInBytes;
+    private Map<String, String> usageData;
 
     /**
      * Constructor.
@@ -26,82 +32,71 @@ public class TenantUsage {
      * @param tenantName
      */
     public TenantUsage(final String tenantName) {
-        super();
         this.tenantName = tenantName;
     }
 
-    /**
-     * @return name of the tenant
-     */
     public String getTenantName() {
         return tenantName;
     }
 
-    /**
-     * @return number of targets of the tenant
-     */
     public long getTargets() {
         return targets;
     }
 
-    /**
-     * @param targets
-     *            of the tenant
-     * @return updated tenant stats element
-     */
     public TenantUsage setTargets(final long targets) {
         this.targets = targets;
         return this;
     }
 
-    /**
-     * @return number of undeleted artifacts of the tenant
-     */
     public long getArtifacts() {
         return artifacts;
     }
 
-    /**
-     * @param artifacts
-     *            of tenant
-     * @return updated tenant stats element
-     */
+    public Map<String, String> getUsageData() {
+        return Collections.unmodifiableMap(getLazyUsageData());
+    }
+
+    private Map<String, String> getLazyUsageData() {
+        if (usageData == null) {
+            usageData = Maps.newHashMap();
+        }
+        return usageData;
+    }
+
     public TenantUsage setArtifacts(final long artifacts) {
         this.artifacts = artifacts;
         return this;
     }
 
-    /**
-     * @return current overallArtifactVolumeInBytes
-     */
     public long getOverallArtifactVolumeInBytes() {
         return overallArtifactVolumeInBytes;
     }
 
-    /**
-     * @param overallArtifactVolumeInBytes
-     *            of the tenant in bytes
-     * @return updated tenant stats element
-     */
     public TenantUsage setOverallArtifactVolumeInBytes(final long overallArtifactVolumeInBytes) {
         this.overallArtifactVolumeInBytes = overallArtifactVolumeInBytes;
         return this;
     }
 
-    /**
-     * @return number of actions of tenant
-     */
     public long getActions() {
         return actions;
     }
 
-    /**
-     * @param actions
-     *            of the tenant
-     * @return updated tenant stats element
-     */
     public TenantUsage setActions(final long actions) {
         this.actions = actions;
+        return this;
+    }
+
+    /**
+     * Add a key and value as usage data to the system usage stats.
+     * 
+     * @param key
+     *            the key to set
+     * @param value
+     *            the value to set
+     * @return tenant stats element with new usage added
+     */
+    public TenantUsage addUsageData(final String key, final String value) {
+        getLazyUsageData().put(key, value);
         return this;
     }
 
@@ -114,6 +109,7 @@ public class TenantUsage {
         result = prime * result + (int) (overallArtifactVolumeInBytes ^ (overallArtifactVolumeInBytes >>> 32));
         result = prime * result + (int) (targets ^ (targets >>> 32));
         result = prime * result + ((tenantName == null) ? 0 : tenantName.hashCode());
+        result = prime * result + ((usageData == null) ? 0 : usageData.hashCode());
         return result;
     }
 
@@ -141,6 +137,9 @@ public class TenantUsage {
         if (targets != other.targets) {
             return false;
         }
+        if (!this.getUsageData().equals(other.getUsageData())) {
+            return false;
+        }
         if (tenantName == null) {
             if (other.tenantName != null) {
                 return false;
@@ -154,7 +153,8 @@ public class TenantUsage {
     @Override
     public String toString() {
         return "TenantUsage [tenantName=" + tenantName + ", targets=" + targets + ", artifacts=" + artifacts
-                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes + "]";
+                + ", actions=" + actions + ", overallArtifactVolumeInBytes=" + overallArtifactVolumeInBytes
+                + ", usageData=" + usageData + "]";
     }
 
 }

@@ -32,6 +32,8 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
 
     private Long forcetime;
 
+    private Long startAt;
+
     private MgmtActionType type;
 
     private List<MgmtRolloutGroup> groups;
@@ -123,5 +125,20 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      */
     public void setGroups(List<MgmtRolloutGroup> groups) {
         this.groups = groups;
+    }
+
+    /**
+     * @return the start at timestamp in millis or null
+     */
+    public Long getStartAt() {
+        return startAt;
+    }
+
+    /**
+     * @param startAt
+     *            the start at timestamp in millis or null
+     */
+    public void setStartAt(Long startAt) {
+        this.startAt = startAt;
     }
 }

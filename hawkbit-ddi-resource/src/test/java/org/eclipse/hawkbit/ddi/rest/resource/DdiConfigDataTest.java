@@ -48,7 +48,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget("4712");
 
         final long current = System.currentTimeMillis();
-        mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+        mvc.perform(
+                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(APPLICATION_JSON_HAL_UTF))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -71,7 +72,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         // controller attributes again
         assertThat(updateControllerAttributes.getTargetInfo().isRequestControllerAttributes()).isFalse();
 
-        mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+        mvc.perform(
+                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(APPLICATION_JSON_HAL_UTF))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))

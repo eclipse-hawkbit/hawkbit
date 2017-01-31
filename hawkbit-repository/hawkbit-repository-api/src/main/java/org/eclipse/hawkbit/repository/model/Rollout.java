@@ -60,6 +60,12 @@ public interface Rollout extends NamedEntity {
     long getForcedTime();
 
     /**
+     * @return Timestamp when the rollout should be started automatically. Can be null.
+     */
+    Long getStartAt();
+
+
+    /**
      * @return number of {@link Target}s in this rollout.
      */
     long getTotalTargets();

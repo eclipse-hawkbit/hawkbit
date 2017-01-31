@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -60,7 +61,7 @@ public final class MgmtDistributionSetMapper {
      *            to convert
      * @return converted {@link DistributionSet}
      */
-    static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
+    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
             final EntityFactory entityFactory) {
 
         final List<Long> modules = new ArrayList<>();
@@ -96,14 +97,7 @@ public final class MgmtDistributionSetMapper {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Create a response for distribution set.
-     * 
-     * @param distributionSet
-     *            the ds set
-     * @return the response
-     */
-    public static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
+    static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
         if (distributionSet == null) {
             return null;
         }
@@ -147,7 +141,8 @@ public final class MgmtDistributionSetMapper {
             return Collections.emptyList();
         }
 
-        return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList()));
     }
 
     static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {

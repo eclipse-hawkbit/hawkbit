@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
 
@@ -67,15 +68,7 @@ public final class MgmtTargetMapper {
                         .withRel(MgmtRestConstants.TARGET_V1_ACTIONS));
     }
 
-    /**
-     * Add the poll status to a target response.
-     *
-     * @param target
-     *            the target
-     * @param targetRest
-     *            the response
-     */
-    public static void addPollStatus(final Target target, final MgmtTarget targetRest) {
+    static void addPollStatus(final Target target, final MgmtTarget targetRest) {
         final PollStatus pollStatus = target.getTargetInfo().getPollStatus();
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
@@ -88,39 +81,25 @@ public final class MgmtTargetMapper {
         }
     }
 
-    /**
-     * Create a response which includes links and pollstatus for all targets.
-     *
-     * @param targets
-     *            the targets
-     * @return the response
-     */
-    public static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
+    static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
         if (targets == null) {
             return Collections.emptyList();
         }
 
-        return targets.stream().map(target -> {
+        return new ResponseList<>(targets.stream().map(target -> {
             final MgmtTarget response = toResponse(target);
             addPollStatus(target, response);
             addTargetLinks(response);
             return response;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()));
     }
 
-    /**
-     * Create a response for targets.
-     *
-     * @param targets
-     *            list of targets
-     * @return the response
-     */
-    public static List<MgmtTarget> toResponse(final Collection<Target> targets) {
+    static List<MgmtTarget> toResponse(final Collection<Target> targets) {
         if (targets == null) {
             return Collections.emptyList();
         }
 
-        return targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList()));
     }
 
     /**
@@ -182,7 +161,7 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
                 .address(targetRest.getAddress());

@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTargetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +50,8 @@ public interface MgmtTargetTagRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getTargetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -64,7 +66,7 @@ public interface MgmtTargetTagRestApi {
      *
      * @return a single target tag with status OK.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetTagId}", produces = { "application/hal+json",
+    @RequestMapping(method = RequestMethod.GET, value = "/{targetTagId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") final Long targetTagId);
 
@@ -78,8 +80,9 @@ public interface MgmtTargetTagRestApi {
      *         with status code 201 - Created. The Response Body are the created
      *         target tags but without ResponseBody.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createTargetTags(final List<MgmtTagRequestBodyPut> tags);
 
     /**
@@ -92,8 +95,9 @@ public interface MgmtTargetTagRestApi {
      *            the the request body to be updated
      * @return status OK if update is successful and the updated target tag.
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
             final MgmtTagRequestBodyPut restTargetTagRest);
 
@@ -117,7 +121,8 @@ public interface MgmtTargetTagRestApi {
      *
      * @return the list of assigned targets.
      */
-    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
+    @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
 
     /**
@@ -132,7 +137,9 @@ public interface MgmtTargetTagRestApi {
      * @return the list of assigned targets and unassigned targets.
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING
-            + "/toggleTagAssignment")
+            + "/toggleTagAssignment", consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("targetTagId") final Long targetTagId,
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
@@ -147,7 +154,9 @@ public interface MgmtTargetTagRestApi {
      *
      * @return the list of assigned targets.
      */
-    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
+    @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING, consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 

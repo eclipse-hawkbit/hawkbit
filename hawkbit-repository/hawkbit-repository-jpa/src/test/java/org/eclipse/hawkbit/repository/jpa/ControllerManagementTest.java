@@ -11,18 +11,23 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -78,6 +83,42 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction.getId()).getNumberOfElements())
                 .isEqualTo(3);
+    }
+
+    @Test
+    @Description("Verifies that assignement verification works based on SHA1 hash. By design it is not important which artifact "
+            + "is actually used for the check as long as they have an identical binary, i.e. same SHA1 hash. ")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 2) })
+    public void hasTargetArtifactAssignedIsTrueWithMultipleArtifacts() {
+        final byte[] random = RandomUtils.nextBytes(5 * 1024);
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
+        Target savedTarget = testdataFactory.createTarget();
+
+        // create two artifacts with identical SHA1 hash
+        final Artifact artifact = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+                ds.findFirstModuleByType(osType).getId(), "file1", false);
+        final Artifact artifact2 = artifactManagement.createArtifact(new ByteArrayInputStream(random),
+                ds2.findFirstModuleByType(osType).getId(), "file1", false);
+        assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
+
+        assertThat(
+                controllerManagament.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
+                        .isFalse();
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        assertThat(
+                controllerManagament.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
+                        .isTrue();
+        assertThat(
+                controllerManagament.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact2.getSha1Hash()))
+                        .isTrue();
     }
 
     @Test
