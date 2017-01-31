@@ -12,8 +12,6 @@ package org.eclipse.hawkbit.ui.utils;
 /**
  * Interface to provide the unchanged constants.
  */
-// Disable sonar "Files should not have too many lines" rule for constant class
-@SuppressWarnings("squid:S00104")
 public final class UIComponentIdProvider {
     /**
      * ID-Target.
@@ -55,22 +53,18 @@ public final class UIComponentIdProvider {
      * ID-Targ.PIN.
      */
     public static final String TARGET_PIN_ICON = "target.pin.icon.";
-
     /**
      * Target search text id.
      */
     public static final String TARGET_TEXT_FIELD = "target.search.textfield";
-
     /**
      * ID for target filter search
      */
     public static final String TARGET_FILTER_SEARCH_TEXT = "target.filter.search.text.Id";
-
     /**
      * ID for add target filter icon
      */
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
-
     /**
      * ID-Dist.
      */
@@ -124,7 +118,6 @@ public final class UIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
-
     /**
      * ID for distribution set tag icon
      */
@@ -137,27 +130,22 @@ public final class UIComponentIdProvider {
      * ID - soft.module.version.
      */
     public static final String SOFT_MODULE_VERSION = "soft.module.version";
-
     /**
      * ID - soft.module.vendor.
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
-
     /**
      * ID - Save Assign.
      */
     public static final String SAVE_ASSIGNMENT = "save.actions.popup.assign";
-
     /**
      * ID - Discard Assign.
      */
     public static final String DISCARD_ASSIGNMENT = "discard.actions.popup.assign";
-
     /**
      * ID - Delete Distribution SetType Save.
      */
     public static final String SAVE_DELETE_DIST_SET_TYPE = "save.actions.popup.delete.dist.set.type";
-
     /**
      * ID - Discard Distribution SetType.
      */
@@ -166,17 +154,14 @@ public final class UIComponentIdProvider {
      * ID Delete Software Module Type save.
      */
     public static final String SAVE_DELETE_SW_MODULE_TYPE = "save.actions.popup.delete.sw.module.type";
-
     /**
      * ID - Discard SW Module Type.
      */
     public static final String DISCARD_SW_MODULE_TYPE = "save.actions.popup.discard.sw.module.type";
-
     /**
      * Action history table cancel Id.
      */
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
-
     /**
      * Start type of rollout manual radio button
      */
@@ -245,22 +230,18 @@ public final class UIComponentIdProvider {
      * Action history message grid Id.
      */
     public static final String ACTION_HISTORY_MESSAGE_GRID_ID = "action.history.message.gridId";
-
     /**
      * Action history table cancel button Id.
      */
     public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
-
     /**
      * Action history table force button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
-
     /**
      * Action history table force quit button Id.
      */
     public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
-
     /**
      * Action history table forced label Id.
      */

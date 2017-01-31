@@ -391,7 +391,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         }
         final Long alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTarget().get()
                 .getTargetId();
-        if (alreadyPinnedControllerId.equals(selectedTarget.getControllerId())) {
+        if (alreadyPinnedControllerId.equals(selectedTarget.getId())) {
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
