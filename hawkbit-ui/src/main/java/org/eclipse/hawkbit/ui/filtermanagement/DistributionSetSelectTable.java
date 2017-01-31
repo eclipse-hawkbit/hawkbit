@@ -87,8 +87,7 @@ public class DistributionSetSelectTable extends Table {
 
         distributionQF.setQueryConfiguration(queryConfiguration);
         return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), distributionQF);
     }
 
     private void addContainerproperties() {

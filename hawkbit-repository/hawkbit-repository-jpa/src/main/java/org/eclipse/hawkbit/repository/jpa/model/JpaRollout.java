@@ -107,6 +107,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "deleted")
     private boolean deleted;
 
+    @Column(name = "start_at")
+    private Long startAt;
+
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
@@ -152,6 +155,15 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setLastCheck(final long lastCheck) {
         this.lastCheck = lastCheck;
+    }
+
+    @Override
+    public Long getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(Long startAt) {
+        this.startAt = startAt;
     }
 
     @Override

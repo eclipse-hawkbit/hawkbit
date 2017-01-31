@@ -29,8 +29,7 @@ import org.springframework.stereotype.Component;
 /**
  * Scheduler to schedule the
  * {@link RolloutManagement#checkRunningRollouts(long)}. The delay between the
- * checks be be configured using the property
- * {@link #PROP_SCHEDULER_DELAY_PLACEHOLDER}.
+ * checks be be configured using the properties from {@link RolloutProperties}.
  */
 @Component
 // don't active the rollout scheduler in test, otherwise it is hard to test
@@ -171,7 +170,7 @@ public class RolloutScheduler {
      */
     @Scheduled(initialDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_DELETING_SCHEDULER_DELAY_PLACEHOLDER)
     public void deletingRolloutScheduler() {
-        if (!rolloutProperties.getCreatingScheduler().isEnabled()) {
+        if (!rolloutProperties.getDeletingScheduler().isEnabled()) {
             return;
         }
 
@@ -192,6 +191,43 @@ public class RolloutScheduler {
                     final long fixedDelay = rolloutProperties.getDeletingScheduler().getFixedDelay();
                     callAndCatchConcurrentModificationException(
                             () -> rolloutManagement.checkDeletingRollouts(fixedDelay));
+                    return null;
+                });
+            }
+            return null;
+        });
+    }
+
+        /**
+     * Scheduler method called by the spring-async mechanism. Retrieves all
+     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenant the {@link RolloutManagement#checkReadyRollouts(long)} in the
+     * {@link SystemSecurityContext}. Used to auto start Rollouts as soon as
+     * their startAt time is reached.
+     */
+    @Scheduled(initialDelayString = RolloutProperties.PROP_READY_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.PROP_READY_SCHEDULER_DELAY_PLACEHOLDER)
+    public void readyRolloutScheduler() {
+        if (!rolloutProperties.getReadyScheduler().isEnabled()) {
+            return;
+        }
+
+        LOGGER.debug("rollout ready schedule checker has been triggered.");
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
+        systemSecurityContext.runAsSystem(() -> {
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multitenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+            final List<String> tenants = systemManagement.findTenants();
+            LOGGER.info("Checking ready rollouts for {} tenants", tenants.size());
+            for (final String tenant : tenants) {
+                tenantAware.runAsTenant(tenant, () -> {
+                    final long fixedDelay = rolloutProperties.getReadyScheduler().getFixedDelay();
+                    callAndCatchConcurrentModificationException(
+                            () -> rolloutManagement.checkReadyRollouts(fixedDelay));
                     return null;
                 });
             }

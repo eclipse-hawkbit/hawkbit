@@ -51,6 +51,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     private final DistributionSetMetadatadetailslayout dsMetadataTable;
 
+    private final UINotification notificationMessage;
+
     DistributionDetails(final I18N i18n, final UIEventBus eventBus, final SpPermissionChecker permissionChecker,
             final ManagementUIState managementUIState, final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final EntityFactory entityFactory,
@@ -64,12 +66,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         this.dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notificationMessage, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
+        this.notificationMessage = notificationMessage;
 
         softwareModuleTable = new SoftwareModuleDetailsTable(i18n, false, permissionChecker, null, null, null,
                 notificationMessage);
 
         dsMetadataTable = new DistributionSetMetadatadetailslayout(i18n, permissionChecker, distributionSetManagement,
-                dsMetadataPopupLayout, entityFactory);
+                dsMetadataPopupLayout, entityFactory, notificationMessage);
         addTabs(detailsTab);
         restoreState();
     }
@@ -193,6 +196,10 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected void showMetadata(final ClickEvent event) {
         final DistributionSet ds = distributionSetManagement.findDistributionSetById(getSelectedBaseEntityId());
+        if (ds == null) {
+            notificationMessage.displayWarning(getI18n().get("distributionset.not.exists"));
+            return;
+        }
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

@@ -10,22 +10,8 @@ package org.eclipse.hawkbit.ui.utils;
 
 /**
  * RepositoryConstants required for Target.
- * 
- *
- * 
- *
- *
  */
 public final class SPUITargetDefinitions {
-    /**
-     * Target Table Style.
-     */
-    public static final String TARGET_STYLE = "target-table";
-
-    /**
-     * Assignment tab column content size.
-     */
-    public static final int ACCORDION_TAB_TARGET_NAME_LENGTH = 25;
 
     /**
      * Distribution name length .

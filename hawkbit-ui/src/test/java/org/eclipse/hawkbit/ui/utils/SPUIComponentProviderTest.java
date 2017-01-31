@@ -38,10 +38,10 @@ public class SPUIComponentProviderTest {
         // Checking Dyanmic Factory
         Button placeHolderButton = null;
         placeHolderButton = SPUIComponentProvider.getButton("", "Test", "Test",
-                SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, true, null, SPUIButtonStyleSmallNoBorderUH.class);
+                SPUIDefinitions.SP_BUTTON_STATUS_STYLE, true, null, SPUIButtonStyleSmallNoBorderUH.class);
         assertThat(placeHolderButton).isInstanceOf(SPUIButton.class);
         assertThat(placeHolderButton.getCaption()).isEqualTo("Test");
-        assertThat(placeHolderButton.getStyleName()).isEqualTo(SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE);
+        assertThat(placeHolderButton.getStyleName()).isEqualTo(SPUIDefinitions.SP_BUTTON_STATUS_STYLE);
     }
 
 }

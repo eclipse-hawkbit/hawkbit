@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -32,7 +32,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @SpringComponent
 @VaadinSessionScope
-public class ManageDistUIState implements ManagmentEntityState<DistributionSetIdName>, Serializable {
+public class ManageDistUIState implements ManagmentEntityState<Long>, Serializable {
 
     private static final long serialVersionUID = -7569047247017742928L;
 
@@ -44,9 +44,9 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
 
     private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private Set<DistributionSetIdName> selectedDistributions = new HashSet<>();
+    private Set<Long> selectedDistributions = new HashSet<>();
 
-    private DistributionSetIdName lastSelectedDistribution;
+    private Long lastSelectedDistribution;
 
     private Set<Long> selectedSoftwareModules = emptySet();
 
@@ -107,24 +107,24 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
     /**
      * @return the slectedDistributions
      */
-    public Optional<Set<DistributionSetIdName>> getSelectedDistributions() {
+    public Optional<Set<Long>> getSelectedDistributions() {
         return Optional.ofNullable(selectedDistributions);
     }
 
     /**
      * @return the lastSelectedDistribution
      */
-    public Optional<DistributionSetIdName> getLastSelectedDistribution() {
+    public Optional<Long> getLastSelectedDistribution() {
         return Optional.ofNullable(lastSelectedDistribution);
     }
 
     @Override
-    public void setLastSelectedEntity(final DistributionSetIdName value) {
+    public void setLastSelectedEntity(final Long value) {
         this.lastSelectedDistribution = value;
     }
 
     @Override
-    public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
+    public void setSelectedEnitities(final Set<Long> values) {
         selectedDistributions = values;
     }
 

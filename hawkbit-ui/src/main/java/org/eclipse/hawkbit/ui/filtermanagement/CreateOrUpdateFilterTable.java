@@ -121,8 +121,7 @@ public class CreateOrUpdateFilterTable extends Table {
 
         // create lazy query container with lazy defination and query
         final LazyQueryContainer targetTableContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME),
-                targetQF);
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), targetQF);
         targetTableContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
 
         return targetTableContainer;

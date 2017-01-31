@@ -424,17 +424,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     /**
      * Set title of artifact details header layout.
      */
-    public void setTitleOfLayoutHeader() {
+    private void setTitleOfLayoutHeader() {
         titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
-    }
-
-    /**
-     * Close artifact details layout.
-     */
-    public void closeArtifactDetails() {
-        removeAllComponents();
-        setVisible(false);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

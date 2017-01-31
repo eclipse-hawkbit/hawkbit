@@ -38,6 +38,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -92,6 +93,8 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String UPDATE_OPTION = "Update";
 
+    private static final String COPY_OPTION = "Copy";
+
     private static final String PAUSE_OPTION = "Pause";
 
     private static final String RUN_OPTION = "Run";
@@ -138,11 +141,12 @@ public class RolloutListGrid extends AbstractGrid {
     RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final UINotification uiNotification, final RolloutUIState rolloutUIState,
             final SpPermissionChecker permissionChecker, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties) {
+            final EntityFactory entityFactory, final UiProperties uiProperties,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, eventBus);
+                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
     }
@@ -258,6 +262,11 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
+                    
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
+                    false);
+        }
             // TODO Permission?
             rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
                     false);
@@ -297,6 +306,10 @@ public class RolloutListGrid extends AbstractGrid {
         } else {
             getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION).setMinimumWidth(25);
+            getColumn(COPY_OPTION).setMaximumWidth(25);
+        }
 
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
     }
@@ -325,10 +338,17 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
             getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
         }
+        
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
+        }
 
         HeaderCell join;
         if (permissionChecker.hasRolloutUpdatePermission()) {
-            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, DELETE_OPTION);
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION, DELETE_OPTION);
         } else {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
         }
@@ -359,6 +379,9 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
             columnList.add(DELETE_OPTION);
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            columnList.add(COPY_OPTION);
         }
 
         columnList.add(VAR_CREATED_DATE);
@@ -416,6 +439,10 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(DELETE_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
         }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            getColumn(COPY_OPTION)
+                    .setRenderer(new HtmlButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())));
+        }
 
     }
 
@@ -469,8 +496,15 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void updateRollout(final Long rolloutId) {
-        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId);
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, false);
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
+        UI.getCurrent().addWindow(addTargetWindow);
+        addTargetWindow.setVisible(Boolean.TRUE);
+    }
+    
+    private void copyRollout(final Long rolloutId) {
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, true);
+        addTargetWindow.setCaption(i18n.get("caption.create.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }

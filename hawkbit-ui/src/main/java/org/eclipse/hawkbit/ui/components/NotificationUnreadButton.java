@@ -57,7 +57,7 @@ public class NotificationUnreadButton extends Button {
      *            i18n
      */
     @Autowired
-    public NotificationUnreadButton(final I18N i18n) {
+    NotificationUnreadButton(final I18N i18n) {
         this.i18n = i18n;
         this.unreadNotifications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);

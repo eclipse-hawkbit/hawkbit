@@ -175,6 +175,21 @@ public final class UIComponentIdProvider {
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
 
     /**
+     * Start type of rollout manual radio button
+     */
+    public static final String ROLLOUT_START_MANUAL_ID = "rollout.start.manual.radio";
+
+    /**
+     * Start type of rollout auto start radio button
+     */
+    public static final String ROLLOUT_START_AUTO_ID = "rollout.start.auto.radio";
+
+    /**
+     * Start type of rollout scheduled start radio button
+     */
+    public static final String ROLLOUT_START_SCHEDULED_ID = "rollout.start.scheduled.start.radio";
+
+    /**
      * ID - Label.
      */
     public static final String ACTION_LABEL = "save.actions.popup.actionMsg";
@@ -724,6 +739,21 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_ERROR_THRESOLD_ID = "rollout.error.thresold.id";
 
     /**
+     * Rollout group target percentage id.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_PERC_ID = "rollout.group.target.percentage.id";
+
+    /**
+     * Rollout group add button id
+     */
+    public static final String ROLLOUT_GROUP_ADD_ID = "rollout.group.add.id";
+
+    /**
+     * Rollout group remove button id
+     */
+    public static final String ROLLOUT_GROUP_REMOVE_ID = "rollout.group.remove.id";
+
+    /**
      * Rollout distribution set combo id.
      */
     public static final String ROLLOUT_DS_ID = "rollout.ds.id";
@@ -735,7 +765,18 @@ public final class UIComponentIdProvider {
      * Rollout target filter query combo id.
      */
     public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
-
+    /**
+     * Rollout groups id
+     */
+    public static final String ROLLOUT_GROUPS = "rollout.groups";
+    /**
+     * Rollout simple tab id
+     */
+    public static final String ROLLOUT_SIMPLE_TAB = "rollout.create.tabs.simple";
+    /**
+     * Rollout advanced tab id
+     */
+    public static final String ROLLOUT_ADVANCED_TAB = "rollout.create.tabs.advanced";
     /**
      * Rollout action button id.
      */
@@ -752,9 +793,14 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
 
     /**
-     * Rollout resume button id.
+     * Rollout update button id.
      */
     public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
+
+    /**
+     * Rollout copy button id.
+     */
+    public static final String ROLLOUT_COPY_BUTTON_ID = ROLLOUT_ACTION_ID + ".12";
 
     /**
      * Rollout status label id.
@@ -849,16 +895,6 @@ public final class UIComponentIdProvider {
     public static final String METADATA_VALUE_ID = "metadata.value.id";
 
     /**
-     * Metadata save id.
-     */
-    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
-
-    /**
-     * Metadata discard id.
-     */
-    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
-
-    /**
      * Metadata add icon id.
      */
     public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
@@ -925,9 +961,6 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
-    /**
-     * Distribution set select enable checkbox id
-     */
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";

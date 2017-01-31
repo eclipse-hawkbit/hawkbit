@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.Set;
 
@@ -156,13 +157,14 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         setContent(rootLayout);
         final Resource resource = context
                 .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
-        try {
-            final CustomLayout customLayout = new CustomLayout(resource.getInputStream());
+        try (InputStream resourceStream = resource.getInputStream()) {
+            final CustomLayout customLayout = new CustomLayout(resourceStream);
             customLayout.setSizeUndefined();
             contentVerticalLayout.addComponent(customLayout);
         } catch (final IOException ex) {
-            LOG.error("Footer file is missing", ex);
+            LOG.error("Footer file cannot be loaded", ex);
         }
+
         final Navigator navigator = new Navigator(this, content);
         navigator.addViewChangeListener(new ViewChangeListener() {
             private static final long serialVersionUID = 1L;

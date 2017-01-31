@@ -159,7 +159,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         if (assignmentResult.getAssigned() > 0 && managementUIState.getLastSelectedDsIdName() != null) {
             final List<Long> assignedDsNames = assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
-            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
+            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName())) {
                 return true;
             }
         }
@@ -170,7 +170,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         if (assignmentResult.getUnassigned() > 0 && managementUIState.getLastSelectedDsIdName() != null) {
             final List<Long> assignedDsNames = assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
-            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
+            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName())) {
                 return true;
             }
         }
