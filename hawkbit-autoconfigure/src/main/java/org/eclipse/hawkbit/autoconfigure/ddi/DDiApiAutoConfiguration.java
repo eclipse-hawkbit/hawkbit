@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.autoconfigure.web;
+package org.eclipse.hawkbit.autoconfigure.ddi;
 
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

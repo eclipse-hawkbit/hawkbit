@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,11 +28,13 @@ import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming
@@ -42,7 +45,7 @@ public interface RolloutManagement {
 
     /**
      * Checking running rollouts. Rollouts which are checked updating the
-     * {@link Rollout#setLastCheck(long)} to indicate that the current instance
+     * lastCheck to indicate that the current instance
      * is handling the specific rollout. This code should run as system-code.
      *
      * <pre>
@@ -55,8 +58,8 @@ public interface RolloutManagement {
      *  }
      * </pre>
      *
-     * This method is attend to be called by a scheduler.
-     * {@link RolloutScheduler}. And must be running in an transaction so it's
+     * This method is intended to be called by a scheduler.
+     * And must be running in an transaction so it's
      * splitted from the scheduler.
      *
      * Rollouts which are currently running are investigated, by means the
@@ -94,6 +97,17 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void checkStartingRollouts(long delayBetweenChecks);
+
+    /**
+     * Checking Rollouts that are currently ready for an auto start.
+     *
+     * @param delayBetweenChecks
+     *            the time in milliseconds of the delay between the further and
+     *            this check. This check is only applied if the last check is
+     *            less than (lastcheck-delay).
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
+    void checkReadyRollouts(long delayBetweenChecks);
 
     /**
      * Counts all {@link Rollout}s in the repository.
@@ -180,6 +194,24 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout createRollout(@NotNull RolloutCreate rollout, @NotNull List<RolloutGroupCreate> groups,
             RolloutGroupConditions conditions);
+
+    /**
+     * Calculates how many targets are addressed by each rollout group and
+     * returns the validation information.
+     *
+     * @param groups
+     *            a list of rollout groups
+     * @param targetFilter
+     *            the rollout
+     * @param createdAt
+     *            timestamp when the rollout was created
+     * @return the validation information
+     * @throws RolloutIllegalStateException
+     *             thrown when no targets are targeted by the rollout
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(List<RolloutGroupCreate> groups,
+            String targetFilter, Long createdAt);
 
     /**
      * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
@@ -365,10 +397,6 @@ public interface RolloutManagement {
      *
      * @param update
      *            rollout to be updated
-     * @param name
-     *            to update or <code>null</code>
-     * @param description
-     *            to update or <code>null</code>
      *
      * @return Rollout updated rollout
      */

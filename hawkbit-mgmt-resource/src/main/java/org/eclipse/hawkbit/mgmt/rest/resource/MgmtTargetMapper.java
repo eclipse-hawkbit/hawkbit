@@ -68,15 +68,7 @@ public final class MgmtTargetMapper {
                         .withRel(MgmtRestConstants.TARGET_V1_ACTIONS));
     }
 
-    /**
-     * Add the poll status to a target response.
-     *
-     * @param target
-     *            the target
-     * @param targetRest
-     *            the response
-     */
-    public static void addPollStatus(final Target target, final MgmtTarget targetRest) {
+    static void addPollStatus(final Target target, final MgmtTarget targetRest) {
         final PollStatus pollStatus = target.getTargetInfo().getPollStatus();
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
@@ -163,7 +155,7 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
                 .address(targetRest.getAddress());

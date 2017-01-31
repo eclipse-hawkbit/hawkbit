@@ -183,7 +183,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         }
     }
 
-    protected void applyMaxTableSettings() {
+    private void applyMaxTableSettings() {
         setColumnProperties();
         setValue(null);
         setSelectable(false);
@@ -192,7 +192,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
         setColumnCollapsingAllowed(true);
     }
 
-    protected void applyMinTableSettings() {
+    private void applyMinTableSettings() {
         setDefault();
         setColumnProperties();
         selectRow();
@@ -439,6 +439,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table impl
             return;
         }
         ((LazyQueryContainer) getContainerDataSource()).refresh();
+    }
+
+    protected UINotification getNotification() {
+        return notification;
     }
 
     protected abstract boolean hasDropPermission();

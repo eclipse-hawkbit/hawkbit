@@ -42,7 +42,7 @@ public final class MgmtSoftwareModuleMapper {
         // Utility class
     }
 
-    static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleRequestBodyPost smsRest) {
         return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
                 .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor());
@@ -68,14 +68,7 @@ public final class MgmtSoftwareModuleMapper {
         return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    /**
-     * Create response for sw modules.
-     * 
-     * @param softwareModules
-     *            the modules
-     * @return the response
-     */
-    public static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
+    static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
@@ -99,14 +92,7 @@ public final class MgmtSoftwareModuleMapper {
         return metadataRest;
     }
 
-    /**
-     * Create response for one sw module.
-     * 
-     * @param baseSofwareModule
-     *            the sw module
-     * @return the response
-     */
-    public static MgmtSoftwareModule toResponse(final SoftwareModule baseSofwareModule) {
+    static MgmtSoftwareModule toResponse(final SoftwareModule baseSofwareModule) {
         if (baseSofwareModule == null) {
             return null;
         }

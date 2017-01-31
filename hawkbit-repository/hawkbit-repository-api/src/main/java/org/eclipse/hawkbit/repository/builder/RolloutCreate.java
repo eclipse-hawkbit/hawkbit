@@ -77,6 +77,13 @@ public interface RolloutCreate {
     RolloutCreate forcedTime(Long forcedTime);
 
     /**
+     * @param startAt
+     *            for {@link Rollout#getStartAt()}
+     * @return updated builder instance
+     */
+    RolloutCreate startAt(Long startAt);
+
+    /**
      * @return peek on current state of {@link Rollout} in the builder
      */
     Rollout build();

@@ -30,6 +30,7 @@ public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate>
         rollout.setDescription(description);
         rollout.setDistributionSet(findDistributionSetAndThrowExceptionIfNotFound(set));
         rollout.setTargetFilterQuery(targetFilterQuery);
+        rollout.setStartAt(startAt);
 
         if (actionType != null) {
             rollout.setActionType(actionType);

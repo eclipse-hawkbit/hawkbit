@@ -338,16 +338,12 @@ public final class SPUIDefinitions {
     /**
      * Space.
      */
-    public static final String SPACE = "&nbsp;";
+    static final String SPACE = "&nbsp;";
 
     /**
      * Distribution tag button id prefix.
      */
     public static final String SOFTWARE_MODULE_TAG_ID_PREFIXS = "swmodule.type.";
-    /**
-     * Distribution tag button id prefix.
-     */
-    public static final String DISTRIBUTION_TYPE_ID_PREFIXS = "dist-type-";
 
     /**
      * DistributionSet Type tag button id prefix.
@@ -387,15 +383,15 @@ public final class SPUIDefinitions {
      * automatically and also horizontal scroll bars get displayed. Used for
      * Responsive UI.
      */
-    public static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
+    static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1000;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 310;
 
-    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
+    static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
 
-    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
+    static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
 
     /** Artifact upload related entries - end. **/
 
@@ -501,6 +497,11 @@ public final class SPUIDefinitions {
      * Rollout list view - header caption .
      */
     public static final String ROLLOUT_LIST_HEADER_CAPTION = "Rollouts";
+
+    /**
+     * BUTTON- STATUS.
+     */
+    public static final String SP_BUTTON_STATUS_STYLE = "targetStatusBtn";
 
     /**
      * /** Constructor.

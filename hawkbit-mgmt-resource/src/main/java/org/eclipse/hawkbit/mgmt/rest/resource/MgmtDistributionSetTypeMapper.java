@@ -47,7 +47,7 @@ final class MgmtDistributionSetTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
     }
 
-    static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return entityFactory.distributionSetType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())

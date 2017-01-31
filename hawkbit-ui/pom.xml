@@ -253,6 +253,11 @@
          <artifactId>spring-boot-configuration-processor</artifactId>
          <optional>true</optional>
       </dependency>
+      <dependency>
+         <groupId>com.github.gwtd3</groupId>
+         <artifactId>gwt-d3-api</artifactId>
+      </dependency>
+
       <!-- Test -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>

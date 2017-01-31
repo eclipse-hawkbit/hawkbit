@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -20,8 +19,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
  *
  */
 public class ProxyDistribution {
-
-    private static final long serialVersionUID = -8891449133620645310L;
 
     private Long distId;
 
@@ -50,10 +47,13 @@ public class ProxyDistribution {
     }
 
     /**
-     * Creates a new proxy distribution set by using the values from a distribution set
-     * @param distributionSet the source distribution set
+     * Creates a new proxy distribution set by using the values from a
+     * distribution set
+     * 
+     * @param distributionSet
+     *            the source distribution set
      */
-    public ProxyDistribution(DistributionSet distributionSet) {
+    public ProxyDistribution(final DistributionSet distributionSet) {
         setName(distributionSet.getName());
         setDescription(distributionSet.getDescription());
         setDistId(distributionSet.getId());
@@ -68,22 +68,10 @@ public class ProxyDistribution {
         setIsComplete(distributionSet.isComplete());
     }
 
-
-    /**
-     * @return the nameVersion
-     */
     public String getNameVersion() {
         return nameVersion;
     }
 
-    public DistributionSetIdName getDistributionSetIdName() {
-        return DistributionSetIdName.generate(id, name, version);
-    }
-
-    /**
-     * @param nameVersion
-     *            the nameVersion to set
-     */
     public void setNameVersion(final String nameVersion) {
         this.nameVersion = nameVersion;
     }

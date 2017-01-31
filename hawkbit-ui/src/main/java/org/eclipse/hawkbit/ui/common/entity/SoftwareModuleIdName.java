@@ -6,9 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.ui.common.entity;
 
 import java.io.Serializable;
+
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * To hold software module name and Id.
@@ -69,5 +71,12 @@ public class SoftwareModuleIdName implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        // only return the ID because it's used in vaadin for setting the item
+        // id in the dom
+        return id.toString();
     }
 }

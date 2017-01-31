@@ -10,12 +10,9 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -25,6 +22,7 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -67,12 +65,10 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     private final transient EntityFactory entityFactory;
 
-    private final transient TargetManagement targetManagement;
-
     TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final I18N i18n,
-            final UINotification notification, final SpPermissionChecker permChecker, final EntityFactory entityFactory,
-            final TargetManagement targetManagement) {
+            final UINotification notification, final SpPermissionChecker permChecker,
+            final EntityFactory entityFactory) {
         super(eventBus, new TargetTagFilterButtonClick(eventBus, managementUIState));
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -80,7 +76,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         this.notification = notification;
         this.permChecker = permChecker;
         this.entityFactory = entityFactory;
-        this.targetManagement = targetManagement;
 
         addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
     }
@@ -199,20 +194,12 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
 
-        @SuppressWarnings("unchecked")
-        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
-                .getSourceComponent();
-
-        final Set<TargetIdName> targetSelected = targetTable.getDeletedEntityByTransferable(transferable);
-
-        final Set<String> targetList = targetSelected.stream().map(t -> t.getControllerId())
-                .collect(Collectors.toSet());
-
+        final TargetTable targetTable = (TargetTable) transferable.getSourceComponent();
+        final Set<Long> targetList = targetTable.getDeletedEntityByTransferable(transferable);
         final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 
-        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
+        final TargetTagAssignmentResult result = targetTable.toggleTagAssignment(targetList, targTagName);
 
         publishAssignTargetTagEvent(result);
 

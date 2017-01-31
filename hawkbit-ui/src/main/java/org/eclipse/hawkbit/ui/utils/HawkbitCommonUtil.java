@@ -10,13 +10,11 @@ package org.eclipse.hawkbit.ui.utils;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -42,10 +40,7 @@ import com.vaadin.ui.Table;
  */
 public final class HawkbitCommonUtil {
     public static final String SP_STRING_PIPE = " | ";
-    /**
-     * Html span.
-     */
-    public static final String SPAN_CLOSE = "</span>";
+
     public static final String HTML_LI_CLOSE_TAG = "</li>";
     public static final String HTML_LI_OPEN_TAG = "<li>";
     public static final String HTML_UL_CLOSE_TAG = "</ul>";
@@ -66,9 +61,6 @@ public final class HawkbitCommonUtil {
     private static final String PREVIEW_BUTTON_COLOR_CREATE_SCRIPT = "tagColorPreview = document.createElement('style'); tagColorPreview.id=\"tag-color-preview\";  document.head.appendChild(tagColorPreview); ";
     private static final String PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT = "var a = document.getElementById('tag-color-preview'); if(a) { document.head.removeChild(a); } ";
     private static final String PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT = "document.getElementById('tag-color-preview').innerHTML = tagColorPreviewStyle;";
-
-    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
-    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     private HawkbitCommonUtil() {
 
@@ -217,14 +209,7 @@ public final class HawkbitCommonUtil {
         return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
-    /**
-     * Find required extra width of software module.
-     *
-     * @param newBrowserWidth
-     *            new browser width
-     * @return float width of software module table
-     */
-    public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
+    private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
                 ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
     }
@@ -455,42 +440,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Add target table container properties.
-     *
-     * @param container
-     *            table container
-     */
-    public static void addTargetTableContainerProperties(final Container container) {
-        final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
-                TargetUpdateStatus.UNKNOWN, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
-
-        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
-        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
-    }
-
-    /**
      * Apply style for status label in target table.
      *
      * @param targetTable
@@ -520,50 +469,11 @@ public final class HawkbitCommonUtil {
         }
     }
 
-    /**
-     * Set status progress bar value.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param statusName
-     *            status name
-     * @param count
-     *            target counts in a status
-     * @param index
-     *            bar part index
-     */
-    public static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
+    private static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
             final int index) {
         bar.setPartSize(index, count);
         bar.setPartTooltip(index, statusName);
         bar.setPartStyleName(index, "status-bar-part-" + statusName);
-    }
-
-    /**
-     * Initialize status progress bar with values and number of parts on load.
-     *
-     * @param bar
-     *            DistributionBar
-     * @param item
-     *            row of a table
-     */
-    public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
-        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
-        final Long scheduledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
-        final Long errorTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
-        final Long finishedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
-        final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
-        if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
-                finishedTargetsCount, cancelledTargetsCount)) {
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0,
-                    0);
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
-                    1);
-        } else {
-            bar.setNumberOfParts(6);
-            setProgressBarDetails(bar, item);
-        }
     }
 
     /**
