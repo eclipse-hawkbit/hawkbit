@@ -445,7 +445,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
+        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
 
         return totalTargets - validation.getTargetsInGroups();
     }
@@ -476,7 +476,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         for (int i = 0; i < groups.size(); i++) {
             final RolloutGroup group = groups.get(i);
-            String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
+            final String groupTargetFilter = RolloutHelper.getGroupTargetFilter(baseFilter, group);
             RolloutHelper.verifyRolloutGroupTargetPercentage(group.getTargetPercentage());
 
             final long targetsInGroupFilter = targetFilterCounts.get(groupTargetFilter);
@@ -498,7 +498,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
         }
-       return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
+        return new RolloutGroupsValidation(totalTargets, groupTargetCounts);
     }
 
     private long countOverlappingTargetsWithPreviousGroups(final String baseFilter, final List<RolloutGroup> groups,
@@ -508,8 +508,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             return 0;
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
-        String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter, previousGroups,
-                group);
+        final String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter,
+                previousGroups, group);
 
         if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
             return targetFilterCounts.get(overlappingTargetsFilter);
@@ -898,8 +898,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         });
 
     }
-    
-        @Override
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void checkReadyRollouts(final long delayBetweenChecks) {
@@ -1050,7 +1050,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
             final Boolean deleted) {
         final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
-        specList.add(likeNameOrDescription(searchText));
+        specList.add(RolloutHelper.likeNameOrDescription(searchText));
         if (deleted != null) {
             specList.add(RolloutSpecification.isDeleted(deleted));
         }
