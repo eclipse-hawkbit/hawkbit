@@ -544,17 +544,10 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("First Group is not the first group.");
         }
 
-        // set rollout-group running before create actions for it.
-        // the actions are created and committed in a new transaction and so
-        // otherwise we would create actions but the rollout-group are not
-        // set runnning yet. Don't set the rollout itself running yet, otherwise
-        // the #checkRunningRollout scheduler will pick it up and also tries to
-        // create actions.
+        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
+
         rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
         rolloutGroupRepository.save(rolloutGroup);
-        entityManager.flush();
-
-        deploymentManagement.startScheduledActionsByRolloutGroupParent(rollout, null);
 
         jpaRollout.setStatus(RolloutStatus.RUNNING);
         jpaRollout.setLastCheck(0);
@@ -980,13 +973,10 @@ public class JpaRolloutManagement implements RolloutManagement {
             return;
         }
 
-        // hard delete groups if all groups are either CREATING, READY or
-        // SCHEDULED state, so the never ran before.
-        final long countRolloutGroupsNotInScheduled = countRolloutGroupsWereRunningBefore(rollout);
-        // if all groups are in schedule state, we hard delete all groups, in
-        // case one rolloutgroup has another state we keep the revision of all
-        // groups of the rollout (soft-delete)
-        final boolean hardDeleteRolloutGroups = countRolloutGroupsNotInScheduled == 0;
+        // only hard delete the rollout if no actions are left for the rollout.
+        // In case actions are left, they are probably are running or were
+        // running before, so only soft delete.
+        final boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutId(rollout.getId());
         if (hardDeleteRolloutGroups) {
             hardDeleteRollout(rollout);
             return;
@@ -998,11 +988,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         rolloutRepository.save(rollout);
 
         rollout.fireDeleteEvent(new DescriptorEvent(rollout));
-    }
-
-    private long countRolloutGroupsWereRunningBefore(final JpaRollout rollout) {
-        return rolloutGroupRepository.countByRolloutIdAndStatusNotAndStatusNotAndStatusNot(rollout.getId(),
-                RolloutGroupStatus.CREATING, RolloutGroupStatus.READY, RolloutGroupStatus.SCHEDULED);
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {

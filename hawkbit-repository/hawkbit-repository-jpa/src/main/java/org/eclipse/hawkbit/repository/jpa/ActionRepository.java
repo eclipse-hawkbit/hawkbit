@@ -278,6 +278,18 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
 
     /**
+     * Returns {@code true} if actions for the given rollout exists, otherwise
+     * {@code false}
+     * 
+     * @param rolloutId
+     *            the ID of the rollout the actions belong to
+     * @return {@code true} if actions for the given rollout exists, otherwise
+     *         {@code false}
+     */
+    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId")
+    boolean existsByRolloutId(@Param("rolloutId") Long rolloutId);
+
+    /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
      *
