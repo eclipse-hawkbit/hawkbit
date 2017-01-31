@@ -140,7 +140,7 @@ public final class MgmtTargetMapper {
             targetRest.setInstalledAt(installationDate);
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetResource.class).getTarget(target.getControllerId())).withSelfRel());
+        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 
         return targetRest;
     }
