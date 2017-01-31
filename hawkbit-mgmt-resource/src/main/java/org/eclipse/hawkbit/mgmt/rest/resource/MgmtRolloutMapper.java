@@ -85,7 +85,7 @@ final class MgmtRolloutMapper {
             }
         }
 
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withRel("self"));
+        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel());
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
@@ -182,7 +182,7 @@ final class MgmtRolloutMapper {
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroup(rolloutGroup.getRollout().getId(),
-                rolloutGroup.getId())).withRel("self"));
+                rolloutGroup.getId())).withSelfRel());
         return body;
     }
 

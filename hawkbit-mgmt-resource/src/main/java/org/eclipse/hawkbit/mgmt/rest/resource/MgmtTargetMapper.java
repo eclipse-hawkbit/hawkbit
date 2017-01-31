@@ -81,20 +81,14 @@ public final class MgmtTargetMapper {
         }
     }
 
-    static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
-        if (targets == null) {
-            return Collections.emptyList();
-        }
-
-        return new ResponseList<>(targets.stream().map(target -> {
-            final MgmtTarget response = toResponse(target);
-            addPollStatus(target, response);
-            addTargetLinks(response);
-            return response;
-        }).collect(Collectors.toList()));
-    }
-
-    static List<MgmtTarget> toResponse(final Collection<Target> targets) {
+    /**
+     * Create a response for targets.
+     *
+     * @param targets
+     *            list of targets
+     * @return the response
+     */
+    public static List<MgmtTarget> toResponse(final Collection<Target> targets) {
         if (targets == null) {
             return Collections.emptyList();
         }
@@ -146,7 +140,7 @@ public final class MgmtTargetMapper {
             targetRest.setInstalledAt(installationDate);
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withRel("self"));
+        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 
         return targetRest;
     }
@@ -189,7 +183,7 @@ public final class MgmtTargetMapper {
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
 
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withRel("self"));
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel());
 
         return result;
     }

@@ -107,7 +107,7 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT));
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
-                .withRel("self"));
+                .withSelfRel());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class)
                 .getSoftwareModuleType(baseSofwareModule.getType().getId()))
@@ -135,7 +135,7 @@ public final class MgmtSoftwareModuleMapper {
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
-                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("self"));
+                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withSelfRel());
 
         artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));
