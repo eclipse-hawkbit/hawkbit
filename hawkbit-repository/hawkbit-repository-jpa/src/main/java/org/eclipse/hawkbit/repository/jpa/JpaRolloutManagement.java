@@ -59,6 +59,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -941,6 +942,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         rollout.setStatus(RolloutStatus.DELETED);
         rollout.setDeleted(true);
         rolloutRepository.save(rollout);
+
+        rollout.fireDeleteEvent(new DescriptorEvent(rollout));
     }
 
     private long countRolloutGroupsWereRunningBefore(final JpaRollout rollout) {
@@ -1044,9 +1047,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Rollout findRolloutWithDetailedStatus(final Long rolloutId) {
+    public Rollout findRolloutWithDetailedStatus(final Long rolloutId, final Boolean deleted) {
         final Rollout rollout = findRolloutById(rolloutId);
-        if (rollout == null || rollout.getStatus().equals(RolloutStatus.DELETING)) {
+        if (rollout == null || (!deleted && rollout.getStatus().equals(RolloutStatus.DELETED))) {
             return null;
         }
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository

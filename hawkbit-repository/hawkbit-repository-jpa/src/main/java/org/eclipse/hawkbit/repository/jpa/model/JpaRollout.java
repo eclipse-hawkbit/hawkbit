@@ -28,6 +28,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -217,12 +218,12 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        // there is no rollout deletion event
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutDeletedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     public boolean isDeleted() {

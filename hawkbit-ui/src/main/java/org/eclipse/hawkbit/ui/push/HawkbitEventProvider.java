@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 
 import com.google.common.collect.Maps;
@@ -60,6 +61,7 @@ public class HawkbitEventProvider implements UIEventProvider {
 
         EVENTS.put(RolloutGroupChangeEvent.class, RolloutGroupChangeEventContainer.class);
         EVENTS.put(RolloutChangeEvent.class, RolloutChangeEventContainer.class);
+        EVENTS.put(RolloutDeleteEvent.class, RolloutDeleteEventContainer.class);
 
         EVENTS.put(SoftwareModuleCreatedEvent.class, SoftwareModuleCreatedEventContainer.class);
         EVENTS.put(SoftwareModuleDeletedEvent.class, SoftwareModuleDeletedEventContainer.class);

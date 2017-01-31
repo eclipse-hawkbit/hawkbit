@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -53,7 +54,9 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
+import org.eclipse.hawkbit.ui.push.RolloutDeleteEventContainer;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
+import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -130,8 +133,6 @@ public class RolloutListGrid extends AbstractGrid {
         statusIconMap.put(RolloutStatus.ERROR_STARTING,
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
-        statusIconMap.put(RolloutStatus.DELETED,
-                new StatusFontIcon(FontAwesome.TRASH, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
     RolloutListGrid(final I18N i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
@@ -165,6 +166,22 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     /**
+     * Handles the RolloutDeleteEvent to refresh the grid.
+     *
+     * @param eventContainer
+     *            container which holds the rollout delete event
+     */
+    @SuppressWarnings("unchecked")
+    @EventBusListenerMethod(scope = EventScope.UI)
+    public void onRolloutDeleteEvent(final RolloutDeleteEventContainer eventContainer) {
+        eventContainer.getEvents().forEach(this::handleEvent);
+    }
+
+    private void handleEvent(final RolloutDeleteEvent rolloutDeleteEvent) {
+        refreshContainer();
+    }
+
+    /**
      * Handles the RolloutChangeEvent to refresh the item in the grid.
      *
      * @param eventContainer
@@ -180,14 +197,15 @@ public class RolloutListGrid extends AbstractGrid {
         if (!rolloutUIState.isShowRollOuts()) {
             return;
         }
-        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId(),
+                false);
 
         // rollout is null if rollout was deleted
         if (rollout != null) {
             final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
-            if (item == null || rollout.getStatus().equals(RolloutStatus.DELETED)) {
+            if (item == null) {
                 refreshContainer();
                 return;
             }
@@ -202,9 +220,6 @@ public class RolloutListGrid extends AbstractGrid {
             }
             item.getItemProperty(ROLLOUT_RENDERER_DATA)
                     .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
-        } else {
-            getContainerDataSource().removeItem(rolloutChangeEvent.getRolloutId());
-            refreshContainer();
         }
     }
 
@@ -474,14 +489,19 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getConfirmationQuestion(final Long rolloutId) {
-        final Rollout rolloutData = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final Rollout rolloutData = rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false);
         final Map<Status, Long> statusTotalCount = rolloutData.getTotalTargetCountStatus().getStatusTotalCountMap();
         Long scheduledActions = statusTotalCount.get(Status.SCHEDULED);
         if (scheduledActions == null) {
             scheduledActions = 0L;
         }
-        return i18n.get("message.delete.rollout", rolloutData.getName(), statusTotalCount.get(Status.RUNNING),
-                scheduledActions);
+        final Long runningActions = statusTotalCount.get(Status.RUNNING);
+        String rolloutDetailsMessage = StringUtils.EMPTY;
+        if ((scheduledActions > 0) || (runningActions > 0)) {
+            rolloutDetailsMessage = i18n.get("message.delete.rollout.details", runningActions, scheduledActions);
+        }
+
+        return i18n.get("message.delete.rollout", rolloutData.getName(), rolloutDetailsMessage);
     }
 
     private String getDescription(final CellReference cell) {

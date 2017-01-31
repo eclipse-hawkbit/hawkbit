@@ -212,7 +212,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     private Rollout findRolloutOrThrowException(final Long rolloutId) {
-        final Rollout rollout = this.rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final Rollout rollout = this.rolloutManagement.findRolloutWithDetailedStatus(rolloutId, false);
         if (rollout == null) {
             throw new EntityNotFoundException("Rollout with Id {" + rolloutId + DOES_NOT_EXIST);
         }

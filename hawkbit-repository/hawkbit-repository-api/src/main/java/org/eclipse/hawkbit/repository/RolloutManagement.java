@@ -294,11 +294,13 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            rollout id
+     * @param deleted
+     *            flag if deleted rollouts should be included
      * @return rollout details of targets count for different statuses
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId);
+    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId, Boolean deleted);
 
     /***
      * Get finished percentage details for a specified group which is in running
