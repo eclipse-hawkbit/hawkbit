@@ -896,4 +896,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.countByTypeId(typeId);
     }
 
+    @Override
+    public List<DistributionSet> findDistributionSetAllById(final Collection<Long> ids) {
+        return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
+    }
+
 }

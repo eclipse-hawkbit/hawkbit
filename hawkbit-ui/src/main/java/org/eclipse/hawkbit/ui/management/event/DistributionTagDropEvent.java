@@ -10,12 +10,10 @@ package org.eclipse.hawkbit.ui.management.event;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
@@ -57,7 +55,7 @@ public class DistributionTagDropEvent implements DropHandler {
     private final transient EventBus.UIEventBus eventBus;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
-    
+
     public DistributionTagDropEvent(final I18N i18n, final UINotification notification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement, final UIEventBus eventBus,
@@ -134,19 +132,16 @@ public class DistributionTagDropEvent implements DropHandler {
 
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, DistributionSetIdName> source = (AbstractTable<?, DistributionSetIdName>) transferable
-                .getSourceComponent();
+        final AbstractTable<?, Long> source = (AbstractTable<?, Long>) transferable.getSourceComponent();
 
-        final Set<DistributionSetIdName> distSelected = source.getDeletedEntityByTransferable(transferable);
-        final Set<Long> distributionList = distSelected.stream().map(entity -> entity.getId())
-                .collect(Collectors.toSet());
+        final Set<Long> distSelected = source.getDeletedEntityByTransferable(transferable);
 
         final String distTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssignmentResult result = distributionSetManagement
-                .toggleTagAssignment(distributionList, distTagName);
+        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distSelected,
+                distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {

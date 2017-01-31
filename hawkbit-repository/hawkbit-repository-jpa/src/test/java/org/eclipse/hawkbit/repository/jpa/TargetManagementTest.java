@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
@@ -705,14 +706,13 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         toggleTagAssignment(targAs, targTagA);
 
-        assertThat(targetManagement.findTargetsByControllerIDsWithTags(
-                targAs.stream().map(Target::getControllerId).collect(toList()))).as("Target count is wrong")
-                        .hasSize(25);
+        assertThat(targetManagement
+                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList())))
+                        .as("Target count is wrong").hasSize(25);
 
         // no lazy loading exception and tag correctly assigned
         assertThat(targetManagement
-                .findTargetsByControllerIDsWithTags(
-                        targAs.stream().map(Target::getControllerId).collect(toList()))
+                .findTargetsByControllerIDsWithTags(targAs.stream().map(Target::getControllerId).collect(toList()))
                 .stream().map(target -> target.getTags().contains(targTagA)).collect(toList()))
                         .as("Tags not correctly assigned").containsOnly(true);
     }
@@ -767,11 +767,31 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
-        Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
+        final Page<Target> foundTargets = targetManagement.findTargetsAll(rsqlFilter, new PageRequest(0, 100));
 
         assertThat(targetManagement.findTargetsAll(new PageRequest(0, 100)).getNumberOfElements()).as("Total targets")
                 .isEqualTo(50);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
 
+    }
+
+    @Test
+    @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
+    public void verifyFindTargetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createTarget("target-4").getId());
+        searchIds.add(testdataFactory.createTarget("target-5").getId());
+        searchIds.add(testdataFactory.createTarget("target-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createTarget("test" + i);
+        }
+
+        final List<Target> foundDs = targetManagement.findTargetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(Target::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
     }
 }

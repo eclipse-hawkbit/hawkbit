@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -179,7 +178,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargets(@NotEmpty Collection<Long> targetIDs);
-
+    
     /**
      * Deletes target with the given IDs.
      *
@@ -191,52 +190,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTarget(@NotEmpty String controllerID);
-
-    /**
-     * Finds all targets for all the given parameters but returns not the full
-     * target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * @param filterByStatus
-     *            find targets having this {@link TargetUpdateStatus}s. Set to
-     *            <code>null</code> in case this is not required.
-     * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
-     * @param filterBySearchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param filterByTagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIdsByFilters(@NotNull Pageable pageRequest,
-            Collection<TargetUpdateStatus> filterByStatus, Boolean overdueState, String filterBySearchText,
-            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... filterByTagNames);
-
-    /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and returns not the full target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * @param rsqlParam
-     *            filter definition in RSQL syntax
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetIdName> findAllTargetIdsByTargetFilterQuery(@NotNull Pageable pageRequest, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
@@ -351,9 +304,9 @@ public interface TargetManagement {
             @NotNull Pageable pageReq);
 
     /**
-     * Find {@link Target} based on given ID returns found Target without
-     * details, i.e. NO {@link Target#getTags()} and {@link Target#getActions()}
-     * possible.
+     * Find {@link Target}s based a given IDs. The returned target will not
+     * contain details (e.g {@link Target#getTags()} and
+     * {@link Target#getActions()})
      *
      * @param controllerIDs
      *            to look for.
@@ -363,9 +316,9 @@ public interface TargetManagement {
     List<Target> findTargetByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
-     * Find {@link Target} based on given ID returns found Target without
-     * details, i.e. NO {@link Target#getTags()} and {@link Target#getActions()}
-     * possible.
+     * Find a {@link Target} based a given ID. The returned target will not
+     * contain details (e.g {@link Target#getTags()} and
+     * {@link Target#getActions()})
      *
      * @param controllerId
      *            to look for.
@@ -639,4 +592,27 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
     Target updateTarget(@NotNull TargetUpdate update);
+
+    /**
+     * Find a {@link Target} based a given ID. The returned target will not
+     * contain details (e.g {@link Target#getTags()} and
+     * {@link Target#getActions()})
+     * 
+     * @param id
+     *            to look for
+     * @return {@link Target} or <code>null</code> if it does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Target findTargetById(Long id);
+
+    /**
+     * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
+     * and {@link Target#getActions()} possible
+     *
+     * @param ids
+     *            the ids to for
+     * @return the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<Target> findTargetAllById(@NotNull Collection<Long> ids);
 }

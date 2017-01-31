@@ -44,6 +44,17 @@ public class UINotification implements Serializable {
     }
 
     /**
+     * Display warning type of notification message.
+     * 
+     * @param message
+     *            is the message to displayed as warning.
+     */
+    public void displayWarning(final String message) {
+        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE, null, message,
+                true);
+    }
+
+    /**
      * Display error type of notification message.
      * 
      * @param message

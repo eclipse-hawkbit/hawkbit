@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;

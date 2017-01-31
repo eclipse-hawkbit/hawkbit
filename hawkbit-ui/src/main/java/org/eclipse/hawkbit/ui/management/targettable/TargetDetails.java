@@ -110,15 +110,17 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (getSelectedBaseEntity() == null) {
             return;
         }
-        targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
         openWindow();
     }
 
     private void openWindow() {
-        final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-        newDistWindow.setCaption(getI18n().get(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
-        UI.getCurrent().addWindow(newDistWindow);
-        newDistWindow.setVisible(Boolean.TRUE);
+        final Window targetWindow = targetAddUpdateWindowLayout.getWindow(getSelectedBaseEntity().getControllerId());
+        if (targetWindow == null) {
+            return;
+        }
+        targetWindow.setCaption(getI18n().get(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
+        UI.getCurrent().addWindow(targetWindow);
+        targetWindow.setVisible(Boolean.TRUE);
     }
 
     @Override
@@ -128,7 +130,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected Boolean onLoadIsTableRowSelected() {
-        return managementUIState.getLastSelectedTargetIdName() != null;
+        return managementUIState.getLastSelectedTargetId() != null;
     }
 
     @Override
