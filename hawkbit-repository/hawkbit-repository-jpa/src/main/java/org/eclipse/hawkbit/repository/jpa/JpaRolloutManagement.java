@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.ConstraintViolationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -62,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
@@ -1024,6 +1026,8 @@ public class JpaRolloutManagement implements RolloutManagement {
                 final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false)
                         .map(action -> action.getId()).collect(Collectors.toList());
                 actionRepository.deleteByIdIn(actionIds);
+                afterCommit.afterCommit(() -> eventPublisher.publishEvent(
+                        new RolloutUpdatedEvent(rollout, EventPublisherHolder.getInstance().getApplicationId())));
             } catch (final RuntimeException e) {
                 LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
