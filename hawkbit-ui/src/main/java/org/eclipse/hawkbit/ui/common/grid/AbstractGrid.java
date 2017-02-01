@@ -58,7 +58,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
     }
 
     /**
-     * Initializes the the grid.
+     * Initializes the grid.
      * <p>
      *
      * <b>NOTE:</b> Sub-classes should configure the grid before calling this
@@ -325,9 +325,9 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
     protected abstract CellDescriptionGenerator getDescriptionGenerator();
 
     /**
-     * Gets the id if the grid.
+     * Gets id of the grid.
      *
-     * @return id if the grid
+     * @return id of the grid
      */
     protected abstract String getGridId();
 
@@ -354,7 +354,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         /**
          * Set selected master-data as member of this grid-support (as all
-         * presented gird-data is related to this master-data) and re-calculate
+         * presented grid-data is related to this master-data) and re-calculate
          * grid-container-content.
          *
          * @param master
@@ -368,7 +368,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         /**
          * Set selected master-data as member of this grid-support (as all
-         * presented gird-data is related to this master-data) and re-create
+         * presented grid-data is related to this master-data) and re-create
          * grid-container.
          *
          * @param master

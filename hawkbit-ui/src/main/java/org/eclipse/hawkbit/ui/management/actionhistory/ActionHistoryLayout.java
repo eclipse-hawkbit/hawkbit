@@ -129,7 +129,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
      * Header for ActionHistory with maximize-support.
      */
     class ActionHistoryHeader extends DefaultGridHeader {
-        private static final long serialVersionUID = -6276188234115774351L;
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructor.

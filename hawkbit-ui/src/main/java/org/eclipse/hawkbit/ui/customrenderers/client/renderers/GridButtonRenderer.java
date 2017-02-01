@@ -32,7 +32,7 @@ public class GridButtonRenderer extends ClickableRenderer<FontIconData, Button> 
         if (iconMetadata.getFontIconHtml() != null) {
             button.setHTML(iconMetadata.getFontIconHtml());
         }
-        applystyles(button, iconMetadata.isDisabled(), iconMetadata.getStyle());
+        applyStyles(button, iconMetadata.isDisabled(), iconMetadata.getStyle());
         button.getElement().setId(iconMetadata.getId());
         button.getElement().setTitle(iconMetadata.getTitle());
         button.setEnabled(!iconMetadata.isDisabled());
@@ -40,7 +40,7 @@ public class GridButtonRenderer extends ClickableRenderer<FontIconData, Button> 
         button.setVisible(iconMetadata.getFontIconHtml() != null);
     }
 
-    private static void applystyles(final Button button, final boolean buttonDisabled, final String additionalStyle) {
+    private static void applyStyles(final Button button, final boolean buttonDisabled, final String additionalStyle) {
 
         button.setStyleName(VButton.CLASSNAME);
         button.addStyleName(getStyle("tiny"));

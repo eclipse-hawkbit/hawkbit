@@ -159,7 +159,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Set target as member of this grid (as all presented gird-data is related
+     * Set target as member of this grid (as all presented grid-data is related
      * to this target) and recalculate grid-data for this target.
      *
      * @param selectedTarget
@@ -605,7 +605,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Concrete html-label converter that handles IsActiveDecoration enum.
      */
     class HtmlIsActiveLabelConverter extends AbstractHtmlLabelConverter<IsActiveDecoration> {
-        private static final long serialVersionUID = 3626949779021779319L;
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructor that sets the appropriate adapter.
@@ -630,7 +630,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * {@link AbstractHtmlLabelConverter#addAdapter()} to do the work.
      */
     class HtmlBooleanLabelConverter extends AbstractHtmlLabelConverter<Boolean> {
-        private static final long serialVersionUID = 2843922855121151526L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public Class<Boolean> getModelType() {
@@ -642,7 +642,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Concrete html-label converter that handles Actions.
      */
     class HtmlVirtPropLabelConverter extends AbstractHtmlLabelConverter<Action> {
-        private static final long serialVersionUID = 1557918021421872258L;
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructor that sets the appropriate adapter.
@@ -664,7 +664,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * Concrete grid-button converter that handles Actions.
      */
     class ActionGridButtonConverter extends AbstractGridButtonConverter<Action> {
-        private static final long serialVersionUID = 4740900405712633886L;
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructor that sets the appropriate adapter.
@@ -687,7 +687,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * order to generate a virtual property.
      */
     class GenericPropertyValueGenerator extends PropertyValueGenerator<Action> {
-        private static final long serialVersionUID = -8720553696548583386L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public Action getValue(Item item, Object itemId, Object propertyId) {
@@ -705,7 +705,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * grid.
      */
     class ButtonPropertyValueGenerator extends PropertyValueGenerator<String> {
-        private static final long serialVersionUID = -6058665861415667763L;
+        private static final long serialVersionUID = 1L;
 
         private final String buttonLabel;
 

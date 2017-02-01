@@ -18,7 +18,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout responsible for action-states-grid and the corresponding header.
  */
 public class ActionStatusLayout extends AbstractGridComponentLayout {
-    private static final long serialVersionUID = 7047753748816775781L;
+    private static final long serialVersionUID = 1L;
 
     protected final ManagementUIState managementUIState;
 

@@ -18,7 +18,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout responsible for messages-grid and the corresponding header.
  */
 public class ActionStatusMsgLayout extends AbstractGridComponentLayout {
-    private static final long serialVersionUID = 6935727088712167442L;
+    private static final long serialVersionUID = 1L;
 
     protected final ManagementUIState managementUIState;
 

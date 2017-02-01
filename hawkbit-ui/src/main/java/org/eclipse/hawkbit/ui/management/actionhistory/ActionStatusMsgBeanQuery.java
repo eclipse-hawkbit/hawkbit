@@ -32,7 +32,7 @@ import com.google.common.base.Strings;
  * {@link ProxyMessage} batch of beans.
  */
 public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
-    private static final long serialVersionUID = -8573709017289467018L;
+    private static final long serialVersionUID = 1L;
 
     private Sort sort = new Sort(Direction.DESC, "id");
     private transient DeploymentManagement deploymentManagement;

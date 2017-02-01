@@ -24,7 +24,7 @@ import com.vaadin.data.util.converter.Converter;
  */
 public abstract class AbstractHtmlLabelConverter<T> implements Converter<String, T> {
 
-    private static final long serialVersionUID = -426931380959883402L;
+    private static final long serialVersionUID = 1L;
 
     private LabelAdapter<T> adapter;
 

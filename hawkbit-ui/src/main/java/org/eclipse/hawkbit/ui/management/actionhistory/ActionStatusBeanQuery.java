@@ -30,7 +30,7 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  * {@link ProxyActionStatus} batch of beans.
  */
 public class ActionStatusBeanQuery extends AbstractBeanQuery<ProxyActionStatus> {
-    private static final long serialVersionUID = -5804988040956783297L;
+    private static final long serialVersionUID = 1L;
 
     private Sort sort = new Sort(Direction.DESC, "id");
     private transient DeploymentManagement deploymentManagement;

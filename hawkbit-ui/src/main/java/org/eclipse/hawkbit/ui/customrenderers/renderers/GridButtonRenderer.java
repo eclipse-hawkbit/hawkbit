@@ -18,7 +18,7 @@ import elemental.json.JsonValue;
  */
 public class GridButtonRenderer extends ClickableRenderer<FontIconData> {
 
-    private static final long serialVersionUID = -2135462159149582745L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor.

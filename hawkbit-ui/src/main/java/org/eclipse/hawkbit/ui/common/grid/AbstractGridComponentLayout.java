@@ -187,7 +187,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
             final HorizontalLayout footerLayout = new HorizontalLayout();
             footerLayout.addComponent(getFooterMessageLabel());
             footerLayout.setStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
-            footerLayout.setWidth("100%");
+            footerLayout.setWidth(100, Unit.PERCENTAGE);
             return footerLayout;
         }
 

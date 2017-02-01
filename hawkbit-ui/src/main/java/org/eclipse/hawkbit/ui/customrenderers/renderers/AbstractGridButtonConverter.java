@@ -24,7 +24,7 @@ import com.vaadin.data.util.converter.Converter;
  */
 public abstract class AbstractGridButtonConverter<T> implements Converter<FontIconData, T> {
 
-    private static final long serialVersionUID = -3536411935643120372L;
+    private static final long serialVersionUID = 1L;
 
     private GridButtonAdapter<T> adapter;
 

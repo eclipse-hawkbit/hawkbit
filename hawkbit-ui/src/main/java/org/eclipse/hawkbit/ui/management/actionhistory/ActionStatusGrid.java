@@ -29,7 +29,7 @@ import com.google.common.collect.Maps;
  * This grid presents the action states for a selected action.
  */
 public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
-    private static final long serialVersionUID = -1357350411682721772L;
+    private static final long serialVersionUID = 1L;
 
     private static final String[] leftAlignedColumns = new String[] { ProxyActionStatus.PXY_AS_CREATED_AT };
 

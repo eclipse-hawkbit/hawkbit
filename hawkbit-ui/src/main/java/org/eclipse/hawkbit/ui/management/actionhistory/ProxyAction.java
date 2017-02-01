@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.Action;
  * Proxy for {@link Action}
  */
 public class ProxyAction implements Serializable {
-    private static final long serialVersionUID = 1279311706795308386L;
+    private static final long serialVersionUID = 1L;
 
     public static final String PXY_ACTION_STATUS = "status";
     public static final String PXY_ACTION_IS_ACTIVE = "isActive";

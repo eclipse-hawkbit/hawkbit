@@ -21,7 +21,7 @@ import com.vaadin.server.FontAwesome;
  */
 public class StatusFontIcon implements Serializable {
     /** serialVersionUID. */
-    private static final long serialVersionUID = -116189262340310779L;
+    private static final long serialVersionUID = 1L;
     private FontAwesome fontIcon;
     private String style;
     private String title;

@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
  * Proxy for an entry of {@link ActionStatus#getMessages()}
  */
 public class ProxyMessage implements Serializable {
-    private static final long serialVersionUID = 1720985468988315597L;
+    private static final long serialVersionUID = 1L;
 
     public static final String PXY_MSG_ID = "id";
     public static final String PXY_MSG_VALUE = "message";

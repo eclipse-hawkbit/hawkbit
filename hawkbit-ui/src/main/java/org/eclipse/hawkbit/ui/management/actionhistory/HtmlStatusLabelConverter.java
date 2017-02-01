@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractHtmlLabelConvert
  */
 public class HtmlStatusLabelConverter extends AbstractHtmlLabelConverter<Action.Status> {
 
-    private static final long serialVersionUID = -3255498692465422446L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor that sets the appropriate adapter.

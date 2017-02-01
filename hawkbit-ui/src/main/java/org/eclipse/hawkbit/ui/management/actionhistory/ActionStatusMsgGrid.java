@@ -32,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * This grid presents the messages for a selected action-status.
  */
 public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
-    private static final long serialVersionUID = -530005318409967775L;
+    private static final long serialVersionUID = 1L;
 
     private static final String[] rightAlignedColumns = new String[] { ProxyMessage.PXY_MSG_ID };
 
@@ -62,7 +62,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
         setDetailsGenerator(new MessageDetailsGenerator());
 
         this.addItemClickListener(new ItemClickListener() {
-            private static final long serialVersionUID = 4058096632392081895L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void itemClick(ItemClickEvent event) {
@@ -174,7 +174,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     protected class MessageDetailsGenerator implements DetailsGenerator {
-        private static final long serialVersionUID = 7900925189320159727L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public Component getDetails(RowReference rowReference) {
@@ -186,8 +186,8 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
             textArea.addStyleName(ValoTheme.TEXTAREA_BORDERLESS);
             textArea.addStyleName(ValoTheme.TEXTAREA_TINY);
             textArea.addStyleName("inline-icon");
-            textArea.setHeight("120px");
-            textArea.setWidth("100%");
+            textArea.setHeight(120, Unit.PIXELS);
+            textArea.setWidth(100, Unit.PERCENTAGE);
             textArea.setValue(message);
             textArea.setReadOnly(Boolean.TRUE);
             return textArea;
@@ -198,7 +198,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
      * CellStyleGenerator that concerns about cutting text.
      */
     protected static class TextCutCellStyleGenerator implements CellStyleGenerator {
-        private static final long serialVersionUID = 5573570647129792429L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public String getStyle(final CellReference cellReference) {
