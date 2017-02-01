@@ -219,10 +219,9 @@ public class BulkUploadHandler extends CustomComponent
         private void syncCountAfterUpload(final int totalNumberOfLines) {
             final int syncedFailedTargetCount = totalNumberOfLines - successfullTargetCount;
             managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(successfullTargetCount);
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
             managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(syncedFailedTargetCount);
             managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(1);
-
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
         }
 
         private BigDecimal getTotalNumberOfLines() {
@@ -276,6 +275,8 @@ public class BulkUploadHandler extends CustomComponent
             final float done = new BigDecimal(lineNumber).divide(totalNumberOfLines, 2, RoundingMode.UP).floatValue();
 
             if (done > previous) {
+                managementUIState.getTargetTableFilters().getBulkUpload()
+                        .setSucessfulUploadCount(successfullTargetCount);
                 managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(done);
                 eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
             }

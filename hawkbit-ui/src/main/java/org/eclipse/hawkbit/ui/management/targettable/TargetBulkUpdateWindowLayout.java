@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -127,8 +125,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         targetBulkUpload.setDsNameAndVersion((Long) dsNamecomboBox.getValue());
         targetBulkUpload.setDescription(descTextArea.getValue());
         targetBulkUpload.setProgressBarCurrentValue(0F);
-        targetBulkUpload.setFailedUploadCount(0L);
-        targetBulkUpload.setSucessfulUploadCount(0L);
+        targetBulkUpload.setFailedUploadCount(0);
+        targetBulkUpload.setSucessfulUploadCount(0);
         closeButton.setEnabled(false);
         minimizeButton.setEnabled(true);
     }
@@ -246,14 +244,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
         final Map<String, Object> queryConfiguration = Maps.newHashMapWithExpectedSize(2);
 
-        final List<String> list = new ArrayList<>();
         queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
 
-        if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
-            list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
-        }
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG, list);
+        queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG,
+                managementUIState.getDistributionTableFilters().getDistSetTags());
 
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
@@ -302,8 +297,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
         targetBulkUpload.setDescription(null);
         targetBulkUpload.setDsNameAndVersion(null);
-        targetBulkUpload.setFailedUploadCount(0L);
-        targetBulkUpload.setSucessfulUploadCount(0L);
+        targetBulkUpload.setFailedUploadCount(0);
+        targetBulkUpload.setSucessfulUploadCount(0);
         targetBulkUpload.getAssignedTagNames().clear();
         targetBulkUpload.getTargetsCreated().clear();
     }
@@ -318,13 +313,14 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
         descTextArea.setValue(targetBulkUpload.getDescription());
         targetBulkTokenTags.addAlreadySelectedTags();
-        if (targetBulkUpload.getSucessfulUploadCount() > 0 || targetBulkUpload.getFailedUploadCount() > 0) {
-            targetsCountLabel.setVisible(true);
-            targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
-                    targetBulkUpload.getFailedUploadCount()));
-        }
-        if (targetBulkUpload.getProgressBarCurrentValue() < 1) {
+
+        if (targetBulkUpload.getProgressBarCurrentValue() > 0) {
             bulkUploader.getUpload().setEnabled(false);
+            if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
+                targetsCountLabel.setVisible(true);
+                targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
+                        targetBulkUpload.getFailedUploadCount()));
+            }
         }
     }
 
@@ -339,13 +335,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         getTargetsCountLabel().setVisible(true);
         getTargetsCountLabel().setCaption(targetCountLabel);
 
-        getBulkUploader().getUpload().setEnabled(true);
-
         closeButton.setEnabled(true);
         minimizeButton.setEnabled(false);
     }
 
-    private static String getFormattedCountLabelValue(final long succussfulUploadCount, final long failedUploadCount) {
+    private static String getFormattedCountLabelValue(final int succussfulUploadCount, final int failedUploadCount) {
         return new StringBuilder().append("Successful :").append(succussfulUploadCount)
                 .append("<font color=RED> Failed :").append(failedUploadCount).append("</font>").toString();
     }

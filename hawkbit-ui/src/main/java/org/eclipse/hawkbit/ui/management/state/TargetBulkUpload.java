@@ -24,9 +24,9 @@ public class TargetBulkUpload implements Serializable {
 
     private String description;
 
-    private long sucessfulUploadCount;
+    private int sucessfulUploadCount;
 
-    private long failedUploadCount;
+    private int failedUploadCount;
 
     private float progressBarCurrentValue;
 
@@ -96,7 +96,7 @@ public class TargetBulkUpload implements Serializable {
     /**
      * @return the sucessfulUploadCount
      */
-    public long getSucessfulUploadCount() {
+    public int getSucessfulUploadCount() {
         return sucessfulUploadCount;
     }
 
@@ -104,14 +104,14 @@ public class TargetBulkUpload implements Serializable {
      * @param sucessfulUploadCount
      *            the sucessfulUploadCount to set
      */
-    public void setSucessfulUploadCount(final long sucessfulUploadCount) {
+    public void setSucessfulUploadCount(final int sucessfulUploadCount) {
         this.sucessfulUploadCount = sucessfulUploadCount;
     }
 
     /**
      * @return the failedUploadCount
      */
-    public long getFailedUploadCount() {
+    public int getFailedUploadCount() {
         return failedUploadCount;
     }
 
@@ -119,7 +119,7 @@ public class TargetBulkUpload implements Serializable {
      * @param failedUploadCount
      *            the failedUploadCount to set
      */
-    public void setFailedUploadCount(final long failedUploadCount) {
+    public void setFailedUploadCount(final int failedUploadCount) {
         this.failedUploadCount = failedUploadCount;
     }
 

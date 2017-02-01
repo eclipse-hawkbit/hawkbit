@@ -403,8 +403,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected void restoreBulkUploadStatusCount() {
-        final Long failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
-        final Long successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
+        final int failedCount = managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount();
+        final int successCount = managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount();
         if (failedCount != 0 || successCount != 0) {
             setUploadStatusButtonCaption(failedCount + successCount);
             enableBulkUploadStatusButton();
