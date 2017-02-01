@@ -517,7 +517,6 @@ public class RolloutListGrid extends AbstractGrid {
                 formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
                         rolloutManagement.deleteRollout(rolloutId);
-                        refreshContainer();
                     }
                 });
         UI.getCurrent().addWindow(confirmationDialog.getWindow());

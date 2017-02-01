@@ -958,6 +958,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
         jpaRollout.setStatus(RolloutStatus.DELETING);
         rolloutRepository.save(jpaRollout);
+        jpaRollout.fireUpdateEvent(new DescriptorEvent(jpaRollout));
     }
 
     private void doDeleteRollout(final JpaRollout rollout) {
