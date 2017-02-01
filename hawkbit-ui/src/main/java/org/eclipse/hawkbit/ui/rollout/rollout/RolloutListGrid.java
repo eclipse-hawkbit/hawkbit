@@ -262,11 +262,11 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
-                    
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
-                    false);
-        }
+
+            if (permissionChecker.hasRolloutCreatePermission()) {
+                rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
+                        false);
+            }
             // TODO Permission?
             rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
                     false);
@@ -301,8 +301,6 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
             getColumn(UPDATE_OPTION).setMaximumWidth(25);
-            getColumn(DELETE_OPTION).setMinimumWidth(25);
-            getColumn(DELETE_OPTION).setMaximumWidth(40);
         } else {
             getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
@@ -310,6 +308,9 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(COPY_OPTION).setMinimumWidth(25);
             getColumn(COPY_OPTION).setMaximumWidth(25);
         }
+
+        getColumn(DELETE_OPTION).setMinimumWidth(25);
+        getColumn(DELETE_OPTION).setMaximumWidth(40);
 
         getColumn(VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
     }
@@ -338,7 +339,7 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
             getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
         }
-        
+
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
         }
@@ -347,6 +348,7 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         HeaderCell join;
+        // Permission TODO
         if (permissionChecker.hasRolloutUpdatePermission()) {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION, DELETE_OPTION);
         } else {
@@ -378,11 +380,11 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
-            columnList.add(DELETE_OPTION);
         }
         if (permissionChecker.hasRolloutCreatePermission()) {
             columnList.add(COPY_OPTION);
         }
+        columnList.add(DELETE_OPTION);
 
         columnList.add(VAR_CREATED_DATE);
         columnList.add(VAR_CREATED_USER);
@@ -501,7 +503,7 @@ public class RolloutListGrid extends AbstractGrid {
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
-    
+
     private void copyRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, true);
         addTargetWindow.setCaption(i18n.get("caption.create.rollout"));
@@ -719,7 +721,10 @@ public class RolloutListGrid extends AbstractGrid {
         }
 
         private String convertRolloutStatusToString(final RolloutStatus value) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            if (statusFontIcon == null) {
+                statusFontIcon = new StatusFontIcon(FontAwesome.QUESTION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE);
+            }
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);

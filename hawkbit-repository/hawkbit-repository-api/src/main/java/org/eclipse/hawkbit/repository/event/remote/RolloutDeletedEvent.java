@@ -6,14 +6,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.event.remote.entity;
+package org.eclipse.hawkbit.repository.event.remote;
 
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
+ *
  * Defines the remote event of deleting a {@link Rollout}.
  */
-public class RolloutDeletedEvent extends RemoteEntityEvent<Rollout> {
+public class RolloutDeletedEvent extends RemoteIdEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -24,15 +27,20 @@ public class RolloutDeletedEvent extends RemoteEntityEvent<Rollout> {
     }
 
     /**
-     * Constructor
+     * Constructor for json serialization.
      * 
-     * @param rollout
-     *            the deleted rollout
+     * @param tenant
+     *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    public RolloutDeletedEvent(final Rollout rollout, final String applicationId) {
-        super(rollout, applicationId);
+    public RolloutDeletedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 
 }
