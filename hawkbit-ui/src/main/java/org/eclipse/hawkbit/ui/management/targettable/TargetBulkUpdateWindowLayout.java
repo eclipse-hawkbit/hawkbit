@@ -11,9 +11,12 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -64,6 +67,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private final I18N i18n;
 
     private final transient TargetManagement targetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
+    private final transient TagManagement tagManagement;
+
+    private final transient EntityFactory entityFactory;
+
+    private final transient Executor uiExecutor;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -92,7 +101,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     TargetBulkUpdateWindowLayout(final I18N i18n, final TargetManagement targetManagement, final UIEventBus eventBus,
             final ManagementUIState managementUIState, final DeploymentManagement deploymentManagement,
             final UiProperties uiproperties, final SpPermissionChecker checker, final UINotification uinotification,
-            final TagManagement tagManagement) {
+            final TagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory, final Executor uiExecutor) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
@@ -101,6 +111,10 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         this.managementUIState = managementUIState;
         this.deploymentManagement = deploymentManagement;
         this.uiproperties = uiproperties;
+        this.tagManagement = tagManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.entityFactory = entityFactory;
+        this.uiExecutor = uiExecutor;
 
         createRequiredComponents();
         buildLayout();
@@ -163,8 +177,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private BulkUploadHandler getBulkUploadHandler() {
-        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
-                deploymentManagement, i18n, UI.getCurrent());
+        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, tagManagement,
+                entityFactory, distributionSetManagement, managementUIState, deploymentManagement, i18n,
+                UI.getCurrent(), uiExecutor);
         bulkUploadHandler.buildLayout();
         bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
         return bulkUploadHandler;
