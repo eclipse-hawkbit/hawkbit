@@ -255,23 +255,19 @@ public class RolloutListGrid extends AbstractGrid {
                 false, false);
 
         rolloutGridContainer.addContainerProperty(RUN_OPTION, String.class, FontAwesome.PLAY.getHtml(), false, false);
-
         rolloutGridContainer.addContainerProperty(PAUSE_OPTION, String.class, FontAwesome.PAUSE.getHtml(), false,
                 false);
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             rolloutGridContainer.addContainerProperty(UPDATE_OPTION, String.class, FontAwesome.EDIT.getHtml(), false,
                     false);
-
-            if (permissionChecker.hasRolloutCreatePermission()) {
-                rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
-                        false);
-            }
-            // TODO Permission?
-            rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
+        }
+        if (permissionChecker.hasRolloutCreatePermission()) {
+            rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
                     false);
         }
-
+        rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
+                false);
     }
 
     @Override
@@ -301,9 +297,8 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setMinimumWidth(25);
             getColumn(UPDATE_OPTION).setMaximumWidth(25);
-        } else {
-            getColumn(PAUSE_OPTION).setMaximumWidth(60);
         }
+
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setMinimumWidth(25);
             getColumn(COPY_OPTION).setMaximumWidth(25);
@@ -347,14 +342,22 @@ public class RolloutListGrid extends AbstractGrid {
             getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
         }
 
+        final HeaderCell join = joinColumns();
+        join.setText(i18n.get("header.action"));
+    }
+
+    private HeaderCell joinColumns() {
         HeaderCell join;
-        // Permission TODO
-        if (permissionChecker.hasRolloutUpdatePermission()) {
+        if (permissionChecker.hasRolloutUpdatePermission() && permissionChecker.hasRolloutCreatePermission()) {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, COPY_OPTION, DELETE_OPTION);
+        } else if (permissionChecker.hasRolloutUpdatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION, DELETE_OPTION);
+        } else if (permissionChecker.hasRolloutCreatePermission()) {
+            join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, COPY_OPTION, DELETE_OPTION);
         } else {
             join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION);
         }
-        join.setText(i18n.get("header.action"));
+        return join;
     }
 
     @Override
