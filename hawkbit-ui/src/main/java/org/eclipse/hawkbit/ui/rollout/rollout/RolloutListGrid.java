@@ -77,6 +77,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
+import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
@@ -149,6 +150,19 @@ public class RolloutListGrid extends AbstractGrid {
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
+        handleNoData(rolloutUIState);
+    }
+
+    @Override
+    protected void handleNoData(final RolloutUIState rolloutUIState) {
+        int size = 0;
+        final Indexed container = getContainerDataSource();
+        if (container != null) {
+            size = container.size();
+        }
+        if (size == 0 && rolloutUIState.isShowRollOuts()) {
+            setData(SPUIDefinitions.NO_DATA);
+        }
     }
 
     /**
@@ -519,7 +533,10 @@ public class RolloutListGrid extends AbstractGrid {
         final ConfirmationDialog confirmationDialog = new ConfirmationDialog(i18n.get("caption.confirm.delete.rollout"),
                 formattedConfirmationQuestion, i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
+                        final Item row = getContainerDataSource().getItem(rolloutId);
+                        final String rolloutName = (String) row.getItemProperty(VAR_NAME).getValue();
                         rolloutManagement.deleteRollout(rolloutId);
+                        uiNotification.displaySuccess(i18n.get("message.rollout.deleted", rolloutName));
                     }
                 });
         UI.getCurrent().addWindow(confirmationDialog.getWindow());

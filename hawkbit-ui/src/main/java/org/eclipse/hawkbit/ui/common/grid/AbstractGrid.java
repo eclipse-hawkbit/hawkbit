@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -78,14 +78,9 @@ public abstract class AbstractGrid extends Grid implements RefreshableContainer 
             c.setHidable(true);
         }
         setHiddenColumns();
-        int size = 0;
-        if (container != null) {
-            size = container.size();
-        }
-        if (size == 0) {
-            setData(SPUIDefinitions.NO_DATA);
-        }
     }
+
+    protected abstract void handleNoData(RolloutUIState rolloutUIState);
 
     protected abstract Container createContainer();
 

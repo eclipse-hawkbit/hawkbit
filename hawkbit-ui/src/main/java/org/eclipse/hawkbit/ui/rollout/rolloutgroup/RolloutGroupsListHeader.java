@@ -38,6 +38,16 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
 
     private Label headerCaption;
 
+    /**
+     * Constructor for RolloutGroupsListHeader
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param rolloutUiState
+     *            RolloutUIState
+     * @param i18n
+     *            I18N
+     */
     public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState, final I18N i18n) {
         super(null, rolloutUiState, i18n);
         this.eventBus = eventBus;

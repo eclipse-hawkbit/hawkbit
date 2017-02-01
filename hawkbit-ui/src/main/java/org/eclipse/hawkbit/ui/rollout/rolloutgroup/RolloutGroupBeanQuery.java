@@ -44,7 +44,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     private Sort sort = new Sort(Direction.ASC, "id");
 
-    private transient Page<RolloutGroup> firstPageRolloutGroupSets = null;
+    private transient Page<RolloutGroup> firstPageRolloutGroupSets;
 
     private transient RolloutManagement rolloutManagement;
 
@@ -97,7 +97,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         List<RolloutGroup> proxyRolloutGroupsList = new ArrayList<>();
         if (startIndex == 0 && firstPageRolloutGroupSets != null) {
             proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
-        } else if (null != rolloutId) {
+        } else if (rolloutId != null) {
             proxyRolloutGroupsList = getRolloutGroupManagement()
                     .findAllRolloutGroupsWithDetailedStatus(rolloutId, new PageRequest(startIndex / count, count))
                     .getContent();
@@ -151,7 +151,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     @Override
     public int size() {
         long size = 0;
-        if (null != rolloutId) {
+        if (rolloutId != null) {
             firstPageRolloutGroupSets = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(rolloutId,
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             size = firstPageRolloutGroupSets.getTotalElements();
@@ -164,21 +164,21 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     }
 
     public RolloutManagement getRolloutManagement() {
-        if (null == rolloutManagement) {
+        if (rolloutManagement == null) {
             rolloutManagement = SpringContextHelper.getBean(RolloutManagement.class);
         }
         return rolloutManagement;
     }
 
     public RolloutGroupManagement getRolloutGroupManagement() {
-        if (null == rolloutGroupManagement) {
+        if (rolloutGroupManagement == null) {
             rolloutGroupManagement = SpringContextHelper.getBean(RolloutGroupManagement.class);
         }
         return rolloutGroupManagement;
     }
 
     public RolloutUIState getRolloutUIState() {
-        if (null == rolloutUIState) {
+        if (rolloutUIState == null) {
             rolloutUIState = SpringContextHelper.getBean(RolloutUIState.class);
         }
         return rolloutUIState;

@@ -106,7 +106,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return getProxyRolloutList(rolloutBeans);
     }
 
-    private List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
+    private static List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
         final List<ProxyRollout> proxyRolloutList = new ArrayList<>();
         if (rolloutBeans != null) {
             for (final Rollout rollout : rolloutBeans) {
