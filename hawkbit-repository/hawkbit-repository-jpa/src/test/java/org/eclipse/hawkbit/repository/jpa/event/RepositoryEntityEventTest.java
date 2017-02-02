@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.fest.assertions.api.Assertions;
@@ -88,6 +90,30 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
                 TimeUnit.SECONDS);
         assertThat(targetDeletedEvent).isNotNull();
         assertThat(targetDeletedEvent.getEntityId()).isEqualTo(createdTarget.getId());
+    }
+
+    @Test
+    @Description("Verifies that the rollout deleted event is published when a rollout has been deleted")
+    public void rolloutDeletedEventIsPublished() throws InterruptedException {
+        final int amountTargetsForRollout = 500;
+        final int amountGroups = 5;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final String rolloutName = "rolloutTest";
+        final String targetPrefixName = rolloutName;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+
+        final Rollout createdRollout = createRolloutByVariables(rolloutName, "desc", amountGroups,
+                "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
+
+        rolloutManagement.deleteRollout(createdRollout.getId());
+        rolloutManagement.checkDeletingRollouts(0);
+
+        final RolloutDeletedEvent rolloutDeletedEvent = eventListener.waitForEvent(RolloutDeletedEvent.class, 1,
+                TimeUnit.SECONDS);
+        assertThat(rolloutDeletedEvent).isNotNull();
+        assertThat(rolloutDeletedEvent.getEntityId()).isEqualTo(createdRollout.getId());
     }
 
     @Test

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 import javax.validation.constraints.NotNull;
 
@@ -45,8 +44,8 @@ public interface RolloutManagement {
 
     /**
      * Checking running rollouts. Rollouts which are checked updating the
-     * lastCheck to indicate that the current instance
-     * is handling the specific rollout. This code should run as system-code.
+     * lastCheck to indicate that the current instance is handling the specific
+     * rollout. This code should run as system-code.
      *
      * <pre>
      * {@code
@@ -58,9 +57,8 @@ public interface RolloutManagement {
      *  }
      * </pre>
      *
-     * This method is intended to be called by a scheduler.
-     * And must be running in an transaction so it's
-     * splitted from the scheduler.
+     * This method is intended to be called by a scheduler. And must be running
+     * in an transaction so it's splitted from the scheduler.
      *
      * Rollouts which are currently running are investigated, by means the
      * error- and finish condition of running groups in this rollout are
@@ -431,4 +429,5 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     void deleteRollout(long rolloutId);
+
 }
