@@ -346,15 +346,13 @@ public class RolloutListGrid extends AbstractGrid {
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
-            getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
         }
 
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
         }
-        if (permissionChecker.hasRolloutCreatePermission()) {
-            getColumn(COPY_OPTION).setHeaderCaption(i18n.get("header.action.copy"));
-        }
+
+        getColumn(DELETE_OPTION).setHeaderCaption(i18n.get("header.action.delete"));
 
         final HeaderCell join = joinColumns();
         join.setText(i18n.get("header.action"));
@@ -455,13 +453,14 @@ public class RolloutListGrid extends AbstractGrid {
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> updateRollout((Long) clickEvent.getItemId())));
-            getColumn(DELETE_OPTION)
-                    .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
         }
         if (permissionChecker.hasRolloutCreatePermission()) {
             getColumn(COPY_OPTION)
                     .setRenderer(new HtmlButtonRenderer(clickEvent -> copyRollout((Long) clickEvent.getItemId())));
         }
+
+        getColumn(DELETE_OPTION)
+                .setRenderer(new HtmlButtonRenderer(clickEvent -> deleteRollout((Long) clickEvent.getItemId())));
 
     }
 
