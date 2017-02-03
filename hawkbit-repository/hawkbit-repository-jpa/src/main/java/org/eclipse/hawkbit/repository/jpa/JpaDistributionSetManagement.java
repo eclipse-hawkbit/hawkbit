@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -69,6 +68,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;

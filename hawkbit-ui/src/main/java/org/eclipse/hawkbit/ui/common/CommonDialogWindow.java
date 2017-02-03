@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -300,16 +300,18 @@ public class CommonDialogWindow extends Window {
     private static boolean isValueEquals(final AbstractField<?> field, final Object orginalValue,
             final Object currentValue) {
         if (Set.class.equals(field.getType())) {
-            return CollectionUtils.isEqualCollection(CollectionUtils.emptyIfNull((Collection<?>) orginalValue),
-                    CollectionUtils.emptyIfNull((Collection<?>) currentValue));
-        }
-
-        if (String.class.equals(field.getType())) {
-            return Objects.equals(Strings.emptyToNull((String) orginalValue),
-                    Strings.emptyToNull((String) currentValue));
+            return Sets.difference(emptyIfNull((Set<?>) orginalValue), emptyIfNull((Set<?>) currentValue)).isEmpty();
         }
 
         return Objects.equals(orginalValue, currentValue);
+    }
+
+    private static Set<?> emptyIfNull(final Set<?> original) {
+        if (original == null) {
+            return Collections.emptySet();
+        }
+
+        return original;
     }
 
     private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
