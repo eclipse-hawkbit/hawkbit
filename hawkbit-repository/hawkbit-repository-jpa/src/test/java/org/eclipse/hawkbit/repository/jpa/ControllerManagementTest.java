@@ -78,6 +78,29 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Controller confirms successfull update with FINISHED status on a action that is on canceling. "
+            + "Reason: The decission to ignore the cancellation is in fact up to the controller.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerConfirmsUpdateWithFinishedAndIgnorsCancellationWithThat() {
+        final Long actionId = createTargetAndAssignDs();
+        deploymentManagement.cancelAction(actionId);
+
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
+    }
+
+    @Test
     @Description("Update server rejects cancelation feedback if action is not in CANCELING state.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
