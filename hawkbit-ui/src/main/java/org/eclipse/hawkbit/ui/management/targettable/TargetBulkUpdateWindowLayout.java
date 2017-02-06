@@ -314,13 +314,10 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         descTextArea.setValue(targetBulkUpload.getDescription());
         targetBulkTokenTags.addAlreadySelectedTags();
 
-        if (targetBulkUpload.getProgressBarCurrentValue() > 0) {
-            bulkUploader.getUpload().setEnabled(false);
-            if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
-                targetsCountLabel.setVisible(true);
-                targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
-                        targetBulkUpload.getFailedUploadCount()));
-            }
+        if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
+            targetsCountLabel.setVisible(true);
+            targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
+                    targetBulkUpload.getFailedUploadCount()));
         }
     }
 
@@ -356,16 +353,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
                 .buildWindow();
         bulkUploadWindow.addStyleName("bulk-upload-window");
         bulkUploadWindow.setImmediate(true);
-        if (isNoBulkUploadInProgress()) {
+        if (managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue() <= 0) {
             bulkUploader.getUpload().setEnabled(true);
+        } else {
+            bulkUploader.getUpload().setEnabled(false);
         }
         return bulkUploadWindow;
-    }
-
-    private boolean isNoBulkUploadInProgress() {
-        final float progressBarCurrentValue = managementUIState.getTargetTableFilters().getBulkUpload()
-                .getProgressBarCurrentValue();
-        return Math.abs(progressBarCurrentValue - 0) < 0.00001 || Math.abs(progressBarCurrentValue - 1) < 0.00001;
     }
 
     private void minimizeWindow() {
