@@ -64,15 +64,15 @@ public final class ActionStatusIconMapper {
         this.icon = icon;
     }
 
-    public String getDescriptionI18N() {
+    String getDescriptionI18N() {
         return descriptionI18N;
     }
 
-    public String getStyleName() {
+    String getStyleName() {
         return styleName;
     }
 
-    public FontAwesome getIcon() {
+    FontAwesome getIcon() {
         return icon;
     }
 
