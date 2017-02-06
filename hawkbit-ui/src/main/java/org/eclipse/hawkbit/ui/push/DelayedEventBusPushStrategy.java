@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -28,8 +29,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.ui.push.event.RolloutDeleteEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -297,12 +298,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             final RolloutGroup rolloutGroup = ((RolloutGroupUpdatedEvent) event).getEntity();
             rolloutId = rolloutGroup.getRollout().getId();
             rolloutGroupId = rolloutGroup.getId();
+        } else if (event instanceof RolloutDeletedEvent) {
+            rolloutId = ((RolloutDeletedEvent) event).getEntityId();
+            offerEventIfNotContains(
+                    new RolloutDeletedEvent(event.getTenant(), ((RolloutDeletedEvent) event).getEntityId(),
+                            getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
         }
 
-        if (rolloutId == null) {
-            offerEventIfNotContains(new RolloutDeleteEvent(event.getTenant(), rolloutId));
-            return;
-        }
         offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));
 
         if (rolloutGroupId != null) {

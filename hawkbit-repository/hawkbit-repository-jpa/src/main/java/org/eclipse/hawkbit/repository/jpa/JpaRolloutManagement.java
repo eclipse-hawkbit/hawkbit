@@ -153,21 +153,16 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final String ROLLOUT_NOT_FOUND = "Rollout with id %s not found.";
 
     @Override
-    public Page<Rollout> findAll(final Pageable pageable, final Boolean deleted) {
-        Specification<JpaRollout> spec = null;
-        if (deleted != null) {
-            spec = RolloutSpecification.isDeleted(deleted);
-        }
+    public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
         return RolloutHelper.convertPage(rolloutRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
-    public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final Boolean deleted) {
+    public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = new ArrayList<>(3);
         specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
-        if (deleted != null) {
             specList.add(RolloutSpecification.isDeleted(deleted));
-        }
 
         return RolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
     }
@@ -1030,12 +1025,10 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Slice<Rollout> findRolloutWithDetailedStatusByFilters(final Pageable pageable, final String searchText,
-            final Boolean deleted) {
+            final boolean deleted) {
         final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
         specList.add(RolloutHelper.likeNameOrDescription(searchText));
-        if (deleted != null) {
-            specList.add(RolloutSpecification.isDeleted(deleted));
-        }
+        specList.add(RolloutSpecification.isDeleted(deleted));
         final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable, specList);
         setRolloutStatusDetails(findAll);
         return RolloutHelper.convertPage(findAll, pageable);
@@ -1071,20 +1064,16 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable, final Boolean deleted) {
+    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         Page<JpaRollout> rollouts;
-        if (deleted != null) {
-            final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
-            rollouts = rolloutRepository.findAll(spec, pageable);
-        } else {
-            rollouts = rolloutRepository.findAll(pageable);
-        }
+        final Specification<JpaRollout> spec = RolloutSpecification.isDeleted(deleted);
+        rollouts = rolloutRepository.findAll(spec, pageable);
         setRolloutStatusDetails(rollouts);
         return RolloutHelper.convertPage(rollouts, pageable);
     }
 
     @Override
-    public Rollout findRolloutWithDetailedStatus(final Long rolloutId, final Boolean deleted) {
+    public Rollout findRolloutWithDetailedStatus(final Long rolloutId, final boolean deleted) {
         final Rollout rollout = findRolloutById(rolloutId);
         if (rollout == null || (!deleted && rollout.getStatus().equals(RolloutStatus.DELETED))) {
             return null;

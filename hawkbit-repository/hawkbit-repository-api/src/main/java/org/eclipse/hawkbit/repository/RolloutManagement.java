@@ -246,7 +246,7 @@ public interface RolloutManagement {
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAll(@NotNull Pageable pageable, Boolean deleted);
+    Page<Rollout> findAll(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Get count of targets in different status in rollout.
@@ -259,7 +259,7 @@ public interface RolloutManagement {
      *         statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable, Boolean deleted);
+    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Retrieves all rollouts found by the given specification.
@@ -279,7 +279,7 @@ public interface RolloutManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable, Boolean deleted);
+    Page<Rollout> findAllByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable, boolean deleted);
 
     /**
      * Finds rollouts by given text in name or description.
@@ -295,7 +295,7 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Slice<Rollout> findRolloutWithDetailedStatusByFilters(@NotNull Pageable pageable, @NotEmpty String searchText,
-            Boolean deleted);
+            boolean deleted);
 
     /**
      * Retrieves a specific rollout by its ID.
@@ -330,7 +330,7 @@ public interface RolloutManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId, Boolean deleted);
+    Rollout findRolloutWithDetailedStatus(@NotNull Long rolloutId, boolean deleted);
 
     /***
      * Get finished percentage details for a specified group which is in running
