@@ -12,7 +12,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -290,28 +289,16 @@ public class CommonDialogWindow extends Window {
             }
             final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (!isValueEquals(field, originalValue, currentValue)) {
+            if (!isValueEquals(originalValue, currentValue)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean isValueEquals(final AbstractField<?> field, final Object orginalValue,
-            final Object currentValue) {
-        if (Set.class.equals(field.getType())) {
-            return Sets.difference(emptyIfNull((Set<?>) orginalValue), emptyIfNull((Set<?>) currentValue)).isEmpty();
-        }
+    private static boolean isValueEquals(final Object orginalValue, final Object currentValue) {
 
         return Objects.equals(orginalValue, currentValue);
-    }
-
-    private static Set<?> emptyIfNull(final Set<?> original) {
-        if (original == null) {
-            return Collections.emptySet();
-        }
-
-        return original;
     }
 
     private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
