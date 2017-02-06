@@ -283,7 +283,7 @@ public class RolloutListGrid extends AbstractGrid {
             rolloutGridContainer.addContainerProperty(COPY_OPTION, String.class, FontAwesome.COPY.getHtml(), false,
                     false);
         }
-        rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH.getHtml(), false,
+        rolloutGridContainer.addContainerProperty(DELETE_OPTION, String.class, FontAwesome.TRASH_O.getHtml(), false,
                 false);
     }
 
