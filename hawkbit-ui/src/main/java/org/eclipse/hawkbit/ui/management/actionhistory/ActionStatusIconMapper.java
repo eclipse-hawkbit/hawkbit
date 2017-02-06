@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.FontAwesome;
@@ -21,37 +22,32 @@ import com.vaadin.server.FontAwesome;
  *
  */
 public final class ActionStatusIconMapper {
-    static final String STATUS_ICON_GREEN = "statusIconGreen";
-    static final String STATUS_ICON_RED = "statusIconRed";
-    static final String STATUS_ICON_ORANGE = "statusIconOrange";
-    static final String STATUS_ICON_PENDING = "statusIconPending";
-
     static final Map<Action.Status, ActionStatusIconMapper> MAPPINGS = Maps.newHashMapWithExpectedSize(10);
 
     static {
-        MAPPINGS.put(Action.Status.FINISHED,
-                new ActionStatusIconMapper("label.finished", STATUS_ICON_GREEN, FontAwesome.CHECK_CIRCLE));
-        MAPPINGS.put(Action.Status.CANCELED,
-                new ActionStatusIconMapper("label.cancelled", STATUS_ICON_GREEN, FontAwesome.TIMES_CIRCLE));
+        MAPPINGS.put(Action.Status.FINISHED, new ActionStatusIconMapper("label.finished",
+                SPUIStyleDefinitions.STATUS_ICON_GREEN, FontAwesome.CHECK_CIRCLE));
+        MAPPINGS.put(Action.Status.CANCELED, new ActionStatusIconMapper("label.cancelled",
+                SPUIStyleDefinitions.STATUS_ICON_GREEN, FontAwesome.TIMES_CIRCLE));
 
-        MAPPINGS.put(Action.Status.ERROR,
-                new ActionStatusIconMapper("label.error", STATUS_ICON_RED, FontAwesome.EXCLAMATION_CIRCLE));
+        MAPPINGS.put(Action.Status.ERROR, new ActionStatusIconMapper("label.error",
+                SPUIStyleDefinitions.STATUS_ICON_RED, FontAwesome.EXCLAMATION_CIRCLE));
 
-        MAPPINGS.put(Action.Status.WARNING,
-                new ActionStatusIconMapper("label.warning", STATUS_ICON_ORANGE, FontAwesome.EXCLAMATION_CIRCLE));
-        MAPPINGS.put(Action.Status.CANCEL_REJECTED,
-                new ActionStatusIconMapper("label.warning", STATUS_ICON_ORANGE, FontAwesome.EXCLAMATION_CIRCLE));
+        MAPPINGS.put(Action.Status.WARNING, new ActionStatusIconMapper("label.warning",
+                SPUIStyleDefinitions.STATUS_ICON_ORANGE, FontAwesome.EXCLAMATION_CIRCLE));
+        MAPPINGS.put(Action.Status.CANCEL_REJECTED, new ActionStatusIconMapper("label.warning",
+                SPUIStyleDefinitions.STATUS_ICON_ORANGE, FontAwesome.EXCLAMATION_CIRCLE));
 
-        MAPPINGS.put(Action.Status.RUNNING,
-                new ActionStatusIconMapper("label.running", STATUS_ICON_PENDING, FontAwesome.ADJUST));
-        MAPPINGS.put(Action.Status.CANCELING,
-                new ActionStatusIconMapper("label.cancelling", STATUS_ICON_PENDING, FontAwesome.TIMES_CIRCLE));
-        MAPPINGS.put(Action.Status.RETRIEVED,
-                new ActionStatusIconMapper("label.retrieved", STATUS_ICON_PENDING, FontAwesome.CIRCLE_O));
-        MAPPINGS.put(Action.Status.DOWNLOAD,
-                new ActionStatusIconMapper("label.download", STATUS_ICON_PENDING, FontAwesome.CLOUD_DOWNLOAD));
-        MAPPINGS.put(Action.Status.SCHEDULED,
-                new ActionStatusIconMapper("label.scheduled", STATUS_ICON_PENDING, FontAwesome.HOURGLASS_1));
+        MAPPINGS.put(Action.Status.RUNNING, new ActionStatusIconMapper("label.running",
+                SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.ADJUST));
+        MAPPINGS.put(Action.Status.CANCELING, new ActionStatusIconMapper("label.cancelling",
+                SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.TIMES_CIRCLE));
+        MAPPINGS.put(Action.Status.RETRIEVED, new ActionStatusIconMapper("label.retrieved",
+                SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.CIRCLE_O));
+        MAPPINGS.put(Action.Status.DOWNLOAD, new ActionStatusIconMapper("label.download",
+                SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.CLOUD_DOWNLOAD));
+        MAPPINGS.put(Action.Status.SCHEDULED, new ActionStatusIconMapper("label.scheduled",
+                SPUIStyleDefinitions.STATUS_ICON_PENDING, FontAwesome.HOURGLASS_1));
     }
 
     private final String descriptionI18N;

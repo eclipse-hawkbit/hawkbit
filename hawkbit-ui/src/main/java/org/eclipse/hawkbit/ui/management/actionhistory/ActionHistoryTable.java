@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
@@ -538,7 +539,7 @@ public class ActionHistoryTable extends TreeTable {
 
         if (actionWithActiveStatus.isHitAutoForceTime(currentTimeMillis)) {
             autoForceLabel.setDescription("autoforced");
-            autoForceLabel.setStyleName(ActionStatusIconMapper.STATUS_ICON_GREEN);
+            autoForceLabel.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             autoForceLabel.setDescription("auto forced since " + SPDateTimeUtil
                     .getDurationFormattedString(actionWithActiveStatus.getForcedTime(), currentTimeMillis, i18n));
         } else {
