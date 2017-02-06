@@ -12,6 +12,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Map;
 
 import javax.validation.ConstraintViolationException;
 
@@ -20,13 +22,15 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -37,8 +41,11 @@ import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Maps;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
@@ -49,40 +56,233 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private RepositoryProperties repositoryProperties;
 
     @Test
-    @Description("Controller adds a new action status.")
+    @Description("Controller confirms successfull update with FINISHED status.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void controllerAddsActionStatus() {
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        Target savedTarget = testdataFactory.createTarget();
+    public void controllerConfirmsUpdateWithFinished() {
+        final Long actionId = createTargetAndAssignDs();
 
-        assertThat(savedTarget.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+        simulateIntermediateStatusOnUpdate(actionId);
 
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
-        final JpaAction savedAction = (JpaAction) deploymentManagement
-                .findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
 
-        assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(actionStatusRepository.count()).isEqualTo(6);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(6);
+    }
 
-        controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
+    @Test
+    @Description("Update server rejects cancelation feedback if action is not in CANCELING state.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void cancellationFeedbackRejectedIfActionIsNotInCaneling() {
+        final Long actionId = createTargetAndAssignDs();
+
+        try {
+            controllerManagament.addCancelActionStatus(
+                    entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+            fail("Expected " + CancelActionNotAllowedException.class.getName());
+        } catch (final CancelActionNotAllowedException e) {
+            // expected
+        }
+
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.RUNNING, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(1);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(1);
+
+    }
+
+    @Test
+    @Description("Controller confirms action cancelation with FINISHED status.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerConfirmsActionCancelationWithFinished() {
+        final Long actionId = createTargetAndAssignDs();
+
+        deploymentManagement.cancelAction(actionId);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.CANCELING, true);
+
+        simulateIntermediateStatusOnCancellation(actionId);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.CANCELED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+    }
+
+    @Test
+    @Description("Controller confirms action cancelation with FINISHED status.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerConfirmsActionCancelationWithCanceled() {
+        final Long actionId = createTargetAndAssignDs();
+
+        deploymentManagement.cancelAction(actionId);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.CANCELING, true);
+
+        simulateIntermediateStatusOnCancellation(actionId);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.CANCELED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.CANCELED, Action.Status.CANCELED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+    }
+
+    @Test
+    @Description("Controller rejects action cancelation with CANCEL_REJECTED status. Action goes back to RUNNING status as it expects "
+            + "that the controller will continue the original update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerRejectsActionCancelationWithReject() {
+        final Long actionId = createTargetAndAssignDs();
+
+        deploymentManagement.cancelAction(actionId);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.CANCELING, true);
+
+        simulateIntermediateStatusOnCancellation(actionId);
+
+        controllerManagament.addCancelActionStatus(
+                entityFactory.actionStatus().create(actionId).status(Action.Status.CANCEL_REJECTED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.CANCEL_REJECTED, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+    }
+
+    @Test
+    @Description("Controller rejects action cancelation with ERROR status. Action goes back to RUNNING status as it expects "
+            + "that the controller will continue the original update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerRejectsActionCancelationWithError() {
+        final Long actionId = createTargetAndAssignDs();
+
+        deploymentManagement.cancelAction(actionId);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.CANCELING, true);
+
+        simulateIntermediateStatusOnCancellation(actionId);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.ERROR, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(7);
+    }
+
+    @Step
+    private Long createTargetAndAssignDs() {
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        testdataFactory.createTarget();
+        assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        return deploymentManagement.findActiveActionsByTarget(TestdataFactory.DEFAULT_CONTROLLER_ID).get(0).getId();
+    }
 
-        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction.getId()).getNumberOfElements())
-                .isEqualTo(3);
+    @Step
+    private void simulateIntermediateStatusOnCancellation(final Long actionId) {
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.RUNNING, true);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.DOWNLOAD, true);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.RETRIEVED, true);
+
+        controllerManagament
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.CANCELING, Action.Status.WARNING, true);
+    }
+
+    @Step
+    private void simulateIntermediateStatusOnUpdate(final Long actionId) {
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.RUNNING, true);
+
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
+
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.RETRIEVED, true);
+
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.WARNING, true);
+    }
+
+    private void assertActionStatus(final Long actionId, final String controllerId,
+            final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
+            final Action.Status expectedActionStatus, final boolean actionActive) {
+        final TargetUpdateStatus targetStatus = targetManagement.findTargetByControllerID(controllerId).getTargetInfo()
+                .getUpdateStatus();
+        assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
+        final Action action = deploymentManagement.findAction(actionId);
+        assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
+        assertThat(action.isActive()).isEqualTo(actionActive);
+        final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, actionId)
+                .getContent();
+        assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
+
     }
 
     @Test
@@ -123,7 +323,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Register a controller which does not exist")
-    public void testfindOrRegisterTargetIfItDoesNotexist() {
+    public void findOrRegisterTargetIfItDoesNotexist() {
         final Target target = controllerManagament.findOrRegisterTargetIfItDoesNotexist("AA", null);
         assertThat(target).as("target should not be null").isNotNull();
 
@@ -142,47 +342,94 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
-    public void tryToFinishUpdateProcessMoreThanOnce() {
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        Target savedTarget = testdataFactory.createTarget();
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId()).get(0);
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void tryToFinishWithErrorUpdateProcessMoreThanOnce() {
+        final Long actionId = createTargetAndAssignDs();
 
         // test and verify
-        savedAction = controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.RUNNING, true);
 
-        savedAction = controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.ERROR));
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+                Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with disabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(true);
-        savedAction = controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+                Action.Status.ERROR, Action.Status.ERROR, false);
 
-        // try with enabled late feedback
+        // try with enabled late feedback - should not make a difference as it
+        // only allows intermediate feedbacks and not multiple close
         repositoryProperties.setRejectActionStatusForClosedAction(false);
-        controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
-                .getUpdateStatus()).isEqualTo(TargetUpdateStatus.ERROR);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+                Action.Status.ERROR, Action.Status.ERROR, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
+
+    }
+
+    @Test
+    @Description("Controller trys to finish an update process after it has been finished by an FINISHED action status.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void tryToFinishUpdateProcessMoreThanOnce() {
+        final Long actionId = prepareFinishedUpdate().getId();
+
+        // try with disabled late feedback
+        repositoryProperties.setRejectActionStatusForClosedAction(true);
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+
+        // test
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        // try with enabled late feedback - should not make a difference as it
+        // only allows intermediate feedbacks and not multiple close
+        repositoryProperties.setRejectActionStatusForClosedAction(false);
+        controllerManagament
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+
+        // test
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, actionId).getNumberOfElements()).isEqualTo(3);
 
     }
 
     @Test
     @Description("Controller trys to send an update feedback after it has been finished which is reject as the repository is "
             + "configured to reject that.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void sendUpdatesForFinishUpdateProcessDropedIfDisabled() {
         repositoryProperties.setRejectActionStatusForClosedAction(true);
 
@@ -194,14 +441,21 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
-        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
                 .isEqualTo(3);
     }
 
     @Test
-    @Description("Controller trys to send an update feedback after it has been finished which is actepted as the repository is "
+    @Description("Controller trys to send an update feedback after it has been finished which is accepted as the repository is "
             + "configured to accept them.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void sendUpdatesForFinishUpdateProcessAcceptedIfEnabled() {
         repositoryProperties.setRejectActionStatusForClosedAction(false);
 
@@ -212,9 +466,58 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.findTargetByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+
+        // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action.getId()).getNumberOfElements())
                 .isEqualTo(4);
     }
 
+    @Test
+    @Description("Ensures that target attribute update is reflected by the repository.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3) })
+    public void updateTargetAttributes() {
+        final String controllerId = "test123";
+        testdataFactory.createTarget(controllerId);
+        addAttributeAndVerify(controllerId);
+        addSecondAttributeAndVerify(controllerId);
+        updateAttributeAndVerify(controllerId);
+    }
+
+    @Step
+    private void addAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
+        testData.put("test1", "testdata1");
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void addSecondAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        testData.put("test2", "testdata20");
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        testData.put("test1", "testdata1");
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void updateAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        testData.put("test1", "testdata12");
+
+        controllerManagament.updateControllerAttributes(controllerId, testData);
+
+        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
+        testData.put("test2", "testdata20");
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
 }

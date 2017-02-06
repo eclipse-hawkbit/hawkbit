@@ -514,7 +514,7 @@ public class ActionHistoryTable extends TreeTable {
             label.setDescription(i18n.get("label.error"));
             label.setStyleName("statusIconRed");
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else if (Action.Status.WARNING == status) {
+        } else if (Action.Status.WARNING == status || Action.Status.CANCEL_REJECTED == status) {
             label.setStyleName("statusIconOrange");
             label.setDescription(i18n.get("label.warning"));
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
