@@ -37,7 +37,6 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private Button rolloutsGroupViewLink;
     private Button rolloutNameLink;
     private Label headerCaption;
 
