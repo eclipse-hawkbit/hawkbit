@@ -107,7 +107,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void cancellationFeedbackRejectedIfActionIsNotInCaneling() {
+    public void cancellationFeedbackRejectedIfActionIsNotInCanceling() {
         final Long actionId = createTargetAndAssignDs();
 
         try {
