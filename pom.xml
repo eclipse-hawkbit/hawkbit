@@ -138,7 +138,7 @@
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
-      <mariadb-java-client.version>1.5.3</mariadb-java-client.version>
+      <mariadb-java-client.version>1.5.7</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
