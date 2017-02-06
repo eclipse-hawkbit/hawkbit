@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
@@ -242,7 +243,7 @@ public class BulkUploadHandler extends CustomComponent
                 }));
 
             } catch (final IOException e) {
-                LOG.error("Error while reading of file {}", tempFile.getName(), e);
+                LOG.error("Error while reading temp file for upload.", e);
             }
 
             return new BigDecimal(0);
@@ -360,23 +361,23 @@ public class BulkUploadHandler extends CustomComponent
             }
         }
 
+        // Exception squid:S1166 - Targets that exist already are simply ignored
+        @SuppressWarnings("squid:S1166")
         private void addNewTarget(final String controllerId, final String name) {
             final String newControllerId = HawkbitCommonUtil.trimAndNullIfEmpty(controllerId);
-            if (isNotDuplicate(newControllerId)) {
-                final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
+            final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
+            try {
                 targetManagement.createTarget(entityFactory.target().create().controllerId(newControllerId).name(name)
                         .description(description));
 
                 managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
                 successfullTargetCount++;
+
+            } catch (final EntityAlreadyExistsException ex) {
+                // Targets that exist already are simply ignored
             }
-
         }
-    }
-
-    private boolean isNotDuplicate(final String newControlllerId) {
-        return targetManagement.findTargetByControllerID(newControlllerId) == null;
     }
 
     /**
