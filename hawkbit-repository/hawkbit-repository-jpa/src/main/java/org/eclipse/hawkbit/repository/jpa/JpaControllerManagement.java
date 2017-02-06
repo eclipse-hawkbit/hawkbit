@@ -125,8 +125,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public String getPollingTime() {
-        return systemSecurityContext.runAsSystem(tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class)::getValue);
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
     }
 
     @Override
