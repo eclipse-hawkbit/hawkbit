@@ -654,6 +654,7 @@ public class RolloutListGrid extends AbstractGrid {
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.CREATING);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STARTING);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.STOPPED);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.FINISHED);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_CREATING);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(COPY_OPTION, RolloutStatus.ERROR_STARTING);
         }
@@ -684,23 +685,27 @@ public class RolloutListGrid extends AbstractGrid {
             }
             String status = null;
             if (RUN_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, RolloutStatus.READY, RolloutStatus.PAUSED);
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.READY, RolloutStatus.PAUSED));
             } else if (PAUSE_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, RolloutStatus.RUNNING);
-            } else if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)
-                    || COPY_OPTION.equals(propertyId)) {
-                status = getStatus(cellReference, RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.RUNNING));
+            } else if (UPDATE_OPTION.equals(propertyId) || DELETE_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference,
+                        Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
+                                RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
+                                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED));
+            } else if (COPY_OPTION.equals(propertyId)) {
+                status = getStatus(cellReference, Arrays.asList(RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING,
                         RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.RUNNING,
-                        RolloutStatus.STARTING, RolloutStatus.STOPPED);
+                        RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED));
             }
 
             return status;
         }
 
-        private String getStatus(final CellReference cellReference, final RolloutStatus... expectedRolloutStatus) {
+        private String getStatus(final CellReference cellReference, final List<RolloutStatus> expectedRolloutStatus) {
             final RolloutStatus currentRolloutStatus = getRolloutStatus(cellReference.getItemId());
 
-            if (Arrays.asList(expectedRolloutStatus).contains(currentRolloutStatus)) {
+            if (expectedRolloutStatus.contains(currentRolloutStatus)) {
                 return null;
             }
 
