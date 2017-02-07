@@ -184,6 +184,11 @@ public final class SPUIStyleDefinitions {
     public static final String STATUS_ICON_RED = "statusIconRed";
 
     /**
+     * Status icon style - orange color.
+     */
+    public static final String STATUS_ICON_ORANGE = "statusIconOrange";
+
+    /**
      * Status icon style - green color.
      */
     public static final String STATUS_ICON_GREEN = "statusIconGreen";
