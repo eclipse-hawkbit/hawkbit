@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetUpdateCreate;
@@ -21,6 +20,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Create/build implementation.

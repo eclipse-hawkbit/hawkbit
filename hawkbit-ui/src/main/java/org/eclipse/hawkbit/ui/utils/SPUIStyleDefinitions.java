@@ -11,16 +11,8 @@ package org.eclipse.hawkbit.ui.utils;
 /**
  * RepositoryConstants required for Style.
  *
- *
- *
- *
- *
  */
 public final class SPUIStyleDefinitions {
-    /**
-     * TABLE- HORI.
-     */
-    public static final String SP_HORIZONTAL_TABLE_STYLE = "table-horizontal-layout";
     /**
      * Tag button wrapper style.
      */
@@ -34,34 +26,9 @@ public final class SPUIStyleDefinitions {
     public static final String SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT = "v-textfield-error";
 
     /**
-     * STYLE to highlight wrong data combo box field.
-     */
-    public static final String SP_COMBOFIELD_ERROR = "combobox-error";
-
-    /**
-     * Style for control buttons in aciton history.
-     */
-    public static final String SP_ACTION_HIS_CTRL_BTN = "action-history-ctl-buttons";
-
-    /**
      * Style for accordion tab button.
      */
     public static final String SP_ACCORDION_TAB_BTN = "accordion-tab-button-style";
-
-    /**
-     * large table style.
-     */
-    public static final String SP_LARGE_TABLE_STYLE = "sp-table-large";
-
-    /**
-     * small table style.
-     */
-    public static final String SP_SMALL_TABLE_STYLE = "sp-table-small";
-
-    /**
-     * Drag highligh layout style.
-     */
-    public static final String DRAG_HIGHLIGHT_LAYOUT = "drag-hightlight-layout";
 
     /**
      * Confirm box question label style.
@@ -72,24 +39,6 @@ public final class SPUIStyleDefinitions {
      * Confirm box window style.
      */
     public static final String CONFIRMBOX_WINDOW_SYLE = "confirmbox-window-style";
-
-    /**
-     * Distribution detail layout style.
-     */
-    public static final String DIST_DETAIL_MODULE_TABLE = "dist-details-module-table";
-    /**
-     * Artifact upload - software module table layout.
-     */
-    public static final String UPLOAD_SW_MODULE_TABLE_LAYOUT = "swModule-table-layout";
-
-    /**
-     * hide tags layout style.
-     */
-    public static final String SP_HIDE_TYPE = "hide-type";
-    /**
-     * style for show type button.
-     */
-    public static final String SP_SHOW_TYPE_ICON_STYLE = "show-type-icon";
 
     /**
      * Error label style.
@@ -140,29 +89,14 @@ public final class SPUIStyleDefinitions {
     public static final String DS_METADATA_ICON = "ds-metadata-icon";
 
     /**
-     * Target table style.
-     */
-    public static final String TARGET_TABLE_STYLE = "target-table";
-
-    /**
      * Details layout style.
      */
     public static final String DETAILS_LAYOUT_STYLE = "details-tab";
 
     /**
-     * Style for table panel to set short cut keys on the table.
-     */
-    public static final String SHORT_CUT_KEY_TABLE_PANEL = "table-panel";
-
-    /**
      * Confirmation popup - discard style.
      */
     public static final String REDICON = "redicon";
-
-    /**
-     * Deployment view - message label style.
-     */
-    public static final String COUNT_MSG_BOX_SHOW = "count-msg-box";
 
     /**
      * Action button style- footer buttons.
@@ -248,6 +182,11 @@ public final class SPUIStyleDefinitions {
      * Status icon style - red color.
      */
     public static final String STATUS_ICON_RED = "statusIconRed";
+
+    /**
+     * Status icon style - orange color.
+     */
+    public static final String STATUS_ICON_ORANGE = "statusIconOrange";
 
     /**
      * Status icon style - green color.

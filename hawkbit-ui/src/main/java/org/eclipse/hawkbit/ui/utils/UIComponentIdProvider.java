@@ -818,16 +818,6 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_ERROR_THRESOLD_OPTION_ID = "rollout.error.thresold.option.id";
 
     /**
-     * Rollout groups options id.
-     */
-    public static final String ROLLOUT_GROUPS_OPTION_ID = "rollout.groups.option.id";
-
-    /**
-     * Rollout groups definition button
-     */
-    public static final String ROLLOUT_GROUPS_DEF_BUTTON_ID = "rollout.groups.definition.button.id";
-
-    /**
      * Rollout target filter query value text area id.
      */
     public static final String ROLLOUT_TARGET_FILTER_QUERY_FIELD = "rollout.target.filter.query.field.id";
@@ -905,16 +895,6 @@ public final class UIComponentIdProvider {
     public static final String METADATA_VALUE_ID = "metadata.value.id";
 
     /**
-     * Metadata save id.
-     */
-    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
-
-    /**
-     * Metadata discard id.
-     */
-    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
-
-    /**
      * Metadata add icon id.
      */
     public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
@@ -981,9 +961,6 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
-    /**
-     * Distribution set select enable checkbox id
-     */
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
 
     public static final String NOTIFICATION_UNREAD_ID = "notification.unread";

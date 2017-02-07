@@ -23,40 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionStatus {
 
-    /**
-     * Action is finished successfully for this target.
-     */
-    public static final String AS_FINISHED = "finished";
-
-    /**
-     * Action has failed for this target.
-     */
-    public static final String AS_ERROR = "error";
-
-    /**
-     * Action is still running but with warnings.
-     */
-    public static final String AS_WARNING = "warning";
-
-    /**
-     * Action is still running for this target.
-     */
-    public static final String AS_RUNNING = "running";
-    /**
-     * Action has been canceled for this target.
-     */
-    public static final String AS_CANCELED = "canceled";
-
-    /**
-     * Action has been presented to the target.
-     */
-    public static final String AS_RETRIEVED = "retrieved";
-
-    /**
-     * Action has been canceled for this target.
-     */
-    public static final String AS_CANCELING = "canceling";
-
     @JsonProperty("id")
     private Long statusId;
 

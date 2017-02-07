@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -245,8 +244,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         notificationMessage.displaySuccess(
                 i18n.get("message.new.dist.save.success", new Object[] { newDist.getName(), newDist.getVersion() }));
 
-        distributionSetTable.setValue(
-                Sets.newHashSet(new DistributionSetIdName(newDist.getId(), newDist.getName(), newDist.getVersion())));
+        distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
     }
 
     private boolean isDuplicate() {

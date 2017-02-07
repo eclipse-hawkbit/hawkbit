@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Create/build implementation.

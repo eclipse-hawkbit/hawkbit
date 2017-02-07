@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

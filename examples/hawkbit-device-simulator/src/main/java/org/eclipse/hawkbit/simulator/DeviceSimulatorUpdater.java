@@ -222,7 +222,7 @@ public class DeviceSimulatorUpdater {
             try {
                 return readAndCheckDownloadUrl(url, targetToken, sha1Hash, size);
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download" + url, e);
+                LOGGER.error("Failed to download " + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
@@ -53,11 +54,9 @@ import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
@@ -242,54 +241,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(10);
         targetManagement.deleteTargets(targets);
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
-    }
-
-    @Test
-    @Description("Ensures that target attribute update is reflected by the repository.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 3) })
-    public void updateTargetAttributes() {
-        final String controllerId = "test123";
-        testdataFactory.createTarget(controllerId);
-        addAttributeAndVerify(controllerId);
-        addSecondAttributeAndVerify(controllerId);
-        updateAttributeAndVerify(controllerId);
-    }
-
-    @Step
-    private void addAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
-        testData.put("test1", "testdata1");
-        controllerManagament.updateControllerAttributes(controllerId, testData);
-
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
-    }
-
-    @Step
-    private void addSecondAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
-        testData.put("test2", "testdata20");
-        controllerManagament.updateControllerAttributes(controllerId, testData);
-
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        testData.put("test1", "testdata1");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
-    }
-
-    @Step
-    private void updateAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
-        testData.put("test1", "testdata12");
-
-        controllerManagament.updateControllerAttributes(controllerId, testData);
-
-        final Target target = targetManagement.findTargetByControllerIDWithDetails(controllerId).get();
-        testData.put("test2", "testdata20");
-        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
     }
 
     private Target createTargetWithAttributes(final String controllerId) {
@@ -773,5 +724,25 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(50);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
 
+    }
+
+    @Test
+    @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
+    public void verifyFindTargetAllById() {
+        final List<Long> searchIds = new ArrayList<>();
+        searchIds.add(testdataFactory.createTarget("target-4").getId());
+        searchIds.add(testdataFactory.createTarget("target-5").getId());
+        searchIds.add(testdataFactory.createTarget("target-6").getId());
+        for (int i = 0; i < 9; i++) {
+            testdataFactory.createTarget("test" + i);
+        }
+
+        final List<Target> foundDs = targetManagement.findTargetAllById(searchIds);
+
+        assertThat(foundDs).hasSize(3);
+
+        final List<Long> collect = foundDs.stream().map(Target::getId).collect(Collectors.toList());
+        assertThat(collect).containsAll(searchIds);
     }
 }

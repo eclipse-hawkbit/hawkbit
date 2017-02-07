@@ -100,7 +100,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         for (final Target targ : targetBeans) {
             final ProxyTarget prxyTarget = new ProxyTarget();
-            prxyTarget.setTargetIdName(targ.getTargetIdName());
+            prxyTarget.setId(targ.getId());
             prxyTarget.setName(targ.getName());
             prxyTarget.setDescription(targ.getDescription());
             prxyTarget.setControllerId(targ.getControllerId());

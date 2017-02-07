@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
@@ -33,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -65,18 +65,10 @@ public final class MgmtTargetMapper {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTIONS));
+                        .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand(ArrayUtils.toArray()));
     }
 
-    /**
-     * Add the poll status to a target response.
-     *
-     * @param target
-     *            the target
-     * @param targetRest
-     *            the response
-     */
-    public static void addPollStatus(final Target target, final MgmtTarget targetRest) {
+    static void addPollStatus(final Target target, final MgmtTarget targetRest) {
         final PollStatus pollStatus = target.getTargetInfo().getPollStatus();
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
@@ -87,26 +79,6 @@ public final class MgmtTargetMapper {
             pollStatusRest.setOverdue(pollStatus.isOverdue());
             targetRest.setPollStatus(pollStatusRest);
         }
-    }
-
-    /**
-     * Create a response which includes links and pollstatus for all targets.
-     *
-     * @param targets
-     *            the targets
-     * @return the response
-     */
-    public static List<MgmtTarget> toResponseWithLinksAndPollStatus(final Collection<Target> targets) {
-        if (targets == null) {
-            return Collections.emptyList();
-        }
-
-        return new ResponseList<>(targets.stream().map(target -> {
-            final MgmtTarget response = toResponse(target);
-            addPollStatus(target, response);
-            addTargetLinks(response);
-            return response;
-        }).collect(Collectors.toList()));
     }
 
     /**
@@ -139,7 +111,7 @@ public final class MgmtTargetMapper {
         targetRest.setControllerId(target.getControllerId());
         targetRest.setDescription(target.getDescription());
         targetRest.setName(target.getName());
-        targetRest.setUpdateStatus(getUpdateStatusName(target.getTargetInfo().getUpdateStatus()));
+        targetRest.setUpdateStatus(target.getTargetInfo().getUpdateStatus().name().toLowerCase());
 
         final URI address = target.getTargetInfo().getAddress();
         if (address != null) {
@@ -168,7 +140,7 @@ public final class MgmtTargetMapper {
             targetRest.setInstalledAt(installationDate);
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withRel("self"));
+        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 
         return targetRest;
     }
@@ -183,7 +155,7 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
                 .address(targetRest.getAddress());
@@ -211,7 +183,7 @@ public final class MgmtTargetMapper {
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
 
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withRel("self"));
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel());
 
         return result;
     }
@@ -225,37 +197,6 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    private static String getNameOfActionStatusType(final Action.Status type) {
-        String result;
-
-        switch (type) {
-        case CANCELED:
-            result = MgmtActionStatus.AS_CANCELED;
-            break;
-        case ERROR:
-            result = MgmtActionStatus.AS_ERROR;
-            break;
-        case FINISHED:
-            result = MgmtActionStatus.AS_FINISHED;
-            break;
-        case RETRIEVED:
-            result = MgmtActionStatus.AS_RETRIEVED;
-            break;
-        case RUNNING:
-            result = MgmtActionStatus.AS_RUNNING;
-            break;
-        case WARNING:
-            result = MgmtActionStatus.AS_WARNING;
-            break;
-        default:
-            return type.name().toLowerCase();
-
-        }
-
-        return result;
-
-    }
-
     private static String getType(final Action action) {
         if (!action.isCancelingOrCanceled()) {
             return MgmtAction.ACTION_UPDATE;
@@ -266,39 +207,13 @@ public final class MgmtTargetMapper {
         return null;
     }
 
-    private static String getUpdateStatusName(final TargetUpdateStatus updatestatus) {
-        String result;
-
-        switch (updatestatus) {
-        case ERROR:
-            result = "error";
-            break;
-        case IN_SYNC:
-            result = "in_sync";
-            break;
-        case PENDING:
-            result = "pending";
-            break;
-        case REGISTERED:
-            result = "registered";
-            break;
-        case UNKNOWN:
-            result = "unknown";
-            break;
-        default:
-            return updatestatus.name().toLowerCase();
-        }
-
-        return result;
-    }
-
     private static MgmtActionStatus toResponse(final ActionStatus actionStatus) {
         final MgmtActionStatus result = new MgmtActionStatus();
 
         result.setMessages(actionStatus.getMessages());
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setStatusId(actionStatus.getId());
-        result.setType(getNameOfActionStatusType(actionStatus.getStatus()));
+        result.setType(actionStatus.getStatus().name().toLowerCase());
 
         return result;
     }

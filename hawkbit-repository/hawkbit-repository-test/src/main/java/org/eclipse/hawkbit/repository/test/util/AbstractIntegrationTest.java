@@ -78,6 +78,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -104,7 +106,7 @@ import com.google.common.collect.Lists;
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable pageReq = new PageRequest(0, 400);
+    protected static final Pageable pageReq = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
 
     /**
      * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring

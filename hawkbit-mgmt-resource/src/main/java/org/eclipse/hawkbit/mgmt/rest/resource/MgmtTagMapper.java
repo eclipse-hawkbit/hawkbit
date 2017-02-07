@@ -59,7 +59,7 @@ final class MgmtTagMapper {
 
         mapTag(response, targetTag);
 
-        response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withRel("self"));
+        response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withSelfRel());
 
         response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getAssignedTargets(targetTag.getId()))
                 .withRel("assignedTargets"));
@@ -91,7 +91,7 @@ final class MgmtTagMapper {
 
         response.add(
                 linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getDistributionSetTag(distributionSetTag.getId()))
-                        .withRel("self"));
+                        .withSelfRel());
 
         response.add(linkTo(
                 methodOn(MgmtDistributionSetTagRestApi.class).getAssignedDistributionSets(distributionSetTag.getId()))

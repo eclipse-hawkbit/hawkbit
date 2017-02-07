@@ -47,7 +47,7 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
      * @param i18n
      *            the internationalization helper
      */
-    public AutoStartOptionGroupLayout(final I18N i18n) {
+    AutoStartOptionGroupLayout(final I18N i18n) {
         this.i18n = i18n;
 
         createOptionGroup();
@@ -138,18 +138,14 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
         addComponent(startAtDateField);
     }
 
-    /**
-     * To Set Default option for save.
-     */
-
-    public void selectDefaultOption() {
+    void selectDefaultOption() {
         autoStartOptionGroup.select(AutoStartOption.MANUAL);
     }
 
     /**
      * Rollout start options
      */
-    public enum AutoStartOption {
+    enum AutoStartOption {
         MANUAL, AUTO_START, SCHEDULED;
 
     }

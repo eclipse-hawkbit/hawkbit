@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -498,7 +501,9 @@ public class TestdataFactory {
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId) {
-        return targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
+        final Target target = targetManagement.createTarget(entityFactory.target().create().controllerId(controllerId));
+        assertThat(target.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+        return target;
     }
 
     /**

@@ -97,8 +97,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         styleTableOnDistSelection();
     }
 
-    /* All event Listeners */
-
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SMFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
@@ -184,7 +182,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
 
         manageDistUIState.getLastSelectedDistribution()
-                .ifPresent(distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+                .ifPresent(id -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, id));
 
         return queryConfig;
     }

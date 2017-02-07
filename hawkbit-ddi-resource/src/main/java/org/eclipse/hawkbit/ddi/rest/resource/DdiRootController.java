@@ -439,7 +439,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         case REJECTED:
             LOG.info("Target rejected the cancelation request (actionid: {}, controllerId: {}).", actionid,
                     target.getControllerId());
-            status = Status.WARNING;
+            status = Status.CANCEL_REJECTED;
             messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected the cancelation request.");
             break;
         case CLOSED:

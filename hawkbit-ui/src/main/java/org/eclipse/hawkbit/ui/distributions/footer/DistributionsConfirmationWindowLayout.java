@@ -17,11 +17,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
+import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -395,9 +396,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(DIST_ID_NAME, DistributionSetIdName.class, "");
         contactContainer.addContainerProperty(DIST_NAME, String.class, "");
-        Item item;
         for (final DistributionSetIdName distIdName : manageDistUIState.getDeletedDistributionList()) {
-            item = contactContainer.addItem(distIdName);
+            final Item item = contactContainer.addItem(distIdName);
             item.getItemProperty(DIST_NAME).setValue(distIdName.getName().concat(":" + distIdName.getVersion()));
         }
         return contactContainer;
@@ -460,7 +460,6 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void deleteDistSetTypeAll(final ConfirmationTab tab) {
 
         final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
-
         manageDistUIState.getSelectedDeleteDistSetTypes().stream()
                 .map(deleteDistTypeName -> dsManagement.findDistributionSetTypeByName(deleteDistTypeName).get().getId())
                 .forEach(dsManagement::deleteDistributionSetType);

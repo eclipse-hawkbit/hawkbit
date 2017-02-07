@@ -30,14 +30,7 @@ public final class MgmtSystemMapper {
         // Utility class
     }
 
-    /**
-     * @param tenantConfigurationManagement
-     *            instance of TenantConfigurationManagement
-     * @param tenantConfigurationProperties
-     *            to get defined keys
-     * @return a map of all existing configuration values
-     */
-    public static Map<String, MgmtSystemTenantConfigurationValue> toResponse(
+    static Map<String, MgmtSystemTenantConfigurationValue> toResponse(
             final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantConfigurationProperties tenantConfigurationProperties) {
 
@@ -46,17 +39,7 @@ public final class MgmtSystemMapper {
                         tenantConfigurationManagement.getConfigurationValue(key.getKeyName()))));
     }
 
-    /**
-     * maps a TenantConfigurationValue from the repository model to a
-     * MgmtSystemTenantConfigurationValue, the RESTful model.
-     * 
-     * @param key
-     *            the key
-     * @param repoConfValue
-     *            configuration value as repository model
-     * @return configuration value as RESTful model
-     */
-    public static MgmtSystemTenantConfigurationValue toResponse(final String key,
+    static MgmtSystemTenantConfigurationValue toResponse(final String key,
             final TenantConfigurationValue<?> repoConfValue) {
         final MgmtSystemTenantConfigurationValue restConfValue = new MgmtSystemTenantConfigurationValue();
 
@@ -67,7 +50,7 @@ public final class MgmtSystemMapper {
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
 
-        restConfValue.add(linkTo(methodOn(MgmtSystemResource.class).getConfigurationValue(key)).withRel("self"));
+        restConfValue.add(linkTo(methodOn(MgmtSystemResource.class).getConfigurationValue(key)).withSelfRel());
 
         return restConfValue;
     }

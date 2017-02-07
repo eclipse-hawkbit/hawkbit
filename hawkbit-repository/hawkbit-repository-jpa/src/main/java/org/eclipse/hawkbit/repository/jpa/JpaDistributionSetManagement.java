@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -69,6 +68,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
@@ -877,6 +877,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Long countDistributionSetsByType(final Long typeId) {
         return distributionSetRepository.countByTypeId(typeId);
+    }
+
+    @Override
+    public List<DistributionSet> findDistributionSetAllById(final Collection<Long> ids) {
+        return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
     }
 
 }

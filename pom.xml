@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.4.3.RELEASE</version>
+      <version>1.4.4.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -101,11 +101,12 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>1.4.3.RELEASE</spring.boot.version>
+      <spring.boot.version>1.4.4.RELEASE</spring.boot.version>
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->      
+      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Incompatible changes in 2.2 -->
       <json-path.version>2.0.0</json-path.version>
@@ -137,14 +138,13 @@
       <gwtmockito.version>1.1.6</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>19.0</guava.version>
-      <mariadb-java-client.version>1.5.3</mariadb-java-client.version>
+      <mariadb-java-client.version>1.5.7</mariadb-java-client.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
       <jlorem.version>1.1</jlorem.version>
       <json-simple.version>1.1.1</json-simple.version>
       <commons-lang3.version>3.4</commons-lang3.version>
-      <commons-collections4.version>4.1</commons-collections4.version>
       <json.version>20141113</json.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <spring.cloud.version>Camden.SR1</spring.cloud.version>
@@ -667,11 +667,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>

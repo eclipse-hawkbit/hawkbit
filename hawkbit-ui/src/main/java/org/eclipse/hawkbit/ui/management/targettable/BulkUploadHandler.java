@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
@@ -84,7 +83,7 @@ public class BulkUploadHandler extends CustomComponent
     private final transient DeploymentManagement deploymentManagement;
     private final transient DistributionSetManagement distributionSetManagement;
 
-    protected File tempFile;
+    private File tempFile;
     private Upload upload;
 
     private final ProgressBar progressBar;
@@ -101,7 +100,7 @@ public class BulkUploadHandler extends CustomComponent
     private transient EntityFactory entityFactory;
     private final UI uiInstance;
 
-    BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
+    public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final I18N i18n, final UI uiInstance) {
         this.uiInstance = uiInstance;
@@ -121,10 +120,7 @@ public class BulkUploadHandler extends CustomComponent
         entityFactory = SpringContextHelper.getBean(EntityFactory.class);
     }
 
-    /**
-     * Intialize layout.
-     */
-    public void buildLayout() {
+    void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
         upload.setEnabled(false);
@@ -162,20 +158,10 @@ public class BulkUploadHandler extends CustomComponent
 
     @Override
     public void uploadSucceeded(final SucceededEvent event) {
-        executor.execute(new UploadAsync(event));
+        executor.execute(new UploadAsync());
     }
 
     class UploadAsync implements Runnable {
-
-        final SucceededEvent event;
-
-        /**
-         *
-         * @param event
-         */
-        public UploadAsync(final SucceededEvent event) {
-            this.event = event;
-        }
 
         @Override
         public void run() {
@@ -312,11 +298,11 @@ public class BulkUploadHandler extends CustomComponent
             final long forcedTimeStamp = new Date().getTime();
             final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
             final List<String> targetsList = targetBulkUpload.getTargetsCreated();
-            final DistributionSetIdName dsSelected = (DistributionSetIdName) comboBox.getValue();
-            if (distributionSetManagement.findDistributionSetById(dsSelected.getId()) == null) {
+            final Long dsSelected = (Long) comboBox.getValue();
+            if (distributionSetManagement.findDistributionSetById(dsSelected) == null) {
                 return i18n.get("message.bulk.upload.assignment.failed");
             }
-            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
+            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
                     forcedTimeStamp, targetsList);
             return null;
         }
