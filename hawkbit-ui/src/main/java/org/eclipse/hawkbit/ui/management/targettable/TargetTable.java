@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -540,8 +541,8 @@ public class TargetTable extends AbstractTable<Target, Long> {
                     Lists.newArrayListWithCapacity(0), null);
         }
 
-        final TargetTag tag = tagManagement.findTargetTag(targTagName);
-        if (tag == null) {
+        final Optional<TargetTag> tag = tagManagement.findTargetTag(targTagName);
+        if (!tag.isPresent()) {
             notification.displayWarning(i18n.get("targettag.not.exists", new Object[] { targTagName }));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);

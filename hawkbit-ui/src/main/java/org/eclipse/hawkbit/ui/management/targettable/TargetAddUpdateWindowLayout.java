@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -162,12 +164,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * @return window or {@code null} if target is not exists.
      */
     public Window getWindow(final String controllerId) {
-        final Target target = targetManagement.findTargetByControllerID(controllerId);
-        if (target == null) {
+        final Optional<Target> target = targetManagement.findTargetByControllerID(controllerId);
+        if (!target.isPresent()) {
             uINotification.displayWarning(i18n.get("target.not.exists", new Object[] { controllerId }));
             return null;
         }
-        populateValuesOfTarget(target);
+        populateValuesOfTarget(target.get());
         createNewWindow();
         window.addStyleName("target-update-window");
         return window;
@@ -188,8 +190,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private boolean isDuplicate() {
         final String newControlllerId = controllerIDTextField.getValue();
-        final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
-        if (existingTarget != null) {
+        final Optional<Target> existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
+        if (existingTarget.isPresent()) {
             uINotification.displayValidationError(
                     i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
             return true;

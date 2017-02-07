@@ -94,7 +94,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
-        final Rollout findRolloutById = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
+        final Rollout findRolloutById = rolloutManagement.findRolloutWithDetailedStatus(rolloutId).orElseThrow(
+                () -> new EntityNotFoundException("Rollout with given ID " + rolloutId + " does not exist"));
+
         return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById, true), HttpStatus.OK);
     }
 
@@ -176,7 +178,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId) {
         rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
-        final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(groupId);
+        final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupWithDetailedStatus(groupId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Rollout Group with given ID " + rolloutId + " does not exist"));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
     }
 
@@ -206,12 +210,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {
-        final DistributionSet ds = this.distributionSetManagement
-                .findDistributionSetById(rolloutRequestBody.getDistributionSetId());
-        if (ds == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSet with Id {" + rolloutRequestBody.getDistributionSetId() + DOES_NOT_EXIST);
-        }
-        return ds;
+        return this.distributionSetManagement.findDistributionSetById(rolloutRequestBody.getDistributionSetId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "DistributionSet with Id {" + rolloutRequestBody.getDistributionSetId() + DOES_NOT_EXIST));
+
     }
 }

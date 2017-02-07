@@ -134,10 +134,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat198TargetsAreInStatusUnknownAndHaveGivenTags(targTagY, targTagW, unknown, expected);
         verfyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(setA, unknown);
         expected = concat(targAs);
-        expected.remove(targetManagement.findTargetByControllerID(assignedA));
+        expected.remove(targetManagement.findTargetByControllerID(assignedA).get());
         verifyThat99TargetsWithNameOrDescriptionAreInGivenStatus(unknown, expected);
         expected = concat(targBs);
-        expected.remove(targetManagement.findTargetByControllerID(assignedB));
+        expected.remove(targetManagement.findTargetByControllerID(assignedB).get());
         verifyThat99TargetsWithGivenNameOrDescAndTagAreInStatusUnknown(targTagW, unknown, expected);
         verifyThat3TargetsAreInStatusPending(pending,
                 targetManagement.findTargetByControllerID(Lists.newArrayList(assignedA, assignedB, assignedC)));

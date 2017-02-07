@@ -316,11 +316,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     private Target findTargetWithExceptionIfNotFound(final String controllerId) {
-        final Target findTarget = this.targetManagement.findTargetByControllerID(controllerId);
-        if (findTarget == null) {
-            throw new EntityNotFoundException("Target with Id {" + controllerId + "} does not exist");
-        }
-        return findTarget;
+        return targetManagement.findTargetByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException("Target with Id {" + controllerId + "} does not exist"));
     }
 
 }

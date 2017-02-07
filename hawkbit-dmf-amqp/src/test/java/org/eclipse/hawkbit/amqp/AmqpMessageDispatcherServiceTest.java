@@ -126,13 +126,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
-                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId());
+                .findTargetByControllerID(targetAssignDistributionSetEvent.getControllerId()).get();
         final Message sendMessage = createArgumentCapture(target.getTargetInfo().getAddress());
         return sendMessage;
     }
 
     private Action createAction(final DistributionSet testDs) {
-        return deploymentManagement.findAction(assignDistributionSet(testDs, testTarget).getActions().get(0));
+        return deploymentManagement.findAction(assignDistributionSet(testDs, testTarget).getActions().get(0)).get();
     }
 
     @Test
@@ -177,8 +177,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new DbArtifact());
         }
-        module = softwareManagement.findSoftwareModuleById(module.getId());
-        dsA = distributionSetManagement.findDistributionSetById(dsA.getId());
+        module = softwareManagement.findSoftwareModuleById(module.getId()).get();
+        dsA = distributionSetManagement.findDistributionSetById(dsA.getId()).get();
 
         final Action action = createAction(dsA);
 

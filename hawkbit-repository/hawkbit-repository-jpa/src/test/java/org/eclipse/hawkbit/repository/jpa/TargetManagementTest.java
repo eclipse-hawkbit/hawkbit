@@ -308,7 +308,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
     public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
-        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd")).as("Expected as").isNull();
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd").isPresent()).isFalse();
     }
 
     @Test

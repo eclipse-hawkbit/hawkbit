@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
@@ -131,8 +131,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTestArtifact(final byte[] random) {
-        JpaSoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
-        sm = softwareModuleRepository.save(sm);
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         artifactManagement.createArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
     }

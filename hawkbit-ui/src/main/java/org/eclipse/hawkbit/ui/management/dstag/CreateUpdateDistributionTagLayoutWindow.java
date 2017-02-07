@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -75,7 +76,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
 
     @Override
     protected DistributionSetTag findEntityByName() {
-        return tagManagement.findDistributionSetTag(tagName.getValue());
+        return tagManagement.findDistributionSetTag(tagName.getValue()).get();
     }
 
     /**
@@ -136,14 +137,14 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
-        if (null != selectedDistTag) {
-            tagDesc.setValue(selectedDistTag.getDescription());
-            if (null == selectedDistTag.getColour()) {
+        final Optional<DistributionSetTag> selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
+        if (selectedDistTag.isPresent()) {
+            tagDesc.setValue(selectedDistTag.get().getDescription());
+            if (null == selectedDistTag.get().getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
             } else {
-                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()),
-                        selectedDistTag.getColour());
+                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.get().getColour()),
+                        selectedDistTag.get().getColour());
             }
         }
     }

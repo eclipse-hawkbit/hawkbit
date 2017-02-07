@@ -12,7 +12,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,7 +29,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -427,7 +425,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .version("anotherVersion").requiredMigrationStep(true));
 
         // load also lazy stuff
-        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).get();
 
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(1);
@@ -557,11 +555,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
 
         one = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==one", pageReq, false).getContent().get(0).getId());
+                .findDistributionSetsAll("name==one", pageReq, false).getContent().get(0).getId()).get();
         two = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==two", pageReq, false).getContent().get(0).getId());
+                .findDistributionSetsAll("name==two", pageReq, false).getContent().get(0).getId()).get();
         three = distributionSetManagement.findDistributionSetByIdWithDetails(distributionSetManagement
-                .findDistributionSetsAll("name==three", pageReq, false).getContent().get(0).getId());
+                .findDistributionSetsAll("name==three", pageReq, false).getContent().get(0).getId()).get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -667,7 +665,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
@@ -693,7 +691,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
-        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId());
+        final DistributionSet setupdated = distributionSetManagement.findDistributionSetById(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(setupdated.getVersion()).isEqualTo(set.getVersion());
@@ -776,10 +774,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey1);
-        final DistributionSetMetadata metaKey2 = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey2);
+        final DistributionSetMetadata metaKey1 = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey1).get();
+        final DistributionSetMetadata metaKey2 = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey2).get();
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -804,8 +802,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final DistributionSetMetadata assertDS = distributionSetManagement.findDistributionSetMetadata(testDS.getId(),
-                knownKey);
+        final DistributionSetMetadata assertDS = distributionSetManagement
+                .findDistributionSetMetadata(testDS.getId(), knownKey).get();
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -823,12 +821,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        try {
-            distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey);
-            fail("expected EntityNotFoundException but didn't throw");
-        } catch (final EntityNotFoundException e) {
-            // ok as expected
-        }
+        assertThat(distributionSetManagement.findDistributionSetMetadata(testDS.getId(), knownKey).isPresent())
+                .isFalse();
     }
 
     @Test

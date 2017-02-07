@@ -194,16 +194,14 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
-        final DistributionSetTag tag = this.tagManagement.findDistributionSetTagById(distributionsetTagId);
-        if (tag == null) {
-            throw new EntityNotFoundException("Distribution Tag with Id {" + distributionsetTagId + "} does not exist");
-        }
-        return tag;
+        return tagManagement.findDistributionSetTagById(distributionsetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Distribution Tag with Id {" + distributionsetTagId + "} does not exist"));
     }
 
     private static List<Long> findDistributionSetIds(
             final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
-        return assignedDistributionSetRequestBodies.stream().map(request -> request.getDistributionSetId())
-                .collect(Collectors.toList());
+        return assignedDistributionSetRequestBodies.stream()
+                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
 }

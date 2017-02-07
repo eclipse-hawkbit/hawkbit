@@ -275,7 +275,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             return;
         }
         editSwModule = Boolean.TRUE;
-        final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId);
+        final SoftwareModule swModule = softwareManagement.findSoftwareModuleById(baseSwModuleId).get();
         nameTextField.setValue(swModule.getName());
         versionTextField.setValue(swModule.getVersion());
         vendorTextField.setValue(HawkbitCommonUtil.trimAndNullIfEmpty(swModule.getVendor()));

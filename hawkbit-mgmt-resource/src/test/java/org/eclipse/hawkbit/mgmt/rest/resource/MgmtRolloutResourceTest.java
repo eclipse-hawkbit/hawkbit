@@ -948,7 +948,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     public Rollout getRollout(final Long rolloutId) throws Exception {
-        return rolloutManagement.findRolloutById(rolloutId);
+        return rolloutManagement.findRolloutById(rolloutId).get();
     }
 
 }

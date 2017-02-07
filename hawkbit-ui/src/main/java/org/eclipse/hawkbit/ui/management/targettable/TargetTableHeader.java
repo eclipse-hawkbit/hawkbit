@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -79,7 +80,8 @@ public class TargetTableHeader extends AbstractTableHeader {
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement, DistributionSetManagement distributionSetManagement) {
+            final EntityFactory entityFactory, final UINotification uinotification, final TagManagement tagManagement,
+            final DistributionSetManagement distributionSetManagement) {
         super(i18n, permChecker, eventbus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -336,12 +338,13 @@ public class TargetTableHeader extends AbstractTableHeader {
                 return;
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
-            DistributionSet distributionSet =distributionSetManagement.findDistributionSetById(distributionSetId);
-            if(distributionSet == null){
+            final Optional<DistributionSet> distributionSet = distributionSetManagement
+                    .findDistributionSetById(distributionSetId);
+            if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.get("distributionset.not.exists"));
                 return;
             }
-            DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
             managementUIState.getTargetTableFilters().setDistributionSet(distributionSetIdName);
             addFilterTextField(distributionSetIdName);
         }
@@ -376,10 +379,9 @@ public class TargetTableHeader extends AbstractTableHeader {
         return isValid;
     }
 
-    private static Set<Long>  getDropppedDistributionDetails(final TableTransferable transferable) {
+    private static Set<Long> getDropppedDistributionDetails(final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) transferable
-                .getSourceComponent();
+        final AbstractTable<?, Long> distTable = (AbstractTable<?, Long>) transferable.getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }
 

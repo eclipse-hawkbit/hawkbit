@@ -74,8 +74,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
 
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId());
-        assertThat(tfq).isNull();
+        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(filterQuery.getId()).isPresent()).isFalse();
     }
 
     @Test
@@ -113,7 +112,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath("$.query", equalTo(filterQuery2)))
                 .andExpect(jsonPath("$.name", equalTo(filterName)));
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery2);
         assertThat(tfqCheck.getName()).isEqualTo(filterName);
     }
@@ -136,7 +135,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath("$.query", equalTo(filterQuery)))
                 .andExpect(jsonPath("$.name", equalTo(filterName2)));
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId());
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
     }
@@ -293,8 +292,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
-                .isEqualTo(set);
+        assertThat(
+                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                        .isEqualTo(set);
 
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
                 + tfq.getId();
@@ -319,8 +319,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
         targetFilterQueryManagement.updateTargetFilterQueryAutoAssignDS(tfq.getId(), set.getId());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
-                .isEqualTo(set);
+        assertThat(
+                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                        .isEqualTo(set);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
@@ -328,8 +329,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
-        assertThat(targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).getAutoAssignDistributionSet())
-                .isNull();
+        assertThat(
+                targetFilterQueryManagement.findTargetFilterQueryById(tfq.getId()).get().getAutoAssignDistributionSet())
+                        .isNull();
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());

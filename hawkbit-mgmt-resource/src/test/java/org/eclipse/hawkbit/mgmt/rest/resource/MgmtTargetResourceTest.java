@@ -226,12 +226,12 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 tA.getControllerId(), tA.getActions().get(0).getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
-        final Action action = deploymentManagement.findAction(tA.getActions().get(0).getId());
+        final Action action = deploymentManagement.findAction(tA.getActions().get(0).getId()).get();
         // still active because in "canceling" state and waiting for controller
         // feedback
         assertThat(action.isActive()).isTrue();
 
-        final Target queryTarget = targetManagement.findTargetByControllerID(tA.getControllerId());
+        final Target queryTarget = targetManagement.findTargetByControllerID(tA.getControllerId()).get();
         // action has not been cancelled confirmed from controller, so DS
         // remains assigned until
         // confirmation
@@ -301,8 +301,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
                 .andExpect(status().isOk());
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
-        assertThat(findTargetByControllerID).isNull();
+        assertThat(targetManagement.findTargetByControllerID(knownControllerId).isPresent()).isFalse();
     }
 
     @Test
@@ -341,7 +340,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.description", equalTo(knownNewDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getDescription()).isEqualTo(knownNewDescription);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -364,7 +363,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.securityToken", equalTo(knownNewToken)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getSecurityToken()).isEqualTo(knownNewToken);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -387,7 +386,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModiy)));
 
-        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId);
+        final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownControllerId).get();
         assertThat(findTargetByControllerID.getTargetInfo().getAddress().toString()).isEqualTo(knownNewAddress);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModiy);
     }
@@ -747,17 +746,17 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                         .isEqualTo("http://localhost/rest/v1/targets/id3");
 
         assertThat(targetManagement.findTargetByControllerID("id1")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id1").getName()).isEqualTo("testname1");
-        assertThat(targetManagement.findTargetByControllerID("id1").getDescription()).isEqualTo("testid1");
-        assertThat(targetManagement.findTargetByControllerID("id1").getSecurityToken()).isEqualTo("token");
-        assertThat(targetManagement.findTargetByControllerID("id1").getTargetInfo().getAddress().toString())
+        assertThat(targetManagement.findTargetByControllerID("id1").get().getName()).isEqualTo("testname1");
+        assertThat(targetManagement.findTargetByControllerID("id1").get().getDescription()).isEqualTo("testid1");
+        assertThat(targetManagement.findTargetByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
+        assertThat(targetManagement.findTargetByControllerID("id1").get().getTargetInfo().getAddress().toString())
                 .isEqualTo("amqp://test123/foobar");
         assertThat(targetManagement.findTargetByControllerID("id2")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id2").getName()).isEqualTo("testname2");
-        assertThat(targetManagement.findTargetByControllerID("id2").getDescription()).isEqualTo("testid2");
+        assertThat(targetManagement.findTargetByControllerID("id2").get().getName()).isEqualTo("testname2");
+        assertThat(targetManagement.findTargetByControllerID("id2").get().getDescription()).isEqualTo("testid2");
         assertThat(targetManagement.findTargetByControllerID("id3")).isNotNull();
-        assertThat(targetManagement.findTargetByControllerID("id3").getName()).isEqualTo("testname3");
-        assertThat(targetManagement.findTargetByControllerID("id3").getDescription()).isEqualTo("testid3");
+        assertThat(targetManagement.findTargetByControllerID("id3").get().getName()).isEqualTo("testname3");
+        assertThat(targetManagement.findTargetByControllerID("id3").get().getDescription()).isEqualTo("testid3");
     }
 
     @Test
@@ -1079,7 +1078,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(targetManagement.findTargetByControllerID("fsdfsd").getAssignedDistributionSet()).isEqualTo(set);
+        assertThat(targetManagement.findTargetByControllerID("fsdfsd").get().getAssignedDistributionSet())
+                .isEqualTo(set);
     }
 
     @Test
@@ -1101,7 +1101,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assertThat(findActiveActionsByTarget).hasSize(1);
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);
-        assertThat(targetManagement.findTargetByControllerID("fsdfsd").getAssignedDistributionSet()).isEqualTo(set);
+        assertThat(targetManagement.findTargetByControllerID("fsdfsd").get().getAssignedDistributionSet())
+                .isEqualTo(set);
     }
 
     @Test
@@ -1279,6 +1280,6 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), pageReq);
         assertThat(actionsByTarget.getContent()).hasSize(1);
-        return targetManagement.findTargetByControllerID(tA.getControllerId());
+        return targetManagement.findTargetByControllerID(tA.getControllerId()).get();
     }
 }

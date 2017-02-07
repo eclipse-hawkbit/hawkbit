@@ -68,7 +68,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     protected void addAlreadySelectedTags() {
         for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            addNewToken(tagManagement.findTargetTag(tagName).getId());
+            addNewToken(tagManagement.findTargetTag(tagName).get().getId());
         }
     }
 

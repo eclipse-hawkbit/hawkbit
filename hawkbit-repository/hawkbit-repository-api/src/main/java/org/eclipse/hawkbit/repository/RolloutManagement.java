@@ -380,7 +380,7 @@ public interface RolloutManagement {
      * all actions are created and the first group is started. The rollout
      * itself will be then also in {@link RolloutStatus#RUNNING}.
      *
-     * @param rollout
+     * @param rolloutId
      *            the rollout to be started
      *
      * @return started rollout
@@ -392,7 +392,7 @@ public interface RolloutManagement {
      *             ready rollouts can be started.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    Rollout startRollout(@NotNull Long rollout);
+    Rollout startRollout(@NotNull Long rolloutId);
 
     /**
      * Update rollout details.

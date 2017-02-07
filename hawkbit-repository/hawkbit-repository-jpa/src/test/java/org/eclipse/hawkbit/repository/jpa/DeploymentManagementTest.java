@@ -22,10 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -634,12 +632,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         distributionSetManagement.deleteDistributionSet(dsA.getId());
-        try {
-            distributionSetManagement.findDistributionSetById(dsA.getId());
-            fail("ds should be null");
-        } catch (final EntityNotFoundException notFound) {
 
-        }
+        assertThat(distributionSetManagement.findDistributionSetById(dsA.getId()).isPresent()).isFalse();
 
         // // verify that the ds is not physically deleted
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {

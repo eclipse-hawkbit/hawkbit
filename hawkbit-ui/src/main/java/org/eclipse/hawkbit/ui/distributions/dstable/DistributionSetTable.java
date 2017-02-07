@@ -185,7 +185,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected DistributionSet findEntityByTableValue(final Long entityTableId) {
-        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId);
+        return distributionSetManagement.findDistributionSetByIdWithDetails(entityTableId).get();
     }
 
     @Override
@@ -242,7 +242,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
-        final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById((Long) distId);
+        final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById((Long) distId).get();
 
         if (distributionSet == null) {
             notification.displayWarning(i18n.get("distributionset.not.exists"));
@@ -264,7 +264,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
             final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
 
-            final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
+            final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId).get();
             if (validSoftwareModule((Long) distId, softwareModule)) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
                         name.concat(":" + swVersion));
@@ -326,7 +326,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (!isSoftwareModuleDragged(distId, sm)) {
             return false;
         }
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId);
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distId).get();
         if (!validateSoftwareModule(sm, ds)) {
             return false;
         }
@@ -490,7 +490,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
+        final DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId).get();
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 

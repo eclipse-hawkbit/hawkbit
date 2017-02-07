@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -84,14 +86,14 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
-        if (selectedTargetTag != null) {
-            tagDesc.setValue(selectedTargetTag.getDescription());
-            if (null == selectedTargetTag.getColour()) {
+        final Optional<TargetTag> selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
+        if (selectedTargetTag.isPresent()) {
+            tagDesc.setValue(selectedTargetTag.get().getDescription());
+            if (null == selectedTargetTag.get().getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
             } else {
-                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()),
-                        selectedTargetTag.getColour());
+                setTagColor(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.get().getColour()),
+                        selectedTargetTag.get().getColour());
             }
         }
     }
@@ -108,7 +110,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     protected TargetTag findEntityByName() {
-        return tagManagement.findTargetTag(tagName.getValue());
+        return tagManagement.findTargetTag(tagName.getValue()).get();
     }
 
     /**

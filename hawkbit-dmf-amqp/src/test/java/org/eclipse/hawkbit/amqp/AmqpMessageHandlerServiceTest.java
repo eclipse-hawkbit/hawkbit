@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -126,6 +127,8 @@ public class AmqpMessageHandlerServiceTest {
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.empty());
+
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
                 controllerManagementMock, entityFactoryMock);
 
@@ -295,6 +298,8 @@ public class AmqpMessageHandlerServiceTest {
     public void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
+        when(controllerManagementMock.findActionWithDetails(any())).thenReturn(Optional.empty());
+
         final ActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(ActionStatus.DOWNLOAD);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
@@ -365,7 +370,7 @@ public class AmqpMessageHandlerServiceTest {
         when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
 
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
-        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(localArtifactMock);
+        when(artifactManagementMock.findFirstArtifactBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
         when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
                 .thenReturn(true);
         when(artifactManagementMock.loadArtifactBinary(anyString())).thenReturn(dbArtifactMock);

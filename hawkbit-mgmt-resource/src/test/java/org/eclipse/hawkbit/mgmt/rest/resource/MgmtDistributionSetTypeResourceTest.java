@@ -241,7 +241,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId());
+        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
@@ -261,7 +261,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId());
+        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
@@ -352,7 +352,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId());
+        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -369,7 +369,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId());
+        testType = distributionSetManagement.findDistributionSetTypeById(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getOptionalModuleTypes()).isEmpty();

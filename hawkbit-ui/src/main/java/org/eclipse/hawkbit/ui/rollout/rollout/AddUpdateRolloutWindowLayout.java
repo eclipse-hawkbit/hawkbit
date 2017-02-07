@@ -854,7 +854,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        rollout = rolloutManagement.findRolloutById(rolloutId);
+        rollout = rolloutManagement.findRolloutById(rolloutId).get();
         description.setValue(rollout.getDescription());
         distributionSet.setValue(rollout.getDistributionSet().getId());
         setActionType(rollout);

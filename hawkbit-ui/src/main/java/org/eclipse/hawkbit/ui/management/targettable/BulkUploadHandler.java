@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -395,8 +396,8 @@ public class BulkUploadHandler extends CustomComponent
     }
 
     private boolean duplicateCheck(final String newControlllerId) {
-        final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
-        if (existingTarget != null) {
+        final Optional<Target> existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
+        if (existingTarget.isPresent()) {
             failedTargetCount++;
             return false;
         } else {

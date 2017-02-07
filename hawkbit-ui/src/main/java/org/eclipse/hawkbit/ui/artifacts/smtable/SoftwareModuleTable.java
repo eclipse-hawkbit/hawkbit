@@ -149,7 +149,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected SoftwareModule findEntityByTableValue(final Long entityTableId) {
-        return softwareManagement.findSoftwareModuleById(entityTableId);
+        return softwareManagement.findSoftwareModuleById(entityTableId).get();
     }
 
     @Override
@@ -259,7 +259,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     private void showMetadataDetails(final Long itemId) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId).get();
         /* display the window */
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }

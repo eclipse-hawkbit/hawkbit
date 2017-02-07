@@ -14,7 +14,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,7 +36,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -111,7 +109,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.description", equalTo(updateDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownSWName))).andReturn();
 
-        sm = softwareManagement.findSoftwareModuleById(sm.getId());
+        sm = softwareManagement.findSoftwareModuleById(sm.getId()).get();
         assertThat(sm.getName()).isEqualTo(knownSWName);
         assertThat(sm.getVendor()).isEqualTo(updateVendor);
         assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
@@ -144,7 +142,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // check rest of response compared to DB
         final MgmtArtifact artResult = ResourceUtility
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
-        final Long artId = softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getId();
+        final Long artId = softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Link contains no self url")
@@ -164,7 +162,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // binary
         try (InputStream fileInputStream = artifactManagement
                 .loadArtifactBinary(
-                        softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getSha1Hash())
+                        softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
                 .getFileInputStream()) {
             assertTrue("Wrong artifact content",
                     IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
@@ -178,7 +176,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts().get(0).getFilename())
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
@@ -689,10 +687,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1].createdAt", not(equalTo(0)))).andReturn();
 
-        final SoftwareModule osCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name1", "version1",
-                osType.getId());
-        final SoftwareModule appCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name3", "version3",
-                appType.getId());
+        final SoftwareModule osCreated = softwareManagement
+                .findSoftwareModuleByNameAndVersion("name1", "version1", osType.getId()).get();
+        final SoftwareModule appCreated = softwareManagement
+                .findSoftwareModuleByNameAndVersion("name3", "version3", appType.getId()).get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
@@ -784,7 +782,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // check repo before delete
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
 
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts()).hasSize(2);
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts()).hasSize(2);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(2);
 
         // delete
@@ -795,7 +793,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("After the sm should be marked as deleted")
                 .hasSize(1);
         assertThat(artifactManagement.countArtifactsAll()).isEqualTo(1);
-        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).getArtifacts())
+        assertThat(softwareManagement.findSoftwareModuleById(sm.getId()).get().getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
 
     }
@@ -823,8 +821,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final SoftwareModuleMetadata metaKey1 = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey1);
-        final SoftwareModuleMetadata metaKey2 = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey2);
+        final SoftwareModuleMetadata metaKey1 = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey1)
+                .get();
+        final SoftwareModuleMetadata metaKey2 = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey2)
+                .get();
 
         assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
@@ -850,7 +850,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final SoftwareModuleMetadata assertDS = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey);
+        final SoftwareModuleMetadata assertDS = softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey)
+                .get();
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
     }
 
@@ -868,12 +869,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        try {
-            softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey);
-            fail("expected EntityNotFoundException but didn't throw");
-        } catch (final EntityNotFoundException e) {
-            // ok as expected
-        }
+        assertThat(softwareManagement.findSoftwareModuleMetadata(sm.getId(), knownKey).isPresent()).isFalse();
     }
 
     @Test

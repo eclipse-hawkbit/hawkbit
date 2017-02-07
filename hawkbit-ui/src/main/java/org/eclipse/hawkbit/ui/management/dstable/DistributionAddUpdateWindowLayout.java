@@ -214,7 +214,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 .updateDistributionSet(entityFactory.distributionSet().update(editDistId)
                         .name(distNameTextField.getValue()).description(descTextArea.getValue())
                         .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq)
-                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId)));
+                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get()));
         notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                 new Object[] { currentDS.getName(), currentDS.getVersion() }));
         // update table row+details layout
@@ -234,9 +234,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final boolean isMigStepReq = reqMigStepCheckbox.getValue();
 
-        final DistributionSet newDist = distributionSetManagement
-                .createDistributionSet(entityFactory.distributionSet().create().name(name).version(version)
-                        .description(desc).type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId))
+        final DistributionSet newDist = distributionSetManagement.createDistributionSet(
+                entityFactory.distributionSet().create().name(name).version(version).description(desc)
+                        .type(distributionSetManagement.findDistributionSetTypeById(distSetTypeId).get())
                         .requiredMigrationStep(isMigStepReq));
 
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
@@ -293,21 +293,22 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             return;
         }
 
-        final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
-        if (distSet == null) {
+        final Optional<DistributionSet> distSet = distributionSetManagement
+                .findDistributionSetByIdWithDetails(editDistId);
+        if (!distSet.isPresent()) {
             return;
         }
 
         editDistribution = Boolean.TRUE;
-        distNameTextField.setValue(distSet.getName());
-        distVersionTextField.setValue(distSet.getVersion());
-        if (distSet.getType().isDeleted()) {
-            distsetTypeNameComboBox.addItem(distSet.getType().getId());
+        distNameTextField.setValue(distSet.get().getName());
+        distVersionTextField.setValue(distSet.get().getVersion());
+        if (distSet.get().getType().isDeleted()) {
+            distsetTypeNameComboBox.addItem(distSet.get().getType().getId());
         }
-        distsetTypeNameComboBox.setValue(distSet.getType().getId());
+        distsetTypeNameComboBox.setValue(distSet.get().getType().getId());
 
-        reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
-        descTextArea.setValue(distSet.getDescription());
+        reqMigStepCheckbox.setValue(distSet.get().isRequiredMigrationStep());
+        descTextArea.setValue(distSet.get().getDescription());
     }
 
     /**

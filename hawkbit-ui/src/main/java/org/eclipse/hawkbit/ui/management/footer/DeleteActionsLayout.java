@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.footer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -330,13 +331,14 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private boolean isDsInUseInBulkUpload(final Set<Long> distributionIdNameSet, final Long dsInBulkUpload) {
         if (distributionIdNameSet.contains(dsInBulkUpload)) {
-            final DistributionSet distributionSet = distributionSetManagement.findDistributionSetById(dsInBulkUpload);
-            if (distributionSet == null) {
+            final Optional<DistributionSet> distributionSet = distributionSetManagement
+                    .findDistributionSetById(dsInBulkUpload);
+            if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.get("distributionset.not.exists"));
                 return true;
             }
             notification.displayValidationError(i18n.get("message.tag.use.bulk.upload", HawkbitCommonUtil
-                    .getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion())));
+                    .getFormattedNameVersion(distributionSet.get().getName(), distributionSet.get().getVersion())));
             return true;
         }
         return false;

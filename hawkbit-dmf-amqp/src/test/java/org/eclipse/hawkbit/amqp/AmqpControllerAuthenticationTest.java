@@ -135,8 +135,8 @@ public class AmqpControllerAuthenticationTest {
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.findByControllerId(anyString())).thenReturn(targteMock);
-        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(targteMock);
+        when(controllerManagement.findByControllerId(anyString())).thenReturn(Optional.of(targteMock));
+        when(controllerManagement.findByTargetId(any(Long.class))).thenReturn(Optional.of(targteMock));
 
         when(targteMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
         when(targteMock.getControllerId()).thenReturn(CONTROLLER_ID);

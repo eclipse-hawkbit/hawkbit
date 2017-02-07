@@ -174,7 +174,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
-        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
+        final SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId).get();
         /* display the window */
         UI.getCurrent()
                 .addWindow(swMetadataPopupLayout.getWindow(swmodule, entityFactory.generateMetadata(metadataKey, "")));

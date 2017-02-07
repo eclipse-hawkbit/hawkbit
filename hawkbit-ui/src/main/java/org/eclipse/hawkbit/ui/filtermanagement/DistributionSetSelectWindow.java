@@ -104,7 +104,7 @@ public class DistributionSetSelectWindow
      */
     public void showForTargetFilter(final Long tfqId) {
         this.tfqId = tfqId;
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(tfqId).get();
         if (tfq == null) {
             throw new IllegalStateException("TargetFilterQuery does not exist for the given id");
         }
@@ -165,7 +165,7 @@ public class DistributionSetSelectWindow
     }
 
     private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId);
+        final TargetFilterQuery tfq = targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQueryId).get();
 
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId);

@@ -58,9 +58,9 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4712").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
         savedTarget.getTargetInfo().getControllerAttributes().put("dsafsdf", "sdsds");
@@ -97,13 +97,12 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(
-                targetManagement.findTargetByControllerIDWithDetails("4717").getTargetInfo().getControllerAttributes())
-                        .isEqualTo(attributes);
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getTargetInfo()
+                .getControllerAttributes()).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
@@ -114,13 +113,12 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         Thread.sleep(1); // is required: otherwise processing the next line is
                          // often too fast and
                          // the following assert will fail
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.findTargetByControllerID("4717").getTargetInfo().getLastTargetQuery())
+        assertThat(targetManagement.findTargetByControllerID("4717").get().getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(
-                targetManagement.findTargetByControllerIDWithDetails("4717").getTargetInfo().getControllerAttributes())
-                        .isEqualTo(attributes);
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("4717").get().getTargetInfo()
+                .getControllerAttributes()).isEqualTo(attributes);
     }
 
     @Test

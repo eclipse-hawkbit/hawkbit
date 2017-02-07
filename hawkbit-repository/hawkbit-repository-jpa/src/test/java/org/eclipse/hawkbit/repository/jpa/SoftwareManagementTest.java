@@ -23,7 +23,6 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
@@ -290,7 +289,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModule is deleted
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
-        assertThat(softwareManagement.findSoftwareModuleById(unassignedModule.getId())).isNull();
+        assertThat(softwareManagement.findSoftwareModuleById(unassignedModule.getId()).isPresent()).isFalse();
 
         // verify: binary data of artifact is deleted
         assertArtfiactNull(artifact1, artifact2);
@@ -400,8 +399,8 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModuleX is deleted, and ModuelY still exists
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleById(moduleX.getId())).isNull();
-        assertThat(softwareManagement.findSoftwareModuleById(moduleY.getId())).isNotNull();
+        assertThat(softwareManagement.findSoftwareModuleById(moduleX.getId()).isPresent()).isFalse();
+        assertThat(softwareManagement.findSoftwareModuleById(moduleY.getId()).isPresent()).isTrue();
 
         // verify: binary data of artifact is not deleted
         assertArtfiactNotNull(artifactY);
@@ -823,12 +822,7 @@ public class SoftwareManagementTest extends AbstractJpaIntegrationTest {
                 .createSoftwareModuleMetadata(ah.getId(), entityFactory.generateMetadata(knownKey1, knownValue1))
                 .getSoftwareModule();
 
-        try {
-            softwareManagement.findSoftwareModuleMetadata(ah.getId(), "doesnotexist");
-            fail("should not have worked as module metadata with that key does not exist");
-        } catch (final EntityNotFoundException e) {
-
-        }
+        assertThat(softwareManagement.findSoftwareModuleMetadata(ah.getId(), "doesnotexist").isPresent()).isFalse();
     }
 
     @Test
