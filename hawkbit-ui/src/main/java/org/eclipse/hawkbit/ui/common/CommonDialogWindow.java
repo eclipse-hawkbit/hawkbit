@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -33,7 +32,6 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -240,7 +238,7 @@ public class CommonDialogWindow extends Window {
             Object value = field.getValue();
 
             if (field instanceof Table) {
-                value = Sets.newHashSet(((Table) field).getContainerDataSource().getItemIds());
+                value = ((Table) field).getContainerDataSource().getItemIds();
             }
             orginalValues.put(field, value);
         }
@@ -263,6 +261,9 @@ public class CommonDialogWindow extends Window {
     }
 
     protected void addComponentListeners() {
+        // avoid duplicate registration
+        removeListeners();
+
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
@@ -290,26 +291,11 @@ public class CommonDialogWindow extends Window {
             }
             final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (!isValueEquals(field, originalValue, currentValue)) {
+            if (!Objects.equals(originalValue, currentValue)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static boolean isValueEquals(final AbstractField<?> field, final Object orginalValue,
-            final Object currentValue) {
-        if (Set.class.equals(field.getType())) {
-            return CollectionUtils.isEqualCollection(CollectionUtils.emptyIfNull((Collection<?>) orginalValue),
-                    CollectionUtils.emptyIfNull((Collection<?>) currentValue));
-        }
-
-        if (String.class.equals(field.getType())) {
-            return Objects.equals(Strings.emptyToNull((String) orginalValue),
-                    Strings.emptyToNull((String) currentValue));
-        }
-
-        return Objects.equals(orginalValue, currentValue);
     }
 
     private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,

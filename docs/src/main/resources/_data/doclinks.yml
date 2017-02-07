@@ -17,6 +17,8 @@
        href: "/documentation/architecture/datamodel.html"
      - title: "Target States"
        href: "/documentation/architecture/targetstate.html"
+     - title: "Rollout Management"
+       href: "/documentation/architecture/rollout-management.html"
 
 - title: "Interfaces"
   href: ""

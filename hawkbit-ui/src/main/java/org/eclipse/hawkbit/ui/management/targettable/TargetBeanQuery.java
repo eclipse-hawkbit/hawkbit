@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -39,6 +38,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -211,7 +211,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private boolean isAnyFilterSelected() {
         final boolean isFilterSelected = isTagSelected() || isOverdueFilterEnabled();
-        return isFilterSelected || CollectionUtils.isNotEmpty(status) || distributionId != null
+        return isFilterSelected || !CollectionUtils.isEmpty(status) || distributionId != null
                 || !isNullOrEmpty(searchText);
     }
 
