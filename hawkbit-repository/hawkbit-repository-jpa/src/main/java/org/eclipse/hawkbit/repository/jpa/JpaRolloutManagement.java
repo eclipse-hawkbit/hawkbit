@@ -147,7 +147,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable) {
-
         final Specification<JpaRollout> specification = RSQLUtility.parse(rsqlParam, RolloutFields.class,
                 virtualPropertyReplacer);
 
@@ -294,8 +293,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void fillRolloutGroupsWithTargets(final Long rolloutId) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
 
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
 
@@ -433,8 +431,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             final long totalTargets) {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         final Map<String, Long> targetFilterCounts = groups.stream()
-                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct().collect(Collectors
-                        .toMap(Function.identity(), filter -> targetManagement.countTargetByTargetFilterQuery(filter)));
+                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
+                .collect(Collectors.toMap(Function.identity(), targetManagement::countTargetByTargetFilterQuery));
 
         long unusedTargetsCount = 0;
 
@@ -490,8 +488,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public Rollout startRollout(final Long rolloutId) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
         rollout.setLastCheck(0);
@@ -516,7 +513,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         jpaRollout.setStatus(RolloutStatus.RUNNING);
         jpaRollout.setLastCheck(0);
         rolloutRepository.save(jpaRollout);
-
     }
 
     private boolean ensureAllGroupsAreScheduled(final Rollout rollout) {
@@ -534,12 +530,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     /**
      * Schedules a group of the rollout. Scheduled Actions are created to
      * achieve this. The creation of those Actions is allowed to fail.
-     *
-     * @param rollout
-     *            the Rollout
-     * @param group
-     *            the RolloutGroup
-     * @return whether the complete group was scheduled
      */
     private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
         final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
@@ -599,19 +589,6 @@ public class JpaRolloutManagement implements RolloutManagement {
      * Creates an action entry into the action repository. In case of existing
      * scheduled actions the scheduled actions gets canceled. A scheduled action
      * is created in-active.
-     *
-     * @param targets
-     *            the targets to create scheduled actions for
-     * @param distributionSet
-     *            the distribution set for the actions
-     * @param actionType
-     *            the action type for the action
-     * @param forcedTime
-     *            the forcedTime of the action
-     * @param rollout
-     *            the roll out for this action
-     * @param rolloutGroup
-     *            the roll out group for this action
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
@@ -620,7 +597,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         // is already scheduled and a next action is created then cancel the
         // current scheduled action to cancel. E.g. a new scheduled action is
         // created.
-        final List<Long> targetIds = targets.stream().map(t -> t.getId()).collect(Collectors.toList());
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
         actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
         targets.forEach(target -> {
             final JpaAction action = new JpaAction();
@@ -640,8 +617,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void pauseRollout(final Long rolloutId) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (rollout.getStatus() != RolloutStatus.RUNNING) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -659,8 +635,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void resumeRollout(final Long rolloutId) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -855,7 +830,6 @@ public class JpaRolloutManagement implements RolloutManagement {
                 startFirstRolloutGroup(rollout);
             }
         });
-
     }
 
     @Override
@@ -876,7 +850,6 @@ public class JpaRolloutManagement implements RolloutManagement {
                 startRollout(rollout.getId());
             }
         });
-
     }
 
     private List<JpaRollout> getRolloutsToCheckForStatus(final long delayBetweenChecks, final RolloutStatus status) {
@@ -891,7 +864,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         return rolloutRepository.findByLastCheckAndStatus(lastCheck, status);
-
     }
 
     @Override
@@ -922,8 +894,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Modifying
     public Rollout updateRollout(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(update.getId()))
-                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + update.getId() + " not found."));
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
 
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
@@ -940,12 +911,16 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rolloutRepository.save(rollout);
     }
 
+    private JpaRollout getRolloutAndThrowExceptionIfNotFound(final Long rolloutId) {
+        return Optional.ofNullable(rolloutRepository.findOne(rolloutId))
+                .orElseThrow(() -> new EntityNotFoundException("Rollout with id " + rolloutId + " not found."));
+    }
+
     @Override
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable) {
         final Page<JpaRollout> rollouts = rolloutRepository.findAll(pageable);
         setRolloutStatusDetails(rollouts);
         return RolloutHelper.convertPage(rollouts, pageable);
-
     }
 
     @Override
@@ -970,8 +945,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void setRolloutStatusDetails(final Slice<JpaRollout> rollouts) {
-        final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
-                .collect(Collectors.toList());
+        final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
                 rolloutIds);
 
@@ -999,5 +973,4 @@ public class JpaRolloutManagement implements RolloutManagement {
         // calculate threshold
         return ((float) finished / (float) totalGroup) * 100;
     }
-
 }
