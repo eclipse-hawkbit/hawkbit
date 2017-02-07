@@ -18,15 +18,14 @@ _hawkBit_ is able to run in a cluster with some constraints. This guide provides
 Event communication between nodes is based on [Spring Cloud Bus](https://cloud.spring.io/spring-cloud-bus/) and [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/). There are different [binder implementations](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_binders) available. The _hawkbit example app_ uses RabbitMQ binder. Every node gets his own queue to receive cluster events, the default payload is JSON.
 If an event is thrown locally at one node, it will be automatically delivered to all other available nodes via the Spring Cloud Bus's topic exchange:
 
-[[images/eventing-within-cluster.png]]
+![](../images/eventing-within-cluster.png){:width="100%"}
 
 Via the ServiceMatcher you can check whether an event happened locally at one node or on a different node.
 `serviceMatcher.isFromSelf(event)`
 
 # Caching
 
-Every node is maintaining its own caches independent from other nodes. So there is no globally shared/synchronized cache instance within the cluster. In order to keep nodes in sync a TTL (time to live) can be set for all caches to ensure that after some time the cache is refreshed from the database. To enable the TTL just set the property "hawkbit.cache.global.ttl" (value in milliseconds).
-Of course you can implement a shared cache, e.g. Redis.
+Every node is maintaining its own caches independent from other nodes. So there is no globally shared/synchronized cache instance within the cluster. In order to keep nodes in sync a TTL (time to live) can be set for all caches to ensure that after some time the cache is refreshed from the database. To enable the TTL just set the property "hawkbit.cache.global.ttl" (value in milliseconds). Of course you can implement a shared cache, e.g. Redis.
 See [CacheAutoConfiguration](https://github.com/eclipse/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/cache/CacheAutoConfiguration.java)
 
 # Schedulers
