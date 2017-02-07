@@ -289,16 +289,11 @@ public class CommonDialogWindow extends Window {
             }
             final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (!isValueEquals(originalValue, currentValue)) {
+            if (!Objects.equals(originalValue, currentValue)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static boolean isValueEquals(final Object orginalValue, final Object currentValue) {
-
-        return Objects.equals(orginalValue, currentValue);
     }
 
     private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
