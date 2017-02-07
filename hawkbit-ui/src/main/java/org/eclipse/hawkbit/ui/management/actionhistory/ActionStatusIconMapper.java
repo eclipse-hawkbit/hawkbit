@@ -22,7 +22,7 @@ import com.vaadin.server.FontAwesome;
  *
  */
 public final class ActionStatusIconMapper {
-    static final Map<Action.Status, ActionStatusIconMapper> MAPPINGS = Maps.newHashMapWithExpectedSize(10);
+    static final Map<Action.Status, ActionStatusIconMapper> MAPPINGS = Maps.newEnumMap(Action.Status.class);
 
     static {
         MAPPINGS.put(Action.Status.FINISHED, new ActionStatusIconMapper("label.finished",
