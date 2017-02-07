@@ -294,7 +294,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private Status hanldeCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
-            return Status.WARNING;
+            return Status.CANCEL_REJECTED;
         } else {
             logAndThrowMessageError(message,
                     "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());

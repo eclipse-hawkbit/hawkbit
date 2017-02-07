@@ -276,7 +276,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
-        // cancelation canceled -> should remove the action from active
+        // cancellation canceled -> should remove the action from active
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -289,7 +289,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
-        // cancelation rejected -> action still active until controller close it
+        // cancellation rejected -> action still active until controller close
+        // it
         // with finished or
         // error
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
@@ -304,9 +305,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId())).hasSize(1);
 
-        // cancelaction closed -> should remove the action from active
+        // update closed -> should remove the action from active
         current = System.currentTimeMillis();
-        mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
+        mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
                 + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))

@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.TooManyStatusEntriesException;
@@ -100,9 +101,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private RepositoryProperties repositoryProperties;
-
-    @Autowired
-    private TenantConfigurationRepository tenantConfigurationRepository;
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
@@ -242,26 +240,29 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+
+        if (!action.isCancelingOrCanceled()) {
+            throw new CancelActionNotAllowedException("The action is not in canceling state.");
+        }
+
         final JpaActionStatus actionStatus = create.build();
 
-        checkForToManyStatusEntries(action);
-        action.setStatus(actionStatus.getStatus());
-
         switch (actionStatus.getStatus()) {
-        case WARNING:
-        case ERROR:
-        case RUNNING:
-            break;
         case CANCELED:
         case FINISHED:
             handleFinishedCancelation(actionStatus, action);
             break;
-        case RETRIEVED:
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
+        case ERROR:
+        case CANCEL_REJECTED:
+            // Cancellation rejected. Back to running.
+            action.setStatus(Status.RUNNING);
             break;
         default:
-            // do nothing
+            // information status entry - check for a potential DOS attack
+            checkForToManyStatusEntries(action);
+            break;
         }
+
         actionStatus.setAction(actionRepository.save(action));
         actionStatusRepository.save(actionStatus);
 
@@ -306,17 +307,11 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
-     *
-     * @param actionStatus
-     * @param action
-     * @return
      */
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
         JpaTarget target = (JpaTarget) action.getTarget();
-        // check for a potential DOS attack
-        checkForToManyStatusEntries(action);
 
         switch (actionStatus.getStatus()) {
         case ERROR:
@@ -327,10 +322,9 @@ public class JpaControllerManagement implements ControllerManagement {
         case FINISHED:
             handleFinishedAndStoreInTargetStatus(target, action);
             break;
-        case CANCELED:
-        case WARNING:
-        case RUNNING:
         default:
+            // information status entry - check for a potential DOS attack
+            checkForToManyStatusEntries(action);
             break;
         }
 
@@ -338,8 +332,6 @@ public class JpaControllerManagement implements ControllerManagement {
         actionStatusRepository.save(actionStatus);
 
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action, target.getId());
-
-        action.setStatus(actionStatus.getStatus());
 
         return actionRepository.save(action);
     }
