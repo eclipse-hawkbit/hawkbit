@@ -32,7 +32,6 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -239,7 +238,7 @@ public class CommonDialogWindow extends Window {
             Object value = field.getValue();
 
             if (field instanceof Table) {
-                value = Sets.newHashSet(((Table) field).getContainerDataSource().getItemIds());
+                value = ((Table) field).getContainerDataSource().getItemIds();
             }
             orginalValues.put(field, value);
         }
@@ -262,6 +261,9 @@ public class CommonDialogWindow extends Window {
     }
 
     protected void addComponentListeners() {
+        // avoid duplicate registration
+        removeListeners();
+
         for (final AbstractField<?> field : allComponents) {
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
