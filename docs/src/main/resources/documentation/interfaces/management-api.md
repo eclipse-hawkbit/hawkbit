@@ -36,7 +36,7 @@ Available Management APIs resources are:
 * [Software Module Types](https://docs.bosch-iot-rollouts.com/documentation/rest-api/softwaremoduletypes-api-guide.html)
 * [Target Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/targettag-api-guide.html)
 * [Distribution Set Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/distributionsettag-api-guide.html)
-* [Rollouts](https://docs.bosch-iot-rollouts.com/documentation/developerguide/apispecifications/managementapi/rollouts.html)
+* [Rollouts](https://docs.bosch-iot-rollouts.com/documentation/rest-api/rollout-api-guide.html)
 
 
 ## Headers

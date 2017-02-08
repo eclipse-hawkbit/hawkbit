@@ -172,7 +172,12 @@ public interface Action extends TenantAwareBaseEntity {
          * Action is in waiting state, e.g. the action is scheduled in a rollout
          * but not yet activated.
          */
-        SCHEDULED;
+        SCHEDULED,
+
+        /**
+         * Cancellation has been rejected by the controller.
+         */
+        CANCEL_REJECTED;
     }
 
     /**

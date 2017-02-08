@@ -73,7 +73,6 @@ public class ActionHistoryTable extends TreeTable {
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String BUTTON_CANCEL = "button.cancel";
     private static final String BUTTON_OK = "button.ok";
-    private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
     private final I18N i18n;
     private final transient DeploymentManagement deploymentManagement;
@@ -505,50 +504,20 @@ public class ActionHistoryTable extends TreeTable {
      */
     private Label getStatusIcon(final Action.Status status) {
         final Label label = new LabelBuilder().name("").buildLabel();
-        final String statusIconPending = "statusIconPending";
         label.setContentMode(ContentMode.HTML);
-        if (Action.Status.FINISHED == status) {
-            label.setDescription(i18n.get("label.finished"));
-            label.setStyleName(STATUS_ICON_GREEN);
-            label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-        } else if (Action.Status.ERROR == status) {
-            label.setDescription(i18n.get("label.error"));
-            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
-            label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else if (Action.Status.WARNING == status) {
-            label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_ORANGE);
-            label.setDescription(i18n.get("label.warning"));
-            label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else if (Action.Status.RUNNING == status) {
-            // dynamic spinner
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.running"));
-            label.setValue(FontAwesome.ADJUST.getHtml());
-        } else if (Action.Status.CANCELING == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.cancelling"));
-            label.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-        } else if (Action.Status.CANCELED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.cancelled"));
-            label.setStyleName(STATUS_ICON_GREEN);
-            label.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-        } else if (Action.Status.RETRIEVED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.retrieved"));
-            label.setValue(FontAwesome.CIRCLE_O.getHtml());
-        } else if (Action.Status.DOWNLOAD == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.download"));
-            label.setValue(FontAwesome.CLOUD_DOWNLOAD.getHtml());
-        } else if (Action.Status.SCHEDULED == status) {
-            label.setStyleName(statusIconPending);
-            label.setDescription(i18n.get("label.scheduled"));
-            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
-        } else {
+        
+      final ActionStatusIconMapper mapping = ActionStatusIconMapper.MAPPINGS.get(status);
+
+        if (mapping == null) {
+            LOG.error("Unknown status icon mapping");
             label.setDescription("");
             label.setValue("");
+            return label;
         }
+
+        label.setDescription(i18n.get(mapping.getDescriptionI18N()));
+        label.setStyleName(mapping.getStyleName());
+        label.setValue(mapping.getIcon().getHtml());
         return label;
 
     }
@@ -569,7 +538,7 @@ public class ActionHistoryTable extends TreeTable {
 
         if (actionWithActiveStatus.isHitAutoForceTime(currentTimeMillis)) {
             autoForceLabel.setDescription("autoforced");
-            autoForceLabel.setStyleName(STATUS_ICON_GREEN);
+            autoForceLabel.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
             autoForceLabel.setDescription("auto forced since " + SPDateTimeUtil
                     .getDurationFormattedString(actionWithActiveStatus.getForcedTime(), currentTimeMillis, i18n));
         } else {
