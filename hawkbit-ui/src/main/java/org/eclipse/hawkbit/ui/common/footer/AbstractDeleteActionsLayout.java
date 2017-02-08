@@ -172,7 +172,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         showBulkUploadWindow();
     }
 
-    protected void setUploadStatusButtonCaption(final Long count) {
+    protected void setUploadStatusButtonCaption(final int count) {
         if (bulkUploadStatusButton == null) {
             return;
         }

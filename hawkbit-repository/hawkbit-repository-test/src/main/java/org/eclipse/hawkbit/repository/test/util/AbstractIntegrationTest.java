@@ -213,12 +213,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         @Override
         protected void starting(final Description description) {
             LOG.info("Starting Test {}...", description.getMethodName());
-        };
+        }
 
         @Override
         protected void succeeded(final Description description) {
             LOG.info("Test {} succeeded.", description.getMethodName());
-        };
+        }
 
         @Override
         protected void failed(final Throwable e, final Description description) {
