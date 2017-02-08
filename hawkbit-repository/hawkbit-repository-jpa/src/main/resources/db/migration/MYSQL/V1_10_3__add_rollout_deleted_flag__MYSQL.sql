@@ -1,3 +1,5 @@
-ALTER TABLE sp_rollout ADD column deleted boolean;
+ALTER TABLE sp_rollout ADD COLUMN deleted BOOLEAN;
 
-UPDATE sp_rollout set deleted = 0;
+UPDATE sp_rollout SET deleted = 0;
+
+ALTER TABLE sp_action MODIFY target BIGINT NOT NULL;

@@ -9,26 +9,23 @@
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
-import org.eclipse.hawkbit.repository.AutoAssignProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Profile;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * Scheduler to check target filters for auto assignment of distribution sets
  */
-// don't active the auto assign scheduler in test, otherwise it is hard to test
-@Profile("!test")
-@EnableConfigurationProperties(AutoAssignProperties.class)
 public class AutoAssignScheduler {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);
+
+    private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
     private final TenantAware tenantAware;
 
@@ -37,6 +34,8 @@ public class AutoAssignScheduler {
     private final SystemSecurityContext systemSecurityContext;
 
     private final AutoAssignChecker autoAssignChecker;
+
+    private final LockRegistry lockRegistry;
 
     /**
      * Instantiates a new AutoAssignScheduler
@@ -49,13 +48,17 @@ public class AutoAssignScheduler {
      *            to run as system
      * @param autoAssignChecker
      *            to run a check as tenant
+     * @param lockRegistry
+     *            to acquire a lock per tenant
      */
     public AutoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker) {
+            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
+            final LockRegistry lockRegistry) {
         this.tenantAware = tenantAware;
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.autoAssignChecker = autoAssignChecker;
+        this.lockRegistry = lockRegistry;
     }
 
     /**
@@ -64,7 +67,7 @@ public class AutoAssignScheduler {
      * tenant the auto assignments defined in the target filter queries
      * {@link SystemSecurityContext}.
      */
-    @Scheduled(initialDelayString = AutoAssignProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = AutoAssignProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
+    @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {
         LOGGER.debug("auto assign schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
@@ -79,12 +82,23 @@ public class AutoAssignScheduler {
             final List<String> tenants = systemManagement.findTenants();
             LOGGER.info("Checking target filter queries for tenants: {}", tenants.size());
             for (final String tenant : tenants) {
-                tenantAware.runAsTenant(tenant, () -> {
 
-                    autoAssignChecker.check();
+                final Lock lock = lockRegistry.obtain(tenant + "-autoassign");
+                boolean acquired = false;
+                try {
+                    acquired = lock.tryLock();
+                    if (acquired) {
 
-                    return null;
-                });
+                        tenantAware.runAsTenant(tenant, () -> {
+                            autoAssignChecker.check();
+                            return null;
+                        });
+                    }
+                } finally {
+                    if (acquired) {
+                        lock.unlock();
+                    }
+                }
             }
             return null;
         });

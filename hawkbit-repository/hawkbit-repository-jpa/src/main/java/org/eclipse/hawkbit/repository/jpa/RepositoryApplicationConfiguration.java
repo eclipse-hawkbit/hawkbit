@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutProperties;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -69,6 +70,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -79,8 +81,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -101,7 +105,7 @@ import com.google.common.collect.Maps;
 @EnableAspectJAutoProxy
 @Configuration
 @ComponentScan
-@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, RolloutProperties.class,
+@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class,
         TenantConfigurationProperties.class })
 @EnableScheduling
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
@@ -525,6 +529,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoAssignScheduler} bean.
+     * 
+     * Note: does not activate in test profile, otherwise it is hard to test the
+     * auto assign functionality.
      *
      * @param tenantAware
      *            to run as specific tenant
@@ -534,14 +541,49 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to run as system
      * @param autoAssignChecker
      *            to run a check as tenant
+     * @param lockRegistry
+     *            to lock the tenant for auto assigment
      * @return a new {@link AutoAssignChecker}
      */
     @Bean
     @ConditionalOnMissingBean
+    // don't active the auto assign scheduler in test, otherwise it is hard to
+    // test
+    @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     public AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware,
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
-            final AutoAssignChecker autoAssignChecker) {
-        return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker);
+            final AutoAssignChecker autoAssignChecker, final LockRegistry lockRegistry) {
+        return new AutoAssignScheduler(tenantAware, systemManagement, systemSecurityContext, autoAssignChecker,
+                lockRegistry);
+    }
+
+    /**
+     * {@link RolloutScheduler} bean.
+     * 
+     * Note: does not activate in test profile, otherwise it is hard to test the
+     * rollout handling functionality.
+     * 
+     * @param tenantAware
+     *            to run as specific tenant
+     * @param systemManagement
+     *            to find all tenants
+     * @param rolloutManagement
+     *            to run the rollout handler
+     * @param systemSecurityContext
+     *            to run as system
+     * @param threadPoolExecutor
+     *            to execute the handlers in parallel
+     * @return a new {@link RolloutScheduler} bean.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @Profile("!test")
+    @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
+    public RolloutScheduler rolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext,
+            @Qualifier("asyncExecutor") final Executor threadPoolExecutor) {
+        return new RolloutScheduler(tenantAware, systemManagement, rolloutManagement, systemSecurityContext,
+                threadPoolExecutor);
     }
 }

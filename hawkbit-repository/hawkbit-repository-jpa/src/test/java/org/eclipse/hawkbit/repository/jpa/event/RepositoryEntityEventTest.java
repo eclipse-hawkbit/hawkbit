@@ -108,7 +108,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
                 "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
 
         rolloutManagement.deleteRollout(createdRollout.getId());
-        rolloutManagement.checkDeletingRollouts(0);
+        rolloutManagement.handleRollouts();
 
         final RolloutDeletedEvent rolloutDeletedEvent = eventListener.waitForEvent(RolloutDeletedEvent.class, 1,
                 TimeUnit.SECONDS);

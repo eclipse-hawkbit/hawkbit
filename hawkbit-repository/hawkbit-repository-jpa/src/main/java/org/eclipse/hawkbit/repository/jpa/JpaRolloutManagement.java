@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -104,12 +106,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     /**
      * Max amount of targets that are handled in one transaction.
      */
-    private static final int TRANSACTION_TARGETS = 1000;
+    private static final int TRANSACTION_TARGETS = 10_000;
 
     /**
      * Maximum amount of actions that are deleted in one transaction.
      */
-    private static final int TRANSACTION_ACTIONS = 1000;
+    private static final int TRANSACTION_ACTIONS = 10_000;
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -150,6 +152,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
+    @Autowired
+    private TenantAware tenantAware;
+
+    @Autowired
+    private LockRegistry lockRegistry;
+
     private static final String ROLLOUT_NOT_FOUND = "Rollout with id %s not found.";
 
     @Override
@@ -162,19 +170,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Page<Rollout> findAllByPredicate(final String rsqlParam, final Pageable pageable, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = new ArrayList<>(3);
         specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer));
-            specList.add(RolloutSpecification.isDeleted(deleted));
+        specList.add(RolloutSpecification.isDeleted(deleted));
 
         return RolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
     }
 
     /**
-     * executes findAll with the given {@link Rollout} {@link Specification}s.
-     *
-     * @param pageable
-     *            paging parameter
-     * @param specList
-     *            list of @link {@link Specification}
-     * @return the page with the found {@link Rollout}
+     * Executes findAll with the given {@link Rollout} {@link Specification}s.
      */
     private Page<JpaRollout> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaRollout>> specList) {
@@ -320,15 +322,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .afterCommit(() -> eventPublisher.publishEvent(new RolloutGroupCreatedEvent(group, context.getId())));
     }
 
-    @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void fillRolloutGroupsWithTargets(final Long rolloutId) {
-        final JpaRollout rollout = Optional.ofNullable(rolloutRepository.findOne(rolloutId))
-                .orElseThrow(() -> new EntityNotFoundException(String.format(ROLLOUT_NOT_FOUND, rolloutId)));
-
-        RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
-
+    private void handleCreateRollout(final JpaRollout rollout, final Lock lock) {
         final List<RolloutGroup> rolloutGroups = RolloutHelper.getOrderedGroups(rollout);
         int readyGroups = 0;
         int totalTargets = 0;
@@ -548,7 +542,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private boolean ensureAllGroupsAreScheduled(final Rollout rollout) {
-        RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.STARTING);
         final JpaRollout jpaRollout = (JpaRollout) rollout;
 
         final List<JpaRolloutGroup> groupsToBeScheduled = rolloutGroupRepository.findByRolloutAndStatus(rollout,
@@ -697,39 +690,28 @@ public class JpaRolloutManagement implements RolloutManagement {
         rolloutRepository.save(rollout);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void checkRunningRollouts(final long delayBetweenChecks) {
-        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.RUNNING);
-        if (rolloutsToCheck.isEmpty()) {
-            return;
+    private void handleRunningRollout(final JpaRollout rollout) {
+
+        LOGGER.debug("Checking rollout {}", rollout);
+
+        final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+                RolloutGroupStatus.RUNNING);
+
+        if (rolloutGroupsRunning.isEmpty()) {
+            // no running rollouts, probably there was an error
+            // somewhere at the latest group. And the latest group has
+            // been switched from running into error state. So we need
+            // to find the latest group which
+            executeLatestRolloutGroup(rollout);
+        } else {
+            LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
+            executeRolloutGroups(rollout, rolloutGroupsRunning);
         }
 
-        LOGGER.info("Found {} running rollouts to check", rolloutsToCheck.size());
-
-        for (final JpaRollout rollout : rolloutsToCheck) {
-            LOGGER.debug("Checking rollout {}", rollout);
-
-            final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
-                    RolloutGroupStatus.RUNNING);
-
-            if (rolloutGroupsRunning.isEmpty()) {
-                // no running rollouts, probably there was an error
-                // somewhere at the latest group. And the latest group has
-                // been switched from running into error state. So we need
-                // to find the latest group which
-                executeLatestRolloutGroup(rollout);
-            } else {
-                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
-                executeRolloutGroups(rollout, rolloutGroupsRunning);
-            }
-
-            if (isRolloutComplete(rollout)) {
-                LOGGER.info("Rollout {} is finished, setting finished status", rollout);
-                rollout.setStatus(RolloutStatus.FINISHED);
-                rolloutRepository.save(rollout);
-            }
+        if (isRolloutComplete(rollout)) {
+            LOGGER.info("Rollout {} is finished, setting finished status", rollout);
+            rollout.setStatus(RolloutStatus.FINISHED);
+            rolloutRepository.save(rollout);
         }
     }
 
@@ -851,104 +833,89 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void checkCreatingRollouts(final long delayBetweenChecks) {
-        final List<Long> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.CREATING)
-                .stream().map(Rollout::getId).collect(Collectors.toList());
-        if (rolloutsToCheck.isEmpty()) {
-            return;
-        }
-
-        LOGGER.info("Found {} creating rollouts to check", rolloutsToCheck.size());
-
-        rolloutsToCheck.forEach(this::fillRolloutGroupsWithTargets);
+    // No transaction, will be created per handled rollout
+    @Transactional(propagation = Propagation.NEVER)
+    public void handleRollouts() {
+        rolloutRepository
+                .findByStatusIn(Lists.newArrayList(RolloutStatus.CREATING, RolloutStatus.DELETING,
+                        RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING))
+                .forEach(this::handleRollout);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void checkStartingRollouts(final long delayBetweenChecks) {
-        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks,
-                RolloutStatus.STARTING);
-        if (rolloutsToCheck.isEmpty()) {
-            return;
-        }
+    private void handleRollout(final Long rolloutId) {
+        final String tenant = tenantAware.getCurrentTenant();
 
-        LOGGER.info("Found {} starting rollouts to check", rolloutsToCheck.size());
-
-        rolloutsToCheck.forEach(rollout -> {
-            if (ensureAllGroupsAreScheduled(rollout)) {
-                startFirstRolloutGroup(rollout);
+        final String handlerId = tenant + "-rollout-" + rolloutId;
+        final Lock lock = lockRegistry.obtain(handlerId);
+        boolean acquired = false;
+        try {
+            acquired = lock.tryLock();
+            if (acquired) {
+                runInNewTransaction(handlerId, status -> executeFittingHandler(rolloutId, lock));
             }
-        });
-    }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void checkReadyRollouts(final long delayBetweenChecks) {
-        final List<JpaRollout> rolloutsToCheck = getRolloutsToCheckForStatus(delayBetweenChecks, RolloutStatus.READY);
-        if (rolloutsToCheck.isEmpty()) {
-            return;
-        }
-
-        LOGGER.info("Found {} ready rollouts to check", rolloutsToCheck.size());
-
-        final long now = System.currentTimeMillis();
-
-        rolloutsToCheck.forEach(rollout -> {
-            if (rollout.getStartAt() != null && rollout.getStartAt() <= now) {
-                startRollout(rollout.getId());
+        } finally {
+            if (acquired) {
+                lock.unlock();
             }
-        });
+        }
     }
 
-    private List<JpaRollout> getRolloutsToCheckForStatus(final long delayBetweenChecks, final RolloutStatus status) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, status);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts starting check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
-            return Collections.emptyList();
+    private int executeFittingHandler(final Long rolloutId, final Lock lock) {
+        final JpaRollout rollout = rolloutRepository.findOne(rolloutId);
+
+        switch (rollout.getStatus()) {
+        case CREATING:
+            handleCreateRollout(rollout, lock);
+            break;
+        case DELETING:
+            handleDeleteRollout(rollout);
+            break;
+        case READY:
+            handleReadyRollout(rollout);
+            break;
+        case STARTING:
+            handleStartingRollout(rollout);
+            break;
+        case RUNNING:
+            handleRunningRollout(rollout);
+            break;
+        default:
+            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+            break;
         }
 
-        return rolloutRepository.findByLastCheckAndStatus(lastCheck, status);
+        return 0;
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @Modifying
-    public void checkDeletingRollouts(final long delayBetweenChecks) {
-        final long lastCheck = System.currentTimeMillis();
-        final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.DELETING);
-        if (updated == 0) {
-            // nothing to check, maybe another instance already checked in
-            // between
-            LOGGER.debug("No rollouts deleting check necessary for current scheduled check {}, next check at {}",
-                    lastCheck, lastCheck + delayBetweenChecks);
-            return;
+    private void handleStartingRollout(final Rollout rollout) {
+
+        if (ensureAllGroupsAreScheduled(rollout)) {
+            startFirstRolloutGroup(rollout);
         }
-
-        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                RolloutStatus.DELETING);
-        LOGGER.info("Found {} deleting rollouts to check", rolloutsToCheck.size());
-
-        rolloutsToCheck.forEach(this::doDeleteRollout);
     }
 
+    private void handleReadyRollout(final Rollout rollout) {
+        if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
+            startRollout(rollout.getId());
+        }
+    }
+
+    // TODO why new?
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Modifying
     public void deleteRollout(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
+        if (RolloutStatus.DELETING.equals(jpaRollout.getStatus())) {
+            return;
+        }
+
         jpaRollout.setStatus(RolloutStatus.DELETING);
         rolloutRepository.save(jpaRollout);
     }
 
-    private void doDeleteRollout(final JpaRollout rollout) {
+    private void handleDeleteRollout(final JpaRollout rollout) {
 
         // clean up all scheduled actions
         final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);

@@ -42,77 +42,9 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 public interface RolloutManagement {
 
-    /**
-     * Checking running rollouts. Rollouts which are checked updating the
-     * lastCheck to indicate that the current instance is handling the specific
-     * rollout. This code should run as system-code.
-     *
-     * <pre>
-     * {@code
-     *  SystemSecurityContext.runAsSystem(new Callable<Void>() {
-     *     public Void call() throws Exception {
-     *        //run system-code
-     *     }
-     * });
-     *  }
-     * </pre>
-     *
-     * This method is intended to be called by a scheduler. And must be running
-     * in an transaction so it's splitted from the scheduler.
-     *
-     * Rollouts which are currently running are investigated, by means the
-     * error- and finish condition of running groups in this rollout are
-     * evaluated.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
+    // TODO
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkRunningRollouts(long delayBetweenChecks);
-
-    /**
-     * Checking Rollouts that are currently being created with asynchronous
-     * assignment of targets to the Rollout Groups.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkCreatingRollouts(long delayBetweenChecks);
-
-    /**
-     * Checking Rollouts that are currently being started with asynchronous
-     * creation of actions to the targets of a group.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkStartingRollouts(long delayBetweenChecks);
-
-    /**
-     * Checking Rollouts that are currently ready for an auto start.
-     *
-     * @param delayBetweenChecks
-     *            the time in milliseconds of the delay between the further and
-     *            this check. This check is only applied if the last check is
-     *            less than (lastcheck-delay).
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void checkReadyRollouts(long delayBetweenChecks);
-
-    /**
-     * TODO: lazy michael, time for you to write javadoc!
-     * 
-     * @param delayBetweenChecks
-     */
-    void checkDeletingRollouts(long delayBetweenChecks);
+    void handleRollouts();
 
     /**
      * Counts all {@link Rollout}s in the repository that are not marked as
@@ -218,23 +150,6 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(List<RolloutGroupCreate> groups,
             String targetFilter, Long createdAt);
-
-    /**
-     * Can be called on a Rollout in {@link RolloutStatus#CREATING} to
-     * automatically fill it with targets.
-     *
-     * Works through all Rollout groups in {@link RolloutGroupStatus#CREATING}
-     * and fills them with remaining targets until the supposed amount of
-     * targets for the group is reached. Targets are added to a group when they
-     * match the overall {@link Rollout#getTargetFilterQuery()} and the
-     * {@link RolloutGroup#getTargetFilterQuery()} and not more than
-     * {@link RolloutGroup#getTargetPercentage()} are assigned to the group.
-     *
-     * @param rollout
-     *            the rollout
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    void fillRolloutGroupsWithTargets(@NotNull Long rollout);
 
     /**
      * Retrieves all rollouts.

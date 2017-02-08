@@ -289,7 +289,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
                 conditions);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.fillRolloutGroupsWithTargets(rollout.getId());
+        rolloutManagement.handleRollouts();
 
         return rolloutManagement.findRolloutById(rollout.getId());
     }

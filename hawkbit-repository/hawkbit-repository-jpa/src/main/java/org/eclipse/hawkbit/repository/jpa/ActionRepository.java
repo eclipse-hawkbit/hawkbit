@@ -335,7 +335,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
-    Slice<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
+    Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
 
     /**
      * Get list of objects which has details of status and count of targets in

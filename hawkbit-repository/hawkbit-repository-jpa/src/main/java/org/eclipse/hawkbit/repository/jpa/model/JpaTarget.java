@@ -94,7 +94,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {
             CascadeType.REMOVE }, targetEntity = JpaAction.class)
-    @JoinColumn(name = "target", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
+    @JoinColumn(name = "target", insertable = false, updatable = false, nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
     private List<Action> actions;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
