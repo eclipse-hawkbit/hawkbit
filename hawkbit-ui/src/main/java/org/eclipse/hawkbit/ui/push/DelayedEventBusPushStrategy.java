@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangeEvent;
 import org.slf4j.Logger;
@@ -70,14 +69,15 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
     private static final Logger LOG = LoggerFactory.getLogger(DelayedEventBusPushStrategy.class);
 
     private static final int BLOCK_SIZE = 10_000;
-    private final BlockingDeque<org.eclipse.hawkbit.repository.event.TenantAwareEvent> queue = new LinkedBlockingDeque<>(
-            BLOCK_SIZE);
+    private final BlockingDeque<TenantAwareEvent> queue = new LinkedBlockingDeque<>(BLOCK_SIZE);
 
     private final ScheduledExecutorService executorService;
     private final EventBus.UIEventBus eventBus;
     private final UIEventProvider eventProvider;
-    private ScheduledFuture<?> jobHandle;
     private final long delay;
+    private final String appContextId;
+
+    private ScheduledFuture<?> jobHandle;
     private UI vaadinUI;
 
     /**
@@ -89,15 +89,18 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
      *            the ui event bus
      * @param eventProvider
      *            the event provider
+     * @param appContextId
+     *            the id of the application context
      * @param delay
      *            the delay for the event forwarding. Every delay millisecond
      *            the events are forwarded by this strategy
      */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider, final long delay) {
+            final UIEventProvider eventProvider, final String appContextId, final long delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
+        this.appContextId = appContextId;
         this.delay = delay;
     }
 
@@ -300,9 +303,8 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             rolloutGroupId = rolloutGroup.getId();
         } else if (event instanceof RolloutDeletedEvent) {
             rolloutId = ((RolloutDeletedEvent) event).getEntityId();
-            offerEventIfNotContains(
-                    new RolloutDeletedEvent(event.getTenant(), ((RolloutDeletedEvent) event).getEntityId(),
-                            getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+            offerEventIfNotContains(new RolloutDeletedEvent(event.getTenant(),
+                    ((RolloutDeletedEvent) event).getEntityId(), getClass().getName(), appContextId));
         }
 
         offerEventIfNotContains(new RolloutChangeEvent(event.getTenant(), rolloutId));

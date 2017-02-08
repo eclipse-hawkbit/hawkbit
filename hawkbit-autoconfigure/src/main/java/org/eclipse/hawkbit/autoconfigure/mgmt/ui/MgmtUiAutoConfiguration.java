@@ -67,7 +67,7 @@ public class MgmtUiAutoConfiguration {
      * UI has an own strategy.
      * 
      * @param applicationContext
-     *            the context to add the listener
+     *            the context to add the listener to
      * @param executorService
      *            the general scheduler service
      * @param eventBus
@@ -85,7 +85,7 @@ public class MgmtUiAutoConfiguration {
             final ScheduledExecutorService executorService, final UIEventBus eventBus,
             final UIEventProvider eventProvider, final UiProperties uiProperties) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,
-                eventBus, eventProvider, uiProperties.getEvent().getPush().getDelay());
+                eventBus, eventProvider, applicationContext.getId(), uiProperties.getEvent().getPush().getDelay());
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);
         return delayedEventBusPushStrategy;
     }
