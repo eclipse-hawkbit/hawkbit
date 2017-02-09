@@ -53,7 +53,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @Column(name = "target_occurred_at")
     private Long occurredAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "action", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
     @NotNull
     private JpaAction action;

@@ -12,30 +12,29 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
  * TenantAwareEvent definition which is been published in case a rollout group
- * has been created for a specific rollout.
+ * has been created for a specific rollout or updated.
  *
  */
-public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent {
+public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
     private static final long serialVersionUID = 1L;
+
+    private Long rolloutId;
 
     /**
      * Default constructor.
      */
-    public RolloutGroupCreatedEvent() {
+    public AbstractRolloutGroupEvent() {
         // for serialization libs like jackson
     }
 
-    /**
-     * Constructor
-     * 
-     * @param rolloutGroup
-     *            the updated rolloutGroup
-     * @param rolloutId
-     *            of the related rollout
-     * @param applicationId
-     *            the origin application id
-     */
-    public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
-        super(rolloutGroup, rolloutId, applicationId);
+    public AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId,
+            final String applicationId) {
+        super(rolloutGroup, applicationId);
+        this.rolloutId = rolloutId;
     }
+
+    public Long getRolloutId() {
+        return rolloutId;
+    }
+
 }

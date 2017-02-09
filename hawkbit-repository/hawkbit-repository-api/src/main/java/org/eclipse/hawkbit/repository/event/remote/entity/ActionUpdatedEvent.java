@@ -13,11 +13,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 /**
  * Defines the remote event of updated a {@link Action}.
  */
-public class ActionUpdatedEvent extends RemoteEntityEvent<Action> {
+public class ActionUpdatedEvent extends AbstractActionEvent {
     private static final long serialVersionUID = 2L;
-
-    private Long rolloutId;
-    private Long rolloutGroupId;
 
     /**
      * Default constructor.
@@ -31,22 +28,16 @@ public class ActionUpdatedEvent extends RemoteEntityEvent<Action> {
      * 
      * @param action
      *            the updated action
+     * @param rolloutId
+     *            rollout identifier (optional)
+     * @param rolloutGroupId
+     *            rollout group identifier (optional)
      * @param applicationId
      *            the origin application id
      */
     public ActionUpdatedEvent(final Action action, final Long rolloutId, final Long rolloutGroupId,
             final String applicationId) {
-        super(action, applicationId);
-        this.rolloutId = rolloutId;
-        this.rolloutGroupId = rolloutGroupId;
-    }
-
-    public Long getRolloutId() {
-        return rolloutId;
-    }
-
-    public Long getRolloutGroupId() {
-        return rolloutGroupId;
+        super(action, rolloutId, rolloutGroupId, applicationId);
     }
 
 }

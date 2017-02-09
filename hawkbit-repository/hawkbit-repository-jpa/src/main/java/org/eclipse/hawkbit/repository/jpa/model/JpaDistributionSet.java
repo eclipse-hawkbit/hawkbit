@@ -109,7 +109,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSetType.class)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     @NotNull
     private DistributionSetType type;

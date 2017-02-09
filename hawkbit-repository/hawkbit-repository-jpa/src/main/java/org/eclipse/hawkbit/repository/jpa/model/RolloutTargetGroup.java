@@ -43,12 +43,14 @@ public class RolloutTargetGroup implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @ManyToOne(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @ManyToOne(optional = false, targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = {
+            CascadeType.PERSIST })
     @JoinColumn(name = "rolloutGroup_Id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group"))
     private JpaRolloutGroup rolloutGroup;
 
     @Id
-    @ManyToOne(targetEntity = JpaTarget.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @ManyToOne(optional = false, targetEntity = JpaTarget.class, fetch = FetchType.LAZY, cascade = {
+            CascadeType.PERSIST })
     @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target"))
     private JpaTarget target;
 

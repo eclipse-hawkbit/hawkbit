@@ -79,7 +79,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @NotEmpty
     private String targetFilterQuery;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
     @NotNull
     private JpaDistributionSet distributionSet;
